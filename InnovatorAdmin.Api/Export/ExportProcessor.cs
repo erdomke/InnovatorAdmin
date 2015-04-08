@@ -772,7 +772,7 @@ namespace Aras.Tools.InnovatorAdmin
       if (_queryTransform == null)
       {
         _queryTransform = new XslCompiledTransform();
-        using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("Aras.Tools.InnovatorInstaller.Export.ExportQuery.xslt"))
+        using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("Aras.Tools.InnovatorAdmin.Export.ExportQuery.xslt"))
         {
           using (var xslt = XmlReader.Create(stream))
           {
@@ -784,7 +784,7 @@ namespace Aras.Tools.InnovatorAdmin
       if (_resultTransform == null)
       {
         _resultTransform = new XslCompiledTransform();
-        using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("Aras.Tools.InnovatorInstaller.Export.ExportResult.xslt"))
+        using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("Aras.Tools.InnovatorAdmin.Export.ExportResult.xslt"))
         {
           using (var xslt = XmlReader.Create(stream))
           {
