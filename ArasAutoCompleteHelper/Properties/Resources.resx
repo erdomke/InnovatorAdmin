@@ -1,0 +1,423 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AmlSchema" xml:space="preserve">
+    <value>&lt;xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.aras.com/AML.xsd" 
+xmlns="http://www.aras.com/AML.xsd" elementFormDefault="qualified"&gt;
+
+	&lt;xs:element name="AML" type="ItemList"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Root element for an AML query&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	
+	&lt;xs:element name="Item"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Item in the Aras database&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+		&lt;xs:complexType&gt;
+			&lt;xs:choice minOccurs="1" maxOccurs="unbounded"&gt;
+				&lt;xs:element ref="LogOp" /&gt;
+				&lt;xs:element ref="Property" /&gt;
+				&lt;xs:element ref="Relationships" /&gt;
+			&lt;/xs:choice&gt;
+		
+			&lt;xs:attribute name="id" type="xs:ID"&gt;
+				&lt;xs:annotation&gt;&lt;xs:documentation&gt;A 32-character globally unique identifier (GUID) for the item&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+			&lt;/xs:attribute&gt;
+			&lt;xs:attribute name="type" type="xs:string" use="required"&gt;
+				&lt;xs:annotation&gt;&lt;xs:documentation&gt;The item type being searched on&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+			&lt;/xs:attribute&gt;
+			&lt;xs:attribute name="typeID" type="xs:IDREF" /&gt;
+			&lt;xs:attribute name="action" use="required"&gt;
+				&lt;xs:annotation&gt;&lt;xs:documentation&gt;Indicates the operation that the query performs&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+				&lt;xs:simpleType&gt;
+					&lt;xs:restriction base="xs:string"&gt;
+						&lt;xs:enumeration value="ActivateActivity"/&gt;
+						&lt;xs:enumeration value="add"/&gt;
+						&lt;xs:enumeration value="AddItem"/&gt;
+						&lt;xs:enumeration value="AddHistory"/&gt;
+						&lt;xs:enumeration value="ApplyUpdate"/&gt;
+						&lt;xs:enumeration value="BuildProcessReport"/&gt;
+						&lt;xs:enumeration value="CancelWorkflow"/&gt;
+						&lt;xs:enumeration value="checkImportedItemType"/&gt;
+						&lt;xs:enumeration value="closeWorkflow"/&gt;
+						&lt;xs:enumeration value="copy"/&gt;
+						&lt;xs:enumeration value="copyAsIs"/&gt;
+						&lt;xs:enumeration value="copyAsNew"/&gt;
+						&lt;xs:enumeration value="create"/&gt;
+						&lt;xs:enumeration value="delete"/&gt;
+						&lt;xs:enumeration value="edit"/&gt;
+						&lt;xs:enumeration value="EmailItem"/&gt;
+						&lt;xs:enumeration value="EvaluateActivity"/&gt;
+						&lt;xs:enumeration value="exportItemType"/&gt;
+						&lt;xs:enumeration value="get"/&gt;
+						&lt;xs:enumeration value="getItemAllVersions"/&gt;
+						&lt;xs:enumeration value="getAffectedItems"/&gt;
+						&lt;xs:enumeration value="getItemConfig"/&gt;
+						&lt;xs:enumeration value="getItemLastVersion"/&gt;
+						&lt;xs:enumeration value="getItemNextStates"/&gt;
+						&lt;xs:enumeration value="getItemRelationships"/&gt;
+						&lt;xs:enumeration value="GetItemRepeatConfig"/&gt;
+						&lt;xs:enumeration value="getItemWhereUsed"/&gt;
+						&lt;xs:enumeration value="GetMappedPath"/&gt;
+						&lt;xs:enumeration value="getPermissions"/&gt;
+						&lt;xs:enumeration value="getRelatedItem"/&gt;
+						&lt;xs:enumeration value="GetUpdateInfo"/&gt;
+						&lt;xs:enumeration value="instantiateWorkflow"/&gt;
+						&lt;xs:enumeration value="lock"/&gt;
+						&lt;xs:enumeration value="merge"/&gt;
+						&lt;xs:enumeration value="New Workflow Map"/&gt;
+						&lt;xs:enumeration value="PromoteItem"/&gt;
+						&lt;xs:enumeration value="purge"/&gt;
+						&lt;xs:enumeration value="recache"/&gt;
+						&lt;xs:enumeration value="replicate"/&gt;
+						&lt;xs:enumeration value="resetAllItemsAccess"/&gt;
+						&lt;xs:enumeration value="resetItemAccess"/&gt;
+						&lt;xs:enumeration value="resetLifecycle"/&gt;
+						&lt;xs:enumeration value="setDefaultLifecycle"/&gt;
+						&lt;xs:enumeration value="skip"/&gt;
+						&lt;xs:enumeration value="startWorkflow"/&gt;
+						&lt;xs:enumeration value="unlock"/&gt;
+						&lt;xs:enumeration value="update"/&gt;
+						&lt;xs:enumeration value="ValidateWorkflowMap"/&gt;
+						&lt;xs:enumeration value="version"/&gt;
+					&lt;/xs:restriction&gt;
+				&lt;/xs:simpleType&gt;
+				&lt;/xs:attribute&gt;
+			&lt;xs:attribute name="doGetItem" type="xs:boolean"&gt;
+				&lt;xs:annotation&gt;&lt;xs:documentation&gt;If 0 then do not perform a final get action after the server performed specified action. Default is 1.&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+			&lt;/xs:attribute&gt;
+			&lt;xs:attribute name="orderBy" type="xs:string"&gt;
+				&lt;xs:annotation&gt;&lt;xs:documentation&gt;A comma delimited list of property names (column names) to order the results.&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+			&lt;/xs:attribute&gt;
+			&lt;xs:attribute name="select" type="xs:string"&gt;
+				&lt;xs:annotation&gt;&lt;xs:documentation&gt;A comma delimited list of property names (column names) to return.&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+			&lt;/xs:attribute&gt;
+			&lt;xs:attribute name="pagesize" type="xs:integer"&gt;
+				&lt;xs:annotation&gt;&lt;xs:documentation&gt;The page size (number of items) for the result set.&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+			&lt;/xs:attribute&gt;
+			&lt;xs:attribute name="page" type="xs:integer"&gt;
+				&lt;xs:annotation&gt;&lt;xs:documentation&gt;The page number for the result set.&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+			&lt;/xs:attribute&gt;
+			&lt;xs:attribute name="maxRecords" type="xs:integer"&gt;
+				&lt;xs:annotation&gt;&lt;xs:documentation&gt;The maximum number of records to return.&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+			&lt;/xs:attribute&gt;
+			&lt;xs:attribute name="levels" type="xs:integer"&gt;
+				&lt;xs:annotation&gt;&lt;xs:documentation&gt;The item configuration depth to be returned.&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+			&lt;/xs:attribute&gt;
+			&lt;xs:attribute name="config_path" type="xs:string"&gt;
+			&lt;/xs:attribute&gt;
+			&lt;xs:attribute name="version" type="xs:Boolean"&gt;
+				&lt;xs:annotation&gt;&lt;xs:documentation&gt;If 0 then don't version an item on update.  Default is 1.&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+			&lt;/xs:attribute&gt;
+			&lt;xs:attribute name="isCriteria" type="xs:Boolean"&gt;
+				&lt;xs:annotation&gt;&lt;xs:documentation&gt;If 0 then don't search on the nested structure.  Default is 1.&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+			&lt;/xs:attribute&gt;
+			&lt;xs:attribute name="related_expand" type="xs:Boolean"&gt;
+				&lt;xs:annotation&gt;&lt;xs:documentation&gt;If 0 then don't expand the related_id property for relationship items.  Default is 1.&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+			&lt;/xs:attribute&gt;
+			&lt;xs:attribute name="serverEvent" type="xs:Boolean"&gt;
+				&lt;xs:annotation&gt;&lt;xs:documentation&gt;If 0 then disable the server events, thereby improving performance.  Default is 1.&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+			&lt;/xs:attribute&gt;
+			&lt;xs:attribute name="language" type="xs:string"&gt;
+				&lt;xs:annotation&gt;&lt;xs:documentation&gt;A comma-delimited list of language codes, or "*" to return all languages.&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+			&lt;/xs:attribute&gt;
+			&lt;xs:attribute name="where" type="xs:string"&gt;
+				&lt;xs:annotation&gt;&lt;xs:documentation&gt;Used instead of the id attribute to specify the SQL where clause for the search criteria.&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+			&lt;/xs:attribute&gt;
+		&lt;/xs:complexType&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="Relationships" type="ItemList"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Relationships to other item types&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	
+	&lt;xs:element name="LogOp" abstract="true" ref="LogOp"/&gt;
+	&lt;xs:element name="and" type="LogicalOperator" substitutionGroup="LogOp"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Logical 'and'&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="or" type="LogicalOperator" substitutionGroup="LogOp"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Logical 'or'&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="not" substitutionGroup="LogOp"&gt;
+		&lt;xs:complexType&gt;
+			&lt;xs:choice minOccurs="1" maxOccurs="1"&gt;
+				&lt;xs:element ref="LogOp" /&gt;
+				&lt;xs:element ref="Property" /&gt;
+			&lt;/xs:choice&gt;
+		&lt;/xs:complexType&gt;
+	&lt;/xs:element&gt;
+	
+	&lt;xs:element name="Property" abstract="true" ref="Property"/&gt;
+	&lt;xs:element name="id" type="GuidProperty" substitutionGroup="Property"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;A 32 character globally unique identifier (GUID) for the item&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="classification" type="TextProperty" substitutionGroup="Property"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Full path of the class representing the item&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="keyed_name" type="TextProperty" substitutionGroup="Property"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Unique item name as specified by the keyed-name-order&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="created_on" type="DateProperty" substitutionGroup="Property"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Timestamp when the item was created&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="created_by_id" type="RelatedId" substitutionGroup="Property"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Creating user id&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="modified_on" type="DateProperty" substitutionGroup="Property"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Timestamp when the item was modified&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="modified_by_id" type="RelatedId" substitutionGroup="Property"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Modifying user id&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="current_state" type="TextProperty" substitutionGroup="Property"&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="state" type="TextProperty" substitutionGroup="Property"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Current life cycle state of the item&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="locked_by_id" type="RelatedId" substitutionGroup="Property"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Id of the user who has the item locked&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="is_current" type="BooleanProperty" substitutionGroup="Property"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Flags the most recent generation of the item&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="major_rev" type="TextProperty" substitutionGroup="Property"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;The major revision of the item (normally a letter)&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="minor_rev" type="TextProperty" substitutionGroup="Property"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;The minor revision of the item (currently not used)&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="is_released" type="BooleanProperty" substitutionGroup="Property"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Flags all released generations&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="not_lockable" type="BooleanProperty" substitutionGroup="Property"&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="css" type="TextProperty" substitutionGroup="Property"&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="generation" type="IntProperty" substitutionGroup="Property"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Sequential generation number&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="new_version" type="BooleanProperty" substitutionGroup="Property"&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="config_id" type="GuidProperty" substitutionGroup="Property"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Common id across generations of an item&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="related_id" type="RelatedId" substitutionGroup="Property"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Id of the related item in a relationship type&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="source_id" type="RelatedId" substitutionGroup="Property"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Id of the source item in a relationship type&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	&lt;xs:element name="behavior" type="TextProperty" substitutionGroup="Property"&gt;
+		&lt;xs:annotation&gt;&lt;xs:documentation&gt;Fixed/float behavior in a relationship type&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+	&lt;/xs:element&gt;
+	
+	&lt;xs:attributeGroup name="propertyAttributes"&gt;
+		&lt;xs:attribute name="keyed_name" type="xs:string"&gt;
+			&lt;xs:annotation&gt;&lt;xs:documentation&gt;The keyed_name Property for the Item referenced by the Item type Property&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+		&lt;/xs:attribute&gt;
+		&lt;xs:attribute name="condition"&gt;
+			&lt;xs:annotation&gt;&lt;xs:documentation&gt;Search condition&lt;/xs:documentation&gt;&lt;/xs:annotation&gt;
+			&lt;xs:simpleType&gt;
+				&lt;xs:restriction base="xs:string"&gt;
+					&lt;xs:enumeration value="eq"/&gt;
+					&lt;xs:enumeration value="ne"/&gt;
+					&lt;xs:enumeration value="ge"/&gt;
+					&lt;xs:enumeration value="le"/&gt;
+					&lt;xs:enumeration value="gt"/&gt;
+					&lt;xs:enumeration value="lt"/&gt;
+					&lt;xs:enumeration value="like"/&gt;
+					&lt;xs:enumeration value="not like"/&gt;
+					&lt;xs:enumeration value="between"/&gt;
+					&lt;xs:enumeration value="not between"/&gt;
+					&lt;xs:enumeration value="in"/&gt;
+					&lt;xs:enumeration value="not in"/&gt;
+					&lt;xs:enumeration value="is"/&gt;
+					&lt;xs:enumeration value="is null"/&gt;
+					&lt;xs:enumeration value="is not null"/&gt;
+				&lt;/xs:restriction&gt;
+			&lt;/xs:simpleType&gt;
+		&lt;/xs:attribute&gt;
+	&lt;/xs:attributeGroup&gt;
+	
+	&lt;xs:complexType name="BooleanProperty"&gt;
+		&lt;xs:simpleContent&gt;
+			&lt;xs:extension base="xs:boolean"&gt;
+				&lt;xs:attributeGroup ref="propertyAttributes"/&gt;
+			&lt;/xs:extension&gt;
+		&lt;/xs:simpleContent&gt;
+	&lt;/xs:complexType&gt;
+	&lt;xs:complexType name="DateProperty"&gt;
+		&lt;xs:simpleContent&gt;
+			&lt;xs:extension base="xs:dateTime"&gt;
+				&lt;xs:attributeGroup ref="propertyAttributes"/&gt;
+			&lt;/xs:extension&gt;
+		&lt;/xs:simpleContent&gt;
+	&lt;/xs:complexType&gt;
+	&lt;xs:complexType name="GuidProperty"&gt;
+		&lt;xs:simpleContent&gt;
+			&lt;xs:extension base="Guid"&gt;
+				&lt;xs:attributeGroup ref="propertyAttributes"/&gt;
+			&lt;/xs:extension&gt;
+		&lt;/xs:simpleContent&gt;
+	&lt;/xs:complexType&gt;
+	&lt;xs:complexType name="IntProperty"&gt;
+		&lt;xs:simpleContent&gt;
+			&lt;xs:extension base="xs:int"&gt;
+				&lt;xs:attributeGroup ref="propertyAttributes"/&gt;
+			&lt;/xs:extension&gt;
+		&lt;/xs:simpleContent&gt;
+	&lt;/xs:complexType&gt;
+	&lt;xs:complexType name="ItemList"&gt;
+		&lt;xs:choice minOccurs="1" maxOccurs="unbounded"&gt;
+			&lt;xs:element ref="Item" /&gt;
+		&lt;/xs:choice&gt;
+	&lt;/xs:complexType&gt;
+	&lt;xs:complexType name="LogicalOperator"&gt;
+		&lt;xs:choice minOccurs="2" maxOccurs="unbounded"&gt;
+			&lt;xs:element ref="LogOp" /&gt;
+			&lt;xs:element ref="Property" /&gt;
+			&lt;xs:element ref="Relationships" /&gt;
+		&lt;/xs:choice&gt;
+	&lt;/xs:complexType&gt;
+	&lt;xs:complexType name="NumberProperty"&gt;
+		&lt;xs:simpleContent&gt;
+			&lt;xs:extension base="xs:double"&gt;
+				&lt;xs:attributeGroup ref="propertyAttributes"/&gt;
+			&lt;/xs:extension&gt;
+		&lt;/xs:simpleContent&gt;
+	&lt;/xs:complexType&gt;
+	&lt;xs:complexType name="RelatedId"&gt;
+		&lt;xs:choice minOccurs="0" maxOccurs="1"&gt;
+			&lt;xs:element ref="Item" /&gt;
+		&lt;/xs:choice&gt;
+		&lt;xs:attributeGroup ref="propertyAttributes"/&gt;
+	&lt;/xs:complexType&gt;
+	&lt;xs:complexType name="TextProperty"&gt;
+		&lt;xs:simpleContent&gt;
+			&lt;xs:extension base="xs:string"&gt;
+				&lt;xs:attributeGroup ref="propertyAttributes"/&gt;
+			&lt;/xs:extension&gt;
+		&lt;/xs:simpleContent&gt;
+	&lt;/xs:complexType&gt;
+	
+	&lt;xs:simpleType name="Guid"&gt;
+		&lt;xs:restriction base="xs:string"&gt;
+			&lt;xs:maxLength value="32" /&gt;
+		&lt;/xs:restriction&gt;
+	&lt;/xs:simpleType&gt;
+&lt;/xs:schema&gt;</value>
+  </data>
+</root>
