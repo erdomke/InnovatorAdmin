@@ -3,7 +3,7 @@
 Innovator Admin is a tool for managing Aras Innovator installations.  The 
 initial focus of the tool is on installing and exporting packages.  While 
 tools already exist for package installs and exports, this tool attempts 
-to improve the experience in the following key areas
+to improve the experience in the following key areas:
 
 ## Wizard Interface
 
@@ -18,7 +18,7 @@ A connection manager saves all your commonly used connections locally so
 you don't have to repetitively enter URLs and credentials when running
 multiple exports or installs
 
-![Connection manager](doc/screenshot-pg01.png)
+![Connection manager](doc/screenshot-pg02.png)
 
 ## Package Anything
 
@@ -78,6 +78,23 @@ powers all of the AML inputs and can be run separately from the main
 screen.
 
 ![AML Studio](doc/aml-studio.png)
+
+# Current Status
+
+Please treat this tool as **alpha** level software.  While some of the 
+core functionality has been tested and should work, other peripheral 
+features have been blocked out and/or coded but not tested.  In 
+particular, exports to/install from the previous manifest file and folder 
+structure have not been tested.
+
+# Ideas for Improvement
+
+- Integrate with the Aras project site allowing the tool to become a 
+  "NuGet" package manager for Aras projects
+- Include an AML diff tool for easily seeing the differences in items
+  between databases
+- Allow for additional plugins so the tool can become a dashboard for
+  administrative tools
 
 # Contributing
 
