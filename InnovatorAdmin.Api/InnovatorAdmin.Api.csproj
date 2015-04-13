@@ -49,9 +49,12 @@
     <Compile Include="Export\InstallType.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Install\InstallProcessor.cs" />
+    <Compile Include="IO\ConfigurableXmlWriter.cs" />
     <Compile Include="IO\DatabasePackage.cs" />
     <Compile Include="IO\DatabasePackageAction.cs" />
     <Compile Include="IO\InnovatorPackage.cs" />
+    <Compile Include="IO\InnovatorPackageFile.cs" />
+    <Compile Include="IO\InnovatorPackageFolder.cs" />
     <Compile Include="IO\InstallScript.cs" />
     <Compile Include="IO\ManifestFolder.cs" />
     <Compile Include="IProgressReporter.cs" />

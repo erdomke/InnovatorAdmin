@@ -248,33 +248,9 @@ namespace Aras.Tools.InnovatorAdmin
         doc = TransformResults(result.DocumentElement);
         ExpandSystemIdentities(doc);
         NormalizeClassStructure(doc);
-        ReorderForeignProperties(doc);
         RemoveRelatedItems(doc);
         RemoveKeyedNameAttributes(doc);
-
-        //var sqlNames = new HashSet<string>();
-        //foreach (var prop in result.ElementsByXPath("//Item[@type='SQL']/sqlserver_body"))
-        //{
-        //  sqlNames.UnionWith(Utils.FindSqlServerNamesBySchema(prop.InnerText, "innovator")
-        //    .Where(n => string.Compare(n, prop.Parent().Element("name", ""), StringComparison.OrdinalIgnoreCase) != 0)
-        //    .Select(n => n.ToLowerInvariant()));
-        //}
-        //ItemType sqlType;
-        //foreach (var name in sqlNames)
-        //{
-        //  if (_itemTypes.TryGetValue(name.Replace('_', ' '), out sqlType))
-        //  {
-        //    warning = sqlType.Reference.Clone();
-        //    warning.KeyedName = "* Possible missing item type: " + warning.KeyedName;
-        //  }
-        //  else
-        //  {
-        //    warning = new ItemReference("SQL", "[SQL].[name] = '" + name + "'");
-        //    warning.KeyedName = "* Possible missing SQL: " + name;
-        //  }
-        //  warnings.Add(warning);
-        //}
-
+        
         Export(script, doc, warnings);
       }
       catch (Exception ex)
@@ -288,6 +264,7 @@ namespace Aras.Tools.InnovatorAdmin
       {
         EnsureSystemData();
         _dependAnalyzer.Reset();
+        FixForeignProperties(doc);
         FixCyclicalWorkflowLifeCycleRefs(doc);
         FixCyclicalWorkflowItemTypeRefs(doc);
         MoveFormRefsInline(doc);
@@ -480,6 +457,57 @@ namespace Aras.Tools.InnovatorAdmin
       }
     }
     /// <summary>
+    /// Remove related items from relationships to non-core itemtypes
+    /// </summary>
+    private void RemoveRelatedItems(XmlDocument doc)
+    {
+      ItemType itemType;
+      foreach (var elem in doc.ElementsByXPath("/AML/Item/Relationships/Item/related_id[Item and not(Item/@action = 'get')]"))
+      {
+        if (!_itemTypes.TryGetValue(elem.Parent().Parent().Parent().Attribute("type").ToLowerInvariant(), out itemType) || !itemType.IsCore)
+        {
+          elem.InnerXml = elem.Element("Item").Attribute("id");
+        }
+      }
+    }
+
+    /// <summary>
+    /// Remove keyed_name attributes to make diffing easier
+    /// </summary>
+    private void RemoveKeyedNameAttributes(XmlDocument doc)
+    {
+      foreach (XmlNode attr in doc.SelectNodes("@keyed_name"))
+      {
+        attr.Detatch();
+      }
+    }
+
+    /// <summary>
+    /// Move all foreign properties to a script.  This is because the other properties must be created first before these can
+    /// be added.
+    /// </summary>
+    private void FixForeignProperties(XmlDocument doc)
+    {
+      var foreignProps = doc.ElementsByXPath("//Relationships/Item[@type = 'Property' and data_type = 'foreign']");
+      XmlElement fix = null;
+      foreach (var foreignProp in foreignProps)
+      {
+        if (fix == null)
+        {
+          var itemType = foreignProp.Parents().First(e => e.LocalName == "Item" && e.Attribute("type", "") == "ItemType");
+          fix = (XmlElement)itemType.CloneNode(false);
+          fix.SetAttribute("action", "edit");
+          fix.IsEmpty = true;
+          fix = (XmlElement)fix.AppendChild(doc.CreateElement("Relationships"));
+          var uppermostItem = foreignProp.Parents().Last(e => e.LocalName == "Item" && !string.IsNullOrEmpty(e.Attribute("type", "")));
+          uppermostItem.ParentNode.InsertAfter(fix.ParentNode, uppermostItem);
+        }
+        foreignProp.ParentNode.RemoveChild(foreignProp);
+        fix.AppendChild(foreignProp);
+      }
+    }
+
+    /// <summary>
     /// Fix cyclical workflow-life cycle references by creating an edit script
     /// </summary>
     private void FixCyclicalWorkflowLifeCycleRefs(XmlDocument doc)
@@ -496,27 +524,6 @@ namespace Aras.Tools.InnovatorAdmin
         map = workflowRef.Parents().First(e => e.LocalName == "Item" && e.Attribute("type", "") == "Life Cycle Map");
         map.ParentNode.InsertAfter(fix, map);
         workflowRef.ParentNode.RemoveChild(workflowRef);
-      }
-    }
-    /// <summary>
-    /// Move the form nodes inline with the itemtype create script
-    /// </summary>
-    private void MoveFormRefsInline(XmlDocument doc)
-    {
-      foreach (var form in doc.ElementsByXPath("//Item[@type='Form' and @action and @id]"))
-      {
-        var references = doc.ElementsByXPath("//self::node()[local-name() != 'Item' and local-name() != 'id' and local-name() != 'config_id' and @type='Form' and not(Item) and text() = '" + form.Attribute("id", "") + "']");
-        if (references.Any())
-        {
-          foreach (var formRef in references)
-          {
-            formRef.InnerXml = form.OuterXml;
-            foreach (var relTag in formRef.Elements("Item").Elements("Relationships").ToList())
-            {
-              relTag.Detatch();
-            }
-          }
-        }
       }
     }
     /// <summary>
@@ -543,24 +550,23 @@ namespace Aras.Tools.InnovatorAdmin
       }
     }
     /// <summary>
-    /// Reorder properties so that foreign properties are dealt with last due to dependencies
+    /// Move the form nodes inline with the itemtype create script
     /// </summary>
-    private void ReorderForeignProperties(XmlDocument doc)
+    private void MoveFormRefsInline(XmlDocument doc)
     {
-      var relsToReorder = doc.ElementsByXPath("//Relationships[Item/@type = 'Property' and Item/data_type = 'foreign']");
-      List<XmlElement> props;
-
-      foreach (var relToReorder in relsToReorder)
+      foreach (var form in doc.ElementsByXPath("//Item[@type='Form' and @action and @id]"))
       {
-        props = relToReorder
-          .Elements(e => e.LocalName == "Item" && e.Attribute("type") == "Property")
-          .OrderByDescending(e => (e.Element("data_type", "") == "foreign" ? 1 : 0))
-          .ThenByDescending(e => e.Element("name", ""))
-          .ToList();
-        foreach (var prop in props)
+        var references = doc.ElementsByXPath("//self::node()[local-name() != 'Item' and local-name() != 'id' and local-name() != 'config_id' and @type='Form' and not(Item) and text() = '" + form.Attribute("id", "") + "']");
+        if (references.Any())
         {
-          prop.ParentNode.RemoveChild(prop);
-          relToReorder.InsertBefore(prop, relToReorder.FirstChild);
+          foreach (var formRef in references)
+          {
+            formRef.InnerXml = form.OuterXml;
+            foreach (var relTag in formRef.Elements("Item").Elements("Relationships").ToList())
+            {
+              relTag.Detatch();
+            }
+          }
         }
       }
     }
@@ -579,32 +585,6 @@ namespace Aras.Tools.InnovatorAdmin
         }
       }
     }
-    /// <summary>
-    /// Remove related items from relationships to non-core itemtypes
-    /// </summary>
-    private void RemoveRelatedItems(XmlDocument doc)
-    {
-      ItemType itemType;
-      foreach (var elem in doc.ElementsByXPath("/AML/Item/Relationships/Item/related_id[Item and not(Item/@action = 'get')]"))
-      {
-        if (!_itemTypes.TryGetValue(elem.Parent().Parent().Parent().Attribute("type").ToLowerInvariant(), out itemType) || !itemType.IsCore)
-        {
-          elem.InnerXml = elem.Element("Item").Attribute("id");
-        }
-      }
-    }
-    /// <summary>
-    /// Remove keyed_name attributes to make diffing easier
-    /// </summary>
-    private void RemoveKeyedNameAttributes(XmlDocument doc)
-    {
-      foreach (XmlNode attr in doc.SelectNodes("@keyed_name"))
-      {
-        attr.Detatch();
-      }
-    }
-
-
     public void RemoveReferencingItems(InstallScript script, ItemReference itemRef)
     {
       var nodes = _dependAnalyzer.RemoveDependencyContexts(itemRef);

@@ -89,12 +89,17 @@ structure have not been tested.
 
 # Ideas for Improvement
 
+- Allow packages to install files on the web server (e.g. dlls, html 
+  files, etc.).  Will also need to modify web files (e.g. 
+  method_config.xml).
 - Integrate with the Aras project site allowing the tool to become a 
   "NuGet" package manager for Aras projects
 - Include an AML diff tool for easily seeing the differences in items
   between databases
 - Allow for additional plugins so the tool can become a dashboard for
   administrative tools
+- Include tools for 'uninstalling' packages or otherwise deleting items
+- Include a tool for mass uploading files to the vault.
 
 # Contributing
 

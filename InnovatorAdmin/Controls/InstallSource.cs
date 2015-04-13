@@ -31,7 +31,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
           {
             if (Path.GetExtension(dialog.FileName) == ".innpkg")
             {
-              using (var pkg = new InnovatorPackage(dialog.FileName))
+              using (var pkg = InnovatorPackage.Load(dialog.FileName))
               {
                 _wizard.InstallScript = pkg.Read();
               }

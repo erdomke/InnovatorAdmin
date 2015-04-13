@@ -163,9 +163,9 @@
       this.flowLayoutPanel1.Controls.Add(this.btnPackageFile);
       this.flowLayoutPanel1.Controls.Add(this.btnDbPackage);
       this.flowLayoutPanel1.Controls.Add(this.btnInstall);
-      this.flowLayoutPanel1.Location = new System.Drawing.Point(371, 228);
+      this.flowLayoutPanel1.Location = new System.Drawing.Point(341, 228);
       this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-      this.flowLayoutPanel1.Size = new System.Drawing.Size(318, 76);
+      this.flowLayoutPanel1.Size = new System.Drawing.Size(348, 76);
       this.flowLayoutPanel1.TabIndex = 8;
       // 
       // btnPackageFile
@@ -177,9 +177,9 @@
       this.btnPackageFile.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
       this.btnPackageFile.Location = new System.Drawing.Point(3, 3);
       this.btnPackageFile.Name = "btnPackageFile";
-      this.btnPackageFile.Size = new System.Drawing.Size(100, 70);
+      this.btnPackageFile.Size = new System.Drawing.Size(110, 70);
       this.btnPackageFile.TabIndex = 5;
-      this.btnPackageFile.Text = "Innovator &Package (File)";
+      this.btnPackageFile.Text = "Innovator &Package File(s)";
       this.btnPackageFile.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
       this.btnPackageFile.UseVisualStyleBackColor = true;
       this.btnPackageFile.Click += new System.EventHandler(this.btnPackageFile_Click);
@@ -191,9 +191,9 @@
       this.btnDbPackage.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnDbPackage.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.packageDefinition;
       this.btnDbPackage.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-      this.btnDbPackage.Location = new System.Drawing.Point(109, 3);
+      this.btnDbPackage.Location = new System.Drawing.Point(119, 3);
       this.btnDbPackage.Name = "btnDbPackage";
-      this.btnDbPackage.Size = new System.Drawing.Size(100, 70);
+      this.btnDbPackage.Size = new System.Drawing.Size(110, 70);
       this.btnDbPackage.TabIndex = 6;
       this.btnDbPackage.Text = "Package &Definition (Db)";
       this.btnDbPackage.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -206,9 +206,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.btnInstall.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.install32;
       this.btnInstall.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-      this.btnInstall.Location = new System.Drawing.Point(215, 3);
+      this.btnInstall.Location = new System.Drawing.Point(235, 3);
       this.btnInstall.Name = "btnInstall";
-      this.btnInstall.Size = new System.Drawing.Size(100, 70);
+      this.btnInstall.Size = new System.Drawing.Size(110, 70);
       this.btnInstall.TabIndex = 7;
       this.btnInstall.Text = "&Install (Db)";
       this.btnInstall.TextAlign = System.Drawing.ContentAlignment.BottomCenter;

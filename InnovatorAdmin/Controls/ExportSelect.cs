@@ -12,13 +12,12 @@ namespace Aras.Tools.InnovatorAdmin.Controls
   public partial class ExportSelect : UserControl, IWizardStep
   {
     private FullBindingList<ItemReference> _availableRefs = new FullBindingList<ItemReference>();
-    private FullBindingList<ItemReference> _selectedRefs = new FullBindingList<ItemReference>();
-    private IWizard _wizard;
-    private ItemReference _searchMessage = new ItemReference("***", "***") { KeyedName = "Enter a more restrictive search, and tap find." };
+    private InstallScript _existingScript = null;
     private Action _findAction;
     private string _lastQuery;
-    private InstallScript _existingScript = null;
-
+    private ItemReference _searchMessage = new ItemReference("***", "***") { KeyedName = "Enter a more restrictive search, and tap find." };
+    private FullBindingList<ItemReference> _selectedRefs = new FullBindingList<ItemReference>();
+    private IWizard _wizard;
     public ExportSelect()
     {
       InitializeComponent();
@@ -30,12 +29,6 @@ namespace Aras.Tools.InnovatorAdmin.Controls
 
       pgResults.Visible = false;
     }
-
-    void _selectedRefs_ListChanged(object sender, ListChangedEventArgs e)
-    {
-      _wizard.NextEnabled = _selectedRefs.Any();
-    }
-
     public void Configure(IWizard wizard)
     {
       _wizard = wizard;
@@ -63,6 +56,95 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       {
         MessageBox.Show(resources.Messages.SelectItemsExport);
       }
+    }
+
+    private void ApplyDefaultSort()
+    {
+      if (string.IsNullOrEmpty(txtFind.Text))
+      {
+        _availableRefs.RemoveSort();
+      }
+      else
+      {
+        _availableRefs.ApplySort((x, y) =>
+        {
+          var compare = SortGroup(x.KeyedName).CompareTo(SortGroup(y.KeyedName));
+          if (compare == 0) compare = (x.KeyedName ?? x.Unique).CompareTo(y.KeyedName ?? y.Unique);
+          return compare;
+        });
+      }
+    }
+
+    private void DefaultFindAction()
+    {
+      if (string.IsNullOrEmpty(txtFind.Text))
+      {
+        _availableRefs.RemoveFilter();
+      }
+      else
+      {
+        _availableRefs.ApplyFilter(r => (r.KeyedName ?? "").IndexOf(txtFind.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+        ApplyDefaultSort();
+      }
+    }
+
+    private void FindByItem(string type)
+    {
+      if (!string.IsNullOrEmpty(_lastQuery) && !string.IsNullOrEmpty(txtFind.Text) && txtFind.Text.StartsWith(_lastQuery))
+      {
+        DefaultFindAction();
+      }
+      else
+      {
+        _availableRefs.Clear();
+        var results = _wizard.Innovator.applyAML(string.Format(Properties.Resources.Aml_ItemGet, type, "<keyed_name condition=\"like\">*" + txtFind.Text + "*</keyed_name>"));
+        if (results.getItemCount() >= 1000)
+        {
+          _availableRefs.Add(_searchMessage);
+        }
+        else
+        {
+          foreach (var result in results.AsEnum())
+          {
+            _availableRefs.Add(ItemReference.FromFullItem(result.node, true));
+          }
+          _lastQuery = txtFind.Text;
+        }
+      }
+    }
+
+    private IEnumerable<ItemReference> GetSelected(DataGridView grid)
+    {
+      return grid.SelectedRows.OfType<DataGridViewRow>().Select(r => (ItemReference)r.DataBoundItem).ToList();
+    }
+
+    private int SortGroup(string value)
+    {
+      if (value.StartsWith(txtFind.Text, StringComparison.OrdinalIgnoreCase)) return 1;
+      return 2;
+    }
+
+    private void SelectItems()
+    {
+      foreach (var itemRef in GetSelected(gridAvailable))
+      {
+        _selectedRefs.Add(itemRef);
+        _availableRefs.Remove(itemRef);
+      }
+    }
+
+    private void UnselectItems()
+    {
+      foreach (var itemRef in GetSelected(gridSelected))
+      {
+        _availableRefs.Add(itemRef);
+        _selectedRefs.Remove(itemRef);
+      }
+    }
+
+    void _selectedRefs_ListChanged(object sender, ListChangedEventArgs e)
+    {
+      _wizard.NextEnabled = _selectedRefs.Any();
     }
 
     private void btnDbPackage_Click(object sender, EventArgs e)
@@ -115,6 +197,21 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       }
       
     }
+    private void btnAmlStudio_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        foreach (var newRef in Editor.GetItems(_wizard.ConnectionInfo.First()))
+        {
+          if (!_selectedRefs.Contains(newRef)) _selectedRefs.Add(newRef);
+        }
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
     private void btnItem_Click(object sender, EventArgs e)
     {
       try
@@ -164,203 +261,11 @@ namespace Aras.Tools.InnovatorAdmin.Controls
         Utils.HandleError(ex);
       }
     }
-
-    private void DefaultFindAction()
-    {
-      if (string.IsNullOrEmpty(txtFind.Text))
-      {
-        _availableRefs.RemoveFilter();
-      }
-      else
-      {
-        _availableRefs.ApplyFilter(r => (r.KeyedName ?? "").IndexOf(txtFind.Text, StringComparison.OrdinalIgnoreCase) >= 0);
-        ApplyDefaultSort();
-      }
-    }
-    private void FindByItem(string type)
-    {
-      if (!string.IsNullOrEmpty(_lastQuery) && !string.IsNullOrEmpty(txtFind.Text) && txtFind.Text.StartsWith(_lastQuery))
-      {
-        DefaultFindAction();
-      }
-      else {
-        _availableRefs.Clear();
-        var results = _wizard.Innovator.applyAML(string.Format(Properties.Resources.Aml_ItemGet, type, "<keyed_name condition=\"like\">*" + txtFind.Text + "*</keyed_name>"));
-        if (results.getItemCount() >= 1000)
-        {
-          _availableRefs.Add(_searchMessage);
-        }
-        else 
-        {
-          foreach (var result in results.AsEnum())
-          {
-            _availableRefs.Add(ItemReference.FromFullItem(result.node, true));
-          }
-          _lastQuery = txtFind.Text;
-        }
-      }
-    }
-    private void ApplyDefaultSort()
-    {
-      if (string.IsNullOrEmpty(txtFind.Text))
-      {
-        _availableRefs.RemoveSort();
-      }
-      else
-      {
-        _availableRefs.ApplySort((x, y) =>
-        {
-          var compare = SortGroup(x.KeyedName).CompareTo(SortGroup(y.KeyedName));
-          if (compare == 0) compare = (x.KeyedName ?? x.Unique).CompareTo(y.KeyedName ?? y.Unique);
-          return compare;
-        });
-      }
-    }
-
-    private int SortGroup(string value)
-    {
-      if (value.StartsWith(txtFind.Text, StringComparison.OrdinalIgnoreCase)) return 1;
-      return 2;
-    }
- 
     private void btnFind_Click(object sender, EventArgs e)
     {
       try
       {
         _findAction.Invoke();
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private void txtFind_KeyDown(object sender, KeyEventArgs e)
-    {
-      try
-      {
-        if (e.KeyCode == Keys.Enter)
-        {
-          _findAction.Invoke();
-        }
-        else if (e.KeyCode == Keys.Down)
-        {
-          gridAvailable.Focus();
-          if (gridAvailable.RowCount > 0) gridAvailable.Rows[0].Selected = true;
-        }
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-    
-    private void btnUnselectAll_Click(object sender, EventArgs e)
-    {
-      try
-      { 
-        _availableRefs.AddRange(_selectedRefs);
-        _selectedRefs.ClearVisible();
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private void btnUnselect_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        UnselectItems();
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private void UnselectItems()
-    {
-      foreach (var itemRef in GetSelected(gridSelected))
-      {
-        _availableRefs.Add(itemRef);
-        _selectedRefs.Remove(itemRef);
-      }
-    }
-
-    private void btnSelect_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        SelectItems();
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private void SelectItems()
-    {
-      foreach (var itemRef in GetSelected(gridAvailable))
-      {
-        _selectedRefs.Add(itemRef);
-        _availableRefs.Remove(itemRef);
-      }
-    }
-
-    private void btnSelectAll_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        _selectedRefs.AddRange(_availableRefs);
-        _availableRefs.ClearVisible();
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private IEnumerable<ItemReference> GetSelected(DataGridView grid)
-    {
-      return grid.SelectedRows.OfType<DataGridViewRow>().Select(r => (ItemReference)r.DataBoundItem).ToList();
-    }
-
-    private void gridAvailable_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
-    {
-      try
-      {
-        SelectItems();
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private void gridSelected_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
-    {
-      try
-      {
-        UnselectItems();
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private void gridAvailable_KeyDown(object sender, KeyEventArgs e)
-    {
-      try
-      {
-        if (e.KeyCode == Keys.Enter)
-        {
-          SelectItems();
-          txtFind.Focus();
-        }
       }
       catch (Exception ex)
       {
@@ -377,7 +282,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
           dialog.Filter = "Innovator Package (.innpkg)|*.innpkg";
           if (dialog.ShowDialog() == DialogResult.OK)
           {
-            using (var pkg = new InnovatorPackage(dialog.FileName))
+            using (var pkg = new InnovatorPackageFile(dialog.FileName))
             {
               var installScript = pkg.Read();
               _availableRefs.Clear();
@@ -401,12 +306,11 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       }
     }
 
-    private void txtFind_TextChanged(object sender, EventArgs e)
+    private void btnSelect_Click(object sender, EventArgs e)
     {
       try
       {
-        if (_availableRefs.Count == 1 && _availableRefs[0].Equals(_searchMessage)) return;
-        _findAction.Invoke();
+        SelectItems();
       }
       catch (Exception ex)
       {
@@ -414,14 +318,116 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       }
     }
 
-    private void btnAmlStudio_Click(object sender, EventArgs e)
+    private void btnSelectAll_Click(object sender, EventArgs e)
     {
       try
       {
-        foreach (var newRef in Editor.GetItems(_wizard.ConnectionInfo.First()))
+        _selectedRefs.AddRange(_availableRefs);
+        _availableRefs.ClearVisible();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void btnUnselect_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        UnselectItems();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void btnUnselectAll_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        _availableRefs.AddRange(_selectedRefs);
+        _selectedRefs.ClearVisible();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void gridAvailable_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+    {
+      try
+      {
+        SelectItems();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void gridAvailable_KeyDown(object sender, KeyEventArgs e)
+    {
+      try
+      {
+        if (e.KeyCode == Keys.Enter)
         {
-          if (!_selectedRefs.Contains(newRef)) _selectedRefs.Add(newRef);
+          SelectItems();
+          txtFind.Focus();
         }
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void gridSelected_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+    {
+      try
+      {
+        UnselectItems();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void txtFind_KeyDown(object sender, KeyEventArgs e)
+    {
+      try
+      {
+        if (e.KeyCode == Keys.Enter)
+        {
+          var origRowCount = gridAvailable.RowCount;
+          _findAction.Invoke();
+          if (gridAvailable.RowCount == 1 && origRowCount == 1)
+          {
+            gridAvailable.Rows[0].Selected = true;
+            SelectItems();
+          }
+        }
+        else if (e.KeyCode == Keys.Down)
+        {
+          gridAvailable.Focus();
+          if (gridAvailable.RowCount > 0) gridAvailable.Rows[0].Selected = true;
+        }
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void txtFind_TextChanged(object sender, EventArgs e)
+    {
+      try
+      {
+        if (_availableRefs.Count == 1 && _availableRefs[0].Equals(_searchMessage)) return;
+        _findAction.Invoke();
       }
       catch (Exception ex)
       {

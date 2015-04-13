@@ -85,7 +85,19 @@ namespace Aras.Tools.InnovatorAdmin
 
       _baseFolderPath = Path.Combine(Path.GetDirectoryName(_path), _baseFolderPath);
 
-      script.WriteLines(GetWriter, i => i.Type != InstallType.DependencyCheck);
+      XmlWriter writer;
+      InstallItem first;
+      foreach (var group in script.GroupLines(i => i.Type != InstallType.DependencyCheck))
+      {
+        first = group.First();
+        writer = GetWriter(first.Reference.Type + "\\" + (first.Reference.KeyedName ?? first.Reference.Unique) + ".xml");
+        writer.WriteStartElement("AML");
+        foreach (var line in group)
+        {
+          line.Script.WriteTo(writer);
+        }
+        writer.WriteEndElement();
+      }
     }
 
 
@@ -99,168 +111,51 @@ namespace Aras.Tools.InnovatorAdmin
       return new CustXmlWriter(stream);
     }
 
-    private class CustXmlWriter : XmlWriter
+    private class CustXmlWriter : ConfigurableXmlWriter
     {
       private XmlWriter _base;
       private bool _blockAttr = false;
       private bool _convertAdd = false;
       private bool _blockWhere = false;
 
-      public CustXmlWriter(Stream stream)
+      public CustXmlWriter(Stream stream) : base(stream) 
       {
-        var settings = new XmlWriterSettings();
-        settings.OmitXmlDeclaration = true;
-        settings.Indent = true;
-        settings.IndentChars = "  ";
-        _base = XmlWriter.Create(stream, settings);
+        this.AttributeProcessor = (prefix, localName, ns, writer) =>
+        {
+          if (localName == "_config_id")
+          {
+            writer.WriteStartAttribute(prefix, "id", ns);
+            _blockWhere = true;
+            return ProcessState.RenderRemaining;
+          }
+          else if (localName.StartsWith("_") || _blockWhere && localName == "where")
+          {
+            _blockWhere = false;
+            return ProcessState.DontRender;
+          }
+          else
+          {
+            _convertAdd = localName == "action";
+            return ProcessState.RenderAll;
+          }
+        };
       }
-
-      public override void Close()
-      {
-        _base.Close();
-      }
-
-      public override void Flush()
-      {
-        _base.Flush();
-      }
-
-      public override string LookupPrefix(string ns)
-      {
-        return _base.LookupPrefix(ns);
-      }
-
-      public override void WriteBase64(byte[] buffer, int index, int count)
-      {
-        _base.WriteBase64(buffer, index, count);
-      }
-
-      public override void WriteCData(string text)
-      {
-        _base.WriteCData(text);
-      }
-
-      public override void WriteCharEntity(char ch)
-      {
-        _base.WriteCharEntity(ch);
-      }
-
-      public override void WriteChars(char[] buffer, int index, int count)
-      {
-        _base.WriteChars(buffer, index, count);
-      }
-
-      public override void WriteComment(string text)
-      {
-        _base.WriteComment(text);
-      }
-
-      public override void WriteDocType(string name, string pubid, string sysid, string subset)
-      {
-        _base.WriteDocType(name, pubid, sysid, subset);
-      }
-
+      
       public override void WriteEndAttribute()
       {
-        if (!_blockAttr) _base.WriteEndAttribute();
-        _blockAttr = false;
+        base.WriteEndAttribute();
         _convertAdd = false;
       }
-
-      public override void WriteEndDocument()
-      {
-        _base.WriteEndDocument();
-      }
-
-      public override void WriteEndElement()
-      {
-        _base.WriteEndElement();
-      }
-
-      public override void WriteEntityRef(string name)
-      {
-        _base.WriteEntityRef(name);
-      }
-
-      public override void WriteFullEndElement()
-      {
-        _base.WriteFullEndElement();
-      }
-
-      public override void WriteProcessingInstruction(string name, string text)
-      {
-        _base.WriteProcessingInstruction(name, text);
-      }
-
-      public override void WriteRaw(string data)
-      {
-        _base.WriteRaw(data);
-      }
-
-      public override void WriteRaw(char[] buffer, int index, int count)
-      {
-        _base.WriteRaw(buffer, index, count);
-      }
-
-      public override void WriteStartAttribute(string prefix, string localName, string ns)
-      {
-        if (localName == "_config_id")
-        {
-          _base.WriteStartAttribute(prefix, "id", ns);
-          _blockWhere = true;
-        }
-        else if (localName.StartsWith("_") || _blockWhere && localName == "where")
-        {
-          _blockAttr = true;
-          _blockWhere = false;
-        }
-        else
-        {
-          _base.WriteStartAttribute(prefix, localName, ns);
-          _convertAdd = localName == "action";
-        }
-      }
-
-      public override void WriteStartDocument(bool standalone)
-      {
-        _base.WriteStartDocument(standalone);
-      }
-
-      public override void WriteStartDocument()
-      {
-        _base.WriteStartDocument();
-      }
-
-      public override void WriteStartElement(string prefix, string localName, string ns)
-      {
-        _base.WriteStartElement(prefix, localName, ns);
-      }
-
-      public override WriteState WriteState
-      {
-        get { return _base.WriteState; }
-      }
-
       public override void WriteString(string text)
       {
         if (_convertAdd && text == "merge")
         {
           _base.WriteString("add");
         }
-        else if (!_blockAttr)
+        else
         {
-          _base.WriteString(text);
+          base.WriteString(text);
         }
-      }
-
-      public override void WriteSurrogateCharEntity(char lowChar, char highChar)
-      {
-        _base.WriteSurrogateCharEntity(lowChar, highChar);
-      }
-
-      public override void WriteWhitespace(string ws)
-      {
-        _base.WriteWhitespace(ws);
       }
     }
   }

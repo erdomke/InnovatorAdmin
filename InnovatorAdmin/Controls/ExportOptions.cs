@@ -29,6 +29,8 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       txtAuthor.Text = _wizard.InstallScript.Creator ?? _wizard.ConnectionInfo.First().UserName;
       txtWebsite.Text = (_wizard.InstallScript.Website == null ? "" : _wizard.InstallScript.Website.ToString());
       txtDescription.Text = _wizard.InstallScript.Description;
+
+      txtName.Focus();
     }
 
     private bool FlushMetadata()
@@ -70,22 +72,29 @@ namespace Aras.Tools.InnovatorAdmin.Controls
             {
               dialog.FileName = _wizard.InstallScript.Title + ".innpkg";
             }
-            dialog.Filter = "Innovator Package|*.innpkg|Manifest|*.mf";
+            dialog.Filter = "Innovator Package (Single file)|*.innpkg|Innovator Package (Multiple files: for development)|*.innpkg|Manifest (Backwards compatible)|*.mf";
             if (dialog.ShowDialog() == DialogResult.OK)
             {
-              if (Path.GetExtension(dialog.FileName) == ".innpkg")
+              switch (dialog.FilterIndex)
               {
-                using (var pkg = new InnovatorPackage(dialog.FileName))
-                {
+                case 2:
+                  var pkgFolder = new InnovatorPackageFolder(dialog.FileName);
                   if (!_wizard.InstallScript.Created.HasValue) _wizard.InstallScript.Created = DateTime.Now;
                   _wizard.InstallScript.Modified = DateTime.Now;
-                  pkg.Write(_wizard.InstallScript);
-                }
-              }
-              else
-              {
-                var pkg = new ManifestFolder(dialog.FileName);
-                pkg.Write(_wizard.InstallScript);
+                  pkgFolder.Write(_wizard.InstallScript);
+                  break;
+                case 3:
+                  var manifest = new ManifestFolder(dialog.FileName);
+                  manifest.Write(_wizard.InstallScript);
+                  break;
+                default:
+                  using (var pkgFile = new InnovatorPackageFile(dialog.FileName))
+                  {
+                    if (!_wizard.InstallScript.Created.HasValue) _wizard.InstallScript.Created = DateTime.Now;
+                    _wizard.InstallScript.Modified = DateTime.Now;
+                    pkgFile.Write(_wizard.InstallScript);
+                  }
+                  break;
               }
             }
           }

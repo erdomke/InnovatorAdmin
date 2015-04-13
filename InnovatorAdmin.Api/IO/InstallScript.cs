@@ -22,42 +22,31 @@ namespace Aras.Tools.InnovatorAdmin
     public string Version { get; set; }
     public Uri Website { get; set; }
 
-    public void WriteLines(Func<string, XmlWriter> writerGetter, Func<InstallItem, bool> predicate = null)
+    public IEnumerable<IEnumerable<InstallItem>> GroupLines(Func<InstallItem, bool> predicate = null)
     {
-      bool first = true;
-      XmlWriter curr = null;
       var linesToExport = Lines.Where(l => l.Script != null && l.Type != InstallType.Warning);
       if (predicate != null) linesToExport = linesToExport.Where(predicate);
 
+      bool first = true;
+      List<InstallItem> buffer = null;
       foreach (var line in linesToExport)
       {
         if (line.Type == InstallType.Script && !first)
         {
-          line.Script.WriteTo(curr);
+          buffer.Add(line);
         }
         else
         {
-          if (curr != null)
-          {
-            curr.WriteEndElement();
-            curr.Flush();
-            curr.Close();
-          }
+          if (buffer != null) yield return buffer;
 
-          curr = writerGetter(line.Reference.Type + "\\" + (line.Reference.KeyedName ?? line.Reference.Unique) + ".xml");
-          curr.WriteStartElement("AML");
-          line.Script.WriteTo(curr);
+          buffer = new List<InstallItem>();
+          buffer.Add(line);
         }
 
         first = false;
       }
 
-      if (curr != null)
-      {
-        curr.WriteEndElement();
-        curr.Flush();
-        curr.Close();
-      }
+      if (buffer != null) yield return buffer;
     }
   }
 }

@@ -158,7 +158,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
     private void UpdateUi()
     {
       resolveGrid.InvalidateColumn(colType.Index);
-      _wizard.NextLabel = (_items.Any(i => i.HasChanges) ? "Rescan" : "Next");
+      _wizard.NextLabel = (_items.Any(i => i.HasChanges) ? "&Rescan" : "&Next");
     }
 
     private void mniEdit_Click(object sender, EventArgs e)
