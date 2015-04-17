@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.IO;
 
 namespace Aras.Tools.InnovatorAdmin.Controls
 {
@@ -279,19 +280,38 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       {
         using (var dialog = new OpenFileDialog())
         {
-          dialog.Filter = "Innovator Package (.innpkg)|*.innpkg";
+          dialog.Filter = "Innovator Package (.innpkg)|*.innpkg|Manifest (.mf)|*.mf";
           if (dialog.ShowDialog() == DialogResult.OK)
           {
-            using (var pkg = new InnovatorPackageFile(dialog.FileName))
+            if (Path.GetExtension(dialog.FileName) == ".innpkg")
             {
-              var installScript = pkg.Read();
-              _availableRefs.Clear();
-              foreach (var item in installScript.Lines.Where(l => l.Type == InstallType.Create).Select(l => l.Reference))
+              using (var pkg = InnovatorPackage.Load(dialog.FileName))
+              {
+                var installScript = pkg.Read();
+
+                _availableRefs.Clear();
+                foreach (var item in installScript.Lines.Where(l => l.Type == InstallType.Create).Select(l => l.Reference))
+                {
+                  if (!_selectedRefs.Contains(item)) _selectedRefs.Add(item);
+                }
+
+                _existingScript = installScript;
+                _existingScript.Lines = null;
+              }
+            }
+            else
+            {
+              var pkg = new ManifestFolder(dialog.FileName);
+              string title;
+              var doc = pkg.Read(out title);
+
+              foreach (var item in ItemReference.FromFullItems(doc.DocumentElement, true))
               {
                 if (!_selectedRefs.Contains(item)) _selectedRefs.Add(item);
               }
-              _existingScript = installScript;
-              _existingScript.Lines = null;
+
+              _existingScript = _existingScript ?? new InstallScript();
+              _existingScript.Title = title;
             }
 
             pgResults.Visible = true;

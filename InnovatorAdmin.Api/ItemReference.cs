@@ -31,6 +31,12 @@ namespace Aras.Tools.InnovatorAdmin
       this.Unique = unique;
     }
 
+    public static ItemReference FromElement(XmlElement elem)
+    {
+      return elem.LocalName == "Item" ? 
+        ItemReference.FromFullItem(elem, false) :
+        ItemReference.FromItemProp(elem);
+    }
     public static ItemReference FromItemProp(XmlElement elem)
     {
       return new ItemReference(elem.Attributes["type"].Value, elem.InnerText)
@@ -87,6 +93,15 @@ namespace Aras.Tools.InnovatorAdmin
       }
 
       return result;
+    }
+    public static IEnumerable<ItemReference> FromFullItems(XmlElement elem, bool getKeyedName)
+    {
+      var node = elem;
+      while (node != null && node.LocalName != "Item") node = node.ChildNodes.OfType<XmlElement>().FirstOrDefault();
+      if (node == null) return Enumerable.Empty<ItemReference>();
+      return (from e in node.ParentNode.ChildNodes.OfType<XmlElement>()
+              where e.LocalName == "Item"
+              select FromFullItem(e, getKeyedName));
     }
 
     public override bool Equals(object obj)

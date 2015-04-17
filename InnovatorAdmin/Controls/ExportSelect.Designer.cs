@@ -42,7 +42,6 @@
       this.btnDbPackage = new System.Windows.Forms.Button();
       this.btnPackageFile = new System.Windows.Forms.Button();
       this.btnItem = new System.Windows.Forms.Button();
-      this.btnPackageFolder = new System.Windows.Forms.Button();
       this.btnAmlStudio = new System.Windows.Forms.Button();
       this.pgResults = new System.Windows.Forms.TabPage();
       this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
@@ -202,8 +201,7 @@
       this.tableLayoutPanel2.Controls.Add(this.btnDbPackage, 0, 0);
       this.tableLayoutPanel2.Controls.Add(this.btnPackageFile, 0, 2);
       this.tableLayoutPanel2.Controls.Add(this.btnItem, 1, 0);
-      this.tableLayoutPanel2.Controls.Add(this.btnPackageFolder, 1, 2);
-      this.tableLayoutPanel2.Controls.Add(this.btnAmlStudio, 0, 3);
+      this.tableLayoutPanel2.Controls.Add(this.btnAmlStudio, 1, 2);
       this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 3);
       this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
@@ -268,22 +266,6 @@
       this.btnItem.UseVisualStyleBackColor = true;
       this.btnItem.Click += new System.EventHandler(this.btnItem_Click);
       // 
-      // btnPackageFolder
-      // 
-      this.btnPackageFolder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-      this.btnPackageFolder.AutoSize = true;
-      this.btnPackageFolder.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.manifestFolder32;
-      this.btnPackageFolder.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-      this.btnPackageFolder.Location = new System.Drawing.Point(147, 79);
-      this.btnPackageFolder.Name = "btnPackageFolder";
-      this.btnPackageFolder.Size = new System.Drawing.Size(139, 70);
-      this.btnPackageFolder.TabIndex = 3;
-      this.btnPackageFolder.Text = "Legacy Package (Folder)";
-      this.btnPackageFolder.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-      this.toolTipManager.SetToolTip(this.btnPackageFolder, "Use previously exported legacy package folder as source.");
-      this.btnPackageFolder.UseVisualStyleBackColor = true;
-      // 
       // btnAmlStudio
       // 
       this.btnAmlStudio.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -291,9 +273,9 @@
       this.btnAmlStudio.AutoSize = true;
       this.btnAmlStudio.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.amlStudio32black;
       this.btnAmlStudio.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-      this.btnAmlStudio.Location = new System.Drawing.Point(3, 155);
+      this.btnAmlStudio.Location = new System.Drawing.Point(147, 79);
       this.btnAmlStudio.Name = "btnAmlStudio";
-      this.btnAmlStudio.Size = new System.Drawing.Size(138, 70);
+      this.btnAmlStudio.Size = new System.Drawing.Size(139, 70);
       this.btnAmlStudio.TabIndex = 4;
       this.btnAmlStudio.Text = "Advanced Search";
       this.btnAmlStudio.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -478,7 +460,6 @@
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
     private System.Windows.Forms.TabControl tbcSearch;
     private System.Windows.Forms.TabPage pgSearchBy;
-    private System.Windows.Forms.Button btnPackageFolder;
     private System.Windows.Forms.TabPage pgResults;
     private System.Windows.Forms.Label label2;
     private System.Windows.Forms.Label label3;

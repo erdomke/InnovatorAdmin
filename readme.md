@@ -52,6 +52,19 @@ install the package into a target database, or both.
 
 ![Export-install integration](doc/screenshot-pg05.png)
 
+## New Package Format
+
+- The new tool defaults to a single-file package format with the extension 
+  *.innpkg. This format is a zip file containing the relevant AML script 
+  files and a manifest XML file defining the install order based on 
+  dependencies.
+- This file format attempts to generate files useful to developers where 
+  possible.  For example, reports are exported as XSLT files with sidecar 
+  XML data files allowing for easier offline development.
+- The tool can also generate an unzipped version of the *.innpkg as well 
+  as the previous import/export file directory structure (although the 
+  latter is not fully tested)
+
 ## Install in Multiple Databases at Once
 
 If you want to quickly install the same changes in multiple databases,
@@ -86,6 +99,18 @@ core functionality has been tested and should work, other peripheral
 features have been blocked out and/or coded but not tested.  In 
 particular, exports to/install from the previous manifest file and folder 
 structure have not been tested.
+
+# Known Bugs / Missing Features
+
+- Fixed properties to versionable items will float on import
+- Locked items are not unlocked during the install process
+- Arbitrary scripts cannot be added to exports via the user interface
+- Package definitions are not written to the database on install even
+  if the checkbox is checked
+- The "Add package definition" checkbox does not exist when installing 
+  immediately after an export.
+- A log file of the import is neither generated nor stored in the database
+- The database version is not modified by the installer
 
 # Ideas for Improvement
 

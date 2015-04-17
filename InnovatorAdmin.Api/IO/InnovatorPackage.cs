@@ -237,18 +237,15 @@ namespace Aras.Tools.InnovatorAdmin
     private const int ZIP_LEAD_BYTES = 0x04034b50;
     public static InnovatorPackage Load(string path)
     {
+      var isFile = false;
       using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
       {
         var bytes = new byte[4];
         if (stream.Read(bytes, 0, 4) == 4 && BitConverter.ToInt32(bytes, 0) == ZIP_LEAD_BYTES)
-        {
-          return new InnovatorPackageFile(path);
-        }
-        else
-        {
-          return new InnovatorPackageFolder(path);
-        }
+          isFile = true; 
       }
+
+      return isFile ? (InnovatorPackage)new InnovatorPackageFile(path) : new InnovatorPackageFolder(path);
     }
 
     public virtual void Dispose()

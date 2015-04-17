@@ -16,7 +16,8 @@ namespace Aras.Tools.InnovatorAdmin
 
     private Connection _conn;
     private DependencyAnalyzer _dependAnalyzer;
-    private Dictionary<string, ItemType> _itemTypes;
+    private Dictionary<string, ItemType> _itemTypesByName;
+    private Dictionary<string, ItemType> _itemTypesById;
 
     public event EventHandler<ActionCompleteEventArgs> ActionComplete;
     public event EventHandler<ProgressChangedEventArgs> ProgressChanged; 
@@ -62,7 +63,7 @@ namespace Aras.Tools.InnovatorAdmin
                                 group i by i.Type into typeGroup
                                 select typeGroup).ToList())
       {
-        if (_itemTypes.TryGetValue(typeItems.Key.ToLowerInvariant(), out metaData) && metaData.IsPolymorphic)
+        if (_itemTypesByName.TryGetValue(typeItems.Key.ToLowerInvariant(), out metaData) && metaData.IsPolymorphic)
         {
           queryElem = outputDoc.CreateElement("Item");
           queryElem.SetAttribute("action", "get");
@@ -102,7 +103,7 @@ namespace Aras.Tools.InnovatorAdmin
           foreach (var polyItem in polyItems)
           {
             newRef = ItemReference.FromFullItem(polyItem, true);
-            realType = _itemTypes.Values.FirstOrDefault(t => t.Id == polyItem.Element("itemtype", ""));
+            realType = _itemTypesByName.Values.FirstOrDefault(t => t.Id == polyItem.Element("itemtype", ""));
             if (realType != null) newRef.Type = realType.Name;
             itemList.Add(newRef);
           }
@@ -116,7 +117,7 @@ namespace Aras.Tools.InnovatorAdmin
       {
         whereClause.Length = 0;
 
-        if (_itemTypes.TryGetValue(typeItems.Key.ToLowerInvariant(), out metaData) && metaData.IsVersionable)
+        if (_itemTypesByName.TryGetValue(typeItems.Key.ToLowerInvariant(), out metaData) && metaData.IsVersionable)
         {
           queryElem = outputDoc.CreateElement("Item");
           queryElem.SetAttribute("action", "get");
@@ -263,7 +264,7 @@ namespace Aras.Tools.InnovatorAdmin
       try 
       {
         EnsureSystemData();
-        _dependAnalyzer.Reset();
+        FixPolyItemReferences(doc);
         FixForeignProperties(doc);
         FixCyclicalWorkflowLifeCycleRefs(doc);
         FixCyclicalWorkflowItemTypeRefs(doc);
@@ -275,17 +276,25 @@ namespace Aras.Tools.InnovatorAdmin
         while (itemNode != null && itemNode.LocalName != "Item") itemNode = itemNode.Elements().FirstOrDefault();
         if (itemNode == null) throw new InvalidOperationException(); //TODO: Give better error information here (e.g. interpret an error item if present)
 
-        var newInstallItems = (from e in itemNode.ParentNode.Elements()
-                               where e.LocalName == "Item" && e.HasAttribute("type")
-                               select InstallItem.FromScript(e)).ToList();
-        foreach (var newInstallItem in newInstallItems)
+        int loops = 0;
+        CycleState state = CycleState.ResolvedCycle;
+        IEnumerable<InstallItem> results = null;
+        while (loops < 10 && state == CycleState.ResolvedCycle)
         {
-          _dependAnalyzer.GatherDependencies(newInstallItem.Script, newInstallItem.Reference, newInstallItem.CoreDependencies);
-        }
-        _dependAnalyzer.CleanDependencies();
+          _dependAnalyzer.Reset();
+          var newInstallItems = (from e in itemNode.ParentNode.Elements()
+                                 where e.LocalName == "Item" && e.HasAttribute("type")
+                                 select InstallItem.FromScript(e)).ToList();
+          foreach (var newInstallItem in newInstallItems)
+          {
+            _dependAnalyzer.GatherDependencies(newInstallItem.Script, newInstallItem.Reference, newInstallItem.CoreDependencies);
+          }
+          _dependAnalyzer.CleanDependencies();
 
-        var results = GetDependencyList((script.Lines ?? Enumerable.Empty<InstallItem>())
-                                        .Concat(newInstallItems)).ToList();
+          results = GetDependencyList((script.Lines ?? Enumerable.Empty<InstallItem>())
+                                        .Concat(newInstallItems), out state).ToList();
+          loops++;
+        }
 
         if (warnings == null) warnings = new HashSet<ItemReference>();
         warnings.ExceptWith(results.Select(r => r.Reference));
@@ -333,7 +342,7 @@ namespace Aras.Tools.InnovatorAdmin
       foreach (var item in query.ChildNodes.OfType<XmlElement>())
       {
         if (item.Attribute("levels") == "1" 
-          && _itemTypes.TryGetValue(item.Attribute("type").ToLowerInvariant(), out itemType) 
+          && _itemTypesByName.TryGetValue(item.Attribute("type").ToLowerInvariant(), out itemType) 
           && itemType.Relationships.Any(r => r.IsFederated))
         {
           item.RemoveAttribute("levels");
@@ -378,7 +387,8 @@ namespace Aras.Tools.InnovatorAdmin
     {
       // TODO: only do this with properties that are supposed to float.
       IEnumerable<XmlElement> resultItems;
-      foreach (var itemType in _itemTypes.Values.Where(t => t.IsVersionable))
+      ItemType fullType;
+      foreach (var itemType in _itemTypesByName.Values.Where(t => t.IsVersionable))
       {
         foreach (var item in result.ElementsByXPath("//Item[@type='" + itemType.Name + "']"))
         {
@@ -389,21 +399,32 @@ namespace Aras.Tools.InnovatorAdmin
         if (ids.Any())
         {
           resultItems = _conn.GetItems("ApplyItem",
-            "<Item type=\"" + itemType.Name + "\" action=\"get\" select=\"config_id\" idlist=\""
+            "<Item type=\"" + itemType.Name + "\" action=\"get\" select=\"config_id,itemtype\" idlist=\""
           + ids.Aggregate((p, c) => p + "," + c)
           + "\" />");
           var versMeta = resultItems.Select(r =>
           {
-            r.SetAttribute("_is_versionable", "1");
             r.SetAttribute("action", "get");
+            // Fix the types on polymorphic items
+            if (itemType.IsPolymorphic && !string.IsNullOrEmpty(r.Element("itemtype", "")))
+            {
+              fullType = _itemTypesById[r.Element("itemtype", "")];
+              r.SetAttribute("type", fullType.Name);
+              r.SetAttribute("_is_versionable", fullType.IsVersionable ? "1" : "0");
+            }
+            else
+            {
+              r.SetAttribute("_is_versionable", "1");
+            }
             return r;
-          }).ToDictionary(r => r.Attribute("id"), r => r.OuterXml);
-          string versItem;
+          }).ToDictionary(r => r.Attribute("id"));
+          XmlElement versItem;
           foreach (var versProp in result.ElementsByXPath("//self::node()[local-name() != 'Item' and local-name() != 'id' and local-name() != 'config_id' and local-name() != 'source_id' and @type='" + itemType.Name + "' and not(Item)]"))
           {
-            if (versMeta.TryGetValue(versProp.InnerText, out versItem))
+            if (versMeta.TryGetValue(versProp.InnerText, out versItem) && versProp.GetAttribute("_is_versionable") == "1")
             {
-              versProp.InnerXml = versItem;
+              versProp.RemoveAttribute("type");
+              versProp.InnerXml = versItem.OuterXml;
             }
           }
         }
@@ -464,7 +485,7 @@ namespace Aras.Tools.InnovatorAdmin
       ItemType itemType;
       foreach (var elem in doc.ElementsByXPath("/AML/Item/Relationships/Item/related_id[Item and not(Item/@action = 'get')]"))
       {
-        if (!_itemTypes.TryGetValue(elem.Parent().Parent().Parent().Attribute("type").ToLowerInvariant(), out itemType) || !itemType.IsCore)
+        if (!_itemTypesByName.TryGetValue(elem.Parent().Parent().Parent().Attribute("type").ToLowerInvariant(), out itemType) || !itemType.IsCore)
         {
           elem.InnerXml = elem.Element("Item").Attribute("id");
         }
@@ -479,6 +500,86 @@ namespace Aras.Tools.InnovatorAdmin
       foreach (XmlNode attr in doc.SelectNodes("@keyed_name"))
       {
         attr.Detatch();
+      }
+    }
+
+    /// <summary>
+    /// Convert references to poly itemtypes to the correct itemtype so that dependency checking works properly
+    /// </summary>
+    private void FixPolyItemReferences(XmlDocument doc)
+    {
+      var polyQuery = "//*["
+        + (from i in _itemTypesByName
+           where i.Value.IsPolymorphic
+           select "@type='" + i.Value.Name + "'")
+          .Aggregate((p, c) => p + " or " + c)
+        + "]";
+      var elements = doc.ElementsByXPath(polyQuery);
+      var elementsByRef =
+        (from e in elements
+         group e by ItemReference.FromElement(e) into newGroup
+         select newGroup)
+         .ToDictionary(g => g.Key, g => g.ToList());
+      
+      // Fix items referenced by ID
+      var queries = (from i in elementsByRef.Keys
+                  where i.Unique.IsGuid()
+                  group i by i.Type into newGroup
+                  select "<Item type=\"" 
+                    + newGroup.Key 
+                    + "\" idlist=\"" 
+                    + newGroup.Select(r => r.Unique).Aggregate((p,c) => p + "," + c) 
+                    + "\" select=\"itemtype\" action=\"get\" />");
+      IEnumerable<XmlElement> items;
+      List<XmlElement> fixElems;
+      ItemType fullType;
+      
+      foreach (var query in queries)
+      {
+        items = _conn.GetItems("ApplyItem", query);
+        foreach (var item in items)
+        {
+          if (elementsByRef.TryGetValue(ItemReference.FromFullItem(item, false), out fixElems))
+          {
+            fullType = _itemTypesById[item.Element("itemtype", "")];
+            if (fullType != null)
+            {
+              foreach (var elem in fixElems)
+              {
+                elem.SetAttribute("type", fullType.Name);
+              }
+            }
+          }
+        }
+      }
+
+      // Fix items referenced with a where clause
+      var whereQueries = (from i in elementsByRef.Keys
+                        where !i.Unique.IsGuid() && !string.IsNullOrEmpty(i.Unique)
+                        select new
+                        {
+                          Ref = i,
+                          Query = "<Item type=\""
+                            + i.Type
+                            + "\" where=\""
+                            + i.Unique
+                            + "\" select=\"itemtype\" action=\"get\" />"
+                        });
+      
+      foreach (var whereQuery in whereQueries)
+      {
+        var item = _conn.GetItems("ApplyItem", whereQuery.Query).FirstOrDefault();
+        if (elementsByRef.TryGetValue(whereQuery.Ref, out fixElems))
+        {
+          fullType = _itemTypesById[item.Element("itemtype", "")];
+          if (fullType != null)
+          {
+            foreach (var elem in fixElems)
+            {
+              elem.SetAttribute("type", fullType.Name);
+            }
+          }
+        }
       }
     }
 
@@ -641,8 +742,16 @@ namespace Aras.Tools.InnovatorAdmin
       ProgressChanged(this, e);
     }
 
-    private IEnumerable<InstallItem> GetDependencyList(IEnumerable<InstallItem> values)
+    private enum CycleState
     {
+      NoCycle,
+      UnresolvedCycle,
+      ResolvedCycle
+    }
+
+    private IEnumerable<InstallItem> GetDependencyList(IEnumerable<InstallItem> values, out CycleState cycleState)
+    {
+      cycleState = CycleState.NoCycle;
       var lookup = (from i in values
                    group i by i.Reference into refGroup
                    select refGroup)
@@ -650,42 +759,67 @@ namespace Aras.Tools.InnovatorAdmin
 
       IEnumerable<ItemReference> sorted = null;
       IList<ItemReference> cycle = new List<ItemReference>() { null };
-      var loops = 0;
+      List<XmlNode> refs;
 
-      while (cycle.Count > 0 && loops < 10)
+      sorted = lookup.Keys.DependencySort<ItemReference>(d =>
       {
-        cycle.Clear();
-        loops++;
-
-        sorted = lookup.Keys.DependencySort<ItemReference>(d =>
+        IEnumerable<InstallItem> res = null;
+        if (lookup.TryGetValue(d, out res)) return res.SelectMany(r =>
         {
-          IEnumerable<InstallItem> res = null;
-          if (lookup.TryGetValue(d, out res)) return res.SelectMany(r =>
-          {
-            var ii = r as InstallItem;
-            if (ii == null) return Enumerable.Empty<ItemReference>();
-            return _dependAnalyzer.GetDependencies(ii.Reference);
-          });
-          return Enumerable.Empty<ItemReference>();
-        }, ref cycle, false);
+          var ii = r as InstallItem;
+          if (ii == null) return Enumerable.Empty<ItemReference>();
+          return _dependAnalyzer.GetDependencies(ii.Reference);
+        });
+        return Enumerable.Empty<ItemReference>();
+      }, ref cycle, false);
 
-        // Resolve cycle somehow
+      // Attempt to remove cycles by identifying a Relationships tag in one of the cycles
+      // and moving the Relationships to the top level
+      if (cycle.Count > 0 && (cycle[0] != null || cycle.Count > 1))
+      {
+        cycleState = CycleState.UnresolvedCycle;
+        for (int i = (cycle[0] == null ? 2 : 1); i < cycle.Count; i++)
+        {
+          refs = _dependAnalyzer.GetReferences(cycle[i - 1], cycle[i]).ToList();
+          if (refs.Count == 1)
+          {
+            var relTag = refs[0].Parents().FirstOrDefault(e => e.LocalName == "Relationships");
+            if (relTag != null)
+            {
+              var parentTag = refs[0].Parents().Last(e => e.LocalName == "Item").Parent();
+              foreach (var child in relTag.Elements().ToList())
+              {
+                child.Detatch();
+                parentTag.AppendChild(child);
+                var sourceId = (XmlElement)child.AppendChild(child.OwnerDocument.CreateElement("source_id"));
+                sourceId.SetAttribute("type", relTag.Parent().Attribute("type"));
+                sourceId.SetAttribute("keyed_name", relTag.Parent().Attribute("_keyed_name"));
+                sourceId.InnerText = relTag.Parent().Attribute("id");
+              }
+              relTag.Detatch();
+              cycleState = CycleState.ResolvedCycle;
+              return Enumerable.Empty<InstallItem>();
+            }
+          }
+        }
       }
 
-
+      var result = new List<InstallItem>();
       IEnumerable<InstallItem> items = null;
       foreach (var sort in sorted)
       {
         if (lookup.TryGetValue(sort, out items))
         {
-          foreach (var item in items)
-            yield return item;
+          foreach (var item in items) 
+            result.Add(item);
         }
         else
         {
-          yield return InstallItem.FromDependency(sort);
+          result.Add(InstallItem.FromDependency(sort));
         }
       }
+
+      return result;
     }
 
     /// <summary>
@@ -776,11 +910,12 @@ namespace Aras.Tools.InnovatorAdmin
 
     private void EnsureSystemData()
     {
-      if (_itemTypes == null)
+      if (_itemTypesByName == null)
       {
-        EnsureSystemData(_conn, ref _itemTypes);
+        EnsureSystemData(_conn, ref _itemTypesByName);
+        _itemTypesById = _itemTypesByName.Values.ToDictionary(i => i.Id);
         
-        _dependAnalyzer = new DependencyAnalyzer(_conn, _itemTypes); 
+        _dependAnalyzer = new DependencyAnalyzer(_conn, _itemTypesByName); 
       }
     }
 

@@ -89,6 +89,8 @@ namespace Aras.Tools.InnovatorAdmin
     public void Reset()
     {
       _allDefinitions.Clear();
+      _allDependencies.Clear();
+      _allItemDependencies.Clear();
     }
 
     /// <summary>
@@ -111,6 +113,19 @@ namespace Aras.Tools.InnovatorAdmin
             node.Detatch();
           }
         }
+      }
+    }
+
+    public IEnumerable<XmlNode> GetReferences(ItemReference masterRef, ItemReference dependency)
+    {
+      References refs;
+      if (_allDependencies.TryGetValue(dependency, out refs))
+      {
+        return refs.GetReferencesByMaster(masterRef);
+      }
+      else
+      {
+        return Enumerable.Empty<XmlNode>();
       }
     }
 
@@ -155,7 +170,7 @@ namespace Aras.Tools.InnovatorAdmin
       if (existingDependencies != null) _dependencies.UnionWith(existingDependencies);
 
       _elem = elem;
-      VisitNode(elem);
+      VisitNode(elem, itemRef);
 
       // Clean up dependencies
       foreach (var defn in _definitions)
@@ -216,7 +231,7 @@ namespace Aras.Tools.InnovatorAdmin
       }
     }
 
-    private void VisitNode(XmlElement elem)
+    private void VisitNode(XmlElement elem, ItemReference masterRef)
     {
       var textChildren = elem.ChildNodes.OfType<XmlText>().ToList();
 
@@ -226,21 +241,21 @@ namespace Aras.Tools.InnovatorAdmin
         ItemType itemType;
         if ( _itemTypes.TryGetValue(elem.Attribute("type"), out itemType))
         {
-          AddDependency(itemType.Reference, elem, elem);
+          AddDependency(itemType.Reference, elem, elem, masterRef);
         }
         else
         {
           AddDependency(new ItemReference("ItemType", "[ItemType].[name] = '" + elem.Attributes["type"].Value + "'")
           {
             KeyedName = elem.Attributes["type"].Value
-          }, elem, elem);
+          }, elem, elem, masterRef);
         }
       }
 
       // Item property node
       if (elem.HasAttribute("type") && textChildren.Count == 1 && !string.IsNullOrEmpty(textChildren[0].Value))
       {
-        AddDependency(ItemReference.FromItemProp(elem), elem.Parent(), elem);
+        AddDependency(ItemReference.FromItemProp(elem), elem.Parent(), elem, masterRef);
       }
       else if (elem.LocalName == "sqlserver_body" && elem.Parent().LocalName == "Item" && elem.Parent().Attribute("type") == "SQL")
       {
@@ -256,11 +271,11 @@ namespace Aras.Tools.InnovatorAdmin
         {
           if (_itemTypes.TryGetValue(name.Replace('_', ' '), out itemType))
           {
-            AddDependency(itemType.Reference, elem.Parent(), elem);
+            AddDependency(itemType.Reference, elem.Parent(), elem, masterRef);
           }
           else if (_sql.TryGetValue(name, out sql))
           {
-            AddDependency(sql, elem.Parent(), elem);
+            AddDependency(sql, elem.Parent(), elem, masterRef);
           }
         }
       }
@@ -282,13 +297,13 @@ namespace Aras.Tools.InnovatorAdmin
                 case "list":
                 case "mv_list":
                 case "filter list":
-                  AddDependency(new ItemReference("List", textChildren[0].Value) { KeyedName = keyedName }, parent, elem);
+                  AddDependency(new ItemReference("List", textChildren[0].Value) { KeyedName = keyedName }, parent, elem, masterRef);
                   break;
                 case "item":
-                  AddDependency(new ItemReference("ItemType", textChildren[0].Value) { KeyedName = keyedName }, parent, elem);
+                  AddDependency(new ItemReference("ItemType", textChildren[0].Value) { KeyedName = keyedName }, parent, elem, masterRef);
                   break;
                 case "sequence":
-                  AddDependency(new ItemReference("Sequence", textChildren[0].Value) { KeyedName = keyedName }, parent, elem);
+                  AddDependency(new ItemReference("Sequence", textChildren[0].Value) { KeyedName = keyedName }, parent, elem, masterRef);
                   break;
               }
             }
@@ -300,7 +315,7 @@ namespace Aras.Tools.InnovatorAdmin
         && (elem.HasAttribute("id") || elem.HasAttribute("where")))
       {
         // Item queries
-        AddDependency(ItemReference.FromFullItem(elem, true), elem.Parent().Parent(), elem.Parent());
+        AddDependency(ItemReference.FromFullItem(elem, true), elem.Parent().Parent(), elem.Parent(), masterRef);
       }
       else
       {
@@ -325,15 +340,15 @@ namespace Aras.Tools.InnovatorAdmin
             if (_customProps.TryGetValue(newProp, out propRef))
             {
               propRef = propRef.Clone();
-              AddDependency(propRef, elem, child);
+              AddDependency(propRef, elem, child, masterRef);
             }
           }
-          VisitNode(child);
+          VisitNode(child, masterRef);
         }
       }
     }
 
-    private void AddDependency(ItemReference itemRef, XmlNode context, XmlNode reference)
+    private void AddDependency(ItemReference itemRef, XmlNode context, XmlNode reference, ItemReference masterRef)
     {
       _dependencies.Add(itemRef);
       if (context != null)
@@ -344,30 +359,43 @@ namespace Aras.Tools.InnovatorAdmin
           refs = new References();
           _allDependencies.Add(itemRef, refs);
         }
-        refs.AddReferences(reference, context);
+        refs.AddReferences(reference, context, masterRef);
       }
     }
 
     private class References
     {
-      private List<XmlNode> _contexts = new List<XmlNode>();
-      private List<XmlNode> _references = new List<XmlNode>();
-
-      public void AddReferences(XmlNode reference, XmlNode context)
+      private List<ReferenceContext> _contexts = new List<ReferenceContext>();
+      
+      public void AddReferences(XmlNode reference, XmlNode context, ItemReference masterRef)
       {
-        _contexts.Add(context);
-        _references.Add(reference);
+        _contexts.Add(new ReferenceContext()
+        {
+          Context = context,
+          Reference = reference,
+          MasterRef = masterRef
+        });
       }
 
       public IEnumerable<XmlNode> GetContexts()
       {
-        return _contexts;
+        return _contexts.Select(c => c.Context);
       }
       public IEnumerable<XmlNode> GetReferences()
       {
-        return _references;
+        return _contexts.Select(c => c.Reference);
       }
+      public IEnumerable<XmlNode> GetReferencesByMaster(ItemReference masterRef)
+      {
+        return (from c in _contexts where c.MasterRef.Equals(masterRef) select c.Reference);
+      }
+    }
 
+    private class ReferenceContext
+    {
+      public XmlNode Context { get; set; }
+      public ItemReference MasterRef { get; set; }
+      public XmlNode Reference { get; set; }
     }
   }
 }
