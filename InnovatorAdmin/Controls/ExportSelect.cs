@@ -424,7 +424,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
         {
           var origRowCount = gridAvailable.RowCount;
           _findAction.Invoke();
-          if (gridAvailable.RowCount == 1 && origRowCount == 1)
+          if (gridAvailable.RowCount == origRowCount && origRowCount > 0)
           {
             gridAvailable.Rows[0].Selected = true;
             SelectItems();

@@ -589,7 +589,7 @@ namespace Aras.Tools.InnovatorAdmin
     /// </summary>
     private void FixForeignProperties(XmlDocument doc)
     {
-      var foreignProps = doc.ElementsByXPath("//Relationships/Item[@type = 'Property' and data_type = 'foreign']");
+      var foreignProps = doc.ElementsByXPath("//Relationships/Item[@type = 'Property' and data_type = 'foreign']").ToList();
       XmlElement fix = null;
       foreach (var foreignProp in foreignProps)
       {

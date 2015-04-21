@@ -69,7 +69,7 @@ namespace Aras.Tools.InnovatorAdmin
             WriteReport(group);
             break;
           default:
-            using (var writer = GetWriter(first.Reference.Type + "\\" + (first.Reference.KeyedName ?? first.Reference.Unique) + ".xml"))
+            using (var writer = GetWriter(first.Reference.Type + "\\" + CleanFileName(first.Reference.KeyedName ?? first.Reference.Unique) + ".xml"))
             {
               writer.WriteStartElement("AML");
               foreach (var line in group)
@@ -232,6 +232,24 @@ namespace Aras.Tools.InnovatorAdmin
       settings.IndentChars = "  ";
 
       return XmlTextWriter.Create(GetNewStream(path), settings);
+    }
+
+    /// <summary>
+    /// Removes invalid characters from the path
+    /// </summary>
+    private string CleanFileName(string path)
+    {
+      var invalidChars = System.IO.Path.GetInvalidFileNameChars();
+      Array.Sort(invalidChars);
+      var builder = new StringBuilder(path.Length);
+      for (int i = 0; i < path.Length; i++)
+      {
+        if (Array.BinarySearch(invalidChars, path[i]) < 0)
+        {
+          builder.Append(path[i]);
+        }
+      }
+      return builder.ToString();
     }
 
     private const int ZIP_LEAD_BYTES = 0x04034b50;

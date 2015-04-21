@@ -100,6 +100,16 @@ features have been blocked out and/or coded but not tested.  In
 particular, exports to/install from the previous manifest file and folder 
 structure have not been tested.
 
+# Download
+ 
+If you don't want to build the project from the source code, you can
+download a [recent release](https://github.com/erdomke/InnovatorAdmin/releases/latest)
+from GitHub.
+
+# Installation
+
+Just unzip the file and run InnovatorAdmin.exe.
+
 # Known Bugs / Missing Features
 
 - Fixed properties to versionable items will float on import
