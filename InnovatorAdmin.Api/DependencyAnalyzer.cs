@@ -239,7 +239,7 @@ namespace Aras.Tools.InnovatorAdmin
       if (elem.LocalName == "Item" && elem.HasAttribute("type"))
       {
         ItemType itemType;
-        if ( _itemTypes.TryGetValue(elem.Attribute("type"), out itemType))
+        if ( _itemTypes.TryGetValue(elem.Attribute("type").ToLowerInvariant(), out itemType))
         {
           AddDependency(itemType.Reference, elem, elem, masterRef);
         }
@@ -316,6 +316,11 @@ namespace Aras.Tools.InnovatorAdmin
       {
         // Item queries
         AddDependency(ItemReference.FromFullItem(elem, true), elem.Parent().Parent(), elem.Parent(), masterRef);
+      }
+      else if (textChildren.Count == 1 && textChildren[0].Value.StartsWith("vault:///?fileId=", StringComparison.OrdinalIgnoreCase))
+      {
+        // Vault Id references for image properties
+        AddDependency(new ItemReference("File", textChildren[0].Value.Substring(17)), elem.Parent(), elem, masterRef);
       }
       else
       {

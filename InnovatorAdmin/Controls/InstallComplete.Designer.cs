@@ -30,7 +30,7 @@
     {
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
       this.label1 = new System.Windows.Forms.Label();
-      this.btnResetServerCache = new System.Windows.Forms.Button();
+      this.btnResetServerCache = new FlatButton();
       this.tableLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
       // 
@@ -100,6 +100,6 @@
 
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     private System.Windows.Forms.Label label1;
-    private System.Windows.Forms.Button btnResetServerCache;
+    private FlatButton btnResetServerCache;
   }
 }

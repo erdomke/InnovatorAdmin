@@ -32,22 +32,32 @@ namespace Aras.Tools.InnovatorAdmin
       if (manifest.DocumentElement.HasAttribute("website"))
         result.Website = new Uri(manifest.DocumentElement.GetAttribute("website"));
 
-      foreach (var child in manifest.DocumentElement.ChildNodes.OfType<XmlElement>().Where(e => !string.IsNullOrEmpty(e.GetAttribute("path"))))
+      foreach (var child in manifest.DocumentElement.ChildNodes.OfType<XmlElement>())
       {
-        path = child.GetAttribute("path");
-        if (path.EndsWith(".xslt", StringComparison.OrdinalIgnoreCase))
+        if (child.LocalName == "Item")
         {
-          doc = ReadReport(path);
+          scripts.Add(InstallItem.FromScript(child));
         }
         else
         {
-          doc = new XmlDocument();
-          doc.Load(GetExistingStream(path));
-        }
+          path = child.GetAttribute("path");
+          if (!string.IsNullOrEmpty(path))
+          {
+            if (path.EndsWith(".xslt", StringComparison.OrdinalIgnoreCase))
+            {
+              doc = ReadReport(path);
+            }
+            else
+            {
+              doc = new XmlDocument();
+              doc.Load(GetExistingStream(path));
+            }
 
-        foreach (var item in doc.DocumentElement.Elements("Item"))
-        {
-          scripts.Add(InstallItem.FromScript(item));
+            foreach (var item in doc.DocumentElement.Elements("Item"))
+            {
+              scripts.Add(InstallItem.FromScript(item));
+            }
+          }
         }
       }
       result.Lines = scripts;
@@ -57,56 +67,75 @@ namespace Aras.Tools.InnovatorAdmin
 
     public virtual void Write(InstallScript script)
     {
-      _paths.Clear();
-
-      InstallItem first;
-      foreach (var group in script.GroupLines())
-      {
-        first = group.First();
-        switch (first.Reference.Type)
-        {
-          case "Report":
-            WriteReport(group);
-            break;
-          default:
-            using (var writer = GetWriter(first.Reference.Type + "\\" + CleanFileName(first.Reference.KeyedName ?? first.Reference.Unique) + ".xml"))
-            {
-              writer.WriteStartElement("AML");
-              foreach (var line in group)
-              {
-                line.Script.WriteTo(writer);
-              }
-              writer.WriteEndElement();
-            }
-            break;
-        }
-      }
+      string newPath;
+      var existingPaths = new HashSet<string>();
 
       // Record the import order
       var settings = new XmlWriterSettings();
       settings.OmitXmlDeclaration = true;
       settings.Indent = true;
       settings.IndentChars = "  ";
-      using (var writer = XmlWriter.Create(GetNewStream(null), settings))
+      using (var manifestStream = GetNewStream(null))
       {
-        writer.WriteStartElement("Import");
-
-        if (script.Created.HasValue) writer.WriteAttributeString("created", script.Created.Value.ToString("s"));
-        writer.WriteAttributeString("creator", script.Creator);
-        writer.WriteAttributeString("description", script.Description);
-        if (script.Modified.HasValue) writer.WriteAttributeString("modified", script.Modified.Value.ToString("s"));
-        writer.WriteAttributeString("revision", script.Version);
-        writer.WriteAttributeString("title", script.Title);
-        if (script.Website != null)
-          writer.WriteAttributeString("website", script.Website.ToString());
-
-        foreach (var path in _paths)
+        using (var manifestWriter = XmlWriter.Create(manifestStream, settings))
         {
-          writer.WriteStartElement("Path");
-          writer.WriteAttributeString("path", path);
-          writer.WriteEndElement();
+          manifestWriter.WriteStartElement("Import");
+
+          if (script.Created.HasValue) manifestWriter.WriteAttributeString("created", script.Created.Value.ToString("s"));
+          manifestWriter.WriteAttributeString("creator", script.Creator);
+          manifestWriter.WriteAttributeString("description", script.Description);
+          if (script.Modified.HasValue) manifestWriter.WriteAttributeString("modified", script.Modified.Value.ToString("s"));
+          manifestWriter.WriteAttributeString("revision", script.Version);
+          manifestWriter.WriteAttributeString("title", script.Title);
+          if (script.Website != null)
+            manifestWriter.WriteAttributeString("website", script.Website.ToString());
+
+          InstallItem first;
+          foreach (var group in script.GroupLines())
+          {
+            first = group.First();
+            if (first.Type == InstallType.DependencyCheck)
+            {
+              foreach (var line in group)
+              {
+                line.Script.WriteTo(manifestWriter);
+              }
+            }
+            else
+            {
+              switch (first.Reference.Type)
+              {
+                case "Report":
+                  WriteReport(group);
+                  break;
+                default:
+                  newPath = first.Reference.Type + "\\" + CleanFileName(first.Reference.KeyedName ?? first.Reference.Unique) + ".xml";
+                  if (existingPaths.Contains(newPath))
+                    newPath = first.Reference.Type + "\\" + CleanFileName((first.Reference.KeyedName ?? "") + "_" + first.Reference.Unique) + ".xml";
+
+                  manifestWriter.WriteStartElement("Path");
+                  manifestWriter.WriteAttributeString("path", newPath);
+                  manifestWriter.WriteEndElement();
+                  using (var stream = GetNewStream(newPath))
+                  {
+                    using (var writer = GetWriter(stream))
+                    {
+                      writer.WriteStartElement("AML");
+                      foreach (var line in group)
+                      {
+                        line.Script.WriteTo(writer);
+                      }
+                      writer.WriteEndElement();
+                    }
+                  }
+
+                  existingPaths.Add(newPath);
+                  break;
+              }
+            }
+          }
+          manifestWriter.WriteEndElement();
         }
-        writer.WriteEndElement();
       }
     }
 
@@ -161,7 +190,7 @@ namespace Aras.Tools.InnovatorAdmin
     private void WriteReport(IEnumerable<InstallItem> reportLines)
     {
       var first = reportLines.First();
-      var path = first.Reference.Type + "\\" + (first.Reference.KeyedName ?? first.Reference.Unique) + ".xslt";
+      var path = first.Reference.Type + "\\" + CleanFileName(first.Reference.KeyedName ?? first.Reference.Unique) + ".xslt";
       _paths.Add(path);
 
       var dataFile = "<Result><Item></Item></Result>";
@@ -223,15 +252,15 @@ namespace Aras.Tools.InnovatorAdmin
     protected abstract Stream GetExistingStream(string path);
     protected abstract Stream GetNewStream(string path);
     
-    private XmlWriter GetWriter(string path)
+    private XmlWriter GetWriter(Stream stream)
     {
-      _paths.Add(path);
       var settings = new XmlWriterSettings();
       settings.OmitXmlDeclaration = true;
       settings.Indent = true;
       settings.IndentChars = "  ";
+      settings.CloseOutput = true;
 
-      return XmlTextWriter.Create(GetNewStream(path), settings);
+      return XmlTextWriter.Create(stream, settings);
     }
 
     /// <summary>
@@ -244,7 +273,7 @@ namespace Aras.Tools.InnovatorAdmin
       var builder = new StringBuilder(path.Length);
       for (int i = 0; i < path.Length; i++)
       {
-        if (Array.BinarySearch(invalidChars, path[i]) < 0)
+        if (Array.BinarySearch(invalidChars, path[i]) < 0 && path[i] != '/')
         {
           builder.Append(path[i]);
         }

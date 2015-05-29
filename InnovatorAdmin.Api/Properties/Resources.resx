@@ -112,10 +112,10 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CustomUserProperties" xml:space="preserve">
     <value>&lt;Item type="Property" action="get" select="name,source_id(id,name)"&gt;
@@ -137,6 +137,18 @@ where p.CREATED_BY_ID &amp;lt;&amp;gt; 'AD30A6D8D3B642F5A2AFED1A4B02BEFA' and it
   &lt;applied_on&gt;__now()&lt;/applied_on&gt;
 &lt;/Item&gt;</value>
   </data>
+  <data name="FloatProperties" xml:space="preserve">
+    <value>&lt;Item type="Property" action="get" select="source_id,item_behavior,name" related_expand="0"&gt;
+  &lt;data_type&gt;item&lt;/data_type&gt;
+  &lt;data_source&gt;
+    &lt;Item type="ItemType" action="get"&gt;
+      &lt;is_versionable&gt;1&lt;/is_versionable&gt;
+    &lt;/Item&gt;
+  &lt;/data_source&gt;
+  &lt;item_behavior&gt;float&lt;/item_behavior&gt;
+  &lt;name condition="not in"&gt;'config_id','id'&lt;/name&gt;
+&lt;/Item&gt;</value>
+  </data>
   <data name="GetCoreMethods" xml:space="preserve">
     <value>&lt;Item type="Method" action="get" select="config_id"&gt;
   &lt;core&gt;1&lt;/core&gt;
@@ -150,7 +162,7 @@ where SOURCE_ID = '{0}')&lt;/source_id&gt;
 &lt;/Item&gt;</value>
   </data>
   <data name="ItemTypeData" xml:space="preserve">
-    <value>&lt;Item type="ItemType" action="get" select="is_versionable,implementation_type,core,name"&gt;
+    <value>&lt;Item type="ItemType" action="get" select="is_versionable,is_dependent,implementation_type,core,name"&gt;
 &lt;/Item&gt;</value>
   </data>
   <data name="ListSqlCriteria" xml:space="preserve">

@@ -15,10 +15,14 @@ namespace Aras.Tools.InnovatorAdmin.Controls
     private FullBindingList<ItemReference> _availableRefs = new FullBindingList<ItemReference>();
     private InstallScript _existingScript = null;
     private Action _findAction;
+    private List<ItemReference> _itemTypes;
     private string _lastQuery;
     private ItemReference _searchMessage = new ItemReference("***", "***") { KeyedName = "Enter a more restrictive search, and tap find." };
     private FullBindingList<ItemReference> _selectedRefs = new FullBindingList<ItemReference>();
     private IWizard _wizard;
+    private Connection _conn;
+
+
     public ExportSelect()
     {
       InitializeComponent();
@@ -28,7 +32,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       gridSelected.DataSource = _selectedRefs;
       _selectedRefs.ListChanged += _selectedRefs_ListChanged;
 
-      pgResults.Visible = false;
+      tbcSearch.TabPages.Remove(pgResults);
     }
     public void Configure(IWizard wizard)
     {
@@ -36,6 +40,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       _wizard.NextEnabled = _selectedRefs.Any();
       _wizard.NextLabel = "&Export";
       _wizard.Message = "Select the items you would like to include in the package.";
+      _conn = new Connection(_wizard.Connection);
     }
 
     public void GoNext()
@@ -89,6 +94,11 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       }
     }
 
+    private void EnsureResultsTab()
+    {
+      if (!tbcSearch.TabPages.Contains(pgResults)) tbcSearch.TabPages.Add(pgResults);
+    }
+
     private void FindByItem(string type)
     {
       if (!string.IsNullOrEmpty(_lastQuery) && !string.IsNullOrEmpty(txtFind.Text) && txtFind.Text.StartsWith(_lastQuery))
@@ -98,16 +108,17 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       else
       {
         _availableRefs.Clear();
-        var results = _wizard.Innovator.applyAML(string.Format(Properties.Resources.Aml_ItemGet, type, "<keyed_name condition=\"like\">*" + txtFind.Text + "*</keyed_name>"));
-        if (results.getItemCount() >= 1000)
+
+        var results = _conn.GetItems("ApplyAML", string.Format(Properties.Resources.Aml_ItemGet, type, "<keyed_name condition=\"like\">*" + txtFind.Text + "*</keyed_name>"));
+        if (results.Count() >= 1000)
         {
           _availableRefs.Add(_searchMessage);
         }
         else
         {
-          foreach (var result in results.AsEnum())
+          foreach (var result in results)
           {
-            _availableRefs.Add(ItemReference.FromFullItem(result.node, true));
+            _availableRefs.Add(ItemReference.FromFullItem(result, true));
           }
           _lastQuery = txtFind.Text;
         }
@@ -152,12 +163,12 @@ namespace Aras.Tools.InnovatorAdmin.Controls
     {
       try
       {
-        var items = _wizard.Innovator.applyAML(Properties.Resources.Aml_Packages);
+        var items = _conn.GetItems("ApplyAML", Properties.Resources.Aml_Packages);
         var refs = new List<ItemReference>();
 
-        foreach (var item in items.AsEnum())
+        foreach (var item in items)
         {
-          refs.Add(ItemReference.FromFullItem(item.node, true));
+          refs.Add(ItemReference.FromFullItem(item, true));
         }
 
         using (var dialog = new FilterSelect<ItemReference>())
@@ -169,16 +180,16 @@ namespace Aras.Tools.InnovatorAdmin.Controls
           {
             txtFind.Text = "";
             _findAction = DefaultFindAction;
-            items = _wizard.Innovator.applyAML(string.Format(Properties.Resources.Aml_PackageElements, dialog.SelectedItem.Unique));
+            items = _conn.GetItems("ApplyAML", string.Format(Properties.Resources.Aml_PackageElements, dialog.SelectedItem.Unique));
             _availableRefs.Clear();
             ItemReference newRef;
-            foreach (var item in items.AsEnum())
+            foreach (var item in items)
             {
               newRef = new ItemReference()
               {
-                Type = item.getProperty("element_type"),
-                Unique = item.getProperty("element_id"),
-                KeyedName = item.getProperty("name")
+                Type = item.Element("element_type", ""),
+                Unique = item.Element("element_id", ""),
+                KeyedName = item.Element("name", "")
               };
               if (!_selectedRefs.Contains(newRef)) _selectedRefs.Add(newRef);
             }
@@ -186,7 +197,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
             _existingScript = _existingScript ?? new InstallScript();
             _existingScript.Title = dialog.SelectedItem.KeyedName;
 
-            pgResults.Visible = true;
+            EnsureResultsTab();
             tbcSearch.SelectedTab = pgResults;
             txtFind.Focus();
           }
@@ -202,7 +213,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
     {
       try
       {
-        foreach (var newRef in Editor.GetItems(_wizard.ConnectionInfo.First()))
+        foreach (var newRef in EditorWindow.GetItems(_wizard.ConnectionInfo.First()))
         {
           if (!_selectedRefs.Contains(newRef)) _selectedRefs.Add(newRef);
         }
@@ -213,21 +224,22 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       }
     }
 
+    private void EnsureItemTypes()
+    {
+      if (_itemTypes == null)
+      {
+        _itemTypes = _conn.GetItems("ApplyAML", Properties.Resources.Aml_ItemTypes).Select(i => ItemReference.FromFullItem(i, true)).ToList();
+      }
+    }
+
     private void btnItem_Click(object sender, EventArgs e)
     {
       try
       {
-        var items = _wizard.Innovator.applyAML(Properties.Resources.Aml_ItemTypes);
-        var refs = new List<ItemReference>();
-
-        foreach (var item in items.AsEnum())
-        {
-          refs.Add(ItemReference.FromFullItem(item.node, true));
-        }
-
         using (var dialog = new FilterSelect<ItemReference>())
         {
-          dialog.DataSource = refs;
+          EnsureItemTypes();
+          dialog.DataSource = _itemTypes;
           dialog.DisplayMember = "KeyedName";
           dialog.Message = resources.Messages.ItemTypeSelect;
           if (dialog.ShowDialog(this) == DialogResult.OK && dialog.SelectedItem != null)
@@ -235,8 +247,8 @@ namespace Aras.Tools.InnovatorAdmin.Controls
             _lastQuery = null;
             txtFind.Text = "";
             _availableRefs.Clear();
-            items = _wizard.Innovator.applyAML(string.Format(Properties.Resources.Aml_ItemGet, dialog.SelectedItem.KeyedName, ""));
-            if (items.getItemCount() >= 1000)
+            var items = _conn.GetItems("ApplyAML", string.Format(Properties.Resources.Aml_ItemGet, dialog.SelectedItem.KeyedName, ""));
+            if (items.Count() >= 1000)
             {
               _findAction = () => FindByItem(dialog.SelectedItem.KeyedName);
               _availableRefs.Add(_searchMessage);
@@ -245,13 +257,13 @@ namespace Aras.Tools.InnovatorAdmin.Controls
             {
               ItemReference newRef;
               _findAction = DefaultFindAction;
-              foreach (var result in items.AsEnum())
+              foreach (var result in items)
               {
-                newRef = ItemReference.FromFullItem(result.node, true);
+                newRef = ItemReference.FromFullItem(result, true);
                 if (!_selectedRefs.Contains(newRef)) _availableRefs.Add(newRef);
               }
             }
-            pgResults.Visible = true;
+            EnsureResultsTab();
             tbcSearch.SelectedTab = pgResults;
             txtFind.Focus();
           }
@@ -314,7 +326,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
               _existingScript.Title = title;
             }
 
-            pgResults.Visible = true;
+            EnsureResultsTab();
             tbcSearch.SelectedTab = pgResults;
             txtFind.Focus();
           }
@@ -448,6 +460,117 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       {
         if (_availableRefs.Count == 1 && _availableRefs[0].Equals(_searchMessage)) return;
         _findAction.Invoke();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void btnAdvanced_Click(object sender, EventArgs e)
+    {
+      ShowContextMenu(btnAdvanced.Parent.PointToScreen(new Point(btnAdvanced.Left, btnAdvanced.Bottom)));
+    }
+
+    private void ShowContextMenu(Point pt)
+    {
+      var items = gridSelected.SelectedRows.OfType<DataGridViewRow>().Select(r => (ItemReference)r.DataBoundItem).ToList();
+      
+      if (items.Any())
+      {
+        foreach (var menu in mniLevels.DropDownItems.OfType<ToolStripMenuItem>()) menu.Checked = false;
+        ((ToolStripMenuItem)mniLevels.DropDownItems[items.Select(i => i.Levels < 0 ? 1 : i.Levels).Min()]).Checked = true;
+
+        var sysProps = items.Select(i => i.SystemProps).Aggregate((p, c) => p & c);
+        mniHistory.Checked = ((sysProps & SystemPropertyGroup.History) == SystemPropertyGroup.History);
+        mniPermissions.Checked = ((sysProps & SystemPropertyGroup.Permission) == SystemPropertyGroup.Permission);
+        mniState.Checked = ((sysProps & SystemPropertyGroup.State) == SystemPropertyGroup.State);
+        mniVersion.Checked = ((sysProps & SystemPropertyGroup.Versioning) == SystemPropertyGroup.Versioning);
+
+        conStrip.Show(pt);
+      }
+    }
+
+    private void conStrip_Closed(object sender, ToolStripDropDownClosedEventArgs e)
+    {
+      try
+      {
+        var items = gridSelected.SelectedRows.OfType<DataGridViewRow>().Select(r => (ItemReference)r.DataBoundItem).ToList();
+
+        if (items.Any())
+        {
+          var selectedLevelItem = mniLevels.DropDownItems.OfType<ToolStripMenuItem>().Where(m => m.Checked).FirstOrDefault();
+          if (selectedLevelItem != null)
+          {
+            var level = mniLevels.DropDownItems.IndexOf(selectedLevelItem);
+            foreach (var item in items) item.Levels = level;
+          }
+
+          var sysProps = (mniHistory.Checked ? SystemPropertyGroup.History : 0)
+            | (mniPermissions.Checked ? SystemPropertyGroup.Permission : 0)
+            | (mniState.Checked ? SystemPropertyGroup.State : 0) 
+            | (mniVersion.Checked ? SystemPropertyGroup.Versioning : 0);
+
+          foreach (var item in items) item.SystemProps = sysProps;
+        }
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void gridSelected_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+    {
+      try
+      {
+        if (e.Button == System.Windows.Forms.MouseButtons.Right && e.RowIndex >= 0 && e.ColumnIndex >= 0)
+        {
+          if (!gridSelected[e.ColumnIndex, e.RowIndex].Selected)
+          {
+            gridSelected.ClearSelection();
+            gridSelected.Rows[e.RowIndex].Selected = true;
+          }
+
+          ShowContextMenu(Cursor.Position);
+        }
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void mniLevelItem_Click(object sender, MouseEventArgs e)
+    {
+      foreach (var menu in mniLevels.DropDownItems.OfType<ToolStripMenuItem>()) menu.Checked = false;
+      ((ToolStripMenuItem)sender).Checked = true;
+    }
+
+    private void mniSysProps_MouseDown(object sender, MouseEventArgs e)
+    {
+      ((ToolStripMenuItem)sender).Checked = !((ToolStripMenuItem)sender).Checked;
+    }
+
+    private void btnRecentlyModified_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        EnsureItemTypes();
+        using (var dialog = new RecentlyModifiedSearch())
+        {
+          dialog.SetConnection(_conn);
+          dialog.SetItemTypes(_itemTypes);
+          if (dialog.ShowDialog() == DialogResult.OK)
+          {
+            _availableRefs.Clear();
+            _availableRefs.AddRange(dialog.Results);
+
+            EnsureResultsTab();
+            tbcSearch.SelectedTab = pgResults;
+            txtFind.Focus();
+          }
+        }
       }
       catch (Exception ex)
       {

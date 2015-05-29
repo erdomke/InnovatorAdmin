@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
 using Aras.Tools.InnovatorAdmin.Connections;
-using Aras.IOM;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -30,6 +29,12 @@ namespace Aras.Tools.InnovatorAdmin
       lstConnections.CheckOnClick = true;
       this.MultiSelect = false;
       _bs.CurrentChanged += _bs_CurrentChanged;
+
+      cboIomVersion.Items.Add(string.Empty);
+      foreach (var version in Iom.Versions())
+      {
+        cboIomVersion.Items.Add(version);
+      }
     }
 
     void _bs_CurrentChanged(object sender, EventArgs e)
@@ -70,6 +75,7 @@ namespace Aras.Tools.InnovatorAdmin
         txtPassword.DataBindings.Add("Text", _bs, "Password");
         txtUrl.DataBindings.Add("Text", _bs, "Url");
         txtUser.DataBindings.Add("Text", _bs, "UserName");
+        cboIomVersion.DataBindings.Add("Text", _bs, "IomVersion");
 
         if (lstConnections.Items.Count > 0 && !this.MultiSelect)
           lstConnections.SetItemChecked(0, true);
@@ -97,7 +103,7 @@ namespace Aras.Tools.InnovatorAdmin
       lblMessage.Text="";
     }
 
-    public static Innovator Login(ConnectionData credentials, out string messageText)
+    public static IArasConnection Login(ConnectionData credentials, out string messageText)
     {
       messageText = "";
       if (string.IsNullOrEmpty(credentials.Url))
@@ -106,27 +112,7 @@ namespace Aras.Tools.InnovatorAdmin
         return null;
       }
 
-      var conn = IomFactory.CreateHttpServerConnection(credentials.Url, credentials.Database, credentials.UserName, credentials.Password);
-      var loginResult = conn.Login();
-      if (loginResult.isError())
-      {
-        //get details of error
-        var errorStr = loginResult.getErrorString();
-
-        //Interpret message string  - remove header text before : symbol
-        var pos = errorStr.IndexOf(':') + 1;
-        if (pos > 0) errorStr = errorStr.Substring(pos);
-
-        //If error contains keyword clean up message text
-        if (errorStr.Contains("Authentication")) errorStr = resources.Messages.InvalidCredentials;
-        if (errorStr.Contains("Database")) errorStr = resources.Messages.DatabaseUnavailable;
-
-        messageText = string.Format(resources.Messages.LoginFailed, errorStr);
-        return null;
-      }
-
-      messageText = resources.Messages.LoginSuccess;
-      return IomFactory.CreateInnovator(conn);
+      return Iom.GetFactory(credentials.IomVersion).Login(credentials.Url, credentials.Database, credentials.UserName, credentials.Password, out messageText);
     }
 
     private void btnNew_Click(object sender, EventArgs e)
@@ -253,13 +239,11 @@ namespace Aras.Tools.InnovatorAdmin
           //get dbs from test connection
           try
           {
-            var conn = IomFactory.CreateHttpServerConnection(txtUrl.Text, cmbDatabase.Text, txtUser.Text, txtPassword.Text);
-            string[] databases = conn.GetDatabases();
-            for (int i = 0; i < databases.Length; i++)
+            foreach (var db in Iom.GetFactory(null).AvailableDatabases(txtUrl.Text))
             {
-              cmbDatabase.Items.Add(databases[i]);
+              cmbDatabase.Items.Add(db);
             }
-
+            
             if (selected != null) cmbDatabase.SelectedItem = selected;
           }
           catch (Exception err)

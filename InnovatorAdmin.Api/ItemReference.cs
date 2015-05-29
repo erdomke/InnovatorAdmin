@@ -6,12 +6,13 @@ using System.Xml;
 
 namespace Aras.Tools.InnovatorAdmin
 {
-  public class ItemReference : IComparable<ItemReference>, IEquatable<ItemReference>, ICloneable
+  public class ItemReference : IComparable<ItemReference>, IComparable, IEquatable<ItemReference>, ICloneable
   {
     private string _unique;
     private string _type;
 
     public string KeyedName { get; set; }
+    // Used when understanding dependencies
     public ItemReference Origin { get; set; }
     public string Type 
     {
@@ -24,8 +25,16 @@ namespace Aras.Tools.InnovatorAdmin
       set { _unique = value; }
     }
 
-    public ItemReference() { }
-    public ItemReference(string type, string unique)
+    // Used with exporting
+    public int Levels { get; set; }
+    public SystemPropertyGroup SystemProps { get; set; }
+
+    public ItemReference() 
+    {
+      this.Levels = -1;
+      this.SystemProps = SystemPropertyGroup.None;
+    }
+    public ItemReference(string type, string unique) : this()
     {
       this.Type = type;
       this.Unique = unique;
@@ -85,7 +94,7 @@ namespace Aras.Tools.InnovatorAdmin
               result.KeyedName = node.Attribute("keyed_name") + " > " + related.Attribute("keyed_name");
             }
           }
-          else
+          else if (!string.IsNullOrEmpty(node.Attribute("keyed_name")))
           {
             result.KeyedName += " {" + node.Attribute("keyed_name") + "}";
           }
@@ -153,6 +162,13 @@ namespace Aras.Tools.InnovatorAdmin
     object ICloneable.Clone()
     {
       return this.Clone();
+    }
+
+    public int CompareTo(object obj)
+    {
+      var itemRef = obj as ItemReference;
+      if (itemRef == null) throw new ArgumentException();
+      return CompareTo(itemRef);
     }
   }
 }

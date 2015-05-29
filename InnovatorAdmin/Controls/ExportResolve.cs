@@ -109,18 +109,23 @@ namespace Aras.Tools.InnovatorAdmin.Controls
             resolveGrid.Rows[e.RowIndex].Selected = true;
           }
 
-          var items = resolveGrid.SelectedRows.OfType<DataGridViewRow>().Select(r => (ImportStepResolve)r.DataBoundItem).ToList();
-          var showList = items.All(i => i.Type == InstallType.DependencyCheck || i.Type == InstallType.Warning || i.HasChanges);
-
-          mniIncludeInPackage.Enabled = showList;
-          mniReset.Enabled = showList;
-          conStrip.Show(Cursor.Position);
+          ShowContextMenu(Cursor.Position);
         }
       }
       catch (Exception ex)
       {
         Utils.HandleError(ex);
       }
+    }
+
+    private void ShowContextMenu(Point pt)
+    {
+      var items = resolveGrid.SelectedRows.OfType<DataGridViewRow>().Select(r => (ImportStepResolve)r.DataBoundItem).ToList();
+      var showList = items.All(i => i.Type == InstallType.DependencyCheck || i.Type == InstallType.Warning || i.HasChanges);
+
+      mniIncludeInPackage.Enabled = showList;
+      mniReset.Enabled = showList;
+      conStrip.Show(pt);
     }
 
     private void mniIncludeInPackage_Click(object sender, EventArgs e)
@@ -163,32 +168,15 @@ namespace Aras.Tools.InnovatorAdmin.Controls
 
     private void mniEdit_Click(object sender, EventArgs e)
     {
-      using (var dialog = new Editor())
+      using (var dialog = new EditorWindow())
       {
         dialog.AllowRun = false;
-        dialog.AmlGetter = o => FormatXml(((ImportStepResolve)o).Item.Script);
+        dialog.AmlGetter = o => Utils.FormatXml(((ImportStepResolve)o).Item.Script);
         dialog.AmlSetter = (o,a) => ((ImportStepResolve)o).Item.SetScript(a);
         dialog.DisplayMember = "Name";
         dialog.DataSource = SelectedRows().ToList();
-        dialog.SetConnection(_wizard.Innovator, _wizard.ConnectionInfo.First().ConnectionName);
+        dialog.SetConnection(_wizard.Connection, _wizard.ConnectionInfo.First().ConnectionName);
         dialog.ShowDialog(this);
-      }
-    }
-
-    private string FormatXml(XmlNode node)
-    {
-      var settings = new XmlWriterSettings();
-      settings.OmitXmlDeclaration = true;
-      settings.Indent = true;
-      settings.IndentChars = "  ";
-
-      using (var writer = new System.IO.StringWriter())
-      {
-        using (var xml = XmlTextWriter.Create(writer, settings))
-        {
-          node.WriteTo(xml);
-        }
-        return writer.ToString();
       }
     }
 
@@ -250,6 +238,11 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       {
         Utils.HandleError(ex);
       }
+    }
+
+    private void btnActions_Click(object sender, EventArgs e)
+    {
+      ShowContextMenu(btnActions.Parent.PointToScreen(new Point(btnActions.Left, btnActions.Bottom)));
     }
   }
 }

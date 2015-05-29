@@ -10,9 +10,9 @@ namespace Aras.Tools.InnovatorAdmin
   {
     private Connection _conn;
     
-    public DatabasePackage(Func<string, XmlNode, XmlNode> applyAction)
+    public DatabasePackage(IArasConnection conn)
     {
-      _conn = new Connection(applyAction);
+      _conn = new Connection(conn);
     }
     internal DatabasePackage(Connection conn)
     {

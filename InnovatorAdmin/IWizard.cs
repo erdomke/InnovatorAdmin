@@ -1,5 +1,4 @@
-﻿using Aras.IOM;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,11 +8,11 @@ namespace Aras.Tools.InnovatorAdmin
 {
   public interface IWizard
   {
-    Func<string, XmlNode, XmlNode> ApplyAction { get; }
+    IArasConnection Connection { get; set; }
     IEnumerable<Connections.ConnectionData> ConnectionInfo { get; set; }
     ExportProcessor ExportProcessor { get; }
     void GoToStep(IWizardStep step);
-    Innovator Innovator { get; set; }
+    ImportProcessor ImportProcessor { get; }
     InstallProcessor InstallProcessor { get; }
     InstallScript InstallScript { get; set; }
     bool NextEnabled { get; set; }

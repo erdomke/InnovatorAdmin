@@ -134,9 +134,48 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       {
         if (FlushMetadata())
         {
-          var dbPackage = new DatabasePackage(_wizard.ApplyAction);
+          var dbPackage = new DatabasePackage(_wizard.Connection);
           dbPackage.Write(_wizard.InstallScript);
         }
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void btnCompare_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        var currInstall = _wizard.InstallScript;
+        var refs = (from i in _wizard.InstallScript.Lines
+                    where i.Reference != null && i.Type == InstallType.Create
+                    select i.Reference);
+
+        var connStep = new ConnectionSelection();
+        connStep.MultiSelect = false;
+        connStep.GoNextAction = () =>
+        {
+          var prog = new ProgressStep<ExportProcessor>(_wizard.ExportProcessor);
+          prog.MethodInvoke = p =>
+          {
+            _wizard.InstallScript = new InstallScript();
+            _wizard.InstallScript.ExportUri = new Uri(_wizard.ConnectionInfo.First().Url);
+            _wizard.InstallScript.ExportDb = _wizard.ConnectionInfo.First().Database;
+            _wizard.InstallScript.Lines = Enumerable.Empty<InstallItem>();
+            p.Export(_wizard.InstallScript, refs);
+          };
+          prog.GoNextAction = () => {
+            var compare = new Compare();
+            compare.BaseInstall = currInstall;
+            _wizard.GoToStep(compare);
+          };
+
+          _wizard.GoToStep(prog);
+        };
+        _wizard.GoToStep(connStep);
+        _wizard.NextLabel = "&Export Compare";
       }
       catch (Exception ex)
       {

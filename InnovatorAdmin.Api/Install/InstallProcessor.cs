@@ -22,10 +22,10 @@ namespace Aras.Tools.InnovatorAdmin
 
     public string InstallLog { get { return _log.ToString(); } }
 
-    public InstallProcessor(Func<string, XmlNode, XmlNode> applyAction)
+    public InstallProcessor(IArasConnection conn)
     {
-      _conn = new Connection(applyAction);
-      _exportTools = new ExportProcessor(applyAction);
+      _conn = new Connection(conn);
+      _exportTools = new ExportProcessor(conn);
       _currLine = -1;
     }
 
@@ -33,16 +33,16 @@ namespace Aras.Tools.InnovatorAdmin
     {
       ExportProcessor.EnsureSystemData(_conn, ref _itemTypes);
 
-      foreach (var elem in doc.ElementsByXPath("//Item[@action='add']"))
+      foreach (var elem in doc.ElementsByXPath("//Item[@action='add']").ToList())
       {
         elem.SetAttribute("action", "merge");
       }
       ItemType itemType;
-      foreach (var elem in doc.ElementsByXPath("//Item[@type and @id]"))
+      foreach (var elem in doc.ElementsByXPath("//Item[@type and @id]").ToList())
       {
         if (_itemTypes.TryGetValue(elem.Attribute("type", "").ToLowerInvariant(), out itemType) && itemType.IsVersionable)
         {
-          elem.SetAttribute("_config_id", elem.Attribute("id"));
+          elem.SetAttribute(XmlFlags.Attr_ConfigId, elem.Attribute("id"));
           elem.SetAttribute("where", string.Format("[{0}].[config_id] = '{1}'", itemType.Name.Replace(' ', '_'), elem.Attribute("id")));
           elem.RemoveAttribute("id");
         }
@@ -106,7 +106,7 @@ namespace Aras.Tools.InnovatorAdmin
             try
             {
               // If the original item uses a where clause or is versionable or the target item is versionable
-              if (query.Attribute("_config_id") != null && query.Attribute("action") == "merge"
+              if (query.Attribute(XmlFlags.Attr_ConfigId) != null && query.Attribute("action") == "merge"
                  && (query.Attribute("where") != null || (_itemTypes.TryGetValue(query.Attribute("type").ToLowerInvariant(), out itemType)) && itemType.IsVersionable ))
               {
                 newQuery = query.Clone() as XmlElement;
@@ -118,23 +118,23 @@ namespace Aras.Tools.InnovatorAdmin
                 if (newQuery.Attribute("where") == null)
                 {
                   newQuery.RemoveAttribute("id");
-                  newQuery.SetAttribute("where", string.Format("[{0}].[config_id] = '{1}'", query.Attribute("type", "").Replace(' ', '_'), query.Attribute("_config_id")));
+                  newQuery.SetAttribute("where", string.Format("[{0}].[config_id] = '{1}'", query.Attribute("type", "").Replace(' ', '_'), query.Attribute(XmlFlags.Attr_ConfigId)));
                 }
 
                 // If the item exists, get the id for use in the relationships
                 // If the item doesn't exist, make sure the id = config_id for the add
                 items = _conn.GetItems("ApplyItem", newQuery);
-                string sourceId = items.Any() ? items.First().Attribute("id") : query.Attribute("_config_id");
+                string sourceId = items.Any() ? items.First().Attribute("id") : query.Attribute(XmlFlags.Attr_ConfigId);
                 newQuery = query.Clone() as XmlElement;
                 newQuery.SetAttribute("id", sourceId);
                 newQuery.RemoveAttribute("where");
-                newQuery.RemoveAttribute("_config_id");
+                newQuery.RemoveAttribute(XmlFlags.Attr_ConfigId);
                 query = newQuery;
 
                 string relatedId;
                 string whereClause;
                 // Check relationships and match based on source_id and related_id where necessary
-                foreach (var rel in query.SelectNodes("Relationships/Item[related_id]").OfType<XmlElement>())
+                foreach (var rel in query.ElementsByXPath("Relationships/Item[related_id]").ToList())
                 {
                   if (rel.Element("related_id").Element("Item") == null)
                   {
@@ -166,6 +166,16 @@ namespace Aras.Tools.InnovatorAdmin
               }
               items = _conn.GetItems("ApplyItem", query, true);
               if (line.Type == InstallType.Create) line.InstalledId = items.First().Attribute("id");
+
+              // Execute any sql scripts
+              var sqlScripts = line.Script
+                            .DescendantsAndSelf(e => e.Attribute(XmlFlags.Attr_SqlScript, "") != "")
+                            .Select(e => e.Attribute(XmlFlags.Attr_SqlScript, ""));
+              if (sqlScripts.Any())
+              {
+                _conn.CallAction("ApplySQL", "<sql>" + sqlScripts.Aggregate((p, c) => p + Environment.NewLine + c) + "</sql>");
+              }
+
               cont = false;
             }
             catch (ArasException ex)
@@ -235,11 +245,11 @@ namespace Aras.Tools.InnovatorAdmin
 
     protected virtual void OnActionComplete(ActionCompleteEventArgs e)
     {
-      ActionComplete(this, e);
+      if (ActionComplete != null) ActionComplete(this, e);
     }
     protected virtual void OnErrorRaised(RecoverableErrorEventArgs e)
     {
-      ErrorRaised(this, e);
+      if (ErrorRaised != null) ErrorRaised(this, e);
     }
     protected virtual void ReportProgress(int progress, string message)
     {

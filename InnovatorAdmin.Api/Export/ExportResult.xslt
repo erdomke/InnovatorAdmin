@@ -21,24 +21,9 @@
   <xsl:template match="Item" mode="first">
     <xsl:copy>
       <xsl:copy-of select="@type"/>
-      
-      <xsl:attribute name="_config_id"><xsl:value-of select="config_id"/></xsl:attribute>
-      
-      <xsl:choose>
-        <xsl:when test="@_is_versionable = '1'">
-          <xsl:attribute name="where">
-            <xsl:text>[</xsl:text>
-            <xsl:value-of select="translate(@type,' ','_')"/>
-            <xsl:text>].[config_id] = '</xsl:text>
-            <xsl:value-of select="config_id"/>
-            <xsl:text>'</xsl:text>
-          </xsl:attribute>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:copy-of select="@id"/>
-        </xsl:otherwise>
-      </xsl:choose>
-
+      <xsl:copy-of select="@_sql_script"/>
+      <xsl:copy-of select="@_float"/>
+      <xsl:copy-of select="@id"/>
       <xsl:attribute name="_keyed_name">
         <xsl:value-of select="id/@keyed_name"/>
       </xsl:attribute>
@@ -62,8 +47,6 @@
       <Item type="View" action="delete" where="[View].[source_id]='{relationship_id/Item/@id}'"/>
       <Item type="Form" action="delete" where="[Form].[name]='{relationship_id/Item/name}'"/>
     </xsl:if>
-    <!-- Check for Fields that use a system property as the data source and correct them -->
-    <xsl:apply-templates mode="fix" select="//Item[@type='Field'][contains($systemProperties,concat('|',propertytype_id/@keyed_name,'|'))]"/>
     <!-- Deal with circular Identity=>Member=>Identity references by importing Members after Identities  -->
     <xsl:apply-templates mode="fix" select="Relationships/Item[@type='Member']"/>
     <!-- Deal with circular ItemType=>Morphae=>ItemType references by importing Morphae after ItemTypes  -->
@@ -93,26 +76,14 @@
   <xsl:template match="Item[@type='Identity'][name(..)!='' and name(..)!='Result']">
     <xsl:value-of select="@id"/>
   </xsl:template>
-  <!-- Methods are versionable, so it's better to match them by config_id -->
-  <xsl:template match="Item[@_is_versionable = '1'][name(..)!='' and name(..)!='Result']">
-    <Item type="{@type}" action="get" select="id">
-      <xsl:attribute name="_config_id">
-        <xsl:value-of select="config_id"/>
-      </xsl:attribute>
-      <xsl:attribute name="where">
-        <xsl:text>[</xsl:text>
-        <xsl:value-of select="translate(@type,' ','_')"/>
-        <xsl:text>].[config_id] = '</xsl:text>
-        <xsl:value-of select="config_id"/>
-        <xsl:text>'</xsl:text>
-      </xsl:attribute>
-      <xsl:attribute name="_keyed_name">
-        <xsl:value-of select="id/@keyed_name"/>
-      </xsl:attribute>
+  <!-- Remove Members and Morphae - they are added later as part of a fix -->
+  <xsl:template match="Item[@type='Member']"/>
+
+  <xsl:template match="Item[@type='Morphae']">
+    <Item _is_dependency="1" action="get">
+      <xsl:copy-of select="related_id/Item/@*"/>
     </Item>
   </xsl:template>
-  <!-- Remove Members and Morphae - they are added later as part of a fix -->
-  <xsl:template match="Item[@type='Member' or @type='Morphae']"/>
   <!-- Remove SolutionConfig Export Actions -->
   <xsl:template match="Item[@type='Item Action'][related_id/@keyed_name='SolutionConfig Export']"/>
   <!-- Remove RelationshipTypes from ItemType exports -->
@@ -121,50 +92,20 @@
   <xsl:template match="related_id/Item[@type='ItemType']">
     <xsl:value-of select="@id"/>
   </xsl:template>
-  <!-- Special handling for the propertytype_id field, which points to Property -->
-  <xsl:template match="Item[@type='Field']/propertytype_id">
-    <xsl:if test="not(contains($systemProperties,concat('|',Item[@type='Property']/name,'|')))">
-      <xsl:copy>
-        <xsl:copy-of select="@*"/>
-        <xsl:choose>
-          <xsl:when test="not(Item)">
-            <xsl:value-of select="."/>
-          </xsl:when>
-          <xsl:otherwise>
-            <xsl:value-of select="Item/@id"/>
-          </xsl:otherwise>
-        </xsl:choose>
-      </xsl:copy>
-    </xsl:if>
-  </xsl:template>
 
   <!-- Add action="merge" to all Items that don't match another template -->
   <xsl:template match="Item">
     <xsl:copy>
       <xsl:copy-of select="@type"/>
       <xsl:copy-of select="@id"/>
+      <xsl:copy-of select="@_sql_script"/>
+      <xsl:copy-of select="@_float"/>
       <xsl:attribute name="action">merge</xsl:attribute>
       <xsl:apply-templates/>
     </xsl:copy>
   </xsl:template>
 
   <!-- Replace full item data with ID references when exporting an ItemType -->
-  <xsl:template match="Item[@type='ItemType']/Relationships/Item/related_id/Item[@_is_versionable='1']">
-    <Item action="get">
-      <xsl:copy-of select="@type"/>
-      <xsl:attribute name="_config_id"><xsl:value-of select="config_id"/></xsl:attribute>
-      <xsl:attribute name="where">
-        <xsl:text>[</xsl:text>
-        <xsl:value-of select="translate(@type,' ','_')"/>
-        <xsl:text>].[config_id] = '</xsl:text>
-        <xsl:value-of select="config_id"/>
-        <xsl:text>'</xsl:text>
-      </xsl:attribute>
-      <xsl:attribute name="_keyed_name">
-        <xsl:value-of select="id/@keyed_name"/>
-      </xsl:attribute>  
-    </Item>
-  </xsl:template>
   <xsl:template match="Item[@type='ItemType']/Relationships/Item/related_id/Item[@type='Form' or @type='Action' or @type='Life Cycle Map' or @type='Permission' or @type='Report']">
     <xsl:value-of select="@id"/>
   </xsl:template>
@@ -240,34 +181,19 @@
   </xsl:template>
 
   <!-- Eliminate the system properties from all ItemTypes -->
-  <xsl:template match="Item[@type!='RelationshipType']/behavior"/>
   <xsl:template match="cache_query"/>
   <xsl:template match="config_id"/>
   <xsl:template match="core"/>
-  <xsl:template match="created_by_id"/>
-  <xsl:template match="created_on"/>
   <xsl:template match="Item[@type!='Field' and @type!='Body']/css"/>
-  <xsl:template match="current_state"/>
   <xsl:template match="generation"/>
   <xsl:template match="history_id"/>
   <xsl:template match="id"/>
   <xsl:template match="is_cached"/>
   <xsl:template match="is_current"/>
-  <xsl:template match="is_released"/>
   <xsl:template match="keyed_name"/>
   <xsl:template match="locked_by_id"/>
-  <xsl:template match="major_rev"/>
-  <xsl:template match="minor_rev"/>
-  <xsl:template match="modified_by_id"/>
-  <xsl:template match="modified_on"/>
   <xsl:template match="new_version"/>
-  <xsl:template match="not_lockable"/>
-  <xsl:template match="permission_id"/>
-  <xsl:template match="state"/>
   <xsl:template match="itemtype"/>
-  <xsl:template match="release_date"/>
-  <xsl:template match="effective_date"/>
-  <xsl:template match="superseded_date"/>
   <xsl:template match="Item[@type='Property' and data_type!='item' ]/item_behavior"/>
   <xsl:template match="Relationships/Item/source_id" />
 
@@ -280,34 +206,6 @@
   <!-- Remove empty Relationships tags -->
   <xsl:template match="Relationships[count(*)=0]"/>
 
-  <!-- Fix for Fields that use system properties as the data source -->
-  <xsl:template mode="fix" match="Item[@type='Field']">
-    <xsl:copy>
-      <xsl:copy-of select="@type"/>
-      <xsl:copy-of select="@id"/>
-      <xsl:attribute name="action">edit</xsl:attribute>
-      <xsl:comment>
-        Please note: this AML depends on the &quot;<xsl:value-of select="propertytype_id/Item/source_id/@keyed_name"/>&quot; ItemType. Please make sure it exists before running this.
-      </xsl:comment>
-      <propertytype_id>
-        <Item type="Property" action="get" select="id">
-          <name>
-            <xsl:value-of select="propertytype_id/Item/name"/>
-          </name>
-          <source_id type="{propertytype_id/Item/source_id/@type}" keyed_name="{propertytype_id/Item/source_id/@keyed_name}">
-            <xsl:value-of select="propertytype_id/Item/source_id"/>
-          </source_id>
-        </Item>
-      </propertytype_id>
-    </xsl:copy>
-  </xsl:template>
-  <!-- Special handling for the propertytype_id field, which points to Property -->
-  <xsl:template mode="fix" match="Item[@type='Field']/propertytype_id">
-    <xsl:copy>
-      <xsl:copy-of select="@*"/>
-      <xsl:copy-of select="Item"/>
-    </xsl:copy>
-  </xsl:template>
   <!-- Second ItemType tag to deal with is_keyed and modified system properties -->
   <xsl:template mode="fix" match="Item[@type='ItemType']">
     <xsl:variable name="modifiedSystemProps" select="Relationships/Item[@type='Property'][name='behavior'][string(label)!='' or string(data_type)!='list' or string(stored_length)!='64' or string(column_alignment)!='left' or string(is_hidden)!='1' or string(is_hidden2)!='1' or string(column_width)!='' or string(readonly)!='0' or string(is_keyed)!='0' or string(order_by)!=''] |

@@ -1,5 +1,4 @@
-﻿using Aras.IOM;
-using Aras.Tools.InnovatorAdmin.Connections;
+﻿using Aras.Tools.InnovatorAdmin.Connections;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,15 +10,38 @@ namespace Aras.Tools.InnovatorAdmin
 {
   public partial class Main : Form, IWizard
   {
+    private IArasConnection _conn;
     private Stack<IWizardStep> _history = new Stack<IWizardStep>();
     private ExportProcessor _export;
+    private ImportProcessor _import;
     private InstallProcessor _install;
 
-    
-    public Func<string, XmlNode, XmlNode> ApplyAction { get { return ApplyActionMethod; } }
+    public IArasConnection Connection 
+    { 
+      get { return _conn; }
+      set 
+      { 
+        _conn = value; 
+        if (_conn != null)
+        {
+          if (_import != null)
+          {
+            _import.ActionComplete -= _import_ActionComplete;
+            _import.ProgressChanged -= _import_ProgressChanged;
+          } 
+
+          _export = new ExportProcessor(_conn);
+          _import = new ImportProcessor(_conn);
+          _install = new InstallProcessor(_conn);
+
+          _import.ActionComplete += _import_ActionComplete;
+          _import.ProgressChanged += _import_ProgressChanged;
+        }
+      }
+    }
     public IEnumerable<ConnectionData> ConnectionInfo { get; set; }
     public ExportProcessor ExportProcessor { get { return _export; } }
-    public Innovator Innovator { get; set; }
+    public ImportProcessor ImportProcessor { get { return _import; } }
     public InstallProcessor InstallProcessor { get { return _install; } }
     public InstallScript InstallScript { get; set; }
 
@@ -47,29 +69,31 @@ namespace Aras.Tools.InnovatorAdmin
     protected override void OnLoad(EventArgs e)
     {
       base.OnLoad(e);
-      _export = new ExportProcessor(ApplyActionMethod);
-      _install = new InstallProcessor(ApplyActionMethod);
+
       GoToStep(new Controls.Welcome());
     }
 
-    private XmlNode ApplyActionMethod(string action, XmlNode input)
-    {
-      var output = new XmlDocument();
-      output.AppendChild(output.CreateElement("Item"));
-      var inDoc = input as XmlDocument;
-      if (inDoc == null && input == input.OwnerDocument.DocumentElement) inDoc = input.OwnerDocument;
-      if (inDoc == null)
-      {
-        inDoc = new XmlDocument();
-        inDoc.LoadXml(input.OuterXml);
-      }
+    private DateTime _lastFileWrite = DateTime.Now;
 
-      this.Innovator.getConnection().CallAction(action, inDoc, output);
-      return output.DocumentElement;
+    void _import_ProgressChanged(object sender, ProgressChangedEventArgs e)
+    {
+      if ((DateTime.Now - _lastFileWrite).TotalMinutes > 2.0)
+      {
+        File.WriteAllText(Utils.GetAppFilePath(AppFileType.ImportExtractor), _import.CurrentExtractor.Serialize());
+        File.WriteAllText(Utils.GetAppFilePath(AppFileType.ImportLog), _import.GetLog());
+        _lastFileWrite = DateTime.Now;
+      }
+    }
+
+    void _import_ActionComplete(object sender, ActionCompleteEventArgs e)
+    {
+      File.WriteAllText(Utils.GetAppFilePath(AppFileType.ImportExtractor), _import.CurrentExtractor.Serialize());
+      File.WriteAllText(Utils.GetAppFilePath(AppFileType.ImportLog), _import.GetLog());
     }
 
     public void GoToStep(IWizardStep step)
     {
+      if (step is Controls.Welcome) _history.Clear();
       var ctrl = step as Control;
       if (ctrl == null) throw new ArgumentException("Each step must be a control.");
 
@@ -123,5 +147,16 @@ namespace Aras.Tools.InnovatorAdmin
       }
     }
 
+    private void picHome_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        GoToStep(new Controls.Welcome());
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
   }
 }

@@ -117,6 +117,34 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="MsdnXml" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+&lt;bookstore&gt;
+    &lt;book genre="autobiography" publicationdate="1981-03-22" ISBN="1-861003-11-0"&gt;
+        &lt;title&gt;The Autobiography of Benjamin Franklin&lt;/title&gt;
+        &lt;author&gt;
+            &lt;first-name&gt;Benjamin&lt;/first-name&gt;
+            &lt;last-name&gt;Franklin&lt;/last-name&gt;
+        &lt;/author&gt;
+        &lt;price&gt;8.99&lt;/price&gt;
+    &lt;/book&gt;
+    &lt;book genre="novel" publicationdate="1967-11-17" ISBN="0-201-63361-2"&gt;
+        &lt;title&gt;The Confidence Man&lt;/title&gt;
+        &lt;author&gt;
+            &lt;first-name&gt;Herman&lt;/first-name&gt;
+            &lt;last-name&gt;Melville&lt;/last-name&gt;
+        &lt;/author&gt;
+        &lt;price&gt;11.99&lt;/price&gt;
+    &lt;/book&gt;
+    &lt;book genre="philosophy" publicationdate="1991-02-15" ISBN="1-861001-57-6"&gt;
+        &lt;title&gt;The Gorgias&lt;/title&gt;
+        &lt;author&gt;
+            &lt;name&gt;Plato&lt;/name&gt;
+        &lt;/author&gt;
+        &lt;price&gt;9.99&lt;/price&gt;
+    &lt;/book&gt;
+&lt;/bookstore&gt;</value>
+  </data>
   <data name="SampleSql" xml:space="preserve">
     <value>SELECT
     c.[id]

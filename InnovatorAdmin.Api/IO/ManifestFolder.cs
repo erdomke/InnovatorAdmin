@@ -113,8 +113,6 @@ namespace Aras.Tools.InnovatorAdmin
 
     private class CustXmlWriter : ConfigurableXmlWriter
     {
-      private XmlWriter _base;
-      private bool _blockAttr = false;
       private bool _convertAdd = false;
       private bool _blockWhere = false;
 
@@ -122,7 +120,7 @@ namespace Aras.Tools.InnovatorAdmin
       {
         this.AttributeProcessor = (prefix, localName, ns, writer) =>
         {
-          if (localName == "_config_id")
+          if (localName == XmlFlags.Attr_ConfigId)
           {
             writer.WriteStartAttribute(prefix, "id", ns);
             _blockWhere = true;

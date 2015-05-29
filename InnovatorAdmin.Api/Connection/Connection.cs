@@ -7,18 +7,33 @@ using System.Xml;
 
 namespace Aras.Tools.InnovatorAdmin
 {
-  internal class Connection
+  public class Connection
   {
-    private Func<string, XmlNode, XmlNode> _applyAction;
+    private IArasConnection _extConn;
+    private XmlElement _currUser;
 
-    public Connection(Func<string, XmlNode, XmlNode> applyAction)
+    public IArasConnection ExternalConnection { get { return _extConn; } }
+
+    public Connection(IArasConnection extConn)
     {
-      _applyAction = applyAction;
+      _extConn = extConn;
     }
 
-    public XmlNode CallAction(string soapAction, XmlNode input)
+    public XmlNode CallAction(string soapAction, string input)
     {
-      return _applyAction.Invoke(soapAction, input);
+      return XmlUtils.DocFromXml(_extConn.CallAction(soapAction, input)).DocumentElement;
+    }
+    public XmlNode CallAction(string soapAction, XmlNode input, Action<int, int> progressReporter = null)
+    {
+      return XmlUtils.DocFromXml(_extConn.CallAction(soapAction, input.OuterXml, new ProgressCallback(progressReporter))).DocumentElement;
+    }
+    public XmlElement GetCurrUserInfo()
+    {
+      if (_currUser == null)
+      {
+        _currUser = this.GetItems("ApplyItem", "<Item type=\"User\" action=\"get\" id=\"" + _extConn.GetUserId() + "\" />").FirstOrDefault();
+      }
+      return _currUser;
     }
     public IEnumerable<XmlElement> GetItems(string soapAction, string input, bool noItemsIsError = false)
     {
@@ -28,7 +43,7 @@ namespace Aras.Tools.InnovatorAdmin
     }
     public IEnumerable<XmlElement> GetItems(string soapAction, XmlNode input, bool noItemsIsError = false)
     {
-      var result = _applyAction.Invoke(soapAction, input);
+      var result = XmlUtils.DocFromXml(_extConn.CallAction(soapAction, input.OuterXml)).DocumentElement;
       var err = GetError(result);
       if (err == null || (!noItemsIsError && err.Element("faultcode", "") == "0"))
       {
@@ -45,7 +60,7 @@ namespace Aras.Tools.InnovatorAdmin
 
     public XmlNode GetError(XmlNode item)
     {
-      if (item.LocalName == "Envelope" && (item.NamespaceURI == "http://schemas.xmlsoap.org/soap/envelope/" || string.IsNullOrEmpty(item.NamespaceURI)))
+      if (item != null && item.LocalName == "Envelope" && (item.NamespaceURI == "http://schemas.xmlsoap.org/soap/envelope/" || string.IsNullOrEmpty(item.NamespaceURI)))
       {
         item = item.Element("Body");
         if (item != null && (item.NamespaceURI == "http://schemas.xmlsoap.org/soap/envelope/" || string.IsNullOrEmpty(item.NamespaceURI)))
@@ -58,6 +73,21 @@ namespace Aras.Tools.InnovatorAdmin
         }
       }
       return null;
+    }
+
+    private class ProgressCallback : MarshalByRefObject, IProgressCallback
+    {
+      private Action<int, int> _callback;
+
+      public ProgressCallback(Action<int, int> callback)
+      {
+        _callback = callback;
+      }
+
+      public void ReportProgress(int currentStep, int totalSteps)
+      {
+        _callback.Invoke(currentStep, totalSteps);
+      }
     }
   }
 }

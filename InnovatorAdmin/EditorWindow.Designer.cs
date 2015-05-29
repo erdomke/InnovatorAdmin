@@ -1,6 +1,6 @@
 ﻿namespace Aras.Tools.InnovatorAdmin
 {
-  partial class Editor
+  partial class EditorWindow
   {
     /// <summary>
     /// Required designer variable.
@@ -33,21 +33,21 @@
       this.lstItems = new System.Windows.Forms.ListBox();
       this.splitEditors = new System.Windows.Forms.SplitContainer();
       this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
-      this.inputEditor = new Aras.Tools.InnovatorAdmin.EditorControl();
+      this.inputEditor = new Aras.Tools.InnovatorAdmin.Editor.EditorControl();
       this.lblConnection = new System.Windows.Forms.Label();
-      this.btnEditConnections = new System.Windows.Forms.Button();
+      this.btnEditConnections = new Controls.FlatButton();
       this.lblConnectionName = new System.Windows.Forms.Label();
       this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-      this.btnSubmit = new System.Windows.Forms.Button();
+      this.btnSubmit = new Controls.FlatButton();
       this.cmbSoapAction = new System.Windows.Forms.ComboBox();
       this.label2 = new System.Windows.Forms.Label();
       this.tbcOutputView = new System.Windows.Forms.TabControl();
       this.pgAmlOutput = new System.Windows.Forms.TabPage();
-      this.outputEditor = new Aras.Tools.InnovatorAdmin.EditorControl();
+      this.outputEditor = new Aras.Tools.InnovatorAdmin.Editor.EditorControl();
       this.pgTableOutput = new System.Windows.Forms.TabPage();
       this.dgvItems = new System.Windows.Forms.DataGridView();
-      this.btnOk = new System.Windows.Forms.Button();
-      this.btnCancel = new System.Windows.Forms.Button();
+      this.btnOk = new Controls.FlatButton();
+      this.btnCancel = new Controls.FlatButton();
       this.lblItems = new System.Windows.Forms.Label();
       this.callAction = new System.ComponentModel.BackgroundWorker();
       this.tableLayoutPanel1.SuspendLayout();
@@ -158,9 +158,8 @@
       this.inputEditor.Location = new System.Drawing.Point(3, 32);
       this.inputEditor.Name = "inputEditor";
       this.inputEditor.Size = new System.Drawing.Size(715, 221);
-      this.inputEditor.SoapAction = "ApplyAML";
       this.inputEditor.TabIndex = 0;
-      this.inputEditor.RunRequested += new System.EventHandler<Aras.Tools.InnovatorAdmin.RunRequestedEventArgs>(this.inputEditor_RunRequested);
+      this.inputEditor.RunRequested += new System.EventHandler<Aras.Tools.InnovatorAdmin.Editor.RunRequestedEventArgs>(this.inputEditor_RunRequested);
       // 
       // lblConnection
       // 
@@ -367,7 +366,6 @@
       this.outputEditor.Location = new System.Drawing.Point(0, 0);
       this.outputEditor.Name = "outputEditor";
       this.outputEditor.Size = new System.Drawing.Size(713, 89);
-      this.outputEditor.SoapAction = "ApplyAML";
       this.outputEditor.TabIndex = 0;
       // 
       // pgTableOutput
@@ -471,15 +469,15 @@
     private System.Windows.Forms.SplitContainer splitMain;
     private System.Windows.Forms.ListBox lstItems;
     private System.Windows.Forms.SplitContainer splitEditors;
-    private EditorControl inputEditor;
+    private Aras.Tools.InnovatorAdmin.Editor.EditorControl inputEditor;
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
-    private EditorControl outputEditor;
-    private System.Windows.Forms.Button btnOk;
-    private System.Windows.Forms.Button btnCancel;
+    private Aras.Tools.InnovatorAdmin.Editor.EditorControl outputEditor;
+    private Controls.FlatButton btnOk;
+    private Controls.FlatButton btnCancel;
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
     private System.Windows.Forms.Label lblConnection;
-    private System.Windows.Forms.Button btnEditConnections;
-    private System.Windows.Forms.Button btnSubmit;
+    private Controls.FlatButton btnEditConnections;
+    private Controls.FlatButton btnSubmit;
     private System.Windows.Forms.ComboBox cmbSoapAction;
     private System.Windows.Forms.Label label2;
     private System.ComponentModel.BackgroundWorker callAction;

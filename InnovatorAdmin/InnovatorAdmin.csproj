@@ -10,15 +10,16 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Aras.Tools.InnovatorAdmin</RootNamespace>
     <AssemblyName>InnovatorAdmin</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -27,7 +28,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -36,16 +37,20 @@
     <ApplicationIcon>resources\icons\InnovatorAdmin.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ICSharpCode.AvalonEdit">
-      <HintPath>..\packages\AvalonEdit.5.0.2\lib\Net35\ICSharpCode.AvalonEdit.dll</HintPath>
+    <Reference Include="ICSharpCode.AvalonEdit, Version=5.0.1.0, Culture=neutral, PublicKeyToken=9cc39be672370310, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\AvalonEdit.5.0.2\lib\Net40\ICSharpCode.AvalonEdit.dll</HintPath>
     </Reference>
-    <Reference Include="IOM">
-      <HintPath>..\lib\IOM.dll</HintPath>
+    <Reference Include="Mvp.Xml, Version=2.3.0.0, Culture=neutral, PublicKeyToken=6ead800d778c9b9f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Mvp.Xml.2.3.0\lib\net20\Mvp.Xml.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
@@ -57,6 +62,31 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppFileType.cs" />
+    <Compile Include="Controls\Compare.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\Compare.Designer.cs">
+      <DependentUpon>Compare.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ImportComplete.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ImportComplete.Designer.cs">
+      <DependentUpon>ImportComplete.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\InstallProgress.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\InstallProgress.Designer.cs">
+      <DependentUpon>InstallProgress.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ImportProgress.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ImportProgress.Designer.cs">
+      <DependentUpon>ImportProgress.cs</DependentUpon>
+    </Compile>
     <Compile Include="ClientInstall.cs" />
     <Compile Include="ConnectionEditorForm.cs">
       <SubType>Form</SubType>
@@ -65,11 +95,42 @@
       <DependentUpon>ConnectionEditorForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ConnectionManager.cs" />
-    <Compile Include="Editor.cs">
+    <Compile Include="Controls\FlatButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ImportMapping.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ImportMapping.Designer.cs">
+      <DependentUpon>ImportMapping.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\RecentlyModifiedSearch.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Editor.Designer.cs">
-      <DependentUpon>Editor.cs</DependentUpon>
+    <Compile Include="Controls\RecentlyModifiedSearch.Designer.cs">
+      <DependentUpon>RecentlyModifiedSearch.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialog\Enums.cs" />
+    <Compile Include="Dialog\Extensions.cs" />
+    <Compile Include="Dialog\FileDialogControlBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Dialog\FileDialogControlBase.designer.cs">
+      <DependentUpon>FileDialogControlBase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialog\ImportSelectDialog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Dialog\HelperTypes.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Dialog\structs.cs" />
+    <Compile Include="Dialog\Win32.cs" />
+    <Compile Include="EditorWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EditorWindow.Designer.cs">
+      <DependentUpon>EditorWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="ConnectionEditor.cs">
       <SubType>UserControl</SubType>
@@ -79,7 +140,6 @@
     </Compile>
     <Compile Include="Connections\ConnectionData.cs" />
     <Compile Include="Connections\ConnectionLibrary.cs" />
-    <Compile Include="Connections\DatabaseConverter.cs" />
     <Compile Include="Connections\RijndaelSimple.cs" />
     <Compile Include="Controls\InstallComplete.cs">
       <SubType>UserControl</SubType>
@@ -117,12 +177,6 @@
     <Compile Include="Controls\FilterSelect.Designer.cs">
       <DependentUpon>FilterSelect.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\InstallProgress.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\InstallProgress.Designer.cs">
-      <DependentUpon>InstallProgress.cs</DependentUpon>
-    </Compile>
     <Compile Include="Controls\InstallSource.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -142,9 +196,22 @@
     <Compile Include="Controls\Welcome.Designer.cs">
       <DependentUpon>Welcome.cs</DependentUpon>
     </Compile>
-    <Compile Include="EditorControl.cs">
+    <Compile Include="Editor\AmlEditorHelper.cs" />
+    <Compile Include="Editor\BasicCompletionData.cs" />
+    <Compile Include="Editor\EditorControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="Editor\IEditorHelper.cs" />
+    <Compile Include="Editor\ImportXsltHelper.cs" />
+    <Compile Include="Editor\QualifiedName.cs" />
+    <Compile Include="Editor\QualifiedNameCollection.cs" />
+    <Compile Include="Editor\XmlCompletionData.cs" />
+    <Compile Include="Editor\XmlCompletionDataCollection.cs" />
+    <Compile Include="Editor\XmlCompletionDataProvider.cs" />
+    <Compile Include="Editor\XmlElementPath.cs" />
+    <Compile Include="Editor\XmlParser.cs" />
+    <Compile Include="Editor\XmlSchemaCompletionData.cs" />
+    <Compile Include="Editor\XmlSchemaCompletionDataCollection.cs" />
     <Compile Include="ErrorWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -152,6 +219,7 @@
       <DependentUpon>ErrorWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="FullBindingList.cs" />
+    <Compile Include="Iom.cs" />
     <Compile Include="IWizard.cs" />
     <Compile Include="IWizardStep.cs" />
     <Compile Include="Main.cs">
@@ -167,12 +235,16 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Messages.resx</DependentUpon>
     </Compile>
+    <Compile Include="Release.cs" />
     <Compile Include="Utils.cs" />
     <EmbeddedResource Include="ConnectionEditor.resx">
       <DependentUpon>ConnectionEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ConnectionEditorForm.resx">
       <DependentUpon>ConnectionEditorForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\Compare.resx">
+      <DependentUpon>Compare.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\ConnectionSelection.resx">
       <DependentUpon>ConnectionSelection.cs</DependentUpon>
@@ -189,23 +261,41 @@
     <EmbeddedResource Include="Controls\FilterSelect.resx">
       <DependentUpon>FilterSelect.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Controls\ImportMapping.resx">
+      <DependentUpon>ImportMapping.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\ImportComplete.resx">
+      <DependentUpon>ImportComplete.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Controls\InstallComplete.resx">
       <DependentUpon>InstallComplete.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\InstallProgress.resx">
-      <DependentUpon>InstallProgress.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\InstallSource.resx">
       <DependentUpon>InstallSource.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Controls\InstallProgress.resx">
+      <DependentUpon>InstallProgress.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\ImportProgress.resx">
+      <DependentUpon>ImportProgress.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Controls\ProgressStep.resx">
       <DependentUpon>ProgressStep.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\RecentlyModifiedSearch.resx">
+      <DependentUpon>RecentlyModifiedSearch.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\Welcome.resx">
       <DependentUpon>Welcome.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Editor.resx">
-      <DependentUpon>Editor.cs</DependentUpon>
+    <EmbeddedResource Include="Dialog\FileDialogControlBase.resx">
+      <DependentUpon>FileDialogControlBase.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialog\ImportSelectDialog.resx">
+      <DependentUpon>ImportSelectDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EditorWindow.resx">
+      <DependentUpon>EditorWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ErrorWindow.resx">
       <DependentUpon>ErrorWindow.cs</DependentUpon>
@@ -231,6 +321,10 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ADiff\ADiff.csproj">
+      <Project>{f74031e5-f623-46e7-b21a-ac093dbadd2e}</Project>
+      <Name>ADiff</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ArasAutoCompleteHelper\ArasAutoCompleteHelper.csproj">
       <Project>{cbce5179-51e7-4ba4-a58a-ca83f8bd13dd}</Project>
       <Name>ArasAutoCompleteHelper</Name>
@@ -241,6 +335,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Editor\xslt.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="resources\icons\add16.png" />
   </ItemGroup>
@@ -303,6 +400,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\icons\amlStudio32black.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\icons\folder32.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

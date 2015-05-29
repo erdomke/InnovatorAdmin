@@ -10,8 +10,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Aras.Tools.InnovatorAdmin</RootNamespace>
     <AssemblyName>InnovatorAdmin.Api</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,6 +32,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="Mvp.Xml">
+      <HintPath>..\packages\Mvp.Xml.2.3.0\lib\net20\Mvp.Xml.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -42,12 +47,27 @@
   <ItemGroup>
     <Compile Include="ActionCompleteEventArgs.cs" />
     <Compile Include="ArasException.cs" />
-    <Compile Include="Connection.cs" />
+    <Compile Include="Connection\Connection.cs" />
+    <Compile Include="Connection\IProgressCallback.cs" />
     <Compile Include="DependencyAnalyzer.cs" />
     <Compile Include="Export\InstallItem.cs" />
     <Compile Include="Export\ExportProcessor.cs" />
+    <Compile Include="Export\InstallItemDiff.cs" />
     <Compile Include="Export\InstallType.cs" />
+    <Compile Include="Export\XmlFlags.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Connection\IArasConnection.cs" />
+    <Compile Include="GroupedList.cs" />
+    <Compile Include="Connection\IConnectionFactory.cs" />
+    <Compile Include="Import\DataExtractorFactory.cs" />
+    <Compile Include="Import\DataTableWriter.cs" />
+    <Compile Include="Import\FileSysExtractor.cs" />
+    <Compile Include="Import\FolderExtractor.cs" />
+    <Compile Include="Import\IDataExtractor.cs" />
+    <Compile Include="Import\IDataWriter.cs" />
+    <Compile Include="Import\ImportProcessor.cs" />
+    <Compile Include="Import\ImportType.cs" />
+    <Compile Include="Import\XmlDataWriter.cs" />
     <Compile Include="Install\InstallProcessor.cs" />
     <Compile Include="IO\ConfigurableXmlWriter.cs" />
     <Compile Include="IO\DatabasePackage.cs" />
@@ -71,7 +91,10 @@
     <Compile Include="RecoverableErrorEventArgs.cs" />
     <Compile Include="RecoveryOption.cs" />
     <Compile Include="SqlParser.cs" />
+    <Compile Include="SystemPropertyGroup.cs" />
     <Compile Include="Utils.cs" />
+    <Compile Include="XmlUtils.cs" />
+    <Compile Include="Xslt\ArasXsltExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Export\ExportResult.xslt">
@@ -83,9 +106,13 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Export\ExportQuery.xslt">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ADiff.Api\ADiff.Api.csproj">
+      <Project>{8d33a5d4-206d-4e3e-9609-968417bdeb23}</Project>
+      <Name>ADiff.Api</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

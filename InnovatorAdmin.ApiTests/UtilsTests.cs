@@ -15,6 +15,22 @@ namespace Aras.Tools.InnovatorAdmin.Tests
   public class UtilsTests
   {
     [TestMethod()]
+    public void XPathTest()
+    {
+      var doc = new XmlDocument();
+      doc.LoadXml(prop.Resources.MsdnXml);
+      var nodes = doc.XPath("/bookstore/book/price").ToList();
+      Assert.AreEqual(3, nodes.Count);
+      Assert.AreEqual("8.99", nodes[0].InnerText);
+      Assert.AreEqual("11.99", nodes[1].InnerText);
+      Assert.AreEqual("9.99", nodes[2].InnerText);
+
+      nodes = doc.XPath("//author[last-name = $p0]", "Franklin").ToList();
+      Assert.AreEqual(1, nodes.Count);
+      Assert.AreEqual("Benjamin", nodes[0].Element("first-name", ""));
+    }
+
+    [TestMethod()]
     public void DependencySortTest()
     {
       var a = new DependencyItem() { Name = "a" };

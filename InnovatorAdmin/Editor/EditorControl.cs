@@ -13,19 +13,28 @@ using System.Windows.Forms.Integration;
 using System.Windows.Threading;
 using System.Xml;
 
-namespace Aras.Tools.InnovatorAdmin
+namespace Aras.Tools.InnovatorAdmin.Editor
 {
+  public enum EditorMode
+  {
+    Xml,
+    Text
+  }
+
   public class EditorControl : UserControl
   {
     private ICSharpCode.AvalonEdit.TextEditor _editor;
     private FoldingManager _foldingManager;
     private XmlFoldingStrategy _foldingStrategy = new XmlFoldingStrategy();
-    private CompletionHelper _helper;
-    private bool _isInitialized;
+    //private CompletionHelper _helper;
+    //private bool _isInitialized;
+    private EditorMode _mode = EditorMode.Xml;
 
     public event EventHandler<RunRequestedEventArgs> RunRequested;
 
-    public string SoapAction { get; set; }
+    public IEditorHelper Helper { get; set; }
+    public ICSharpCode.AvalonEdit.TextEditor Editor { get { return _editor; } }
+    //public string SoapAction { get; set; }
 
     public EditorControl()
     {
@@ -55,11 +64,7 @@ namespace Aras.Tools.InnovatorAdmin
       foldingUpdateTimer.Interval = TimeSpan.FromSeconds(2);
       foldingUpdateTimer.Tick += delegate { UpdateFoldings(); };
       foldingUpdateTimer.Start();
-
-      _helper = new CompletionHelper();
-
-      this.SoapAction = "ApplyAML";
-
+      
       this.Controls.Add(host);
     }
 
@@ -77,7 +82,7 @@ namespace Aras.Tools.InnovatorAdmin
       else if ((e.Key == System.Windows.Input.Key.Enter && IsControlDown(e.KeyboardDevice))
         || (e.Key == System.Windows.Input.Key.E && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice)))
       {
-        OnRunRequested(new RunRequestedEventArgs(_helper.GetQuery(_editor.Text, _editor.CaretOffset)));
+        OnRunRequested(new RunRequestedEventArgs(Helper.GetCurrentQuery(_editor.Text, _editor.CaretOffset)));
       }
     }
 
@@ -90,6 +95,11 @@ namespace Aras.Tools.InnovatorAdmin
       return keyboard.IsKeyDown(System.Windows.Input.Key.LeftShift) || keyboard.IsKeyDown(System.Windows.Input.Key.RightShift);
     }
 
+    public bool ReadOnly
+    {
+      get { return _editor.IsReadOnly; }
+      set { _editor.IsReadOnly = value; }
+    }
     public override string Text
     {
       get { return _editor.Text; }
@@ -98,62 +108,41 @@ namespace Aras.Tools.InnovatorAdmin
 
     private void UpdateFoldings()
     {
-      _foldingStrategy.UpdateFoldings(_foldingManager, _editor.Document);
-    }
-
-    public void InitializeConnection(Func<string, XmlNode, XmlNode> applyAction)
-    {
-      _isInitialized = true;
-      _helper.InitializeConnection(applyAction);
+      switch (_mode)
+      {
+        case EditorMode.Xml:
+          _foldingStrategy.UpdateFoldings(_foldingManager, _editor.Document);
+          break;
+      }
     }
 
     CompletionWindow completionWindow;
 
+    public void ShowCompletionWindow(IEnumerable<ICompletionData> completionItems, int overlap)
+    {
+      if (completionItems.Any())
+      {
+        completionWindow = new CompletionWindow(_editor.TextArea);
+        completionWindow.StartOffset -= overlap;
+        IList<ICompletionData> data = completionWindow.CompletionList.CompletionData;
+        foreach (var item in completionItems)
+        {
+          data.Add(item);
+        }
+        completionWindow.Show();
+        completionWindow.CompletionList.IsFiltering = false;
+        completionWindow.CompletionList.SelectItem(completionItems.First().Text);
+        completionWindow.CompletionList.IsFiltering = true;
+        completionWindow.Closed += delegate
+        {
+          completionWindow = null;
+        };
+      }
+    }
+
     void TextArea_TextEntered(object sender, System.Windows.Input.TextCompositionEventArgs e)
     {
-      if (_isInitialized)
-      {
-        switch (e.Text)
-        {
-          case "\"":
-          case " ":
-          case "<":
-          case ",":
-          case "(":
-            int overlap;
-            var completionItems = _helper.GetCompletions(_editor.Text.Substring(0, _editor.CaretOffset), this.SoapAction, out overlap).Select(c => new MyCompletionData(c));
-            if (completionItems.Any())
-            {
-              completionWindow = new CompletionWindow(_editor.TextArea);
-              completionWindow.StartOffset -= overlap;
-              IList<ICompletionData> data = completionWindow.CompletionList.CompletionData;
-              foreach (var item in completionItems)
-              {
-                data.Add(item);
-              }
-              completionWindow.Show();
-              completionWindow.CompletionList.IsFiltering = false;
-              completionWindow.CompletionList.SelectItem(completionItems.First().Text);
-              completionWindow.CompletionList.IsFiltering = true;
-              completionWindow.Closed += delegate
-              {
-                completionWindow = null;
-              };
-            }
-            break;
-          case ">":
-            var endTag = _helper.LastOpenTag(_editor.Text.Substring(0, _editor.CaretOffset));
-            if (!string.IsNullOrEmpty(endTag))
-            {
-              var insert = "</" + endTag + ">";
-              if (!_editor.Text.Substring(_editor.CaretOffset).StartsWith(insert))
-              {
-                _editor.Document.Insert(_editor.CaretOffset, "</" + endTag + ">", AnchorMovementType.BeforeInsertion);
-              }
-            }
-            break;
-        }
-      }
+      this.Helper.HandleTextEntered(this, e.Text);
     }
 
 
@@ -176,45 +165,6 @@ namespace Aras.Tools.InnovatorAdmin
       // We still want to insert the character that was typed.
     }
 
-
-    /// Implements AvalonEdit ICompletionData interface to provide the entries in the
-    /// completion drop down.
-    private class MyCompletionData : ICompletionData
-    {
-      public MyCompletionData(string text)
-      {
-        this.Text = text;
-      }
-
-      public System.Windows.Media.ImageSource Image
-      {
-        get { return null; }
-      }
-
-      public string Text { get; private set; }
-
-      // Use this property if you want to show a fancy UIElement in the list.
-      public object Content
-      {
-        get { return this.Text; }
-      }
-
-      public object Description
-      {
-        get { return this.Text; }
-      }
-
-      public void Complete(TextArea textArea, ISegment completionSegment,
-          EventArgs insertionRequestEventArgs)
-      {
-        textArea.Document.Replace(completionSegment, this.Text);
-      }
-
-      public double Priority
-      {
-        get { return 0; }
-      }
-    }
   }
   public class RunRequestedEventArgs : EventArgs
   {

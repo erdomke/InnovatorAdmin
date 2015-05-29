@@ -384,6 +384,7 @@ namespace Aras.AutoComplete
         switch (r.NodeType)
         {
           case XmlNodeType.Element:
+
             if (depth == 0)
             {
               start = o;
@@ -421,7 +422,7 @@ namespace Aras.AutoComplete
       return result;
     }
 
-    public void InitializeConnection(Func<string, XmlNode, XmlNode> applyAction)
+    public virtual void InitializeConnection(Func<string, XmlNode, XmlNode> applyAction)
     {
       _itemTypes.Clear();
       _applyAction = applyAction;

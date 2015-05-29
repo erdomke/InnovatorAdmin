@@ -1,5 +1,4 @@
 ﻿using Aras.AutoComplete;
-using Aras.IOM;
 using Aras.Tools.InnovatorAdmin.Connections;
 using System;
 using System.Collections.Generic;
@@ -12,10 +11,10 @@ using System.Linq;
 
 namespace Aras.Tools.InnovatorAdmin
 {
-  public partial class Editor : Form
+  public partial class EditorWindow : Form
   {
     private object _current;
-    private Innovator _inn;
+    private IArasConnection _conn;
     private DataTable _outputTable;
     private XmlDocument _outputXml;
 
@@ -46,34 +45,35 @@ namespace Aras.Tools.InnovatorAdmin
       set { lstItems.DisplayMember = value; }
     }
 
-    public Editor()
+    public EditorWindow()
     {
       InitializeComponent();
 
+      inputEditor.Helper = new Editor.AmlEditorHelper();
       cmbSoapAction.SelectedItem = "ApplyAML";
     }
 
-    public void SetConnection(Innovator inn, string name = null)
+    public void SetConnection(IArasConnection conn, string name = null)
     {
-      if (inn == null) throw new ArgumentNullException("inn");
-      _inn = inn;
-      inputEditor.InitializeConnection(ApplyAction);
-      lblConnectionName.Text = name ?? inn.getConnection().GetDatabaseName();
+      if (conn == null) throw new ArgumentNullException("inn");
+      _conn = conn;
+      ((Editor.AmlEditorHelper)inputEditor.Helper).InitializeConnection(ApplyAction);
+      lblConnectionName.Text = string.Format("{0} ({1})", name ?? conn.GetDatabaseName(), conn.GetIomVersion());
     }
     public void SetConnection(ConnectionData conn)
     {
       string msg;
-      var inn = ConnectionEditor.Login(conn, out msg);
-      if (inn == null)
+      var arasConn = ConnectionEditor.Login(conn, out msg);
+      if (arasConn == null)
       {
         MessageBox.Show(msg);
       }
       else
       {
-        _inn = inn;
-        inputEditor.InitializeConnection(ApplyAction);
+        _conn = arasConn;
+        ((Editor.AmlEditorHelper)inputEditor.Helper).InitializeConnection(ApplyAction);
       }
-      lblConnectionName.Text = conn.ConnectionName;
+      lblConnectionName.Text = string.Format("{0} ({1})", conn.ConnectionName, _conn.GetIomVersion());
     }
 
     protected override void OnLoad(EventArgs e)
@@ -84,11 +84,11 @@ namespace Aras.Tools.InnovatorAdmin
         btnOk.Visible = this.Modal;
         btnCancel.Visible = this.Modal;
 
-        lblConnection.Visible = _inn == null;
+        lblConnection.Visible = _conn == null;
         lblConnectionName.Visible = lblConnection.Visible;
         btnEditConnections.Visible = lblConnection.Visible;
 
-        if (_inn == null)
+        if (_conn == null)
         {
           SetConnection(ConnectionManager.Current.Library.Connections.First());
         }
@@ -102,18 +102,7 @@ namespace Aras.Tools.InnovatorAdmin
 
     private XmlNode ApplyAction(string action, XmlNode input)
     {
-      var output = new XmlDocument();
-      output.AppendChild(output.CreateElement("Item"));
-      var inDoc = input as XmlDocument;
-      if (inDoc == null && input == input.OwnerDocument.DocumentElement) inDoc = input.OwnerDocument;
-      if (inDoc == null)
-      {
-        inDoc = new XmlDocument();
-        inDoc.LoadXml(input.OuterXml);
-      }
-
-      _inn.getConnection().CallAction(action, inDoc, output);
-      return output.DocumentElement;
+      return XmlUtils.DocFromXml(_conn.CallAction(action, input.OuterXml)).DocumentElement;
     }
 
     private void EnsureDataTable()
@@ -161,7 +150,7 @@ namespace Aras.Tools.InnovatorAdmin
 
     private void Submit(string query)
     {
-      if (_inn != null)
+      if (_conn != null)
       {
         try
         {
@@ -226,7 +215,7 @@ namespace Aras.Tools.InnovatorAdmin
     {
       var action = (AmlAction)e.Argument;
       var output = new XmlDocument();
-      _inn.getConnection().CallAction(action.SoapAction, action.Aml, output);
+      output.LoadXml(_conn.CallAction(action.SoapAction, action.Aml.OuterXml));
       e.Result = output;
     }
 
@@ -296,7 +285,7 @@ namespace Aras.Tools.InnovatorAdmin
 
     public static IEnumerable<ItemReference> GetItems(Connections.ConnectionData conn)
     {
-      using (var dialog = new Editor())
+      using (var dialog = new EditorWindow())
       {
         dialog.dgvItems.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         dialog.tbcOutputView.Appearance = TabAppearance.FlatButtons;
@@ -325,7 +314,7 @@ namespace Aras.Tools.InnovatorAdmin
       public XmlDocument Aml { get; set; }
     }
 
-    private void inputEditor_RunRequested(object sender, RunRequestedEventArgs e)
+    private void inputEditor_RunRequested(object sender, Editor.RunRequestedEventArgs e)
     {
       try
       {

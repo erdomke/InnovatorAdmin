@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.IO;
 
 namespace Aras.Tools.InnovatorAdmin.Controls
 {
@@ -57,11 +58,55 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       }
     }
 
-    private void picAmlStudio_Click(object sender, EventArgs e)
+    private void btnAmlStudio_Click(object sender, EventArgs e)
     {
       try
       {
-        new Editor().Show();
+        new EditorWindow().Show();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void btnImportData_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        IDataExtractor result = null;
+
+        using (var dialog = new Dialog.ImportSelectDialog())
+        {
+          dialog.Filter = "File / Folders to Import|*.*|Data File|*.csv;*.xslx";
+          dialog.Multiselect = true;
+          if (dialog.ShowDialog() == DialogResult.OK)
+          {
+            if (dialog.FileName == Utils.GetAppFilePath(AppFileType.ImportExtractor))
+            {
+              result = DataExtractorFactory.Deserialize(File.ReadAllText(dialog.FileName));
+            }
+            if (dialog.FilterIndex == 1 || Directory.Exists(dialog.FileName))
+            {
+              result = DataExtractorFactory.Get(dialog.FileNames, ImportType.Files);
+            }
+            else
+            {
+              throw new NotSupportedException();
+            }
+          }
+        }
+
+        if (result != null)
+        {
+          var mapping = new ImportMapping();
+          mapping.Extractor = result;
+
+          var connSelect = new ConnectionSelection();
+          connSelect.MultiSelect = false;
+          connSelect.GoNextAction = () => _wizard.GoToStep(mapping);
+          _wizard.GoToStep(connSelect);
+        }
       }
       catch (Exception ex)
       {

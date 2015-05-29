@@ -140,7 +140,7 @@ namespace Aras.Tools.InnovatorAdmin
             if ((elem.Attributes["type"].Value != "Form" && elem.Attributes["type"].Value != "View") 
               || elem.Attributes["action"].Value != "delete")
             result._dependencies = Enumerable.Repeat(result._itemRef, 1);
-            result._itemRef = new ItemReference("*Script", result._itemRef.ToString() + " " + Guid.NewGuid().ToString("N"))
+            result._itemRef = new ItemReference("*Script", result._itemRef.ToString() + " " + Utils.GetChecksum(Encoding.UTF8.GetBytes(elem.OuterXml)))
             {
               KeyedName = RenderAttributes(elem)
             };
@@ -151,13 +151,22 @@ namespace Aras.Tools.InnovatorAdmin
             {
               KeyedName = elem.Attributes["action"].Value
             }, 1);
-            result._itemRef = new ItemReference("*Script", result._itemRef.ToString() + " " + Guid.NewGuid().ToString("N"))
+            result._itemRef = new ItemReference("*Script", result._itemRef.ToString() + " " + Utils.GetChecksum(Encoding.UTF8.GetBytes(elem.OuterXml)))
             {
               KeyedName = RenderAttributes(elem)
             };
             result._type = InstallType.Script;
             break;
         }
+      }
+
+      if (elem.Attribute(XmlFlags.Attr_IsScript) == "1")
+      {
+        if (string.IsNullOrEmpty(result._itemRef.KeyedName))
+        {
+          result._itemRef.KeyedName = RenderAttributes(elem);
+        }
+        result._type = InstallType.Script;
       }
       return result;
     }

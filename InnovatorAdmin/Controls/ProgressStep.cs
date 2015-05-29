@@ -26,6 +26,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       _progress = progress;
       _progress.ActionComplete += _progress_ActionComplete;
       _progress.ProgressChanged += _progress_ProgressChanged;
+      btnCancel.Visible = _progress is ICancelableProgressReporter;
 
       _timer.Interval = 50;
       _timer.Tick += _timer_Tick;
@@ -91,6 +92,18 @@ namespace Aras.Tools.InnovatorAdmin.Controls
     public void GoNext()
     {
       throw new NotImplementedException();
+    }
+
+    private void btnCancel_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        ((ICancelableProgressReporter)_progress).Cancel = true;
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
     }
   }
 }

@@ -10,4 +10,9 @@ namespace Aras.Tools.InnovatorAdmin
     event EventHandler<ActionCompleteEventArgs> ActionComplete;
     event EventHandler<ProgressChangedEventArgs> ProgressChanged;
   }
+
+  public interface ICancelableProgressReporter : IProgressReporter
+  {
+    bool Cancel { get; set; }
+  }
 }

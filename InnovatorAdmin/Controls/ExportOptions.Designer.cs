@@ -39,9 +39,10 @@
       this.label3 = new System.Windows.Forms.Label();
       this.label4 = new System.Windows.Forms.Label();
       this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-      this.btnPackageFile = new System.Windows.Forms.Button();
-      this.btnDbPackage = new System.Windows.Forms.Button();
-      this.btnInstall = new System.Windows.Forms.Button();
+      this.btnPackageFile = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnDbPackage = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnInstall = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnCompare = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
       this.toolTipManager = new System.Windows.Forms.ToolTip(this.components);
       this.tableLayoutPanel2.SuspendLayout();
       this.flowLayoutPanel1.SuspendLayout();
@@ -163,24 +164,33 @@
       this.flowLayoutPanel1.Controls.Add(this.btnPackageFile);
       this.flowLayoutPanel1.Controls.Add(this.btnDbPackage);
       this.flowLayoutPanel1.Controls.Add(this.btnInstall);
-      this.flowLayoutPanel1.Location = new System.Drawing.Point(341, 228);
+      this.flowLayoutPanel1.Controls.Add(this.btnCompare);
+      this.flowLayoutPanel1.Location = new System.Drawing.Point(249, 228);
       this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-      this.flowLayoutPanel1.Size = new System.Drawing.Size(348, 76);
+      this.flowLayoutPanel1.Size = new System.Drawing.Size(440, 76);
       this.flowLayoutPanel1.TabIndex = 8;
       // 
       // btnPackageFile
       // 
       this.btnPackageFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+      this.btnPackageFile.AutoSize = true;
+      this.btnPackageFile.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnPackageFile.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnPackageFile.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnPackageFile.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnPackageFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.btnPackageFile.ForeColor = System.Drawing.Color.Black;
       this.btnPackageFile.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.innPkg32;
       this.btnPackageFile.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
       this.btnPackageFile.Location = new System.Drawing.Point(3, 3);
       this.btnPackageFile.Name = "btnPackageFile";
-      this.btnPackageFile.Size = new System.Drawing.Size(110, 70);
+      this.btnPackageFile.Padding = new System.Windows.Forms.Padding(2);
+      this.btnPackageFile.Size = new System.Drawing.Size(111, 70);
       this.btnPackageFile.TabIndex = 5;
-      this.btnPackageFile.Text = "Innovator &Package File(s)";
+      this.btnPackageFile.Text = "&Package File(s)";
       this.btnPackageFile.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+      this.btnPackageFile.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnPackageFile.UseVisualStyleBackColor = true;
       this.btnPackageFile.Click += new System.EventHandler(this.btnPackageFile_Click);
       // 
@@ -188,15 +198,24 @@
       // 
       this.btnDbPackage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+      this.btnDbPackage.AutoSize = true;
+      this.btnDbPackage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnDbPackage.Enabled = false;
+      this.btnDbPackage.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnDbPackage.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnDbPackage.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnDbPackage.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+      this.btnDbPackage.ForeColor = System.Drawing.Color.Black;
       this.btnDbPackage.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.packageDefinition;
       this.btnDbPackage.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-      this.btnDbPackage.Location = new System.Drawing.Point(119, 3);
+      this.btnDbPackage.Location = new System.Drawing.Point(120, 3);
       this.btnDbPackage.Name = "btnDbPackage";
-      this.btnDbPackage.Size = new System.Drawing.Size(110, 70);
+      this.btnDbPackage.Padding = new System.Windows.Forms.Padding(2);
+      this.btnDbPackage.Size = new System.Drawing.Size(136, 70);
       this.btnDbPackage.TabIndex = 6;
       this.btnDbPackage.Text = "Package &Definition (Db)";
       this.btnDbPackage.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+      this.btnDbPackage.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnDbPackage.UseVisualStyleBackColor = true;
       this.btnDbPackage.Click += new System.EventHandler(this.btnDbPackage_Click);
       // 
@@ -204,16 +223,46 @@
       // 
       this.btnInstall.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+      this.btnInstall.AutoSize = true;
+      this.btnInstall.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnInstall.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnInstall.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnInstall.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnInstall.ForeColor = System.Drawing.Color.Black;
       this.btnInstall.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.install32;
       this.btnInstall.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-      this.btnInstall.Location = new System.Drawing.Point(235, 3);
+      this.btnInstall.Location = new System.Drawing.Point(262, 3);
       this.btnInstall.Name = "btnInstall";
-      this.btnInstall.Size = new System.Drawing.Size(110, 70);
+      this.btnInstall.Padding = new System.Windows.Forms.Padding(2);
+      this.btnInstall.Size = new System.Drawing.Size(88, 70);
       this.btnInstall.TabIndex = 7;
       this.btnInstall.Text = "&Install (Db)";
       this.btnInstall.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+      this.btnInstall.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnInstall.UseVisualStyleBackColor = true;
       this.btnInstall.Click += new System.EventHandler(this.btnInstall_Click);
+      // 
+      // btnCompare
+      // 
+      this.btnCompare.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.btnCompare.AutoSize = true;
+      this.btnCompare.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnCompare.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnCompare.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnCompare.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnCompare.ForeColor = System.Drawing.Color.Black;
+      this.btnCompare.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+      this.btnCompare.Location = new System.Drawing.Point(356, 3);
+      this.btnCompare.Name = "btnCompare";
+      this.btnCompare.Padding = new System.Windows.Forms.Padding(2);
+      this.btnCompare.Size = new System.Drawing.Size(81, 70);
+      this.btnCompare.TabIndex = 8;
+      this.btnCompare.Text = "&Compare";
+      this.btnCompare.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+      this.btnCompare.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnCompare.UseVisualStyleBackColor = true;
+      this.btnCompare.Click += new System.EventHandler(this.btnCompare_Click);
       // 
       // ExportOptions
       // 
@@ -225,6 +274,7 @@
       this.tableLayoutPanel2.ResumeLayout(false);
       this.tableLayoutPanel2.PerformLayout();
       this.flowLayoutPanel1.ResumeLayout(false);
+      this.flowLayoutPanel1.PerformLayout();
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -242,9 +292,10 @@
     private System.Windows.Forms.Label label3;
     private System.Windows.Forms.Label label4;
     private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
-    private System.Windows.Forms.Button btnPackageFile;
-    private System.Windows.Forms.Button btnDbPackage;
-    private System.Windows.Forms.Button btnInstall;
+    private FlatButton btnPackageFile;
+    private FlatButton btnDbPackage;
+    private FlatButton btnInstall;
     private System.Windows.Forms.ToolTip toolTipManager;
+    private FlatButton btnCompare;
   }
 }

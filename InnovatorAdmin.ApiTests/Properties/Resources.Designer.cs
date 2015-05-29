@@ -61,6 +61,28 @@ namespace InnovatorAdmin.ApiTests.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
+        ///&lt;bookstore&gt;
+        ///    &lt;book genre=&quot;autobiography&quot; publicationdate=&quot;1981-03-22&quot; ISBN=&quot;1-861003-11-0&quot;&gt;
+        ///        &lt;title&gt;The Autobiography of Benjamin Franklin&lt;/title&gt;
+        ///        &lt;author&gt;
+        ///            &lt;first-name&gt;Benjamin&lt;/first-name&gt;
+        ///            &lt;last-name&gt;Franklin&lt;/last-name&gt;
+        ///        &lt;/author&gt;
+        ///        &lt;price&gt;8.99&lt;/price&gt;
+        ///    &lt;/book&gt;
+        ///    &lt;book genre=&quot;novel&quot; publicationdate=&quot;1967-11-17&quot; ISBN=&quot;0-201-63361-2&quot;&gt;
+        ///        &lt;title&gt;The Confidence Man&lt;/title&gt;
+        ///        &lt;author&gt;
+        ///    [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string MsdnXml {
+            get {
+                return ResourceManager.GetString("MsdnXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SELECT
         ///    c.[id]
         ///  , case when charindex(&apos;/&apos;, c.[CLASSIFICATION]) = 0 then c.[CLASSIFICATION] else left(c.CLASSIFICATION, charindex(&apos;/&apos;, c.[CLASSIFICATION])-1) end classification_01

@@ -15,7 +15,7 @@ namespace Aras.Tools.InnovatorAdmin
   }
   public class ConfigurableXmlWriter : XmlWriter
   {
-    private XmlWriter _base;
+    protected XmlWriter _base;
     private bool _blockAttr = false;
     private int _blockElemDepth = 0;
 

@@ -171,6 +171,21 @@ namespace Aras.Tools.InnovatorAdmin.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;xsl:stylesheet version=&quot;1.0&quot; xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:arasx=&quot;http://www.aras.com/XsltExtensions/1.0&quot; extension-element-prefixes=&quot;arasx&quot;&gt;
+        ///  &lt;xsl:output method=&quot;xml&quot; omit-xml-declaration=&quot;yes&quot; standalone=&quot;yes&quot; indent=&quot;yes&quot;&gt;&lt;/xsl:output&gt;
+        ///
+        ///  &lt;xsl:template match=&quot;table&quot;&gt;
+        ///    
+        ///  &lt;/xsl:template&gt;
+        ///&lt;/xsl:stylesheet&gt;.
+        /// </summary>
+        internal static string BaseImportXslt {
+            get {
+                return ResourceManager.GetString("BaseImportXslt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap check32 {
@@ -206,6 +221,16 @@ namespace Aras.Tools.InnovatorAdmin.Properties {
         internal static System.Drawing.Bitmap down16 {
             get {
                 object obj = ResourceManager.GetObject("down16", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap folder32 {
+            get {
+                object obj = ResourceManager.GetObject("folder32", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -277,6 +302,34 @@ namespace Aras.Tools.InnovatorAdmin.Properties {
             get {
                 object obj = ResourceManager.GetObject("packageDefinition", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;Item type=&quot;{0}&quot; action=&quot;get&quot;&gt;
+        ///  &lt;modified_by_id&gt;{1}&lt;/modified_by_id&gt;
+        ///  &lt;modified_on condition=&quot;gt&quot;&gt;{2}&lt;/modified_on&gt;
+        ///&lt;/Item&gt;.
+        /// </summary>
+        internal static string RecentItems_UserId {
+            get {
+                return ResourceManager.GetString("RecentItems_UserId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;Item type=&quot;{0}&quot; action=&quot;get&quot;&gt;
+        ///  &lt;modified_by_id&gt;
+        ///    &lt;Item type=&quot;User&quot; action=&quot;get&quot;&gt;
+        ///      &lt;keyed_name condition=&quot;like&quot;&gt;*{1}*&lt;/keyed_name&gt;
+        ///    &lt;/Item&gt;
+        ///  &lt;/modified_by_id&gt;
+        ///  &lt;modified_on condition=&quot;gt&quot;&gt;{2}&lt;/modified_on&gt;
+        ///&lt;/Item&gt;.
+        /// </summary>
+        internal static string RecentItems_UserKeyedName {
+            get {
+                return ResourceManager.GetString("RecentItems_UserKeyedName", resourceCulture);
             }
         }
         

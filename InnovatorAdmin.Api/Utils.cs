@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
-using System.Xml;
 
 namespace Aras.Tools.InnovatorAdmin
 {
@@ -34,89 +35,7 @@ namespace Aras.Tools.InnovatorAdmin
       }
     }
 
-    public static XmlElement AppendElement(this XmlNode node, string localName)
-    {
-      if (node == null) return null;
-      var newElem = node.OwnerDocument.CreateElement(localName);
-      node.AppendChild(newElem);
-      return newElem;
-    }
-    public static string Attribute(this XmlNode elem, string localName, string defaultValue = null)
-    {
-      if (elem == null || elem.Attributes == null) return defaultValue;
-      var attr = elem.Attributes[localName];
-      if (attr == null)
-      {
-        return defaultValue;
-      }
-      else
-      {
-        return attr.Value;
-      }
-    }
-    public static void Detatch(this XmlNode node)
-    {
-      if (node != null && node.ParentNode != null) node.ParentNode.RemoveChild(node);
-    }
-    public static XmlElement Element(this XmlNode node, string localName)
-    {
-      if (node == null) return null;
-      return node.ChildNodes.OfType<XmlElement>().SingleOrDefault(e => e.LocalName == localName);
-    }
-    public static string Element(this XmlNode node, string localName, string defaultValue)
-    {
-      if (node == null) return defaultValue;
-      var elem = node.Element(localName);
-      if (elem == null) return defaultValue;
-      return elem.InnerText;
-    }
-    public static XmlElement Element(this IEnumerable<XmlElement> nodes, string localName)
-    {
-      if (nodes == null) return null;
-      return nodes.SelectMany(n => n.ChildNodes.OfType<XmlElement>()).SingleOrDefault(e => e.LocalName == localName);
-    }
-    public static IEnumerable<XmlElement> Elements(this XmlNode node)
-    {
-      return node.ChildNodes.OfType<XmlElement>();
-    }
-    public static IEnumerable<XmlElement> Elements(this XmlNode node, string localName)
-    {
-      return node.ChildNodes.OfType<XmlElement>().Where(e => e.LocalName == localName);
-    }
-    public static IEnumerable<XmlElement> Elements(this XmlNode node, Func<XmlElement, bool> predicate)
-    {
-      return node.ChildNodes.OfType<XmlElement>().Where(predicate);
-    }
-    public static IEnumerable<XmlElement> Elements(this IEnumerable<XmlElement> nodes, Func<XmlElement, bool> predicate)
-    {
-      return nodes.SelectMany(n => n.ChildNodes.OfType<XmlElement>()).Where(predicate);
-    }
-    public static IEnumerable<XmlElement> Elements(this IEnumerable<XmlElement> nodes, string localName)
-    {
-      return nodes.SelectMany(n => n.ChildNodes.OfType<XmlElement>()).Where(e => e.LocalName == localName);
-    }
-    public static IEnumerable<XmlElement> ElementsByXPath(this XmlNode node, string xPath)
-    {
-      return node.SelectNodes(xPath).OfType<XmlElement>();
-    }
-    public static XmlNode Parent(this XmlNode node)
-    {
-      if (node == null) return null;
-      return node.ParentNode;
-    }
-    public static IEnumerable<XmlElement> Parents(this XmlNode node)
-    {
-      if (node == null) yield break;
-
-      var parent = node.ParentNode as XmlElement;
-      while (parent != null)
-      {
-        yield return parent;
-        parent = parent.ParentNode as XmlElement;
-      }
-    }
-
-    public static IEnumerable<T> DependencySort<T>(this IEnumerable<T> source, Func<T, IEnumerable<T>> dependencies, bool throwOnCycle = false)
+        public static IEnumerable<T> DependencySort<T>(this IEnumerable<T> source, Func<T, IEnumerable<T>> dependencies, bool throwOnCycle = false)
     {
       IList<T> cycle = new List<T>();
       return DependencySort(source, dependencies, ref cycle, throwOnCycle);
@@ -166,6 +85,86 @@ namespace Aras.Tools.InnovatorAdmin
 
       if (!hasCycle) cycle.RemoveAt(cycle.Count - 1);
       return hasCycle;
+    }
+
+    public static string GroupConcat<T>(this IEnumerable<T> values, string separator, Func<T, string> renderer)
+    {
+      if (values.Any())
+      {
+        if (renderer == null)
+        {
+          return values.Select(v => v.ToString()).Aggregate((p, c) => p + separator + c);
+        }
+        return values.Select(renderer).Aggregate((p, c) => p + separator + c);
+      }
+      else
+      {
+        return string.Empty;
+      }
+    }
+
+    public static string GetFileChecksum(string fileName)
+    {
+      var fileInfo = new FileInfo(fileName);
+      if (!File.Exists(fileInfo.FullName)) throw new ArgumentException("The specified file doesn't exist.", "fileName");
+      if (Directory.Exists(fileInfo.FullName)) throw new ArgumentException("The specified path is a directory and not a file.", "fileName");
+
+      byte[] array;
+      using (var mD = MD5.Create())
+      {
+        FileStream fileStream = null;
+        try
+        {
+          fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+          using (BufferedStream bufferedStream = new BufferedStream(fileStream, 32768))
+          {
+            fileStream = null;
+            array = mD.ComputeHash(bufferedStream);
+          }
+        }
+        finally
+        {
+          if (fileStream != null)
+          {
+            fileStream.Close();
+          }
+        }
+      }
+
+      return FormatChecksum(array);
+    }
+    public static string GetChecksum(byte[] data)
+    {
+      using (var mD = MD5.Create())
+      {
+        return FormatChecksum(mD.ComputeHash(data));
+      }
+    }
+    private static string FormatChecksum(byte[] array)
+    {
+      var stringBuilder = new StringBuilder(array.Length);
+      for (var i = 0; i < array.Length; i++)
+      {
+        var b = (byte)((array[i] & 240) >> 4);
+        var b2 = (byte)(array[i] & 15);
+        if (b < 10)
+        {
+          stringBuilder.Append((char)(48 + b));
+        }
+        else
+        {
+          stringBuilder.Append((char)(65 + (b - 10)));
+        }
+        if (b2 < 10)
+        {
+          stringBuilder.Append((char)(48 + b2));
+        }
+        else
+        {
+          stringBuilder.Append((char)(65 + (b2 - 10)));
+        }
+      }
+      return stringBuilder.ToString();
     }
   }
 }

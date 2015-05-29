@@ -93,6 +93,24 @@ namespace Aras.Tools.InnovatorAdmin.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;Item type=&quot;Property&quot; action=&quot;get&quot; select=&quot;source_id,item_behavior,name&quot; related_expand=&quot;0&quot;&gt;
+        ///  &lt;data_type&gt;item&lt;/data_type&gt;
+        ///  &lt;data_source&gt;
+        ///    &lt;Item type=&quot;ItemType&quot; action=&quot;get&quot;&gt;
+        ///      &lt;is_versionable&gt;1&lt;/is_versionable&gt;
+        ///    &lt;/Item&gt;
+        ///  &lt;/data_source&gt;
+        ///  &lt;item_behavior&gt;float&lt;/item_behavior&gt;
+        ///  &lt;name condition=&quot;not in&quot;&gt;&apos;config_id&apos;,&apos;id&apos;&lt;/name&gt;
+        ///&lt;/Item&gt;.
+        /// </summary>
+        internal static string FloatProperties {
+            get {
+                return ResourceManager.GetString("FloatProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;Item type=&quot;Method&quot; action=&quot;get&quot; select=&quot;config_id&quot;&gt;
         ///  &lt;core&gt;1&lt;/core&gt;
         ///&lt;/Item&gt;.
@@ -117,7 +135,7 @@ namespace Aras.Tools.InnovatorAdmin.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;Item type=&quot;ItemType&quot; action=&quot;get&quot; select=&quot;is_versionable,implementation_type,core,name&quot;&gt;
+        ///   Looks up a localized string similar to &lt;Item type=&quot;ItemType&quot; action=&quot;get&quot; select=&quot;is_versionable,is_dependent,implementation_type,core,name&quot;&gt;
         ///&lt;/Item&gt;.
         /// </summary>
         internal static string ItemTypeData {

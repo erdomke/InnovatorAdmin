@@ -30,17 +30,17 @@
     {
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ErrorWindow));
       this.tableLayout = new System.Windows.Forms.TableLayoutPanel();
-      this.btnShowDetails = new System.Windows.Forms.Button();
-      this.btnRetry = new System.Windows.Forms.Button();
-      this.btnIgnore = new System.Windows.Forms.Button();
-      this.btnAbort = new System.Windows.Forms.Button();
+      this.btnShowDetails = new Controls.FlatButton();
+      this.btnRetry = new Controls.FlatButton();
+      this.btnIgnore = new Controls.FlatButton();
+      this.btnAbort = new Controls.FlatButton();
       this.txtMessage = new System.Windows.Forms.TextBox();
       this.tbcMain = new System.Windows.Forms.TabControl();
       this.tabPage1 = new System.Windows.Forms.TabPage();
-      this.txtErrorDetails = new EditorControl();
+      this.txtErrorDetails = new Editor.EditorControl();
       this.tabPage2 = new System.Windows.Forms.TabPage();
       this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-      this.txtQuery = new EditorControl();
+      this.txtQuery = new Editor.EditorControl();
       this.tableLayout.SuspendLayout();
       this.tbcMain.SuspendLayout();
       this.tabPage1.SuspendLayout();
@@ -230,15 +230,15 @@
 
     private System.Windows.Forms.TableLayoutPanel tableLayout;
     private System.Windows.Forms.TextBox txtMessage;
-    private System.Windows.Forms.Button btnShowDetails;
+    private Controls.FlatButton btnShowDetails;
     private System.Windows.Forms.TabControl tbcMain;
     private System.Windows.Forms.TabPage tabPage1;
     private System.Windows.Forms.TabPage tabPage2;
-    private System.Windows.Forms.Button btnRetry;
-    private System.Windows.Forms.Button btnIgnore;
-    private System.Windows.Forms.Button btnAbort;
+    private Controls.FlatButton btnRetry;
+    private Controls.FlatButton btnIgnore;
+    private Controls.FlatButton btnAbort;
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
-    private EditorControl txtErrorDetails;
-    private EditorControl txtQuery;
+    private Editor.EditorControl txtErrorDetails;
+    private Editor.EditorControl txtQuery;
   }
 }

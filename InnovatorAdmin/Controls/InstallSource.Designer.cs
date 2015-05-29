@@ -29,7 +29,7 @@
     private void InitializeComponent()
     {
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-      this.btnInnovatorPackage = new System.Windows.Forms.Button();
+      this.btnInnovatorPackage = new FlatButton();
       this.label1 = new System.Windows.Forms.Label();
       this.label2 = new System.Windows.Forms.Label();
       this.label3 = new System.Windows.Forms.Label();
@@ -201,7 +201,7 @@
     #endregion
 
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-    private System.Windows.Forms.Button btnInnovatorPackage;
+    private FlatButton btnInnovatorPackage;
     private System.Windows.Forms.Label label1;
     private System.Windows.Forms.Label label2;
     private System.Windows.Forms.Label label3;

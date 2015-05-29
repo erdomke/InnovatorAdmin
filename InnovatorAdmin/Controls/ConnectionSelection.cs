@@ -52,14 +52,14 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       {
         string msg;
         _wizard.ConnectionInfo = connEditor.SelectedConnections;
-        var inn = ConnectionEditor.Login(_wizard.ConnectionInfo.First(), out msg);
-        if (inn == null)
+        var conn = ConnectionEditor.Login(_wizard.ConnectionInfo.First(), out msg);
+        if (conn == null)
         {
           MessageBox.Show(msg);
         }
         else
         {
-          _wizard.Innovator = inn;
+          _wizard.Connection = conn;
           this.GoNextAction();
         }
       }

@@ -12,6 +12,8 @@ namespace Aras.Tools.InnovatorAdmin.Controls
 {
   public partial class InstallComplete : UserControl, IWizardStep
   {
+    private IWizard _wizard;
+
     public InstallComplete()
     {
       InitializeComponent();
@@ -19,12 +21,14 @@ namespace Aras.Tools.InnovatorAdmin.Controls
 
     public void Configure(IWizard wizard)
     {
-      wizard.NextEnabled = false;
+      wizard.NextLabel = "Start Over";
+      wizard.NextEnabled = true;
+      _wizard = wizard;
     }
 
     public void GoNext()
     {
-      throw new NotImplementedException();
+      _wizard.GoToStep(new Welcome());
     }
 
     private void btnResetServerCache_Click(object sender, EventArgs e)
@@ -35,18 +39,14 @@ namespace Aras.Tools.InnovatorAdmin.Controls
         {
           foreach (var conn in rsc.SelectedConnections)
           {
-            var inn = ConnectionEditor.Login(conn, out msg);
-            if (inn == null)
+            var arasConn = ConnectionEditor.Login(conn, out msg);
+            if (arasConn == null)
             {
               MessageBox.Show(msg);
             }
             else
             {
-              var output = new XmlDocument();
-              output.AppendChild(output.CreateElement("Item"));
-              var inDoc = new XmlDocument();
-              inDoc.AppendChild(inDoc.CreateElement("Item"));
-              inn.getConnection().CallAction("ResetServerCache", inDoc, output);
+              arasConn.CallAction("ResetServerCache", "<Item/>");
             }
 
           }

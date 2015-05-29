@@ -31,8 +31,8 @@
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
       this.listValues = new System.Windows.Forms.ListBox();
       this.txtFilter = new System.Windows.Forms.TextBox();
-      this.btnOK = new System.Windows.Forms.Button();
-      this.btnCancel = new System.Windows.Forms.Button();
+      this.btnOK = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnCancel = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
       this.lblMessage = new System.Windows.Forms.Label();
       this.tableLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
@@ -89,23 +89,33 @@
       // 
       this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.btnOK.AutoSize = true;
+      this.btnOK.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-      this.btnOK.Location = new System.Drawing.Point(147, 236);
+      this.btnOK.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnOK.ForeColor = System.Drawing.Color.Black;
+      this.btnOK.Location = new System.Drawing.Point(147, 230);
       this.btnOK.Name = "btnOK";
-      this.btnOK.Size = new System.Drawing.Size(65, 23);
+      this.btnOK.Padding = new System.Windows.Forms.Padding(2);
+      this.btnOK.Size = new System.Drawing.Size(65, 29);
       this.btnOK.TabIndex = 2;
       this.btnOK.Text = "&OK";
+      this.btnOK.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnOK.UseVisualStyleBackColor = true;
       // 
       // btnCancel
       // 
       this.btnCancel.AutoSize = true;
+      this.btnCancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-      this.btnCancel.Location = new System.Drawing.Point(218, 236);
+      this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnCancel.ForeColor = System.Drawing.Color.Black;
+      this.btnCancel.Location = new System.Drawing.Point(218, 230);
       this.btnCancel.Name = "btnCancel";
-      this.btnCancel.Size = new System.Drawing.Size(63, 23);
+      this.btnCancel.Padding = new System.Windows.Forms.Padding(2);
+      this.btnCancel.Size = new System.Drawing.Size(63, 29);
       this.btnCancel.TabIndex = 3;
       this.btnCancel.Text = "&Cancel";
+      this.btnCancel.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnCancel.UseVisualStyleBackColor = true;
       // 
       // lblMessage
@@ -139,8 +149,8 @@
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     private System.Windows.Forms.ListBox listValues;
     private System.Windows.Forms.TextBox txtFilter;
-    private System.Windows.Forms.Button btnOK;
-    private System.Windows.Forms.Button btnCancel;
+    private FlatButton btnOK;
+    private FlatButton btnCancel;
     private System.Windows.Forms.Label lblMessage;
   }
 }

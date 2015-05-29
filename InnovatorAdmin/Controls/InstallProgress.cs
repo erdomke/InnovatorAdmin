@@ -71,15 +71,21 @@ namespace Aras.Tools.InnovatorAdmin.Controls
         if (!isLoggedIn)
         {
           string msg;
-          var inn = ConnectionEditor.Login(_connections.First(), out msg);
-          if (inn == null)
+          var conn = ConnectionEditor.Login(_connections.First(), out msg);
+          if (conn == null)
           {
             MessageBox.Show(msg);
             return false;
           }
           else
           {
-            _wizard.Innovator = inn;
+            _wizard.InstallProcessor.ActionComplete -= InstallProcessor_ActionComplete;
+            _wizard.InstallProcessor.ErrorRaised -= InstallProcessor_ErrorRaised;
+            _wizard.InstallProcessor.ProgressChanged -= InstallProcessor_ProgressChanged;
+            _wizard.Connection = conn;
+            _wizard.InstallProcessor.ActionComplete += InstallProcessor_ActionComplete;
+            _wizard.InstallProcessor.ErrorRaised += InstallProcessor_ErrorRaised;
+            _wizard.InstallProcessor.ProgressChanged += InstallProcessor_ProgressChanged;
           }
         }
 
@@ -127,7 +133,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       this.UiThreadInvoke(() =>
       {
         progBar.Value = e.Progress;
-        lblMessage.Text = _wizard.Innovator.getConnection().GetDatabaseName() + ": " + (e.Message ?? lblMessage.Text);
+        lblMessage.Text = _wizard.Connection.GetDatabaseName() + ": " + (e.Message ?? lblMessage.Text);
       }); 
     }
 

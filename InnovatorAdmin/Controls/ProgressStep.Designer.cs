@@ -32,6 +32,7 @@
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
       this.lblMessage = new System.Windows.Forms.Label();
       this.progBar = new System.Windows.Forms.ProgressBar();
+      this.btnCancel = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
       this.tableLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
       // 
@@ -44,6 +45,7 @@
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
       this.tableLayoutPanel1.Controls.Add(this.lblMessage, 1, 1);
       this.tableLayoutPanel1.Controls.Add(this.progBar, 1, 2);
+      this.tableLayoutPanel1.Controls.Add(this.btnCancel, 1, 3);
       this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
       this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -73,6 +75,26 @@
       this.progBar.Size = new System.Drawing.Size(499, 23);
       this.progBar.TabIndex = 1;
       // 
+      // btnCancel
+      // 
+      this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+      this.btnCancel.AutoSize = true;
+      this.btnCancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnCancel.FlatAppearance.BorderSize = 0;
+      this.btnCancel.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnCancel.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnCancel.ForeColor = System.Drawing.Color.Black;
+      this.btnCancel.Location = new System.Drawing.Point(527, 287);
+      this.btnCancel.Name = "btnCancel";
+      this.btnCancel.Padding = new System.Windows.Forms.Padding(2);
+      this.btnCancel.Size = new System.Drawing.Size(75, 27);
+      this.btnCancel.TabIndex = 2;
+      this.btnCancel.Text = "Cancel";
+      this.btnCancel.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnCancel.UseVisualStyleBackColor = false;
+      this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+      // 
       // ProgressStep
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -91,5 +113,6 @@
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     private System.Windows.Forms.Label lblMessage;
     private System.Windows.Forms.ProgressBar progBar;
+    private FlatButton btnCancel;
   }
 }
