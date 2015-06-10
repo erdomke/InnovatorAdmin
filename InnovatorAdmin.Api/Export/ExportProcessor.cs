@@ -25,7 +25,7 @@ namespace Aras.Tools.InnovatorAdmin
     private Dictionary<string, ItemType> _itemTypesByName;
     XslCompiledTransform _resultTransform;
     public event EventHandler<ActionCompleteEventArgs> ActionComplete;
-    public event EventHandler<ProgressChangedEventArgs> ProgressChanged; 
+    public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
 
     public ExportProcessor(IArasConnection conn)
     {
@@ -84,7 +84,7 @@ namespace Aras.Tools.InnovatorAdmin
         {
           // Make sure relationship item types aren't accidentally added
           queryElem = outputDoc.CreateElement("Item").Attr("action", "get").Attr("type", typeItems.Key.Type);
-          
+
           if (typeItems.Any(i => i.Unique.IsGuid()))
           {
             whereClause.Append("[ItemType].[id] in ('")
@@ -162,7 +162,7 @@ namespace Aras.Tools.InnovatorAdmin
 
         FixFederatedRelationships(outputDoc.DocumentElement);
         var result = ExecuteExportQuery(outputDoc.DocumentElement);
-        
+
         // Add warnings for embedded relationships
         var warnings = new HashSet<ItemReference>();
         ItemReference warning;
@@ -205,16 +205,16 @@ namespace Aras.Tools.InnovatorAdmin
         this.OnActionComplete(new ActionCompleteEventArgs() { Exception = ex });
       }
     }
-    public void Export(InstallScript script, XmlDocument doc, HashSet<ItemReference> warnings = null) 
+    public void Export(InstallScript script, XmlDocument doc, HashSet<ItemReference> warnings = null)
     {
-      try 
+      try
       {
         EnsureSystemData();
         FixPolyItemReferences(doc);
         FixForeignProperties(doc);
         FixCyclicalWorkflowLifeCycleRefs(doc);
         FixCyclicalWorkflowItemTypeRefs(doc);
-        MoveFormRefsInline(doc);
+        MoveFormRefsInline(doc, (script.Lines ?? Enumerable.Empty<InstallItem>()).Where(l => l.Type == InstallType.Create || l.Type == InstallType.Script));
 
         // Sort the resulting nodes as appropriate
         ReportProgress(98, "Sorting the results");
@@ -227,7 +227,15 @@ namespace Aras.Tools.InnovatorAdmin
         IEnumerable<InstallItem> results = null;
         while (loops < 10 && state == CycleState.ResolvedCycle)
         {
-          _dependAnalyzer.Reset();
+          // Only reset if this is not a rescan
+          if (script.Lines != null)
+          {
+            _dependAnalyzer.Reset(from l in script.Lines where l.Type == InstallType.Create || l.Type == InstallType.Script select l.Reference);
+          }
+          else
+          {
+            _dependAnalyzer.Reset();
+          }
           var newInstallItems = (from e in itemNode.ParentNode.Elements()
                                  where e.LocalName == "Item" && e.HasAttribute("type")
                                  select InstallItem.FromScript(e)).ToList();
@@ -244,7 +252,7 @@ namespace Aras.Tools.InnovatorAdmin
 
         if (warnings == null) warnings = new HashSet<ItemReference>();
         warnings.ExceptWith(results.Select(r => r.Reference));
-        
+
         script.Lines = warnings.Select(w => InstallItem.FromWarning(w, w.KeyedName))
           .Concat(results.Where(r => r.Type == InstallType.DependencyCheck || r.Type == InstallType.Warning))
           .OrderBy(r => r.Name)
@@ -337,8 +345,8 @@ namespace Aras.Tools.InnovatorAdmin
     /// <param name="items">Data regarding which system properties to persist as sql scripts</param>
     /// <param name="cleanAll">Whether to preserve the required data for dependency checking, or remove it all</param>
     /// <remarks>
-    /// This method is called twice. Once with <see cref="cleanAll"/> set to <c>false</c> where the SQL scripts are written an unnecessary
-    /// properties are removed.  Properties included in the SQL script are kept for dependency checking.  The run with <see cref="cleanAll"/> 
+    /// This method is called twice. Once with <paramref name="cleanAll"/> set to <c>false</c> where the SQL scripts are written an unnecessary
+    /// properties are removed.  Properties included in the SQL script are kept for dependency checking.  The run with <paramref name="cleanAll"/>
     /// set to <c>true</c> removes the remaining system properties.
     /// </remarks>
     private void CleanUpSystemProps(XmlDocument doc, IEnumerable<ItemReference> items, bool cleanAll)
@@ -490,7 +498,7 @@ namespace Aras.Tools.InnovatorAdmin
         if (e.HasAttribute(XmlFlags.Attr_Float))
         {
           e.RemoveAttribute(XmlFlags.Attr_Float);
-          if (!string.IsNullOrEmpty(e.Attribute("id")) 
+          if (!string.IsNullOrEmpty(e.Attribute("id"))
             && !string.IsNullOrEmpty(e.Attribute("type")))
           {
             e.SetAttribute(XmlFlags.Attr_ConfigId, e.Attribute("id"));
@@ -693,8 +701,8 @@ namespace Aras.Tools.InnovatorAdmin
       string relQuery;
       foreach (var item in query.ChildNodes.OfType<XmlElement>())
       {
-        if (item.Attribute("levels") == "1" 
-          && _itemTypesByName.TryGetValue(item.Attribute("type").ToLowerInvariant(), out itemType) 
+        if (item.Attribute("levels") == "1"
+          && _itemTypesByName.TryGetValue(item.Attribute("type").ToLowerInvariant(), out itemType)
           && itemType.Relationships.Any(r => r.IsFederated))
         {
           item.RemoveAttribute("levels");
@@ -1021,11 +1029,15 @@ namespace Aras.Tools.InnovatorAdmin
     /// <summary>
     /// Move the form nodes inline with the itemtype create script
     /// </summary>
-    private void MoveFormRefsInline(XmlDocument doc)
+    private void MoveFormRefsInline(XmlDocument doc, IEnumerable<InstallItem> lines)
     {
+      ItemReference formItemRef = null;
+
       foreach (var form in doc.ElementsByXPath("//Item[@type='Form' and @action and @id]").ToList())
       {
-        var references = doc.ElementsByXPath("//self::node()[local-name() != 'Item' and local-name() != 'id' and local-name() != 'config_id' and @type='Form' and not(Item) and text() = $p0]", form.Attribute("id", "")).ToList();
+        var references = doc.ElementsByXPath("//self::node()[local-name() != 'Item' and local-name() != 'id' and local-name() != 'config_id' and @type='Form' and not(Item) and text() = $p0]", form.Attribute("id", ""))
+          //.Concat(otherDocs.SelectMany(d => d.ElementsByXPath("//self::node()[local-name() != 'Item' and local-name() != 'id' and local-name() != 'config_id' and @type='Form' and not(Item) and text() = $p0]", form.Attribute("id", "")))).ToList();
+          .ToList();
         if (references.Any())
         {
           foreach (var formRef in references)
@@ -1036,6 +1048,27 @@ namespace Aras.Tools.InnovatorAdmin
               relTag.Detatch();
             }
           }
+        }
+
+        foreach (var line in lines)
+        {
+          references = line.Script.ElementsByXPath("//self::node()[local-name() != 'Item' and local-name() != 'id' and local-name() != 'config_id' and @type='Form' and not(Item) and text() = $p0]", form.Attribute("id", "")).ToList();
+          if (references.Any())
+          {
+            if (formItemRef == null) formItemRef = ItemReference.FromFullItem(form, false);
+
+            foreach (var formRef in references)
+            {
+              formRef.InnerXml = form.OuterXml;
+              foreach (var relTag in formRef.Elements("Item").Elements("Relationships").ToList())
+              {
+                relTag.Detatch();
+              }
+            }
+
+            _dependAnalyzer.RemoveDependency(line.Reference, formItemRef);
+          }
+
         }
       }
     }
@@ -1291,7 +1324,7 @@ namespace Aras.Tools.InnovatorAdmin
         ItemType relType;
         foreach (var rel in relationships)
         {
-          if (rel.Element("source_id").Attribute("name") != null 
+          if (rel.Element("source_id").Attribute("name") != null
             && _itemTypes.TryGetValue(rel.Element("source_id").Attribute("name").ToLowerInvariant(), out result)
             && rel.Element("relationship_id").Attribute("name") != null
             && _itemTypes.TryGetValue(rel.Element("relationship_id").Attribute("name").ToLowerInvariant(), out relType))

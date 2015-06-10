@@ -30,11 +30,11 @@
     {
       this.components = new System.ComponentModel.Container();
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-      this.toolTipManager = new System.Windows.Forms.ToolTip(this.components);
       this.btnCreate = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
       this.btnInstall = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
       this.btnAmlStudio = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
       this.btnImportData = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.toolTipManager = new System.Windows.Forms.ToolTip(this.components);
       this.tableLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
       // 

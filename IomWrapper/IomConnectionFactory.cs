@@ -33,12 +33,19 @@ namespace IomWrapper
 
       message = Properties.Resources.LoginSuccess;
 
-      return new IomConnection(IomFactory.CreateInnovator(conn));
+      var result = new IomConnection(IomFactory.CreateInnovator(conn));
+      //result.Initialize();
+      return result;
     }
 
     public IEnumerable<string> AvailableDatabases(string url)
     {
       return IomFactory.CreateHttpServerConnection(url).GetDatabases();
+    }
+
+    public override object InitializeLifetimeService()
+    {
+      return null;
     }
   }
 }

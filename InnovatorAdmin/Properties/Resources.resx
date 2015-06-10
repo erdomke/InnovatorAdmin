@@ -117,104 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="amlStudio32black" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\amlStudio32black.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="check32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\check32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="BaseImportXslt" xml:space="preserve">
-    <value>&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:arasx="http://www.aras.com/XsltExtensions/1.0" extension-element-prefixes="arasx"&gt;
-  &lt;xsl:output method="xml" omit-xml-declaration="yes" standalone="yes" indent="yes"&gt;&lt;/xsl:output&gt;
-
-  &lt;xsl:template match="table"&gt;
-    
-  &lt;/xsl:template&gt;
-&lt;/xsl:stylesheet&gt;</value>
-  </data>
-  <data name="login16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\login16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Header" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\Header.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="packageDefinition" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\packageDefinition.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="amlStudio32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\amlStudio32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="remove16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\remove16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="arrowLeftAllSimpleBlack16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\arrowLeftAllSimpleBlack16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="innPkg32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\innPkg32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="add16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\add16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Aml_Packages" xml:space="preserve">
-    <value>&lt;AML&gt;&lt;Item type="PackageDefinition" action="get" select="id"&gt;&lt;/Item&gt;&lt;/AML&gt;</value>
-  </data>
-  <data name="manifestFolder32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\manifestFolder32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Aml_ItemGet" xml:space="preserve">
-    <value>&lt;AML&gt;&lt;Item type="{0}" action="get" maxRecords="1000" orderBy="keyed_name" select="id,source_id,related_id"&gt;{1}&lt;/Item&gt;&lt;/AML&gt;</value>
-  </data>
-  <data name="arrowRightAllSimpleBlack16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\arrowRightAllSimpleBlack16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Aml_ItemTypes" xml:space="preserve">
-    <value>&lt;AML&gt;&lt;Item type="ItemType" action="get" select="id"&gt;&lt;/Item&gt;&lt;/AML&gt;</value>
-  </data>
-  <data name="install32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\install32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="search32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\search32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="arrowRightSimpleBlack16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\arrowRightSimpleBlack16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Aml_PackageElements" xml:space="preserve">
-    <value>&lt;AML&gt;&lt;Item type="PackageElement" action="get" select="element_id,element_type,name" orderBy="element_type,name,element_id"&gt;
-  &lt;source_id condition="in"&gt;(select id
-from innovator.PACKAGEGROUP
-where SOURCE_ID = '{0}')&lt;/source_id&gt;
-&lt;/Item&gt;&lt;/AML&gt;</value>
-  </data>
-  <data name="InnovatorAdmin" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\InnovatorAdmin.ico;System.Drawing.Icon, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="down16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\down16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="up16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\up16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="arrowLeftSimpleBlack16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\arrowLeftSimpleBlack16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="connectionEditor16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\connectionEditor16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="copy16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\copy16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="folder32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\icons\folder32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="RecentItems_UserId" xml:space="preserve">
-    <value>&lt;Item type="{0}" action="get"&gt;
-  &lt;modified_by_id&gt;{1}&lt;/modified_by_id&gt;
-  &lt;modified_on condition="gt"&gt;{2}&lt;/modified_on&gt;
-&lt;/Item&gt;</value>
-  </data>
   <data name="RecentItems_UserKeyedName" xml:space="preserve">
     <value>&lt;Item type="{0}" action="get"&gt;
   &lt;modified_by_id&gt;
@@ -224,5 +126,349 @@ where SOURCE_ID = '{0}')&lt;/source_id&gt;
   &lt;/modified_by_id&gt;
   &lt;modified_on condition="gt"&gt;{2}&lt;/modified_on&gt;
 &lt;/Item&gt;</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="search32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\search32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="arrowRightAllSimpleBlack16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\arrowRightAllSimpleBlack16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="arrowRightSimpleBlack16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\arrowRightSimpleBlack16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="amlStudio32black" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\amlStudio32black.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="InnovatorAdmin" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\InnovatorAdmin.ico;System.Drawing.Icon, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="innPkg32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\innPkg32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="RecentItems_UserId" xml:space="preserve">
+    <value>&lt;Item type="{0}" action="get"&gt;
+  &lt;modified_by_id&gt;{1}&lt;/modified_by_id&gt;
+  &lt;modified_on condition="gt"&gt;{2}&lt;/modified_on&gt;
+&lt;/Item&gt;</value>
+  </data>
+  <data name="Xslt_DocumentMergeImport" xml:space="preserve">
+    <value>&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:arasx="http://www.aras.com/XsltExtensions/1.0" xmlns:msxsl="urn:schemas-microsoft-com:xslt" extension-element-prefixes="arasx msxsl"&gt;
+  &lt;xsl:output method="xml" omit-xml-declaration="yes" standalone="yes" indent="yes"&gt;&lt;/xsl:output&gt;
+
+  &lt;xsl:template match="table"&gt;
+    &lt;xsl:variable name="unique-files" select="arasx:GetUniqueFiles(row/path)" /&gt;
+  
+    &lt;xsl:variable name="file-query"&gt;
+      &lt;Item type="File" action="get" select="id,checksum,file_size"&gt;
+        &lt;xsl:attribute name="where"&gt;
+          &lt;xsl:for-each select="$unique-files/Result/Item"&gt;
+            &lt;xsl:if test="position() != 1"&gt; OR &lt;/xsl:if&gt;
+            &lt;xsl:text&gt;([File].[checksum] = '&lt;/xsl:text&gt;
+            &lt;xsl:value-of select="checksum" /&gt;
+            &lt;xsl:text&gt;' AND [File].[file_size] = &lt;/xsl:text&gt;
+            &lt;xsl:value-of select="size" /&gt;
+            &lt;xsl:text&gt;)&lt;/xsl:text&gt;
+          &lt;/xsl:for-each&gt;
+        &lt;/xsl:attribute&gt;
+      &lt;/Item&gt;
+    &lt;/xsl:variable&gt;
+    
+    &lt;xsl:variable name="existing-files" select="arasx:CallAction('ApplyItem',$file-query)//*[Item][1]" /&gt;
+    
+    &lt;xsl:variable name="unique-existing-files"&gt;
+      &lt;Result&gt;
+        &lt;xsl:for-each select="$unique-files/Result/Item"&gt;
+          &lt;xsl:variable name="existing-file" select="$existing-files/Item[checksum = current()/checksum and file_size = current()/size][1]" /&gt;
+          &lt;xsl:choose&gt;
+            &lt;!-- use the existing file --&gt;
+            &lt;xsl:when test="$existing-file"&gt;
+              &lt;Item action="get"&gt;
+                &lt;xsl:copy-of select="$existing-file/@*" /&gt;
+                &lt;xsl:copy-of select="paths" /&gt;
+              &lt;/Item&gt;
+            &lt;/xsl:when&gt;
+            &lt;!-- Upload potential new duplicates to prevent possible race conditions later --&gt;
+            &lt;xsl:when test="count(paths/path) &gt; 1"&gt;
+              &lt;xsl:variable name="new-query"&gt;
+                &lt;Item type="File" action="add" id="{@id}"&gt;
+                  &lt;actual_filename&gt;&lt;xsl:value-of select="paths/path[1]" /&gt;&lt;/actual_filename&gt;
+                &lt;/Item&gt;
+              &lt;/xsl:variable&gt;
+              &lt;xsl:choose&gt;
+                &lt;xsl:when test="arasx:IsArasFault(arasx:CallAction('ApplyItem',$file-query))"&gt;
+                  &lt;Item action="add"&gt;
+                    &lt;xsl:copy-of select="@*" /&gt;
+                    &lt;xsl:copy-of select="node()" /&gt;
+                  &lt;/Item&gt;
+                &lt;/xsl:when&gt;
+                &lt;xsl:otherwise&gt;
+                  &lt;Item action="get"&gt;
+                    &lt;xsl:copy-of select="@*" /&gt;
+                    &lt;xsl:copy-of select="paths" /&gt;
+                  &lt;/Item&gt;
+                &lt;/xsl:otherwise&gt;
+              &lt;/xsl:choose&gt;
+            &lt;/xsl:when&gt;
+            &lt;!-- Add the file later --&gt;
+            &lt;xsl:otherwise&gt;
+              &lt;Item action="add"&gt;
+                &lt;xsl:copy-of select="@*" /&gt;
+                &lt;xsl:copy-of select="node()" /&gt;
+              &lt;/Item&gt;
+            &lt;/xsl:otherwise&gt;
+          &lt;/xsl:choose&gt;
+        &lt;/xsl:for-each&gt;
+      &lt;/Result&gt;
+    &lt;/xsl:variable&gt;
+    
+    &lt;xsl:variable name="document-query"&gt;
+      &lt;Item type="Document File" 
+            action="get" 
+            select="source_id(id),related_id(id)" 
+            where="1 = (select count(*) from innovator.DOCUMENT_FILE i where i.SOURCE_ID = [Document_File].SOURCE_ID) and 1 = (select count(*) from innovator.DOCUMENT_FILE i where i.RELATED_ID = [Document_File].RELATED_ID)"&gt;
+        &lt;related_id condition="in"&gt;
+          &lt;xsl:for-each select="$existing-files/Item"&gt;
+            &lt;xsl:if test="position() != 1"&gt;,&lt;/xsl:if&gt;
+            &lt;xsl:text&gt;'&lt;/xsl:text&gt;
+            &lt;xsl:value-of select="@id"/&gt;
+            &lt;xsl:text&gt;'&lt;/xsl:text&gt;
+          &lt;/xsl:for-each&gt;
+        &lt;/related_id&gt;
+      &lt;/Item&gt;
+    &lt;/xsl:variable&gt;
+    
+    &lt;xsl:variable name="existing-docs" select="arasx:CallAction('ApplyItem',$document-query)//*[Item][1]" /&gt;
+    
+    &lt;Result&gt;
+      &lt;xsl:for-each select="row"&gt;
+        &lt;xsl:call-template name="RenderAml"&gt;
+          &lt;xsl:with-param name="row" select="." /&gt;
+          &lt;xsl:with-param name="existing-file" select="msxsl:node-set($unique-existing-files)/Result/Item[paths/path = current()/path]" /&gt;
+          &lt;xsl:with-param name="existing-docs" select="$existing-docs" /&gt;
+        &lt;/xsl:call-template&gt;
+      &lt;/xsl:for-each&gt;
+    &lt;/Result&gt;
+    
+  &lt;/xsl:template&gt;
+  
+  &lt;xsl:template name="RenderAml"&gt;
+    &lt;xsl:param name="row" /&gt;
+    &lt;xsl:param name="existing-file" /&gt;
+    &lt;xsl:param name="existing-docs" /&gt;
+        
+    &lt;xsl:choose&gt;
+      &lt;xsl:when test="$existing-file/@action = 'get'"&gt;
+        &lt;xsl:variable name="existing-doc" select="$existing-docs/Item[related_id/Item/@id = $existing-file/@id]/source_id/Item" /&gt;
+        
+        &lt;xsl:choose&gt;
+          &lt;xsl:when test="$existing-doc"&gt;
+            &lt;Item type="Document" action="get" id="{$existing-doc/@id}"&gt;&lt;/Item&gt;
+          &lt;/xsl:when&gt;
+          &lt;xsl:otherwise&gt;
+            &lt;Item type="Document" action="add"&gt;
+              &lt;Relationships&gt;
+                &lt;Item type="Document File" action="add"&gt;
+                  &lt;related_id&gt;
+                    &lt;xsl:value-of select="$existing-file/@id" /&gt;
+                  &lt;/related_id&gt;
+                &lt;/Item&gt;
+              &lt;/Relationships&gt;
+            &lt;/Item&gt;
+          &lt;/xsl:otherwise&gt;
+        &lt;/xsl:choose&gt;
+      &lt;/xsl:when&gt;
+      &lt;xsl:otherwise&gt;
+        &lt;Item type="Document" action="add"&gt;
+          &lt;Relationships&gt;
+            &lt;Item type="Document File" action="add"&gt;
+              &lt;related_id&gt;
+                &lt;Item type="File" action="add" id="{$existing-file/@id}"&gt;
+                &lt;/Item&gt;
+              &lt;/related_id&gt;
+            &lt;/Item&gt;
+          &lt;/Relationships&gt;
+        &lt;/Item&gt;
+      &lt;/xsl:otherwise&gt;          
+    &lt;/xsl:choose&gt;
+  &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;</value>
+  </data>
+  <data name="install32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\install32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Xslt_FileMergeImport" xml:space="preserve">
+    <value>&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:arasx="http://www.aras.com/XsltExtensions/1.0" xmlns:msxsl="urn:schemas-microsoft-com:xslt" extension-element-prefixes="arasx msxsl"&gt;
+  &lt;xsl:output method="xml" omit-xml-declaration="yes" standalone="yes" indent="yes"&gt;&lt;/xsl:output&gt;
+
+  &lt;xsl:template match="table"&gt;
+    &lt;xsl:variable name="unique-files" select="arasx:GetUniqueFiles(row/path)" /&gt;
+  
+    &lt;xsl:variable name="file-query"&gt;
+      &lt;Item type="File" action="get" select="id,checksum,file_size"&gt;
+        &lt;xsl:attribute name="where"&gt;
+          &lt;xsl:for-each select="$unique-files/Result/Item"&gt;
+            &lt;xsl:if test="position() != 1"&gt; OR &lt;/xsl:if&gt;
+            &lt;xsl:text&gt;([File].[checksum] = '&lt;/xsl:text&gt;
+            &lt;xsl:value-of select="checksum" /&gt;
+            &lt;xsl:text&gt;' AND [File].[file_size] = &lt;/xsl:text&gt;
+            &lt;xsl:value-of select="size" /&gt;
+            &lt;xsl:text&gt;)&lt;/xsl:text&gt;
+          &lt;/xsl:for-each&gt;
+        &lt;/xsl:attribute&gt;
+      &lt;/Item&gt;
+    &lt;/xsl:variable&gt;
+    
+    &lt;xsl:variable name="existing-files" select="arasx:CallAction('ApplyItem',$file-query)//*[Item][1]" /&gt;
+    
+    &lt;xsl:variable name="unique-existing-files"&gt;
+      &lt;Result&gt;
+        &lt;xsl:for-each select="$unique-files/Result/Item"&gt;
+          &lt;xsl:variable name="existing-file" select="$existing-files/Item[checksum = current()/checksum and file_size = current()/size][1]" /&gt;
+          &lt;xsl:choose&gt;
+            &lt;!-- use the existing file --&gt;
+            &lt;xsl:when test="$existing-file"&gt;
+              &lt;Item action="get"&gt;
+                &lt;xsl:copy-of select="$existing-file/@*" /&gt;
+                &lt;xsl:copy-of select="paths" /&gt;
+              &lt;/Item&gt;
+            &lt;/xsl:when&gt;
+            &lt;!-- Upload potential new duplicates to prevent possible race conditions later --&gt;
+            &lt;xsl:when test="count(paths/path) &gt; 1"&gt;
+              &lt;xsl:variable name="new-query"&gt;
+                &lt;Item type="File" action="add" id="{@id}"&gt;
+                  &lt;actual_filename&gt;&lt;xsl:value-of select="paths/path[1]" /&gt;&lt;/actual_filename&gt;
+                &lt;/Item&gt;
+              &lt;/xsl:variable&gt;
+              &lt;xsl:choose&gt;
+                &lt;xsl:when test="arasx:IsArasFault(arasx:CallAction('ApplyItem',$file-query))"&gt;
+                  &lt;Item action="add"&gt;
+                    &lt;xsl:copy-of select="@*" /&gt;
+                    &lt;xsl:copy-of select="node()" /&gt;
+                  &lt;/Item&gt;
+                &lt;/xsl:when&gt;
+                &lt;xsl:otherwise&gt;
+                  &lt;Item action="get"&gt;
+                    &lt;xsl:copy-of select="@*" /&gt;
+                    &lt;xsl:copy-of select="paths" /&gt;
+                  &lt;/Item&gt;
+                &lt;/xsl:otherwise&gt;
+              &lt;/xsl:choose&gt;
+            &lt;/xsl:when&gt;
+            &lt;!-- Add the file later --&gt;
+            &lt;xsl:otherwise&gt;
+              &lt;Item action="add"&gt;
+                &lt;xsl:copy-of select="@*" /&gt;
+                &lt;xsl:copy-of select="node()" /&gt;
+              &lt;/Item&gt;
+            &lt;/xsl:otherwise&gt;
+          &lt;/xsl:choose&gt;
+        &lt;/xsl:for-each&gt;
+      &lt;/Result&gt;
+    &lt;/xsl:variable&gt;
+    
+    &lt;Result&gt;
+      &lt;xsl:for-each select="row"&gt;
+        &lt;xsl:call-template name="RenderAml"&gt;
+          &lt;xsl:with-param name="row" select="." /&gt;
+          &lt;xsl:with-param name="existing-file" select="msxsl:node-set($unique-existing-files)/Result/Item[paths/path = current()/path]" /&gt;
+        &lt;/xsl:call-template&gt;
+      &lt;/xsl:for-each&gt;
+    &lt;/Result&gt;
+    
+  &lt;/xsl:template&gt;
+  
+  &lt;xsl:template name="RenderAml"&gt;
+    &lt;xsl:param name="row" /&gt;
+    &lt;xsl:param name="existing-file" /&gt;
+        
+    &lt;xsl:choose&gt;
+      &lt;xsl:when test="$existing-file/@action = 'get'"&gt;
+        &lt;Item type="File" action="get" id="{$existing-file/@id}" /&gt;
+      &lt;/xsl:when&gt;
+      &lt;xsl:otherwise&gt;
+        &lt;Item type="File" action="add" id="{$existing-file/@id}"&gt;
+        &lt;/Item&gt;
+      &lt;/xsl:otherwise&gt;          
+    &lt;/xsl:choose&gt;
+  &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;</value>
+  </data>
+  <data name="copy16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\copy16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Aml_Packages" xml:space="preserve">
+    <value>&lt;AML&gt;&lt;Item type="PackageDefinition" action="get" select="id"&gt;&lt;/Item&gt;&lt;/AML&gt;</value>
+  </data>
+  <data name="arrowLeftSimpleBlack16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\arrowLeftSimpleBlack16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="folder32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\folder32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="amlStudio32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\amlStudio32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Aml_PackageElements" xml:space="preserve">
+    <value>&lt;AML&gt;&lt;Item type="PackageElement" action="get" select="element_id,element_type,name" orderBy="element_type,name,element_id"&gt;
+  &lt;source_id condition="in"&gt;(select id
+from innovator.PACKAGEGROUP
+where SOURCE_ID = '{0}')&lt;/source_id&gt;
+&lt;/Item&gt;&lt;/AML&gt;</value>
+  </data>
+  <data name="up16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\up16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="down16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\down16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Xslt_BaseImport" xml:space="preserve">
+    <value>&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:arasx="http://www.aras.com/XsltExtensions/1.0" xmlns:msxsl="urn:schemas-microsoft-com:xslt" extension-element-prefixes="arasx msxsl"&gt;
+  &lt;xsl:output method="xml" omit-xml-declaration="yes" standalone="yes" indent="yes"&gt;&lt;/xsl:output&gt;
+
+  &lt;xsl:template match="table"&gt;
+    &lt;Result&gt;
+      &lt;xsl:for-each select="row"&gt;
+        
+      &lt;/xsl:for-each&gt;
+    &lt;/Result&gt;
+  &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;</value>
+  </data>
+  <data name="Aml_ItemGet" xml:space="preserve">
+    <value>&lt;AML&gt;&lt;Item type="{0}" action="get" maxRecords="1000" orderBy="keyed_name" select="id,source_id,related_id"&gt;{1}&lt;/Item&gt;&lt;/AML&gt;</value>
+  </data>
+  <data name="arrowLeftAllSimpleBlack16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\arrowLeftAllSimpleBlack16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="connectionEditor16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\connectionEditor16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="remove16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\remove16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Aml_ItemTypes" xml:space="preserve">
+    <value>&lt;AML&gt;&lt;Item type="ItemType" action="get" select="id"&gt;&lt;/Item&gt;&lt;/AML&gt;</value>
+  </data>
+  <data name="manifestFolder32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\manifestFolder32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="packageDefinition" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\packageDefinition.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="add16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\add16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="check32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\check32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Header" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\Header.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="login16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\login16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="function14" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\icons\function14.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

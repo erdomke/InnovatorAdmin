@@ -103,6 +103,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
         string namespaceUri;
         if (elementNamespace.Namespace.Length == 0
           && !string.IsNullOrEmpty(elementName.Prefix)
+          && namespaces != null
           && namespaces.TryGetValue(elementName.Prefix, out namespaceUri))
         {
           elementNamespace.Namespace = namespaceUri;

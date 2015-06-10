@@ -1,5 +1,4 @@
-﻿using ADiff.Api;
-using ICSharpCode.AvalonEdit;
+﻿using ICSharpCode.AvalonEdit;
 using System;
 using System.Collections.Generic;
 using System.Linq;

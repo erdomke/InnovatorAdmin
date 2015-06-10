@@ -10,10 +10,15 @@ namespace Aras.Tools.InnovatorAdmin
   {
     private const string PreAnalyzed = "_dependencies_analyzed";
 
+    //// Persistent variables between scans
+    // Pointer from a child reference to the master reference that defines it
     private Dictionary<ItemReference, ItemReference> _allDefinitions = new Dictionary<ItemReference,ItemReference>();
+    // Pointer from a child reference to the XML data and master reference where the child is referenced
     private Dictionary<ItemReference, References> _allDependencies = new Dictionary<ItemReference, References>();
+    // All the dependencies for a given item based on the reference
     private Dictionary<ItemReference, HashSet<ItemReference>> _allItemDependencies = new Dictionary<ItemReference, HashSet<ItemReference>>();
 
+    //// Temporary variables only used within a set of scans
     private Dictionary<ItemProperty, ItemReference> _customProps;
     private HashSet<ItemReference> _definitions = new HashSet<ItemReference>();
     private HashSet<ItemReference> _dependencies = new HashSet<ItemReference>();
@@ -91,6 +96,57 @@ namespace Aras.Tools.InnovatorAdmin
       _allDefinitions.Clear();
       _allDependencies.Clear();
       _allItemDependencies.Clear();
+    }
+    public void Reset(IEnumerable<ItemReference> refsToKeep)
+    {
+      if (refsToKeep.Any())
+      {
+        var refsToKeepHash = new HashSet<ItemReference>(refsToKeep);
+        
+        // Clean up the definitions as necessary
+        var defnsToRemove = (from p in _allDefinitions where !refsToKeepHash.Contains(p.Value) select p.Key).ToList();
+        foreach (var defnToRemove in defnsToRemove)
+        {
+          _allDefinitions.Remove(defnToRemove);
+        }
+
+        // Clean up the dependencies as necessary
+        foreach (var depend in _allDependencies)
+        {
+          depend.Value.RemoveAllButMasterList(refsToKeepHash);
+        }
+
+        // Remove dependency information
+        var itemsToRemove = (from p in _allItemDependencies where !refsToKeepHash.Contains(p.Key) select p.Key).ToList();
+        foreach (var itemToRemove in itemsToRemove)
+        {
+          _allItemDependencies.Remove(itemToRemove);
+        }
+      }
+      else 
+      {
+        this.Reset();
+      }
+    }
+
+    /// <summary>
+    /// Removes a dependency from the data
+    /// </summary>
+    /// <param name="masterRef">Parent of the dependency</param>
+    /// <param name="dependency">Child of the dependency</param>
+    public void RemoveDependency(ItemReference masterRef, ItemReference dependency)
+    {
+      HashSet<ItemReference> childDependencies;
+      if (_allItemDependencies.TryGetValue(masterRef, out childDependencies))
+      {
+        childDependencies.Remove(dependency);
+        
+      }
+      References refs;
+      if (_allDependencies.TryGetValue(dependency, out refs))
+      {
+        refs.RemoveByMaster(masterRef);
+      }
     }
 
     /// <summary>
@@ -178,12 +234,6 @@ namespace Aras.Tools.InnovatorAdmin
         _dependencies.Remove(defn);
         _allDefinitions.Add(defn, itemRef);
       }
-
-      foreach (var depend in _dependencies)
-      {
-        depend.Origin = itemRef;
-      }
-
       _dependencies.ExceptWith(_systemIdentities.Values);
       _dependencies.ExceptWith(_coreMethods);
       _dependencies.ExceptWith(_itemTypes.Values.Where(i => i.IsCore).Select(i => i.Reference));
@@ -196,6 +246,12 @@ namespace Aras.Tools.InnovatorAdmin
         }
         return false;
       }).ToList());
+      _dependencies.Remove(itemRef);
+
+      foreach (var depend in _dependencies)
+      {
+          depend.Origin = itemRef;
+      }
 
       if (_dependencies.Any()) 
       { 
@@ -382,6 +438,11 @@ namespace Aras.Tools.InnovatorAdmin
         });
       }
 
+      public int Count
+      {
+        get { return _contexts.Count; }
+      }
+
       public IEnumerable<XmlNode> GetContexts()
       {
         return _contexts.Select(c => c.Context);
@@ -393,6 +454,36 @@ namespace Aras.Tools.InnovatorAdmin
       public IEnumerable<XmlNode> GetReferencesByMaster(ItemReference masterRef)
       {
         return (from c in _contexts where c.MasterRef.Equals(masterRef) select c.Reference);
+      }
+      public void RemoveByMaster(ItemReference masterRef)
+      {
+        var i = 0;
+        while (i < _contexts.Count)
+        {
+          if (_contexts[i].MasterRef == masterRef)
+          {
+            _contexts.RemoveAt(i); 
+          }
+          else
+          {
+            i++;
+          }
+        }
+      }
+      public void RemoveAllButMasterList(HashSet<ItemReference> masterRefsToKeep)
+      {
+        var i = 0;
+        while (i < _contexts.Count)
+        {
+          if (masterRefsToKeep.Contains(_contexts[i].MasterRef))
+          {
+            i++;
+          }
+          else
+          {
+            _contexts.RemoveAt(i);
+          }
+        }
       }
     }
 

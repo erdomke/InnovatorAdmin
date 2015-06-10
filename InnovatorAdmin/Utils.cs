@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace Aras.Tools.InnovatorAdmin
 {
@@ -85,6 +86,35 @@ namespace Aras.Tools.InnovatorAdmin
         }
         return writer.ToString();
       }
+    }
+
+    public static T AddAndReturn<T>(this XElement parent, T content)
+    {
+      parent.Add(content);
+      return content;
+    }
+
+    public static void RemoveFilter<T>(this IList<T> list, Func<T, bool> predicate)
+    {
+      var i = 0;
+      while (i < list.Count)
+      {
+        if (predicate(list[i]))
+        {
+          list.RemoveAt(i);
+        }
+        else
+        {
+          i++;
+        }
+      }
+    }
+
+    public static string AttributeValue(this XElement element, string attributeName)
+    {
+      var attr = element.Attribute(attributeName);
+      if (attr == null) return null;
+      return attr.Value;
     }
   }
 }

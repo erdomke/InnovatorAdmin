@@ -142,7 +142,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
 
     void TextArea_TextEntered(object sender, System.Windows.Input.TextCompositionEventArgs e)
     {
-      this.Helper.HandleTextEntered(this, e.Text);
+      if (this.Helper != null) this.Helper.HandleTextEntered(this, e.Text);
     }
 
 

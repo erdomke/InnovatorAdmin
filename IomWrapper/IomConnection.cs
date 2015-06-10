@@ -14,6 +14,7 @@ namespace IomWrapper
   {
     private Innovator _inn;
     private Item _userInfo;
+    //private SelfSponsor _sponsor;
 
     public IomConnection(Innovator inn)
     {
@@ -26,6 +27,7 @@ namespace IomWrapper
     }
     public string CallAction(string action, string input, IProgressCallback progressReporter)
     {
+
       XmlDocument outputDoc = null;
       var inputDoc = new XmlDocument();
       inputDoc.LoadXml(input);
@@ -56,11 +58,11 @@ namespace IomWrapper
 
           var firstItem = XPathCache.SelectSingleNode("//Item[1]", inputDoc.DocumentElement);
           IList<XmlElement> items;
-          if (firstItem.ParentNode == null) 
+          if (firstItem.ParentNode == null)
           {
             items = new XmlElement[] { (XmlElement)firstItem };
           }
-          else 
+          else
           {
             items = firstItem.Parent().Elements("Item").ToList();
           }
@@ -92,41 +94,63 @@ namespace IomWrapper
           return outputDoc.OuterXml;
         }
       }
-      
+
       outputDoc = new XmlDocument();
       outputDoc.Elem("Empty");
       _inn.getConnection().CallAction(action, inputDoc, outputDoc);
       return outputDoc.DocumentElement.OuterXml;
     }
 
-
     public string GetDatabaseName()
     {
       return _inn.getConnection().GetDatabaseName();
     }
-
 
     public string GetIomVersion()
     {
       return typeof(Aras.IOM.IomFactory).Assembly.GetName().Version.ToString();
     }
 
-
     public string GetUserId()
     {
       return _inn.getUserID();
     }
 
+    //public void Initialize()
+    //{
+    //  if (_sponsor == null)
+    //  {
+    //    _sponsor = new SelfSponsor();
+    //    ((ILease)GetLifetimeService()).Register(_sponsor);
+    //  }
+    //}
+
     public override object InitializeLifetimeService()
     {
-      var lease = (ILease)base.InitializeLifetimeService();
-      if (lease.CurrentState == LeaseState.Initial)
-      {
-        lease.InitialLeaseTime = TimeSpan.FromMinutes(60);
-        lease.SponsorshipTimeout = TimeSpan.FromMinutes(2);
-        lease.RenewOnCallTime = TimeSpan.FromMinutes(30);
-      }
-      return lease;
+      //var lease = (ILease)base.InitializeLifetimeService();
+      //if (lease.CurrentState == LeaseState.Initial)
+      //{
+      //  lease.InitialLeaseTime = TimeSpan.FromMinutes(60);
+      //  lease.SponsorshipTimeout = TimeSpan.FromMinutes(2);
+      //  lease.RenewOnCallTime = TimeSpan.FromMinutes(30);
+      //}
+      //return lease;
+      return null;
     }
+
+    //public void Dispose()
+    //{
+    //  ((ILease)GetLifetimeService()).Unregister(_sponsor);
+    //  _sponsor = null;
+    //}
+
+    //private class SelfSponsor : ISponsor
+    //{
+
+    //  public TimeSpan Renewal(ILease lease)
+    //  {
+    //    return lease.RenewOnCallTime;
+    //  }
+    //}
   }
 }

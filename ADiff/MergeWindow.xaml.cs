@@ -21,6 +21,14 @@ namespace ADiff
     public MergeWindow()
     {
       InitializeComponent();
+
+      var engine = new DiffMatchPatch();
+      var path = @"C:\Users\edomke\Documents\Local_Projects\ArasImportExport\DiffTests\Misc.java";
+      var result = engine.diff_three_way(System.IO.File.ReadAllText(path + ".parent"),
+        System.IO.File.ReadAllText(path + ".1st"),
+        System.IO.File.ReadAllText(path + ".2nd"));
+      merge.Document = result;
+
     }
   }
 }

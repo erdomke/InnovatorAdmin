@@ -22,11 +22,6 @@ namespace Aras.Tools.InnovatorAdmin
     private List<string> _newPaths = new List<string>();
     private int _totalCount = -1;
 
-    [DisplayName("Include Checksum"), Description("Include information about the file checksum in the import"), DefaultValue(false)]
-    public bool IncludeChecksum { get; set; }
-    [DisplayName("Include Size"), Description("Include information about the file size in the import"), DefaultValue(false)]
-    public bool IncludeSize { get; set; }
-
     public bool AtEnd
     {
       get { return _atEnd; }
@@ -63,28 +58,13 @@ namespace Aras.Tools.InnovatorAdmin
         paths.Add(_enum.Current);
         i++;
       }
-      string[] checksums = null;
 
-      if (this.IncludeChecksum)
-      {
-        checksums = new string[paths.Count];
-        Parallel.For(0, checksums.Length, j =>
-        {
-          checksums[j] = Utils.GetFileChecksum(paths[j]);
-        });
-      }
-
-      long size = 0;
       for (i = 0; i < paths.Count; i++)
       {
-        if (this.IncludeSize) size = new FileInfo(paths[i]).Length;
-
         foreach (var writer in writers)
         {
           writer.Row();
           writer.Cell("Path", paths[i]);
-          if (this.IncludeChecksum) writer.Cell("Checksum", checksums[i]);
-          if (this.IncludeSize) writer.Cell("Size", size);
           writer.RowEnd();
         }
       }
@@ -132,8 +112,6 @@ namespace Aras.Tools.InnovatorAdmin
 
     protected virtual void ReadProperties(System.Xml.XmlReader reader)
     {
-      this.IncludeChecksum = (reader.ReadElementString("IncludeChecksum") == "1");
-      this.IncludeSize = (reader.ReadElementString("IncludeSize") == "1");
       reader.MoveToContent();
       var isEmptyElement = reader.IsEmptyElement;
       reader.ReadStartElement("ProcessedPaths");
@@ -151,8 +129,6 @@ namespace Aras.Tools.InnovatorAdmin
 
     public virtual void WriteXml(System.Xml.XmlWriter writer)
     {
-      writer.WriteElementString("IncludeChecksum", IncludeChecksum ? "1" : "0");
-      writer.WriteElementString("IncludeSize", IncludeSize ? "1" : "0");
       writer.WriteStartElement("ProcessedPaths");
       foreach (var path in _newPaths.Concat(_oldPaths))
       {

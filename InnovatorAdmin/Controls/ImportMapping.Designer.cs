@@ -36,13 +36,34 @@ namespace Aras.Tools.InnovatorAdmin.Controls
     private void InitializeComponent()
     {
       this.components = new System.ComponentModel.Container();
+      System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+      System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+      System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
       this.tabControl1 = new System.Windows.Forms.TabControl();
       this.pgSimple = new System.Windows.Forms.TabPage();
       this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+      this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
+      this.label4 = new System.Windows.Forms.Label();
       this.gridPreview = new System.Windows.Forms.DataGridView();
       this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
       this.label3 = new System.Windows.Forms.Label();
       this.nudBatchSize = new System.Windows.Forms.NumericUpDown();
+      this.dgvMappings = new System.Windows.Forms.DataGridView();
+      this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+      this.label6 = new System.Windows.Forms.Label();
+      this.cboItemTypes = new System.Windows.Forms.ComboBox();
+      this.cboProperties = new System.Windows.Forms.ComboBox();
+      this.txtValue = new System.Windows.Forms.TextBox();
+      this.label5 = new System.Windows.Forms.Label();
+      this.label7 = new System.Windows.Forms.Label();
+      this.lblValue = new System.Windows.Forms.Label();
+      this.btnAdd = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.chkCalculated = new System.Windows.Forms.CheckBox();
+      this.btnDelete = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
+      this.chkPreventDuplicateFiles = new System.Windows.Forms.CheckBox();
+      this.chkPreventDuplicateDocs = new System.Windows.Forms.CheckBox();
+      this.label9 = new System.Windows.Forms.Label();
       this.pgAdvanced = new System.Windows.Forms.TabPage();
       this.splitContainer2 = new System.Windows.Forms.SplitContainer();
       this.splitContainer3 = new System.Windows.Forms.SplitContainer();
@@ -59,8 +80,6 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       this.btnTest = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
       this.btnLoadMore = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.chkChecksum = new System.Windows.Forms.CheckBox();
-      this.chkFileSize = new System.Windows.Forms.CheckBox();
       this.lblCount = new System.Windows.Forms.Label();
       this.countWorker = new System.ComponentModel.BackgroundWorker();
       this.timerAutoSave = new System.Windows.Forms.Timer(this.components);
@@ -70,9 +89,12 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       this.splitContainer1.Panel1.SuspendLayout();
       this.splitContainer1.Panel2.SuspendLayout();
       this.splitContainer1.SuspendLayout();
+      this.tableLayoutPanel6.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.gridPreview)).BeginInit();
       this.tableLayoutPanel5.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.nudBatchSize)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.dgvMappings)).BeginInit();
+      this.flowLayoutPanel2.SuspendLayout();
       this.pgAdvanced.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
       this.splitContainer2.Panel1.SuspendLayout();
@@ -97,7 +119,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       this.tabControl1.Location = new System.Drawing.Point(3, 3);
       this.tabControl1.Name = "tabControl1";
       this.tabControl1.SelectedIndex = 0;
-      this.tabControl1.Size = new System.Drawing.Size(601, 349);
+      this.tabControl1.Size = new System.Drawing.Size(751, 482);
       this.tabControl1.TabIndex = 0;
       // 
       // pgSimple
@@ -106,7 +128,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       this.pgSimple.Location = new System.Drawing.Point(4, 22);
       this.pgSimple.Name = "pgSimple";
       this.pgSimple.Padding = new System.Windows.Forms.Padding(3);
-      this.pgSimple.Size = new System.Drawing.Size(593, 323);
+      this.pgSimple.Size = new System.Drawing.Size(743, 456);
       this.pgSimple.TabIndex = 0;
       this.pgSimple.Text = "Simple";
       this.pgSimple.UseVisualStyleBackColor = true;
@@ -114,20 +136,47 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       // splitContainer1
       // 
       this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
       this.splitContainer1.Location = new System.Drawing.Point(3, 3);
       this.splitContainer1.Name = "splitContainer1";
+      this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
       // 
       // splitContainer1.Panel1
       // 
-      this.splitContainer1.Panel1.Controls.Add(this.gridPreview);
+      this.splitContainer1.Panel1.Controls.Add(this.tableLayoutPanel6);
       // 
       // splitContainer1.Panel2
       // 
       this.splitContainer1.Panel2.Controls.Add(this.tableLayoutPanel5);
-      this.splitContainer1.Size = new System.Drawing.Size(587, 317);
-      this.splitContainer1.SplitterDistance = 366;
+      this.splitContainer1.Size = new System.Drawing.Size(737, 450);
+      this.splitContainer1.SplitterDistance = 220;
       this.splitContainer1.TabIndex = 0;
+      // 
+      // tableLayoutPanel6
+      // 
+      this.tableLayoutPanel6.ColumnCount = 1;
+      this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.tableLayoutPanel6.Controls.Add(this.label4, 0, 0);
+      this.tableLayoutPanel6.Controls.Add(this.gridPreview, 0, 1);
+      this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.tableLayoutPanel6.Location = new System.Drawing.Point(0, 0);
+      this.tableLayoutPanel6.Margin = new System.Windows.Forms.Padding(0);
+      this.tableLayoutPanel6.Name = "tableLayoutPanel6";
+      this.tableLayoutPanel6.RowCount = 2;
+      this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.tableLayoutPanel6.Size = new System.Drawing.Size(737, 220);
+      this.tableLayoutPanel6.TabIndex = 1;
+      // 
+      // label4
+      // 
+      this.label4.AutoSize = true;
+      this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.label4.Location = new System.Drawing.Point(3, 3);
+      this.label4.Margin = new System.Windows.Forms.Padding(3);
+      this.label4.Name = "label4";
+      this.label4.Size = new System.Drawing.Size(100, 13);
+      this.label4.TabIndex = 0;
+      this.label4.Text = "Source Preview:";
       // 
       // gridPreview
       // 
@@ -135,34 +184,62 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       this.gridPreview.AllowUserToDeleteRows = false;
       this.gridPreview.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
       this.gridPreview.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.gridPreview.Location = new System.Drawing.Point(0, 0);
+      this.gridPreview.Location = new System.Drawing.Point(3, 22);
       this.gridPreview.Name = "gridPreview";
-      this.gridPreview.Size = new System.Drawing.Size(366, 317);
+      this.gridPreview.Size = new System.Drawing.Size(731, 195);
       this.gridPreview.TabIndex = 0;
+      this.gridPreview.SelectionChanged += new System.EventHandler(this.gridPreview_SelectionChanged);
       // 
       // tableLayoutPanel5
       // 
-      this.tableLayoutPanel5.ColumnCount = 2;
+      this.tableLayoutPanel5.ColumnCount = 7;
+      this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+      this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-      this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-      this.tableLayoutPanel5.Controls.Add(this.chkFileSize, 1, 2);
-      this.tableLayoutPanel5.Controls.Add(this.chkChecksum, 1, 1);
-      this.tableLayoutPanel5.Controls.Add(this.label3, 0, 0);
-      this.tableLayoutPanel5.Controls.Add(this.nudBatchSize, 1, 0);
+      this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tableLayoutPanel5.Controls.Add(this.label3, 1, 7);
+      this.tableLayoutPanel5.Controls.Add(this.nudBatchSize, 2, 7);
+      this.tableLayoutPanel5.Controls.Add(this.dgvMappings, 0, 6);
+      this.tableLayoutPanel5.Controls.Add(this.flowLayoutPanel1, 2, 0);
+      this.tableLayoutPanel5.Controls.Add(this.label6, 0, 5);
+      this.tableLayoutPanel5.Controls.Add(this.cboItemTypes, 1, 3);
+      this.tableLayoutPanel5.Controls.Add(this.cboProperties, 2, 3);
+      this.tableLayoutPanel5.Controls.Add(this.txtValue, 4, 3);
+      this.tableLayoutPanel5.Controls.Add(this.label5, 1, 2);
+      this.tableLayoutPanel5.Controls.Add(this.label7, 2, 2);
+      this.tableLayoutPanel5.Controls.Add(this.lblValue, 4, 2);
+      this.tableLayoutPanel5.Controls.Add(this.btnAdd, 5, 3);
+      this.tableLayoutPanel5.Controls.Add(this.chkCalculated, 3, 3);
+      this.tableLayoutPanel5.Controls.Add(this.btnDelete, 6, 3);
+      this.tableLayoutPanel5.Controls.Add(this.flowLayoutPanel2, 3, 7);
+      this.tableLayoutPanel5.Controls.Add(this.label9, 0, 1);
       this.tableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tableLayoutPanel5.Location = new System.Drawing.Point(0, 0);
       this.tableLayoutPanel5.Name = "tableLayoutPanel5";
-      this.tableLayoutPanel5.RowCount = 3;
+      this.tableLayoutPanel5.RowCount = 10;
+      this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+      this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+      this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+      this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-      this.tableLayoutPanel5.Size = new System.Drawing.Size(217, 317);
+      this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+      this.tableLayoutPanel5.Size = new System.Drawing.Size(737, 226);
       this.tableLayoutPanel5.TabIndex = 0;
       // 
       // label3
       // 
+      this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.label3.AutoSize = true;
-      this.label3.Location = new System.Drawing.Point(3, 3);
+      this.label3.Location = new System.Drawing.Point(86, 203);
       this.label3.Margin = new System.Windows.Forms.Padding(3);
       this.label3.Name = "label3";
       this.label3.Size = new System.Drawing.Size(58, 13);
@@ -171,7 +248,9 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       // 
       // nudBatchSize
       // 
-      this.nudBatchSize.Location = new System.Drawing.Point(111, 3);
+      this.nudBatchSize.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.nudBatchSize.Location = new System.Drawing.Point(150, 203);
       this.nudBatchSize.Maximum = new decimal(new int[] {
             100000,
             0,
@@ -183,7 +262,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
             0,
             0});
       this.nudBatchSize.Name = "nudBatchSize";
-      this.nudBatchSize.Size = new System.Drawing.Size(103, 20);
+      this.nudBatchSize.Size = new System.Drawing.Size(121, 20);
       this.nudBatchSize.TabIndex = 1;
       this.nudBatchSize.Value = new decimal(new int[] {
             50,
@@ -191,13 +270,244 @@ namespace Aras.Tools.InnovatorAdmin.Controls
             0,
             0});
       // 
+      // dgvMappings
+      // 
+      this.dgvMappings.AllowUserToAddRows = false;
+      this.dgvMappings.AllowUserToDeleteRows = false;
+      this.dgvMappings.AllowUserToResizeRows = false;
+      this.dgvMappings.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+      dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+      dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+      dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+      dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+      dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+      this.dgvMappings.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+      this.dgvMappings.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+      this.tableLayoutPanel5.SetColumnSpan(this.dgvMappings, 7);
+      dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+      dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+      dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+      dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+      dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+      dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+      this.dgvMappings.DefaultCellStyle = dataGridViewCellStyle2;
+      this.dgvMappings.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
+      this.dgvMappings.Location = new System.Drawing.Point(3, 95);
+      this.dgvMappings.Name = "dgvMappings";
+      this.dgvMappings.ReadOnly = true;
+      dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+      dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
+      dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+      dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+      dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+      dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+      this.dgvMappings.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
+      this.dgvMappings.Size = new System.Drawing.Size(731, 102);
+      this.dgvMappings.TabIndex = 4;
+      // 
+      // flowLayoutPanel1
+      // 
+      this.flowLayoutPanel1.AutoSize = true;
+      this.flowLayoutPanel1.Location = new System.Drawing.Point(147, 0);
+      this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
+      this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+      this.flowLayoutPanel1.Size = new System.Drawing.Size(0, 0);
+      this.flowLayoutPanel1.TabIndex = 5;
+      // 
+      // label6
+      // 
+      this.label6.AutoSize = true;
+      this.tableLayoutPanel5.SetColumnSpan(this.label6, 2);
+      this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.label6.Location = new System.Drawing.Point(3, 76);
+      this.label6.Margin = new System.Windows.Forms.Padding(3);
+      this.label6.Name = "label6";
+      this.label6.Size = new System.Drawing.Size(137, 13);
+      this.label6.TabIndex = 6;
+      this.label6.Text = "Mappings and Options:";
+      // 
+      // cboItemTypes
+      // 
+      this.cboItemTypes.Anchor = System.Windows.Forms.AnchorStyles.Left;
+      this.cboItemTypes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.cboItemTypes.FormattingEnabled = true;
+      this.cboItemTypes.Location = new System.Drawing.Point(23, 46);
+      this.cboItemTypes.Name = "cboItemTypes";
+      this.cboItemTypes.Size = new System.Drawing.Size(121, 21);
+      this.cboItemTypes.TabIndex = 7;
+      this.cboItemTypes.DropDown += new System.EventHandler(this.cboItemTypes_DropDown);
+      this.cboItemTypes.SelectedIndexChanged += new System.EventHandler(this.cboItemTypes_SelectedIndexChanged);
+      // 
+      // cboProperties
+      // 
+      this.cboProperties.Anchor = System.Windows.Forms.AnchorStyles.Left;
+      this.cboProperties.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.cboProperties.FormattingEnabled = true;
+      this.cboProperties.Location = new System.Drawing.Point(150, 46);
+      this.cboProperties.Name = "cboProperties";
+      this.cboProperties.Size = new System.Drawing.Size(121, 21);
+      this.cboProperties.TabIndex = 8;
+      // 
+      // txtValue
+      // 
+      this.txtValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+      this.txtValue.Location = new System.Drawing.Point(308, 46);
+      this.txtValue.Name = "txtValue";
+      this.txtValue.Size = new System.Drawing.Size(312, 20);
+      this.txtValue.TabIndex = 10;
+      // 
+      // label5
+      // 
+      this.label5.AutoSize = true;
+      this.label5.Location = new System.Drawing.Point(23, 23);
+      this.label5.Margin = new System.Windows.Forms.Padding(3);
+      this.label5.Name = "label5";
+      this.label5.Size = new System.Drawing.Size(31, 13);
+      this.label5.TabIndex = 13;
+      this.label5.Text = "Type";
+      // 
+      // label7
+      // 
+      this.label7.AutoSize = true;
+      this.label7.Location = new System.Drawing.Point(150, 23);
+      this.label7.Margin = new System.Windows.Forms.Padding(3);
+      this.label7.Name = "label7";
+      this.label7.Size = new System.Drawing.Size(46, 13);
+      this.label7.TabIndex = 14;
+      this.label7.Text = "Property";
+      // 
+      // lblValue
+      // 
+      this.lblValue.AutoSize = true;
+      this.lblValue.Location = new System.Drawing.Point(308, 23);
+      this.lblValue.Margin = new System.Windows.Forms.Padding(3);
+      this.lblValue.Name = "lblValue";
+      this.lblValue.Size = new System.Drawing.Size(78, 13);
+      this.lblValue.TabIndex = 15;
+      this.lblValue.Text = "Constant value";
+      // 
+      // btnAdd
+      // 
+      this.btnAdd.Anchor = System.Windows.Forms.AnchorStyles.Right;
+      this.btnAdd.AutoSize = true;
+      this.btnAdd.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnAdd.FlatAppearance.BorderSize = 0;
+      this.btnAdd.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnAdd.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnAdd.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnAdd.ForeColor = System.Drawing.Color.Black;
+      this.btnAdd.Location = new System.Drawing.Point(626, 43);
+      this.btnAdd.Name = "btnAdd";
+      this.btnAdd.Padding = new System.Windows.Forms.Padding(2);
+      this.btnAdd.Size = new System.Drawing.Size(50, 27);
+      this.btnAdd.TabIndex = 12;
+      this.btnAdd.Text = "Add";
+      this.btnAdd.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnAdd.UseVisualStyleBackColor = false;
+      this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
+      // 
+      // chkCalculated
+      // 
+      this.chkCalculated.Anchor = System.Windows.Forms.AnchorStyles.Right;
+      this.chkCalculated.Appearance = System.Windows.Forms.Appearance.Button;
+      this.chkCalculated.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.chkCalculated.FlatAppearance.BorderSize = 0;
+      this.chkCalculated.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(204)))), ((int)(((byte)(0)))), ((int)(((byte)(51)))));
+      this.chkCalculated.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.chkCalculated.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.chkCalculated.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.chkCalculated.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.function14;
+      this.chkCalculated.Location = new System.Drawing.Point(277, 45);
+      this.chkCalculated.Name = "chkCalculated";
+      this.chkCalculated.Padding = new System.Windows.Forms.Padding(4, 2, 4, 2);
+      this.chkCalculated.Size = new System.Drawing.Size(25, 23);
+      this.chkCalculated.TabIndex = 16;
+      this.chkCalculated.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+      this.chkCalculated.UseVisualStyleBackColor = false;
+      this.chkCalculated.CheckedChanged += new System.EventHandler(this.chkCalculated_CheckedChanged);
+      // 
+      // btnDelete
+      // 
+      this.btnDelete.Anchor = System.Windows.Forms.AnchorStyles.Right;
+      this.btnDelete.AutoSize = true;
+      this.btnDelete.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnDelete.FlatAppearance.BorderSize = 0;
+      this.btnDelete.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnDelete.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnDelete.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnDelete.ForeColor = System.Drawing.Color.Black;
+      this.btnDelete.Location = new System.Drawing.Point(682, 43);
+      this.btnDelete.Name = "btnDelete";
+      this.btnDelete.Padding = new System.Windows.Forms.Padding(2);
+      this.btnDelete.Size = new System.Drawing.Size(52, 27);
+      this.btnDelete.TabIndex = 17;
+      this.btnDelete.Text = "Delete";
+      this.btnDelete.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnDelete.UseVisualStyleBackColor = false;
+      this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
+      // 
+      // flowLayoutPanel2
+      // 
+      this.flowLayoutPanel2.AutoSize = true;
+      this.tableLayoutPanel5.SetColumnSpan(this.flowLayoutPanel2, 4);
+      this.flowLayoutPanel2.Controls.Add(this.chkPreventDuplicateFiles);
+      this.flowLayoutPanel2.Controls.Add(this.chkPreventDuplicateDocs);
+      this.flowLayoutPanel2.Location = new System.Drawing.Point(274, 200);
+      this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
+      this.flowLayoutPanel2.Name = "flowLayoutPanel2";
+      this.flowLayoutPanel2.Size = new System.Drawing.Size(315, 23);
+      this.flowLayoutPanel2.TabIndex = 18;
+      // 
+      // chkPreventDuplicateFiles
+      // 
+      this.chkPreventDuplicateFiles.AutoSize = true;
+      this.chkPreventDuplicateFiles.Checked = true;
+      this.chkPreventDuplicateFiles.CheckState = System.Windows.Forms.CheckState.Checked;
+      this.chkPreventDuplicateFiles.Location = new System.Drawing.Point(3, 3);
+      this.chkPreventDuplicateFiles.Name = "chkPreventDuplicateFiles";
+      this.chkPreventDuplicateFiles.Size = new System.Drawing.Size(135, 17);
+      this.chkPreventDuplicateFiles.TabIndex = 0;
+      this.chkPreventDuplicateFiles.Text = "Prevent Duplicate Files";
+      this.chkPreventDuplicateFiles.UseVisualStyleBackColor = true;
+      this.chkPreventDuplicateFiles.CheckedChanged += new System.EventHandler(this.chkPreventDuplicateFiles_CheckedChanged);
+      // 
+      // chkPreventDuplicateDocs
+      // 
+      this.chkPreventDuplicateDocs.AutoSize = true;
+      this.chkPreventDuplicateDocs.Checked = true;
+      this.chkPreventDuplicateDocs.CheckState = System.Windows.Forms.CheckState.Checked;
+      this.chkPreventDuplicateDocs.Location = new System.Drawing.Point(144, 3);
+      this.chkPreventDuplicateDocs.Name = "chkPreventDuplicateDocs";
+      this.chkPreventDuplicateDocs.Size = new System.Drawing.Size(168, 17);
+      this.chkPreventDuplicateDocs.TabIndex = 1;
+      this.chkPreventDuplicateDocs.Text = "Prevent Duplicate Documents";
+      this.chkPreventDuplicateDocs.UseVisualStyleBackColor = true;
+      // 
+      // label9
+      // 
+      this.label9.AutoSize = true;
+      this.tableLayoutPanel5.SetColumnSpan(this.label9, 2);
+      this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.label9.Location = new System.Drawing.Point(3, 3);
+      this.label9.Margin = new System.Windows.Forms.Padding(3);
+      this.label9.Name = "label9";
+      this.label9.Size = new System.Drawing.Size(100, 13);
+      this.label9.TabIndex = 19;
+      this.label9.Text = "Define Mapping:";
+      // 
       // pgAdvanced
       // 
       this.pgAdvanced.Controls.Add(this.splitContainer2);
       this.pgAdvanced.Location = new System.Drawing.Point(4, 22);
       this.pgAdvanced.Name = "pgAdvanced";
       this.pgAdvanced.Padding = new System.Windows.Forms.Padding(3);
-      this.pgAdvanced.Size = new System.Drawing.Size(593, 323);
+      this.pgAdvanced.Size = new System.Drawing.Size(743, 456);
       this.pgAdvanced.TabIndex = 1;
       this.pgAdvanced.Text = "Advanced";
       this.pgAdvanced.UseVisualStyleBackColor = true;
@@ -215,8 +525,8 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       // splitContainer2.Panel2
       // 
       this.splitContainer2.Panel2.Controls.Add(this.tableLayoutPanel4);
-      this.splitContainer2.Size = new System.Drawing.Size(587, 317);
-      this.splitContainer2.SplitterDistance = 305;
+      this.splitContainer2.Size = new System.Drawing.Size(737, 450);
+      this.splitContainer2.SplitterDistance = 382;
       this.splitContainer2.TabIndex = 0;
       // 
       // splitContainer3
@@ -234,8 +544,8 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       // splitContainer3.Panel2
       // 
       this.splitContainer3.Panel2.Controls.Add(this.tableLayoutPanel3);
-      this.splitContainer3.Size = new System.Drawing.Size(305, 317);
-      this.splitContainer3.SplitterDistance = 158;
+      this.splitContainer3.Size = new System.Drawing.Size(382, 450);
+      this.splitContainer3.SplitterDistance = 223;
       this.splitContainer3.TabIndex = 1;
       // 
       // tableLayoutPanel2
@@ -250,7 +560,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       this.tableLayoutPanel2.RowCount = 2;
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-      this.tableLayoutPanel2.Size = new System.Drawing.Size(305, 158);
+      this.tableLayoutPanel2.Size = new System.Drawing.Size(382, 223);
       this.tableLayoutPanel2.TabIndex = 1;
       // 
       // label1
@@ -270,7 +580,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       this.xmlEditor.Location = new System.Drawing.Point(3, 22);
       this.xmlEditor.Name = "xmlEditor";
       this.xmlEditor.ReadOnly = true;
-      this.xmlEditor.Size = new System.Drawing.Size(299, 133);
+      this.xmlEditor.Size = new System.Drawing.Size(376, 198);
       this.xmlEditor.TabIndex = 0;
       // 
       // tableLayoutPanel3
@@ -285,7 +595,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       this.tableLayoutPanel3.RowCount = 2;
       this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-      this.tableLayoutPanel3.Size = new System.Drawing.Size(305, 155);
+      this.tableLayoutPanel3.Size = new System.Drawing.Size(382, 223);
       this.tableLayoutPanel3.TabIndex = 1;
       // 
       // label2
@@ -305,7 +615,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       this.outputEditor.Location = new System.Drawing.Point(3, 22);
       this.outputEditor.Name = "outputEditor";
       this.outputEditor.ReadOnly = true;
-      this.outputEditor.Size = new System.Drawing.Size(299, 130);
+      this.outputEditor.Size = new System.Drawing.Size(376, 198);
       this.outputEditor.TabIndex = 0;
       // 
       // tableLayoutPanel4
@@ -324,7 +634,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       this.tableLayoutPanel4.RowCount = 2;
       this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-      this.tableLayoutPanel4.Size = new System.Drawing.Size(278, 317);
+      this.tableLayoutPanel4.Size = new System.Drawing.Size(351, 450);
       this.tableLayoutPanel4.TabIndex = 1;
       // 
       // xsltEditor
@@ -335,7 +645,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       this.xsltEditor.Location = new System.Drawing.Point(3, 36);
       this.xsltEditor.Name = "xsltEditor";
       this.xsltEditor.ReadOnly = false;
-      this.xsltEditor.Size = new System.Drawing.Size(272, 278);
+      this.xsltEditor.Size = new System.Drawing.Size(345, 411);
       this.xsltEditor.TabIndex = 0;
       this.xsltEditor.RunRequested += new System.EventHandler<Aras.Tools.InnovatorAdmin.Editor.RunRequestedEventArgs>(this.xsltEditor_RunRequested);
       // 
@@ -411,7 +721,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       this.tableLayoutPanel1.RowCount = 2;
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel1.Size = new System.Drawing.Size(607, 388);
+      this.tableLayoutPanel1.Size = new System.Drawing.Size(757, 521);
       this.tableLayoutPanel1.TabIndex = 1;
       // 
       // btnLoadMore
@@ -424,7 +734,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       this.btnLoadMore.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnLoadMore.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnLoadMore.ForeColor = System.Drawing.Color.Black;
-      this.btnLoadMore.Location = new System.Drawing.Point(529, 358);
+      this.btnLoadMore.Location = new System.Drawing.Point(679, 491);
       this.btnLoadMore.Name = "btnLoadMore";
       this.btnLoadMore.Padding = new System.Windows.Forms.Padding(2);
       this.btnLoadMore.Size = new System.Drawing.Size(75, 27);
@@ -434,33 +744,11 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       this.btnLoadMore.UseVisualStyleBackColor = false;
       this.btnLoadMore.Click += new System.EventHandler(this.btnLoadMore_Click);
       // 
-      // chkChecksum
-      // 
-      this.chkChecksum.AutoSize = true;
-      this.chkChecksum.Location = new System.Drawing.Point(111, 29);
-      this.chkChecksum.Name = "chkChecksum";
-      this.chkChecksum.Size = new System.Drawing.Size(76, 17);
-      this.chkChecksum.TabIndex = 0;
-      this.chkChecksum.Text = "Checksum";
-      this.chkChecksum.UseVisualStyleBackColor = true;
-      this.chkChecksum.CheckedChanged += new System.EventHandler(this.chkChecksum_CheckedChanged);
-      // 
-      // chkFileSize
-      // 
-      this.chkFileSize.AutoSize = true;
-      this.chkFileSize.Location = new System.Drawing.Point(111, 52);
-      this.chkFileSize.Name = "chkFileSize";
-      this.chkFileSize.Size = new System.Drawing.Size(65, 17);
-      this.chkFileSize.TabIndex = 1;
-      this.chkFileSize.Text = "File Size";
-      this.chkFileSize.UseVisualStyleBackColor = true;
-      this.chkFileSize.CheckedChanged += new System.EventHandler(this.chkFileSize_CheckedChanged);
-      // 
       // lblCount
       // 
       this.lblCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
       this.lblCount.AutoSize = true;
-      this.lblCount.Location = new System.Drawing.Point(523, 365);
+      this.lblCount.Location = new System.Drawing.Point(673, 498);
       this.lblCount.Name = "lblCount";
       this.lblCount.Size = new System.Drawing.Size(1, 13);
       this.lblCount.TabIndex = 3;
@@ -483,17 +771,22 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       this.BackColor = System.Drawing.Color.White;
       this.Controls.Add(this.tableLayoutPanel1);
       this.Name = "ImportMapping";
-      this.Size = new System.Drawing.Size(607, 388);
+      this.Size = new System.Drawing.Size(757, 521);
       this.tabControl1.ResumeLayout(false);
       this.pgSimple.ResumeLayout(false);
       this.splitContainer1.Panel1.ResumeLayout(false);
       this.splitContainer1.Panel2.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
       this.splitContainer1.ResumeLayout(false);
+      this.tableLayoutPanel6.ResumeLayout(false);
+      this.tableLayoutPanel6.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.gridPreview)).EndInit();
       this.tableLayoutPanel5.ResumeLayout(false);
       this.tableLayoutPanel5.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.nudBatchSize)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.dgvMappings)).EndInit();
+      this.flowLayoutPanel2.ResumeLayout(false);
+      this.flowLayoutPanel2.PerformLayout();
       this.pgAdvanced.ResumeLayout(false);
       this.splitContainer2.Panel1.ResumeLayout(false);
       this.splitContainer2.Panel2.ResumeLayout(false);
@@ -527,8 +820,6 @@ namespace Aras.Tools.InnovatorAdmin.Controls
     private Editor.EditorControl xmlEditor;
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     private FlatButton btnLoadMore;
-    private System.Windows.Forms.CheckBox chkChecksum;
-    private System.Windows.Forms.CheckBox chkFileSize;
     private System.Windows.Forms.SplitContainer splitContainer3;
     private Editor.EditorControl outputEditor;
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
@@ -545,5 +836,23 @@ namespace Aras.Tools.InnovatorAdmin.Controls
     private System.Windows.Forms.Label label3;
     private System.Windows.Forms.NumericUpDown nudBatchSize;
     private FlatButton btnTest;
+    private System.Windows.Forms.DataGridView dgvMappings;
+    private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+    private System.Windows.Forms.Label label6;
+    private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
+    private System.Windows.Forms.Label label4;
+    private System.Windows.Forms.ComboBox cboItemTypes;
+    private System.Windows.Forms.ComboBox cboProperties;
+    private System.Windows.Forms.TextBox txtValue;
+    private System.Windows.Forms.Label label5;
+    private System.Windows.Forms.Label label7;
+    private System.Windows.Forms.Label lblValue;
+    private FlatButton btnAdd;
+    private System.Windows.Forms.CheckBox chkCalculated;
+    private FlatButton btnDelete;
+    private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
+    private System.Windows.Forms.CheckBox chkPreventDuplicateFiles;
+    private System.Windows.Forms.CheckBox chkPreventDuplicateDocs;
+    private System.Windows.Forms.Label label9;
   }
 }

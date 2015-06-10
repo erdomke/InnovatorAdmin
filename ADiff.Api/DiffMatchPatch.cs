@@ -26,7 +26,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 
-namespace ADiff.Api 
+namespace ADiff
 {
   internal static class CompatibilityExtensions {
     // JScript splice function
@@ -573,7 +573,7 @@ namespace ADiff.Api
       
       Action processBuilders = () => {
         var block = new MergeBlock();
-        block.Alternates.Add(new MergeAlternate() {
+        block.Alternates.Add(new MergeAlternate(block) {
           Text = leftBuilder.ToString(),
           LineCount = leftCount,
           Location = MergeLocation.Left
@@ -586,7 +586,8 @@ namespace ADiff.Api
         }
         else 
         {
-          block.Alternates.Add(new MergeAlternate() {
+          block.Alternates.Add(new MergeAlternate(block)
+          {
             Text = rightBuilder.ToString(),
             LineCount = rightCount,
             Location = MergeLocation.Right
@@ -605,7 +606,8 @@ namespace ADiff.Api
         }
         if (!found)
         {
-          block.Alternates.Add(new MergeAlternate() {
+          block.Alternates.Add(new MergeAlternate(block)
+          {
             Text = parentBuilder.ToString(),
             LineCount = parentCount,
             Location = MergeLocation.Parent

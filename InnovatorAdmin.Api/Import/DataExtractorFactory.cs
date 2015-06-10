@@ -16,6 +16,8 @@ namespace Aras.Tools.InnovatorAdmin
       {
         case ImportType.Files:
           return new FolderExtractor(paths);
+        case ImportType.DataFile:
+          return new ExcelExtractor(paths.Single());
         default:
           throw new NotImplementedException();
       }
@@ -25,7 +27,7 @@ namespace Aras.Tools.InnovatorAdmin
     {
       var concreteTypes = typeof(DataExtractorFactory).Assembly.GetTypes().Where(t => typeof(IDataExtractor).IsAssignableFrom(t) && !t.IsAbstract && t.IsClass);
       var serializer = concreteTypes.Select(t => new XmlSerializer(t))
-        .FirstOrDefault(s => { 
+        .FirstOrDefault(s => {
           using (var reader = new StringReader(data))
           {
             using (var xml = XmlReader.Create(reader))

@@ -171,21 +171,6 @@ namespace Aras.Tools.InnovatorAdmin.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;xsl:stylesheet version=&quot;1.0&quot; xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:arasx=&quot;http://www.aras.com/XsltExtensions/1.0&quot; extension-element-prefixes=&quot;arasx&quot;&gt;
-        ///  &lt;xsl:output method=&quot;xml&quot; omit-xml-declaration=&quot;yes&quot; standalone=&quot;yes&quot; indent=&quot;yes&quot;&gt;&lt;/xsl:output&gt;
-        ///
-        ///  &lt;xsl:template match=&quot;table&quot;&gt;
-        ///    
-        ///  &lt;/xsl:template&gt;
-        ///&lt;/xsl:stylesheet&gt;.
-        /// </summary>
-        internal static string BaseImportXslt {
-            get {
-                return ResourceManager.GetString("BaseImportXslt", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap check32 {
@@ -231,6 +216,16 @@ namespace Aras.Tools.InnovatorAdmin.Properties {
         internal static System.Drawing.Bitmap folder32 {
             get {
                 object obj = ResourceManager.GetObject("folder32", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap function14 {
+            get {
+                object obj = ResourceManager.GetObject("function14", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -360,6 +355,57 @@ namespace Aras.Tools.InnovatorAdmin.Properties {
             get {
                 object obj = ResourceManager.GetObject("up16", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;xsl:stylesheet version=&quot;1.0&quot; xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:arasx=&quot;http://www.aras.com/XsltExtensions/1.0&quot; xmlns:msxsl=&quot;urn:schemas-microsoft-com:xslt&quot; extension-element-prefixes=&quot;arasx msxsl&quot;&gt;
+        ///  &lt;xsl:output method=&quot;xml&quot; omit-xml-declaration=&quot;yes&quot; standalone=&quot;yes&quot; indent=&quot;yes&quot;&gt;&lt;/xsl:output&gt;
+        ///
+        ///  &lt;xsl:template match=&quot;table&quot;&gt;
+        ///    &lt;Result&gt;
+        ///      &lt;xsl:for-each select=&quot;row&quot;&gt;
+        ///        
+        ///      &lt;/xsl:for-each&gt;
+        ///    &lt;/Result&gt;
+        ///  &lt;/xsl:template&gt;
+        ///&lt;/xsl:stylesheet&gt;.
+        /// </summary>
+        internal static string Xslt_BaseImport {
+            get {
+                return ResourceManager.GetString("Xslt_BaseImport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;xsl:stylesheet version=&quot;1.0&quot; xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:arasx=&quot;http://www.aras.com/XsltExtensions/1.0&quot; xmlns:msxsl=&quot;urn:schemas-microsoft-com:xslt&quot; extension-element-prefixes=&quot;arasx msxsl&quot;&gt;
+        ///  &lt;xsl:output method=&quot;xml&quot; omit-xml-declaration=&quot;yes&quot; standalone=&quot;yes&quot; indent=&quot;yes&quot;&gt;&lt;/xsl:output&gt;
+        ///
+        ///  &lt;xsl:template match=&quot;table&quot;&gt;
+        ///    &lt;xsl:variable name=&quot;unique-files&quot; select=&quot;arasx:GetUniqueFiles(row/path)&quot; /&gt;
+        ///  
+        ///    &lt;xsl:variable name=&quot;file-query&quot;&gt;
+        ///      &lt;Item type=&quot;File&quot; action=&quot;get [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string Xslt_DocumentMergeImport {
+            get {
+                return ResourceManager.GetString("Xslt_DocumentMergeImport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;xsl:stylesheet version=&quot;1.0&quot; xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:arasx=&quot;http://www.aras.com/XsltExtensions/1.0&quot; xmlns:msxsl=&quot;urn:schemas-microsoft-com:xslt&quot; extension-element-prefixes=&quot;arasx msxsl&quot;&gt;
+        ///  &lt;xsl:output method=&quot;xml&quot; omit-xml-declaration=&quot;yes&quot; standalone=&quot;yes&quot; indent=&quot;yes&quot;&gt;&lt;/xsl:output&gt;
+        ///
+        ///  &lt;xsl:template match=&quot;table&quot;&gt;
+        ///    &lt;xsl:variable name=&quot;unique-files&quot; select=&quot;arasx:GetUniqueFiles(row/path)&quot; /&gt;
+        ///  
+        ///    &lt;xsl:variable name=&quot;file-query&quot;&gt;
+        ///      &lt;Item type=&quot;File&quot; action=&quot;get [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string Xslt_FileMergeImport {
+            get {
+                return ResourceManager.GetString("Xslt_FileMergeImport", resourceCulture);
             }
         }
     }

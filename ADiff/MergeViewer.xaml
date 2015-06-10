@@ -24,19 +24,19 @@
 
     <avalonedit:TextEditor x:Name="editLeft" Margin="0" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden"/>
 
-    <GridSplitter x:Name="splitterLeft" Grid.Column="1" Width="40" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="{x:Null}"/>
+    <GridSplitter x:Name="splitterLeft" Grid.Column="1" Width="40" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
 
     <avalonedit:TextEditor x:Name="editParent" Grid.Column="2" Margin="0" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden"/>
 
-    <GridSplitter x:Name="splitterRight" Grid.Column="3" Width="40" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="{x:Null}"/>
+    <GridSplitter x:Name="splitterRight" Grid.Column="3" Width="40" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
 
     <avalonedit:TextEditor x:Name="editRight" Grid.Column="4" Margin="0" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden"/>
     <ScrollBar x:Name="vertScroll" Grid.Column="5" Grid.RowSpan="3" Margin="0,0,0,0" Width="22" SmallChange="1" LargeChange="10" Maximum="100" Scroll="vertScroll_Scroll" Background="{x:Null}"/>
 
-    <GridSplitter x:Name="splitterHoriz" Grid.Row="1" Grid.ColumnSpan="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="{x:Null}" Margin="0,0,0,0"/>
+    <GridSplitter x:Name="splitterHoriz" Grid.Row="1" Grid.ColumnSpan="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0,0,0,0"/>
 
-    <avalonedit:TextEditor x:Name="editResult" Grid.Row="2" Grid.ColumnSpan="5" Margin="0" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden"/>
+    <avalonedit:TextEditor x:Name="editOutput" Grid.Row="2" Grid.ColumnSpan="5" Margin="0" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden"/>
     
-    <ScrollBar x:Name="horizScroll" Grid.Column="0" Grid.Row="3" Margin="0,0,0,0" SmallChange="1" LargeChange="10" Maximum="100" Scroll="horizScroll_Scroll" Orientation="Horizontal" Grid.ColumnSpan="3" Background="White"/>
+    <ScrollBar x:Name="horizScroll" Grid.Column="0" Grid.Row="3" Margin="0,0,0,0" SmallChange="1" LargeChange="10" Maximum="100" Scroll="horizScroll_Scroll" Orientation="Horizontal" Grid.ColumnSpan="5" Background="White"/>
   </Grid>
 </UserControl>

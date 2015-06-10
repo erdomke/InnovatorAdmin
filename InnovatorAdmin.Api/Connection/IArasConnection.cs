@@ -6,7 +6,7 @@ using System.Xml;
 
 namespace Aras.Tools.InnovatorAdmin
 {
-  public interface IArasConnection
+  public interface IArasConnection //: IDisposable
   {
     string CallAction(string action, string input, IProgressCallback progressReporter);
     string CallAction(string action, string input);

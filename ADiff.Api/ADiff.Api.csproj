@@ -7,7 +7,7 @@
     <ProjectGuid>{8D33A5D4-206D-4E3E-9609-968417BDEB23}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ADiff.Api</RootNamespace>
+    <RootNamespace>ADiff</RootNamespace>
     <AssemblyName>ADiff.Api</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

@@ -3,7 +3,7 @@ using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace ADiff.Api
+namespace ADiff
 {
   internal struct ElementWriter
   {

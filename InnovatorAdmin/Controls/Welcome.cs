@@ -86,7 +86,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
             {
               result = DataExtractorFactory.Deserialize(File.ReadAllText(dialog.FileName));
             }
-            if (dialog.FilterIndex == 1 || Directory.Exists(dialog.FileName))
+            else if (dialog.FilterIndex == 1 || Directory.Exists(dialog.FileName))
             {
               result = DataExtractorFactory.Get(dialog.FileNames, ImportType.Files);
             }
