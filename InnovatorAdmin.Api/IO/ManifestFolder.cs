@@ -38,7 +38,7 @@ namespace Aras.Tools.InnovatorAdmin
       {
         title = pkg.Attribute("name", "");
         folderPath = pkg.Attribute("path");
-        if (folderPath == ".\\") folderPath = title.Replace('.', '\\');
+        if (folderPath == ".\\") folderPath = InnovatorPackage.CleanFileName(title).Replace('.', '\\');
         foreach (var file in Directory.GetFiles(Path.Combine(Path.GetDirectoryName(_path), folderPath), "*.xml", SearchOption.AllDirectories))
         {
           child = result.CreateElement("AML");
@@ -64,18 +64,18 @@ namespace Aras.Tools.InnovatorAdmin
         {
           if (script.Title.StartsWith("com.aras.innovator.solution."))
           {
-            _baseFolderPath = script.Title.Substring(28).Replace('.', '\\') + "\\Import";
+            _baseFolderPath = InnovatorPackage.CleanFileName(script.Title).Substring(28).Replace('.', '\\') + "\\Import";
             xml.WriteAttributeString("path", _baseFolderPath);
           }
           else
           {
-            _baseFolderPath = script.Title.Replace('.', '\\');
+            _baseFolderPath = InnovatorPackage.CleanFileName(script.Title).Replace('.', '\\');
             xml.WriteAttributeString("path", ".\\");
           }
         }
         else
         {
-          _baseFolderPath = script.Title + "\\Import";
+          _baseFolderPath = InnovatorPackage.CleanFileName(script.Title) + "\\Import";
           xml.WriteAttributeString("path", _baseFolderPath);
         }
 
@@ -87,16 +87,32 @@ namespace Aras.Tools.InnovatorAdmin
 
       XmlWriter writer;
       InstallItem first;
+      var existingPaths = new HashSet<string>();
+      string newPath;
       foreach (var group in script.GroupLines(i => i.Type != InstallType.DependencyCheck))
       {
         first = group.First();
-        writer = GetWriter(first.Reference.Type + "\\" + (first.Reference.KeyedName ?? first.Reference.Unique) + ".xml");
-        writer.WriteStartElement("AML");
-        foreach (var line in group)
+        newPath = first.Reference.Type + "\\" + InnovatorPackage.CleanFileName(first.Reference.KeyedName ?? first.Reference.Unique) + ".xml";
+        if (existingPaths.Contains(newPath))
+          newPath = first.Reference.Type + "\\" + InnovatorPackage.CleanFileName((first.Reference.KeyedName ?? "") + "_" + first.Reference.Unique) + ".xml";
+
+        writer = GetWriter(newPath);
+        try
         {
-          line.Script.WriteTo(writer);
+          writer.WriteStartElement("AML");
+          foreach (var line in group)
+          {
+            line.Script.WriteTo(writer);
+          }
+          writer.WriteEndElement();
+          writer.Flush();
         }
-        writer.WriteEndElement();
+        finally
+        {
+          writer.Close();
+        }
+
+        existingPaths.Add(newPath);
       }
     }
 
@@ -116,7 +132,7 @@ namespace Aras.Tools.InnovatorAdmin
       private bool _convertAdd = false;
       private bool _blockWhere = false;
 
-      public CustXmlWriter(Stream stream) : base(stream) 
+      public CustXmlWriter(Stream stream) : base(stream)
       {
         this.AttributeProcessor = (prefix, localName, ns, writer) =>
         {
@@ -138,7 +154,7 @@ namespace Aras.Tools.InnovatorAdmin
           }
         };
       }
-      
+
       public override void WriteEndAttribute()
       {
         base.WriteEndAttribute();

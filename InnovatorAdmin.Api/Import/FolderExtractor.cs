@@ -38,6 +38,7 @@ namespace Aras.Tools.InnovatorAdmin
           reader.MoveToContent();
         }
         reader.ReadEndElement();
+        _paths = paths;
       }
     }
     public override void WriteXml(System.Xml.XmlWriter writer)

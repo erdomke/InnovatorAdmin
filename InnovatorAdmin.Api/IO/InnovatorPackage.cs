@@ -14,7 +14,7 @@ namespace Aras.Tools.InnovatorAdmin
     public virtual InstallScript Read()
     {
       var result = new InstallScript();
-      
+
       XmlDocument doc;
       var scripts = new List<InstallItem>();
       var manifest = new XmlDocument();
@@ -160,7 +160,7 @@ namespace Aras.Tools.InnovatorAdmin
         using (var reader = new StreamReader(dataFileStream))
         {
           dataFile = reader.ReadToEnd();
-        }  
+        }
       }
 
       var metaStart = file.IndexOf(_reportStart);
@@ -233,7 +233,7 @@ namespace Aras.Tools.InnovatorAdmin
             dataFile = xslt.Substring(dataStart + _reportDataStart.Length, dataEnd - dataStart - _reportDataStart.Length).Trim();
             xslt = xslt.Substring(0, dataStart).Trim() + Environment.NewLine + xslt.Substring(dataEnd + _reportDataEnd.Length).Trim();
           }
-          else 
+          else
           {
             dataFile = xsltElem.Parent().Element("report_query", "<Result><Item></Item></Result>");
           }
@@ -251,7 +251,7 @@ namespace Aras.Tools.InnovatorAdmin
 
     protected abstract Stream GetExistingStream(string path);
     protected abstract Stream GetNewStream(string path);
-    
+
     private XmlWriter GetWriter(Stream stream)
     {
       var settings = new XmlWriterSettings();
@@ -266,7 +266,7 @@ namespace Aras.Tools.InnovatorAdmin
     /// <summary>
     /// Removes invalid characters from the path
     /// </summary>
-    private string CleanFileName(string path)
+    internal static string CleanFileName(string path)
     {
       var invalidChars = System.IO.Path.GetInvalidFileNameChars();
       Array.Sort(invalidChars);
@@ -289,7 +289,7 @@ namespace Aras.Tools.InnovatorAdmin
       {
         var bytes = new byte[4];
         if (stream.Read(bytes, 0, 4) == 4 && BitConverter.ToInt32(bytes, 0) == ZIP_LEAD_BYTES)
-          isFile = true; 
+          isFile = true;
       }
 
       return isFile ? (InnovatorPackage)new InnovatorPackageFile(path) : new InnovatorPackageFolder(path);

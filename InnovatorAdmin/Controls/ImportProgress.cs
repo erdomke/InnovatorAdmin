@@ -12,20 +12,30 @@ namespace Aras.Tools.InnovatorAdmin.Controls
 {
   public partial class ImportProgress : UserControl, IWizardStep, IProgessStep
   {
+    private System.Windows.Forms.Timer _clock = new System.Windows.Forms.Timer();
     private ImportProcessor _import;
-    private IWizard _wizard;
     private System.Windows.Forms.Timer _timer = new System.Windows.Forms.Timer();
+    private DateTime _startTime;
     private bool _unlinked = false;
+    private IWizard _wizard;
 
     public Action<ImportProcessor> MethodInvoke { get; set; }
-    
+
     public ImportProgress()
     {
       InitializeComponent();
-      
+
       _timer.Interval = 50;
       _timer.Tick += _timer_Tick;
+      _clock.Interval = 200;
+      _clock.Tick += _clock_Tick;
+      _clock.Enabled = false;
       progBar.Maximum = 1000000;
+    }
+
+    void _clock_Tick(object sender, EventArgs e)
+    {
+      lblClock.Text = (DateTime.Now - _startTime).ToString("hh':'mm':'ss");
     }
 
     private void UnLink()
@@ -85,8 +95,9 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       btnCancel.Text = "Cancel";
 
       var thread = new Thread(o => this.MethodInvoke(_import));
+      _startTime = DateTime.Now;
       thread.Start();
-
+      _clock.Enabled = true;
       countWorker.RunWorkerAsync();
     }
 

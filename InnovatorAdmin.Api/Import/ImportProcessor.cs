@@ -25,7 +25,7 @@ namespace Aras.Tools.InnovatorAdmin
     private int _globallyProcessed;
     private int _maxCount;
 
-    public bool Cancel 
+    public bool Cancel
     {
       get { return _cancel; }
       set
@@ -47,7 +47,7 @@ namespace Aras.Tools.InnovatorAdmin
       var builder = new StringBuilder();
       builder.Append("Import ").Append(_completeDate == DateTime.MinValue ? "still running" : (this.Cancel ? "canceled" : "completed")).Append(" on ").Append(_completeDate.ToString("s"));
 
-      if (_errors.Any())
+      if (_errors.Count > 0)
       {
         builder.Append(" with errors during ").Append(_errorBlocks).Append(" blocks").Append(Environment.NewLine).Append(Environment.NewLine);
 

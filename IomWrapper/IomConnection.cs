@@ -12,9 +12,10 @@ namespace IomWrapper
 {
   public class IomConnection : MarshalByRefObject, IArasConnection
   {
+    const string faultXPath = "/*[local-name()='Envelope' and (namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' or namespace-uri()='')]/*[local-name()='Body' and (namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' or namespace-uri()='')]/*[local-name()='Fault' and (namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' or namespace-uri()='')]";
+
     private Innovator _inn;
     private Item _userInfo;
-    //private SelfSponsor _sponsor;
 
     public IomConnection(Innovator inn)
     {
@@ -27,7 +28,7 @@ namespace IomWrapper
     }
     public string CallAction(string action, string input, IProgressCallback progressReporter)
     {
-
+      XmlNode fault;
       XmlDocument outputDoc = null;
       var inputDoc = new XmlDocument();
       inputDoc.LoadXml(input);
@@ -76,7 +77,16 @@ namespace IomWrapper
             fileItem.node = items[i];
             fileItem.nodeList = null;
             result = fileItem.apply();
-            if (result.isError()) return result.dom.DocumentElement.OuterXml;
+            fault = XPathCache.SelectSingleNode(faultXPath, result.dom.DocumentElement);
+            if (fault != null)
+            {
+              fault.AppendChild(result.dom.CreateElement("original_query")).InnerText = input;
+              return result.dom.DocumentElement.OuterXml;
+            }
+            else if (result.isError())
+            {
+              throw new InvalidOperationException();
+            }
 
             if (outputDoc == null)
             {
@@ -98,6 +108,11 @@ namespace IomWrapper
       outputDoc = new XmlDocument();
       outputDoc.Elem("Empty");
       _inn.getConnection().CallAction(action, inputDoc, outputDoc);
+      fault = XPathCache.SelectSingleNode(faultXPath, outputDoc.DocumentElement);
+      if (fault != null)
+      {
+        fault.AppendChild(outputDoc.CreateElement("original_query")).InnerText = input;
+      }
       return outputDoc.DocumentElement.OuterXml;
     }
 
@@ -116,41 +131,9 @@ namespace IomWrapper
       return _inn.getUserID();
     }
 
-    //public void Initialize()
-    //{
-    //  if (_sponsor == null)
-    //  {
-    //    _sponsor = new SelfSponsor();
-    //    ((ILease)GetLifetimeService()).Register(_sponsor);
-    //  }
-    //}
-
     public override object InitializeLifetimeService()
     {
-      //var lease = (ILease)base.InitializeLifetimeService();
-      //if (lease.CurrentState == LeaseState.Initial)
-      //{
-      //  lease.InitialLeaseTime = TimeSpan.FromMinutes(60);
-      //  lease.SponsorshipTimeout = TimeSpan.FromMinutes(2);
-      //  lease.RenewOnCallTime = TimeSpan.FromMinutes(30);
-      //}
-      //return lease;
       return null;
     }
-
-    //public void Dispose()
-    //{
-    //  ((ILease)GetLifetimeService()).Unregister(_sponsor);
-    //  _sponsor = null;
-    //}
-
-    //private class SelfSponsor : ISponsor
-    //{
-
-    //  public TimeSpan Renewal(ILease lease)
-    //  {
-    //    return lease.RenewOnCallTime;
-    //  }
-    //}
   }
 }

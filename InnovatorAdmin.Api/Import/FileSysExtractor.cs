@@ -130,7 +130,7 @@ namespace Aras.Tools.InnovatorAdmin
     public virtual void WriteXml(System.Xml.XmlWriter writer)
     {
       writer.WriteStartElement("ProcessedPaths");
-      foreach (var path in _newPaths.Concat(_oldPaths))
+      foreach (var path in _newPaths.Concat(_oldPaths).ToList())
       {
         writer.WriteElementString("ProcessedPath", path);
       }

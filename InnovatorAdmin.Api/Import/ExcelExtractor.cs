@@ -39,6 +39,9 @@ namespace Aras.Tools.InnovatorAdmin
       get { return _reader.SheetNames; }
     }
 
+    // For serialization
+    internal ExcelExtractor() { }
+
     public ExcelExtractor(string path)
     {
       _reader = new ExcelReader();

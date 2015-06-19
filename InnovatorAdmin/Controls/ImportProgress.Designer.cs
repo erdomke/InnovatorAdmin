@@ -32,23 +32,26 @@
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
       this.lblMessage = new System.Windows.Forms.Label();
       this.progBar = new System.Windows.Forms.ProgressBar();
+      this.btnCancel = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
       this.txtMessage = new System.Windows.Forms.TextBox();
       this.countWorker = new System.ComponentModel.BackgroundWorker();
-      this.btnCancel = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.lblClock = new System.Windows.Forms.Label();
       this.tableLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
       // 
       // tableLayoutPanel1
       // 
       this.tableLayoutPanel1.BackColor = System.Drawing.Color.White;
-      this.tableLayoutPanel1.ColumnCount = 3;
+      this.tableLayoutPanel1.ColumnCount = 4;
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
-      this.tableLayoutPanel1.Controls.Add(this.lblMessage, 1, 1);
+      this.tableLayoutPanel1.Controls.Add(this.lblMessage, 2, 1);
       this.tableLayoutPanel1.Controls.Add(this.progBar, 1, 2);
-      this.tableLayoutPanel1.Controls.Add(this.btnCancel, 1, 3);
-      this.tableLayoutPanel1.Controls.Add(this.txtMessage, 1, 4);
+      this.tableLayoutPanel1.Controls.Add(this.btnCancel, 2, 3);
+      this.tableLayoutPanel1.Controls.Add(this.txtMessage, 2, 4);
+      this.tableLayoutPanel1.Controls.Add(this.lblClock, 1, 1);
       this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
       this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -64,7 +67,7 @@
       // lblMessage
       // 
       this.lblMessage.AutoSize = true;
-      this.lblMessage.Location = new System.Drawing.Point(103, 222);
+      this.lblMessage.Location = new System.Drawing.Point(158, 222);
       this.lblMessage.Margin = new System.Windows.Forms.Padding(3);
       this.lblMessage.Name = "lblMessage";
       this.lblMessage.Size = new System.Drawing.Size(52, 13);
@@ -75,30 +78,11 @@
       // 
       this.progBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+      this.tableLayoutPanel1.SetColumnSpan(this.progBar, 2);
       this.progBar.Location = new System.Drawing.Point(103, 241);
       this.progBar.Name = "progBar";
       this.progBar.Size = new System.Drawing.Size(499, 23);
       this.progBar.TabIndex = 1;
-      // 
-      // txtMessage
-      // 
-      this.txtMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-      this.txtMessage.BackColor = System.Drawing.Color.White;
-      this.txtMessage.BorderStyle = System.Windows.Forms.BorderStyle.None;
-      this.txtMessage.Location = new System.Drawing.Point(103, 303);
-      this.txtMessage.Multiline = true;
-      this.txtMessage.Name = "txtMessage";
-      this.txtMessage.ReadOnly = true;
-      this.txtMessage.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-      this.txtMessage.Size = new System.Drawing.Size(499, 214);
-      this.txtMessage.TabIndex = 3;
-      // 
-      // countWorker
-      // 
-      this.countWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.countWorker_DoWork);
-      this.countWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.countWorker_RunWorkerCompleted);
       // 
       // btnCancel
       // 
@@ -119,6 +103,36 @@
       this.btnCancel.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnCancel.UseVisualStyleBackColor = false;
       this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+      // 
+      // txtMessage
+      // 
+      this.txtMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.txtMessage.BackColor = System.Drawing.Color.White;
+      this.txtMessage.BorderStyle = System.Windows.Forms.BorderStyle.None;
+      this.txtMessage.Location = new System.Drawing.Point(158, 303);
+      this.txtMessage.Multiline = true;
+      this.txtMessage.Name = "txtMessage";
+      this.txtMessage.ReadOnly = true;
+      this.txtMessage.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+      this.txtMessage.Size = new System.Drawing.Size(444, 214);
+      this.txtMessage.TabIndex = 3;
+      // 
+      // countWorker
+      // 
+      this.countWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.countWorker_DoWork);
+      this.countWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.countWorker_RunWorkerCompleted);
+      // 
+      // lblClock
+      // 
+      this.lblClock.AutoSize = true;
+      this.lblClock.Location = new System.Drawing.Point(103, 222);
+      this.lblClock.Margin = new System.Windows.Forms.Padding(3);
+      this.lblClock.Name = "lblClock";
+      this.lblClock.Size = new System.Drawing.Size(49, 13);
+      this.lblClock.TabIndex = 4;
+      this.lblClock.Text = "00:00:00";
       // 
       // ImportProgress
       // 
@@ -141,5 +155,6 @@
     private FlatButton btnCancel;
     private System.Windows.Forms.TextBox txtMessage;
     private System.ComponentModel.BackgroundWorker countWorker;
+    private System.Windows.Forms.Label lblClock;
   }
 }
