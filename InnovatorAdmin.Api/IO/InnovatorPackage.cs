@@ -106,16 +106,17 @@ namespace Aras.Tools.InnovatorAdmin
               switch (first.Reference.Type)
               {
                 case "Report":
-                  WriteReport(group);
+                  newPath = first.Reference.Type + "\\" + CleanFileName(first.Reference.KeyedName ?? first.Reference.Unique) + ".xslt";
+                  if (existingPaths.Contains(newPath))
+                    newPath = first.Reference.Type + "\\" + CleanFileName((first.Reference.KeyedName ?? "") + "_" + first.Reference.Unique) + ".xslt";
+
+                  WriteReport(group, newPath);
                   break;
                 default:
                   newPath = first.Reference.Type + "\\" + CleanFileName(first.Reference.KeyedName ?? first.Reference.Unique) + ".xml";
                   if (existingPaths.Contains(newPath))
                     newPath = first.Reference.Type + "\\" + CleanFileName((first.Reference.KeyedName ?? "") + "_" + first.Reference.Unique) + ".xml";
 
-                  manifestWriter.WriteStartElement("Path");
-                  manifestWriter.WriteAttributeString("path", newPath);
-                  manifestWriter.WriteEndElement();
                   using (var stream = GetNewStream(newPath))
                   {
                     using (var writer = GetWriter(stream))
@@ -128,10 +129,13 @@ namespace Aras.Tools.InnovatorAdmin
                       writer.WriteEndElement();
                     }
                   }
-
-                  existingPaths.Add(newPath);
                   break;
               }
+
+              existingPaths.Add(newPath);
+              manifestWriter.WriteStartElement("Path");
+              manifestWriter.WriteAttributeString("path", newPath);
+              manifestWriter.WriteEndElement();
             }
           }
           manifestWriter.WriteEndElement();
@@ -187,12 +191,9 @@ namespace Aras.Tools.InnovatorAdmin
 
       return result;
     }
-    private void WriteReport(IEnumerable<InstallItem> reportLines)
+    private void WriteReport(IEnumerable<InstallItem> reportLines, string path)
     {
       var first = reportLines.First();
-      var path = first.Reference.Type + "\\" + CleanFileName(first.Reference.KeyedName ?? first.Reference.Unique) + ".xslt";
-      _paths.Add(path);
-
       var dataFile = "<Result><Item></Item></Result>";
 
       using (var writer = new StreamWriter(GetNewStream(path)))

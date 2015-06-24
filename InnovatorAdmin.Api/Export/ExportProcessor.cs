@@ -1035,7 +1035,7 @@ namespace Aras.Tools.InnovatorAdmin
 
       foreach (var form in doc.ElementsByXPath("//Item[@type='Form' and @action and @id]").ToList())
       {
-        var references = doc.ElementsByXPath("//self::node()[local-name() != 'Item' and local-name() != 'id' and local-name() != 'config_id' and @type='Form' and not(Item) and text() = $p0]", form.Attribute("id", ""))
+        var references = doc.ElementsByXPath(".//self::node()[local-name() != 'Item' and local-name() != 'id' and local-name() != 'config_id' and @type='Form' and not(Item) and text() = $p0]", form.Attribute("id", ""))
           //.Concat(otherDocs.SelectMany(d => d.ElementsByXPath("//self::node()[local-name() != 'Item' and local-name() != 'id' and local-name() != 'config_id' and @type='Form' and not(Item) and text() = $p0]", form.Attribute("id", "")))).ToList();
           .ToList();
         if (references.Any())
@@ -1052,7 +1052,7 @@ namespace Aras.Tools.InnovatorAdmin
 
         foreach (var line in lines)
         {
-          references = line.Script.ElementsByXPath("//self::node()[local-name() != 'Item' and local-name() != 'id' and local-name() != 'config_id' and @type='Form' and not(Item) and text() = $p0]", form.Attribute("id", "")).ToList();
+          references = line.Script.ElementsByXPath(".//self::node()[local-name() != 'Item' and local-name() != 'id' and local-name() != 'config_id' and @type='Form' and not(Item) and text() = $p0]", form.Attribute("id", "")).ToList();
           if (references.Any())
           {
             if (formItemRef == null) formItemRef = ItemReference.FromFullItem(form, false);

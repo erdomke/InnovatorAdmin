@@ -23,7 +23,7 @@ namespace Aras.Tools.InnovatorAdmin
     private HashSet<ItemReference> _definitions = new HashSet<ItemReference>();
     private HashSet<ItemReference> _dependencies = new HashSet<ItemReference>();
     private XmlElement _elem;
-    
+
     private HashSet<ItemReference> _coreMethods;
     private Dictionary<string, ItemReference> _systemIdentities;
     private Dictionary<string, ItemType> _itemTypes;
@@ -67,7 +67,7 @@ namespace Aras.Tools.InnovatorAdmin
       {
         itemRef = ItemReference.FromFullItem(sql, false);
         itemRef.KeyedName = sql.Element("name", "");
-        _sql.Add(itemRef.KeyedName, itemRef);
+        _sql.Add(itemRef.KeyedName.ToLowerInvariant(), itemRef);
       }
 
       _customProps = new Dictionary<ItemProperty, ItemReference>();
@@ -102,7 +102,7 @@ namespace Aras.Tools.InnovatorAdmin
       if (refsToKeep.Any())
       {
         var refsToKeepHash = new HashSet<ItemReference>(refsToKeep);
-        
+
         // Clean up the definitions as necessary
         var defnsToRemove = (from p in _allDefinitions where !refsToKeepHash.Contains(p.Value) select p.Key).ToList();
         foreach (var defnToRemove in defnsToRemove)
@@ -123,7 +123,7 @@ namespace Aras.Tools.InnovatorAdmin
           _allItemDependencies.Remove(itemToRemove);
         }
       }
-      else 
+      else
       {
         this.Reset();
       }
@@ -140,7 +140,7 @@ namespace Aras.Tools.InnovatorAdmin
       if (_allItemDependencies.TryGetValue(masterRef, out childDependencies))
       {
         childDependencies.Remove(dependency);
-        
+
       }
       References refs;
       if (_allDependencies.TryGetValue(dependency, out refs))
@@ -237,7 +237,7 @@ namespace Aras.Tools.InnovatorAdmin
       _dependencies.ExceptWith(_systemIdentities.Values);
       _dependencies.ExceptWith(_coreMethods);
       _dependencies.ExceptWith(_itemTypes.Values.Where(i => i.IsCore).Select(i => i.Reference));
-      _dependencies.ExceptWith(_dependencies.Where(d => 
+      _dependencies.ExceptWith(_dependencies.Where(d =>
       {
         if (d.Type == "ItemType" && !string.IsNullOrEmpty(d.KeyedName))
         {
@@ -253,14 +253,14 @@ namespace Aras.Tools.InnovatorAdmin
           depend.Origin = itemRef;
       }
 
-      if (_dependencies.Any()) 
-      { 
+      if (_dependencies.Any())
+      {
         HashSet<ItemReference> dependSet;
         if (_allItemDependencies.TryGetValue(itemRef, out dependSet))
         {
           dependSet.UnionWith(_dependencies);
         }
-        else 
+        else
         {
           _allItemDependencies[itemRef] = new HashSet<ItemReference>(_dependencies);
         }
@@ -316,8 +316,8 @@ namespace Aras.Tools.InnovatorAdmin
       else if (elem.LocalName == "sqlserver_body" && elem.Parent().LocalName == "Item" && elem.Parent().Attribute("type") == "SQL")
       {
         var names = _parser.FindSqlServerObjectNames(elem.InnerText)
-          .Select(n => n.StartsWith(_parser.SchemaToKeep + ".", StringComparison.OrdinalIgnoreCase) ? 
-                       n.Substring(_parser.SchemaToKeep.Length+1).ToLowerInvariant() : 
+          .Select(n => n.StartsWith(_parser.SchemaToKeep + ".", StringComparison.OrdinalIgnoreCase) ?
+                       n.Substring(_parser.SchemaToKeep.Length+1).ToLowerInvariant() :
                        n.ToLowerInvariant())
           .Distinct();
 
@@ -427,7 +427,7 @@ namespace Aras.Tools.InnovatorAdmin
     private class References
     {
       private List<ReferenceContext> _contexts = new List<ReferenceContext>();
-      
+
       public void AddReferences(XmlNode reference, XmlNode context, ItemReference masterRef)
       {
         _contexts.Add(new ReferenceContext()
@@ -462,7 +462,7 @@ namespace Aras.Tools.InnovatorAdmin
         {
           if (_contexts[i].MasterRef == masterRef)
           {
-            _contexts.RemoveAt(i); 
+            _contexts.RemoveAt(i);
           }
           else
           {
