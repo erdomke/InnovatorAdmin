@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using System.Windows.Forms.Integration;
 using System.Windows.Threading;
 using System.Xml;
+using System.IO;
 
 namespace Aras.Tools.InnovatorAdmin.Editor
 {
@@ -84,6 +85,11 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       {
         OnRunRequested(new RunRequestedEventArgs(Helper.GetCurrentQuery(_editor.Text, _editor.CaretOffset)));
       }
+      else if (e.Key == System.Windows.Input.Key.T && IsControlDown(e.KeyboardDevice)) // Indent the code
+      {
+        TidyXml();
+      }
+
     }
 
     private bool IsControlDown(System.Windows.Input.KeyboardDevice keyboard)
@@ -165,6 +171,80 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       // We still want to insert the character that was typed.
     }
 
+    /// <summary>
+    /// Tidy the xml of the editor by adding AML tags and indenting
+    /// </summary>
+    /// <returns>Tidied Xml</returns>
+    void TidyXml()
+    {
+            //_editor.TextArea.Document.Text = "Hallo";
+            string buffer = _editor.TextArea.Document.Text;
+            if (buffer.Length < 30000 || MessageBox.Show("Validating large requests may take several moments.  Continue?","AML Requestor", MessageBoxButtons.YesNo,MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                if (IndentXml(buffer, out buffer) == null)
+                {
+                    _editor.TextArea.Document.Text = buffer;
+                }
+            }
+    }
+
+    /// <summary>
+    /// Tidy the xml of the editor by adding AML tags and indenting
+    /// </summary>
+    /// <param name="xml">Unformatted XML string</param>
+    /// <returns>Formatted Xml String</returns>
+    public Exception IndentXml(string xml, out string formattedString)
+    {
+            try
+            {
+                XmlDocument doc = new XmlDocument();
+
+                doc.LoadXml(xml);
+                return IndentXml(doc, out formattedString);
+
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                formattedString = string.Empty;
+                return ex;
+            }
+    }
+
+    /// <summary>
+    /// Takes an Xml Document and renders it as a formatted (indented) string
+    /// </summary>
+    /// <param name="doc">XML Document</param>
+    /// <returns>Formatted (indented) XML string</returns>
+    public Exception IndentXml(XmlDocument doc, out string formattedString)
+    {
+        try
+        {
+            using (StringWriter writer = new StringWriter())
+            {
+                XmlWriterSettings settings = new XmlWriterSettings();
+                settings.OmitXmlDeclaration = true;
+                settings.Indent = true;
+                settings.IndentChars = "  ";
+                settings.CheckCharacters = true;
+                using (XmlWriter xmlWriter = XmlWriter.Create(writer, settings))
+                {
+                    doc.WriteContentTo(xmlWriter);
+                    xmlWriter.Flush();
+                    formattedString = writer.ToString();
+                }
+
+            }
+
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message);
+            formattedString = string.Empty;
+            return ex;
+        }
+        return null;
+    }
   }
   public class RunRequestedEventArgs : EventArgs
   {
