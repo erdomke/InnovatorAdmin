@@ -723,22 +723,22 @@ namespace Aras.Tools.InnovatorAdmin
     /// </summary>
     private void FixForeignProperties(XmlDocument doc)
     {
-      var foreignProps = doc.ElementsByXPath("//Relationships/Item[@type = 'Property' and data_type = 'foreign']").ToList();
+      var itemTypes = doc.ElementsByXPath("//Item[@type='ItemType' and Relationships/Item[@type = 'Property' and data_type = 'foreign']]").ToList();
       XmlElement fix = null;
-      foreach (var foreignProp in foreignProps)
+      foreach (var itemType in itemTypes)
       {
-        if (fix == null)
+        fix = (XmlElement)itemType.CloneNode(false);
+        fix.SetAttribute("action", "edit");
+        fix.IsEmpty = true;
+        fix = (XmlElement)fix.AppendChild(doc.CreateElement("Relationships"));
+        var uppermostItem = itemType.Parents().LastOrDefault(e => e.LocalName == "Item" && !string.IsNullOrEmpty(e.Attribute("type", ""))) ?? itemType;
+        uppermostItem.ParentNode.InsertAfter(fix.ParentNode, uppermostItem);
+
+        foreach (var foreignProp in itemType.ElementsByXPath(".//Relationships/Item[@type = 'Property' and data_type = 'foreign']").ToList())
         {
-          var itemType = foreignProp.Parents().First(e => e.LocalName == "Item" && e.Attribute("type", "") == "ItemType");
-          fix = (XmlElement)itemType.CloneNode(false);
-          fix.SetAttribute("action", "edit");
-          fix.IsEmpty = true;
-          fix = (XmlElement)fix.AppendChild(doc.CreateElement("Relationships"));
-          var uppermostItem = foreignProp.Parents().Last(e => e.LocalName == "Item" && !string.IsNullOrEmpty(e.Attribute("type", "")));
-          uppermostItem.ParentNode.InsertAfter(fix.ParentNode, uppermostItem);
+          foreignProp.Detatch();
+          fix.AppendChild(foreignProp);
         }
-        foreignProp.ParentNode.RemoveChild(foreignProp);
-        fix.AppendChild(foreignProp);
       }
     }
 

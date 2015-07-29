@@ -223,7 +223,7 @@ namespace Aras.Tools.InnovatorAdmin
         writer.WriteLine(aml);
         writer.WriteLine(_reportEnd);
 
-        var xsltElem = first.Script.SelectSingleNode("//xsl_stylesheet") as XmlElement;
+        var xsltElem = first.Script.SelectSingleNode(".//xsl_stylesheet") as XmlElement;
         if (xsltElem != null)
         {
           var xslt = xsltElem.InnerText;

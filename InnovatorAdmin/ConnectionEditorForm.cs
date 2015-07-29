@@ -37,5 +37,11 @@ namespace Aras.Tools.InnovatorAdmin
       this.TopMost = false;
     }
 
+    private void btnOk_Click(object sender, EventArgs e)
+    {
+      ConnectionManager.Current.Save();
+      this.DialogResult = System.Windows.Forms.DialogResult.OK;
+    }
+
   }
 }

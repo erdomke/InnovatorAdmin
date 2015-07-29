@@ -81,7 +81,6 @@
       // 
       this.btnOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.btnOk.AutoSize = true;
-      this.btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
       this.btnOk.Location = new System.Drawing.Point(267, 245);
       this.btnOk.MinimumSize = new System.Drawing.Size(75, 0);
       this.btnOk.Name = "btnOk";
@@ -89,6 +88,7 @@
       this.btnOk.TabIndex = 1;
       this.btnOk.Text = "&OK";
       this.btnOk.UseVisualStyleBackColor = true;
+      this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
       // 
       // ConnectionEditorForm
       // 
