@@ -32,7 +32,8 @@ namespace Aras.Tools.InnovatorAdmin.Connections
         Database = this.Database,
         Password = this.Password,
         Url = this.Url,
-        UserName = this.UserName
+        UserName = this.UserName,
+        IomVersion = this.IomVersion
       };
     }
 
