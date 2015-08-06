@@ -8,6 +8,7 @@ using System.IO;
 using System.Windows.Forms;
 using System.Xml;
 using System.Linq;
+using System.Diagnostics;
 
 namespace Aras.Tools.InnovatorAdmin
 {
@@ -16,7 +17,7 @@ namespace Aras.Tools.InnovatorAdmin
     private object _current;
     private IArasConnection _conn;
     private DataTable _outputTable;
-    private XmlDocument _outputXml;
+    private string _outputXml;
 
     public bool AllowRun
     {
@@ -107,45 +108,105 @@ namespace Aras.Tools.InnovatorAdmin
 
     private void EnsureDataTable()
     {
-      if (_outputXml != null && _outputTable == null && tbcOutputView.SelectedTab == pgTableOutput)
+      if (!string.IsNullOrEmpty(_outputXml) && _outputTable == null && tbcOutputView.SelectedTab == pgTableOutput)
       {
-        _outputTable = Extensions.GetItemTable(_outputXml);
+        var doc = new XmlDocument();
+        doc.LoadXml(_outputXml);
+        _outputTable = Extensions.GetItemTable(doc);
         dgvItems.DataSource = _outputTable;
       }
     }
 
-    /// <summary>
-    /// Takes an XML document and renders it as a formatted (indented) string
-    /// </summary>
-    /// <param name="doc">XML Document</param>
-    /// <returns>Formatted (indented) XML string</returns>
-    private Exception IndentXml(XmlDocument doc, out string formattedString)
+    private string IndentXml(string xmlContent, out int itemCount)
     {
-      try
+      itemCount = 0;
+      char[] writeNodeBuffer = null;
+      var levels = new int[64];
+      int level = 0;
+
+      using (var strReader = new StringReader(xmlContent))
       {
-        using (var writer = new StringWriter())
+        using (var reader = XmlReader.Create(strReader))
         {
-          XmlWriterSettings settings = new XmlWriterSettings();
-          settings.OmitXmlDeclaration = true;
-          settings.Indent = true;
-          settings.IndentChars = "  ";
-          settings.CheckCharacters = true;
-          using (var xmlWriter = XmlWriter.Create(writer, settings))
+          using (var writer = new StringWriter())
           {
-            // write dom xml to the xmltextwriter
-            doc.WriteContentTo(xmlWriter);
-            xmlWriter.Flush();
-            formattedString = writer.ToString();
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.OmitXmlDeclaration = true;
+            settings.Indent = true;
+            settings.IndentChars = "  ";
+            settings.CheckCharacters = true;
+            using (var xmlWriter = XmlWriter.Create(writer, settings))
+            {
+              bool canReadValueChunk = reader.CanReadValueChunk;
+              while (reader.Read())
+              {
+                switch (reader.NodeType)
+                {
+                  case XmlNodeType.Element:
+                    if (reader.LocalName == "Item") levels[level]++;
+                    xmlWriter.WriteStartElement(reader.Prefix, reader.LocalName, reader.NamespaceURI);
+                    xmlWriter.WriteAttributes(reader, false);
+                    if (reader.IsEmptyElement)
+                    {
+                      xmlWriter.WriteEndElement();
+                    }
+                    else
+                    {
+                      level++;
+                    }
+                    break;
+                  case XmlNodeType.Text:
+                    if (canReadValueChunk)
+                    {
+                      if (writeNodeBuffer == null)
+                      {
+                        writeNodeBuffer = new char[1024];
+                      }
+                      int count;
+                      while ((count = reader.ReadValueChunk(writeNodeBuffer, 0, 1024)) > 0)
+                      {
+                        xmlWriter.WriteChars(writeNodeBuffer, 0, count);
+                      }
+                    }
+                    else
+                    {
+                      xmlWriter.WriteString(reader.Value);
+                    }
+                    break;
+                  case XmlNodeType.CDATA:
+                    xmlWriter.WriteCData(reader.Value);
+                    break;
+                  case XmlNodeType.EntityReference:
+                    xmlWriter.WriteEntityRef(reader.Name);
+                    break;
+                  case XmlNodeType.ProcessingInstruction:
+                  case XmlNodeType.XmlDeclaration:
+                    xmlWriter.WriteProcessingInstruction(reader.Name, reader.Value);
+                    break;
+                  case XmlNodeType.Comment:
+                    xmlWriter.WriteComment(reader.Value);
+                    break;
+                  case XmlNodeType.DocumentType:
+                    xmlWriter.WriteDocType(reader.Name, reader.GetAttribute("PUBLIC"), reader.GetAttribute("SYSTEM"), reader.Value);
+                    break;
+                  case XmlNodeType.Whitespace:
+                  case XmlNodeType.SignificantWhitespace:
+                    xmlWriter.WriteWhitespace(reader.Value);
+                    break;
+                  case XmlNodeType.EndElement:
+                    xmlWriter.WriteFullEndElement();
+                    level--;
+                    break;
+                }
+              }
+              
+              xmlWriter.Flush();
+            }
+            itemCount = levels.FirstOrDefault(i => i > 0);
+            return writer.ToString();
           }
         }
       }
-      catch (Exception ex)
-      {
-        MessageBox.Show(ex.Message);
-        formattedString = string.Empty;
-        return ex;
-      }
-      return null;
     }
 
     private void Submit(string query)
@@ -162,16 +223,13 @@ namespace Aras.Tools.InnovatorAdmin
           {
             _amlText = "<AML>" + _amlText + "</AML>";
           }
-
-          XmlDocument input = new XmlDocument();
-          input.LoadXml(_amlText);
-
+          
           _outputTable = null;
           dgvItems.DataSource = null;
           callAction.RunWorkerAsync(new AmlAction()
           {
             SoapAction = cmbSoapAction.SelectedItem.ToString(),
-            Aml = input
+            Aml = _amlText
           });
         }
         catch (Exception err)
@@ -214,40 +272,44 @@ namespace Aras.Tools.InnovatorAdmin
     private void callAction_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
     {
       var action = (AmlAction)e.Argument;
-      var output = new XmlDocument();
-      output.LoadXml(_conn.CallAction(action.SoapAction, action.Aml.OuterXml));
-      e.Result = output;
+      action.Output = _conn.CallAction(action.SoapAction, action.Aml);
+      e.Result = action;
     }
 
     private void callAction_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
     {
       try
       {
-        var output = e.Result as XmlDocument;
-        if (output != null)
+        var action = e.Result as AmlAction;
+        if (action != null)
         {
-          var node = output.DocumentElement;
-          while (node != null && node.LocalName != "Item") node = node.ChildNodes.OfType<XmlElement>().FirstOrDefault();
-          
-          if (node == null)
+          var milliseconds = action.Stopwatch.ElapsedMilliseconds;
+          int itemCount = 0;
+          string indented = action.Output;
+          try
           {
-            lblItems.Text = "No items found.";
+            indented = IndentXml(action.Output, out itemCount);
           }
-          else
+          catch (Exception ex)
           {
-            lblItems.Text = string.Format("{0} item(s) found.", node.ParentNode.ChildNodes.OfType<XmlElement>().Where(n => n.LocalName == "Item").Count());
+            MessageBox.Show(ex.Message);
           }
 
-          string viewerText;
-          if (IndentXml(output, out viewerText) == null)
+          if (itemCount > 0)
           {
-            outputEditor.Text = viewerText;
+            lblItems.Text = string.Format("{0} item(s) found in {1} ms.", itemCount, milliseconds);
           }
           else
           {
-            outputEditor.Text = output.OuterXml;
+            lblItems.Text = string.Format("No items found in {0} ms.", milliseconds);
           }
-          _outputXml = output;
+          outputEditor.Text = indented;
+
+          if (itemCount > 1 && outputEditor.Editor.LineCount > 100)
+          {
+            outputEditor.CollapseAll();
+          }
+          _outputXml = action.Output;
         }
         EnsureDataTable();
       }
@@ -293,14 +355,14 @@ namespace Aras.Tools.InnovatorAdmin
         dialog.tbcOutputView.SelectedTab = dialog.pgTableOutput;
         dialog.tbcOutputView.SizeMode = TabSizeMode.Fixed;
         dialog.SetConnection(conn);
-        if (dialog.ShowDialog() == DialogResult.OK 
+        if (dialog.ShowDialog() == DialogResult.OK
           && dialog._outputTable.Columns.Contains("type")
           && dialog._outputTable.Columns.Contains("id"))
         {
           return dialog.dgvItems.SelectedRows
                        .OfType<DataGridViewRow>()
                        .Select(r => ((DataRowView)r.DataBoundItem).Row)
-                       .Select(r => new ItemReference((string)r["type"], (string)r["id"]) { 
+                       .Select(r => new ItemReference((string)r["type"], (string)r["id"]) {
                          KeyedName = dialog._outputTable.Columns.Contains("keyed_name") ? (string)r["keyed_name"] : null
                        }).ToList();
         }
@@ -310,8 +372,15 @@ namespace Aras.Tools.InnovatorAdmin
 
     private class AmlAction
     {
+      private Stopwatch _stopwatch = Stopwatch.StartNew();
+
       public string SoapAction { get; set; }
-      public XmlDocument Aml { get; set; }
+      public string Aml { get; set; }
+      public string Output { get; set; }
+      public Stopwatch Stopwatch
+      {
+        get { return _stopwatch; }
+      }
     }
 
     private void inputEditor_RunRequested(object sender, Editor.RunRequestedEventArgs e)

@@ -197,9 +197,13 @@
       <DependentUpon>Welcome.cs</DependentUpon>
     </Compile>
     <Compile Include="Editor\AmlEditorHelper.cs" />
+    <Compile Include="Editor\AmlFoldingStrategy.cs" />
     <Compile Include="Editor\BasicCompletionData.cs" />
     <Compile Include="Editor\EditorControl.cs">
       <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Editor\ExtendedEditor.xaml.cs">
+      <DependentUpon>ExtendedEditor.xaml</DependentUpon>
     </Compile>
     <Compile Include="Editor\IEditorHelper.cs" />
     <Compile Include="Editor\ImportXsltHelper.cs" />
@@ -406,6 +410,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\icons\function14.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Editor\ExtendedEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

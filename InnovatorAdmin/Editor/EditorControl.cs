@@ -24,17 +24,17 @@ namespace Aras.Tools.InnovatorAdmin.Editor
 
   public class EditorControl : UserControl
   {
-    private ICSharpCode.AvalonEdit.TextEditor _editor;
-    private FoldingManager _foldingManager;
-    private XmlFoldingStrategy _foldingStrategy = new XmlFoldingStrategy();
     //private CompletionHelper _helper;
     //private bool _isInitialized;
-    private EditorMode _mode = EditorMode.Xml;
+    private ExtendedEditor _extEditor;
 
     public event EventHandler<RunRequestedEventArgs> RunRequested;
 
-    public IEditorHelper Helper { get; set; }
-    public ICSharpCode.AvalonEdit.TextEditor Editor { get { return _editor; } }
+    public IEditorHelper Helper {
+      get { return _extEditor.Helper; }
+      set { _extEditor.Helper = value; }
+    }
+    public ICSharpCode.AvalonEdit.TextEditor Editor { get { return _extEditor.Editor; } }
     //public string SoapAction { get; set; }
 
     public EditorControl()
@@ -44,29 +44,28 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       host.Location = new Point(100, 100);
       host.Dock = DockStyle.Fill;
 
-      _editor = new ICSharpCode.AvalonEdit.TextEditor();
-      _editor.FontFamily = new System.Windows.Media.FontFamily("Consolas");
-      _editor.FontSize = 12.0;
-      _editor.Options.ConvertTabsToSpaces = true;
-      _editor.Options.EnableRectangularSelection = true;
-      _editor.Options.IndentationSize = 2;
-      _editor.ShowLineNumbers = true;
-      _editor.SyntaxHighlighting = ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance.GetDefinitionByExtension(".xml");
-      _editor.TextArea.TextEntering += TextArea_TextEntering;
-      _editor.TextArea.TextEntered += TextArea_TextEntered;
-      _editor.TextArea.KeyDown += TextArea_KeyDown;
-      host.Child = _editor;
+      _extEditor = new ExtendedEditor();
+      var editor = _extEditor.editor;
+      editor.FontFamily = new System.Windows.Media.FontFamily("Consolas");
+      editor.FontSize = 12.0;
+      editor.Options.ConvertTabsToSpaces = true;
+      editor.Options.EnableRectangularSelection = true;
+      editor.Options.IndentationSize = 2;
+      editor.ShowLineNumbers = true;
+      editor.SyntaxHighlighting = ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance.GetDefinitionByExtension(".xml");
+      editor.TextArea.TextEntering += TextArea_TextEntering;
+      editor.TextArea.TextEntered += TextArea_TextEntered;
+      editor.TextArea.KeyDown += TextArea_KeyDown;
+      host.Child = _extEditor;
 
-      _editor.TextArea.IndentationStrategy = new ICSharpCode.AvalonEdit.Indentation.DefaultIndentationStrategy();
-      _foldingManager = FoldingManager.Install(_editor.TextArea);
-      UpdateFoldings();
+      editor.TextArea.IndentationStrategy = new ICSharpCode.AvalonEdit.Indentation.DefaultIndentationStrategy();
 
-      var foldingUpdateTimer = new DispatcherTimer();
-      foldingUpdateTimer.Interval = TimeSpan.FromSeconds(2);
-      foldingUpdateTimer.Tick += delegate { UpdateFoldings(); };
-      foldingUpdateTimer.Start();
-      
       this.Controls.Add(host);
+    }
+
+    public void CollapseAll()
+    {
+      _extEditor.CollapseAll();
     }
 
     protected virtual void OnRunRequested(RunRequestedEventArgs e)
@@ -78,12 +77,12 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     {
       if (e.Key == System.Windows.Input.Key.F9 || e.Key == System.Windows.Input.Key.F5)
       {
-        OnRunRequested(new RunRequestedEventArgs(_editor.Text));
+        OnRunRequested(new RunRequestedEventArgs(Editor.Text));
       }
       else if ((e.Key == System.Windows.Input.Key.Enter && IsControlDown(e.KeyboardDevice))
         || (e.Key == System.Windows.Input.Key.E && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice)))
       {
-        OnRunRequested(new RunRequestedEventArgs(Helper.GetCurrentQuery(_editor.Text, _editor.CaretOffset)));
+        OnRunRequested(new RunRequestedEventArgs(Helper.GetCurrentQuery(Editor.Text, Editor.CaretOffset)));
       }
       else if (e.Key == System.Windows.Input.Key.T && IsControlDown(e.KeyboardDevice)) // Indent the code
       {
@@ -103,23 +102,13 @@ namespace Aras.Tools.InnovatorAdmin.Editor
 
     public bool ReadOnly
     {
-      get { return _editor.IsReadOnly; }
-      set { _editor.IsReadOnly = value; }
+      get { return Editor.IsReadOnly; }
+      set { Editor.IsReadOnly = value; }
     }
     public override string Text
     {
-      get { return _editor.Text; }
-      set { _editor.Text = value; }
-    }
-
-    private void UpdateFoldings()
-    {
-      switch (_mode)
-      {
-        case EditorMode.Xml:
-          _foldingStrategy.UpdateFoldings(_foldingManager, _editor.Document);
-          break;
-      }
+      get { return Editor.Text; }
+      set { Editor.Text = value; }
     }
 
     CompletionWindow completionWindow;
@@ -128,7 +117,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     {
       if (completionItems.Any())
       {
-        completionWindow = new CompletionWindow(_editor.TextArea);
+        completionWindow = new CompletionWindow(Editor.TextArea);
         completionWindow.StartOffset -= overlap;
         IList<ICompletionData> data = completionWindow.CompletionList.CompletionData;
         foreach (var item in completionItems)
@@ -177,15 +166,15 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     /// <returns>Tidied Xml</returns>
     void TidyXml()
     {
-            //_editor.TextArea.Document.Text = "Hallo";
-            string buffer = _editor.TextArea.Document.Text;
-            if (buffer.Length < 30000 || MessageBox.Show("Validating large requests may take several moments.  Continue?","AML Requestor", MessageBoxButtons.YesNo,MessageBoxIcon.Question) == DialogResult.Yes)
-            {
-                if (IndentXml(buffer, out buffer) == null)
-                {
-                    _editor.TextArea.Document.Text = buffer;
-                }
-            }
+      //_editor.TextArea.Document.Text = "Hallo";
+      string buffer = Editor.TextArea.Document.Text;
+      if (buffer.Length < 30000 || MessageBox.Show("Validating large requests may take several moments.  Continue?", "AML Requestor", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+      {
+        if (IndentXml(buffer, out buffer) == null)
+        {
+          Editor.TextArea.Document.Text = buffer;
+        }
+      }
     }
 
     /// <summary>
@@ -195,61 +184,45 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     /// <returns>Formatted Xml String</returns>
     public Exception IndentXml(string xml, out string formattedString)
     {
-            try
-            {
-                XmlDocument doc = new XmlDocument();
-
-                doc.LoadXml(xml);
-                return IndentXml(doc, out formattedString);
-
-            }
-            catch(Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-                formattedString = string.Empty;
-                return ex;
-            }
-    }
-
-    /// <summary>
-    /// Takes an Xml Document and renders it as a formatted (indented) string
-    /// </summary>
-    /// <param name="doc">XML Document</param>
-    /// <returns>Formatted (indented) XML string</returns>
-    public Exception IndentXml(XmlDocument doc, out string formattedString)
-    {
-        try
+      try
+      {
+        using(var reader = new StringReader(xml))
         {
-            using (StringWriter writer = new StringWriter())
+          using (var xmlReader = XmlReader.Create(reader))
+          {
+            using (var writer = new StringWriter())
             {
-                XmlWriterSettings settings = new XmlWriterSettings();
-                settings.OmitXmlDeclaration = true;
-                settings.Indent = true;
-                settings.IndentChars = "  ";
-                settings.CheckCharacters = true;
-                using (XmlWriter xmlWriter = XmlWriter.Create(writer, settings))
-                {
-                    doc.WriteContentTo(xmlWriter);
-                    xmlWriter.Flush();
-                    formattedString = writer.ToString();
-                }
+              var settings = new XmlWriterSettings();
+              settings.OmitXmlDeclaration = true;
+              settings.Indent = true;
+              settings.IndentChars = "  ";
+              settings.CheckCharacters = true;
+              settings.CloseOutput = true;
+              using (var xmlWriter = XmlWriter.Create(writer, settings))
+              {
+                xmlWriter.WriteNode(xmlReader, true);
+                xmlWriter.Flush();
+                formattedString = writer.ToString();
+              }
 
             }
+          }
+        }
 
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show(ex.Message);
-            formattedString = string.Empty;
-            return ex;
-        }
         return null;
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show(ex.Message);
+        formattedString = string.Empty;
+        return ex;
+      }
     }
   }
   public class RunRequestedEventArgs : EventArgs
   {
     private string _query;
-    public string Query 
+    public string Query
     {
       get { return _query; }
     }
