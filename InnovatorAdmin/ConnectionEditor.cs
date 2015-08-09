@@ -19,14 +19,17 @@ namespace Aras.Tools.InnovatorAdmin
     {
       get
       {
-        return lstConnections.CheckedItems.OfType<ConnectionData>();
+        return lstConnections.Selected.OfType<ConnectionData>();
+      }
+      set
+      {
+        lstConnections.SetSelection(value.ToArray());
       }
     }
-    
+
     public ConnectionEditor()
     {
       InitializeComponent();
-      lstConnections.CheckOnClick = true;
       this.MultiSelect = false;
       _bs.CurrentChanged += _bs_CurrentChanged;
 
@@ -78,10 +81,10 @@ namespace Aras.Tools.InnovatorAdmin
         cboIomVersion.DataBindings.Add("Text", _bs, "IomVersion");
 
         if (lstConnections.Items.Count > 0 && !this.MultiSelect)
-          lstConnections.SetItemChecked(0, true);
+          lstConnections.SetItemSelected(0, true);
       }
     }
-    
+
     private void btnTest_Click(object sender, EventArgs e)
     {
       try
@@ -195,32 +198,32 @@ namespace Aras.Tools.InnovatorAdmin
       }
     }
 
-    private void lstConnections_ItemCheck(object sender, ItemCheckEventArgs e)
-    {
-      try
-      {
-        _itemCheckChanged = true;
-        if (e.NewValue == CheckState.Checked && !this.MultiSelect)
-        {
-          try
-          {
-            lstConnections.ItemCheck -= lstConnections_ItemCheck;
-            for (int i = 0; i < lstConnections.Items.Count; i++)
-            {
-              if (i != e.Index) lstConnections.SetItemCheckState(i, CheckState.Unchecked);
-            }
-          }
-          finally
-          {
-            lstConnections.ItemCheck += lstConnections_ItemCheck;
-          }
-        }
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
+    //private void lstConnections_ItemCheck(object sender, ItemCheckEventArgs e)
+    //{
+    //  try
+    //  {
+    //    _itemCheckChanged = true;
+    //    if (e.NewValue == CheckState.Checked && !this.MultiSelect)
+    //    {
+    //      try
+    //      {
+    //        clstConnections.ItemCheck -= lstConnections_ItemCheck;
+    //        for (int i = 0; i < clstConnections.Items.Count; i++)
+    //        {
+    //          if (i != e.Index) clstConnections.SetItemCheckState(i, CheckState.Unchecked);
+    //        }
+    //      }
+    //      finally
+    //      {
+    //        clstConnections.ItemCheck += lstConnections_ItemCheck;
+    //      }
+    //    }
+    //  }
+    //  catch (Exception ex)
+    //  {
+    //    Utils.HandleError(ex);
+    //  }
+    //}
 
     private string _lastDatabaseUrl;
     private bool _itemCheckChanged;
@@ -228,7 +231,7 @@ namespace Aras.Tools.InnovatorAdmin
     private void cmbDatabase_DropDown(object sender, EventArgs e)
     {
       try
-      { 
+      {
         if (txtUrl.Text != _lastDatabaseUrl)
         {
           var selected = (cmbDatabase.Items.Count > 0 ? cmbDatabase.SelectedItem : null);
@@ -243,7 +246,7 @@ namespace Aras.Tools.InnovatorAdmin
             {
               cmbDatabase.Items.Add(db);
             }
-            
+
             if (selected != null) cmbDatabase.SelectedItem = selected;
           }
           catch (Exception err)

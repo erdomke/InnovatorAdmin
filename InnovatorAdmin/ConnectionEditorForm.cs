@@ -31,6 +31,11 @@ namespace Aras.Tools.InnovatorAdmin
       this.TopMost = true;
     }
 
+    public void SetSelected(params Connections.ConnectionData[] connections)
+    {
+      connectionEditor.SelectedConnections = connections;
+    }
+
     protected override void OnLoad(EventArgs e)
     {
       base.OnLoad(e);

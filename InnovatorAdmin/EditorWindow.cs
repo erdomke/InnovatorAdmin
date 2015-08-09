@@ -15,6 +15,7 @@ namespace Aras.Tools.InnovatorAdmin
   public partial class EditorWindow : Form
   {
     private object _current;
+    private ConnectionData _connData;
     private IArasConnection _conn;
     private DataTable _outputTable;
     private string _outputXml;
@@ -72,6 +73,7 @@ namespace Aras.Tools.InnovatorAdmin
       else
       {
         _conn = arasConn;
+        _connData = conn;
         ((Editor.AmlEditorHelper)inputEditor.Helper).InitializeConnection(ApplyAction);
       }
       lblConnectionName.Text = string.Format("{0} ({1})", conn.ConnectionName, _conn.GetIomVersion());
@@ -246,6 +248,7 @@ namespace Aras.Tools.InnovatorAdmin
         using (var dialog = new ConnectionEditorForm())
         {
           dialog.Multiselect = false;
+          dialog.SetSelected(_connData);
           if (dialog.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
           {
             SetConnection(dialog.SelectedConnections.First());

@@ -15,7 +15,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
     private FullBindingList<T> _filterable;
     private PropertyDescriptorCollection _props;
 
-    public IEnumerable<T> DataSource 
+    public IEnumerable<T> DataSource
     {
       get { return _dataSource; }
       set
@@ -28,7 +28,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
         SortDefault();
       }
     }
-    public string DisplayMember 
+    public string DisplayMember
     {
       get { return listValues.DisplayMember; }
       set { listValues.DisplayMember = value; }
@@ -44,7 +44,15 @@ namespace Aras.Tools.InnovatorAdmin.Controls
     {
       InitializeComponent();
       _props = TypeDescriptor.GetProperties(typeof(T));
+      this.KeyPreview = true;
     }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+      if (listValues.ContainsFocus) txtFilter.Focus();
+      base.OnKeyDown(e);
+    }
+
 
     private void txtFilter_TextChanged(object sender, EventArgs e)
     {
@@ -98,10 +106,38 @@ namespace Aras.Tools.InnovatorAdmin.Controls
     {
       try
       {
-        if (e.KeyCode == Keys.Down)
+        var page = listValues.Height / listValues.ItemHeight;
+        switch (e.KeyCode)
         {
-          listValues.Focus();
-          if (_filterable.Count > 1) listValues.SelectedIndex = 1;
+          case Keys.Down:
+            if (_filterable.Count > 1)
+            {
+              if (listValues.SelectedIndex < 0)
+              {
+                listValues.SelectedIndex = 0;
+              }
+              else if (listValues.SelectedIndex < (listValues.Items.Count - 1))
+              {
+                listValues.SelectedIndex += 1;
+              }
+            }
+            e.Handled = true;
+            break;
+          case Keys.Up:
+            if (listValues.SelectedIndex > 0)
+            {
+              listValues.SelectedIndex -= 1;
+            }
+            e.Handled = true;
+            break;
+          case Keys.PageDown:
+            listValues.SelectedIndex = Math.Min(Math.Max(0, listValues.SelectedIndex) + page, listValues.Items.Count - 1);
+            e.Handled = true;
+            break;
+          case Keys.PageUp:
+            listValues.SelectedIndex = Math.Max(Math.Max(0, listValues.SelectedIndex) - page, 0);
+            e.Handled = true;
+            break;
         }
       }
       catch (Exception ex)
@@ -115,6 +151,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       try
       {
         txtFilter.Focus();
+
       }
       catch (Exception ex)
       {
