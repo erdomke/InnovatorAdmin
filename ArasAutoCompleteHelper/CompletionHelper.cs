@@ -1,4 +1,5 @@
 ﻿using Aras.AutoComplete.AmlSchema;
+using Innovator.Client;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,25 +11,25 @@ namespace Aras.AutoComplete
 {
   public class CompletionHelper
   {
-    private Func<string, XmlNode, XmlNode> _applyAction;
+    private IAsyncConnection _conn;
     private ItemTypeCollection _itemTypes = new ItemTypeCollection();
-    private List<string> _methods;
+    private IPromise<IEnumerable<string>> _methods;
 
-    public IEnumerable<string> GetCompletions(string xml, string soapAction, out int overlap)
+    public IPromise<CompletionData> GetCompletions(string xml, string soapAction)
     {
-      overlap = 0;
-      if (string.IsNullOrEmpty(xml)) return Enumerable.Empty<string>();
+      //var overlap = 0;
+      if (string.IsNullOrEmpty(xml)) return Promises.Resolved<CompletionData>(new CompletionData());
 
       var path = new List<AmlNode>();
       string attr = null;
       string attrValue = null;
-      
-      var state = Utils.ProcessFragment(xml, (r, o) =>
+
+      var state = XmlUtils.ProcessFragment(xml, (r, o) =>
       {
         switch (r.NodeType)
         {
           case XmlNodeType.Element:
-            if (!r.IsEmptyElement) 
+            if (!r.IsEmptyElement)
               path.Add(new AmlNode() { LocalName = r.LocalName, Type = r.GetAttribute("type"), Action = r.GetAttribute("action") });
             break;
           case XmlNodeType.EndElement:
@@ -41,22 +42,25 @@ namespace Aras.AutoComplete
         }
         return true;
       });
-      if (state == Utils.XmlState.Tag && xml.EndsWith("\"")) return Enumerable.Empty<string>();
+      if (state == XmlState.Tag && (xml.Last() == '"' || xml.Last() == '\''))
+        return Promises.Resolved<CompletionData>(new CompletionData());
 
-      var items = new List<string>();
+      IPromise<IEnumerable<string>> items = null;
+      var filter = string.Empty;
+      var multiValueAttribute = false;
 
       if (path.Count < 1)
       {
         switch (soapAction)
         {
           case "ApplySQL":
-            items.Add("sql");
+            items = StringPromise("sql");
             break;
           case "ApplyAML":
-            items.Add("AML");
+            items = StringPromise("AML");
             break;
           default:
-            items.Add("Item");
+            items = StringPromise("Item");
             break;
         }
       }
@@ -64,8 +68,8 @@ namespace Aras.AutoComplete
       {
         switch (state)
         {
-          case Utils.XmlState.Attribute:
-          case Utils.XmlState.AttributeStart:
+          case XmlState.Attribute:
+          case XmlState.AttributeStart:
             switch (path.Last().LocalName)
             {
               case "and":
@@ -80,130 +84,124 @@ namespace Aras.AutoComplete
                 switch (soapAction)
                 {
                   case "GenerateNewGUIDEx":
-                    items.Add("quantity");
+                    items = StringPromise("quantity");
                     break;
                   case "":
                     break;
                   default:
-                    items.Add("action");
-                    if (path.Last().Action == "getPermissions") items.Add("access_type");
-                    items.Add("config_path");
-                    items.Add("doGetItem");
-                    items.Add("id");
-                    items.Add("idlist");
-                    items.Add("isCriteria");
-                    items.Add("language");
-                    items.Add("levels");
-                    items.Add("maxRecords");
-                    items.Add("page");
-                    items.Add("pagesize");
-                    items.Add("orderBy");
-                    items.Add("queryDate");
-                    items.Add("queryType");
-                    items.Add("related_expand");
-                    items.Add("select");
-                    items.Add("serverEvents");
-                    items.Add("type");
-                    items.Add("typeID");
-                    items.Add("version");
-                    items.Add("where");
+                    items = StringPromise(new string[] {"action"
+                      , "access_type"
+                      , "config_path"
+                      , "doGetItem"
+                      , "id"
+                      , "idlist"
+                      , "isCriteria"
+                      , "language"
+                      , "levels"
+                      , "maxRecords"
+                      , "page"
+                      , "pagesize"
+                      , "orderBy"
+                      , "queryDate"
+                      , "queryType"
+                      , "related_expand"
+                      , "select"
+                      , "serverEvents"
+                      , "type"
+                      , "typeID"
+                      , "version"
+                      , "where"}
+                      .Where(i => path.Last().Action == "getPermissions" || i != "access_type"));
                     break;
                 }
                 break;
               default:
-                items.Add("condition");
-                items.Add("is_null");
+                items = StringPromise("condition", "is_null");
                 break;
             }
-            if (!string.IsNullOrEmpty(attr))
-            {
-              items = FilterAndSort(items, attr);
-              overlap = attr.Length;
-            }
+
+            filter = attr;
             break;
-          case Utils.XmlState.AttributeValue:
+          case XmlState.AttributeValue:
             if (path.Last().LocalName == "Item")
             {
               ItemType itemType;
               switch (attr)
               {
                 case "action":
-                  items.Add("ActivateActivity");
-                  items.Add("add");
-                  items.Add("AddItem");
-                  items.Add("AddHistory");
-                  items.Add("ApplyUpdate");
-                  items.Add("BuildProcessReport");
-                  items.Add("CancelWorkflow");
-                  items.Add("checkImportedItemType");
-                  items.Add("closeWorkflow");
-                  items.Add("copy");
-                  items.Add("copyAsIs");
-                  items.Add("copyAsNew");
-                  items.Add("create");
-                  items.Add("delete");
-                  items.Add("edit");
-                  items.Add("EmailItem");
-                  items.Add("EvaluateActivity");
-                  items.Add("exportItemType");
-                  items.Add("get");
-                  items.Add("getItemAllVersions");
-                  items.Add("getAffectedItems");
-                  items.Add("GetItemConfig");
-                  items.Add("getItemLastVersion");
-                  items.Add("getItemNextStates");
-                  items.Add("getItemRelationships");
-                  items.Add("GetItemRepeatConfig");
-                  items.Add("getItemWhereUsed");
-                  items.Add("GetMappedPath");
-                  items.Add("getPermissions");
-                  items.Add("getRelatedItem");
-                  items.Add("GetUpdateInfo");
-                  items.Add("instantiateWorkflow");
-                  items.Add("lock");
-                  items.Add("merge");
-                  items.Add("New Workflow Map");
-                  items.Add("PromoteItem");
-                  items.Add("purge");
-                  items.Add("recache");
-                  items.Add("replicate");
-                  items.Add("resetAllItemsAccess");
-                  items.Add("resetItemAccess");
-                  items.Add("resetLifecycle");
-                  items.Add("setDefaultLifecycle");
-                  items.Add("skip");
-                  items.Add("startWorkflow");
-                  items.Add("unlock");
-                  items.Add("update");
-                  items.Add("ValidateWorkflowMap");
-                  items.Add("version");
-
-                  if (_methods == null)
+                  if (_methods == null && _conn != null)
                   {
-                    var methods = GetItems("ApplyItem", "<AML><Item action=\"get\" type=\"Method\" select=\"name\"></Item></AML>");
-                    _methods = methods.Select(m => m.Element("name", "")).ToList();
+                    _methods = _conn.ApplyAsync("<AML><Item action=\"get\" type=\"Method\" select=\"name\"></Item></AML>", true, false)
+                      .Convert(r => r.Items()
+                                     .Select(m => m.Property("name").AsString("")));
                   }
 
-                  items.AddRange(_methods);
+                  var baseMethods = new string[] {"ActivateActivity"
+                    , "add"
+                    , "AddItem"
+                    , "AddHistory"
+                    , "ApplyUpdate"
+                    , "BuildProcessReport"
+                    , "CancelWorkflow"
+                    , "checkImportedItemType"
+                    , "closeWorkflow"
+                    , "copy"
+                    , "copyAsIs"
+                    , "copyAsNew"
+                    , "create"
+                    , "delete"
+                    , "edit"
+                    , "EmailItem"
+                    , "EvaluateActivity"
+                    , "exportItemType"
+                    , "get"
+                    , "getItemAllVersions"
+                    , "getAffectedItems"
+                    , "GetItemConfig"
+                    , "getItemLastVersion"
+                    , "getItemNextStates"
+                    , "getItemRelationships"
+                    , "GetItemRepeatConfig"
+                    , "getItemWhereUsed"
+                    , "GetMappedPath"
+                    , "getPermissions"
+                    , "getRelatedItem"
+                    , "GetUpdateInfo"
+                    , "instantiateWorkflow"
+                    , "lock"
+                    , "merge"
+                    , "New Workflow Map"
+                    , "PromoteItem"
+                    , "purge"
+                    , "recache"
+                    , "replicate"
+                    , "resetAllItemsAccess"
+                    , "resetItemAccess"
+                    , "resetLifecycle"
+                    , "setDefaultLifecycle"
+                    , "skip"
+                    , "startWorkflow"
+                    , "unlock"
+                    , "update"
+                    , "ValidateWorkflowMap"
+                    , "version"};
+
+                  items = _methods == null
+                    ? StringPromise(baseMethods)
+                    : _methods.Convert(m => m.Concat(baseMethods));
                   break;
                 case "access_type":
-                  items.Add("can_add");
-                  items.Add("can_delete");
-                  items.Add("can_get");
-                  items.Add("can_update");
+                  items = StringPromise("can_add", "can_delete", "can_get", "can_update");
                   break;
                 case "doGetItem":
                 case "version":
                 case "isCriteria":
                 case "related_expand":
                 case "serverEvents":
-                  items.Add("0");
-                  items.Add("1");
+                  items = StringPromise("0", "1");
                   break;
                 case "queryType":
-                  items.Add("Effective");
-                  items.Add("Latest");
-                  items.Add("Released");
+                  items = StringPromise("Effective", "Latest", "Released");
                   break;
                 case "orderBy":
                   if (!string.IsNullOrEmpty(path.Last().Type)
@@ -211,10 +209,11 @@ namespace Aras.AutoComplete
                   {
                     var lastComma = attrValue.LastIndexOf(",");
                     if (lastComma >= 0) attrValue = attrValue.Substring(lastComma + 1).Trim();
-                    
-                    items.AddRange(GetProperties(itemType).Select(p => p.Name));
-                    items.AddRange(GetProperties(itemType).Select(p => p.Name + " DESC"));
+
+                    items = GetProperties(itemType)
+                      .Convert(p => p.SelectMany(i => new string[] { i.Name, i.Name + " DESC" }));
                   }
+                  multiValueAttribute = true;
                   break;
                 case "select":
                   if (!string.IsNullOrEmpty(path.Last().Type)
@@ -224,47 +223,39 @@ namespace Aras.AutoComplete
                     var selectPath = SelectPath(attrValue, out partial);
                     attrValue = partial;
 
-                    Property currProp;
-                    foreach (var part in selectPath)
-                    {
-                      if (TryGetProperty(itemType, part, out currProp) 
-                        && currProp.Type == PropertyType.item 
-                        && currProp.Restrictions.Any() 
-                        && _itemTypes.TryGetValue(currProp.Restrictions.First(), out itemType))
-                      {
-                        // continue
-                      }
-                      else
-                      {
-                        break;
-                      }
-                    }
+                    var itPromise = new Promise<ItemType>();
+                    RecurseProperties(itemType, selectPath, it => itPromise.Resolve(it));
 
-                    items.AddRange(GetProperties(itemType).Select(p => p.Name));
+                    items = itPromise
+                      .Continue(it => GetProperties(it))
+                      .Convert(p => p.Select(i => i.Name));
                   }
+                  multiValueAttribute = true;
                   break;
                 case "type":
-                  if (path.Count > 2 
-                    && path[path.Count - 3].LocalName == "Item" 
-                    && path[path.Count - 2].LocalName == "Relationships") 
+                  if (path.Count > 2
+                    && path[path.Count - 3].LocalName == "Item"
+                    && path[path.Count - 2].LocalName == "Relationships")
                   {
                     if (!string.IsNullOrEmpty(path[path.Count - 3].Type)
                       && _itemTypes.TryGetValue(path[path.Count - 3].Type, out itemType))
                     {
-                      items.AddRange(itemType.Relationships.Select(r => r.Name));
+                      items = StringPromise(itemType.Relationships.Select(r => r.Name));
                     }
                   }
                   else
                   {
-                    items.AddRange(_itemTypes.Select(i => i.Value.Name));
+                    items = StringPromise(_itemTypes.Select(i => i.Value.Name));
                   }
                   break;
                 case "where":
                   if (!string.IsNullOrEmpty(path.Last().Type)
                     && _itemTypes.TryGetValue(path.Last().Type, out itemType))
                   {
-                    items.AddRange(GetProperties(itemType).Select(p => "[" + itemType.Name + "].[" + p.Name + "]"));
+                    items = GetProperties(itemType)
+                      .Convert(i => i.Select(p => "[" + itemType.Name + "].[" + p.Name + "]"));
                   }
+                  multiValueAttribute = true;
                   break;
               }
             }
@@ -273,43 +264,34 @@ namespace Aras.AutoComplete
               switch (attr)
               {
                 case "condition":
-                  items.Add("between");
-                  items.Add("eq");
-                  items.Add("ge");
-                  items.Add("gt");
-                  items.Add("in");
-                  items.Add("is not null");
-                  items.Add("is null");
-                  items.Add("is");
-                  items.Add("le");
-                  items.Add("like");
-                  items.Add("lt");
-                  items.Add("ne");
-                  items.Add("not between");
-                  items.Add("not in");
-                  items.Add("not like");
+                  items = StringPromise("between"
+                    , "eq"
+                    , "ge"
+                    , "gt"
+                    , "in"
+                    , "is not null"
+                    , "is null"
+                    , "is"
+                    , "le"
+                    , "like"
+                    , "lt"
+                    , "ne"
+                    , "not between"
+                    , "not in"
+                    , "not like");
                   break;
                 case "is_null":
-                  items.Add("0");
-                  items.Add("1");
+                  items = StringPromise("0", "1");
                   break;
               }
             }
 
-            if (string.IsNullOrEmpty(attrValue))
-            {
-              items.Sort();
-            }
-            else
-            {
-              items = FilterAndSort(items, attrValue);
-              if (overlap == 0) overlap = attrValue.Length;
-            }
+            filter = attrValue;
             break;
           default:
             if (path.Count == 1 && path.First().LocalName == "AML")
             {
-              items.Add("Item");
+              items = StringPromise("Item");
             }
             else
             {
@@ -318,18 +300,25 @@ namespace Aras.AutoComplete
               var last = path[j];
               if (last.LocalName == "Item")
               {
-                items.Add("Relationships");
+                var buffer = new List<string>();
+
+                buffer.Add("Relationships");
                 if (last.Action == "get")
                 {
-                  items.Add("and");
-                  items.Add("not");
-                  items.Add("or");
+                  buffer.Add("and");
+                  buffer.Add("not");
+                  buffer.Add("or");
                 }
                 ItemType itemType;
-                if (!string.IsNullOrEmpty(last.Type) 
+                if (!string.IsNullOrEmpty(last.Type)
                   && _itemTypes.TryGetValue(last.Type, out itemType))
                 {
-                  items.AddRange(GetProperties(itemType).Select(p => p.Name));
+                  items = GetProperties(itemType)
+                      .Convert(p => p.Select(i => i.Name).Concat(buffer));
+                }
+                else
+                {
+                  items = StringPromise(buffer);
                 }
               }
               else if (path.Count > 1)
@@ -339,7 +328,7 @@ namespace Aras.AutoComplete
                 {
                   if (path.Last().LocalName == "Relationships")
                   {
-                    items.Add("Item");
+                    items = StringPromise("Item");
                   }
                   else
                   {
@@ -347,29 +336,74 @@ namespace Aras.AutoComplete
                     if (!string.IsNullOrEmpty(lastItem.Type)
                       && _itemTypes.TryGetValue(lastItem.Type, out itemType))
                     {
-                      Property prop;
-                      if (TryGetProperty(itemType, path.Last().LocalName, out prop))
-                      {
-                        if (prop.Type == PropertyType.item && prop.Restrictions.Any())
+                      items = GetProperty(itemType, path.Last().LocalName)
+                        .Convert(p =>
                         {
-                          foreach (var type in prop.Restrictions)
+                          if (p.Type == PropertyType.item && p.Restrictions.Any())
                           {
-                            items.Add("Item type=\"" + type + "\"");
+                            return p.Restrictions.Select(type => "Item type=\"" + type + "\"");
                           }
-                        }
-                      }
+                          else
+                          {
+                            return Enumerable.Empty<string>();
+                          }
+                        });
                     }
                   }
                 }
               }
             }
 
-            items.Sort();
             break;
         }
 
       }
-      return items;
+
+      if (items == null)
+        return Promises.Resolved(new CompletionData());
+
+      return items.Convert(i => new CompletionData() {
+        Items = string.IsNullOrEmpty(filter) ? i.OrderBy(j => j) : FilterAndSort(i, filter),
+        MultiValueAttribute = multiValueAttribute,
+        Overlap = (filter ?? "").Length,
+        State = state
+      });
+    }
+
+    private void RecurseProperties(ItemType itemType, IEnumerable<string> remainingPath, Action<ItemType> callback)
+    {
+      if (remainingPath.Any())
+      {
+        GetProperty(itemType, remainingPath.First())
+        .Done(currProp =>
+        {
+          ItemType it;
+          if (currProp.Type == PropertyType.item
+            && currProp.Restrictions.Any()
+            && _itemTypes.TryGetValue(currProp.Restrictions.First(), out it))
+          {
+            RecurseProperties(it, remainingPath.Skip(1), callback);
+          }
+          else
+          {
+            callback(itemType);
+          }
+        })
+        .Fail(ex => callback(itemType));
+      }
+      else
+      {
+        callback(itemType);
+      }
+    }
+
+    private IPromise<IEnumerable<string>> StringPromise(IEnumerable<string> values)
+    {
+      return Promises.Resolved(values);
+    }
+    private IPromise<IEnumerable<string>> StringPromise(params string[] values)
+    {
+      return Promises.Resolved<IEnumerable<string>>(values);
     }
 
     public string GetQuery(string xml, int offset)
@@ -379,7 +413,7 @@ namespace Aras.AutoComplete
       var depth = 0;
       string result = null;
 
-      Utils.ProcessFragment(xml, (r, o) =>
+      XmlUtils.ProcessFragment(xml, (r, o) =>
       {
         switch (r.NodeType)
         {
@@ -422,11 +456,16 @@ namespace Aras.AutoComplete
       return result;
     }
 
-    public virtual void InitializeConnection(Func<string, XmlNode, XmlNode> applyAction)
+    public virtual void InitializeConnection(IAsyncConnection conn)
     {
       _itemTypes.Clear();
-      _applyAction = applyAction;
-      LoadItemTypes(GetItems("ApplyAML", "<AML><Item action=\"get\" type=\"ItemType\" select=\"name\" /><Item action=\"get\" type=\"RelationshipType\" related_expand=\"0\" select=\"related_id,source_id,relationship_id,name\" /></AML>"));
+      if (conn != null)
+      {
+        _conn = conn;
+        _conn.ApplyAsync("<AML><Item action=\"get\" type=\"ItemType\" select=\"name\" /><Item action=\"get\" type=\"RelationshipType\" related_expand=\"0\" select=\"related_id,source_id,relationship_id,name\" /></AML>"
+          , true, false)
+          .Done(r => LoadItemTypes(r.Items()));
+      }
     }
 
     public string LastOpenTag(string xml)
@@ -434,7 +473,7 @@ namespace Aras.AutoComplete
       bool isOpenTag = false;
       var path = new List<AmlNode>();
 
-      var state = Utils.ProcessFragment(xml, (r, o) =>
+      var state = XmlUtils.ProcessFragment(xml, (r, o) =>
       {
         switch (r.NodeType)
         {
@@ -460,7 +499,7 @@ namespace Aras.AutoComplete
       return null;
     }
 
-    private List<string> FilterAndSort(IEnumerable<string> values, string substring)
+    private IEnumerable<string> FilterAndSort(IEnumerable<string> values, string substring)
     {
       var result = values.Where(i => i.IndexOf(substring, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
       result.Sort((x, y) =>
@@ -483,47 +522,39 @@ namespace Aras.AutoComplete
       return result;
     }
 
-    private IEnumerable<XmlElement> GetItems(string soapAction, string input)
+    private IPromise<IEnumerable<Property>> GetProperties(ItemType itemType)
     {
-      var inputDoc = new XmlDocument();
-      inputDoc.LoadXml(input);
-      return this.GetItems(soapAction, inputDoc);
-    }
-    private IEnumerable<XmlElement> GetItems(string soapAction, XmlNode input)
-    {
-      var result = _applyAction.Invoke(soapAction, input);
-      var node = result;
-      while (node != null && node.LocalName != "Item") node = node.ChildNodes.OfType<XmlElement>().FirstOrDefault();
-      if (node == null) return Enumerable.Empty<XmlElement>();
-      return node.ParentNode.ChildNodes.OfType<XmlElement>().Where(e => e.LocalName == "Item");
-    }
-    private IEnumerable<Property> GetProperties(ItemType itemType)
-    {
-      if (itemType.Properties.Count < 1)
-        LoadProperties(itemType, GetItems("ApplyItem", string.Format("<AML><Item action=\"get\" type=\"ItemType\" select=\"name\"><name>{0}</name><Relationships><Item action=\"get\" type=\"Property\" select=\"name,label,data_type,data_source\" /></Relationships></Item></AML>", itemType.Name)));
-      return itemType.Properties.Values;
+      if (_conn == null || itemType.Properties.Count > 0)
+        return Promises.Resolved<IEnumerable<Property>>(itemType.Properties.Values);
+
+      return _conn.ApplyAsync("<AML><Item action=\"get\" type=\"ItemType\" select=\"name\"><name>@0</name><Relationships><Item action=\"get\" type=\"Property\" select=\"name,label,data_type,data_source\" /></Relationships></Item></AML>"
+        , true, true, itemType.Name)
+        .Convert(r => {
+          LoadProperties(itemType, r.AssertItem());
+          return (IEnumerable<Property>)itemType.Properties.Values;
+        });
     }
     /// <summary>
     /// Loads the metadata pertaining to the item types in Aras.
     /// </summary>
     /// <param name="items">The item type data.</param>
-    private void LoadItemTypes(IEnumerable<XmlElement> items)
+    private void LoadItemTypes(IEnumerable<IReadOnlyItem> items)
     {
       try
       {
         ItemType currType = null;
         ItemType sourceType = null;
-        
+
         foreach (var item in items)
         {
-          Debug.Print(item.Attribute("type"));
-          switch (item.Attribute("type"))
+          Debug.Print(item.Type().Value);
+          switch (item.Type().Value)
           {
             case "RelationshipType":
-              if (_itemTypes.TryGetValue(item.Element("relationship_id").Attribute("name"), out currType))
+              if (_itemTypes.TryGetValue(item.Property("relationship_id").Attribute("name").Value, out currType))
               {
-                if (item.Element("source_id").Attribute("name") != null &&
-                    _itemTypes.TryGetValue(item.Element("source_id").Attribute("name"), out sourceType))
+                if (item.SourceId().Attribute("name").HasValue() &&
+                    _itemTypes.TryGetValue(item.SourceId().Attribute("name").Value, out sourceType))
                 {
                   currType.Source = sourceType;
                   sourceType.Relationships.Add(currType);
@@ -531,7 +562,7 @@ namespace Aras.AutoComplete
               }
               break;
             default: //"ItemType"
-              _itemTypes.Add(new ItemType(item.Element("name").InnerText));
+              _itemTypes.Add(new ItemType(item.Property("name").Value));
               break;
           }
         }
@@ -546,23 +577,20 @@ namespace Aras.AutoComplete
     /// Loads the property metadata for the current type into the schema.
     /// </summary>
     /// <param name="type">The type.</param>
-    /// <param name="properties">The properties.</param>
-    private void LoadProperties(ItemType type, IEnumerable<XmlElement> properties)
+    /// <param name="itemTypeMeta">The properties.</param>
+    private void LoadProperties(ItemType type, IReadOnlyItem itemTypeMeta)
     {
-      if (properties.Any())
+      var props = itemTypeMeta.Relationships("Property");
+      Property newProp = null;
+      foreach (var prop in props)
       {
-        var props = properties.Single().ElementsByXPath("Relationships/Item[@type='Property']");
-        Property newProp = null;
-        foreach (var prop in props)
+        newProp = new Property(prop.Property("name").Value);
+        newProp.SetType(prop.Property("data_type").Value);
+        if (newProp.Type == PropertyType.item && prop.Property("data_source").Attribute("name").HasValue())
         {
-          newProp = new Property(prop.Element("name").InnerText);
-          newProp.SetType(prop.Element("data_type").InnerText);
-          if (newProp.Type == PropertyType.item && prop.Element("data_source").Attribute("name") != null)
-          {
-            newProp.Restrictions.Add(prop.Element("data_source").Attribute("name"));
-          }
-          type.Properties.Add(newProp);
+          newProp.Restrictions.Add(prop.Property("data_source").Attribute("name").Value);
         }
+        type.Properties.Add(newProp);
       }
     }
 
@@ -595,11 +623,31 @@ namespace Aras.AutoComplete
       return path;
     }
 
-    private bool TryGetProperty(ItemType itemType, string name, out Property prop)
+    private IPromise<Property> GetProperty(ItemType itemType, string name)
     {
-      if (itemType.Properties.Count < 1)
-        LoadProperties(itemType, GetItems("ApplyItem", string.Format("<AML><Item action=\"get\" type=\"ItemType\" select=\"name\"><name>{0}</name><Relationships><Item action=\"get\" type=\"Property\" select=\"name,label,data_type,data_source\" /></Relationships></Item></AML>", itemType.Name)));
-      return itemType.Properties.TryGetValue(name, out prop);
+      if (_conn == null || itemType.Properties.Count > 0)
+        return LoadedProperty(itemType, name);
+
+      return _conn.ApplyAsync("<AML><Item action=\"get\" type=\"ItemType\" select=\"name\"><name>@0</name><Relationships><Item action=\"get\" type=\"Property\" select=\"name,label,data_type,data_source\" /></Relationships></Item></AML>"
+        , true, true, itemType.Name)
+        .Continue(r =>
+        {
+          LoadProperties(itemType, r.AssertItem());
+          return LoadedProperty(itemType, name);
+        });
+    }
+
+    private IPromise<Property> LoadedProperty(ItemType itemType, string name)
+    {
+      Property prop;
+      if (itemType.Properties.TryGetValue(name, out prop))
+      {
+        return Promises.Resolved(prop);
+      }
+      else
+      {
+        return Promises.Rejected<Property>(new KeyNotFoundException());
+      }
     }
 
     private class AmlNode

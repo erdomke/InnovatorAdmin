@@ -15,7 +15,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
   {
     private IWizard _wizard;
 
-    public bool MultiSelect 
+    public bool MultiSelect
     {
       get { return connEditor.MultiSelect; }
       set { connEditor.MultiSelect = value; }
@@ -43,7 +43,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
     public void GoNext()
     {
       ConnectionManager.Current.Save();
-      
+
       if (!connEditor.SelectedConnections.Any())
       {
         MessageBox.Show(resources.Messages.NoConnectionSelected);
@@ -52,22 +52,22 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       {
         string msg;
         _wizard.ConnectionInfo = connEditor.SelectedConnections;
-        var conn = ConnectionEditor.Login(_wizard.ConnectionInfo.First(), out msg);
-        if (conn == null)
+        try
         {
-          MessageBox.Show(msg);
-        }
-        else
-        {
+          var conn = ConnectionEditor.Login(_wizard.ConnectionInfo.First());
           _wizard.Connection = conn;
           this.GoNextAction();
+        }
+        catch (Exception ex)
+        {
+          MessageBox.Show(ex.Message);
         }
       }
     }
 
     private void connEditor_SelectionChanged(object sender, EventArgs e)
     {
-      _wizard.NextEnabled = connEditor.SelectedConnections.Any();
+      if (_wizard != null) _wizard.NextEnabled = connEditor.SelectedConnections.Any();
     }
   }
 }

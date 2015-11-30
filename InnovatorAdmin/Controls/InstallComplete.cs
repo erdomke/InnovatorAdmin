@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
+using Innovator.Client;
 
 namespace Aras.Tools.InnovatorAdmin.Controls
 {
@@ -33,22 +34,13 @@ namespace Aras.Tools.InnovatorAdmin.Controls
 
     private void btnResetServerCache_Click(object sender, EventArgs e)
     {
-      string msg;
       using (var rsc = new ConnectionEditorForm()) {
         if (rsc.ShowDialog(this.ParentForm) == DialogResult.OK)
         {
           foreach (var conn in rsc.SelectedConnections)
           {
-            var arasConn = ConnectionEditor.Login(conn, out msg);
-            if (arasConn == null)
-            {
-              MessageBox.Show(msg);
-            }
-            else
-            {
-              arasConn.CallAction("ResetServerCache", "<Item/>");
-            }
-
+            var arasConn = ConnectionEditor.Login(conn);
+            arasConn.Process(new Command("<Item/>").WithAction("ResetServerCache"));
           }
         }
       }

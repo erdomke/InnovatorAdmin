@@ -6,6 +6,7 @@ using System.Xml;
 using System.Xml.Xsl;
 using System.IO;
 using System.Diagnostics;
+using Innovator.Client;
 
 namespace Aras.Tools.InnovatorAdmin
 {
@@ -19,7 +20,7 @@ namespace Aras.Tools.InnovatorAdmin
       ResolvedCycle
     }
 
-    private Connection _conn;
+    private IAsyncConnection _conn;
     private DependencyAnalyzer _dependAnalyzer;
     private Dictionary<string, ItemType> _itemTypesById;
     private Dictionary<string, ItemType> _itemTypesByName;
@@ -27,9 +28,9 @@ namespace Aras.Tools.InnovatorAdmin
     public event EventHandler<ActionCompleteEventArgs> ActionComplete;
     public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
 
-    public ExportProcessor(IArasConnection conn)
+    public ExportProcessor(IAsyncConnection conn)
     {
-      _conn = new Connection(conn);
+      _conn = conn;
     }
 
     public void Export(InstallScript script, IEnumerable<ItemReference> items)
@@ -571,11 +572,11 @@ namespace Aras.Tools.InnovatorAdmin
             }
           }
 
-          var polyItems = _conn.GetItems("ApplyItem", queryElem.OuterXml);
+          var polyItems = _conn.Apply(queryElem.OuterXml).Items();
           foreach (var polyItem in polyItems)
           {
             newRef = ItemReference.FromFullItem(polyItem, true);
-            realType = _itemTypesByName.Values.FirstOrDefault(t => t.Id == polyItem.Element("itemtype", ""));
+            realType = _itemTypesByName.Values.FirstOrDefault(t => t.Id == polyItem.Property("itemtype").AsString(""));
             if (realType != null) newRef.Type = realType.Name;
             itemList.Add(newRef);
           }
@@ -589,16 +590,19 @@ namespace Aras.Tools.InnovatorAdmin
     {
       var result = new XmlDocument();
       result.AppendChild(result.CreateElement("Result"));
-      IEnumerable<XmlElement> resultItems;
+      IEnumerable<IReadOnlyItem> resultItems;
       var queryItems = query.Elements("Item").ToList();
       var i = 0;
       ReportProgress(4, string.Format("Searching for data ({0} of {1})", i, queryItems.Count));
       foreach (var item in queryItems)
       {
-        resultItems = _conn.GetItems("ApplyItem", item);
+        resultItems = _conn.Apply(item).Items();
+        XmlDocument doc;
         foreach (var resultItem in resultItems)
         {
-          result.DocumentElement.AppendChild(result.ImportNode(resultItem, true));
+          doc = new XmlDocument();
+          doc.LoadXml(resultItem.ToAml());
+          result.DocumentElement.AppendChild(result.ImportNode(doc.DocumentElement, true));
         }
         i++;
         ReportProgress(4 + (int)(i * 90.0 / queryItems.Count), string.Format("Searching for data ({0} of {1})", i, queryItems.Count));
@@ -752,24 +756,16 @@ namespace Aras.Tools.InnovatorAdmin
       var query = "<Item type=\"Property\" action=\"get\" idlist=\"" + fields.GroupConcat(",", f => f.Element("propertytype_id", "")) + "\" select=\"name,source_id\" />";
 
       // Get all the property information from the database
-      var results = _conn.GetItems("ApplyItem", query).ToDictionary(e => e.Attribute("id"));
-
-      // Reformat the results as queries
-      foreach (var result in results.Values)
-      {
-        foreach (var attr in result.Attributes.OfType<XmlAttribute>().Where(a => a.LocalName != "type").ToList())
-        {
-          result.RemoveAttributeNode(attr);
-        }
-        foreach (var child in result.Elements().Where(e => e.LocalName != "name" && e.LocalName != "source_id").ToList())
-        {
-          child.Detatch();
-        }
-        result.Attr("action", "get").Attr("select", "id");
-      }
+      var results = _conn.Apply(query).Items().ToDictionary(e => e.Id(), e => new Command(
+        @"<Item type='@0' action='get' select='id'>
+            <name>@1</name>
+            <source_id>@2</source_id>
+        </Item>", e.Type().Value, e.Property("name").Value, e.SourceId().Value)
+                .ToNormalizedAml(_conn.AmlContext.LocalizationContext));
 
       // Update the export the the proper edit scripts
-      XmlElement propData;
+      string propData;
+      XmlDocument tempDoc;
       XmlElement propType;
       XmlElement parentItem;
       XmlElement script;
@@ -779,7 +775,11 @@ namespace Aras.Tools.InnovatorAdmin
         {
           propType = field.Element("propertytype_id");
           propType.RemoveAll();
-          propType.AppendChild(propType.OwnerDocument.ImportNode(propData, true));
+
+          tempDoc = new XmlDocument();
+          tempDoc.LoadXml(propData);
+
+          propType.AppendChild(propType.OwnerDocument.ImportNode(tempDoc.DocumentElement, true));
           propType.Detatch();
           parentItem = field.Parents().Last(e => e.LocalName == "Item");
           script = parentItem.OwnerDocument.CreateElement("Item").Attr("type", field.Attribute("type")).Attr("id", field.Attribute("id")).Attr("action", "edit");
@@ -816,18 +816,18 @@ namespace Aras.Tools.InnovatorAdmin
                        + "\" idlist=\""
                        + newGroup.Select(r => r.Unique).Aggregate((p, c) => p + "," + c)
                        + "\" select=\"itemtype\" action=\"get\" />");
-      IEnumerable<XmlElement> items;
+      IEnumerable<IReadOnlyItem> items;
       List<XmlElement> fixElems;
       ItemType fullType;
 
       foreach (var query in queries)
       {
-        items = _conn.GetItems("ApplyItem", query);
+        items = _conn.Apply(query).Items();
         foreach (var item in items)
         {
           if (elementsByRef.TryGetValue(ItemReference.FromFullItem(item, false), out fixElems))
           {
-            fullType = _itemTypesById[item.Element("itemtype", "")];
+            fullType = _itemTypesById[item.Property("itemtype").AsString("")];
             if (fullType != null)
             {
               foreach (var elem in fixElems)
@@ -854,10 +854,10 @@ namespace Aras.Tools.InnovatorAdmin
 
       foreach (var whereQuery in whereQueries)
       {
-        var item = _conn.GetItems("ApplyItem", whereQuery.Query).FirstOrDefault();
+        var item = _conn.Apply(whereQuery.Query).Items().FirstOrDefault();
         if (elementsByRef.TryGetValue(whereQuery.Ref, out fixElems))
         {
-          fullType = _itemTypesById[item.Element("itemtype", "")];
+          fullType = _itemTypesById[item.Property("itemtype").AsString("")];
           if (fullType != null)
           {
             foreach (var elem in fixElems)
@@ -939,8 +939,8 @@ namespace Aras.Tools.InnovatorAdmin
                      select "<Item type=\"" + g.Key.Name + "\" action=\"get\" select=\"config_id\" idlist=\""
                               + g.Select(i => i.Item2).Distinct().Aggregate((p, c) => p + "," + c)
                               + "\" />");
-      var resultItems = queries.SelectMany(q => _conn.GetItems("ApplyItem", q))
-                               .ToDictionary(e => ItemReference.FromFullItem(e, false), e => e.Element("config_id", ""));
+      var resultItems = queries.SelectMany(q => _conn.Apply(q).Items())
+                               .ToDictionary(e => ItemReference.FromFullItem(e, false), e => e.ConfigId().AsString(""));
       result.VisitDescendantsAndSelf(e =>
       {
         string configId;
@@ -1299,46 +1299,46 @@ namespace Aras.Tools.InnovatorAdmin
       }
     }
 
-    internal static void EnsureSystemData(Connection _conn, ref Dictionary<string, ItemType> _itemTypes)
+    internal static void EnsureSystemData(IAsyncConnection _conn, ref Dictionary<string, ItemType> _itemTypes)
     {
       if (_itemTypes == null)
       {
         _itemTypes = new Dictionary<string, ItemType>();
-        var itemTypes = _conn.GetItems("ApplyItem", Properties.Resources.ItemTypeData);
+        var itemTypes = _conn.Apply(Properties.Resources.ItemTypeData).Items();
         ItemType result;
         foreach (var itemTypeData in itemTypes)
         {
           result = new ItemType();
-          result.Id = itemTypeData.Attribute("id");
-          result.IsCore = itemTypeData.Element("core").InnerText == "1";
-          result.IsDependent = itemTypeData.Element("is_dependent").InnerText != "0";
-          result.IsFederated = itemTypeData.Element("implementation_type").InnerText == "federated";
-          result.IsPolymorphic = itemTypeData.Element("implementation_type").InnerText == "polymorphic";
-          result.IsVersionable = itemTypeData.Element("is_versionable").InnerText != "0";
-          result.Name = itemTypeData.Element("name").InnerText;
+          result.Id = itemTypeData.Id();
+          result.IsCore = itemTypeData.Property("core").AsBoolean(false);
+          result.IsDependent = itemTypeData.Property("is_dependent").AsBoolean(false);
+          result.IsFederated = itemTypeData.Property("implementation_type").Value == "federated";
+          result.IsPolymorphic = itemTypeData.Property("implementation_type").Value == "polymorphic";
+          result.IsVersionable = itemTypeData.Property("is_versionable").AsBoolean(false);
+          result.Name = itemTypeData.Property("name").Value;
           result.Reference = ItemReference.FromFullItem(itemTypeData, true);
           _itemTypes[result.Name.ToLowerInvariant()] = result;
         }
 
-        var relationships = _conn.GetItems("ApplyItem", Properties.Resources.RelationshipData);
+        var relationships = _conn.Apply(Properties.Resources.RelationshipData).Items();
         ItemType relType;
         foreach (var rel in relationships)
         {
-          if (rel.Element("source_id").Attribute("name") != null
-            && _itemTypes.TryGetValue(rel.Element("source_id").Attribute("name").ToLowerInvariant(), out result)
-            && rel.Element("relationship_id").Attribute("name") != null
-            && _itemTypes.TryGetValue(rel.Element("relationship_id").Attribute("name").ToLowerInvariant(), out relType))
+          if (rel.SourceId().Attribute("name").HasValue()
+            && _itemTypes.TryGetValue(rel.SourceId().Attribute("name").Value.ToLowerInvariant(), out result)
+            && rel.Property("relationship_id").Attribute("name").HasValue()
+            && _itemTypes.TryGetValue(rel.Property("relationship_id").Attribute("name").Value.ToLowerInvariant(), out relType))
           {
             result.Relationships.Add(relType);
           }
         }
 
-        var floatProps = _conn.GetItems("ApplyItem", Properties.Resources.FloatProperties);
+        var floatProps = _conn.Apply(Properties.Resources.FloatProperties).Items();
         foreach (var floatProp in floatProps)
         {
-          if (_itemTypes.TryGetValue(floatProp.Element("source_id").Attribute("name").ToLowerInvariant(), out result))
+          if (_itemTypes.TryGetValue(floatProp.SourceId().Attribute("name").Value.ToLowerInvariant(), out result))
           {
-            result.FloatProperties.Add(floatProp.Element("name", ""));
+            result.FloatProperties.Add(floatProp.Property("name").AsString(""));
           }
         }
       }

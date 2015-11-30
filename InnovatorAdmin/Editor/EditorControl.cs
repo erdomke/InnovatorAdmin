@@ -1,5 +1,4 @@
-﻿using Aras.AutoComplete;
-using ICSharpCode.AvalonEdit.CodeCompletion;
+﻿using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Folding;
@@ -27,6 +26,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     //private CompletionHelper _helper;
     //private bool _isInitialized;
     private ExtendedEditor _extEditor;
+    private FindReplace _findReplace;
 
     public event EventHandler<RunRequestedEventArgs> RunRequested;
 
@@ -45,6 +45,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       host.Dock = DockStyle.Fill;
 
       _extEditor = new ExtendedEditor();
+      _extEditor.Host = this;
       var editor = _extEditor.editor;
       editor.FontFamily = new System.Windows.Media.FontFamily("Consolas");
       editor.FontSize = 12.0;
@@ -87,6 +88,15 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       else if (e.Key == System.Windows.Input.Key.T && IsControlDown(e.KeyboardDevice)) // Indent the code
       {
         TidyXml();
+      }
+      else if (e.Key == System.Windows.Input.Key.F && IsControlDown(e.KeyboardDevice))
+      {
+        if (_findReplace == null)
+          _findReplace = new FindReplace(this);
+        if (_findReplace.IsDisposed)
+          _findReplace = new FindReplace(this);
+        _findReplace.Show();
+
       }
 
     }
@@ -148,11 +158,22 @@ namespace Aras.Tools.InnovatorAdmin.Editor
         switch (e.Text[0])
         {
           case '"':
-          case ' ':
-          case '>':
+          case '\'':
             // Whenever a non-letter is typed while the completion window is open,
             // insert the currently selected element.
             completionWindow.CompletionList.RequestInsertion(e);
+            break;
+          case '>':
+            if (Editor.CaretOffset > 0)
+            {
+              var prev = Editor.Document.GetCharAt(Editor.CaretOffset - 1);
+              if (prev != ' ')
+                completionWindow.CompletionList.RequestInsertion(e);
+            }
+            break;
+          case ' ':
+            if (!completionWindow.CompletionList.CompletionData.Any(d => d.Text.IndexOf(' ') >= 0))
+              completionWindow.CompletionList.RequestInsertion(e);
             break;
         }
       }
@@ -161,14 +182,14 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     }
 
     /// <summary>
-    /// Tidy the xml of the editor by adding AML tags and indenting
+    /// Tidy the xml of the editor by indenting
     /// </summary>
     /// <returns>Tidied Xml</returns>
-    void TidyXml()
+    public void TidyXml()
     {
-      //_editor.TextArea.Document.Text = "Hallo";
       string buffer = Editor.TextArea.Document.Text;
-      if (buffer.Length < 30000 || MessageBox.Show("Validating large requests may take several moments.  Continue?", "AML Requestor", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+      if (buffer.Length < 30000
+        || MessageBox.Show("Validating large requests may take several moments.  Continue?", "AML Studio", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
       {
         if (IndentXml(buffer, out buffer) == null)
         {
@@ -178,7 +199,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     }
 
     /// <summary>
-    /// Tidy the xml of the editor by adding AML tags and indenting
+    /// Tidy the xml of the editor by indenting
     /// </summary>
     /// <param name="xml">Unformatted XML string</param>
     /// <returns>Formatted Xml String</returns>
@@ -186,27 +207,24 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     {
       try
       {
-        using(var reader = new StringReader(xml))
-        {
-          using (var xmlReader = XmlReader.Create(reader))
-          {
-            using (var writer = new StringWriter())
-            {
-              var settings = new XmlWriterSettings();
-              settings.OmitXmlDeclaration = true;
-              settings.Indent = true;
-              settings.IndentChars = "  ";
-              settings.CheckCharacters = true;
-              settings.CloseOutput = true;
-              using (var xmlWriter = XmlWriter.Create(writer, settings))
-              {
-                xmlWriter.WriteNode(xmlReader, true);
-                xmlWriter.Flush();
-                formattedString = writer.ToString();
-              }
+        var readerSettings = new XmlReaderSettings();
+        readerSettings.IgnoreWhitespace = true;
 
-            }
-          }
+        var settings = new XmlWriterSettings();
+        settings.OmitXmlDeclaration = true;
+        settings.Indent = true;
+        settings.IndentChars = "  ";
+        settings.CheckCharacters = true;
+        settings.CloseOutput = true;
+
+        using (var reader = new StringReader(xml))
+        using (var xmlReader = XmlReader.Create(reader, readerSettings))
+        using (var writer = new StringWriter())
+        using (var xmlWriter = XmlWriter.Create(writer, settings))
+        {
+          xmlWriter.WriteNode(xmlReader, true);
+          xmlWriter.Flush();
+          formattedString = writer.ToString();
         }
 
         return null;
@@ -218,7 +236,18 @@ namespace Aras.Tools.InnovatorAdmin.Editor
         return ex;
       }
     }
+
+    protected override void Dispose(bool disposing)
+    {
+      base.Dispose(disposing);
+      if (disposing)
+      {
+        if (_findReplace != null)
+          _findReplace.Dispose();
+      }
+    }
   }
+
   public class RunRequestedEventArgs : EventArgs
   {
     private string _query;

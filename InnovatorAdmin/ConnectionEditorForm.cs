@@ -28,7 +28,13 @@ namespace Aras.Tools.InnovatorAdmin
     {
       InitializeComponent();
       connectionEditor.LoadConnectionLibrary(ConnectionManager.Current.Library);
+      connectionEditor.ConnectionSelected += connectionEditor_ConnectionSelected;
       this.TopMost = true;
+    }
+
+    void connectionEditor_ConnectionSelected(object sender, EventArgs e)
+    {
+      Accept();
     }
 
     public void SetSelected(params Connections.ConnectionData[] connections)
@@ -44,9 +50,15 @@ namespace Aras.Tools.InnovatorAdmin
 
     private void btnOk_Click(object sender, EventArgs e)
     {
+      Accept();
+    }
+
+    private void Accept()
+    {
       ConnectionManager.Current.Save();
       this.DialogResult = System.Windows.Forms.DialogResult.OK;
     }
+
 
   }
 }

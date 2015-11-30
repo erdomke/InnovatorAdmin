@@ -45,6 +45,7 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       InitializeComponent();
       _props = TypeDescriptor.GetProperties(typeof(T));
       this.KeyPreview = true;
+      this.Icon = (this.Owner ?? Application.OpenForms[0]).Icon;
     }
 
     protected override void OnKeyDown(KeyEventArgs e)

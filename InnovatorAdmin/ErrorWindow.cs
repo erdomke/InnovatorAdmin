@@ -16,6 +16,8 @@ namespace Aras.Tools.InnovatorAdmin
     public ErrorWindow()
     {
       InitializeComponent();
+
+      this.Icon = (this.Owner ?? Application.OpenForms[0]).Icon;
     }
 
     protected override void OnLoad(EventArgs e)

@@ -155,6 +155,10 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     /// </summary>
     public IEnumerable<NewFolding> CreateNewFoldings(TextDocument document, out int firstErrorOffset)
     {
+      firstErrorOffset = 0;
+      if (document.TextLength < 1)
+        return Enumerable.Empty<NewFolding>();
+
       try
       {
         XmlTextReader reader = new XmlTextReader(document.CreateReader());
@@ -163,7 +167,6 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       }
       catch (XmlException)
       {
-        firstErrorOffset = 0;
         return Enumerable.Empty<NewFolding>();
       }
     }

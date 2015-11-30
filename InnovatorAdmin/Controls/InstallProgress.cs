@@ -70,23 +70,14 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       {
         if (!isLoggedIn)
         {
-          string msg;
-          var conn = ConnectionEditor.Login(_connections.First(), out msg);
-          if (conn == null)
-          {
-            MessageBox.Show(msg);
-            return false;
-          }
-          else
-          {
-            _wizard.InstallProcessor.ActionComplete -= InstallProcessor_ActionComplete;
-            _wizard.InstallProcessor.ErrorRaised -= InstallProcessor_ErrorRaised;
-            _wizard.InstallProcessor.ProgressChanged -= InstallProcessor_ProgressChanged;
-            _wizard.Connection = conn;
-            _wizard.InstallProcessor.ActionComplete += InstallProcessor_ActionComplete;
-            _wizard.InstallProcessor.ErrorRaised += InstallProcessor_ErrorRaised;
-            _wizard.InstallProcessor.ProgressChanged += InstallProcessor_ProgressChanged;
-          }
+          var conn = ConnectionEditor.Login(_connections.First());
+          _wizard.InstallProcessor.ActionComplete -= InstallProcessor_ActionComplete;
+          _wizard.InstallProcessor.ErrorRaised -= InstallProcessor_ErrorRaised;
+          _wizard.InstallProcessor.ProgressChanged -= InstallProcessor_ProgressChanged;
+          _wizard.Connection = conn;
+          _wizard.InstallProcessor.ActionComplete += InstallProcessor_ActionComplete;
+          _wizard.InstallProcessor.ErrorRaised += InstallProcessor_ErrorRaised;
+          _wizard.InstallProcessor.ProgressChanged += InstallProcessor_ProgressChanged;
         }
 
         _ex = null;
@@ -133,8 +124,8 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       this.UiThreadInvoke(() =>
       {
         progBar.Value = e.Progress;
-        lblMessage.Text = _wizard.Connection.GetDatabaseName() + ": " + (e.Message ?? lblMessage.Text);
-      }); 
+        lblMessage.Text = _wizard.Connection.Database + ": " + (e.Message ?? lblMessage.Text);
+      });
     }
 
     public void GoNext()

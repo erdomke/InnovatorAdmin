@@ -5,43 +5,33 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Xml;
+using Innovator.Client;
 
 namespace Aras.Tools.InnovatorAdmin
 {
   public partial class Main : Form, IWizard
   {
-    private IArasConnection _conn;
+    private IAsyncConnection _conn;
     private Stack<IWizardStep> _history = new Stack<IWizardStep>();
     private ExportProcessor _export;
-    private ImportProcessor _import;
+    //private ImportProcessor _import;
     private InstallProcessor _install;
 
-    public IArasConnection Connection 
-    { 
+    public IAsyncConnection Connection
+    {
       get { return _conn; }
-      set 
-      { 
-        _conn = value; 
+      set
+      {
+        _conn = value;
         if (_conn != null)
         {
-          if (_import != null)
-          {
-            _import.ActionComplete -= _import_ActionComplete;
-            _import.ProgressChanged -= _import_ProgressChanged;
-          } 
-
           _export = new ExportProcessor(_conn);
-          _import = new ImportProcessor(_conn);
           _install = new InstallProcessor(_conn);
-
-          _import.ActionComplete += _import_ActionComplete;
-          _import.ProgressChanged += _import_ProgressChanged;
         }
       }
     }
     public IEnumerable<ConnectionData> ConnectionInfo { get; set; }
     public ExportProcessor ExportProcessor { get { return _export; } }
-    public ImportProcessor ImportProcessor { get { return _import; } }
     public InstallProcessor InstallProcessor { get { return _install; } }
     public InstallScript InstallScript { get; set; }
 
@@ -75,22 +65,6 @@ namespace Aras.Tools.InnovatorAdmin
 
     private DateTime _lastFileWrite = DateTime.Now;
 
-    void _import_ProgressChanged(object sender, ProgressChangedEventArgs e)
-    {
-      if ((DateTime.Now - _lastFileWrite).TotalMinutes > 2.0)
-      {
-        File.WriteAllText(Utils.GetAppFilePath(AppFileType.ImportExtractor), _import.CurrentExtractor.Serialize());
-        File.WriteAllText(Utils.GetAppFilePath(AppFileType.ImportLog), _import.GetLog());
-        _lastFileWrite = DateTime.Now;
-      }
-    }
-
-    void _import_ActionComplete(object sender, ActionCompleteEventArgs e)
-    {
-      File.WriteAllText(Utils.GetAppFilePath(AppFileType.ImportExtractor), _import.CurrentExtractor.Serialize());
-      File.WriteAllText(Utils.GetAppFilePath(AppFileType.ImportLog), _import.GetLog());
-    }
-
     public void GoToStep(IWizardStep step)
     {
       if (step is Controls.Welcome) _history.Clear();
@@ -110,7 +84,7 @@ namespace Aras.Tools.InnovatorAdmin
       btnPrevious.Enabled = _history.Any();
       _history.Push(step);
     }
-    
+
     private void btnClose_Click(object sender, EventArgs e)
     {
       this.Close();

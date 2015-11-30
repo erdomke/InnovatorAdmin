@@ -90,7 +90,7 @@ namespace Aras.Tools.InnovatorAdmin
           if (items.Any(i => i.HasAttribute("typeId") || i.Element("itemtype") != null)) props.Add("itemtype");
           if (items.Any(i => i.Element("keyed_name") != null || i.Element("id") != null)) props.Add("keyed_name");
           if (items.Any(i => i.HasAttribute("id") || i.Element("id") != null)) props.Add("id");
-          
+
 
           foreach (var elem in items.SelectMany(i => i.Elements()))
           {
@@ -151,6 +151,7 @@ namespace Aras.Tools.InnovatorAdmin
       finally
       {
         result.EndLoadData();
+        result.AcceptChanges();
       }
       return result;
     }

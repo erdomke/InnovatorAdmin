@@ -1,7 +1,7 @@
-﻿using Aras.AutoComplete;
-using ICSharpCode.AvalonEdit.CodeCompletion;
+﻿using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
+using Innovator.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
   public class AmlEditorHelper : CompletionHelper, IEditorHelper
   {
     private bool _isInitialized = false;
-    
+
     public string SoapAction { get; set; }
 
     public AmlEditorHelper()
@@ -21,10 +21,10 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       this.SoapAction = "ApplyAML";
     }
 
-    public override void InitializeConnection(Func<string, XmlNode, XmlNode> applyAction)
+    public override void InitializeConnection(IAsyncConnection conn)
     {
       _isInitialized = true;
-      base.InitializeConnection(applyAction);
+      base.InitializeConnection(conn);
     }
 
     public void HandleTextEntered(EditorControl control, string insertText)
@@ -33,14 +33,26 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       {
         switch (insertText)
         {
+          case "'":
           case "\"":
           case " ":
           case "<":
           case ",":
           case "(":
-            int overlap;
-            var completionItems = this.GetCompletions(control.Editor.Text.Substring(0, control.Editor.CaretOffset), this.SoapAction, out overlap).Select(c => new BasicCompletionData(c));
-            control.ShowCompletionWindow(completionItems, overlap);
+            ShowCompletions(control)
+              .Done(data =>
+              {
+                if (data != null && data.State == XmlState.Attribute && !data.Items.Any()
+                  && control.Editor.CaretOffset < control.Editor.Document.TextLength)
+                {
+                  var doc = control.Editor.TextArea.Document;
+                  var quote = doc.GetCharAt(doc.LastIndexOf('=', 0, control.Editor.CaretOffset) + 1);
+                  if (insertText[0] == quote && quote == doc.GetCharAt(control.Editor.CaretOffset))
+                  {
+                    doc.Remove(control.Editor.CaretOffset, 1);
+                  }
+                }
+              });
             break;
           case ">":
             var endTag = this.LastOpenTag(control.Editor.Text.Substring(0, control.Editor.CaretOffset));
@@ -57,9 +69,91 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       }
     }
 
+    private IPromise<CompletionData> ShowCompletions(EditorControl control)
+    {
+      var length = control.Editor.Document.TextLength;
+      var caret = control.Editor.CaretOffset;
+
+      return this.GetCompletions(control.Editor.Text.Substring(0, control.Editor.CaretOffset), this.SoapAction)
+        .UiPromise(control)
+        .Convert(data => {
+          if (length != control.Editor.Document.TextLength
+            || caret != control.Editor.CaretOffset)
+          {
+            ShowCompletions(control);
+            return null;
+          }
+
+          if (data.Items.Any())
+            control.ShowCompletionWindow(data.Items.Select(c =>
+            {
+              switch (data.State)
+              {
+                case XmlState.Attribute:
+                case XmlState.AttributeStart:
+                  return new AttributeCompletionData(c, this, control);
+                case XmlState.AttributeValue:
+                  return new AttributeValueCompletionData(c, data.MultiValueAttribute);
+              }
+              return new BasicCompletionData(c);
+            }), data.Overlap);
+
+          return data;
+        });
+    }
+
     public string GetCurrentQuery(string text, int offset)
     {
       return this.GetQuery(text, offset);
+    }
+
+    private class AttributeCompletionData : BasicCompletionData
+    {
+      private AmlEditorHelper _parent;
+      private EditorControl _control;
+
+
+      public AttributeCompletionData(string text, AmlEditorHelper parent, EditorControl control)
+        : base(text)
+      {
+        _parent = parent;
+        _control = control;
+      }
+
+      public override void Complete(TextArea textArea, ISegment completionSegment, EventArgs insertionRequestEventArgs)
+      {
+        textArea.Document.Replace(completionSegment, this.Text + "=''");
+        textArea.Caret.Offset -= 1;
+        _parent.ShowCompletions(_control);
+      }
+    }
+
+    private class AttributeValueCompletionData : BasicCompletionData
+    {
+
+      private bool _multiValue;
+
+      public AttributeValueCompletionData(string text, bool multiValue) : base(text)
+      {
+        _multiValue = multiValue;
+      }
+
+      public override void Complete(TextArea textArea, ISegment completionSegment, EventArgs insertionRequestEventArgs)
+      {
+        textArea.Document.Replace(completionSegment, this.Text);
+
+        if (!_multiValue)
+        {
+          var offset = completionSegment.Offset + this.Text.Length;
+          var doc = textArea.Document;
+          var quote = doc.GetCharAt(completionSegment.Offset - 1);
+          if (doc.TextLength > offset && doc.GetCharAt(offset) == quote
+            && (quote == '\'' || quote == '"'))
+          {
+            textArea.Caret.Offset += 1;
+          }
+        }
+      }
     }
   }
 }

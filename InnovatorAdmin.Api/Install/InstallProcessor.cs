@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using Innovator.Client;
 
 namespace Aras.Tools.InnovatorAdmin
 {
   public class InstallProcessor : IProgressReporter
   {
-    private Connection _conn;
+    private IAsyncConnection _conn;
     private int _currLine;
     private InstallScript _script;
     private List<InstallItem> _lines;
@@ -22,9 +23,9 @@ namespace Aras.Tools.InnovatorAdmin
 
     public string InstallLog { get { return _log.ToString(); } }
 
-    public InstallProcessor(IArasConnection conn)
+    public InstallProcessor(IAsyncConnection conn)
     {
-      _conn = new Connection(conn);
+      _conn = conn;
       _exportTools = new ExportProcessor(conn);
       _currLine = -1;
     }
@@ -90,11 +91,11 @@ namespace Aras.Tools.InnovatorAdmin
         XmlNode query;
         XmlElement newQuery;
         ItemType itemType;
-        
-        ReportProgress(0, "Starting install.");
-        _conn.GetItems("ApplyItem", string.Format(Properties.Resources.DbUpgrade_Start, upgradeId, Environment.UserDomainName, Environment.UserName, _script.Title, _script.Description));
 
-        IEnumerable<XmlElement> items;
+        ReportProgress(0, "Starting install.");
+        _conn.Apply(string.Format(Properties.Resources.DbUpgrade_Start, upgradeId, Environment.UserDomainName, Environment.UserName, _script.Title, _script.Description)).AssertNoError();
+
+        IEnumerable<IReadOnlyItem> items;
         foreach (var line in _lines.Skip(_currLine).ToList())
         {
           cont = true;
@@ -123,8 +124,8 @@ namespace Aras.Tools.InnovatorAdmin
 
                 // If the item exists, get the id for use in the relationships
                 // If the item doesn't exist, make sure the id = config_id for the add
-                items = _conn.GetItems("ApplyItem", newQuery);
-                string sourceId = items.Any() ? items.First().Attribute("id") : query.Attribute(XmlFlags.Attr_ConfigId);
+                items = _conn.Apply(newQuery).Items();
+                string sourceId = items.Any() ? items.First().Attribute("id").Value : query.Attribute(XmlFlags.Attr_ConfigId);
                 newQuery = query.Clone() as XmlElement;
                 newQuery.SetAttribute("id", sourceId);
                 newQuery.RemoveAttribute("where");
@@ -154,7 +155,7 @@ namespace Aras.Tools.InnovatorAdmin
                     newQuery.SetAttribute("where", whereClause);
                     newQuery.SetAttribute("action", "get");
 
-                    items = _conn.GetItems("ApplyItem", newQuery);
+                    items = _conn.Apply(newQuery).Items();
                     if (items.Any())
                     {
                       rel.RemoveAttribute("id");
@@ -164,8 +165,8 @@ namespace Aras.Tools.InnovatorAdmin
                   }
                 }
               }
-              items = _conn.GetItems("ApplyItem", query, true);
-              if (line.Type == InstallType.Create) line.InstalledId = items.First().Attribute("id");
+              items = _conn.Apply(query).AssertItems();
+              if (line.Type == InstallType.Create) line.InstalledId = items.First().Attribute("id").Value;
 
               // Execute any sql scripts
               var sqlScripts = line.Script
@@ -173,7 +174,7 @@ namespace Aras.Tools.InnovatorAdmin
                             .Select(e => e.Attribute(XmlFlags.Attr_SqlScript, ""));
               if (sqlScripts.Any())
               {
-                _conn.CallAction("ApplySQL", "<sql>" + sqlScripts.Aggregate((p, c) => p + Environment.NewLine + c) + "</sql>");
+                _conn.ApplySql(sqlScripts.Aggregate((p, c) => p + Environment.NewLine + c)).AssertNoError();
               }
 
               cont = false;
@@ -233,12 +234,12 @@ namespace Aras.Tools.InnovatorAdmin
           });
         }
 
-        _conn.GetItems("ApplyItem", "<Item type=\"DatabaseUpgrade\" action=\"merge\" id=\"" + upgradeId + "\"><upgrade_status>1</upgrade_status></Item>");
+        _conn.Apply("<Item type=\"DatabaseUpgrade\" action=\"merge\" id=\"" + upgradeId + "\"><upgrade_status>1</upgrade_status></Item>").AssertNoError();
         OnActionComplete(new ActionCompleteEventArgs());
       }
       catch (Exception ex)
       {
-        _conn.GetItems("ApplyItem", "<Item type=\"DatabaseUpgrade\" action=\"merge\" id=\"" + upgradeId + "\"><upgrade_status>2</upgrade_status></Item>");
+        _conn.Apply("<Item type=\"DatabaseUpgrade\" action=\"merge\" id=\"" + upgradeId + "\"><upgrade_status>2</upgrade_status></Item>").AssertNoError();
         OnActionComplete(new ActionCompleteEventArgs() { Exception = ex });
       }
     }

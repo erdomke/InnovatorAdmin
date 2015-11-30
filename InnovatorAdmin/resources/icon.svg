@@ -87,14 +87,14 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="2"
-     inkscape:cx="308.69067"
-     inkscape:cy="882.43788"
+     inkscape:cx="186.44067"
+     inkscape:cy="884.93788"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1920"
-     inkscape:window-height="1178"
-     inkscape:window-x="1912"
+     inkscape:window-height="1138"
+     inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1">
     <inkscape:grid
@@ -121,7 +121,8 @@
        id="g4540"
        transform="matrix(2,0,0,2,-75.75463,-67.257294)"
        inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
+       inkscape:export-ydpi="90"
+       inkscape:export-filename="C:\Users\edomke\Documents\GitHub\InnovatorAdmin\InnovatorAdmin\resources\icons\icon.png">
       <path
          inkscape:connector-curvature="0"
          inkscape:export-ydpi="90"
@@ -222,13 +223,16 @@
        style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:url(#radialGradient4539-6-1);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.89136785;marker:none;enable-background:accumulate"
        d="m 108,36.362204 10,0 c 1.662,0 3,1.338 3,3 l 0,10 c 0,1.662 -1.338,3 -3,3 l -10,0 c -1.662,0 -3,-1.338 -3,-3 l 0,-10 c 0,-1.662 1.338,-3 3,-3 z"
        id="rect6223-8-3-6"
-       inkscape:export-filename="C:\Users\edomke\Documents\Local_Projects\AmlStudio\Editing\res\icon16.png"
+       inkscape:export-filename="C:\Users\edomke\Documents\GitHub\InnovatorAdmin\InnovatorAdmin\resources\icons\icon16.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90"
        inkscape:connector-curvature="0" />
     <g
        id="g4410"
-       transform="translate(0.015625,0.90625)">
+       transform="translate(0.015625,0.90625)"
+       inkscape:export-filename="C:\Users\edomke\Documents\GitHub\InnovatorAdmin\InnovatorAdmin\resources\icons\icon16.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
       <path
          id="path303-4"
          d="m 115.98907,47.732262 c -7.3e-4,-0.17243 0.2986,-0.455076 0.2986,-0.455076 0,0 0.85222,-0.685166 1.07132,-0.68409 0.22228,-0.0011 1.09922,0.7278 1.09922,0.7278 0,0 0.24224,0.206737 0.24383,0.42826 -10e-4,0.223649 5.4e-4,1.872331 5.4e-4,1.872331 0,0 0.0122,0.226873 0.16431,0.07455 0.49381,-0.494195 1.47974,-1.511102 1.47946,-2.487504 l 0.002,-0.201924 c -0.004,-1.275396 -1.012,-2.254203 -2.25457,-2.25768 l -1.49994,-2.71e-4 c -1.242,-0.0029 -2.2463,0.973978 -2.24549,2.251261 l 7.2e-4,0.199517 c -0.002,0.94716 0.9748,1.959221 1.47229,2.466319 0.15928,0.160631 0.17337,-0.06114 0.17337,-0.06114 0,0 -0.007,-1.696683 -0.005,-1.872333 z"
@@ -573,7 +577,10 @@
     <g
        id="g4220-3-07-6"
        transform="matrix(1.1797597,0,0,1.1797597,84.172071,27.687396)"
-       style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#831b10;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.89136785;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate">
+       style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#831b10;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.89136785;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       inkscape:export-filename="C:\Users\edomke\Documents\GitHub\InnovatorAdmin\InnovatorAdmin\resources\icons\icon16.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
       <path
          inkscape:export-ydpi="90"
          inkscape:export-xdpi="90"
@@ -604,7 +611,10 @@
     </g>
     <g
        id="g4220-2-6"
-       transform="matrix(1.1797597,0,0,1.1797597,83.586348,27.320538)">
+       transform="matrix(1.1797597,0,0,1.1797597,83.586348,27.320538)"
+       inkscape:export-filename="C:\Users\edomke\Documents\GitHub\InnovatorAdmin\InnovatorAdmin\resources\icons\icon16.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
       <path
          inkscape:export-ydpi="90"
          inkscape:export-xdpi="90"
@@ -637,12 +647,18 @@
        inkscape:connector-curvature="0"
        style="fill:#ffffff;fill-rule:nonzero;stroke:none"
        d="m 115.64072,48.345815 c -7.3e-4,-0.17243 0.2986,-0.455076 0.2986,-0.455076 0,0 0.85222,-0.685166 1.07132,-0.68409 0.22228,-0.0011 1.09922,0.7278 1.09922,0.7278 0,0 0.24224,0.206737 0.24383,0.42826 -0.001,0.223649 5.4e-4,1.872331 5.4e-4,1.872331 0,0 0.0122,0.226873 0.16431,0.07455 0.49381,-0.494195 1.47974,-1.511102 1.47946,-2.487504 L 120,47.620162 c -0.004,-1.275396 -1.012,-2.254203 -2.25457,-2.25768 l -1.49994,-2.71e-4 c -1.242,-0.0029 -2.2463,0.973978 -2.24549,2.251261 l 7.2e-4,0.199517 c -0.002,0.94716 0.9748,1.959221 1.47229,2.466319 0.15928,0.160631 0.17337,-0.06114 0.17337,-0.06114 0,0 -0.007,-1.696683 -0.005,-1.872333 z"
-       id="path303" />
+       id="path303"
+       inkscape:export-filename="C:\Users\edomke\Documents\GitHub\InnovatorAdmin\InnovatorAdmin\resources\icons\icon16.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <path
        inkscape:connector-curvature="0"
        style="fill:#ffffff;fill-rule:nonzero;stroke:none"
        d="m 118.26791,40.35886 c 0.24966,-0.249663 0.65341,-0.249411 0.90257,-2.51e-4 0.24941,0.249412 0.24966,0.653161 0,0.902824 -0.24966,0.249663 -0.65342,0.249414 -0.90283,2e-6 -0.24916,-0.249159 -0.24941,-0.652912 2.6e-4,-0.902575 z m 0.18258,6.21991 0.5142,-2.48e-4 c 0.42569,0.002 0.77371,-0.346 0.77169,-0.771689 l 0.25799,-5.148881 c 6.8e-4,-0.427709 -0.29909,-1.287663 -1.28741,-1.287409 -0.98832,2.54e-4 -1.28741,0.861214 -1.28615,1.286146 0,0 0.16543,3.675866 0.18208,3.99513 0.0169,0.319521 0.27337,0.414597 0.27337,0.414597 0,0 0.73916,0.123819 1.16358,0.215365 0.23176,0.05019 0.20654,0.11071 -0.004,0.157111 -0.58204,0.129117 -1.25589,0.28245 -1.36054,0.319015 l 0.003,0.04844 c -10e-4,0.427457 0.34473,0.773456 0.77245,0.772445 z"
-       id="path305" />
+       id="path305"
+       inkscape:export-filename="C:\Users\edomke\Documents\GitHub\InnovatorAdmin\InnovatorAdmin\resources\icons\icon16.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <text
        xml:space="preserve"
        style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:27.10308266px;line-height:125%;font-family:'Open Sans';-inkscape-font-specification:'Open Sans';text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;display:inline;overflow:visible;visibility:visible;fill:#393f3f;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;marker:none;enable-background:accumulate"
@@ -690,5 +706,22 @@
        id="path6557-7-8-5"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="czsszszczc" />
+    <g
+       transform="translate(0.306641,-130.31163)"
+       id="g4313-0"
+       inkscape:export-filename="C:\Users\edomke\Documents\Local_Projects\ArasImportExport\Editing\InnovatorInstaller\resources\icons\amlStudio32black.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <path
+         inkscape:connector-curvature="0"
+         id="rect6223-8-4-5"
+         d="m 27.193359,162.67383 c -3.324,0 -6,2.676 -6,6 l 0,20 c 0,3.324 2.676,6 6,6 l 20,0 c 3.324,0 6,-2.676 6,-6 l 0,-20 c 0,-3.324 -2.676,-6 -6,-6 l -20,0 z m 11.984375,5.99805 c -0.0485,0.17995 -0.09778,0.36275 -0.146484,0.54296 0.05489,-0.15346 0.145455,-0.40239 0.185547,-0.53515 -0.14171,2.02814 0.08715,5.11537 0.447265,8.25195 2.817403,-1.32494 5.061682,-2.03162 5.554688,-2.18555 l 0.04102,0.0742 5.933593,4.97461 0,1.27344 -6,5.60547 0,-2.3418 4.310547,-3.88476 -4.011718,-3.26563 c -1.906785,0.66358 -3.739176,1.36767 -5.527344,2.19727 0.02359,0.17547 0.05018,0.33585 0.07422,0.50976 1.802031,1.23024 3.585342,2.69267 5.134766,4.42578 l -0.0078,2.35547 c -1.68269,-1.57652 -3.220827,-2.86743 -4.714844,-3.99023 0.378389,2.3941 0.750878,4.3805 0.970703,5.2539 l -1.941406,0.96094 c -0.767107,-3.10398 -1.222552,-5.69558 -1.482422,-7.91601 -0.170973,-0.10871 -0.342557,-0.22737 -0.513672,-0.33204 -0.467261,0.25754 -0.934818,0.51628 -1.400391,0.79688 -0.430162,2.40085 -0.734289,4.81665 -0.818359,7.24414 l -2.138672,0 c 0.09231,-0.87622 0.34183,-3.12081 0.847656,-5.875 -1.560528,1.08393 -3.13083,2.32622 -4.746093,3.82031 l 0,0.041 -0.02344,-0.0215 c -0.0053,0.005 -0.01036,0.009 -0.01563,0.0137 l 0,-0.0293 -5.996094,-5.61719 0,-1.28515 5.982422,-5.05469 0,-0.006 c 5.1e-4,1.6e-4 0.0034,0.002 0.0039,0.002 2.18e-4,7e-5 0.0017,-7e-5 0.002,0 0.529064,0.16693 3.026122,0.93962 6.117187,2.46094 0.909882,-3.17889 2.155663,-6.31963 3.878906,-8.46484 z m -1.234375,4.60546 c -0.403609,1.53816 -0.787626,3.0851 -1.138671,4.63868 0.148757,0.0808 0.299002,0.16783 0.449218,0.25195 0.162172,-0.0844 0.326261,-0.17424 0.490235,-0.26172 -0.07352,-1.88098 0.01982,-3.40394 0.199218,-4.62891 z m -8.761718,3.58789 -4.308594,3.52735 4.349609,3.91211 c 1.627907,-1.79593 3.503938,-3.29686 5.388672,-4.54883 0.04593,-0.19745 0.109734,-0.40059 0.158203,-0.59961 -1.73486,-0.85799 -3.547747,-1.59334 -5.58789,-2.29102 z"
+         style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.89136785;marker:none;enable-background:accumulate" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path3081-9-1-1"
+         d="m 29.175781,174.67383 0,0.006 0.0039,-0.004 c -5.14e-4,-1.6e-4 -0.0034,-0.002 -0.0039,-0.002 z m 0.0059,0.002 0,2.18945 c 2.040143,0.69768 3.85303,1.43303 5.58789,2.29102 0.163178,-0.67001 0.335847,-1.34367 0.529297,-2.01953 -3.091065,-1.52132 -5.588123,-2.29401 -6.117187,-2.46094 z m 7.623047,3.24024 c -0.04228,0.18709 -0.08975,0.37322 -0.13086,0.56054 0.19828,-0.11377 0.388336,-0.20877 0.580078,-0.30859 -0.150216,-0.0841 -0.300461,-0.17111 -0.449218,-0.25195 z m 3.234374,1.97265 c 0.134667,0.97422 0.271985,1.90443 0.41211,2.79102 1.494017,1.1228 3.032154,2.41371 4.714844,3.99023 l 0.0078,-2.35547 c -1.549424,-1.73311 -3.332735,-3.19554 -5.134766,-4.42578 z m -2.113281,0.50586 c -0.147514,0.0784 -0.294013,0.17072 -0.441406,0.25195 0.171115,0.10467 0.342699,0.22333 0.513672,0.33204 -0.02237,-0.19116 -0.05287,-0.39855 -0.07227,-0.58399 z"
+         style="opacity:0.3;fill:#000000;fill-opacity:1;stroke:none" />
+    </g>
   </g>
 </svg>

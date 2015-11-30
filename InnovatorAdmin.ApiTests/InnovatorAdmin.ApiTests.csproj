@@ -61,10 +61,6 @@
     <Compile Include="UtilsTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ArasAutoCompleteHelper\ArasAutoCompleteHelper.csproj">
-      <Project>{CBCE5179-51E7-4BA4-A58A-CA83F8BD13DD}</Project>
-      <Name>ArasAutoCompleteHelper</Name>
-    </ProjectReference>
     <ProjectReference Include="..\InnovatorAdmin.Api\InnovatorAdmin.Api.csproj">
       <Project>{7C397623-C59E-4DB2-8879-8A3385DABCD9}</Project>
       <Name>InnovatorAdmin.Api</Name>

@@ -3,6 +3,7 @@ using System.Windows.Forms;
 using Aras.Tools.InnovatorAdmin.Connections;
 using System.Collections.Generic;
 using System.Linq;
+using Innovator.Client;
 
 namespace Aras.Tools.InnovatorAdmin
 {
@@ -13,8 +14,13 @@ namespace Aras.Tools.InnovatorAdmin
 
 
     public event EventHandler SelectionChanged;
+    public event EventHandler ConnectionSelected;
 
-    public bool MultiSelect { get; set; }
+    public bool MultiSelect
+    {
+      get { return lstConnections.Multiselect; }
+      set { lstConnections.Multiselect = value; }
+    }
     public IEnumerable<ConnectionData> SelectedConnections
     {
       get
@@ -32,12 +38,6 @@ namespace Aras.Tools.InnovatorAdmin
       InitializeComponent();
       this.MultiSelect = false;
       _bs.CurrentChanged += _bs_CurrentChanged;
-
-      cboIomVersion.Items.Add(string.Empty);
-      foreach (var version in Iom.Versions())
-      {
-        cboIomVersion.Items.Add(version);
-      }
     }
 
     void _bs_CurrentChanged(object sender, EventArgs e)
@@ -78,7 +78,6 @@ namespace Aras.Tools.InnovatorAdmin
         txtPassword.DataBindings.Add("Text", _bs, "Password");
         txtUrl.DataBindings.Add("Text", _bs, "Url");
         txtUser.DataBindings.Add("Text", _bs, "UserName");
-        cboIomVersion.DataBindings.Add("Text", _bs, "IomVersion");
 
         if (lstConnections.Items.Count > 0 && !this.MultiSelect)
           lstConnections.SetItemSelected(0, true);
@@ -90,10 +89,10 @@ namespace Aras.Tools.InnovatorAdmin
       try
       {
         lblMessage.Text="Testing...";
-        Application.DoEvents();
-        string msg;
-        var inn = Login((ConnectionData)_bs.Current, out msg);
-        lblMessage.Text = msg;
+        Login((ConnectionData)_bs.Current, true)
+          .UiPromise(this)
+          .Done(c => lblMessage.Text = "Success")
+          .Fail(ex => lblMessage.Text = ex.Message);
       }
       catch (Exception ex)
       {
@@ -106,16 +105,22 @@ namespace Aras.Tools.InnovatorAdmin
       lblMessage.Text="";
     }
 
-    public static IArasConnection Login(ConnectionData credentials, out string messageText)
+    public static IAsyncConnection Login(ConnectionData credentials)
     {
-      messageText = "";
-      if (string.IsNullOrEmpty(credentials.Url))
+      var conn = Factory.GetConnection(credentials.Url, "InnovatorAdmin");
+      conn.Login(new ExplicitCredentials(credentials.Database, credentials.UserName, credentials.Password));
+      return conn;
+    }
+    public static IPromise<IAsyncConnection> Login(ConnectionData credentials, bool async)
+    {
+      return Factory.GetConnection(credentials.Url
+        , new ConnectionPreferences() { UserAgent = "InnovatorAdmin" }
+        , async)
+      .Continue(c =>
       {
-        messageText = resources.Messages.UrlNotSpecified;
-        return null;
-      }
-
-      return Iom.GetFactory(credentials.IomVersion).Login(credentials.Url, credentials.Database, credentials.UserName, credentials.Password, out messageText);
+        return c.Login(new ExplicitCredentials(credentials.Database, credentials.UserName, credentials.Password), async)
+          .Convert(u => (IAsyncConnection)c);
+      });
     }
 
     private void btnNew_Click(object sender, EventArgs e)
@@ -198,35 +203,7 @@ namespace Aras.Tools.InnovatorAdmin
       }
     }
 
-    //private void lstConnections_ItemCheck(object sender, ItemCheckEventArgs e)
-    //{
-    //  try
-    //  {
-    //    _itemCheckChanged = true;
-    //    if (e.NewValue == CheckState.Checked && !this.MultiSelect)
-    //    {
-    //      try
-    //      {
-    //        clstConnections.ItemCheck -= lstConnections_ItemCheck;
-    //        for (int i = 0; i < clstConnections.Items.Count; i++)
-    //        {
-    //          if (i != e.Index) clstConnections.SetItemCheckState(i, CheckState.Unchecked);
-    //        }
-    //      }
-    //      finally
-    //      {
-    //        clstConnections.ItemCheck += lstConnections_ItemCheck;
-    //      }
-    //    }
-    //  }
-    //  catch (Exception ex)
-    //  {
-    //    Utils.HandleError(ex);
-    //  }
-    //}
-
     private string _lastDatabaseUrl;
-    private bool _itemCheckChanged;
 
     private void cmbDatabase_DropDown(object sender, EventArgs e)
     {
@@ -242,7 +219,7 @@ namespace Aras.Tools.InnovatorAdmin
           //get dbs from test connection
           try
           {
-            foreach (var db in Iom.GetFactory(null).AvailableDatabases(txtUrl.Text))
+            foreach (var db in Factory.GetConnection(_lastDatabaseUrl, "InnovatorAdmin").GetDatabases())
             {
               cmbDatabase.Items.Add(db);
             }
@@ -261,28 +238,15 @@ namespace Aras.Tools.InnovatorAdmin
       }
     }
 
-    private void lstConnections_MouseUp(object sender, MouseEventArgs e)
+    private void lstConnections_SelectionChanged(object sender, EventArgs e)
     {
-      try
-      {
-        if (_itemCheckChanged) OnSelectionChanged(EventArgs.Empty);
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
+      OnSelectionChanged(EventArgs.Empty);
     }
 
-    private void lstConnections_MouseDown(object sender, MouseEventArgs e)
+    private void lstConnections_MouseDoubleClick(object sender, MouseEventArgs e)
     {
-      try
-      {
-        _itemCheckChanged = false;
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
+      if (ConnectionSelected != null)
+        ConnectionSelected.Invoke(this, e);
     }
 
   }

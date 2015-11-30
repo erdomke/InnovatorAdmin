@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Innovator.Client;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -115,6 +116,12 @@ namespace Aras.Tools.InnovatorAdmin
       var attr = element.Attribute(attributeName);
       if (attr == null) return null;
       return attr.Value;
+    }
+
+
+    public static IPromise<T> UiPromise<T>(this IPromise<T> promise, Control ctrl)
+    {
+      return promise.WithInvoker((d, a) => ctrl.Invoke(d, a));
     }
   }
 }

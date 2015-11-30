@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Clean;GenerateFiles;Build;UpdateIcons;GenerateNupkg;PackNuget">
+  <PropertyGroup>
+    <BuildVersion>$([System.DateTime]::Now.ToString(yyyy.MM.dd.HHmm))</BuildVersion>
+    <ProjectName>InnovatorAdmin</ProjectName>
+    <NuSpecPath>$(ProjectName).nuspec</NuSpecPath>
+    <OutDir45>bin\Release</OutDir45>
+    <ObjDir45>obj\net45</ObjDir45>
+    <AssemInfo><![CDATA[using System.Reflection%3B
+
+[assembly: AssemblyVersion("$(BuildVersion)")]
+[assembly: AssemblyFileVersion("$(BuildVersion)")]]]></AssemInfo>
+  </PropertyGroup>
+  
+  <Target Name="Clean">
+    <ItemGroup>
+      <FilesToDelete Include="$(OutDir45)\*.*;$(ObjDir45)\*.*;*.nupkg"/>
+    </ItemGroup>   
+    <Delete Files="@(FilesToDelete)" />
+  </Target>
+  <Target Name="GenerateFiles">
+    <WriteLinesToFile File="AssemblyInfo.Version.cs" Lines="$(AssemInfo)" Overwrite="true" />
+  </Target>
+  <Target Name="Build">
+    <ItemGroup>
+      <ProjectToBuild45 Include="$(ProjectName).csproj">
+        <Properties>OutputPath=$(OutDir45);IntermediateOutputPath=$(ObjDir45)\;TargetFrameworkVersion=v4.5;Configuration=Release</Properties>
+        <SGenToolPath>C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\sgen.exe</SGenToolPath>
+      </ProjectToBuild45>
+    </ItemGroup>
+    <MSBuild Projects="@(ProjectToBuild45)" />
+  </Target>
+  <Target Name="UpdateIcons">
+    <Exec Command="..\lib\InsertIcons.exe $(OutDir45)\InnovatorAdmin.exe resources\icons\AmlStudio.ico" />
+  </Target>
+  <Target Name="GenerateNupkg">
+    <ItemGroup>
+      <AllFiles Include="$(OutDir45)\*.dll;$(OutDir45)\*.exe" />
+      <Line Include="line01"><Text><![CDATA[<?xml version="1.0" encoding="utf-8"?>
+  <package>
+    <metadata>
+      <id>$(ProjectName)</id>
+      <version>$(BuildVersion)</version>
+      <authors>eric.domke</authors>
+      <requireLicenseAcceptance>false</requireLicenseAcceptance>
+      <description>Application for administrating an Aras Innovator instance</description>
+      <iconUrl>file:///icon.png</iconUrl>
+    </metadata>
+    <files>]]></Text></Line>
+      <Line Include="line02"><Text><![CDATA[<file src="%(AllFiles.Identity)" target="lib/net45" />]]></Text></Line>
+      <Line Include="line03"><Text><![CDATA[  </files>
+  </package>]]></Text></Line>
+      <LineText Include="%(Line.Text)" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(NuSpecPath)" Lines="@(LineText)" Overwrite="true" />
+  </Target>
+  <Target Name="PackNuget">
+    <!--<Exec Command="..\.nuget\NuGet.exe Update -self" />-->
+    <Exec Command="..\.nuget\NuGet.exe Pack $(NuSpecPath)" />
+    <ItemGroup>
+      <SquirrelPath Include="..\packages\squirrel.windows.*\tools\Squirrel.exe" />
+      <NuPkgPath Include="$(ProjectName).*.nupkg" />
+    </ItemGroup>
+    <Exec Command="@(SquirrelPath) --releasify=@(NuPkgPath)" />
+  </Target>
+</Project>

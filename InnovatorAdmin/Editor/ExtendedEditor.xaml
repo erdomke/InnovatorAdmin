@@ -12,11 +12,15 @@
       <ContextMenu>
         <MenuItem Command="Cut" />
         <MenuItem Command="Copy" />
-        <MenuItem Header="Copy ID" Click="CopyId_Click" />
+        <MenuItem Header="Copy...">
+          <MenuItem Header="Copy ID" Click="CopyId_Click" />
+        </MenuItem>
         <MenuItem Command="Paste" />
         <Separator />
         <MenuItem Header="Collapse All" Click="CollapseAll_Click" />
         <MenuItem Header="Expand All" Click="ExpandAll_Click" />
+        <Separator />
+        <MenuItem Header="Open With..." Click="OpenWith_Click" />
       </ContextMenu>
     </avalonedit:TextEditor.ContextMenu>
   </avalonedit:TextEditor>

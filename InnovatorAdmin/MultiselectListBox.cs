@@ -15,6 +15,9 @@ namespace Aras.Tools.InnovatorAdmin
     private CheckedListBox _checked;
     private ObjectCollection _items;
     private bool _multiselect;
+    private bool _itemChecked;
+
+    public event EventHandler SelectionChanged;
 
     public object DataSource
     {
@@ -97,6 +100,17 @@ namespace Aras.Tools.InnovatorAdmin
       _checked.CheckOnClick = true;
 
       this.Controls.Add(_list);
+      _list.SelectedIndexChanged += _list_SelectedIndexChanged;
+      _list.MouseDoubleClick += _list_MouseDoubleClick;
+      _checked.ItemCheck += _checked_ItemCheck;
+      _checked.MouseDown += _checked_MouseDown;
+      _checked.MouseUp += _checked_MouseUp;
+      _checked.MouseDoubleClick += _list_MouseDoubleClick;
+    }
+
+    void _list_MouseDoubleClick(object sender, MouseEventArgs e)
+    {
+      OnMouseDoubleClick(e);
     }
 
     public void SetItemSelected(int index, bool state)
@@ -124,6 +138,31 @@ namespace Aras.Tools.InnovatorAdmin
       {
         _checked.SetItemChecked(i, items.Contains(_checked.Items[i]));
       }
+    }
+
+    protected virtual void OnSelectionChanged(EventArgs e)
+    {
+      if (SelectionChanged != null) SelectionChanged.Invoke(this, e);
+    }
+
+    void _checked_ItemCheck(object sender, ItemCheckEventArgs e)
+    {
+      _itemChecked = true;
+    }
+
+    void _checked_MouseDown(object sender, MouseEventArgs e)
+    {
+      _itemChecked = false;
+    }
+
+    void _checked_MouseUp(object sender, MouseEventArgs e)
+    {
+      if (_itemChecked) OnSelectionChanged(e);
+    }
+
+    void _list_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      OnSelectionChanged(e);
     }
 
     private class ObjectCollection : IList<object>

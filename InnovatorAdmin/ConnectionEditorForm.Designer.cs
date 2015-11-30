@@ -28,6 +28,7 @@
     /// </summary>
     private void InitializeComponent()
     {
+      System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ConnectionEditorForm));
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
       this.btnClose = new System.Windows.Forms.Button();
       this.connectionEditor = new Aras.Tools.InnovatorAdmin.ConnectionEditor();
@@ -98,6 +99,7 @@
       this.CancelButton = this.btnClose;
       this.ClientSize = new System.Drawing.Size(426, 271);
       this.Controls.Add(this.tableLayoutPanel1);
+      this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.Name = "ConnectionEditorForm";
       this.ShowIcon = false;
       this.ShowInTaskbar = false;

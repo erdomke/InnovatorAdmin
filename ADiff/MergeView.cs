@@ -30,7 +30,7 @@ namespace ADiff
       {
         for (var i = _blockBoundaries.Count - 2; i >= 0; i--)
         {
-          if (_blockBoundaries[i] < _view.VerticalOffset) 
+          if (_blockBoundaries[i] < _view.VerticalOffset)
           {
             return new VerticalOffset(i, Math.Min((_view.VerticalOffset - _blockBoundaries[i]) / (_blockBoundaries[i + 1] - _blockBoundaries[i]), 1.0));
           }
@@ -80,7 +80,7 @@ namespace ADiff
       _editor.ScrollToVerticalOffset(percentOffset * (_blockBoundaries[block + 1] - _blockBoundaries[block]) + _blockBoundaries[block]);
     }
 
-    protected virtual void OnVerticalOffsetChanged(EventArgs e) 
+    protected virtual void OnVerticalOffsetChanged(EventArgs e)
     {
       if (this.VerticalOffsetChanged != null) this.VerticalOffsetChanged.Invoke(this, e);
     }
@@ -113,7 +113,7 @@ namespace ADiff
         showAll = _location == MergeLocation.Output && !block.Alternates.Any(a => (a.Location & _location) != 0);
         foreach (var alt in block.Alternates.Where(a => (a.Location & _location) != 0 || showAll))
         {
-          _starts.Add(new Alignment() { 
+          _starts.Add(new Alignment() {
             LineNumber = lastStart,
             Alternate = alt
           });
@@ -134,7 +134,7 @@ namespace ADiff
     private class DiffBackground : IBackgroundRenderer
     {
       private MergeView _view;
-      
+
       public DiffBackground(MergeView view)
       {
         _view = view;
@@ -160,7 +160,7 @@ namespace ADiff
         if (textView.Document == null) return;
 
         textView.EnsureVisualLines();
-        
+
         var firstLine = textView.VisualLines.First().FirstDocumentLine.LineNumber;
         int nextBlockLine = int.MaxValue;
         int blockIndex;
@@ -188,20 +188,20 @@ namespace ADiff
           }
 
           alt = _view._starts[blockIndex].Alternate;
-          if (_view._starts[blockIndex].Alternate.Parent.Alternates.Count > 1 
-            && (_view.Location == MergeLocation.Output 
-              || _view.Location == MergeLocation.Parent 
+          if (_view._starts[blockIndex].Alternate.Parent.Alternates.Count > 1
+            && (_view.Location == MergeLocation.Output
+              || _view.Location == MergeLocation.Parent
               || (alt.Location & MergeLocation.Parent) == 0))
           {
 
             colorLocation = alt.Location & ~MergeLocation.Output;
             if (_view.Location == MergeLocation.Output)
             {
-              if ((colorLocation & MergeLocation.Right) != 0) 
+              if ((colorLocation & MergeLocation.Right) != 0)
               {
                 backColor = GetColor(MergeLocation.Right);
               }
-              else if ((colorLocation & MergeLocation.Parent) != 0) 
+              else if ((colorLocation & MergeLocation.Parent) != 0)
               {
                 backColor = GetColor(MergeLocation.Parent);
               }
@@ -210,7 +210,7 @@ namespace ADiff
                 backColor = GetColor(MergeLocation.Left);
               }
             }
-            else 
+            else
             {
               backColor = GetColor(_view.Location);
               if (colorLocation == (MergeLocation.Left | MergeLocation.Right)) backColor = GetColor(MergeLocation.Right);

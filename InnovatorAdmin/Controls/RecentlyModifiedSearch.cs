@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
+using Innovator.Client;
 
 namespace Aras.Tools.InnovatorAdmin.Controls
 {
@@ -15,24 +16,25 @@ namespace Aras.Tools.InnovatorAdmin.Controls
     private BindingList<ItemReference> _availTypes = new BindingList<ItemReference>();
     private List<ItemReference> _results = new List<ItemReference>();
     private BindingList<ItemReference> _selectedTypes = new BindingList<ItemReference>();
-    private Connection _conn;
+    private IAsyncConnection _conn;
     private string _currUserKeyedName;
-    
+
     public IEnumerable<ItemReference> Results
     {
       get { return _results; }
     }
-    
+
     public RecentlyModifiedSearch()
     {
       InitializeComponent();
     }
 
-    public void SetConnection(Connection conn)
+    public void SetConnection(IAsyncConnection conn)
     {
       _conn = conn;
-      _currUserKeyedName = conn.GetCurrUserInfo().Element("keyed_name", "");
+      _currUserKeyedName = conn.ItemById("User", conn.UserId).KeyedName().Value;
       txtModifiedBy.Text = _currUserKeyedName;
+      this.Icon = (this.Owner ?? Application.OpenForms[0]).Icon;
     }
     public void SetItemTypes(IEnumerable<ItemReference> itemTypes)
     {
@@ -132,22 +134,32 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       try
       {
         _results.Clear();
-        IEnumerable<XmlElement> queryResults;
+        IEnumerable<IReadOnlyItem> queryResults;
         foreach (var itemType in _selectedTypes)
         {
           if (txtModifiedBy.Text == _currUserKeyedName)
           {
-            queryResults = _conn.GetItems("ApplyItem", string.Format(Properties.Resources.RecentItems_UserId, 
-              itemType.KeyedName, 
-              _conn.GetCurrUserInfo().Attribute("id"), 
-              DateTime.Today.AddDays(-1 * (double)nudDays.Value).ToString("s")));
+            queryResults = _conn.Apply(@"<Item type='@0' action='get'>
+                                          <modified_by_id>@1</modified_by_id>
+                                          <modified_on condition='gt'>@2</modified_on>
+                                        </Item>"
+              , itemType.KeyedName
+              , _conn.UserId
+              , DateTime.Today.AddDays(-1 * (double)nudDays.Value)).Items();
           }
-          else 
+          else
           {
-            queryResults = _conn.GetItems("ApplyItem", string.Format(Properties.Resources.RecentItems_UserKeyedName, 
-              itemType.KeyedName, 
-              txtModifiedBy.Text, 
-              DateTime.Today.AddDays(-1 * (double)nudDays.Value).ToString("s")));
+            queryResults = _conn.Apply(@"<Item type='@0' action='get'>
+                                          <modified_by_id>
+                                            <Item type='User' action='get'>
+                                              <keyed_name condition='like'>@1</keyed_name>
+                                            </Item>
+                                          </modified_by_id>
+                                          <modified_on condition='gt'>@2</modified_on>
+                                        </Item>"
+              , itemType.KeyedName
+              , "*" + txtModifiedBy.Text + "*"
+              , DateTime.Today.AddDays(-1 * (double)nudDays.Value)).Items();
           }
 
           foreach (var qr in queryResults)

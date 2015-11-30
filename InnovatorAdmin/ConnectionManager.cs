@@ -52,7 +52,7 @@ namespace Aras.Tools.InnovatorAdmin
     internal static string GetConnectionFilePath()
     {
       string path = @"{0}\{1}\connections.xml";
-      return string.Format(path, Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Application.ProductName);
+      return string.Format(path, Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Innovator Admin");
     }
   }
 }

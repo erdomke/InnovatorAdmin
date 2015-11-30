@@ -69,49 +69,5 @@ namespace Aras.Tools.InnovatorAdmin.Controls
         Utils.HandleError(ex);
       }
     }
-
-    private void btnImportData_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        IDataExtractor result = null;
-
-        using (var dialog = new Dialog.ImportSelectDialog())
-        {
-          dialog.Filter = "File / Folders to Import|*.*|Data File|*.csv;*.xslx";
-          dialog.Multiselect = true;
-          if (dialog.ShowDialog() == DialogResult.OK)
-          {
-            if (dialog.FileName == Utils.GetAppFilePath(AppFileType.ImportExtractor))
-            {
-              result = DataExtractorFactory.Deserialize(File.ReadAllText(dialog.FileName));
-            }
-            else if (dialog.FilterIndex == 1 || Directory.Exists(dialog.FileName))
-            {
-              result = DataExtractorFactory.Get(dialog.FileNames, ImportType.Files);
-            }
-            else
-            {
-              throw new NotSupportedException();
-            }
-          }
-        }
-
-        if (result != null)
-        {
-          var mapping = new ImportMapping();
-          mapping.Extractor = result;
-
-          var connSelect = new ConnectionSelection();
-          connSelect.MultiSelect = false;
-          connSelect.GoNextAction = () => _wizard.GoToStep(mapping);
-          _wizard.GoToStep(connSelect);
-        }
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
   }
 }

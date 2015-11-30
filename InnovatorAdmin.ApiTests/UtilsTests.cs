@@ -7,7 +7,6 @@ using System.Xml;
 using Aras.Tools.InnovatorAdmin;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using prop = global::InnovatorAdmin.ApiTests.Properties;
-using Aras.AutoComplete;
 
 namespace Aras.Tools.InnovatorAdmin.Tests
 {
@@ -46,7 +45,7 @@ namespace Aras.Tools.InnovatorAdmin.Tests
       var items = new DependencyItem[] { a, b, c, d, e };
       IList<DependencyItem> cycle = new List<DependencyItem>();
       var sorted = InnovatorAdmin.Utils.DependencySort(items, dep => dep.Dependencies, ref cycle, false).ToList();
-      
+
       Assert.AreEqual(e, sorted[0]);
       Assert.AreEqual(b, sorted[1]);
       Assert.AreEqual(c, sorted[2]);

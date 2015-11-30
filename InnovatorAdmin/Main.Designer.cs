@@ -28,6 +28,7 @@
     /// </summary>
     private void InitializeComponent()
     {
+      System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
       this.tblLayout = new System.Windows.Forms.TableLayoutPanel();
       this.btnNext = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
       this.btnPrevious = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
@@ -179,6 +180,7 @@
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(599, 449);
       this.Controls.Add(this.tblLayout);
+      this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.Name = "Main";
       this.Text = "Innovator Installer";
       this.tblLayout.ResumeLayout(false);

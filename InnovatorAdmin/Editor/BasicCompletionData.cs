@@ -37,7 +37,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       get { return _description; }
     }
 
-    public void Complete(TextArea textArea, ISegment completionSegment,
+    public virtual void Complete(TextArea textArea, ISegment completionSegment,
         EventArgs insertionRequestEventArgs)
     {
       textArea.Document.Replace(completionSegment, this.Text);

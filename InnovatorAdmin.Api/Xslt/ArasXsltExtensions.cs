@@ -13,6 +13,7 @@ using Mvp.Xml.Common.XPath;
 using System.Reflection;
 using Mvp.Xml.Exslt;
 using System.Threading.Tasks;
+using Innovator.Client;
 
 namespace Aras.Tools.InnovatorAdmin
 {
@@ -67,7 +68,7 @@ namespace Aras.Tools.InnovatorAdmin
       if (type == null) return Enumerable.Empty<MethodInfo>();
       return type.GetMethods(BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.Public);
     }
-    public static string Transform(string xslt, string xml, IArasConnection conn)
+    public static string Transform(string xslt, string xml, IAsyncConnection conn)
     {
       var xal = new XsltArgumentList();
       xal.AddExtensionObject(Namespace, new ArasXsltExtensions(conn));
@@ -90,9 +91,9 @@ namespace Aras.Tools.InnovatorAdmin
 
     public const string Namespace = "http://www.aras.com/XsltExtensions/1.0";
 
-    private IArasConnection _conn;
+    private IAsyncConnection _conn;
 
-    public ArasXsltExtensions(IArasConnection conn)
+    public ArasXsltExtensions(IAsyncConnection conn)
     {
       _conn = conn;
     }
@@ -139,7 +140,7 @@ namespace Aras.Tools.InnovatorAdmin
         }
       }
 
-      return XmlUtils.DocFromXml(_conn.CallAction(action, mainElem.OuterXml)).CreateNavigator();
+      return XmlUtils.DocFromXml(_conn.Process(new Command(mainElem.OuterXml).WithAction(action)).AsString()).CreateNavigator();
     }
 
     /// <summary>Returns the smallest integral value that is greater than or equal to the specified double-precision floating-point number.</summary>

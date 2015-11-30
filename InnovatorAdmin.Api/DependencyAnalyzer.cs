@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using Innovator.Client;
 
 namespace Aras.Tools.InnovatorAdmin
 {
@@ -38,53 +39,54 @@ namespace Aras.Tools.InnovatorAdmin
       return result;
     }
 
-    public DependencyAnalyzer(Connection _conn, Dictionary<string, ItemType> itemTypes)
+    public DependencyAnalyzer(IAsyncConnection _conn, Dictionary<string, ItemType> itemTypes)
     {
       _parser.SchemaToKeep = "innovator";
 
-      _coreMethods = new HashSet<ItemReference>();
-      ItemReference itemRef;
-      var methodItems = _conn.GetItems("ApplyItem", Properties.Resources.GetCoreMethods);
-      foreach (var methodItem in methodItems)
-      {
-        itemRef = new ItemReference("Method", "[Method].[config_id] = '" + methodItem.Element("config_id", "") + "'");
-        itemRef.KeyedName = methodItem.Element("id").Attribute("keyed_name", "");
-        _coreMethods.Add(itemRef);
-      }
 
-      _systemIdentities = new Dictionary<string, ItemReference>();
-      var sysIdents = _conn.GetItems("ApplyItem", Properties.Resources.SystemIdentities);
-      foreach (var sysIdent in sysIdents)
-      {
-        itemRef = ItemReference.FromFullItem(sysIdent, false);
-        itemRef.KeyedName = sysIdent.Element("name", "");
-        _systemIdentities.Add(itemRef.Unique, itemRef);
-      }
+      var methodItems = _conn.Apply(Properties.Resources.GetCoreMethods)
+        .Items()
+        .Select(i => new ItemReference("Method", "[Method].[config_id] = '" + i.ConfigId().Value + "'") {
+          KeyedName = i.Property("id").KeyedName().Value
+        });
 
-      _sql = new Dictionary<string, ItemReference>();
-      var sqlItems = _conn.GetItems("ApplyItem", Properties.Resources.SqlItems);
-      foreach (var sql in sqlItems)
-      {
-        itemRef = ItemReference.FromFullItem(sql, false);
-        itemRef.KeyedName = sql.Element("name", "");
-        _sql.Add(itemRef.KeyedName.ToLowerInvariant(), itemRef);
-      }
+      _coreMethods = new HashSet<ItemReference>(methodItems);
+
+      var sysIdents = _conn.Apply(Properties.Resources.SystemIdentities)
+        .Items()
+        .Select(i => {
+          var itemRef = ItemReference.FromFullItem(i, false);
+          itemRef.KeyedName = i.Property("name").AsString("");
+          return itemRef;
+        });
+      _systemIdentities = sysIdents.ToDictionary(i => i.Unique);
+
+      var sqlItems = _conn.Apply(Properties.Resources.SqlItems)
+        .Items()
+        .Select(i =>
+        {
+          var itemRef = ItemReference.FromFullItem(i, false);
+          itemRef.KeyedName = i.Property("name").AsString("");
+          return itemRef;
+        });
+      _sql = sqlItems.ToDictionary(i => i.KeyedName.ToLowerInvariant());
+
 
       _customProps = new Dictionary<ItemProperty, ItemReference>();
-      var customPropItems = _conn.GetItems("ApplyItem", Properties.Resources.CustomUserProperties);
-      XmlElement itemType;
+      var customPropItems = _conn.Apply(Properties.Resources.CustomUserProperties).Items();
+      IReadOnlyItem itemType;
       foreach (var customProp in customPropItems)
       {
-        itemType = customProp.Elements("source_id").Element("Item");
+        itemType = customProp.SourceItem();
         _customProps.Add(new ItemProperty()
         {
-          ItemType = itemType.Element("name").InnerText,
-          ItemTypeId = itemType.Element("id").InnerText,
-          Property = customProp.Element("name").InnerText,
-          PropertyId = customProp.Element("id").InnerText
-        }, new ItemReference("Property", customProp.Element("id").InnerText)
+          ItemType = itemType.Property("name").Value,
+          ItemTypeId = itemType.Id(),
+          Property = customProp.Property("name").Value,
+          PropertyId = customProp.Id()
+        }, new ItemReference("Property", customProp.Id())
         {
-          KeyedName = customProp.Element("name").InnerText
+          KeyedName = customProp.Property("name").Value
         });
       }
 

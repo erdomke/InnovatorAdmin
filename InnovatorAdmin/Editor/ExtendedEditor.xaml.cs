@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using io = System.IO;
 
 namespace Aras.Tools.InnovatorAdmin.Editor
 {
@@ -26,6 +27,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     private EditorMode _mode = EditorMode.Xml;
 
     public IEditorHelper Helper { get; set; }
+    public System.Windows.Forms.Control Host { get; set; }
 
     public ICSharpCode.AvalonEdit.TextEditor Editor
     {
@@ -198,6 +200,20 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       }
 
       return null;
+    }
+
+    private void OpenWith_Click(object sender, RoutedEventArgs e)
+    {
+      try
+      {
+        var file = io.Path.Combine(io.Path.GetTempPath(), io.Path.GetRandomFileName() + ".xml");
+        io.File.WriteAllText(file, this.editor.Text);
+        ShellHelper.OpenAs(this.Host.FindForm().Handle, file);
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
     }
   }
 }

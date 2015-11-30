@@ -117,16 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="RecentItems_UserKeyedName" xml:space="preserve">
-    <value>&lt;Item type="{0}" action="get"&gt;
-  &lt;modified_by_id&gt;
-    &lt;Item type="User" action="get"&gt;
-      &lt;keyed_name condition="like"&gt;*{1}*&lt;/keyed_name&gt;
-    &lt;/Item&gt;
-  &lt;/modified_by_id&gt;
-  &lt;modified_on condition="gt"&gt;{2}&lt;/modified_on&gt;
-&lt;/Item&gt;</value>
-  </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="search32" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\icons\search32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -145,12 +135,6 @@
   </data>
   <data name="innPkg32" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\icons\innPkg32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="RecentItems_UserId" xml:space="preserve">
-    <value>&lt;Item type="{0}" action="get"&gt;
-  &lt;modified_by_id&gt;{1}&lt;/modified_by_id&gt;
-  &lt;modified_on condition="gt"&gt;{2}&lt;/modified_on&gt;
-&lt;/Item&gt;</value>
   </data>
   <data name="Xslt_DocumentMergeImport" xml:space="preserve">
     <value>&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:arasx="http://www.aras.com/XsltExtensions/1.0" xmlns:msxsl="urn:schemas-microsoft-com:xslt" extension-element-prefixes="arasx msxsl"&gt;
@@ -397,9 +381,6 @@
   <data name="copy16" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\icons\copy16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Aml_Packages" xml:space="preserve">
-    <value>&lt;AML&gt;&lt;Item type="PackageDefinition" action="get" select="id"&gt;&lt;/Item&gt;&lt;/AML&gt;</value>
-  </data>
   <data name="arrowLeftSimpleBlack16" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\icons\arrowLeftSimpleBlack16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -435,9 +416,6 @@ where SOURCE_ID = '{0}')&lt;/source_id&gt;
   &lt;/xsl:template&gt;
 &lt;/xsl:stylesheet&gt;</value>
   </data>
-  <data name="Aml_ItemGet" xml:space="preserve">
-    <value>&lt;AML&gt;&lt;Item type="{0}" action="get" maxRecords="1000" orderBy="keyed_name" select="id,source_id,related_id"&gt;{1}&lt;/Item&gt;&lt;/AML&gt;</value>
-  </data>
   <data name="arrowLeftAllSimpleBlack16" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\icons\arrowLeftAllSimpleBlack16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -446,9 +424,6 @@ where SOURCE_ID = '{0}')&lt;/source_id&gt;
   </data>
   <data name="remove16" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\icons\remove16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Aml_ItemTypes" xml:space="preserve">
-    <value>&lt;AML&gt;&lt;Item type="ItemType" action="get" select="id"&gt;&lt;/Item&gt;&lt;/AML&gt;</value>
   </data>
   <data name="manifestFolder32" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\icons\manifestFolder32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>

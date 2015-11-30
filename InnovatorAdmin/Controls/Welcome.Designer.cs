@@ -30,11 +30,10 @@
     {
       this.components = new System.ComponentModel.Container();
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+      this.toolTipManager = new System.Windows.Forms.ToolTip(this.components);
       this.btnCreate = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
       this.btnInstall = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
       this.btnAmlStudio = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnImportData = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.toolTipManager = new System.Windows.Forms.ToolTip(this.components);
       this.tableLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
       // 
@@ -47,10 +46,9 @@
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 101F));
-      this.tableLayoutPanel1.Controls.Add(this.btnCreate, 1, 3);
       this.tableLayoutPanel1.Controls.Add(this.btnInstall, 1, 1);
       this.tableLayoutPanel1.Controls.Add(this.btnAmlStudio, 3, 3);
-      this.tableLayoutPanel1.Controls.Add(this.btnImportData, 3, 1);
+      this.tableLayoutPanel1.Controls.Add(this.btnCreate, 3, 1);
       this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
       this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -76,7 +74,7 @@
       this.btnCreate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnCreate.ForeColor = System.Drawing.Color.Black;
       this.btnCreate.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.innPkg32;
-      this.btnCreate.Location = new System.Drawing.Point(103, 122);
+      this.btnCreate.Location = new System.Drawing.Point(245, 35);
       this.btnCreate.MinimumSize = new System.Drawing.Size(120, 40);
       this.btnCreate.Name = "btnCreate";
       this.btnCreate.Padding = new System.Windows.Forms.Padding(2);
@@ -137,30 +135,6 @@
       this.btnAmlStudio.UseVisualStyleBackColor = false;
       this.btnAmlStudio.Click += new System.EventHandler(this.btnAmlStudio_Click);
       // 
-      // btnImportData
-      // 
-      this.btnImportData.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-      this.btnImportData.AutoSize = true;
-      this.btnImportData.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.btnImportData.FlatAppearance.BorderSize = 0;
-      this.btnImportData.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
-      this.btnImportData.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
-      this.btnImportData.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-      this.btnImportData.ForeColor = System.Drawing.Color.Black;
-      this.btnImportData.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.folder32;
-      this.btnImportData.Location = new System.Drawing.Point(245, 35);
-      this.btnImportData.Name = "btnImportData";
-      this.btnImportData.Padding = new System.Windows.Forms.Padding(2);
-      this.btnImportData.Size = new System.Drawing.Size(116, 61);
-      this.btnImportData.TabIndex = 6;
-      this.btnImportData.Text = "Import Files";
-      this.btnImportData.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-      this.btnImportData.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
-      this.btnImportData.UseVisualStyleBackColor = false;
-      this.btnImportData.Click += new System.EventHandler(this.btnImportData_Click);
-      // 
       // Welcome
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -181,6 +155,5 @@
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     private System.Windows.Forms.ToolTip toolTipManager;
     private FlatButton btnAmlStudio;
-    private FlatButton btnImportData;
   }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using Innovator.Client;
 
 namespace Aras.Tools.InnovatorAdmin
 {
@@ -14,12 +15,12 @@ namespace Aras.Tools.InnovatorAdmin
     public string KeyedName { get; set; }
     // Used when understanding dependencies
     public ItemReference Origin { get; set; }
-    public string Type 
+    public string Type
     {
       get { return _type; }
       set { _type = value; }
     }
-    public string Unique 
+    public string Unique
     {
       get { return _unique; }
       set { _unique = value; }
@@ -29,7 +30,7 @@ namespace Aras.Tools.InnovatorAdmin
     public int Levels { get; set; }
     public SystemPropertyGroup SystemProps { get; set; }
 
-    public ItemReference() 
+    public ItemReference()
     {
       this.Levels = -1;
       this.SystemProps = SystemPropertyGroup.None;
@@ -42,7 +43,7 @@ namespace Aras.Tools.InnovatorAdmin
 
     public static ItemReference FromElement(XmlElement elem)
     {
-      return elem.LocalName == "Item" ? 
+      return elem.LocalName == "Item" ?
         ItemReference.FromFullItem(elem, false) :
         ItemReference.FromItemProp(elem);
     }
@@ -53,11 +54,61 @@ namespace Aras.Tools.InnovatorAdmin
         KeyedName = (elem.HasAttribute("keyed_name") ? elem.Attributes["keyed_name"].Value : "")
       };
     }
+    public static ItemReference FromFullItem(IReadOnlyItem elem, bool getKeyedName)
+    {
+      var result = new ItemReference();
+      result.Type = elem.Type().Value;
+      if (elem.Attribute("id").Exists)
+      {
+        result._unique = elem.Attribute("id").Value;
+      }
+      else if (elem.Attribute("where").Exists)
+      {
+        result._unique = elem.Attribute("where").Value;
+      }
+      if (getKeyedName)
+      {
+        var node = elem.Property("id");
+        if (node.Exists && node.KeyedName().Exists)
+        {
+          result.KeyedName = node.KeyedName().Value;
+        }
+        else
+        {
+          result.KeyedName = node.Attribute("_keyed_name").Value
+                          ?? elem.KeyedName().AsString(null)
+                          ?? elem.Property("name").AsString(null);
+        }
+
+        node = elem.SourceId();
+        if (node.Exists && node.KeyedName().Exists)
+        {
+          if (result.KeyedName.IsGuid())
+          {
+            var related = elem.RelatedId();
+            if (related.Exists && related.KeyedName().Exists)
+            {
+              result.KeyedName = node.Attribute("keyed_name").Value + " > " + related.Attribute("keyed_name").Value;
+            }
+            else
+            {
+              result.KeyedName = node.Attribute("keyed_name").Value + ": " + result.KeyedName;
+            }
+          }
+          else if (!string.IsNullOrEmpty(node.Attribute("keyed_name").Value))
+          {
+            result.KeyedName += " {" + node.Attribute("keyed_name").Value + "}";
+          }
+        }
+      }
+
+      return result;
+    }
     public static ItemReference FromFullItem(XmlElement elem, bool getKeyedName)
     {
       var result = new ItemReference();
       result.Type = elem.Attributes["type"].Value;
-      if (elem.HasAttribute("id")) 
+      if (elem.HasAttribute("id"))
       {
         result._unique = elem.Attributes["id"].Value;
       }
@@ -122,13 +173,13 @@ namespace Aras.Tools.InnovatorAdmin
 
     bool IEquatable<ItemReference>.Equals(ItemReference itemRef)
     {
-      return Utils.StringEquals(this.Unique, itemRef.Unique, StringComparison.OrdinalIgnoreCase) 
+      return Utils.StringEquals(this.Unique, itemRef.Unique, StringComparison.OrdinalIgnoreCase)
         && Utils.StringEquals(this.Type, itemRef.Type, StringComparison.OrdinalIgnoreCase);
     }
 
     public override int GetHashCode()
     {
-      return (this.Unique.ToUpperInvariant() ?? "").GetHashCode() 
+      return (this.Unique.ToUpperInvariant() ?? "").GetHashCode()
         ^ (this.Type.ToUpperInvariant() ?? "").GetHashCode();
     }
 
