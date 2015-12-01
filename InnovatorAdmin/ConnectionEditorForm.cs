@@ -59,6 +59,14 @@ namespace Aras.Tools.InnovatorAdmin
       this.DialogResult = System.Windows.Forms.DialogResult.OK;
     }
 
-
+    public DialogResult ShowDialog(IWin32Window owner, Rectangle bounds)
+    {
+      this.StartPosition = FormStartPosition.Manual;
+      var screenDim = SystemInformation.VirtualScreen;
+      var newX = Math.Min(Math.Max(bounds.X, 0), screenDim.Width - this.DesktopBounds.Width);
+      var newY = Math.Min(Math.Max(bounds.Y - 30, 0), screenDim.Height - this.DesktopBounds.Height);
+      this.DesktopLocation = new Point(newX, newY);
+      return this.ShowDialog(owner);
+    }
   }
 }

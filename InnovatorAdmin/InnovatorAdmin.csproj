@@ -327,6 +327,11 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
     <Compile Include="resources\Messages.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -390,6 +395,9 @@
     <EmbeddedResource Include="EditorWindow\ParameterWindow.resx">
       <DependentUpon>ParameterWindow.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Editor\FindReplace.resx">
+      <DependentUpon>FindReplace.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
     </EmbeddedResource>
@@ -428,6 +436,10 @@
     </EmbeddedResource>
     <None Include="packages.config" />
     <EmbeddedResource Include="resources\Aml.xshd" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
     <None Include="resources\icons\add16.png" />
   </ItemGroup>
   <ItemGroup>

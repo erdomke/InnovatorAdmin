@@ -588,6 +588,7 @@
       this.Controls.Add(this.menuStrip);
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.Name = "EditorWindow";
+      this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
       this.Text = "AmlStudio";
       this.tableLayoutPanel1.ResumeLayout(false);
       this.tableLayoutPanel1.PerformLayout();

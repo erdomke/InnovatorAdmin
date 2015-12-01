@@ -35,7 +35,8 @@ namespace Aras.Tools.InnovatorAdmin.Controls
     private void btnResetServerCache_Click(object sender, EventArgs e)
     {
       using (var rsc = new ConnectionEditorForm()) {
-        if (rsc.ShowDialog(this.ParentForm) == DialogResult.OK)
+        if (rsc.ShowDialog(this.ParentForm,
+          btnResetServerCache.RectangleToScreen(btnResetServerCache.Bounds)) == DialogResult.OK)
         {
           foreach (var conn in rsc.SelectedConnections)
           {

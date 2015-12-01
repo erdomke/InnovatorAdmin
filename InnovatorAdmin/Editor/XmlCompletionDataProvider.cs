@@ -17,12 +17,12 @@ using System.Linq;
 
 namespace Aras.Tools.InnovatorAdmin.Editor
 {
-	/// <summary>
-	/// Provides the autocomplete (intellisense) data for an
-	/// xml document that specifies a known schema.
-	/// </summary>
-	public class XmlCompletionDataProvider : IEditorHelper
-	{
+  /// <summary>
+  /// Provides the autocomplete (intellisense) data for an
+  /// xml document that specifies a known schema.
+  /// </summary>
+  public class XmlCompletionDataProvider : IEditorHelper
+  {
     //public static XmlCompletionDataProvider FromResource(string path)
     //{
     //  var schema = new XmlSchema();
@@ -45,22 +45,21 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     //  // Do nothing.
     //}
 
-		XmlSchemaCompletionDataCollection schemaCompletionDataItems;
-		XmlSchemaCompletionData defaultSchemaCompletionData;
-		string defaultNamespacePrefix = String.Empty;
-		
-		public XmlCompletionDataProvider(XmlSchema schema)
-		{
-			this.schemaCompletionDataItems = new XmlSchemaCompletionDataCollection();
-			this.defaultSchemaCompletionData = new XmlSchemaCompletionData(schema);
-			this.defaultNamespacePrefix = string.Empty;
-		}
+    XmlSchemaCompletionDataCollection schemaCompletionDataItems;
+    XmlSchemaCompletionData defaultSchemaCompletionData;
+    string defaultNamespacePrefix = String.Empty;
+
+    public XmlCompletionDataProvider(XmlSchema schema)
+    {
+      this.schemaCompletionDataItems = new XmlSchemaCompletionDataCollection();
+      this.defaultSchemaCompletionData = new XmlSchemaCompletionData(schema);
+      this.defaultNamespacePrefix = string.Empty;
+    }
 
     public virtual void HandleTextEntered(EditorControl control, string insertText)
     {
       var text = control.Editor.Text.Substring(0, control.Editor.CaretOffset);
       ICompletionData[] result = null;
-      XmlElementPath parentPath;
       IEnumerable<XmlElementPath> parentPaths;
       switch (insertText)
       {
@@ -140,86 +139,86 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     {
       return text;
     }
-		
-		/// <summary>
-		/// Finds the schema given the xml element path.
-		/// </summary>
-		public XmlSchemaCompletionData FindSchema(XmlElementPath path)
-		{
-			if (path.Elements.Count > 0) {
-				string namespaceUri = path.Elements[0].Namespace;
-				if (namespaceUri.Length > 0) {
-					var result = schemaCompletionDataItems[namespaceUri];
+
+    /// <summary>
+    /// Finds the schema given the xml element path.
+    /// </summary>
+    public XmlSchemaCompletionData FindSchema(XmlElementPath path)
+    {
+      if (path.Elements.Count > 0) {
+        string namespaceUri = path.Elements[0].Namespace;
+        if (namespaceUri.Length > 0) {
+          var result = schemaCompletionDataItems[namespaceUri];
           if (result == null && defaultSchemaCompletionData.NamespaceUri == namespaceUri) result = defaultSchemaCompletionData;
           return result;
-				} else if (defaultSchemaCompletionData != null) {
-					
-					// Use the default schema namespace if none
-					// specified in a xml element path, otherwise
-					// we will not find any attribute or element matches
-					// later.
-					foreach (QualifiedName name in path.Elements) {
-						if (name.Namespace.Length == 0) {
-							name.Namespace = defaultSchemaCompletionData.NamespaceUri;
-						}
-					}
-					return defaultSchemaCompletionData;
-				}
-			}
-			return null;
-		}
-		
-		/// <summary>
-		/// Finds the schema given a namespace URI.
-		/// </summary>
-		public XmlSchemaCompletionData FindSchema(string namespaceUri)
-		{
-			return schemaCompletionDataItems[namespaceUri];
-		}
-		
-		/// <summary>
-		/// Gets the schema completion data that was created from the specified 
-		/// schema filename.
-		/// </summary>
-		public XmlSchemaCompletionData FindSchemaFromFileName(string fileName)
-		{
-			return schemaCompletionDataItems.GetSchemaFromFileName(fileName);
-		}
-		
-		ICompletionData[] GetChildElementCompletionData(XmlElementPath path)
-		{
-			ICompletionData[] completionData = null;
-			
-			XmlSchemaCompletionData schema = FindSchema(path);
-			if (schema != null) {
-				completionData = schema.GetChildElementCompletionData(path);
-			}
-			
-			return completionData;
-		}
-		
-		ICompletionData[] GetAttributeCompletionData(XmlElementPath path)
-		{
-			ICompletionData[] completionData = null;
-			
-			XmlSchemaCompletionData schema = FindSchema(path);
-			if (schema != null) {
-				completionData = schema.GetAttributeCompletionData(path);
-			}
-			
-			return completionData;
-		}
-		
-		ICompletionData[] GetAttributeValueCompletionData(XmlElementPath path, string name)
-		{
-			ICompletionData[] completionData = null;
-			
-			XmlSchemaCompletionData schema = FindSchema(path);
-			if (schema != null) {
-				completionData = schema.GetAttributeValueCompletionData(path, name);
-			}
-			
-			return completionData;
-		}
+        } else if (defaultSchemaCompletionData != null) {
+
+          // Use the default schema namespace if none
+          // specified in a xml element path, otherwise
+          // we will not find any attribute or element matches
+          // later.
+          foreach (QualifiedName name in path.Elements) {
+            if (name.Namespace.Length == 0) {
+              name.Namespace = defaultSchemaCompletionData.NamespaceUri;
+            }
+          }
+          return defaultSchemaCompletionData;
+        }
+      }
+      return null;
+    }
+
+    /// <summary>
+    /// Finds the schema given a namespace URI.
+    /// </summary>
+    public XmlSchemaCompletionData FindSchema(string namespaceUri)
+    {
+      return schemaCompletionDataItems[namespaceUri];
+    }
+
+    /// <summary>
+    /// Gets the schema completion data that was created from the specified
+    /// schema filename.
+    /// </summary>
+    public XmlSchemaCompletionData FindSchemaFromFileName(string fileName)
+    {
+      return schemaCompletionDataItems.GetSchemaFromFileName(fileName);
+    }
+
+    ICompletionData[] GetChildElementCompletionData(XmlElementPath path)
+    {
+      ICompletionData[] completionData = null;
+
+      XmlSchemaCompletionData schema = FindSchema(path);
+      if (schema != null) {
+        completionData = schema.GetChildElementCompletionData(path);
+      }
+
+      return completionData;
+    }
+
+    ICompletionData[] GetAttributeCompletionData(XmlElementPath path)
+    {
+      ICompletionData[] completionData = null;
+
+      XmlSchemaCompletionData schema = FindSchema(path);
+      if (schema != null) {
+        completionData = schema.GetAttributeCompletionData(path);
+      }
+
+      return completionData;
+    }
+
+    ICompletionData[] GetAttributeValueCompletionData(XmlElementPath path, string name)
+    {
+      ICompletionData[] completionData = null;
+
+      XmlSchemaCompletionData schema = FindSchema(path);
+      if (schema != null) {
+        completionData = schema.GetAttributeValueCompletionData(path, name);
+      }
+
+      return completionData;
+    }
   }
 }

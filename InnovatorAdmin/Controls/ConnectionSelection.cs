@@ -50,7 +50,6 @@ namespace Aras.Tools.InnovatorAdmin.Controls
       }
       else
       {
-        string msg;
         _wizard.ConnectionInfo = connEditor.SelectedConnections;
         try
         {

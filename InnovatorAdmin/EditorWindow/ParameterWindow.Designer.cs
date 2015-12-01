@@ -39,10 +39,10 @@
       this.label2 = new System.Windows.Forms.Label();
       this.label3 = new System.Windows.Forms.Label();
       this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-      this.btnCancel = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnReplace = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnIgnore = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
       this.bs = new System.Windows.Forms.BindingSource(this.components);
+      this.btnCancel = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnIgnore = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnReplace = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
       this.tableLayoutPanel1.SuspendLayout();
       this.tableLayoutPanel2.SuspendLayout();
       this.flowLayoutPanel1.SuspendLayout();
@@ -188,25 +188,6 @@
       this.btnCancel.UseVisualStyleBackColor = false;
       this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
       // 
-      // btnReplace
-      // 
-      this.btnReplace.AutoSize = true;
-      this.btnReplace.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.btnReplace.FlatAppearance.BorderSize = 0;
-      this.btnReplace.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
-      this.btnReplace.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
-      this.btnReplace.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-      this.btnReplace.ForeColor = System.Drawing.Color.Black;
-      this.btnReplace.Location = new System.Drawing.Point(125, 3);
-      this.btnReplace.Name = "btnReplace";
-      this.btnReplace.Padding = new System.Windows.Forms.Padding(2);
-      this.btnReplace.Size = new System.Drawing.Size(75, 27);
-      this.btnReplace.TabIndex = 1;
-      this.btnReplace.Text = "&Replace";
-      this.btnReplace.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
-      this.btnReplace.UseVisualStyleBackColor = false;
-      this.btnReplace.Click += new System.EventHandler(this.btnOk_Click);
-      // 
       // btnIgnore
       // 
       this.btnIgnore.AutoSize = true;
@@ -226,6 +207,25 @@
       this.btnIgnore.UseVisualStyleBackColor = false;
       this.btnIgnore.Click += new System.EventHandler(this.btnIgnore_Click);
       // 
+      // btnReplace
+      // 
+      this.btnReplace.AutoSize = true;
+      this.btnReplace.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnReplace.FlatAppearance.BorderSize = 0;
+      this.btnReplace.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnReplace.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnReplace.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnReplace.ForeColor = System.Drawing.Color.Black;
+      this.btnReplace.Location = new System.Drawing.Point(125, 3);
+      this.btnReplace.Name = "btnReplace";
+      this.btnReplace.Padding = new System.Windows.Forms.Padding(2);
+      this.btnReplace.Size = new System.Drawing.Size(75, 27);
+      this.btnReplace.TabIndex = 1;
+      this.btnReplace.Text = "&Replace";
+      this.btnReplace.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnReplace.UseVisualStyleBackColor = false;
+      this.btnReplace.Click += new System.EventHandler(this.btnOk_Click);
+      // 
       // ParameterWindow
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -234,6 +234,7 @@
       this.ClientSize = new System.Drawing.Size(365, 192);
       this.Controls.Add(this.tableLayoutPanel1);
       this.Name = "ParameterWindow";
+      this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
       this.Text = "Enter Parameters";
       this.tableLayoutPanel1.ResumeLayout(false);
       this.tableLayoutPanel1.PerformLayout();

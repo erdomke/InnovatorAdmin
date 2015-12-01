@@ -1,6 +1,7 @@
 ﻿using Innovator.Client;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -11,6 +12,53 @@ namespace Aras.Tools.InnovatorAdmin
 {
   public static class Utils
   {
+    public static string IndentXml(string xml)
+    {
+      string result;
+      if (IndentXml(xml, out result) == null)
+        return result;
+      return xml;
+    }
+
+    /// <summary>
+    /// Tidy the xml of the editor by indenting
+    /// </summary>
+    /// <param name="xml">Unformatted XML string</param>
+    /// <returns>Formatted Xml String</returns>
+    public static Exception IndentXml(string xml, out string formattedString)
+    {
+      try
+      {
+        var readerSettings = new XmlReaderSettings();
+        readerSettings.IgnoreWhitespace = true;
+
+        var settings = new XmlWriterSettings();
+        settings.OmitXmlDeclaration = true;
+        settings.Indent = true;
+        settings.IndentChars = "  ";
+        settings.CheckCharacters = true;
+        settings.CloseOutput = true;
+
+        using (var reader = new StringReader(xml))
+        using (var xmlReader = XmlReader.Create(reader, readerSettings))
+        using (var writer = new StringWriter())
+        using (var xmlWriter = XmlWriter.Create(writer, settings))
+        {
+          xmlWriter.WriteNode(xmlReader, true);
+          xmlWriter.Flush();
+          formattedString = writer.ToString();
+        }
+
+        return null;
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show(ex.Message);
+        formattedString = string.Empty;
+        return ex;
+      }
+    }
+
     public static string GroupConcat<T>(this IEnumerable<T> values, string separator, Func<T, string> renderer)
     {
       if (values.Any())

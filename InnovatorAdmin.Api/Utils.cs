@@ -9,6 +9,13 @@ namespace Aras.Tools.InnovatorAdmin
 {
   internal static class Utils
   {
+    public static string Left(this string value, int count)
+    {
+      return value.Length > count
+        ? value.Substring(0, count)
+        : value;
+    }
+
     public static StringBuilder AppendSeparator(this StringBuilder builder, string separator, object value)
     {
       if (builder.Length > 0) builder.Append(separator);
@@ -35,7 +42,7 @@ namespace Aras.Tools.InnovatorAdmin
       }
     }
 
-        public static IEnumerable<T> DependencySort<T>(this IEnumerable<T> source, Func<T, IEnumerable<T>> dependencies, bool throwOnCycle = false)
+    public static IEnumerable<T> DependencySort<T>(this IEnumerable<T> source, Func<T, IEnumerable<T>> dependencies, bool throwOnCycle = false)
     {
       IList<T> cycle = new List<T>();
       return DependencySort(source, dependencies, ref cycle, throwOnCycle);

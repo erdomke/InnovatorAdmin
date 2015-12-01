@@ -30,13 +30,14 @@
     {
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
       this.tblLayout = new System.Windows.Forms.TableLayoutPanel();
-      this.btnNext = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnPrevious = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnClose = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
       this.lblMessage = new System.Windows.Forms.Label();
       this.picHome = new System.Windows.Forms.PictureBox();
       this.lblLine = new System.Windows.Forms.Label();
       this.lblLine2 = new System.Windows.Forms.Label();
+      this.lblVersion = new System.Windows.Forms.Label();
+      this.btnNext = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnPrevious = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnClose = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
       this.tblLayout.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.picHome)).BeginInit();
       this.SuspendLayout();
@@ -44,18 +45,20 @@
       // tblLayout
       // 
       this.tblLayout.BackColor = System.Drawing.Color.White;
-      this.tblLayout.ColumnCount = 4;
+      this.tblLayout.ColumnCount = 5;
       this.tblLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 48F));
       this.tblLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
       this.tblLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tblLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this.tblLayout.Controls.Add(this.btnNext, 2, 5);
-      this.tblLayout.Controls.Add(this.btnPrevious, 1, 5);
-      this.tblLayout.Controls.Add(this.btnClose, 3, 5);
-      this.tblLayout.Controls.Add(this.lblMessage, 1, 1);
+      this.tblLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tblLayout.Controls.Add(this.btnNext, 3, 5);
+      this.tblLayout.Controls.Add(this.btnPrevious, 2, 5);
+      this.tblLayout.Controls.Add(this.btnClose, 4, 5);
       this.tblLayout.Controls.Add(this.picHome, 0, 0);
       this.tblLayout.Controls.Add(this.lblLine, 0, 2);
       this.tblLayout.Controls.Add(this.lblLine2, 0, 4);
+      this.tblLayout.Controls.Add(this.lblVersion, 1, 5);
+      this.tblLayout.Controls.Add(this.lblMessage, 1, 1);
       this.tblLayout.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tblLayout.Location = new System.Drawing.Point(0, 0);
       this.tblLayout.Name = "tblLayout";
@@ -68,6 +71,63 @@
       this.tblLayout.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tblLayout.Size = new System.Drawing.Size(599, 449);
       this.tblLayout.TabIndex = 1;
+      // 
+      // lblMessage
+      // 
+      this.lblMessage.AutoSize = true;
+      this.tblLayout.SetColumnSpan(this.lblMessage, 3);
+      this.lblMessage.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.lblMessage.Location = new System.Drawing.Point(51, 52);
+      this.lblMessage.Margin = new System.Windows.Forms.Padding(3, 3, 3, 10);
+      this.lblMessage.Name = "lblMessage";
+      this.lblMessage.Size = new System.Drawing.Size(0, 15);
+      this.lblMessage.TabIndex = 4;
+      // 
+      // picHome
+      // 
+      this.tblLayout.SetColumnSpan(this.picHome, 5);
+      this.picHome.Cursor = System.Windows.Forms.Cursors.Hand;
+      this.picHome.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.Header;
+      this.picHome.Location = new System.Drawing.Point(8, 12);
+      this.picHome.Margin = new System.Windows.Forms.Padding(8, 12, 3, 3);
+      this.picHome.Name = "picHome";
+      this.picHome.Size = new System.Drawing.Size(348, 34);
+      this.picHome.TabIndex = 5;
+      this.picHome.TabStop = false;
+      this.picHome.Click += new System.EventHandler(this.picHome_Click);
+      // 
+      // lblLine
+      // 
+      this.lblLine.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.lblLine.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+      this.tblLayout.SetColumnSpan(this.lblLine, 5);
+      this.lblLine.Location = new System.Drawing.Point(20, 80);
+      this.lblLine.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
+      this.lblLine.Name = "lblLine";
+      this.lblLine.Size = new System.Drawing.Size(559, 1);
+      this.lblLine.TabIndex = 2;
+      // 
+      // lblLine2
+      // 
+      this.lblLine2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.lblLine2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+      this.tblLayout.SetColumnSpan(this.lblLine2, 5);
+      this.lblLine2.Location = new System.Drawing.Point(20, 410);
+      this.lblLine2.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
+      this.lblLine2.Name = "lblLine2";
+      this.lblLine2.Size = new System.Drawing.Size(559, 1);
+      this.lblLine2.TabIndex = 0;
+      // 
+      // lblVersion
+      // 
+      this.lblVersion.AutoSize = true;
+      this.lblVersion.Location = new System.Drawing.Point(51, 417);
+      this.lblVersion.Margin = new System.Windows.Forms.Padding(3);
+      this.lblVersion.Name = "lblVersion";
+      this.lblVersion.Size = new System.Drawing.Size(0, 13);
+      this.lblVersion.TabIndex = 6;
       // 
       // btnNext
       // 
@@ -126,54 +186,6 @@
       this.btnClose.UseVisualStyleBackColor = true;
       this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
       // 
-      // lblMessage
-      // 
-      this.lblMessage.AutoSize = true;
-      this.tblLayout.SetColumnSpan(this.lblMessage, 3);
-      this.lblMessage.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lblMessage.Location = new System.Drawing.Point(51, 52);
-      this.lblMessage.Margin = new System.Windows.Forms.Padding(3, 3, 3, 10);
-      this.lblMessage.Name = "lblMessage";
-      this.lblMessage.Size = new System.Drawing.Size(0, 15);
-      this.lblMessage.TabIndex = 4;
-      // 
-      // picHome
-      // 
-      this.tblLayout.SetColumnSpan(this.picHome, 4);
-      this.picHome.Cursor = System.Windows.Forms.Cursors.Hand;
-      this.picHome.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.Header;
-      this.picHome.Location = new System.Drawing.Point(8, 12);
-      this.picHome.Margin = new System.Windows.Forms.Padding(8, 12, 3, 3);
-      this.picHome.Name = "picHome";
-      this.picHome.Size = new System.Drawing.Size(348, 34);
-      this.picHome.TabIndex = 5;
-      this.picHome.TabStop = false;
-      this.picHome.Click += new System.EventHandler(this.picHome_Click);
-      // 
-      // lblLine
-      // 
-      this.lblLine.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-      this.lblLine.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-      this.tblLayout.SetColumnSpan(this.lblLine, 4);
-      this.lblLine.Location = new System.Drawing.Point(20, 80);
-      this.lblLine.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
-      this.lblLine.Name = "lblLine";
-      this.lblLine.Size = new System.Drawing.Size(559, 1);
-      this.lblLine.TabIndex = 2;
-      // 
-      // lblLine2
-      // 
-      this.lblLine2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-      this.lblLine2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-      this.tblLayout.SetColumnSpan(this.lblLine2, 4);
-      this.lblLine2.Location = new System.Drawing.Point(20, 410);
-      this.lblLine2.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
-      this.lblLine2.Name = "lblLine2";
-      this.lblLine2.Size = new System.Drawing.Size(559, 1);
-      this.lblLine2.TabIndex = 0;
-      // 
       // Main
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -182,6 +194,7 @@
       this.Controls.Add(this.tblLayout);
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.Name = "Main";
+      this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
       this.Text = "Innovator Installer";
       this.tblLayout.ResumeLayout(false);
       this.tblLayout.PerformLayout();
@@ -200,6 +213,7 @@
     private System.Windows.Forms.PictureBox picHome;
     private System.Windows.Forms.Label lblLine;
     private System.Windows.Forms.Label lblLine2;
+    private System.Windows.Forms.Label lblVersion;
 
   }
 }

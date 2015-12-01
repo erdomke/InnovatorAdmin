@@ -203,52 +203,13 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       if (buffer.Length < 30000
         || MessageBox.Show("Validating large requests may take several moments.  Continue?", "AML Studio", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
       {
-        if (IndentXml(buffer, out buffer) == null)
+        if (Utils.IndentXml(buffer, out buffer) == null)
         {
           Editor.TextArea.Document.Text = buffer;
         }
       }
     }
-
-    /// <summary>
-    /// Tidy the xml of the editor by indenting
-    /// </summary>
-    /// <param name="xml">Unformatted XML string</param>
-    /// <returns>Formatted Xml String</returns>
-    public Exception IndentXml(string xml, out string formattedString)
-    {
-      try
-      {
-        var readerSettings = new XmlReaderSettings();
-        readerSettings.IgnoreWhitespace = true;
-
-        var settings = new XmlWriterSettings();
-        settings.OmitXmlDeclaration = true;
-        settings.Indent = true;
-        settings.IndentChars = "  ";
-        settings.CheckCharacters = true;
-        settings.CloseOutput = true;
-
-        using (var reader = new StringReader(xml))
-        using (var xmlReader = XmlReader.Create(reader, readerSettings))
-        using (var writer = new StringWriter())
-        using (var xmlWriter = XmlWriter.Create(writer, settings))
-        {
-          xmlWriter.WriteNode(xmlReader, true);
-          xmlWriter.Flush();
-          formattedString = writer.ToString();
-        }
-
-        return null;
-      }
-      catch (Exception ex)
-      {
-        MessageBox.Show(ex.Message);
-        formattedString = string.Empty;
-        return ex;
-      }
-    }
-
+    
     protected override void Dispose(bool disposing)
     {
       base.Dispose(disposing);

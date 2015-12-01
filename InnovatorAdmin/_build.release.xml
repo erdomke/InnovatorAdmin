@@ -55,12 +55,17 @@
     <WriteLinesToFile File="$(NuSpecPath)" Lines="@(LineText)" Overwrite="true" />
   </Target>
   <Target Name="PackNuget">
+    <ReadLinesFromFile File="..\.nuget\key.user">
+      <Output TaskParameter="Lines" PropertyName="ApiKey" />
+    </ReadLinesFromFile>
     <!--<Exec Command="..\.nuget\NuGet.exe Update -self" />-->
+    <Exec Command="..\.nuget\NuGet.exe SetApiKey $(ApiKey)" />
     <Exec Command="..\.nuget\NuGet.exe Pack $(NuSpecPath)" />
     <ItemGroup>
       <SquirrelPath Include="..\packages\squirrel.windows.*\tools\Squirrel.exe" />
       <NuPkgPath Include="$(ProjectName).*.nupkg" />
     </ItemGroup>
+    <Exec Command="..\.nuget\NuGet.exe Push @(NuPkgPath)" />
     <Exec Command="@(SquirrelPath) --releasify=@(NuPkgPath)" />
   </Target>
 </Project>

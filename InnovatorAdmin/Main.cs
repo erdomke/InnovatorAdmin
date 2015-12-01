@@ -6,6 +6,8 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Xml;
 using Innovator.Client;
+using System.Reflection;
+using System.Drawing;
 
 namespace Aras.Tools.InnovatorAdmin
 {
@@ -27,6 +29,15 @@ namespace Aras.Tools.InnovatorAdmin
         {
           _export = new ExportProcessor(_conn);
           _install = new InstallProcessor(_conn);
+          if (this.ConnectionInfo.Count() == 1)
+          {
+            lblLine.Height = 5;
+            lblLine.BackColor = this.ConnectionInfo.First().Color;
+          }
+          else
+          {
+            lblLine.Height = 1;
+          }
         }
       }
     }
@@ -54,13 +65,37 @@ namespace Aras.Tools.InnovatorAdmin
     public Main()
     {
       InitializeComponent();
+
+      var assy = Assembly.GetExecutingAssembly().GetName().Version;
+      this.lblVersion.Text = "v" + assy.ToString();
     }
 
     protected override void OnLoad(EventArgs e)
     {
-      base.OnLoad(e);
+      try
+      {
+        base.OnLoad(e);
 
-      GoToStep(new Controls.Welcome());
+        var bounds = Properties.Settings.Default.Main_Bounds;
+        if (bounds.Width < 100 || bounds.Height < 100)
+        {
+          // Do nothing
+        }
+        else if (bounds.IntersectsWith(SystemInformation.VirtualScreen))
+        {
+          this.DesktopBounds = bounds;
+        }
+        else
+        {
+          this.Size = bounds.Size;
+        }
+
+        GoToStep(new Controls.Welcome());
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
     }
 
     private DateTime _lastFileWrite = DateTime.Now;
@@ -76,7 +111,7 @@ namespace Aras.Tools.InnovatorAdmin
 
       ctrl.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
       tblLayout.Controls.Add(ctrl, 0, 3);
-      tblLayout.SetColumnSpan(ctrl, 4);
+      tblLayout.SetColumnSpan(ctrl, 5);
       this.Message = "";
       this.NextLabel = "&Next";
       step.Configure(this);
@@ -130,6 +165,30 @@ namespace Aras.Tools.InnovatorAdmin
       catch (Exception ex)
       {
         Utils.HandleError(ex);
+      }
+    }
+
+    protected override void OnFormClosed(FormClosedEventArgs e)
+    {
+      base.OnFormClosed(e);
+      SaveFormBounds();
+    }
+    protected override void OnMove(EventArgs e)
+    {
+      base.OnMove(e);
+      SaveFormBounds();
+    }
+    protected override void OnResizeEnd(EventArgs e)
+    {
+      base.OnResizeEnd(e);
+      SaveFormBounds();
+    }
+    private void SaveFormBounds()
+    {
+      if (this.WindowState == FormWindowState.Normal)
+      {
+        Properties.Settings.Default.Main_Bounds = this.DesktopBounds;
+        Properties.Settings.Default.Save();
       }
     }
   }

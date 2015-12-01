@@ -31,8 +31,8 @@ namespace Aras.Tools.InnovatorAdmin
       using (var dialog = new ErrorWindow())
       {
         dialog.txtMessage.Text = args.Message ?? args.Exception.Message;
-        dialog.txtErrorDetails.Text = FormatXml(args.Exception.ErrorNode);
-        dialog.txtQuery.Text = FormatXml(args.Exception.QueryNode);
+        dialog.txtErrorDetails.Text = Utils.IndentXml(args.Exception.AsAmlString());
+        dialog.txtQuery.Text = Utils.IndentXml(args.Exception.Query);
         dialog.TopMost = true;
         switch (dialog.ShowDialog())
         {
@@ -52,22 +52,6 @@ namespace Aras.Tools.InnovatorAdmin
       }
     }
 
-    private static string FormatXml(XmlNode node)
-    {
-      var settings = new XmlWriterSettings();
-      settings.OmitXmlDeclaration = true;
-      settings.Indent = true;
-      settings.IndentChars = "  ";
-
-      using (var output = new StringWriter())
-      {
-        using (var writer = XmlTextWriter.Create(output, settings))
-        {
-          node.WriteTo(writer);
-        }
-        return output.ToString();
-      }
-    }
 
     private void btnShowDetails_Click(object sender, EventArgs e)
     {

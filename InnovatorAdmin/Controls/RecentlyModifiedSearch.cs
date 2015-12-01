@@ -99,7 +99,8 @@ namespace Aras.Tools.InnovatorAdmin.Controls
           dialog.DataSource = _availTypes;
           dialog.DisplayMember = "KeyedName";
           dialog.Message = resources.Messages.ItemTypeSelect;
-          if (dialog.ShowDialog(this) == DialogResult.OK && dialog.SelectedItem != null)
+          if (dialog.ShowDialog(this, btnAddItemTypes.RectangleToScreen(btnAddItemTypes.Bounds)) == 
+            DialogResult.OK && dialog.SelectedItem != null)
           {
             _selectedTypes.Add(dialog.SelectedItem);
             _availTypes.Remove(dialog.SelectedItem);

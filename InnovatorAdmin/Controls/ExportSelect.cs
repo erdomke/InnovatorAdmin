@@ -180,7 +180,8 @@ namespace Aras.Tools.InnovatorAdmin.Controls
           dialog.DataSource = refs;
           dialog.DisplayMember = "KeyedName";
           dialog.Message = resources.Messages.PackageSelect;
-          if (dialog.ShowDialog(this) == DialogResult.OK && dialog.SelectedItem != null)
+          if (dialog.ShowDialog(this, btnDbPackage.RectangleToScreen(btnDbPackage.Bounds)) ==
+            DialogResult.OK && dialog.SelectedItem != null)
           {
             txtFind.Text = "";
             _findAction = DefaultFindAction;
@@ -253,7 +254,8 @@ namespace Aras.Tools.InnovatorAdmin.Controls
           dialog.DataSource = _itemTypes;
           dialog.DisplayMember = "KeyedName";
           dialog.Message = resources.Messages.ItemTypeSelect;
-          if (dialog.ShowDialog(this) == DialogResult.OK && dialog.SelectedItem != null)
+          if (dialog.ShowDialog(this, btnItem.RectangleToScreen(btnItem.Bounds)) ==
+            DialogResult.OK && dialog.SelectedItem != null)
           {
             _lastQuery = null;
             txtFind.Text = "";

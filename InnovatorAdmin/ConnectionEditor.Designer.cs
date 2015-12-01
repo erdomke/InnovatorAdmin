@@ -57,7 +57,7 @@
       // 
       this.lblDatabase.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblDatabase.AutoSize = true;
-      this.lblDatabase.Location = new System.Drawing.Point(198, 62);
+      this.lblDatabase.Location = new System.Drawing.Point(195, 62);
       this.lblDatabase.Name = "lblDatabase";
       this.lblDatabase.Size = new System.Drawing.Size(56, 13);
       this.lblDatabase.TabIndex = 26;
@@ -68,12 +68,12 @@
       // 
       this.txtPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.txtPassword.Location = new System.Drawing.Point(438, 86);
+      this.txtPassword.Location = new System.Drawing.Point(418, 86);
       this.txtPassword.MaxLength = 64;
       this.txtPassword.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtPassword.Name = "txtPassword";
       this.txtPassword.PasswordChar = '*';
-      this.txtPassword.Size = new System.Drawing.Size(112, 22);
+      this.txtPassword.Size = new System.Drawing.Size(94, 22);
       this.txtPassword.TabIndex = 4;
       this.txtPassword.WordWrap = false;
       // 
@@ -81,7 +81,7 @@
       // 
       this.lblPassword.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblPassword.AutoSize = true;
-      this.lblPassword.Location = new System.Drawing.Point(376, 90);
+      this.lblPassword.Location = new System.Drawing.Point(356, 90);
       this.lblPassword.Name = "lblPassword";
       this.lblPassword.Size = new System.Drawing.Size(56, 13);
       this.lblPassword.TabIndex = 24;
@@ -91,19 +91,19 @@
       // 
       this.txtUser.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.txtUser.Location = new System.Drawing.Point(260, 86);
+      this.txtUser.Location = new System.Drawing.Point(257, 86);
       this.txtUser.MaximumSize = new System.Drawing.Size(160, 4);
       this.txtUser.MaxLength = 32;
       this.txtUser.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtUser.Name = "txtUser";
-      this.txtUser.Size = new System.Drawing.Size(110, 22);
+      this.txtUser.Size = new System.Drawing.Size(93, 22);
       this.txtUser.TabIndex = 3;
       // 
       // lblUser
       // 
       this.lblUser.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblUser.AutoSize = true;
-      this.lblUser.Location = new System.Drawing.Point(198, 90);
+      this.lblUser.Location = new System.Drawing.Point(195, 90);
       this.lblUser.Name = "lblUser";
       this.lblUser.Size = new System.Drawing.Size(32, 13);
       this.lblUser.TabIndex = 22;
@@ -115,17 +115,17 @@
       this.txtUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.tlpControls.SetColumnSpan(this.txtUrl, 3);
-      this.txtUrl.Location = new System.Drawing.Point(260, 29);
+      this.txtUrl.Location = new System.Drawing.Point(257, 29);
       this.txtUrl.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtUrl.Name = "txtUrl";
-      this.txtUrl.Size = new System.Drawing.Size(290, 22);
+      this.txtUrl.Size = new System.Drawing.Size(255, 22);
       this.txtUrl.TabIndex = 1;
       // 
       // lblUrl
       // 
       this.lblUrl.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblUrl.AutoSize = true;
-      this.lblUrl.Location = new System.Drawing.Point(198, 33);
+      this.lblUrl.Location = new System.Drawing.Point(195, 33);
       this.lblUrl.Name = "lblUrl";
       this.lblUrl.Size = new System.Drawing.Size(32, 13);
       this.lblUrl.TabIndex = 20;
@@ -137,18 +137,18 @@
       this.txtName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.tlpControls.SetColumnSpan(this.txtName, 3);
-      this.txtName.Location = new System.Drawing.Point(260, 3);
+      this.txtName.Location = new System.Drawing.Point(257, 3);
       this.txtName.MaximumSize = new System.Drawing.Size(260, 4);
       this.txtName.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtName.Name = "txtName";
-      this.txtName.Size = new System.Drawing.Size(260, 22);
+      this.txtName.Size = new System.Drawing.Size(255, 20);
       this.txtName.TabIndex = 0;
       // 
       // lblName
       // 
       this.lblName.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblName.AutoSize = true;
-      this.lblName.Location = new System.Drawing.Point(198, 6);
+      this.lblName.Location = new System.Drawing.Point(195, 6);
       this.lblName.Name = "lblName";
       this.lblName.Size = new System.Drawing.Size(38, 13);
       this.lblName.TabIndex = 32;
@@ -166,8 +166,8 @@
       this.lstConnections.Location = new System.Drawing.Point(3, 3);
       this.lstConnections.Multiselect = false;
       this.lstConnections.Name = "lstConnections";
-      this.tlpControls.SetRowSpan(this.lstConnections, 6);
-      this.lstConnections.Size = new System.Drawing.Size(189, 184);
+      this.tlpControls.SetRowSpan(this.lstConnections, 5);
+      this.lstConnections.Size = new System.Drawing.Size(186, 169);
       this.lstConnections.TabIndex = 6;
       this.lstConnections.ValueMember = "";
       this.lstConnections.SelectionChanged += new System.EventHandler(this.lstConnections_SelectionChanged);
@@ -182,7 +182,7 @@
       this.btnMoveDown.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnMoveDown.ForeColor = System.Drawing.Color.Black;
       this.btnMoveDown.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.down16;
-      this.btnMoveDown.Location = new System.Drawing.Point(164, 193);
+      this.btnMoveDown.Location = new System.Drawing.Point(161, 178);
       this.btnMoveDown.Name = "btnMoveDown";
       this.btnMoveDown.Padding = new System.Windows.Forms.Padding(2);
       this.btnMoveDown.Size = new System.Drawing.Size(28, 28);
@@ -201,7 +201,7 @@
       this.btnNew.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnNew.ForeColor = System.Drawing.Color.Black;
       this.btnNew.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.add16;
-      this.btnNew.Location = new System.Drawing.Point(3, 193);
+      this.btnNew.Location = new System.Drawing.Point(3, 178);
       this.btnNew.Name = "btnNew";
       this.btnNew.Padding = new System.Windows.Forms.Padding(2);
       this.btnNew.Size = new System.Drawing.Size(28, 28);
@@ -220,7 +220,7 @@
       this.btnMoveUp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnMoveUp.ForeColor = System.Drawing.Color.Black;
       this.btnMoveUp.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.up16;
-      this.btnMoveUp.Location = new System.Drawing.Point(130, 193);
+      this.btnMoveUp.Location = new System.Drawing.Point(127, 178);
       this.btnMoveUp.Name = "btnMoveUp";
       this.btnMoveUp.Padding = new System.Windows.Forms.Padding(2);
       this.btnMoveUp.Size = new System.Drawing.Size(28, 28);
@@ -239,7 +239,7 @@
       this.btnCopy.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnCopy.ForeColor = System.Drawing.Color.Black;
       this.btnCopy.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.copy16;
-      this.btnCopy.Location = new System.Drawing.Point(37, 193);
+      this.btnCopy.Location = new System.Drawing.Point(37, 178);
       this.btnCopy.Name = "btnCopy";
       this.btnCopy.Padding = new System.Windows.Forms.Padding(2);
       this.btnCopy.Size = new System.Drawing.Size(28, 28);
@@ -258,7 +258,7 @@
       this.btnDelete.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnDelete.ForeColor = System.Drawing.Color.Black;
       this.btnDelete.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.remove16;
-      this.btnDelete.Location = new System.Drawing.Point(71, 193);
+      this.btnDelete.Location = new System.Drawing.Point(71, 178);
       this.btnDelete.Name = "btnDelete";
       this.btnDelete.Padding = new System.Windows.Forms.Padding(2);
       this.btnDelete.Size = new System.Drawing.Size(28, 28);
@@ -282,36 +282,35 @@
       this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 45F));
       this.tlpControls.Controls.Add(this.lstConnections, 0, 0);
-      this.tlpControls.Controls.Add(this.btnMoveDown, 5, 6);
+      this.tlpControls.Controls.Add(this.btnMoveDown, 5, 5);
       this.tlpControls.Controls.Add(this.txtName, 7, 0);
       this.tlpControls.Controls.Add(this.txtPassword, 9, 3);
       this.tlpControls.Controls.Add(this.lblPassword, 8, 3);
-      this.tlpControls.Controls.Add(this.btnNew, 0, 6);
+      this.tlpControls.Controls.Add(this.btnNew, 0, 5);
       this.tlpControls.Controls.Add(this.txtUser, 7, 3);
-      this.tlpControls.Controls.Add(this.btnTest, 9, 5);
+      this.tlpControls.Controls.Add(this.btnTest, 9, 4);
       this.tlpControls.Controls.Add(this.lblName, 6, 0);
-      this.tlpControls.Controls.Add(this.btnMoveUp, 4, 6);
+      this.tlpControls.Controls.Add(this.btnMoveUp, 4, 5);
       this.tlpControls.Controls.Add(this.txtUrl, 7, 1);
-      this.tlpControls.Controls.Add(this.btnCopy, 1, 6);
+      this.tlpControls.Controls.Add(this.btnCopy, 1, 5);
       this.tlpControls.Controls.Add(this.lblDatabase, 6, 2);
-      this.tlpControls.Controls.Add(this.btnDelete, 2, 6);
+      this.tlpControls.Controls.Add(this.btnDelete, 2, 5);
       this.tlpControls.Controls.Add(this.lblUrl, 6, 1);
       this.tlpControls.Controls.Add(this.lblUser, 6, 3);
-      this.tlpControls.Controls.Add(this.lblMessage, 6, 5);
+      this.tlpControls.Controls.Add(this.lblMessage, 6, 4);
       this.tlpControls.Controls.Add(this.cmbDatabase, 7, 2);
       this.tlpControls.Controls.Add(this.btnColor, 8, 2);
       this.tlpControls.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tlpControls.Location = new System.Drawing.Point(0, 0);
       this.tlpControls.Name = "tlpControls";
-      this.tlpControls.RowCount = 7;
-      this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tlpControls.RowCount = 6;
       this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
       this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tlpControls.Size = new System.Drawing.Size(553, 224);
+      this.tlpControls.Size = new System.Drawing.Size(515, 209);
       this.tlpControls.TabIndex = 41;
       // 
       // btnTest
@@ -323,7 +322,7 @@
       this.btnTest.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnTest.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnTest.ForeColor = System.Drawing.Color.Black;
-      this.btnTest.Location = new System.Drawing.Point(479, 158);
+      this.btnTest.Location = new System.Drawing.Point(441, 114);
       this.btnTest.Name = "btnTest";
       this.btnTest.Padding = new System.Windows.Forms.Padding(2);
       this.btnTest.Size = new System.Drawing.Size(71, 29);
@@ -337,7 +336,7 @@
       // 
       this.lblMessage.AutoSize = true;
       this.tlpControls.SetColumnSpan(this.lblMessage, 3);
-      this.lblMessage.Location = new System.Drawing.Point(201, 161);
+      this.lblMessage.Location = new System.Drawing.Point(198, 117);
       this.lblMessage.Margin = new System.Windows.Forms.Padding(6);
       this.lblMessage.Name = "lblMessage";
       this.lblMessage.Size = new System.Drawing.Size(0, 13);
@@ -348,16 +347,16 @@
       this.cmbDatabase.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
       this.cmbDatabase.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.cmbDatabase.FormattingEnabled = true;
-      this.cmbDatabase.Location = new System.Drawing.Point(260, 58);
+      this.cmbDatabase.Location = new System.Drawing.Point(257, 58);
       this.cmbDatabase.Name = "cmbDatabase";
-      this.cmbDatabase.Size = new System.Drawing.Size(110, 21);
+      this.cmbDatabase.Size = new System.Drawing.Size(93, 21);
       this.cmbDatabase.TabIndex = 2;
       this.cmbDatabase.DropDown += new System.EventHandler(this.cmbDatabase_DropDown);
       // 
       // btnColor
       // 
       this.btnColor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-      this.btnColor.Location = new System.Drawing.Point(376, 57);
+      this.btnColor.Location = new System.Drawing.Point(356, 57);
       this.btnColor.Name = "btnColor";
       this.btnColor.Size = new System.Drawing.Size(29, 23);
       this.btnColor.TabIndex = 42;
@@ -371,7 +370,7 @@
       this.Controls.Add(this.tlpControls);
       this.MinimumSize = new System.Drawing.Size(425, 170);
       this.Name = "ConnectionEditor";
-      this.Size = new System.Drawing.Size(553, 224);
+      this.Size = new System.Drawing.Size(515, 209);
       this.tlpControls.ResumeLayout(false);
       this.tlpControls.PerformLayout();
       this.ResumeLayout(false);

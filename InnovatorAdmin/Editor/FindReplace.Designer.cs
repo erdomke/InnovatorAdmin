@@ -46,9 +46,9 @@
       this.tableLayoutPanel1.SuspendLayout();
       this.flowLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
-      //
+      // 
       // tableLayoutPanel1
-      //
+      // 
       this.tableLayoutPanel1.ColumnCount = 4;
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -70,10 +70,10 @@
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel1.Size = new System.Drawing.Size(352, 93);
       this.tableLayoutPanel1.TabIndex = 3;
-      //
+      // 
       // flowLayoutPanel1
-      //
-      this.flowLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.flowLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.flowLayoutPanel1.AutoSize = true;
       this.tableLayoutPanel1.SetColumnSpan(this.flowLayoutPanel1, 4);
@@ -87,9 +87,9 @@
       this.flowLayoutPanel1.Name = "flowLayoutPanel1";
       this.flowLayoutPanel1.Size = new System.Drawing.Size(352, 29);
       this.flowLayoutPanel1.TabIndex = 0;
-      //
+      // 
       // chkCaseSensitive
-      //
+      // 
       this.chkCaseSensitive.Appearance = System.Windows.Forms.Appearance.Button;
       this.chkCaseSensitive.AutoSize = true;
       this.chkCaseSensitive.FlatAppearance.BorderSize = 0;
@@ -101,9 +101,9 @@
       this.chkCaseSensitive.TabIndex = 5;
       this.chkCaseSensitive.Text = "Aa";
       this.chkCaseSensitive.UseVisualStyleBackColor = true;
-      //
+      // 
       // chkNormal
-      //
+      // 
       this.chkNormal.Appearance = System.Windows.Forms.Appearance.Button;
       this.chkNormal.AutoSize = true;
       this.chkNormal.Checked = true;
@@ -118,9 +118,9 @@
       this.chkNormal.Text = "abc";
       this.chkNormal.UseVisualStyleBackColor = true;
       this.chkNormal.CheckedChanged += new System.EventHandler(this.chkNormal_CheckedChanged);
-      //
+      // 
       // chkExtended
-      //
+      // 
       this.chkExtended.Appearance = System.Windows.Forms.Appearance.Button;
       this.chkExtended.AutoSize = true;
       this.chkExtended.FlatAppearance.BorderSize = 0;
@@ -133,9 +133,9 @@
       this.chkExtended.Text = "\\r\\n";
       this.chkExtended.UseVisualStyleBackColor = true;
       this.chkExtended.CheckedChanged += new System.EventHandler(this.chkExtended_CheckedChanged);
-      //
+      // 
       // chkRegExp
-      //
+      // 
       this.chkRegExp.Appearance = System.Windows.Forms.Appearance.Button;
       this.chkRegExp.AutoSize = true;
       this.chkRegExp.FlatAppearance.BorderSize = 0;
@@ -148,9 +148,9 @@
       this.chkRegExp.Text = ".*";
       this.chkRegExp.UseVisualStyleBackColor = true;
       this.chkRegExp.CheckedChanged += new System.EventHandler(this.chkRegExp_CheckedChanged);
-      //
+      // 
       // chkXPath
-      //
+      // 
       this.chkXPath.Appearance = System.Windows.Forms.Appearance.Button;
       this.chkXPath.AutoSize = true;
       this.chkXPath.FlatAppearance.BorderSize = 0;
@@ -163,10 +163,10 @@
       this.chkXPath.Text = "/e[@a]";
       this.chkXPath.UseVisualStyleBackColor = true;
       this.chkXPath.CheckedChanged += new System.EventHandler(this.chkXPath_CheckedChanged);
-      //
+      // 
       // txtFind
-      //
-      this.txtFind.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.txtFind.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.txtFind.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.txtFind.Location = new System.Drawing.Point(38, 3);
@@ -175,19 +175,19 @@
       this.txtFind.TabIndex = 1;
       this.txtFind.TextChanged += new System.EventHandler(this.txtFind_TextChanged);
       this.txtFind.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtFind_KeyDown);
-      //
+      // 
       // txtReplace
-      //
-      this.txtReplace.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.txtReplace.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.txtReplace.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.txtReplace.Location = new System.Drawing.Point(38, 32);
       this.txtReplace.Name = "txtReplace";
       this.txtReplace.Size = new System.Drawing.Size(247, 20);
       this.txtReplace.TabIndex = 2;
-      //
+      // 
       // btnFind
-      //
+      // 
       this.btnFind.AutoSize = true;
       this.tableLayoutPanel1.SetColumnSpan(this.btnFind, 2);
       this.btnFind.FlatAppearance.BorderSize = 0;
@@ -199,9 +199,9 @@
       this.btnFind.Text = "→";
       this.btnFind.UseVisualStyleBackColor = true;
       this.btnFind.Click += new System.EventHandler(this.btnFind_Click);
-      //
+      // 
       // btnReplaceNext
-      //
+      // 
       this.btnReplaceNext.AutoSize = true;
       this.btnReplaceNext.FlatAppearance.BorderSize = 0;
       this.btnReplaceNext.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -211,9 +211,9 @@
       this.btnReplaceNext.TabIndex = 4;
       this.btnReplaceNext.Text = ">";
       this.btnReplaceNext.UseVisualStyleBackColor = true;
-      //
+      // 
       // btnReplaceAll
-      //
+      // 
       this.btnReplaceAll.AutoSize = true;
       this.btnReplaceAll.FlatAppearance.BorderSize = 0;
       this.btnReplaceAll.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -223,9 +223,9 @@
       this.btnReplaceAll.TabIndex = 5;
       this.btnReplaceAll.Text = ">>";
       this.btnReplaceAll.UseVisualStyleBackColor = true;
-      //
+      // 
       // btnShowReplace
-      //
+      // 
       this.btnShowReplace.AutoSize = true;
       this.btnShowReplace.FlatAppearance.BorderSize = 0;
       this.btnShowReplace.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -236,9 +236,9 @@
       this.btnShowReplace.Text = "▼";
       this.btnShowReplace.UseVisualStyleBackColor = true;
       this.btnShowReplace.Click += new System.EventHandler(this.btnShowReplace_Click);
-      //
+      // 
       // FindReplace
-      //
+      // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.BackColor = System.Drawing.Color.White;
@@ -247,6 +247,7 @@
       this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
       this.Name = "FindReplace";
       this.Text = "Find/Replace";
+      this.TopMost = true;
       this.tableLayoutPanel1.ResumeLayout(false);
       this.tableLayoutPanel1.PerformLayout();
       this.flowLayoutPanel1.ResumeLayout(false);

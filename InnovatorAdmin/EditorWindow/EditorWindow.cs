@@ -172,6 +172,19 @@ namespace Aras.Tools.InnovatorAdmin
           SetConnection(ConnectionManager.Current.Library.Connections.First());
         }
 
+        var bounds = Properties.Settings.Default.EditorWindow_Bounds;
+        if (bounds.Width < 100 || bounds.Height < 100)
+        {
+          // Do nothing
+        }
+        else if (bounds != Rectangle.Empty && bounds.IntersectsWith(SystemInformation.VirtualScreen))
+        {
+          this.DesktopBounds = bounds;
+        }
+        else
+        {
+          this.Size = bounds.Size;
+        }
       }
       catch (Exception ex)
       {
@@ -493,7 +506,8 @@ namespace Aras.Tools.InnovatorAdmin
         {
           dialog.Multiselect = false;
           dialog.SetSelected(_connData);
-          if (dialog.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+          if (dialog.ShowDialog(this, menuStrip.RectangleToScreen(btnEditConnections.Bounds)) == 
+            System.Windows.Forms.DialogResult.OK)
           {
             SetConnection(dialog.SelectedConnections.First());
           }
@@ -587,7 +601,8 @@ namespace Aras.Tools.InnovatorAdmin
       {
         dialog.DataSource = _proxy.GetActions();
         dialog.Message = "Select an action to perform";
-        if (dialog.ShowDialog(this) == DialogResult.OK && dialog.SelectedItem != null)
+        if (dialog.ShowDialog(this, menuStrip.RectangleToScreen(btnSoapAction.Bounds)) == 
+          DialogResult.OK && dialog.SelectedItem != null)
         {
           this.SoapAction = dialog.SelectedItem;
         }
@@ -811,7 +826,8 @@ namespace Aras.Tools.InnovatorAdmin
         {
           dialog.DataSource = TimeZoneInfo.GetSystemTimeZones().Select(t => t.Id).ToList();
           dialog.Message = "Select a time zone";
-          if (dialog.ShowDialog(this) == DialogResult.OK && dialog.SelectedItem != null)
+          if (dialog.ShowDialog(this) == 
+            DialogResult.OK && dialog.SelectedItem != null)
           {
             _timeZone = dialog.SelectedItem;
             mniTimeZone.ShortcutKeyDisplayString = _timeZone;
@@ -833,7 +849,8 @@ namespace Aras.Tools.InnovatorAdmin
           dialog.DataSource = CultureInfo.GetCultures(CultureTypes.SpecificCultures)
             .Select(c => c.Name).ToList();
           dialog.Message = "Select a locale";
-          if (dialog.ShowDialog(this) == DialogResult.OK && dialog.SelectedItem != null)
+          if (dialog.ShowDialog(this) == 
+            DialogResult.OK && dialog.SelectedItem != null)
           {
             _locale = dialog.SelectedItem;
             mniLocale.ShortcutKeyDisplayString = _locale;
@@ -874,6 +891,30 @@ namespace Aras.Tools.InnovatorAdmin
       catch (Exception ex)
       {
         Utils.HandleError(ex);
+      }
+    }
+
+    protected override void OnFormClosed(FormClosedEventArgs e)
+    {
+      base.OnFormClosed(e);
+      SaveFormBounds();
+    }
+    protected override void OnMove(EventArgs e)
+    {
+      base.OnMove(e);
+      SaveFormBounds();
+    }
+    protected override void OnResizeEnd(EventArgs e)
+    {
+      base.OnResizeEnd(e);
+      SaveFormBounds();
+    }
+    private void SaveFormBounds()
+    {
+      if (this.WindowState == FormWindowState.Normal)
+      {
+        Properties.Settings.Default.EditorWindow_Bounds = this.DesktopBounds;
+        Properties.Settings.Default.Save();
       }
     }
 

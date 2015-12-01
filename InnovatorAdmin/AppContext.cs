@@ -48,7 +48,7 @@ namespace Aras.Tools.InnovatorAdmin
       catch (Exception) { }
 
 #if !DEBUG
-      _mgr = UpdateManager.GitHubUpdateManager("https://github.com/erdomke/InnovatorAdmin/");
+      _mgr = UpdateManager.GitHubUpdateManager("https://github.com/erdomke/InnovatorAdmin");
       _mgr.ContinueWith(t => _updates = t.Result.UpdateApp());
 #endif
     }

@@ -93,7 +93,19 @@ namespace Aras.Tools.InnovatorAdmin
         ItemType itemType;
 
         ReportProgress(0, "Starting install.");
-        _conn.Apply(string.Format(Properties.Resources.DbUpgrade_Start, upgradeId, Environment.UserDomainName, Environment.UserName, _script.Title, _script.Description)).AssertNoError();
+        _conn.Apply(@"<Item type='DatabaseUpgrade' action='merge' id='@0'>
+                        <upgrade_status>0</upgrade_status>
+                        <is_latest>0</is_latest>
+                        <type>1</type>
+                        <os_user>@1</os_user>
+                        <name>@2</name>
+                        <description>@3</description>
+                        <applied_on>__now()</applied_on>
+                      </Item>"
+          , upgradeId
+          , Environment.UserDomainName + "\\" + Environment.UserName
+          , _script.Title.Left(64)
+          , _script.Description.Left(512)).AssertNoError();
 
         IEnumerable<IReadOnlyItem> items;
         foreach (var line in _lines.Skip(_currLine).ToList())
@@ -179,14 +191,14 @@ namespace Aras.Tools.InnovatorAdmin
 
               cont = false;
             }
-            catch (ArasException ex)
+            catch (ServerException ex)
             {
               _log.Append(DateTime.Now.ToString("s")).AppendLine(": ERROR");
-              _log.AppendLine(ex.ErrorNode.OuterXml);
+              _log.AppendLine(ex.AsAmlString());
               _log.AppendLine(" for query ");
-              _log.AppendLine(ex.QueryNode.OuterXml);
+              _log.AppendLine(ex.Query);
               args = new RecoverableErrorEventArgs() { Exception = ex };
-              if (line.Type == InstallType.DependencyCheck && ex.ErrorNode.Element("faultcode", "") == "0")
+              if (line.Type == InstallType.DependencyCheck && ex.FaultCode == "0")
               {
                 args.Message = "Unable to find required dependency " + line.Reference.Type + ": " + line.Reference.KeyedName;
               }
@@ -234,12 +246,12 @@ namespace Aras.Tools.InnovatorAdmin
           });
         }
 
-        _conn.Apply("<Item type=\"DatabaseUpgrade\" action=\"merge\" id=\"" + upgradeId + "\"><upgrade_status>1</upgrade_status></Item>").AssertNoError();
+        _conn.Apply("<Item type=\"DatabaseUpgrade\" action=\"merge\" id=\"@0\"><upgrade_status>1</upgrade_status></Item>", upgradeId).AssertNoError();
         OnActionComplete(new ActionCompleteEventArgs());
       }
       catch (Exception ex)
       {
-        _conn.Apply("<Item type=\"DatabaseUpgrade\" action=\"merge\" id=\"" + upgradeId + "\"><upgrade_status>2</upgrade_status></Item>").AssertNoError();
+        _conn.Apply("<Item type=\"DatabaseUpgrade\" action=\"merge\" id=\"@0\"><upgrade_status>2</upgrade_status></Item>", upgradeId); //.AssertNoError();
         OnActionComplete(new ActionCompleteEventArgs() { Exception = ex });
       }
     }
