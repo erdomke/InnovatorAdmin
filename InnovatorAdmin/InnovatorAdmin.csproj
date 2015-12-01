@@ -241,6 +241,12 @@
       <DependentUpon>Welcome.cs</DependentUpon>
     </Compile>
     <Compile Include="EditorWindow\IEditorProxy.cs" />
+    <Compile Include="EditorWindow\InputBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EditorWindow\InputBox.Designer.cs">
+      <DependentUpon>InputBox.cs</DependentUpon>
+    </Compile>
     <Compile Include="EditorWindow\SimpleProxy.cs" />
     <Compile Include="Editor\AmlSchema\ItemType.cs" />
     <Compile Include="Editor\AmlSchema\ItemTypeCollection.cs" />
@@ -351,6 +357,9 @@
     <EmbeddedResource Include="Controls\ExportSelect.resx">
       <DependentUpon>ExportSelect.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Controls\FilterSelect.resx">
+      <DependentUpon>FilterSelect.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Controls\InstallComplete.resx">
       <DependentUpon>InstallComplete.cs</DependentUpon>
     </EmbeddedResource>
@@ -375,6 +384,12 @@
     <EmbeddedResource Include="EditorWindow\EditorWindow.resx">
       <DependentUpon>EditorWindow.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="EditorWindow\InputBox.resx">
+      <DependentUpon>InputBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EditorWindow\ParameterWindow.resx">
+      <DependentUpon>ParameterWindow.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
     </EmbeddedResource>
@@ -398,9 +413,9 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ADiff\ADiff.csproj">
+    <ProjectReference Include="..\ADiff\ADiff.Ui.csproj">
       <Project>{f74031e5-f623-46e7-b21a-ac093dbadd2e}</Project>
-      <Name>ADiff</Name>
+      <Name>ADiff.Ui</Name>
     </ProjectReference>
     <ProjectReference Include="..\InnovatorAdmin.Api\InnovatorAdmin.Api.csproj">
       <Project>{7C397623-C59E-4DB2-8879-8A3385DABCD9}</Project>
@@ -412,6 +427,7 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="packages.config" />
+    <EmbeddedResource Include="resources\Aml.xshd" />
     <None Include="resources\icons\add16.png" />
   </ItemGroup>
   <ItemGroup>

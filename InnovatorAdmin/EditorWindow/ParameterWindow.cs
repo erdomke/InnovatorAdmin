@@ -89,6 +89,19 @@ namespace Aras.Tools.InnovatorAdmin
       }
     }
 
+    private void btnIgnore_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        this.DialogResult = System.Windows.Forms.DialogResult.Ignore;
+        this.Close();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
 
   }
 }

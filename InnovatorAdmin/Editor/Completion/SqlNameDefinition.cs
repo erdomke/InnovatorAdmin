@@ -62,7 +62,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     {
       return this.Count > 0
         && this.Last().Type == SqlType.Identifier
-        && this.Count == 1 || this[this.Count - 2].Type != SqlType.Identifier;
+        && (this.Count == 1 || this[this.Count - 2].Type != SqlType.Identifier);
     }
   }
 }

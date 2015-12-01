@@ -51,6 +51,7 @@ namespace Aras.Tools.InnovatorAdmin
           cmbDatabase.Items.Add(connData.Database);
           cmbDatabase.SelectedIndex = 0;
         }
+        btnColor.BackColor = connData.Color;
       }
       catch (Exception ex)
       {
@@ -245,8 +246,36 @@ namespace Aras.Tools.InnovatorAdmin
 
     private void lstConnections_MouseDoubleClick(object sender, MouseEventArgs e)
     {
-      if (ConnectionSelected != null)
-        ConnectionSelected.Invoke(this, e);
+      try
+      {
+        if (ConnectionSelected != null)
+          ConnectionSelected.Invoke(this, e);
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void btnColor_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        var connData = _bs.Current as ConnectionData;
+        using (var dialog = new ColorDialog())
+        {
+          dialog.Color = connData.Color;
+          if (dialog.ShowDialog(this) == DialogResult.OK)
+          {
+            connData.Color = dialog.Color;
+            btnColor.BackColor = dialog.Color;
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
     }
 
   }

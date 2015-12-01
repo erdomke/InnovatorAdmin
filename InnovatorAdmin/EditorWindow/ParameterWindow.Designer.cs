@@ -40,16 +40,17 @@
       this.label3 = new System.Windows.Forms.Label();
       this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
       this.btnCancel = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnOk = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnReplace = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnIgnore = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
       this.bs = new System.Windows.Forms.BindingSource(this.components);
       this.tableLayoutPanel1.SuspendLayout();
       this.tableLayoutPanel2.SuspendLayout();
       this.flowLayoutPanel1.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.bs)).BeginInit();
       this.SuspendLayout();
-      //
+      // 
       // tableLayoutPanel1
-      //
+      // 
       this.tableLayoutPanel1.ColumnCount = 2;
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 60F));
@@ -64,18 +65,18 @@
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel1.Size = new System.Drawing.Size(365, 192);
       this.tableLayoutPanel1.TabIndex = 0;
-      //
+      // 
       // lstItems
-      //
+      // 
       this.lstItems.Dock = System.Windows.Forms.DockStyle.Fill;
       this.lstItems.FormattingEnabled = true;
       this.lstItems.Location = new System.Drawing.Point(3, 3);
       this.lstItems.Name = "lstItems";
       this.lstItems.Size = new System.Drawing.Size(140, 153);
       this.lstItems.TabIndex = 0;
-      //
+      // 
       // tableLayoutPanel2
-      //
+      // 
       this.tableLayoutPanel2.ColumnCount = 2;
       this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -94,37 +95,37 @@
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel2.Size = new System.Drawing.Size(213, 153);
       this.tableLayoutPanel2.TabIndex = 1;
-      //
+      // 
       // txtValue
-      //
+      // 
       this.txtValue.Dock = System.Windows.Forms.DockStyle.Fill;
       this.txtValue.Location = new System.Drawing.Point(47, 29);
       this.txtValue.Multiline = true;
       this.txtValue.Name = "txtValue";
       this.txtValue.Size = new System.Drawing.Size(163, 94);
       this.txtValue.TabIndex = 2;
-      //
+      // 
       // txtName
-      //
-      this.txtName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.txtName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.txtName.Location = new System.Drawing.Point(47, 3);
       this.txtName.Name = "txtName";
       this.txtName.ReadOnly = true;
       this.txtName.Size = new System.Drawing.Size(163, 20);
       this.txtName.TabIndex = 3;
-      //
+      // 
       // cmbType
-      //
+      // 
       this.cmbType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.cmbType.FormattingEnabled = true;
       this.cmbType.Location = new System.Drawing.Point(47, 129);
       this.cmbType.Name = "cmbType";
       this.cmbType.Size = new System.Drawing.Size(121, 21);
       this.cmbType.TabIndex = 4;
-      //
+      // 
       // label1
-      //
+      // 
       this.label1.AutoSize = true;
       this.label1.Location = new System.Drawing.Point(3, 3);
       this.label1.Margin = new System.Windows.Forms.Padding(3);
@@ -132,9 +133,9 @@
       this.label1.Size = new System.Drawing.Size(38, 13);
       this.label1.TabIndex = 5;
       this.label1.Text = "Name:";
-      //
+      // 
       // label2
-      //
+      // 
       this.label2.AutoSize = true;
       this.label2.Location = new System.Drawing.Point(3, 29);
       this.label2.Margin = new System.Windows.Forms.Padding(3);
@@ -142,9 +143,9 @@
       this.label2.Size = new System.Drawing.Size(37, 13);
       this.label2.TabIndex = 6;
       this.label2.Text = "Value:";
-      //
+      // 
       // label3
-      //
+      // 
       this.label3.AutoSize = true;
       this.label3.Location = new System.Drawing.Point(3, 129);
       this.label3.Margin = new System.Windows.Forms.Padding(3);
@@ -152,13 +153,14 @@
       this.label3.Size = new System.Drawing.Size(34, 13);
       this.label3.TabIndex = 7;
       this.label3.Text = "Type:";
-      //
+      // 
       // flowLayoutPanel1
-      //
+      // 
       this.flowLayoutPanel1.AutoSize = true;
       this.tableLayoutPanel1.SetColumnSpan(this.flowLayoutPanel1, 2);
       this.flowLayoutPanel1.Controls.Add(this.btnCancel);
-      this.flowLayoutPanel1.Controls.Add(this.btnOk);
+      this.flowLayoutPanel1.Controls.Add(this.btnIgnore);
+      this.flowLayoutPanel1.Controls.Add(this.btnReplace);
       this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
       this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 159);
@@ -166,9 +168,9 @@
       this.flowLayoutPanel1.Name = "flowLayoutPanel1";
       this.flowLayoutPanel1.Size = new System.Drawing.Size(365, 33);
       this.flowLayoutPanel1.TabIndex = 2;
-      //
+      // 
       // btnCancel
-      //
+      // 
       this.btnCancel.AutoSize = true;
       this.btnCancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnCancel.FlatAppearance.BorderSize = 0;
@@ -185,28 +187,47 @@
       this.btnCancel.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnCancel.UseVisualStyleBackColor = false;
       this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
-      //
-      // btnOk
-      //
-      this.btnOk.AutoSize = true;
-      this.btnOk.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.btnOk.FlatAppearance.BorderSize = 0;
-      this.btnOk.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
-      this.btnOk.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
-      this.btnOk.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-      this.btnOk.ForeColor = System.Drawing.Color.Black;
-      this.btnOk.Location = new System.Drawing.Point(206, 3);
-      this.btnOk.Name = "btnOk";
-      this.btnOk.Padding = new System.Windows.Forms.Padding(2);
-      this.btnOk.Size = new System.Drawing.Size(75, 27);
-      this.btnOk.TabIndex = 1;
-      this.btnOk.Text = "&OK";
-      this.btnOk.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
-      this.btnOk.UseVisualStyleBackColor = false;
-      this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
-      //
+      // 
+      // btnReplace
+      // 
+      this.btnReplace.AutoSize = true;
+      this.btnReplace.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnReplace.FlatAppearance.BorderSize = 0;
+      this.btnReplace.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnReplace.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnReplace.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnReplace.ForeColor = System.Drawing.Color.Black;
+      this.btnReplace.Location = new System.Drawing.Point(125, 3);
+      this.btnReplace.Name = "btnReplace";
+      this.btnReplace.Padding = new System.Windows.Forms.Padding(2);
+      this.btnReplace.Size = new System.Drawing.Size(75, 27);
+      this.btnReplace.TabIndex = 1;
+      this.btnReplace.Text = "&Replace";
+      this.btnReplace.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnReplace.UseVisualStyleBackColor = false;
+      this.btnReplace.Click += new System.EventHandler(this.btnOk_Click);
+      // 
+      // btnIgnore
+      // 
+      this.btnIgnore.AutoSize = true;
+      this.btnIgnore.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnIgnore.FlatAppearance.BorderSize = 0;
+      this.btnIgnore.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnIgnore.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnIgnore.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnIgnore.ForeColor = System.Drawing.Color.Black;
+      this.btnIgnore.Location = new System.Drawing.Point(206, 3);
+      this.btnIgnore.Name = "btnIgnore";
+      this.btnIgnore.Padding = new System.Windows.Forms.Padding(2);
+      this.btnIgnore.Size = new System.Drawing.Size(75, 27);
+      this.btnIgnore.TabIndex = 2;
+      this.btnIgnore.Text = "&Ignore All";
+      this.btnIgnore.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnIgnore.UseVisualStyleBackColor = false;
+      this.btnIgnore.Click += new System.EventHandler(this.btnIgnore_Click);
+      // 
       // ParameterWindow
-      //
+      // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.BackColor = System.Drawing.Color.White;
@@ -238,7 +259,8 @@
     private System.Windows.Forms.Label label3;
     private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
     private Controls.FlatButton btnCancel;
-    private Controls.FlatButton btnOk;
+    private Controls.FlatButton btnReplace;
     private System.Windows.Forms.BindingSource bs;
+    private Controls.FlatButton btnIgnore;
   }
 }

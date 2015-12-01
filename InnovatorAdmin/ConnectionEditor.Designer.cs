@@ -49,6 +49,7 @@
       this.btnTest = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
       this.lblMessage = new System.Windows.Forms.Label();
       this.cmbDatabase = new System.Windows.Forms.ComboBox();
+      this.btnColor = new System.Windows.Forms.Button();
       this.tlpControls.SuspendLayout();
       this.SuspendLayout();
       // 
@@ -56,7 +57,7 @@
       // 
       this.lblDatabase.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblDatabase.AutoSize = true;
-      this.lblDatabase.Location = new System.Drawing.Point(198, 61);
+      this.lblDatabase.Location = new System.Drawing.Point(198, 62);
       this.lblDatabase.Name = "lblDatabase";
       this.lblDatabase.Size = new System.Drawing.Size(56, 13);
       this.lblDatabase.TabIndex = 26;
@@ -67,7 +68,7 @@
       // 
       this.txtPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.txtPassword.Location = new System.Drawing.Point(438, 84);
+      this.txtPassword.Location = new System.Drawing.Point(438, 86);
       this.txtPassword.MaxLength = 64;
       this.txtPassword.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtPassword.Name = "txtPassword";
@@ -80,7 +81,7 @@
       // 
       this.lblPassword.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblPassword.AutoSize = true;
-      this.lblPassword.Location = new System.Drawing.Point(376, 88);
+      this.lblPassword.Location = new System.Drawing.Point(376, 90);
       this.lblPassword.Name = "lblPassword";
       this.lblPassword.Size = new System.Drawing.Size(56, 13);
       this.lblPassword.TabIndex = 24;
@@ -90,7 +91,7 @@
       // 
       this.txtUser.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.txtUser.Location = new System.Drawing.Point(260, 84);
+      this.txtUser.Location = new System.Drawing.Point(260, 86);
       this.txtUser.MaximumSize = new System.Drawing.Size(160, 4);
       this.txtUser.MaxLength = 32;
       this.txtUser.MinimumSize = new System.Drawing.Size(4, 22);
@@ -102,7 +103,7 @@
       // 
       this.lblUser.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblUser.AutoSize = true;
-      this.lblUser.Location = new System.Drawing.Point(198, 88);
+      this.lblUser.Location = new System.Drawing.Point(198, 90);
       this.lblUser.Name = "lblUser";
       this.lblUser.Size = new System.Drawing.Size(32, 13);
       this.lblUser.TabIndex = 22;
@@ -298,6 +299,7 @@
       this.tlpControls.Controls.Add(this.lblUser, 6, 3);
       this.tlpControls.Controls.Add(this.lblMessage, 6, 5);
       this.tlpControls.Controls.Add(this.cmbDatabase, 7, 2);
+      this.tlpControls.Controls.Add(this.btnColor, 8, 2);
       this.tlpControls.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tlpControls.Location = new System.Drawing.Point(0, 0);
       this.tlpControls.Name = "tlpControls";
@@ -344,14 +346,23 @@
       // cmbDatabase
       // 
       this.cmbDatabase.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-      this.tlpControls.SetColumnSpan(this.cmbDatabase, 3);
       this.cmbDatabase.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.cmbDatabase.FormattingEnabled = true;
-      this.cmbDatabase.Location = new System.Drawing.Point(260, 57);
+      this.cmbDatabase.Location = new System.Drawing.Point(260, 58);
       this.cmbDatabase.Name = "cmbDatabase";
-      this.cmbDatabase.Size = new System.Drawing.Size(290, 21);
+      this.cmbDatabase.Size = new System.Drawing.Size(110, 21);
       this.cmbDatabase.TabIndex = 2;
       this.cmbDatabase.DropDown += new System.EventHandler(this.cmbDatabase_DropDown);
+      // 
+      // btnColor
+      // 
+      this.btnColor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnColor.Location = new System.Drawing.Point(376, 57);
+      this.btnColor.Name = "btnColor";
+      this.btnColor.Size = new System.Drawing.Size(29, 23);
+      this.btnColor.TabIndex = 42;
+      this.btnColor.UseVisualStyleBackColor = true;
+      this.btnColor.Click += new System.EventHandler(this.btnColor_Click);
       // 
       // ConnectionEditor
       // 
@@ -389,5 +400,6 @@
     private System.Windows.Forms.ToolTip toolTipManager;
     private System.Windows.Forms.Label lblMessage;
     private System.Windows.Forms.ComboBox cmbDatabase;
+    private System.Windows.Forms.Button btnColor;
   }
 }

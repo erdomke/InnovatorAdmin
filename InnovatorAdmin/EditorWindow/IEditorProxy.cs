@@ -11,5 +11,6 @@ namespace Aras.Tools.InnovatorAdmin
     IAsyncConnection Connection { get; set; }
     IEnumerable<string> GetActions();
     IPromise<System.IO.Stream> Process(Command request, bool async);
+    IEditorProxy Clone();
   }
 }

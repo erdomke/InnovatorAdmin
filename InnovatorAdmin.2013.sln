@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ADiff.Api", "ADiff.Api\ADif
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ADiff.ApiTests", "ADiff.ApiTests\ADiff.ApiTests.csproj", "{DE66FD5A-FF22-433F-977A-9D62CB908A4C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ADiff", "ADiff\ADiff.csproj", "{F74031E5-F623-46E7-B21A-AC093DBADD2E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ADiff.Ui", "ADiff\ADiff.Ui.csproj", "{F74031E5-F623-46E7-B21A-AC093DBADD2E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{F03DD0BF-C5A7-4D8E-BB6C-F98029F5D903}"
 	ProjectSection(SolutionItems) = preProject

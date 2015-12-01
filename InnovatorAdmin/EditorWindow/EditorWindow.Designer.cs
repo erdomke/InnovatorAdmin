@@ -53,6 +53,7 @@
       this.btnOk = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
       this.btnCancel = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
       this.lblItems = new System.Windows.Forms.Label();
+      this.lblConnColor = new System.Windows.Forms.Label();
       this.menuStrip = new System.Windows.Forms.ToolStrip();
       this.lblConnection = new System.Windows.Forms.ToolStripLabel();
       this.btnEditConnections = new System.Windows.Forms.ToolStripButton();
@@ -65,6 +66,11 @@
       this.mniClose = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
       this.mniTidyXml = new System.Windows.Forms.ToolStripMenuItem();
+      this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+      this.preferencesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniLocale = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniTimeZone = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniTimeout = new System.Windows.Forms.ToolStripMenuItem();
       this.btnSubmit = new System.Windows.Forms.ToolStripSplitButton();
       this.mniRunAll = new System.Windows.Forms.ToolStripMenuItem();
       this.mniRunCurrent = new System.Windows.Forms.ToolStripMenuItem();
@@ -92,18 +98,20 @@
       // 
       this.tableLayoutPanel1.BackColor = System.Drawing.Color.White;
       this.tableLayoutPanel1.ColumnCount = 3;
-      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this.tableLayoutPanel1.Controls.Add(this.splitMain, 0, 0);
-      this.tableLayoutPanel1.Controls.Add(this.btnOk, 1, 1);
-      this.tableLayoutPanel1.Controls.Add(this.btnCancel, 2, 1);
-      this.tableLayoutPanel1.Controls.Add(this.lblItems, 0, 1);
+      this.tableLayoutPanel1.Controls.Add(this.splitMain, 0, 1);
+      this.tableLayoutPanel1.Controls.Add(this.btnOk, 1, 2);
+      this.tableLayoutPanel1.Controls.Add(this.btnCancel, 2, 2);
+      this.tableLayoutPanel1.Controls.Add(this.lblItems, 0, 2);
+      this.tableLayoutPanel1.Controls.Add(this.lblConnColor, 0, 0);
       this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 25);
       this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-      this.tableLayoutPanel1.RowCount = 2;
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.tableLayoutPanel1.RowCount = 3;
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel1.Size = new System.Drawing.Size(847, 605);
       this.tableLayoutPanel1.TabIndex = 0;
@@ -112,7 +120,7 @@
       // 
       this.tableLayoutPanel1.SetColumnSpan(this.splitMain, 3);
       this.splitMain.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.splitMain.Location = new System.Drawing.Point(3, 3);
+      this.splitMain.Location = new System.Drawing.Point(3, 8);
       this.splitMain.Name = "splitMain";
       // 
       // splitMain.Panel1
@@ -123,7 +131,7 @@
       // splitMain.Panel2
       // 
       this.splitMain.Panel2.Controls.Add(this.splitEditors);
-      this.splitMain.Size = new System.Drawing.Size(841, 564);
+      this.splitMain.Size = new System.Drawing.Size(841, 559);
       this.splitMain.SplitterDistance = 164;
       this.splitMain.TabIndex = 0;
       // 
@@ -151,8 +159,8 @@
       // splitEditors.Panel2
       // 
       this.splitEditors.Panel2.Controls.Add(this.tableLayoutPanel2);
-      this.splitEditors.Size = new System.Drawing.Size(841, 564);
-      this.splitEditors.SplitterDistance = 175;
+      this.splitEditors.Size = new System.Drawing.Size(841, 559);
+      this.splitEditors.SplitterDistance = 173;
       this.splitEditors.TabIndex = 0;
       // 
       // tableLayoutPanel3
@@ -168,7 +176,7 @@
       this.tableLayoutPanel3.RowCount = 2;
       this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-      this.tableLayoutPanel3.Size = new System.Drawing.Size(841, 175);
+      this.tableLayoutPanel3.Size = new System.Drawing.Size(841, 173);
       this.tableLayoutPanel3.TabIndex = 1;
       // 
       // inputEditor
@@ -179,7 +187,7 @@
       this.inputEditor.Location = new System.Drawing.Point(3, 3);
       this.inputEditor.Name = "inputEditor";
       this.inputEditor.ReadOnly = false;
-      this.inputEditor.Size = new System.Drawing.Size(835, 169);
+      this.inputEditor.Size = new System.Drawing.Size(835, 167);
       this.inputEditor.TabIndex = 0;
       this.inputEditor.RunRequested += new System.EventHandler<Aras.Tools.InnovatorAdmin.Editor.RunRequestedEventArgs>(this.inputEditor_RunRequested);
       // 
@@ -197,7 +205,7 @@
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-      this.tableLayoutPanel2.Size = new System.Drawing.Size(841, 385);
+      this.tableLayoutPanel2.Size = new System.Drawing.Size(841, 382);
       this.tableLayoutPanel2.TabIndex = 0;
       // 
       // tbcOutputView
@@ -213,7 +221,7 @@
       this.tbcOutputView.Name = "tbcOutputView";
       this.tbcOutputView.Padding = new System.Drawing.Point(0, 0);
       this.tbcOutputView.SelectedIndex = 0;
-      this.tbcOutputView.Size = new System.Drawing.Size(841, 385);
+      this.tbcOutputView.Size = new System.Drawing.Size(841, 382);
       this.tbcOutputView.TabIndex = 5;
       this.tbcOutputView.SelectedIndexChanged += new System.EventHandler(this.tbcOutputView_SelectedIndexChanged);
       // 
@@ -222,7 +230,7 @@
       this.pgAmlOutput.Controls.Add(this.outputEditor);
       this.pgAmlOutput.Location = new System.Drawing.Point(4, 22);
       this.pgAmlOutput.Name = "pgAmlOutput";
-      this.pgAmlOutput.Size = new System.Drawing.Size(833, 359);
+      this.pgAmlOutput.Size = new System.Drawing.Size(833, 356);
       this.pgAmlOutput.TabIndex = 0;
       this.pgAmlOutput.Text = "AML";
       this.pgAmlOutput.UseVisualStyleBackColor = true;
@@ -234,7 +242,7 @@
       this.outputEditor.Location = new System.Drawing.Point(0, 0);
       this.outputEditor.Name = "outputEditor";
       this.outputEditor.ReadOnly = false;
-      this.outputEditor.Size = new System.Drawing.Size(833, 359);
+      this.outputEditor.Size = new System.Drawing.Size(833, 356);
       this.outputEditor.TabIndex = 0;
       // 
       // pgTableOutput
@@ -243,7 +251,7 @@
       this.pgTableOutput.Location = new System.Drawing.Point(4, 22);
       this.pgTableOutput.Margin = new System.Windows.Forms.Padding(0);
       this.pgTableOutput.Name = "pgTableOutput";
-      this.pgTableOutput.Size = new System.Drawing.Size(833, 359);
+      this.pgTableOutput.Size = new System.Drawing.Size(833, 356);
       this.pgTableOutput.TabIndex = 1;
       this.pgTableOutput.Text = "Table";
       this.pgTableOutput.UseVisualStyleBackColor = true;
@@ -256,7 +264,7 @@
       this.dgvItems.Location = new System.Drawing.Point(0, 0);
       this.dgvItems.Margin = new System.Windows.Forms.Padding(0);
       this.dgvItems.Name = "dgvItems";
-      this.dgvItems.Size = new System.Drawing.Size(833, 359);
+      this.dgvItems.Size = new System.Drawing.Size(833, 356);
       this.dgvItems.TabIndex = 0;
       // 
       // conTable
@@ -369,6 +377,17 @@
       this.lblItems.Size = new System.Drawing.Size(0, 13);
       this.lblItems.TabIndex = 3;
       // 
+      // lblConnColor
+      // 
+      this.lblConnColor.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.tableLayoutPanel1.SetColumnSpan(this.lblConnColor, 3);
+      this.lblConnColor.Location = new System.Drawing.Point(0, 0);
+      this.lblConnColor.Margin = new System.Windows.Forms.Padding(0);
+      this.lblConnColor.Name = "lblConnColor";
+      this.lblConnColor.Size = new System.Drawing.Size(847, 5);
+      this.lblConnColor.TabIndex = 4;
+      // 
       // menuStrip
       // 
       this.menuStrip.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
@@ -463,7 +482,9 @@
       // 
       this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
       this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mniTidyXml});
+            this.mniTidyXml,
+            this.toolStripSeparator4,
+            this.preferencesToolStripMenuItem});
       this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
       this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
       this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
@@ -477,6 +498,44 @@
       this.mniTidyXml.Size = new System.Drawing.Size(162, 22);
       this.mniTidyXml.Text = "Tidy Xml";
       this.mniTidyXml.Click += new System.EventHandler(this.mniTidyXml_Click);
+      // 
+      // toolStripSeparator4
+      // 
+      this.toolStripSeparator4.Name = "toolStripSeparator4";
+      this.toolStripSeparator4.Size = new System.Drawing.Size(159, 6);
+      // 
+      // preferencesToolStripMenuItem
+      // 
+      this.preferencesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mniLocale,
+            this.mniTimeZone,
+            this.mniTimeout});
+      this.preferencesToolStripMenuItem.Name = "preferencesToolStripMenuItem";
+      this.preferencesToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+      this.preferencesToolStripMenuItem.Text = "Preferences";
+      // 
+      // mniLocale
+      // 
+      this.mniLocale.Name = "mniLocale";
+      this.mniLocale.ShortcutKeyDisplayString = "";
+      this.mniLocale.Size = new System.Drawing.Size(140, 22);
+      this.mniLocale.Text = "Locale...";
+      this.mniLocale.Click += new System.EventHandler(this.mniLocale_Click);
+      // 
+      // mniTimeZone
+      // 
+      this.mniTimeZone.Name = "mniTimeZone";
+      this.mniTimeZone.ShortcutKeyDisplayString = "";
+      this.mniTimeZone.Size = new System.Drawing.Size(140, 22);
+      this.mniTimeZone.Text = "Time Zone...";
+      this.mniTimeZone.Click += new System.EventHandler(this.mniTimeZone_Click);
+      // 
+      // mniTimeout
+      // 
+      this.mniTimeout.Name = "mniTimeout";
+      this.mniTimeout.Size = new System.Drawing.Size(140, 22);
+      this.mniTimeout.Text = "Timeout...";
+      this.mniTimeout.Click += new System.EventHandler(this.mniTimeout_Click);
       // 
       // btnSubmit
       // 
@@ -497,7 +556,7 @@
       // mniRunAll
       // 
       this.mniRunAll.Name = "mniRunAll";
-      this.mniRunAll.ShortcutKeys = System.Windows.Forms.Keys.F5;
+      this.mniRunAll.ShortcutKeyDisplayString = "F5";
       this.mniRunAll.Size = new System.Drawing.Size(225, 22);
       this.mniRunAll.Text = "Run All";
       this.mniRunAll.Click += new System.EventHandler(this.mniRunAll_Click);
@@ -595,5 +654,11 @@
     private System.Windows.Forms.ToolStripMenuItem mniNewWindow;
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
     private System.Windows.Forms.ToolStripMenuItem mniClose;
+    private System.Windows.Forms.ToolStripMenuItem preferencesToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem mniLocale;
+    private System.Windows.Forms.ToolStripMenuItem mniTimeZone;
+    private System.Windows.Forms.ToolStripMenuItem mniTimeout;
+    private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+    private System.Windows.Forms.Label lblConnColor;
   }
 }

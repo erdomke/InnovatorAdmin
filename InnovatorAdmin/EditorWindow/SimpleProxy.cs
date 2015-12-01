@@ -8,7 +8,8 @@ namespace Aras.Tools.InnovatorAdmin
 {
   class SimpleProxy : IEditorProxy
   {
-    private readonly string[] _defaultActions = new string[] {
+    #region "Default Actions"
+    private static readonly string[] _defaultActions = new string[] {
             "ActivateActivity",
             "AddItem",
             "ApplyAML",
@@ -103,6 +104,7 @@ namespace Aras.Tools.InnovatorAdmin
             "ValidateUser",
             "ValidateVote",
             "ValidateWorkflowMap"};
+    #endregion
 
     public IAsyncConnection Connection { get; set; }
 
@@ -114,6 +116,14 @@ namespace Aras.Tools.InnovatorAdmin
     public Innovator.Client.IPromise<System.IO.Stream> Process(Innovator.Client.Command request, bool async)
     {
       return this.Connection.Process(request, async);
+    }
+
+    public IEditorProxy Clone()
+    {
+      return new SimpleProxy()
+      {
+        Connection = this.Connection
+      };
     }
   }
 }

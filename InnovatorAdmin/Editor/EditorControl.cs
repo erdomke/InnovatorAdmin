@@ -46,6 +46,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
 
       _extEditor = new ExtendedEditor();
       _extEditor.Host = this;
+
       var editor = _extEditor.editor;
       editor.FontFamily = new System.Windows.Media.FontFamily("Consolas");
       editor.FontSize = 12.0;
@@ -53,11 +54,21 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       editor.Options.EnableRectangularSelection = true;
       editor.Options.IndentationSize = 2;
       editor.ShowLineNumbers = true;
-      editor.SyntaxHighlighting = ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance.GetDefinitionByExtension(".xml");
+      //editor.SyntaxHighlighting = ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance.GetDefinitionByExtension(".xml");
       editor.TextArea.TextEntering += TextArea_TextEntering;
       editor.TextArea.TextEntered += TextArea_TextEntered;
       editor.TextArea.KeyDown += TextArea_KeyDown;
       host.Child = _extEditor;
+
+      using (var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("Aras.Tools.InnovatorAdmin.resources.Aml.xshd"))
+      {
+        using (var reader = new System.Xml.XmlTextReader(stream))
+        {
+          editor.SyntaxHighlighting =
+              ICSharpCode.AvalonEdit.Highlighting.Xshd.HighlightingLoader.Load(reader,
+              ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance);
+        }
+      }
 
       editor.TextArea.IndentationStrategy = new ICSharpCode.AvalonEdit.Indentation.DefaultIndentationStrategy();
 
