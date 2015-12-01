@@ -247,8 +247,16 @@
     <Compile Include="Editor\AmlSchema\Property.cs" />
     <Compile Include="Editor\AmlSchema\PropertyCollection.cs" />
     <Compile Include="Editor\AmlSchema\PropertyType.cs" />
+    <Compile Include="Editor\Completion\CompletionType.cs" />
     <Compile Include="Editor\Completion\CompletionData.cs" />
     <Compile Include="Editor\Completion\CompletionHelper.cs" />
+    <Compile Include="Editor\Completion\SqlGroup.cs" />
+    <Compile Include="Editor\Completion\SqlGroupBase.cs" />
+    <Compile Include="Editor\Completion\SqlLiteral.cs" />
+    <Compile Include="Editor\Completion\SqlNode.cs" />
+    <Compile Include="Editor\Completion\SqlNameDefinition.cs" />
+    <Compile Include="Editor\Completion\SqlTokenizer.cs" />
+    <Compile Include="Editor\Completion\SqlType.cs" />
     <Compile Include="Editor\SearchResultBackgroundRenderer.cs" />
     <Compile Include="Editor\ShellHelper.cs" />
     <Compile Include="Editor\SimpleToolstripRenderer.cs" />

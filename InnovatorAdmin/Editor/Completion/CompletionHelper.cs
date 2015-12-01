@@ -14,29 +14,44 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     private ItemTypeCollection _itemTypes = new ItemTypeCollection();
     private IPromise<IEnumerable<string>> _methods;
 
-    public IPromise<CompletionData> GetCompletions(string xml, string soapAction)
+    public IPromise<CompletionData> GetCompletions(string xml, int caret, string soapAction)
     {
       //var overlap = 0;
       if (string.IsNullOrEmpty(xml)) return Promises.Resolved<CompletionData>(new CompletionData());
 
       var path = new List<AmlNode>();
-      string attr = null;
-      string attrValue = null;
+      string attrName = null;
+      string value = null;
+      bool cdata = false;
 
-      var state = XmlUtils.ProcessFragment(xml, (r, o) =>
+      var state = XmlUtils.ProcessFragment(xml.Substring(0, caret), (r, o) =>
       {
         switch (r.NodeType)
         {
           case XmlNodeType.Element:
             if (!r.IsEmptyElement)
-              path.Add(new AmlNode() { LocalName = r.LocalName, Type = r.GetAttribute("type"), Action = r.GetAttribute("action") });
+              path.Add(new AmlNode()
+              {
+                LocalName = r.LocalName,
+                Type = r.GetAttribute("type"),
+                Action = r.GetAttribute("action"),
+                Condition = r.GetAttribute("condition")
+              });
             break;
           case XmlNodeType.EndElement:
             path.RemoveAt(path.Count - 1);
             break;
           case XmlNodeType.Attribute:
-            attr = r.LocalName;
-            attrValue = r.Value;
+            attrName = r.LocalName;
+            value = r.Value;
+            break;
+          case XmlNodeType.CDATA:
+            cdata = true;
+            value = r.Value;
+            break;
+          case XmlNodeType.Text:
+            cdata = false;
+            value = r.Value;
             break;
         }
         return true;
@@ -119,13 +134,13 @@ namespace Aras.Tools.InnovatorAdmin.Editor
                 break;
             }
 
-            filter = attr;
+            filter = attrName;
             break;
           case XmlState.AttributeValue:
             if (path.Last().LocalName == "Item")
             {
               ItemType itemType;
-              switch (attr)
+              switch (attrName)
               {
                 case "action":
                   if (_methods == null && _conn != null)
@@ -206,8 +221,8 @@ namespace Aras.Tools.InnovatorAdmin.Editor
                   if (!string.IsNullOrEmpty(path.Last().Type)
                     && _itemTypes.TryGetValue(path.Last().Type, out itemType))
                   {
-                    var lastComma = attrValue.LastIndexOf(",");
-                    if (lastComma >= 0) attrValue = attrValue.Substring(lastComma + 1).Trim();
+                    var lastComma = value.LastIndexOf(",");
+                    if (lastComma >= 0) value = value.Substring(lastComma + 1).Trim();
 
                     items = GetProperties(itemType)
                       .Convert(p => p.SelectMany(i => new string[] { i.Name, i.Name + " DESC" }));
@@ -219,8 +234,8 @@ namespace Aras.Tools.InnovatorAdmin.Editor
                     && _itemTypes.TryGetValue(path.Last().Type, out itemType))
                   {
                     string partial;
-                    var selectPath = SelectPath(attrValue, out partial);
-                    attrValue = partial;
+                    var selectPath = SelectPath(value, out partial);
+                    value = partial;
 
                     var itPromise = new Promise<ItemType>();
                     RecurseProperties(itemType, selectPath, it => itPromise.Resolve(it));
@@ -260,7 +275,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
             }
             else
             {
-              switch (attr)
+              switch (attrName)
               {
                 case "condition":
                   items = StringPromise("between"
@@ -285,12 +300,16 @@ namespace Aras.Tools.InnovatorAdmin.Editor
               }
             }
 
-            filter = attrValue;
+            filter = value;
             break;
           default:
             if (path.Count == 1 && path.First().LocalName == "AML")
             {
               items = StringPromise("Item");
+            }
+            if (path.Count == 1 && path.First().LocalName.Equals("sql", StringComparison.OrdinalIgnoreCase) && soapAction == "ApplySQL")
+            {
+              return SqlCompletions(value, xml, caret, cdata);
             }
             else
             {
@@ -329,6 +348,10 @@ namespace Aras.Tools.InnovatorAdmin.Editor
                   {
                     items = StringPromise("Item");
                   }
+                  else if (path.Last().Condition == "in")
+                  {
+                    return SqlCompletions(value, xml, caret, cdata);
+                  }
                   else
                   {
                     ItemType itemType;
@@ -365,8 +388,137 @@ namespace Aras.Tools.InnovatorAdmin.Editor
         Items = string.IsNullOrEmpty(filter) ? i.OrderBy(j => j) : FilterAndSort(i, filter),
         MultiValueAttribute = multiValueAttribute,
         Overlap = (filter ?? "").Length,
-        State = state
+        State = GetCompletionType(state)
       });
+    }
+
+    private CompletionType GetCompletionType(XmlState state)
+    {
+      switch (state)
+      {
+        case XmlState.Attribute:
+        case XmlState.AttributeStart:
+          return CompletionType.Attribute;
+        case XmlState.AttributeValue:
+          return CompletionType.AttributeValue;
+      }
+      return CompletionType.Other;
+    }
+
+    private IPromise<CompletionData> SqlCompletions(string prefix, string all, int caret, bool cdata)
+    {
+      var lastIndex = cdata ? all.IndexOf("]]>", caret) : all.IndexOf('<', caret);
+      var sql = prefix + (lastIndex < 0 ? all.Substring(caret) : all.Substring(caret, lastIndex - caret));
+      var parseTree = new SqlTokenizer(sql).Parse();
+      if (!parseTree.Any())
+        return Promises.Resolved(new CompletionData());
+
+      var currNode = parseTree.NodeByOffset(prefix.Length);
+      var literal = currNode as SqlLiteral;
+
+      if (literal != null)
+      {
+
+        if (literal.Text.Equals("from", StringComparison.OrdinalIgnoreCase)
+          || literal.Text.Equals("join", StringComparison.OrdinalIgnoreCase)
+          || literal.Text.Equals("apply", StringComparison.OrdinalIgnoreCase))
+        {
+          return Promises.Resolved(new CompletionData()
+          {
+            Items = _itemTypes.Values.Select(i => i.Name.Replace(' ', '_'))
+              .Concat(Enumerable.Repeat("Innovator", 1)
+              .OrderBy(i => i)),
+            State = CompletionType.SqlObjectName,
+            Overlap = 0
+          });
+        }
+        else if (literal.Text == ".")
+        {
+          var name = literal.Parent as SqlNameDefinition;
+          if (name != null)
+          {
+            var idx = name.IndexOf(literal);
+            if (name[idx - 1].Text.Equals("innovator", StringComparison.OrdinalIgnoreCase))
+            {
+              return Promises.Resolved(new CompletionData()
+              {
+                Items = _itemTypes.Values.Select(i => i.Name.Replace(' ', '_')).Concat(Enumerable.Repeat("innovator", 1)),
+                State = CompletionType.SqlObjectName,
+                Overlap = 0
+              });
+            }
+          }
+          else
+          {
+            var group = literal.Parent as SqlGroup;
+            if (group != null)
+            {
+              var idx = group.IndexOf(literal);
+              var context = GetAliasContext(literal);
+              string fullName;
+              ItemType type;
+              if (idx > 0 && group[idx -1] is SqlLiteral
+                && context.TryGetValue(((SqlLiteral)group[idx -1]).Text.ToLowerInvariant(), out fullName)
+                && _itemTypes.TryGetValue(fullName, out type))
+              {
+                return GetProperties(type)
+                  .Convert(p => new CompletionData() {
+                    Items = p.Select (i => i.Name),
+                    State = CompletionType.SqlGeneral
+                  });
+              }
+            }
+          }
+        }
+        else if (SqlTokenizer.IsKeyword(literal.Text)
+          || literal.Type == SqlType.Operator)
+        {
+          var group = literal.Parent as SqlGroup;
+          if (group != null)
+          {
+            var types = GetTypes(group.OfType<SqlNameDefinition>().Select(n => n.Name));
+            return Promises.All(types
+              .Select(t => (IPromise)GetProperties(t)).ToArray())
+              .Convert(l => new CompletionData() {
+                Items = l.OfType<IEnumerable<Property>>()
+                  .SelectMany(i => i)
+                  .Select(i => i.Name)
+                  .Distinct()
+                  .OrderBy(i => i),
+                State = CompletionType.SqlGeneral
+              });
+          }
+        }
+      }
+
+      //System.Diagnostics.Debug.Print(parseTree.NodeByOffset(prefix.Length).ToString());
+      return Promises.Resolved(new CompletionData());
+    }
+
+    private IEnumerable<ItemType> GetTypes(IEnumerable<string> names)
+    {
+      return from n in names
+             where _itemTypes.ContainsKey(n)
+             select _itemTypes[n];
+    }
+
+    private IDictionary<string, string> GetAliasContext(SqlNode node)
+    {
+      var result = new Dictionary<string, string>();
+
+      var group = node.Parent as SqlGroup;
+      while (group != null)
+      {
+        foreach (var name in group.OfType<SqlNameDefinition>())
+        {
+          if (name.Alias != null && !result.ContainsKey(name.Alias.ToLowerInvariant()))
+            result[name.Alias.ToLowerInvariant()] = name.Name;
+          result[name.Name.ToLowerInvariant()] = name.Name;
+        }
+        group = group.Parent as SqlGroup;
+      }
+
+      return result;
     }
 
     private void RecurseProperties(ItemType itemType, IEnumerable<string> remainingPath, Action<ItemType> callback)
@@ -479,7 +631,9 @@ namespace Aras.Tools.InnovatorAdmin.Editor
           case XmlNodeType.Element:
             if (!r.IsEmptyElement)
             {
-              path.Add(new AmlNode() { LocalName = r.LocalName });
+              path.Add(new AmlNode() {
+                LocalName = r.LocalName
+              });
               isOpenTag = true;
             }
             break;
@@ -654,6 +808,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       public string LocalName { get; set; }
       public string Type { get; set; }
       public string Action { get; set; }
+      public string Condition { get; set; }
     }
   }
 }

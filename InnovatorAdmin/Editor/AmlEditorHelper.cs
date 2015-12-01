@@ -39,10 +39,11 @@ namespace Aras.Tools.InnovatorAdmin.Editor
           case "<":
           case ",":
           case "(":
+          case ".":
             ShowCompletions(control)
               .Done(data =>
               {
-                if (data != null && data.State == XmlState.Attribute && !data.Items.Any()
+                if (data != null && data.State == CompletionType.Attribute && !data.Items.Any()
                   && control.Editor.CaretOffset < control.Editor.Document.TextLength)
                 {
                   var doc = control.Editor.TextArea.Document;
@@ -74,7 +75,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       var length = control.Editor.Document.TextLength;
       var caret = control.Editor.CaretOffset;
 
-      return this.GetCompletions(control.Editor.Text.Substring(0, control.Editor.CaretOffset), this.SoapAction)
+      return this.GetCompletions(control.Editor.Text, control.Editor.CaretOffset, this.SoapAction)
         .UiPromise(control)
         .Convert(data => {
           if (length != control.Editor.Document.TextLength
@@ -89,11 +90,14 @@ namespace Aras.Tools.InnovatorAdmin.Editor
             {
               switch (data.State)
               {
-                case XmlState.Attribute:
-                case XmlState.AttributeStart:
+                case CompletionType.Attribute:
                   return new AttributeCompletionData(c, this, control);
-                case XmlState.AttributeValue:
+                case CompletionType.AttributeValue:
                   return new AttributeValueCompletionData(c, data.MultiValueAttribute);
+                case CompletionType.SqlGeneral:
+                  return new SqlGeneral(c);
+                case CompletionType.SqlObjectName:
+                  return new SqlObjectCompletionData(c, this, control);
               }
               return new BasicCompletionData(c);
             }), data.Overlap);
@@ -126,6 +130,45 @@ namespace Aras.Tools.InnovatorAdmin.Editor
         textArea.Caret.Offset -= 1;
         _parent.ShowCompletions(_control);
       }
+    }
+
+    private class SqlObjectCompletionData : BasicCompletionData
+    {
+      private AmlEditorHelper _parent;
+      private EditorControl _control;
+
+
+      public SqlObjectCompletionData(string text, AmlEditorHelper parent, EditorControl control)
+        : base(text)
+      {
+        _parent = parent;
+        _control = control;
+      }
+
+      public override void Complete(TextArea textArea, ISegment completionSegment, EventArgs insertionRequestEventArgs)
+      {
+        if (this.Text.Equals("innovator", StringComparison.OrdinalIgnoreCase))
+        {
+          textArea.Document.Replace(completionSegment, "innovator.");
+          _parent.ShowCompletions(_control);
+        }
+        else
+        {
+          if (textArea.Document.Text.Substring(0, completionSegment.Offset).EndsWith("innovator.", StringComparison.OrdinalIgnoreCase))
+          {
+            textArea.Document.Replace(completionSegment, "[" + this.Text + "]");
+          }
+          else
+          {
+            textArea.Document.Replace(completionSegment, "innovator.[" + this.Text + "]");
+          }
+        }
+      }
+    }
+
+    internal class SqlGeneral : BasicCompletionData
+    {
+      public SqlGeneral(string text) : base(text) { }
     }
 
     private class AttributeValueCompletionData : BasicCompletionData

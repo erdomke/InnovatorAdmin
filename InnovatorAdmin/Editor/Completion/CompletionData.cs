@@ -10,7 +10,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     public IEnumerable<string> Items { get; set; }
     public bool MultiValueAttribute { get; set; }
     public int Overlap { get; set; }
-    public XmlState State { get; set; }
+    public CompletionType State { get; set; }
 
     public CompletionData()
     {

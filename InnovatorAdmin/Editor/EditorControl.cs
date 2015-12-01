@@ -153,7 +153,8 @@ namespace Aras.Tools.InnovatorAdmin.Editor
 
     void TextArea_TextEntering(object sender, System.Windows.Input.TextCompositionEventArgs e)
     {
-      if (e.Text.Length > 0 && completionWindow != null)
+      if (e.Text.Length > 0 && completionWindow != null
+        && !completionWindow.CompletionList.CompletionData.OfType<AmlEditorHelper.SqlGeneral>().Any())
       {
         switch (e.Text[0])
         {
