@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Aras.Tools.InnovatorAdmin.Controls
+namespace InnovatorAdmin.Controls
 {
   public partial class FilterSelect<T> : Form
   {

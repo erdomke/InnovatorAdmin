@@ -1,4 +1,4 @@
-﻿namespace Aras.Tools.InnovatorAdmin.Editor
+﻿namespace InnovatorAdmin.Editor
 {
   partial class FindReplace
   {
@@ -247,7 +247,6 @@
       this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
       this.Name = "FindReplace";
       this.Text = "Find/Replace";
-      this.TopMost = true;
       this.tableLayoutPanel1.ResumeLayout(false);
       this.tableLayoutPanel1.PerformLayout();
       this.flowLayoutPanel1.ResumeLayout(false);

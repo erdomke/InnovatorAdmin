@@ -8,7 +8,7 @@
     <ProjectGuid>{56CC682F-1810-4A66-B06C-129A86621294}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Aras.Tools.InnovatorAdmin</RootNamespace>
+    <RootNamespace>InnovatorAdmin</RootNamespace>
     <AssemblyName>InnovatorAdmin</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -64,6 +64,8 @@
     <Reference Include="Innovator.Client">
       <HintPath>..\lib\Innovator.Client.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.WindowsAPICodePack, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Windows7APICodePack-Core.1.1.0.0\lib\Microsoft.WindowsAPICodePack.dll</HintPath>
       <Private>True</Private>
@@ -125,6 +127,8 @@
     <Compile Include="AppContext.cs" />
     <Compile Include="AppFileType.cs" />
     <Compile Include="AssemblyInfo.Version.cs" />
+    <Compile Include="Connections\Authentication.cs" />
+    <Compile Include="Connections\ConnectionType.cs" />
     <Compile Include="Controls\Compare.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -240,6 +244,7 @@
     <Compile Include="Controls\Welcome.Designer.cs">
       <DependentUpon>Welcome.cs</DependentUpon>
     </Compile>
+    <Compile Include="EditorWindow\ICommand.cs" />
     <Compile Include="EditorWindow\IEditorProxy.cs" />
     <Compile Include="EditorWindow\InputBox.cs">
       <SubType>Form</SubType>
@@ -247,15 +252,24 @@
     <Compile Include="EditorWindow\InputBox.Designer.cs">
       <DependentUpon>InputBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="EditorWindow\SimpleProxy.cs" />
-    <Compile Include="Editor\AmlSchema\ItemType.cs" />
-    <Compile Include="Editor\AmlSchema\ItemTypeCollection.cs" />
-    <Compile Include="Editor\AmlSchema\Property.cs" />
-    <Compile Include="Editor\AmlSchema\PropertyCollection.cs" />
-    <Compile Include="Editor\AmlSchema\PropertyType.cs" />
+    <Compile Include="EditorWindow\ArasEditorProxy.cs" />
+    <Compile Include="EditorWindow\IResultObject.cs" />
+    <Compile Include="EditorWindow\ProxyFactory.cs" />
+    <Compile Include="EditorWindow\SqlEditorProxy.cs" />
+    <Compile Include="Editor\Completion\ISqlMetadataProvider.cs" />
+    <Compile Include="Editor\Completion\SqlGeneralCompletionData.cs" />
+    <Compile Include="Editor\Completion\SqlObjectCompletionData.cs" />
+    <Compile Include="Editor\Schema\ItemType.cs" />
+    <Compile Include="Editor\Schema\ItemTypeCollection.cs" />
+    <Compile Include="Editor\Schema\Property.cs" />
+    <Compile Include="Editor\Schema\PropertyCollection.cs" />
+    <Compile Include="Editor\Schema\PropertyType.cs" />
+    <Compile Include="Editor\Schema\SqlColumn.cs" />
+    <Compile Include="Editor\Schema\SqlObject.cs" />
     <Compile Include="Editor\Completion\CompletionType.cs" />
-    <Compile Include="Editor\Completion\CompletionData.cs" />
+    <Compile Include="Editor\Completion\CompletionContext.cs" />
     <Compile Include="Editor\Completion\CompletionHelper.cs" />
+    <Compile Include="Editor\Completion\SqlCompletionHelper.cs" />
     <Compile Include="Editor\Completion\SqlGroup.cs" />
     <Compile Include="Editor\Completion\SqlGroupBase.cs" />
     <Compile Include="Editor\Completion\SqlLiteral.cs" />
@@ -263,15 +277,18 @@
     <Compile Include="Editor\Completion\SqlNameDefinition.cs" />
     <Compile Include="Editor\Completion\SqlTokenizer.cs" />
     <Compile Include="Editor\Completion\SqlType.cs" />
+    <Compile Include="Editor\IFoldingStrategy.cs" />
     <Compile Include="Editor\SearchResultBackgroundRenderer.cs" />
     <Compile Include="Editor\ShellHelper.cs" />
     <Compile Include="Editor\SimpleToolstripRenderer.cs" />
+    <Compile Include="Editor\SqlEditorHelper.cs" />
+    <Compile Include="Editor\SqlExtension.cs" />
     <Compile Include="Editor\ToolStripSpringTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Editor\AmlEditorHelper.cs" />
     <Compile Include="Editor\AmlFoldingStrategy.cs" />
-    <Compile Include="Editor\BasicCompletionData.cs" />
+    <Compile Include="Editor\Completion\BasicCompletionData.cs" />
     <Compile Include="Editor\EditorControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -338,9 +355,38 @@
       <DependentUpon>Messages.resx</DependentUpon>
     </Compile>
     <Compile Include="Release.cs" />
+    <Compile Include="Scripts\GenerateCtClass.cs" />
+    <Compile Include="Scripts\IRemoteScript.cs" />
+    <Compile Include="Scripts\ReplaceItem.cs" />
     <Compile Include="Snippet.cs" />
     <Compile Include="SnippetManager.cs" />
     <Compile Include="Utils.cs" />
+    <Compile Include="Editor\XPathReader\arraymanager.cs" />
+    <Compile Include="Editor\XPathReader\astnode.cs" />
+    <Compile Include="Editor\XPathReader\axis.cs" />
+    <Compile Include="Editor\XPathReader\AxisQuery.cs" />
+    <Compile Include="Editor\XPathReader\BaseQuery.cs" />
+    <Compile Include="Editor\XPathReader\ExprQuery.cs" />
+    <Compile Include="Editor\XPathReader\filter.cs" />
+    <Compile Include="Editor\XPathReader\FilterQuery.cs" />
+    <Compile Include="Editor\XPathReader\function.cs" />
+    <Compile Include="Editor\XPathReader\FunctionQuery.cs" />
+    <Compile Include="Editor\XPathReader\group.cs" />
+    <Compile Include="Editor\XPathReader\IQuery.cs" />
+    <Compile Include="Editor\XPathReader\operand.cs" />
+    <Compile Include="Editor\XPathReader\OperandQuery.cs" />
+    <Compile Include="Editor\XPathReader\operator.cs" />
+    <Compile Include="Editor\XPathReader\queryBuilder.cs" />
+    <Compile Include="Editor\XPathReader\root.cs" />
+    <Compile Include="Editor\XPathReader\variable.cs" />
+    <Compile Include="Editor\XPathReader\xmlchartype.cs" />
+    <Compile Include="Editor\XPathReader\XPathCollection.cs" />
+    <Compile Include="Editor\XPathReader\xpathexpr.cs" />
+    <Compile Include="Editor\XPathReader\xpathnodetype.cs" />
+    <Compile Include="Editor\XPathReader\xpathparser.cs" />
+    <Compile Include="Editor\XPathReader\xpathreader.cs" />
+    <Compile Include="Editor\XPathReader\XPathReaderException.cs" />
+    <Compile Include="Editor\XPathReader\xpathscanner.cs" />
     <EmbeddedResource Include="ConnectionEditor.resx">
       <DependentUpon>ConnectionEditor.cs</DependentUpon>
     </EmbeddedResource>
@@ -440,6 +486,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <EmbeddedResource Include="resources\Sql.xshd" />
     <None Include="resources\icons\add16.png" />
   </ItemGroup>
   <ItemGroup>

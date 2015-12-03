@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
 	/// <summary>
 	///   A collection that stores <see cref='XmlSchemaCompletionData'/> objects.

@@ -1,4 +1,4 @@
-﻿namespace Aras.Tools.InnovatorAdmin.Controls
+﻿namespace InnovatorAdmin.Controls
 {
   partial class Welcome
   {
@@ -31,9 +31,9 @@
       this.components = new System.ComponentModel.Container();
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
       this.toolTipManager = new System.Windows.Forms.ToolTip(this.components);
-      this.btnCreate = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnInstall = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnAmlStudio = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnCreate = new InnovatorAdmin.Controls.FlatButton();
+      this.btnInstall = new InnovatorAdmin.Controls.FlatButton();
+      this.btnAmlStudio = new InnovatorAdmin.Controls.FlatButton();
       this.tableLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
       // 
@@ -73,7 +73,7 @@
       this.btnCreate.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnCreate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnCreate.ForeColor = System.Drawing.Color.Black;
-      this.btnCreate.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.innPkg32;
+      this.btnCreate.Image = global::InnovatorAdmin.Properties.Resources.innPkg32;
       this.btnCreate.Location = new System.Drawing.Point(245, 35);
       this.btnCreate.MinimumSize = new System.Drawing.Size(120, 40);
       this.btnCreate.Name = "btnCreate";
@@ -82,7 +82,7 @@
       this.btnCreate.TabIndex = 3;
       this.btnCreate.Text = "Create Package";
       this.btnCreate.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-      this.btnCreate.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnCreate.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.toolTipManager.SetToolTip(this.btnCreate, "Create a new package for export.");
       this.btnCreate.UseVisualStyleBackColor = true;
       this.btnCreate.Click += new System.EventHandler(this.btnCreate_Click);
@@ -97,7 +97,7 @@
       this.btnInstall.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnInstall.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnInstall.ForeColor = System.Drawing.Color.Black;
-      this.btnInstall.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.install32;
+      this.btnInstall.Image = global::InnovatorAdmin.Properties.Resources.install32;
       this.btnInstall.Location = new System.Drawing.Point(103, 35);
       this.btnInstall.MinimumSize = new System.Drawing.Size(120, 40);
       this.btnInstall.Name = "btnInstall";
@@ -106,7 +106,7 @@
       this.btnInstall.TabIndex = 2;
       this.btnInstall.Text = "Install Package";
       this.btnInstall.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-      this.btnInstall.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnInstall.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.toolTipManager.SetToolTip(this.btnInstall, "Install (import) solution from existing package.");
       this.btnInstall.UseVisualStyleBackColor = true;
       this.btnInstall.Click += new System.EventHandler(this.btnInstall_Click);
@@ -123,7 +123,7 @@
       this.btnAmlStudio.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnAmlStudio.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnAmlStudio.ForeColor = System.Drawing.Color.Black;
-      this.btnAmlStudio.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.amlStudio32black;
+      this.btnAmlStudio.Image = global::InnovatorAdmin.Properties.Resources.amlStudio32black;
       this.btnAmlStudio.Location = new System.Drawing.Point(245, 122);
       this.btnAmlStudio.Name = "btnAmlStudio";
       this.btnAmlStudio.Padding = new System.Windows.Forms.Padding(2);
@@ -131,7 +131,7 @@
       this.btnAmlStudio.TabIndex = 5;
       this.btnAmlStudio.Text = "AML Studio";
       this.btnAmlStudio.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-      this.btnAmlStudio.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnAmlStudio.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnAmlStudio.UseVisualStyleBackColor = false;
       this.btnAmlStudio.Click += new System.EventHandler(this.btnAmlStudio_Click);
       // 

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
   internal static class XmlUtils
   {

@@ -3,7 +3,7 @@ using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using System;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
   public class BasicCompletionData : ICompletionData
   {
@@ -24,7 +24,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       get { return null; }
     }
 
-    public string Text { get; private set; }
+    public string Text { get; protected set; }
 
     // Use this property if you want to show a fancy UIElement in the list.
     public object Content

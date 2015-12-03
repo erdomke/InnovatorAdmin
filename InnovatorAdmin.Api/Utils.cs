@@ -5,7 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Aras.Tools.InnovatorAdmin
+namespace InnovatorAdmin
 {
   internal static class Utils
   {

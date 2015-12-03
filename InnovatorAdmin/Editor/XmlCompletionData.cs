@@ -8,7 +8,7 @@
 using System;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
   /// <summary>
   /// Holds the text for  namespace, child element or attribute 

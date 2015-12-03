@@ -1,4 +1,4 @@
-﻿namespace Aras.Tools.InnovatorAdmin
+﻿namespace InnovatorAdmin
 {
   partial class ParameterWindow
   {
@@ -40,9 +40,9 @@
       this.label3 = new System.Windows.Forms.Label();
       this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
       this.bs = new System.Windows.Forms.BindingSource(this.components);
-      this.btnCancel = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnIgnore = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnReplace = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnCancel = new InnovatorAdmin.Controls.FlatButton();
+      this.btnIgnore = new InnovatorAdmin.Controls.FlatButton();
+      this.btnReplace = new InnovatorAdmin.Controls.FlatButton();
       this.tableLayoutPanel1.SuspendLayout();
       this.tableLayoutPanel2.SuspendLayout();
       this.flowLayoutPanel1.SuspendLayout();
@@ -184,7 +184,7 @@
       this.btnCancel.Size = new System.Drawing.Size(75, 27);
       this.btnCancel.TabIndex = 0;
       this.btnCancel.Text = "&Cancel";
-      this.btnCancel.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnCancel.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnCancel.UseVisualStyleBackColor = false;
       this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
       // 
@@ -203,7 +203,7 @@
       this.btnIgnore.Size = new System.Drawing.Size(75, 27);
       this.btnIgnore.TabIndex = 2;
       this.btnIgnore.Text = "&Ignore All";
-      this.btnIgnore.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnIgnore.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnIgnore.UseVisualStyleBackColor = false;
       this.btnIgnore.Click += new System.EventHandler(this.btnIgnore_Click);
       // 
@@ -222,7 +222,7 @@
       this.btnReplace.Size = new System.Drawing.Size(75, 27);
       this.btnReplace.TabIndex = 1;
       this.btnReplace.Text = "&Replace";
-      this.btnReplace.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnReplace.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnReplace.UseVisualStyleBackColor = false;
       this.btnReplace.Click += new System.EventHandler(this.btnOk_Click);
       // 

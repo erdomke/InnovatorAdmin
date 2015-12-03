@@ -7,7 +7,7 @@ using System.Windows.Media;
 using ICSharpCode.AvalonEdit.Search;
 using System.Text.RegularExpressions;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
 	internal class SearchResultBackgroundRenderer : IBackgroundRenderer
 	{

@@ -24,7 +24,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace Aras.Tools.InnovatorAdmin.Dialog
+namespace InnovatorAdmin.Dialog
 {
     internal static class NativeMethods
     {

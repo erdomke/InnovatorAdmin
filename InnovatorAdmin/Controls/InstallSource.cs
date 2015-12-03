@@ -9,7 +9,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
 
-namespace Aras.Tools.InnovatorAdmin.Controls
+namespace InnovatorAdmin.Controls
 {
   public partial class InstallSource : UserControl, IWizardStep
   {

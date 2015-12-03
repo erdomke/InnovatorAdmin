@@ -1,4 +1,4 @@
-﻿namespace Aras.Tools.InnovatorAdmin
+﻿namespace InnovatorAdmin
 {
   partial class ErrorWindow
   {
@@ -29,17 +29,17 @@
     private void InitializeComponent()
     {
       this.tableLayout = new System.Windows.Forms.TableLayoutPanel();
-      this.btnShowDetails = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnRetry = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnIgnore = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnAbort = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnShowDetails = new InnovatorAdmin.Controls.FlatButton();
+      this.btnRetry = new InnovatorAdmin.Controls.FlatButton();
+      this.btnIgnore = new InnovatorAdmin.Controls.FlatButton();
+      this.btnAbort = new InnovatorAdmin.Controls.FlatButton();
       this.txtMessage = new System.Windows.Forms.TextBox();
       this.tbcMain = new System.Windows.Forms.TabControl();
       this.tabPage1 = new System.Windows.Forms.TabPage();
-      this.txtErrorDetails = new Aras.Tools.InnovatorAdmin.Editor.EditorControl();
+      this.txtErrorDetails = new InnovatorAdmin.Editor.EditorControl();
       this.tabPage2 = new System.Windows.Forms.TabPage();
       this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-      this.txtQuery = new Aras.Tools.InnovatorAdmin.Editor.EditorControl();
+      this.txtQuery = new InnovatorAdmin.Editor.EditorControl();
       this.tableLayout.SuspendLayout();
       this.tbcMain.SuspendLayout();
       this.tabPage1.SuspendLayout();
@@ -85,7 +85,7 @@
       this.btnShowDetails.Size = new System.Drawing.Size(91, 29);
       this.btnShowDetails.TabIndex = 1;
       this.btnShowDetails.Text = "Toggle Details";
-      this.btnShowDetails.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnShowDetails.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnShowDetails.UseVisualStyleBackColor = true;
       this.btnShowDetails.Click += new System.EventHandler(this.btnShowDetails_Click);
       //
@@ -103,7 +103,7 @@
       this.btnRetry.Size = new System.Drawing.Size(61, 29);
       this.btnRetry.TabIndex = 3;
       this.btnRetry.Text = "&Retry";
-      this.btnRetry.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnRetry.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnRetry.UseVisualStyleBackColor = true;
       //
       // btnIgnore
@@ -120,7 +120,7 @@
       this.btnIgnore.Size = new System.Drawing.Size(53, 29);
       this.btnIgnore.TabIndex = 4;
       this.btnIgnore.Text = "&Ignore";
-      this.btnIgnore.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnIgnore.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnIgnore.UseVisualStyleBackColor = true;
       //
       // btnAbort
@@ -137,7 +137,7 @@
       this.btnAbort.Size = new System.Drawing.Size(53, 29);
       this.btnAbort.TabIndex = 5;
       this.btnAbort.Text = "&Abort";
-      this.btnAbort.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnAbort.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnAbort.UseVisualStyleBackColor = true;
       //
       // txtMessage

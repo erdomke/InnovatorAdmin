@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 
-namespace Aras.Tools.InnovatorAdmin
+namespace InnovatorAdmin
 {
   public class InstallScript
   {

@@ -6,7 +6,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace Aras.Tools.InnovatorAdmin
+namespace InnovatorAdmin
 {
   public static class DataExtractorFactory
   {

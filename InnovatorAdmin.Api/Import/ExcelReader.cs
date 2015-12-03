@@ -7,7 +7,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 
-namespace Aras.Tools.InnovatorAdmin
+namespace InnovatorAdmin
 {
   public class ExcelReader : IEnumerable<object[]>, IDisposable //: IPipeInput<System.IO.Stream>, IPipeOutput<IDataRecord>
   {

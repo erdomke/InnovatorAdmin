@@ -25,7 +25,7 @@ using System.Drawing;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace Aras.Tools.InnovatorAdmin.Dialog
+namespace InnovatorAdmin.Dialog
 {
 	#region WINDOWINFO
 

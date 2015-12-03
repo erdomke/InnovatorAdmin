@@ -25,7 +25,7 @@ using System.Xml;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Folding;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
   /// <summary>
   /// Holds information about the start of a fold in an xml string.
@@ -142,7 +142,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
   /// <summary>
   /// Determines folds for an xml string in the editor.
   /// </summary>
-  public class AmlFoldingStrategy
+  public class AmlFoldingStrategy : IFoldingStrategy
   {
     /// <summary>
     /// Flag indicating whether attributes should be displayed on folded
@@ -161,7 +161,9 @@ namespace Aras.Tools.InnovatorAdmin.Editor
 
       try
       {
-        XmlTextReader reader = new XmlTextReader(document.CreateReader());
+        if (document.IndexOf('<', 0, document.TextLength) < 0)
+          return Enumerable.Empty<NewFolding>();
+        var reader = new XmlTextReader(document.CreateReader());
         reader.XmlResolver = null; // don't resolve DTDs
         return CreateNewFoldings(document, reader, out firstErrorOffset);
       }

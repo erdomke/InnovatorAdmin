@@ -1,4 +1,4 @@
-﻿using Aras.Tools.InnovatorAdmin.Connections;
+﻿using InnovatorAdmin.Connections;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -9,18 +9,17 @@ using System.Xml;
 using System.Linq;
 using System.Diagnostics;
 using Innovator.Client;
-using Aras.Tools.InnovatorAdmin.Controls;
+using InnovatorAdmin.Controls;
 using System.Globalization;
 
-namespace Aras.Tools.InnovatorAdmin
+namespace InnovatorAdmin
 {
   public partial class EditorWindow : Form
   {
     private object _current;
-    private ConnectionData _connData;
     private IEditorProxy _proxy;
+    private IResultObject _result;
     private DataTable _outputTable;
-    private string _outputXml;
     private string _soapAction;
     private Dictionary<string, QueryParameter> _paramCache = new Dictionary<string, QueryParameter>();
     private IPromise _currentQuery;
@@ -57,11 +56,7 @@ namespace Aras.Tools.InnovatorAdmin
     public IEditorProxy Proxy
     {
       get { return _proxy; }
-      set
-      {
-        value.Connection = _proxy.Connection;
-        _proxy = value;
-      }
+      set { SetConnection(value); }
     }
     public string SoapAction
     {
@@ -69,7 +64,7 @@ namespace Aras.Tools.InnovatorAdmin
       set
       {
         _soapAction = value;
-        ((Editor.AmlEditorHelper)inputEditor.Helper).SoapAction = value;
+        if (_proxy != null) _proxy.Action = value;
         btnSoapAction.Text = value + " ▼";
       }
     }
@@ -83,32 +78,27 @@ namespace Aras.Tools.InnovatorAdmin
       inputEditor.Text = lastQuery.Text;
       this.SoapAction = lastQuery.Action;
       menuStrip.Renderer = new SimpleToolstripRenderer();
-      _proxy = new SimpleProxy();
     }
 
     public void SetConnection(IAsyncConnection conn, string name = null)
     {
-      if (conn == null) throw new ArgumentNullException("inn");
-      _proxy.Connection = conn;
-      ((Editor.AmlEditorHelper)inputEditor.Helper).InitializeConnection(conn);
-      btnEditConnections.Text = string.Format("{0} ▼", name ?? conn.Database);
-      InitializeUi(conn);
+      if (conn == null) throw new ArgumentNullException("conn");
+      SetConnection(new ArasEditorProxy(conn, name ?? conn.Database));
     }
     public void SetConnection(ConnectionData conn)
     {
       try
       {
-        ConnectionEditor.Login(conn, true)
+        btnEditConnections.Text = "Connecting... ▼";
+        ProxyFactory.FromConn(conn)
           .UiPromise(this)
-          .Done(arasConn =>
+          .Done(proxy =>
           {
-            _proxy.Connection = arasConn;
-            SetConnection(conn, _proxy);
+            SetConnection(proxy);
           })
           .Fail(ex =>
           {
             MessageBox.Show(ex.Message);
-            ((Editor.AmlEditorHelper)inputEditor.Helper).InitializeConnection(null);
             btnEditConnections.Text = "Not Connected ▼";
             lblConnection.Visible = true;
             btnEditConnections.Visible = lblConnection.Visible;
@@ -119,23 +109,51 @@ namespace Aras.Tools.InnovatorAdmin
         MessageBox.Show(ex.Message);
       }
     }
-    public void SetConnection(ConnectionData connData, IEditorProxy proxy)
+    public void SetConnection(IEditorProxy proxy)
     {
+      if (_proxy != null)
+        _proxy.Dispose();
+      
       _proxy = proxy;
-      _connData = connData;
-      ((Editor.AmlEditorHelper)inputEditor.Helper).InitializeConnection(proxy.Connection);
-      btnEditConnections.Text = string.Format("{0} ▼", connData.ConnectionName);
-      lblConnection.Visible = true;
-      btnEditConnections.Visible = lblConnection.Visible;
-      lblConnColor.BackColor = connData.Color;
-      InitializeUi(_proxy.Connection);
+
+      if (proxy == null)
+        return;
+      
+      
+      if (_proxy.GetActions().Any())
+      {
+        _proxy.Action = _soapAction;
+        btnSoapAction.Visible = true;
+      }
+      else
+      {
+        btnSoapAction.Visible = true;
+      }
+      lblSoapAction.Visible = btnSoapAction.Visible;
+
+      inputEditor.Helper = _proxy.GetHelper();
+      outputEditor.Helper = _proxy.GetHelper();
+      btnEditConnections.Text = string.Format("{0} ▼", _proxy.Name);
+
+      if (proxy.ConnData != null)
+      {
+        lblConnection.Visible = true;
+        btnEditConnections.Visible = lblConnection.Visible;
+        lblConnColor.BackColor = proxy.ConnData.Color;
+      }
+      InitializeUi(_proxy as ArasEditorProxy);
     }
-    private void InitializeUi(IAsyncConnection conn)
+    private void InitializeUi(ArasEditorProxy proxy)
     {
-      var local = conn.AmlContext.LocalizationContext;
-      var remote = conn as IRemoteConnection;
-      mniLocale.ShortcutKeyDisplayString = "(" + local.Locale + ")";
-      mniTimeZone.ShortcutKeyDisplayString = "(" + local.TimeZone + ")";
+      if (proxy == null || proxy.Connection.AmlContext == null)
+        return;
+
+      var local = proxy.Connection.AmlContext.LocalizationContext;
+      var remote = proxy.Connection as IRemoteConnection;
+      _locale = local.Locale;
+      _timeZone = local.TimeZone;
+      mniLocale.ShortcutKeyDisplayString = "(" + _locale + ")";
+      mniTimeZone.ShortcutKeyDisplayString = "(" + _timeZone + ")";
       mniTimeout.ShortcutKeyDisplayString = "(" + (_timeout / 1000) + "s)";
 
       mniLocale.Enabled = remote != null;
@@ -150,9 +168,8 @@ namespace Aras.Tools.InnovatorAdmin
 
     private void ConfigureRequest(IHttpRequest req)
     {
-      var local = _proxy.Connection.AmlContext.LocalizationContext;
-      req.SetHeader("LOCALE", _locale ?? local.Locale);
-      req.SetHeader("TIMEZONE_NAME", _timeZone ?? local.TimeZone);
+      req.SetHeader("LOCALE", _locale);
+      req.SetHeader("TIMEZONE_NAME", _timeZone);
       req.Timeout = _timeout;
     }
 
@@ -164,10 +181,10 @@ namespace Aras.Tools.InnovatorAdmin
         btnOk.Visible = this.Modal;
         btnCancel.Visible = this.Modal;
 
-        lblConnection.Visible = _connData != null;
+        lblConnection.Visible = _proxy != null && _proxy.ConnData != null;
         btnEditConnections.Visible = lblConnection.Visible;
 
-        if (_proxy.Connection == null)
+        if (_proxy == null)
         {
           SetConnection(ConnectionManager.Current.Library.Connections.First());
         }
@@ -194,104 +211,10 @@ namespace Aras.Tools.InnovatorAdmin
 
     private void EnsureDataTable()
     {
-      if (!string.IsNullOrEmpty(_outputXml) && _outputTable == null && tbcOutputView.SelectedTab == pgTableOutput)
+      if (_result != null && tbcOutputView.SelectedTab == pgTableOutput)
       {
-        var doc = new XmlDocument();
-        doc.LoadXml(_outputXml);
-        _outputTable = Extensions.GetItemTable(doc);
+        _outputTable = _result.GetTable();
         dgvItems.DataSource = _outputTable;
-      }
-    }
-
-    private string IndentXml(string xmlContent, out int itemCount)
-    {
-      itemCount = 0;
-      char[] writeNodeBuffer = null;
-      var levels = new int[64];
-      int level = 0;
-
-      using (var strReader = new StringReader(xmlContent))
-      {
-        using (var reader = XmlReader.Create(strReader))
-        {
-          using (var writer = new StringWriter())
-          {
-            XmlWriterSettings settings = new XmlWriterSettings();
-            settings.OmitXmlDeclaration = true;
-            settings.Indent = true;
-            settings.IndentChars = "  ";
-            settings.CheckCharacters = true;
-            using (var xmlWriter = XmlWriter.Create(writer, settings))
-            {
-              bool canReadValueChunk = reader.CanReadValueChunk;
-              while (reader.Read())
-              {
-                switch (reader.NodeType)
-                {
-                  case XmlNodeType.Element:
-                    if (reader.LocalName == "Item") levels[level]++;
-                    xmlWriter.WriteStartElement(reader.Prefix, reader.LocalName, reader.NamespaceURI);
-                    xmlWriter.WriteAttributes(reader, false);
-                    if (reader.IsEmptyElement)
-                    {
-                      xmlWriter.WriteEndElement();
-                    }
-                    else
-                    {
-                      level++;
-                    }
-                    break;
-                  case XmlNodeType.Text:
-                    if (canReadValueChunk)
-                    {
-                      if (writeNodeBuffer == null)
-                      {
-                        writeNodeBuffer = new char[1024];
-                      }
-                      int count;
-                      while ((count = reader.ReadValueChunk(writeNodeBuffer, 0, 1024)) > 0)
-                      {
-                        xmlWriter.WriteChars(writeNodeBuffer, 0, count);
-                      }
-                    }
-                    else
-                    {
-                      xmlWriter.WriteString(reader.Value);
-                    }
-                    break;
-                  case XmlNodeType.CDATA:
-                    xmlWriter.WriteCData(reader.Value);
-                    break;
-                  case XmlNodeType.EntityReference:
-                    xmlWriter.WriteEntityRef(reader.Name);
-                    break;
-                  case XmlNodeType.ProcessingInstruction:
-                  case XmlNodeType.XmlDeclaration:
-                    xmlWriter.WriteProcessingInstruction(reader.Name, reader.Value);
-                    break;
-                  case XmlNodeType.Comment:
-                    xmlWriter.WriteComment(reader.Value);
-                    break;
-                  case XmlNodeType.DocumentType:
-                    xmlWriter.WriteDocType(reader.Name, reader.GetAttribute("PUBLIC"), reader.GetAttribute("SYSTEM"), reader.Value);
-                    break;
-                  case XmlNodeType.Whitespace:
-                  case XmlNodeType.SignificantWhitespace:
-                    xmlWriter.WriteWhitespace(reader.Value);
-                    break;
-                  case XmlNodeType.EndElement:
-                    xmlWriter.WriteFullEndElement();
-                    level--;
-                    break;
-                }
-              }
-
-              xmlWriter.Flush();
-            }
-            itemCount = levels.FirstOrDefault(i => i > 0);
-            return writer.ToString();
-          }
-        }
       }
     }
 
@@ -356,14 +279,12 @@ namespace Aras.Tools.InnovatorAdmin
     private EditorWindow NewWindow()
     {
       var window = new EditorWindow();
-      window.SetConnection(_connData, _proxy.Clone());
+      window.SetConnection(_proxy.Clone());
       return window;
     }
 
     private void Submit(string query)
     {
-      if (_proxy.Connection == null) return;
-
       if (_currentQuery != null)
       {
         _currentQuery.Cancel();
@@ -377,22 +298,9 @@ namespace Aras.Tools.InnovatorAdmin
         outputEditor.Text = "Processing...";
         lblItems.Text = "Processing...";
         btnSubmit.Text = "Cancel";
-        var _amlText = query;
 
-        if (_amlText.IndexOf("<AML>") < 0 && this.SoapAction == "ApplyAML")
-        {
-          _amlText = "<AML>" + _amlText + "</AML>";
-        }
-
-        var cmd = new Command(_amlText).WithAction(this.SoapAction);
-        var paramNames = new List<string>();
-        var subs = new ParameterSubstitution()
-        {
-          ParameterAccessListener = (n) => paramNames.Add(n)
-        };
-        subs.Substitute(_amlText, _proxy.Connection.AmlContext.LocalizationContext);
-
-        var queryParams = paramNames.Distinct().OrderBy(n => n)
+        var cmd = _proxy.NewCommand().WithQuery(query).WithAction(this.SoapAction);
+        var queryParams = _proxy.GetHelper().GetParameterNames(query)
           .Select(p => GetCreateParameter(p)).ToList();
         if (queryParams.Any())
         {
@@ -414,6 +322,7 @@ namespace Aras.Tools.InnovatorAdmin
           }
         }
 
+        _result = null;
         _outputTable = null;
         dgvItems.DataSource = null;
 
@@ -425,47 +334,33 @@ namespace Aras.Tools.InnovatorAdmin
         var st = Stopwatch.StartNew();
         _currentQuery = _proxy.Process(cmd, true)
           .UiPromise(this)
-          .Done(s =>
+          .Done(result =>
           {
             try
             {
               var milliseconds = st.ElapsedMilliseconds;
-              int itemCount = 0;
-              _outputXml = s.AsString();
-              string indented = _outputXml;
-              try
-              {
-                indented = IndentXml(indented, out itemCount);
-              }
-              catch (Exception ex)
-              {
-                MessageBox.Show(ex.Message);
-              }
 
-              if (itemCount > 0)
+              _result = result;
+              if (result.ItemCount > 0)
               {
-                lblItems.Text = string.Format("{0} item(s) found in {1} ms.", itemCount, milliseconds);
+                lblItems.Text = string.Format("{0} item(s) found in {1} ms.", result.ItemCount, milliseconds);
               }
               else
               {
                 lblItems.Text = string.Format("No items found in {0} ms.", milliseconds);
               }
-              outputEditor.Text = indented;
+              outputEditor.Text = result.GetText();
 
-              if (itemCount > 1 && outputEditor.Editor.LineCount > 100)
+              if (result.ItemCount > 1 && outputEditor.Editor.LineCount > 100)
               {
                 outputEditor.CollapseAll();
               }
 
+              tbcOutputView.SelectedTab = result.PreferTable ? pgTableOutput : pgAmlOutput;
               EnsureDataTable();
-              if (this.SoapAction == "ApplySQL")
-              {
-                tbcOutputView.SelectedTab = (_outputTable != null && _outputTable.Rows.Count > 1) 
-                  ? pgTableOutput : pgAmlOutput;
-              }
 
-              dgvItems.AllowUserToAddRows = _outputTable != null 
-                && _outputTable.Columns.Contains("id") 
+              dgvItems.AllowUserToAddRows = _outputTable != null
+                && _outputTable.Columns.Contains("id")
                 && _outputTable.Columns.Contains("type");
               dgvItems.AllowUserToDeleteRows = dgvItems.AllowUserToAddRows;
               dgvItems.ReadOnly = !dgvItems.AllowUserToAddRows;
@@ -505,8 +400,9 @@ namespace Aras.Tools.InnovatorAdmin
         using (var dialog = new ConnectionEditorForm())
         {
           dialog.Multiselect = false;
-          dialog.SetSelected(_connData);
-          if (dialog.ShowDialog(this, menuStrip.RectangleToScreen(btnEditConnections.Bounds)) == 
+          if (_proxy != null && _proxy.ConnData != null)
+            dialog.SetSelected(_proxy.ConnData);
+          if (dialog.ShowDialog(this, menuStrip.RectangleToScreen(btnEditConnections.Bounds)) ==
             System.Windows.Forms.DialogResult.OK)
           {
             SetConnection(dialog.SelectedConnections.First());
@@ -597,15 +493,24 @@ namespace Aras.Tools.InnovatorAdmin
 
     private void btnSoapAction_Click(object sender, EventArgs e)
     {
-      using (var dialog = new FilterSelect<string>())
+      try
       {
-        dialog.DataSource = _proxy.GetActions();
-        dialog.Message = "Select an action to perform";
-        if (dialog.ShowDialog(this, menuStrip.RectangleToScreen(btnSoapAction.Bounds)) == 
-          DialogResult.OK && dialog.SelectedItem != null)
+        if (_proxy == null) return;
+
+        using (var dialog = new FilterSelect<string>())
         {
-          this.SoapAction = dialog.SelectedItem;
+          dialog.DataSource = _proxy.GetActions();
+          dialog.Message = "Select an action to perform";
+          if (dialog.ShowDialog(this, menuStrip.RectangleToScreen(btnSoapAction.Bounds)) ==
+            DialogResult.OK && dialog.SelectedItem != null)
+          {
+            this.SoapAction = dialog.SelectedItem;
+          }
         }
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
       }
     }
 
@@ -826,7 +731,7 @@ namespace Aras.Tools.InnovatorAdmin
         {
           dialog.DataSource = TimeZoneInfo.GetSystemTimeZones().Select(t => t.Id).ToList();
           dialog.Message = "Select a time zone";
-          if (dialog.ShowDialog(this) == 
+          if (dialog.ShowDialog(this) ==
             DialogResult.OK && dialog.SelectedItem != null)
           {
             _timeZone = dialog.SelectedItem;
@@ -849,7 +754,7 @@ namespace Aras.Tools.InnovatorAdmin
           dialog.DataSource = CultureInfo.GetCultures(CultureTypes.SpecificCultures)
             .Select(c => c.Name).ToList();
           dialog.Message = "Select a locale";
-          if (dialog.ShowDialog(this) == 
+          if (dialog.ShowDialog(this) ==
             DialogResult.OK && dialog.SelectedItem != null)
           {
             _locale = dialog.SelectedItem;
@@ -898,6 +803,8 @@ namespace Aras.Tools.InnovatorAdmin
     {
       base.OnFormClosed(e);
       SaveFormBounds();
+      if (_proxy != null)
+        _proxy.Dispose();
     }
     protected override void OnMove(EventArgs e)
     {

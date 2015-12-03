@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.IO;
 
-namespace Aras.Tools.InnovatorAdmin
+namespace InnovatorAdmin
 {
   public class ClientInstall
   {

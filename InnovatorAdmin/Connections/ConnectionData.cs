@@ -4,15 +4,19 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
-using Aras.Tools.InnovatorAdmin;
+using InnovatorAdmin;
 using System.Security.Cryptography;
 using Innovator.Client;
 using System.Drawing;
 
-namespace Aras.Tools.InnovatorAdmin.Connections
+namespace InnovatorAdmin.Connections
 {
   public class ConnectionData : ICloneable, IXmlSerializable
   {
+    [DisplayName("Type")]
+    public ConnectionType Type { get; set; }
+    [DisplayName("Authentication")]
+    public Authentication Authentication { get; set; }
     [DisplayName("Connection Name")]
     public string ConnectionName { get; set; }
     [DisplayName("Database")]
@@ -26,6 +30,11 @@ namespace Aras.Tools.InnovatorAdmin.Connections
     [DisplayName("Color")]
     public Color Color { get; set; }
 
+    public ConnectionData()
+    {
+      this.Type = ConnectionType.Innovator;
+    }
+
     public ConnectionData Clone()
     {
       return new ConnectionData()
@@ -35,7 +44,9 @@ namespace Aras.Tools.InnovatorAdmin.Connections
         Password = this.Password,
         Url = this.Url,
         UserName = this.UserName,
-        Color = this.Color
+        Color = this.Color,
+        Type = this.Type,
+        Authentication = this.Authentication
       };
     }
 
@@ -63,6 +74,11 @@ namespace Aras.Tools.InnovatorAdmin.Connections
       {
         switch (reader.LocalName)
         {
+          case "Authentication":
+            Authentication newAuth;
+            if (Enum.TryParse<Authentication>(reader.ReadElementString(reader.LocalName), out newAuth))
+              this.Authentication = newAuth;
+            break;
           case "Color":
             this.Color = FromHex(reader.ReadElementString(reader.LocalName));
             break;
@@ -84,6 +100,11 @@ namespace Aras.Tools.InnovatorAdmin.Connections
             break;
           case "UserName":
             this.UserName = reader.ReadElementString(reader.LocalName);
+            break;
+          case "Type":
+            ConnectionType newType;
+            if (Enum.TryParse<ConnectionType>(reader.ReadElementString(reader.LocalName), out newType))
+              this.Type = newType;
             break;
           default:
             reader.ReadOuterXml();
@@ -108,6 +129,9 @@ namespace Aras.Tools.InnovatorAdmin.Connections
       writer.WriteElementString("Url", this.Url);
       writer.WriteElementString("UserName", this.UserName);
       writer.WriteElementString("Color", ToHex(this.Color));
+      writer.WriteElementString("Type", this.Type.ToString());
+      writer.WriteElementString("Authentication", this.Authentication.ToString());
+      writer.Flush();
     }
 
     #region New Encryption
@@ -133,7 +157,7 @@ namespace Aras.Tools.InnovatorAdmin.Connections
     }
     private string EncryptWindows(string data)
     {
-      return Convert.ToBase64String(ProtectedData.Protect(Encoding.ASCII.GetBytes(data), _salt, DataProtectionScope.CurrentUser));
+      return Convert.ToBase64String(ProtectedData.Protect(Encoding.ASCII.GetBytes(data ?? ""), _salt, DataProtectionScope.CurrentUser));
     }
     #endregion
     #region Old Encryption

@@ -7,7 +7,7 @@ using System.Xml.XPath;
 using System.Runtime.Serialization.Json;
 using System.Diagnostics;
 
-namespace Aras.Tools.InnovatorAdmin
+namespace InnovatorAdmin
 {
   public class Release
   {

@@ -1,4 +1,4 @@
-﻿namespace Aras.Tools.InnovatorAdmin.Controls
+﻿namespace InnovatorAdmin.Controls
 {
   partial class InstallSource
   {
@@ -77,7 +77,7 @@
       this.btnInnovatorPackage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.btnInnovatorPackage.AutoSize = true;
-      this.btnInnovatorPackage.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.innPkg32;
+      this.btnInnovatorPackage.Image = global::InnovatorAdmin.Properties.Resources.innPkg32;
       this.btnInnovatorPackage.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
       this.btnInnovatorPackage.Location = new System.Drawing.Point(69, 3);
       this.btnInnovatorPackage.MinimumSize = new System.Drawing.Size(120, 40);

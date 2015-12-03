@@ -1,4 +1,4 @@
-﻿namespace Aras.Tools.InnovatorAdmin.Controls
+﻿namespace InnovatorAdmin.Controls
 {
   partial class RecentlyModifiedSearch
   {
@@ -35,11 +35,11 @@
       this.label3 = new System.Windows.Forms.Label();
       this.label4 = new System.Windows.Forms.Label();
       this.lstItemTypes = new System.Windows.Forms.ListBox();
-      this.btnAddItemTypes = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnOk = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnCancel = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnAddItemTypes = new InnovatorAdmin.Controls.FlatButton();
+      this.btnOk = new InnovatorAdmin.Controls.FlatButton();
+      this.btnCancel = new InnovatorAdmin.Controls.FlatButton();
       this.nudDays = new System.Windows.Forms.NumericUpDown();
-      this.btnRemove = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnRemove = new InnovatorAdmin.Controls.FlatButton();
       this.tableLayoutPanel1.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.nudDays)).BeginInit();
       this.SuspendLayout();
@@ -151,7 +151,7 @@
       this.btnAddItemTypes.Size = new System.Drawing.Size(75, 27);
       this.btnAddItemTypes.TabIndex = 6;
       this.btnAddItemTypes.Text = "&Add";
-      this.btnAddItemTypes.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnAddItemTypes.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnAddItemTypes.UseVisualStyleBackColor = false;
       this.btnAddItemTypes.Click += new System.EventHandler(this.btnAddItemTypes_Click);
       //
@@ -171,7 +171,7 @@
       this.btnOk.Size = new System.Drawing.Size(75, 27);
       this.btnOk.TabIndex = 7;
       this.btnOk.Text = "&OK";
-      this.btnOk.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnOk.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnOk.UseVisualStyleBackColor = false;
       this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
       //
@@ -192,7 +192,7 @@
       this.btnCancel.Size = new System.Drawing.Size(75, 27);
       this.btnCancel.TabIndex = 8;
       this.btnCancel.Text = "&Cancel";
-      this.btnCancel.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnCancel.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnCancel.UseVisualStyleBackColor = false;
       //
       // nudDays
@@ -232,7 +232,7 @@
       this.btnRemove.Size = new System.Drawing.Size(75, 27);
       this.btnRemove.TabIndex = 10;
       this.btnRemove.Text = "&Remove";
-      this.btnRemove.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnRemove.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnRemove.UseVisualStyleBackColor = false;
       this.btnRemove.Click += new System.EventHandler(this.btnRemove_Click);
       //

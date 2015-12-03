@@ -16,7 +16,7 @@ using System.Xml;
 using System.Xml.XPath;
 using System.Linq;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
   /// <summary>
   /// Utility class that contains xml parsing routines used to determine

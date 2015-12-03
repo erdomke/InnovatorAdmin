@@ -12,7 +12,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Schema;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
   /// <summary>
   /// Holds the completion (intellisense) data for an xml schema.

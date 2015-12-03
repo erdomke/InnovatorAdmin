@@ -1,9 +1,9 @@
-﻿using Aras.Tools.InnovatorAdmin.Connections;
+﻿using InnovatorAdmin.Connections;
 using System;
 using System.IO;
 using System.Windows.Forms;
 
-namespace Aras.Tools.InnovatorAdmin
+namespace InnovatorAdmin
 {
   internal class ConnectionManager
   {

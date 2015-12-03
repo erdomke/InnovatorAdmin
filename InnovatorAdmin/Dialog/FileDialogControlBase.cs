@@ -31,7 +31,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Drawing.Drawing2D;
 
-namespace Aras.Tools.InnovatorAdmin.Dialog
+namespace InnovatorAdmin.Dialog
 {
   #region Base class
 

@@ -1,4 +1,4 @@
-﻿namespace Aras.Tools.InnovatorAdmin
+﻿namespace InnovatorAdmin
 {
   partial class MultiselectListBox
   {

@@ -8,7 +8,7 @@
 //using System.Xml;
 //using Innovator.Client;
 
-//namespace Aras.Tools.InnovatorAdmin
+//namespace InnovatorAdmin
 //{
 //  public class ImportProcessor : ICancelableProgressReporter
 //  {

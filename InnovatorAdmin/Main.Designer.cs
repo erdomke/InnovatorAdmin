@@ -1,4 +1,4 @@
-﻿namespace Aras.Tools.InnovatorAdmin
+﻿namespace InnovatorAdmin
 {
   partial class Main
   {
@@ -35,9 +35,9 @@
       this.lblLine = new System.Windows.Forms.Label();
       this.lblLine2 = new System.Windows.Forms.Label();
       this.lblVersion = new System.Windows.Forms.Label();
-      this.btnNext = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnPrevious = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnClose = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnNext = new InnovatorAdmin.Controls.FlatButton();
+      this.btnPrevious = new InnovatorAdmin.Controls.FlatButton();
+      this.btnClose = new InnovatorAdmin.Controls.FlatButton();
       this.tblLayout.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.picHome)).BeginInit();
       this.SuspendLayout();
@@ -87,7 +87,7 @@
       // 
       this.tblLayout.SetColumnSpan(this.picHome, 5);
       this.picHome.Cursor = System.Windows.Forms.Cursors.Hand;
-      this.picHome.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.Header;
+      this.picHome.Image = global::InnovatorAdmin.Properties.Resources.Header;
       this.picHome.Location = new System.Drawing.Point(8, 12);
       this.picHome.Margin = new System.Windows.Forms.Padding(8, 12, 3, 3);
       this.picHome.Name = "picHome";
@@ -144,7 +144,7 @@
       this.btnNext.Size = new System.Drawing.Size(75, 29);
       this.btnNext.TabIndex = 0;
       this.btnNext.Text = "&Next";
-      this.btnNext.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.Red;
+      this.btnNext.Theme = InnovatorAdmin.Controls.FlatButtonTheme.Red;
       this.btnNext.UseVisualStyleBackColor = false;
       this.btnNext.Click += new System.EventHandler(this.btnNext_Click);
       // 
@@ -163,7 +163,7 @@
       this.btnPrevious.Size = new System.Drawing.Size(75, 29);
       this.btnPrevious.TabIndex = 1;
       this.btnPrevious.Text = "&Previous";
-      this.btnPrevious.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnPrevious.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnPrevious.UseVisualStyleBackColor = true;
       this.btnPrevious.Click += new System.EventHandler(this.btnPrevious_Click);
       // 
@@ -182,7 +182,7 @@
       this.btnClose.Size = new System.Drawing.Size(75, 29);
       this.btnClose.TabIndex = 2;
       this.btnClose.Text = "&Close";
-      this.btnClose.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnClose.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnClose.UseVisualStyleBackColor = true;
       this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
       // 

@@ -7,7 +7,7 @@
 
 using System;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
 	/// <summary>
 	/// Represents the path to an xml element starting from the root of the

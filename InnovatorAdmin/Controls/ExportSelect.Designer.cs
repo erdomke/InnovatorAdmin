@@ -1,4 +1,4 @@
-﻿namespace Aras.Tools.InnovatorAdmin.Controls
+﻿namespace InnovatorAdmin.Controls
 {
   partial class ExportSelect
   {
@@ -39,22 +39,22 @@
       this.tbcSearch = new System.Windows.Forms.TabControl();
       this.pgSearchBy = new System.Windows.Forms.TabPage();
       this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-      this.btnDbPackage = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnPackageFile = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnItem = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnAmlStudio = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnDbPackage = new InnovatorAdmin.Controls.FlatButton();
+      this.btnPackageFile = new InnovatorAdmin.Controls.FlatButton();
+      this.btnItem = new InnovatorAdmin.Controls.FlatButton();
+      this.btnAmlStudio = new InnovatorAdmin.Controls.FlatButton();
       this.pgResults = new System.Windows.Forms.TabPage();
       this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
       this.txtFind = new System.Windows.Forms.TextBox();
-      this.btnFind = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnFind = new InnovatorAdmin.Controls.FlatButton();
       this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
-      this.btnSelectAll = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnSelect = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnUnselect = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnUnselectAll = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnSelectAll = new InnovatorAdmin.Controls.FlatButton();
+      this.btnSelect = new InnovatorAdmin.Controls.FlatButton();
+      this.btnUnselect = new InnovatorAdmin.Controls.FlatButton();
+      this.btnUnselectAll = new InnovatorAdmin.Controls.FlatButton();
       this.label2 = new System.Windows.Forms.Label();
       this.label3 = new System.Windows.Forms.Label();
-      this.btnAdvanced = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnAdvanced = new InnovatorAdmin.Controls.FlatButton();
       this.toolTipManager = new System.Windows.Forms.ToolTip(this.components);
       this.conStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
       this.mniHistory = new System.Windows.Forms.ToolStripMenuItem();
@@ -71,7 +71,7 @@
       this.mniLevels6 = new System.Windows.Forms.ToolStripMenuItem();
       this.mniLevels7 = new System.Windows.Forms.ToolStripMenuItem();
       this.mniLevels8 = new System.Windows.Forms.ToolStripMenuItem();
-      this.btnRecentlyModified = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnRecentlyModified = new InnovatorAdmin.Controls.FlatButton();
       ((System.ComponentModel.ISupportInitialize)(this.gridSelected)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.gridAvailable)).BeginInit();
       this.tableLayoutPanel1.SuspendLayout();
@@ -248,7 +248,7 @@
       this.btnDbPackage.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnDbPackage.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.btnDbPackage.ForeColor = System.Drawing.Color.Black;
-      this.btnDbPackage.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.packageDefinition;
+      this.btnDbPackage.Image = global::InnovatorAdmin.Properties.Resources.packageDefinition;
       this.btnDbPackage.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
       this.btnDbPackage.Location = new System.Drawing.Point(3, 3);
       this.btnDbPackage.Name = "btnDbPackage";
@@ -257,7 +257,7 @@
       this.btnDbPackage.TabIndex = 0;
       this.btnDbPackage.Text = "Package Definition (Db)";
       this.btnDbPackage.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-      this.btnDbPackage.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnDbPackage.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.toolTipManager.SetToolTip(this.btnDbPackage, "Use legacy Innovator package stored in source database.");
       this.btnDbPackage.UseVisualStyleBackColor = true;
       this.btnDbPackage.Click += new System.EventHandler(this.btnDbPackage_Click);
@@ -272,7 +272,7 @@
       this.btnPackageFile.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnPackageFile.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnPackageFile.ForeColor = System.Drawing.Color.Black;
-      this.btnPackageFile.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.innPkg32;
+      this.btnPackageFile.Image = global::InnovatorAdmin.Properties.Resources.innPkg32;
       this.btnPackageFile.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
       this.btnPackageFile.Location = new System.Drawing.Point(3, 79);
       this.btnPackageFile.Name = "btnPackageFile";
@@ -281,7 +281,7 @@
       this.btnPackageFile.TabIndex = 2;
       this.btnPackageFile.Text = "Innovator Package (File)";
       this.btnPackageFile.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-      this.btnPackageFile.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnPackageFile.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.toolTipManager.SetToolTip(this.btnPackageFile, "Use previously created Innovator package file (*.innpkg)");
       this.btnPackageFile.UseVisualStyleBackColor = true;
       this.btnPackageFile.Click += new System.EventHandler(this.btnPackageFile_Click);
@@ -296,7 +296,7 @@
       this.btnItem.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnItem.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnItem.ForeColor = System.Drawing.Color.Black;
-      this.btnItem.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.search32;
+      this.btnItem.Image = global::InnovatorAdmin.Properties.Resources.search32;
       this.btnItem.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
       this.btnItem.Location = new System.Drawing.Point(131, 3);
       this.btnItem.Name = "btnItem";
@@ -305,7 +305,7 @@
       this.btnItem.TabIndex = 1;
       this.btnItem.Text = "Search (Db)";
       this.btnItem.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-      this.btnItem.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnItem.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.toolTipManager.SetToolTip(this.btnItem, "Select items directly from source database.");
       this.btnItem.UseVisualStyleBackColor = true;
       this.btnItem.Click += new System.EventHandler(this.btnItem_Click);
@@ -320,7 +320,7 @@
       this.btnAmlStudio.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnAmlStudio.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnAmlStudio.ForeColor = System.Drawing.Color.Black;
-      this.btnAmlStudio.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.amlStudio32black;
+      this.btnAmlStudio.Image = global::InnovatorAdmin.Properties.Resources.amlStudio32black;
       this.btnAmlStudio.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
       this.btnAmlStudio.Location = new System.Drawing.Point(131, 79);
       this.btnAmlStudio.Name = "btnAmlStudio";
@@ -329,7 +329,7 @@
       this.btnAmlStudio.TabIndex = 4;
       this.btnAmlStudio.Text = "Advanced Search";
       this.btnAmlStudio.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-      this.btnAmlStudio.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnAmlStudio.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.toolTipManager.SetToolTip(this.btnAmlStudio, "Use previously created Innovator package file (*.innpkg)");
       this.btnAmlStudio.UseVisualStyleBackColor = true;
       this.btnAmlStudio.Click += new System.EventHandler(this.btnAmlStudio_Click);
@@ -388,7 +388,7 @@
       this.btnFind.Size = new System.Drawing.Size(51, 29);
       this.btnFind.TabIndex = 1;
       this.btnFind.Text = "Find";
-      this.btnFind.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnFind.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnFind.UseVisualStyleBackColor = true;
       this.btnFind.Click += new System.EventHandler(this.btnFind_Click);
       // 
@@ -420,13 +420,13 @@
       this.btnSelectAll.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnSelectAll.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnSelectAll.ForeColor = System.Drawing.Color.Black;
-      this.btnSelectAll.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.arrowRightAllSimpleBlack16;
+      this.btnSelectAll.Image = global::InnovatorAdmin.Properties.Resources.arrowRightAllSimpleBlack16;
       this.btnSelectAll.Location = new System.Drawing.Point(3, 105);
       this.btnSelectAll.Name = "btnSelectAll";
       this.btnSelectAll.Padding = new System.Windows.Forms.Padding(2);
       this.btnSelectAll.Size = new System.Drawing.Size(28, 28);
       this.btnSelectAll.TabIndex = 3;
-      this.btnSelectAll.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnSelectAll.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnSelectAll.UseVisualStyleBackColor = true;
       this.btnSelectAll.Click += new System.EventHandler(this.btnSelectAll_Click);
       // 
@@ -438,13 +438,13 @@
       this.btnSelect.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnSelect.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnSelect.ForeColor = System.Drawing.Color.Black;
-      this.btnSelect.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.arrowRightSimpleBlack16;
+      this.btnSelect.Image = global::InnovatorAdmin.Properties.Resources.arrowRightSimpleBlack16;
       this.btnSelect.Location = new System.Drawing.Point(3, 71);
       this.btnSelect.Name = "btnSelect";
       this.btnSelect.Padding = new System.Windows.Forms.Padding(2);
       this.btnSelect.Size = new System.Drawing.Size(28, 28);
       this.btnSelect.TabIndex = 2;
-      this.btnSelect.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnSelect.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnSelect.UseVisualStyleBackColor = true;
       this.btnSelect.Click += new System.EventHandler(this.btnSelect_Click);
       // 
@@ -456,13 +456,13 @@
       this.btnUnselect.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnUnselect.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnUnselect.ForeColor = System.Drawing.Color.Black;
-      this.btnUnselect.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.arrowLeftSimpleBlack16;
+      this.btnUnselect.Image = global::InnovatorAdmin.Properties.Resources.arrowLeftSimpleBlack16;
       this.btnUnselect.Location = new System.Drawing.Point(3, 37);
       this.btnUnselect.Name = "btnUnselect";
       this.btnUnselect.Padding = new System.Windows.Forms.Padding(2);
       this.btnUnselect.Size = new System.Drawing.Size(28, 28);
       this.btnUnselect.TabIndex = 1;
-      this.btnUnselect.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnUnselect.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnUnselect.UseVisualStyleBackColor = true;
       this.btnUnselect.Click += new System.EventHandler(this.btnUnselect_Click);
       // 
@@ -474,13 +474,13 @@
       this.btnUnselectAll.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnUnselectAll.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnUnselectAll.ForeColor = System.Drawing.Color.Black;
-      this.btnUnselectAll.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.arrowLeftAllSimpleBlack16;
+      this.btnUnselectAll.Image = global::InnovatorAdmin.Properties.Resources.arrowLeftAllSimpleBlack16;
       this.btnUnselectAll.Location = new System.Drawing.Point(3, 3);
       this.btnUnselectAll.Name = "btnUnselectAll";
       this.btnUnselectAll.Padding = new System.Windows.Forms.Padding(2);
       this.btnUnselectAll.Size = new System.Drawing.Size(28, 28);
       this.btnUnselectAll.TabIndex = 0;
-      this.btnUnselectAll.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnUnselectAll.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnUnselectAll.UseVisualStyleBackColor = true;
       this.btnUnselectAll.Click += new System.EventHandler(this.btnUnselectAll_Click);
       // 
@@ -522,7 +522,7 @@
       this.btnAdvanced.Size = new System.Drawing.Size(85, 27);
       this.btnAdvanced.TabIndex = 8;
       this.btnAdvanced.Text = "Advanced ▼";
-      this.btnAdvanced.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnAdvanced.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnAdvanced.UseVisualStyleBackColor = false;
       this.btnAdvanced.Click += new System.EventHandler(this.btnAdvanced_Click);
       // 
@@ -665,7 +665,7 @@
       this.btnRecentlyModified.TabIndex = 5;
       this.btnRecentlyModified.Text = "Recently Modified";
       this.btnRecentlyModified.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-      this.btnRecentlyModified.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnRecentlyModified.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.toolTipManager.SetToolTip(this.btnRecentlyModified, "Use previously created Innovator package file (*.innpkg)");
       this.btnRecentlyModified.UseVisualStyleBackColor = true;
       this.btnRecentlyModified.Click += new System.EventHandler(this.btnRecentlyModified_Click);

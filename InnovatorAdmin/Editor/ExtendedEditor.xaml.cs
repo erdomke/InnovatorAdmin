@@ -15,18 +15,27 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using io = System.IO;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
   /// <summary>
   /// Interaction logic for ExtendedEditor.xaml
   /// </summary>
   public partial class ExtendedEditor : UserControl
   {
+    private IEditorHelper _helper;
     private FoldingManager _foldingManager;
-    private AmlFoldingStrategy _foldingStrategy = new AmlFoldingStrategy();
-    private EditorMode _mode = EditorMode.Xml;
-
-    public IEditorHelper Helper { get; set; }
+    private IFoldingStrategy _foldingStrategy;
+    
+    public IEditorHelper Helper 
+    {
+      get { return _helper; }
+      set 
+      { 
+        _helper = value;
+        _foldingStrategy = value == null ? null : value.FoldingStrategy;
+        this.editor.SyntaxHighlighting = value == null ? null : value.GetHighlighting();
+      }
+    }
     public System.Windows.Forms.Control Host { get; set; }
 
     public ICSharpCode.AvalonEdit.TextEditor Editor
@@ -39,7 +48,6 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       InitializeComponent();
 
       _foldingManager = FoldingManager.Install(this.editor.TextArea);
-      _foldingStrategy.ShowAttributesWhenFolded = true;
       UpdateFoldings();
 
       var foldingUpdateTimer = new DispatcherTimer();
@@ -88,12 +96,8 @@ namespace Aras.Tools.InnovatorAdmin.Editor
 
     private void UpdateFoldings()
     {
-      switch (_mode)
-      {
-        case EditorMode.Xml:
-          _foldingStrategy.UpdateFoldings(_foldingManager, this.editor.Document);
-          break;
-      }
+      if (_foldingStrategy != null)
+        _foldingStrategy.UpdateFoldings(_foldingManager, this.editor.Document);
     }
 
     private void CollapseAll_Click(object sender, RoutedEventArgs e)

@@ -1,4 +1,4 @@
-﻿namespace Aras.Tools.InnovatorAdmin.Controls
+﻿namespace InnovatorAdmin.Controls
 {
   partial class ProgressStep<T>
   {
@@ -32,7 +32,7 @@
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
       this.lblMessage = new System.Windows.Forms.Label();
       this.progBar = new System.Windows.Forms.ProgressBar();
-      this.btnCancel = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnCancel = new InnovatorAdmin.Controls.FlatButton();
       this.tableLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
       // 
@@ -91,7 +91,7 @@
       this.btnCancel.Size = new System.Drawing.Size(75, 27);
       this.btnCancel.TabIndex = 2;
       this.btnCancel.Text = "Cancel";
-      this.btnCancel.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnCancel.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnCancel.UseVisualStyleBackColor = false;
       this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
       // 

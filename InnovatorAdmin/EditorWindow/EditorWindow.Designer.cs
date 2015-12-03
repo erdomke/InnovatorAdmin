@@ -1,4 +1,4 @@
-﻿namespace Aras.Tools.InnovatorAdmin
+﻿namespace InnovatorAdmin
 {
   partial class EditorWindow
   {
@@ -35,11 +35,11 @@
       this.lstItems = new System.Windows.Forms.ListBox();
       this.splitEditors = new System.Windows.Forms.SplitContainer();
       this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
-      this.inputEditor = new Aras.Tools.InnovatorAdmin.Editor.EditorControl();
+      this.inputEditor = new InnovatorAdmin.Editor.EditorControl();
       this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
       this.tbcOutputView = new System.Windows.Forms.TabControl();
       this.pgAmlOutput = new System.Windows.Forms.TabPage();
-      this.outputEditor = new Aras.Tools.InnovatorAdmin.Editor.EditorControl();
+      this.outputEditor = new InnovatorAdmin.Editor.EditorControl();
       this.pgTableOutput = new System.Windows.Forms.TabPage();
       this.dgvItems = new System.Windows.Forms.DataGridView();
       this.conTable = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -50,14 +50,14 @@
       this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
       this.mniAcceptChanges = new System.Windows.Forms.ToolStripMenuItem();
       this.mniResetChanges = new System.Windows.Forms.ToolStripMenuItem();
-      this.btnOk = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnCancel = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnOk = new InnovatorAdmin.Controls.FlatButton();
+      this.btnCancel = new InnovatorAdmin.Controls.FlatButton();
       this.lblItems = new System.Windows.Forms.Label();
       this.lblConnColor = new System.Windows.Forms.Label();
       this.menuStrip = new System.Windows.Forms.ToolStrip();
       this.lblConnection = new System.Windows.Forms.ToolStripLabel();
       this.btnEditConnections = new System.Windows.Forms.ToolStripButton();
-      this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
+      this.lblSoapAction = new System.Windows.Forms.ToolStripLabel();
       this.btnSoapAction = new System.Windows.Forms.ToolStripButton();
       this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
       this.toolStripDropDownButton2 = new System.Windows.Forms.ToolStripDropDownButton();
@@ -113,7 +113,7 @@
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel1.Size = new System.Drawing.Size(847, 605);
+      this.tableLayoutPanel1.Size = new System.Drawing.Size(701, 490);
       this.tableLayoutPanel1.TabIndex = 0;
       // 
       // splitMain
@@ -131,7 +131,7 @@
       // splitMain.Panel2
       // 
       this.splitMain.Panel2.Controls.Add(this.splitEditors);
-      this.splitMain.Size = new System.Drawing.Size(841, 559);
+      this.splitMain.Size = new System.Drawing.Size(695, 444);
       this.splitMain.SplitterDistance = 164;
       this.splitMain.TabIndex = 0;
       // 
@@ -159,8 +159,8 @@
       // splitEditors.Panel2
       // 
       this.splitEditors.Panel2.Controls.Add(this.tableLayoutPanel2);
-      this.splitEditors.Size = new System.Drawing.Size(841, 559);
-      this.splitEditors.SplitterDistance = 173;
+      this.splitEditors.Size = new System.Drawing.Size(695, 444);
+      this.splitEditors.SplitterDistance = 137;
       this.splitEditors.TabIndex = 0;
       // 
       // tableLayoutPanel3
@@ -176,7 +176,7 @@
       this.tableLayoutPanel3.RowCount = 2;
       this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-      this.tableLayoutPanel3.Size = new System.Drawing.Size(841, 173);
+      this.tableLayoutPanel3.Size = new System.Drawing.Size(695, 137);
       this.tableLayoutPanel3.TabIndex = 1;
       // 
       // inputEditor
@@ -187,9 +187,9 @@
       this.inputEditor.Location = new System.Drawing.Point(3, 3);
       this.inputEditor.Name = "inputEditor";
       this.inputEditor.ReadOnly = false;
-      this.inputEditor.Size = new System.Drawing.Size(835, 167);
+      this.inputEditor.Size = new System.Drawing.Size(689, 131);
       this.inputEditor.TabIndex = 0;
-      this.inputEditor.RunRequested += new System.EventHandler<Aras.Tools.InnovatorAdmin.Editor.RunRequestedEventArgs>(this.inputEditor_RunRequested);
+      this.inputEditor.RunRequested += new System.EventHandler<InnovatorAdmin.Editor.RunRequestedEventArgs>(this.inputEditor_RunRequested);
       // 
       // tableLayoutPanel2
       // 
@@ -205,7 +205,7 @@
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-      this.tableLayoutPanel2.Size = new System.Drawing.Size(841, 382);
+      this.tableLayoutPanel2.Size = new System.Drawing.Size(695, 303);
       this.tableLayoutPanel2.TabIndex = 0;
       // 
       // tbcOutputView
@@ -221,7 +221,7 @@
       this.tbcOutputView.Name = "tbcOutputView";
       this.tbcOutputView.Padding = new System.Drawing.Point(0, 0);
       this.tbcOutputView.SelectedIndex = 0;
-      this.tbcOutputView.Size = new System.Drawing.Size(841, 382);
+      this.tbcOutputView.Size = new System.Drawing.Size(695, 303);
       this.tbcOutputView.TabIndex = 5;
       this.tbcOutputView.SelectedIndexChanged += new System.EventHandler(this.tbcOutputView_SelectedIndexChanged);
       // 
@@ -230,7 +230,7 @@
       this.pgAmlOutput.Controls.Add(this.outputEditor);
       this.pgAmlOutput.Location = new System.Drawing.Point(4, 22);
       this.pgAmlOutput.Name = "pgAmlOutput";
-      this.pgAmlOutput.Size = new System.Drawing.Size(833, 356);
+      this.pgAmlOutput.Size = new System.Drawing.Size(687, 277);
       this.pgAmlOutput.TabIndex = 0;
       this.pgAmlOutput.Text = "AML";
       this.pgAmlOutput.UseVisualStyleBackColor = true;
@@ -242,7 +242,7 @@
       this.outputEditor.Location = new System.Drawing.Point(0, 0);
       this.outputEditor.Name = "outputEditor";
       this.outputEditor.ReadOnly = false;
-      this.outputEditor.Size = new System.Drawing.Size(833, 356);
+      this.outputEditor.Size = new System.Drawing.Size(687, 277);
       this.outputEditor.TabIndex = 0;
       // 
       // pgTableOutput
@@ -337,13 +337,13 @@
       this.btnOk.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnOk.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnOk.ForeColor = System.Drawing.Color.Black;
-      this.btnOk.Location = new System.Drawing.Point(688, 573);
+      this.btnOk.Location = new System.Drawing.Point(542, 458);
       this.btnOk.Name = "btnOk";
       this.btnOk.Padding = new System.Windows.Forms.Padding(2);
       this.btnOk.Size = new System.Drawing.Size(75, 29);
       this.btnOk.TabIndex = 1;
       this.btnOk.Text = "&OK";
-      this.btnOk.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnOk.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnOk.UseVisualStyleBackColor = true;
       this.btnOk.Visible = false;
       // 
@@ -357,21 +357,22 @@
       this.btnCancel.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnCancel.ForeColor = System.Drawing.Color.Black;
-      this.btnCancel.Location = new System.Drawing.Point(769, 573);
+      this.btnCancel.Location = new System.Drawing.Point(623, 458);
       this.btnCancel.Name = "btnCancel";
       this.btnCancel.Padding = new System.Windows.Forms.Padding(2);
       this.btnCancel.Size = new System.Drawing.Size(75, 29);
       this.btnCancel.TabIndex = 2;
       this.btnCancel.Text = "&Cancel";
-      this.btnCancel.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnCancel.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnCancel.UseVisualStyleBackColor = true;
       this.btnCancel.Visible = false;
       // 
       // lblItems
       // 
-      this.lblItems.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+      this.lblItems.Anchor = System.Windows.Forms.AnchorStyles.Left;
+      this.lblItems.AutoEllipsis = true;
       this.lblItems.AutoSize = true;
-      this.lblItems.Location = new System.Drawing.Point(3, 583);
+      this.lblItems.Location = new System.Drawing.Point(3, 463);
       this.lblItems.Margin = new System.Windows.Forms.Padding(3, 3, 3, 9);
       this.lblItems.Name = "lblItems";
       this.lblItems.Size = new System.Drawing.Size(0, 13);
@@ -385,7 +386,7 @@
       this.lblConnColor.Location = new System.Drawing.Point(0, 0);
       this.lblConnColor.Margin = new System.Windows.Forms.Padding(0);
       this.lblConnColor.Name = "lblConnColor";
-      this.lblConnColor.Size = new System.Drawing.Size(847, 5);
+      this.lblConnColor.Size = new System.Drawing.Size(701, 5);
       this.lblConnColor.TabIndex = 4;
       // 
       // menuStrip
@@ -394,7 +395,7 @@
       this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.lblConnection,
             this.btnEditConnections,
-            this.toolStripLabel2,
+            this.lblSoapAction,
             this.btnSoapAction,
             this.toolStripSeparator2,
             this.toolStripDropDownButton2,
@@ -402,7 +403,7 @@
             this.btnSubmit});
       this.menuStrip.Location = new System.Drawing.Point(0, 0);
       this.menuStrip.Name = "menuStrip";
-      this.menuStrip.Size = new System.Drawing.Size(847, 25);
+      this.menuStrip.Size = new System.Drawing.Size(701, 25);
       this.menuStrip.TabIndex = 1;
       this.menuStrip.Text = "toolStrip1";
       // 
@@ -423,13 +424,13 @@
       this.btnEditConnections.Text = "Change";
       this.btnEditConnections.Click += new System.EventHandler(this.btnEditConnections_Click);
       // 
-      // toolStripLabel2
+      // lblSoapAction
       // 
-      this.toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.toolStripLabel2.ForeColor = System.Drawing.Color.DimGray;
-      this.toolStripLabel2.Name = "toolStripLabel2";
-      this.toolStripLabel2.Size = new System.Drawing.Size(43, 22);
-      this.toolStripLabel2.Text = "Action:";
+      this.lblSoapAction.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.lblSoapAction.ForeColor = System.Drawing.Color.DimGray;
+      this.lblSoapAction.Name = "lblSoapAction";
+      this.lblSoapAction.Size = new System.Drawing.Size(43, 22);
+      this.lblSoapAction.Text = "Action:";
       // 
       // btnSoapAction
       // 
@@ -583,7 +584,7 @@
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.BackColor = System.Drawing.Color.White;
       this.CancelButton = this.btnCancel;
-      this.ClientSize = new System.Drawing.Size(847, 630);
+      this.ClientSize = new System.Drawing.Size(701, 515);
       this.Controls.Add(this.tableLayoutPanel1);
       this.Controls.Add(this.menuStrip);
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -620,9 +621,9 @@
     private System.Windows.Forms.SplitContainer splitMain;
     private System.Windows.Forms.ListBox lstItems;
     private System.Windows.Forms.SplitContainer splitEditors;
-    private Aras.Tools.InnovatorAdmin.Editor.EditorControl inputEditor;
+    private InnovatorAdmin.Editor.EditorControl inputEditor;
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
-    private Aras.Tools.InnovatorAdmin.Editor.EditorControl outputEditor;
+    private InnovatorAdmin.Editor.EditorControl outputEditor;
     private Controls.FlatButton btnOk;
     private Controls.FlatButton btnCancel;
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
@@ -645,7 +646,7 @@
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
     private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
     private System.Windows.Forms.ToolStripMenuItem mniTidyXml;
-    private System.Windows.Forms.ToolStripLabel toolStripLabel2;
+    private System.Windows.Forms.ToolStripLabel lblSoapAction;
     private System.Windows.Forms.ToolStripButton btnSoapAction;
     private System.Windows.Forms.ToolStripSplitButton btnSubmit;
     private System.Windows.Forms.ToolStripMenuItem mniRunAll;

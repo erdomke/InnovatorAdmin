@@ -8,7 +8,7 @@ using System.IO;
 using System.Diagnostics;
 using Innovator.Client;
 
-namespace Aras.Tools.InnovatorAdmin
+namespace InnovatorAdmin
 {
   public class ExportProcessor : IProgressReporter
   {
@@ -641,7 +641,7 @@ namespace Aras.Tools.InnovatorAdmin
       if (_resultTransform == null)
       {
         _resultTransform = new XslCompiledTransform();
-        using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("Aras.Tools.InnovatorAdmin.Export.ExportResult.xslt"))
+        using (Stream stream = this.GetType().Assembly.GetManifestResourceStream("InnovatorAdmin.Export.ExportResult.xslt"))
         {
           using (var xslt = XmlReader.Create(stream))
           {

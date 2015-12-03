@@ -6,7 +6,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace Aras.Tools.InnovatorAdmin.Connections
+namespace InnovatorAdmin.Connections
 {
   public class ConnectionLibrary
   {

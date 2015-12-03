@@ -1,4 +1,4 @@
-﻿namespace Aras.Tools.InnovatorAdmin
+﻿namespace InnovatorAdmin
 {
   partial class ConnectionEditorForm
   {
@@ -30,9 +30,9 @@
     {
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ConnectionEditorForm));
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-      this.btnClose = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.connectionEditor = new Aras.Tools.InnovatorAdmin.ConnectionEditor();
-      this.btnOk = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnClose = new InnovatorAdmin.Controls.FlatButton();
+      this.connectionEditor = new InnovatorAdmin.ConnectionEditor();
+      this.btnOk = new InnovatorAdmin.Controls.FlatButton();
       this.tableLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
       // 
@@ -51,7 +51,7 @@
       this.tableLayoutPanel1.RowCount = 2;
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel1.Size = new System.Drawing.Size(524, 249);
+      this.tableLayoutPanel1.Size = new System.Drawing.Size(597, 235);
       this.tableLayoutPanel1.TabIndex = 0;
       // 
       // btnClose
@@ -64,14 +64,14 @@
       this.btnClose.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnClose.ForeColor = System.Drawing.Color.Black;
-      this.btnClose.Location = new System.Drawing.Point(446, 217);
+      this.btnClose.Location = new System.Drawing.Point(519, 203);
       this.btnClose.MinimumSize = new System.Drawing.Size(75, 0);
       this.btnClose.Name = "btnClose";
       this.btnClose.Padding = new System.Windows.Forms.Padding(2);
       this.btnClose.Size = new System.Drawing.Size(75, 29);
       this.btnClose.TabIndex = 2;
       this.btnClose.Text = "&Cancel";
-      this.btnClose.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnClose.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnClose.UseVisualStyleBackColor = false;
       // 
       // connectionEditor
@@ -83,7 +83,7 @@
       this.connectionEditor.MinimumSize = new System.Drawing.Size(425, 170);
       this.connectionEditor.MultiSelect = false;
       this.connectionEditor.Name = "connectionEditor";
-      this.connectionEditor.Size = new System.Drawing.Size(524, 214);
+      this.connectionEditor.Size = new System.Drawing.Size(597, 200);
       this.connectionEditor.TabIndex = 0;
       // 
       // btnOk
@@ -95,14 +95,14 @@
       this.btnOk.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(119)))), ((int)(((byte)(3)))), ((int)(((byte)(32)))));
       this.btnOk.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnOk.ForeColor = System.Drawing.Color.White;
-      this.btnOk.Location = new System.Drawing.Point(365, 217);
+      this.btnOk.Location = new System.Drawing.Point(438, 203);
       this.btnOk.MinimumSize = new System.Drawing.Size(75, 0);
       this.btnOk.Name = "btnOk";
       this.btnOk.Padding = new System.Windows.Forms.Padding(2);
       this.btnOk.Size = new System.Drawing.Size(75, 29);
       this.btnOk.TabIndex = 1;
       this.btnOk.Text = "&OK";
-      this.btnOk.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.Red;
+      this.btnOk.Theme = InnovatorAdmin.Controls.FlatButtonTheme.Red;
       this.btnOk.UseVisualStyleBackColor = false;
       this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
       // 
@@ -112,7 +112,7 @@
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.CancelButton = this.btnClose;
-      this.ClientSize = new System.Drawing.Size(524, 249);
+      this.ClientSize = new System.Drawing.Size(597, 235);
       this.Controls.Add(this.tableLayoutPanel1);
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.Name = "ConnectionEditorForm";
@@ -128,8 +128,8 @@
     #endregion
 
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-    private Aras.Tools.InnovatorAdmin.Controls.FlatButton btnClose;
+    private InnovatorAdmin.Controls.FlatButton btnClose;
     private ConnectionEditor connectionEditor;
-    private Aras.Tools.InnovatorAdmin.Controls.FlatButton btnOk;
+    private InnovatorAdmin.Controls.FlatButton btnOk;
   }
 }

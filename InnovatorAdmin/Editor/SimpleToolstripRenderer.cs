@@ -5,7 +5,7 @@ using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace Aras.Tools.InnovatorAdmin
+namespace InnovatorAdmin
 {
   public class SimpleToolstripRenderer
     : System.Windows.Forms.ToolStripProfessionalRenderer

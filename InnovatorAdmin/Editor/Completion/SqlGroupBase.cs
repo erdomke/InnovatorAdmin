@@ -4,14 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
-  public interface ISearchableSqlNode
+  public interface ISqlGroupNode
   {
     SqlNode NodeByOffset(int offset);
+    IEnumerable<SqlNode> Items { get; }
   }
 
-  public class SqlGroupBase<T> : SqlNode, ICollection<T>, ISearchableSqlNode where T : SqlNode
+  public class SqlGroupBase<T> : SqlNode, ICollection<T>, ISqlGroupNode where T : SqlNode
   {
     private List<T> _nodes = new List<T>();
 
@@ -36,7 +37,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       if (offset < this.StartOffset) return null;
       var i = _nodes.Count - 1;
       while (i >= 0 && offset < _nodes[i].StartOffset) i--;
-      var searchable = _nodes[i] as ISearchableSqlNode;
+      var searchable = _nodes[i] as ISqlGroupNode;
       if (searchable == null) return _nodes[i];
       return searchable.NodeByOffset(offset);
     }
@@ -89,6 +90,11 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     public override string ToString()
     {
       return _nodes.GroupConcat(" ", n => n.ToString());
+    }
+
+    public IEnumerable<SqlNode> Items
+    {
+      get { return this.OfType<SqlNode>(); }
     }
   }
 }

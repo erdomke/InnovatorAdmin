@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Aras.Tools.InnovatorAdmin.Dialog
+namespace InnovatorAdmin.Dialog
 {
   public class ImportSelectDialog : FileDialogControlBase
   {
@@ -108,7 +108,7 @@ namespace Aras.Tools.InnovatorAdmin.Dialog
       this.DefaultExtension = "";
       this.Name = "ImportSelectDialog";
       this.Size = new System.Drawing.Size(553, 32);
-      this.StartLocation = Aras.Tools.InnovatorAdmin.Dialog.AddonWindowLocation.Bottom;
+      this.StartLocation = InnovatorAdmin.Dialog.AddonWindowLocation.Bottom;
       this.ResumeLayout(false);
       this.PerformLayout();
 

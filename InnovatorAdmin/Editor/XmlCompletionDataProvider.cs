@@ -15,7 +15,7 @@ using System.Xml;
 using System.Xml.Schema;
 using System.Linq;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
   /// <summary>
   /// Provides the autocomplete (intellisense) data for an
@@ -26,7 +26,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     //public static XmlCompletionDataProvider FromResource(string path)
     //{
     //  var schema = new XmlSchema();
-    //  using (Stream stream = typeof(XmlCompletionDataProvider).Assembly.GetManifestResourceStream("Aras.Tools.InnovatorAdmin.Editor." + path))
+    //  using (Stream stream = typeof(XmlCompletionDataProvider).Assembly.GetManifestResourceStream("InnovatorAdmin.Editor." + path))
     //  {
     //    using (var reader = XmlReader.Create(stream))
     //    {
@@ -219,6 +219,27 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       }
 
       return completionData;
+    }
+
+    public IEnumerable<string> GetParameterNames(string query)
+    {
+      return Enumerable.Empty<string>();
+    }
+
+    public IFoldingStrategy FoldingStrategy
+    {
+      get { return null; }
+    }
+
+    public ICSharpCode.AvalonEdit.Highlighting.IHighlightingDefinition GetHighlighting()
+    {
+      return null;
+    }
+
+
+    public Innovator.Client.IPromise<CompletionContext> ShowCompletions(EditorControl control)
+    {
+      throw new NotImplementedException();
     }
   }
 }

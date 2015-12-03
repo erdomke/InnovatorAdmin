@@ -15,7 +15,7 @@ using Mvp.Xml.Exslt;
 using System.Threading.Tasks;
 using Innovator.Client;
 
-namespace Aras.Tools.InnovatorAdmin
+namespace InnovatorAdmin
 {
   public class ArasXsltExtensions
   {

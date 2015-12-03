@@ -9,7 +9,7 @@ using ICSharpCode.AvalonEdit.CodeCompletion;
 using System;
 using System.Collections;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
 	/// <summary>
 	///   A collection that stores <see cref='XmlCompletionData'/> objects.

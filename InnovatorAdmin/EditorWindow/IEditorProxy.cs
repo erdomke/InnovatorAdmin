@@ -3,14 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Innovator.Client;
+using InnovatorAdmin.Editor;
+using InnovatorAdmin.Connections;
 
-namespace Aras.Tools.InnovatorAdmin
+namespace InnovatorAdmin
 {
-  public interface IEditorProxy
+  public interface IEditorProxy : IDisposable
   {
-    IAsyncConnection Connection { get; set; }
-    IEnumerable<string> GetActions();
-    IPromise<System.IO.Stream> Process(Command request, bool async);
+    string Action { get; set; }
+    ConnectionData ConnData { get; }
+    string Name { get; }
+
     IEditorProxy Clone();
+    IEnumerable<string> GetActions();
+    IEditorHelper GetHelper();
+    ICommand NewCommand();
+    IPromise<IResultObject> Process(ICommand request, bool async);
   }
 }

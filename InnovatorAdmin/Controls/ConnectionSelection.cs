@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
-using Aras.Tools.InnovatorAdmin.Connections;
+using InnovatorAdmin.Connections;
 
-namespace Aras.Tools.InnovatorAdmin.Controls
+namespace InnovatorAdmin.Controls
 {
   public partial class ConnectionSelection : UserControl, IWizardStep
   {

@@ -8,7 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Threading;
 
-namespace Aras.Tools.InnovatorAdmin.Controls
+namespace InnovatorAdmin.Controls
 {
   public partial class ProgressStep<T> : UserControl, IWizardStep, IProgessStep where T : IProgressReporter
   {

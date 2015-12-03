@@ -15,7 +15,7 @@ using System.Text;
 // 
 // Copyright (C) 2002 Obviex(TM). All rights reserved.
 //http://www.obviex.com/samples/Encryption.aspx
-namespace Aras.Tools.InnovatorAdmin.Connections
+namespace InnovatorAdmin.Connections
 {
   /// <summary>
   /// This class uses a symmetric key algorithm (Rijndael/AES) to encrypt and 

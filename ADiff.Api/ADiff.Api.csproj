@@ -45,6 +45,8 @@
     <Compile Include="Diff.cs" />
     <Compile Include="DiffMatchPatch.cs" />
     <Compile Include="ElementWriter.cs" />
+    <Compile Include="FileStatus.cs" />
+    <Compile Include="FolderMerge.cs" />
     <Compile Include="LineWriter.cs" />
     <Compile Include="ListCompare.cs" />
     <Compile Include="MergeAlternate.cs" />

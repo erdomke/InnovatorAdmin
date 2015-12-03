@@ -8,7 +8,7 @@
 using System;
 using System.Xml;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
 	/// <summary>
 	/// An <see cref="XmlQualifiedName"/> with the namespace prefix.

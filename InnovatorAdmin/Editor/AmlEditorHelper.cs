@@ -1,6 +1,7 @@
 ﻿using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
+using ICSharpCode.AvalonEdit.Highlighting;
 using Innovator.Client;
 using System;
 using System.Collections.Generic;
@@ -8,17 +9,23 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
   public class AmlEditorHelper : CompletionHelper, IEditorHelper
   {
     private bool _isInitialized = false;
+    private AmlFoldingStrategy _foldingStrategy = new AmlFoldingStrategy();
 
+    public IFoldingStrategy FoldingStrategy
+    {
+      get { return _foldingStrategy; }
+    }
     public string SoapAction { get; set; }
 
     public AmlEditorHelper()
     {
       this.SoapAction = "ApplyAML";
+      _foldingStrategy.ShowAttributesWhenFolded = true;
     }
 
     public override void InitializeConnection(IAsyncConnection conn)
@@ -70,7 +77,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       }
     }
 
-    private IPromise<CompletionData> ShowCompletions(EditorControl control)
+    public IPromise<CompletionContext> ShowCompletions(EditorControl control)
     {
       var length = control.Editor.Document.TextLength;
       var caret = control.Editor.CaretOffset;
@@ -95,7 +102,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
                 case CompletionType.AttributeValue:
                   return new AttributeValueCompletionData(c, data.MultiValueAttribute);
                 case CompletionType.SqlGeneral:
-                  return new SqlGeneral(c);
+                  return new SqlGeneralCompletionData(c);
                 case CompletionType.SqlObjectName:
                   return new SqlObjectCompletionData(c, this, control);
               }
@@ -132,45 +139,6 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       }
     }
 
-    private class SqlObjectCompletionData : BasicCompletionData
-    {
-      private AmlEditorHelper _parent;
-      private EditorControl _control;
-
-
-      public SqlObjectCompletionData(string text, AmlEditorHelper parent, EditorControl control)
-        : base(text)
-      {
-        _parent = parent;
-        _control = control;
-      }
-
-      public override void Complete(TextArea textArea, ISegment completionSegment, EventArgs insertionRequestEventArgs)
-      {
-        if (this.Text.Equals("innovator", StringComparison.OrdinalIgnoreCase))
-        {
-          textArea.Document.Replace(completionSegment, "innovator.");
-          _parent.ShowCompletions(_control);
-        }
-        else
-        {
-          if (textArea.Document.Text.Substring(0, completionSegment.Offset).EndsWith("innovator.", StringComparison.OrdinalIgnoreCase))
-          {
-            textArea.Document.Replace(completionSegment, "[" + this.Text + "]");
-          }
-          else
-          {
-            textArea.Document.Replace(completionSegment, "innovator.[" + this.Text + "]");
-          }
-        }
-      }
-    }
-
-    internal class SqlGeneral : BasicCompletionData
-    {
-      public SqlGeneral(string text) : base(text) { }
-    }
-
     private class AttributeValueCompletionData : BasicCompletionData
     {
 
@@ -197,6 +165,39 @@ namespace Aras.Tools.InnovatorAdmin.Editor
           }
         }
       }
+    }
+
+    public IEnumerable<string> GetParameterNames(string query)
+    {
+      var paramNames = new List<string>();
+      var subs = new ParameterSubstitution()
+      {
+        ParameterAccessListener = (n) => paramNames.Add(n)
+      };
+      subs.Substitute(query, _conn.AmlContext.LocalizationContext);
+
+      return paramNames.Distinct().OrderBy(n => n);
+    }
+
+    private static IHighlightingDefinition _highlighter;
+
+    static AmlEditorHelper()
+    {
+      using (var stream = System.Reflection.Assembly.GetExecutingAssembly()
+        .GetManifestResourceStream("InnovatorAdmin.resources.Aml.xshd"))
+      {
+        using (var reader = new System.Xml.XmlTextReader(stream))
+        {
+          _highlighter =
+              ICSharpCode.AvalonEdit.Highlighting.Xshd.HighlightingLoader.Load(reader,
+              ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance);
+        }
+      }
+    }
+
+    public IHighlightingDefinition GetHighlighting()
+    {
+      return _highlighter;
     }
   }
 }

@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-using Aras.Tools.InnovatorAdmin;
+using InnovatorAdmin;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using prop = global::InnovatorAdmin.ApiTests.Properties;
 
-namespace Aras.Tools.InnovatorAdmin.Tests
+namespace InnovatorAdmin.Tests
 {
   [TestClass()]
   public class UtilsTests

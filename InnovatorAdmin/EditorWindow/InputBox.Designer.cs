@@ -1,4 +1,4 @@
-﻿namespace Aras.Tools.InnovatorAdmin
+﻿namespace InnovatorAdmin
 {
   partial class InputBox
   {
@@ -31,8 +31,8 @@
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
       this.txtInput = new System.Windows.Forms.TextBox();
       this.lblMessage = new System.Windows.Forms.Label();
-      this.btnOk = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnCancel = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnOk = new InnovatorAdmin.Controls.FlatButton();
+      this.btnCancel = new InnovatorAdmin.Controls.FlatButton();
       this.tableLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
       //
@@ -93,7 +93,7 @@
       this.btnOk.Size = new System.Drawing.Size(75, 27);
       this.btnOk.TabIndex = 2;
       this.btnOk.Text = "&OK";
-      this.btnOk.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnOk.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnOk.UseVisualStyleBackColor = false;
       //
       // btnCancel
@@ -112,7 +112,7 @@
       this.btnCancel.Size = new System.Drawing.Size(75, 27);
       this.btnCancel.TabIndex = 3;
       this.btnCancel.Text = "&Cancel";
-      this.btnCancel.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnCancel.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnCancel.UseVisualStyleBackColor = false;
       //
       // InputBox

@@ -1,4 +1,4 @@
-﻿using Aras.Tools.InnovatorAdmin.Connections;
+﻿using InnovatorAdmin.Connections;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +9,7 @@ using Innovator.Client;
 using System.Reflection;
 using System.Drawing;
 
-namespace Aras.Tools.InnovatorAdmin
+namespace InnovatorAdmin
 {
   public partial class Main : Form, IWizard
   {

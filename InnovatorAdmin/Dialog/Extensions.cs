@@ -24,7 +24,7 @@ using System.Windows.Forms;
 using System.ComponentModel;
 using Microsoft.Win32;
 
-namespace Aras.Tools.InnovatorAdmin.Dialog
+namespace InnovatorAdmin.Dialog
 {
   public static class Extensions
   {

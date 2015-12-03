@@ -1,4 +1,4 @@
-﻿namespace Aras.Tools.InnovatorAdmin.Controls
+﻿namespace InnovatorAdmin.Controls
 {
   partial class ConnectionSelection
   {
@@ -29,7 +29,7 @@
     private void InitializeComponent()
     {
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-      this.connEditor = new Aras.Tools.InnovatorAdmin.ConnectionEditor();
+      this.connEditor = new InnovatorAdmin.ConnectionEditor();
       this.tableLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
       // 

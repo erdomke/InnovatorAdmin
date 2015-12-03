@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
   public class SqlTokenizer : IEnumerable<SqlNode>
   {
@@ -563,20 +563,40 @@ namespace Aras.Tools.InnovatorAdmin.Editor
           }
         }
         groups.Peek().Add(node);
-        if (literal != null
-          && (literal.Text == ")"
-            || literal.Text == ";"
-            || literal.Text.Equals("end", StringComparison.OrdinalIgnoreCase)))
+        if (literal != null)
         {
-          var child = groups.Pop();
-          if (!groups.Any()) groups.Push(new SqlGroup());
-          groups.Peek().Add(child);
+          if (literal.Text == ")"
+            || literal.Text.Equals("end", StringComparison.OrdinalIgnoreCase))
+          {
+            var child = groups.Pop();
+            if (!groups.Any()) groups.Push(new SqlGroup());
+            groups.Peek().Add(child);
+          }
+          else if (literal.Text == ";")
+          {
+            var child = groups.Pop();
+            if (!groups.Any())
+            {
+              groups.Push(new SqlGroup());
+              groups.Peek().Add(child);
+            }
+
+            child = new SqlGroup();
+            groups.Peek().Add(child);
+            groups.Push(child);
+          }
         }
       }
 
       var result = groups.Pop();
+      if (result.Count < 1 && groups.Any())
+        result = groups.Pop();
       if (result.Count == 1 && result[0] is SqlGroup)
         result = result[0] as SqlGroup;
+      else if (result.Any() && result.Last() is SqlGroup && !((SqlGroup)result.Last()).Any()) 
+      {
+        result.Remove(result.Last());
+      }
       return result;
     }
   }

@@ -13,10 +13,12 @@ using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using System.Globalization;
 using System.IO;
-using System.Xml.XPath;
 using System.Xml;
+using GotDotNet.XPath;
+using Mvp.Xml.XPointer;
+using System.Xml.XPath;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
   public partial class FindReplace : Form
   {
@@ -26,6 +28,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     private SearchMode _mode = SearchMode.Normal;
     private bool _programChangingCheckState;
     private TextDocument _currentDoc;
+    private Control _positionParent;
 
     public enum SearchMode
     {
@@ -47,10 +50,32 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       this.Icon = (this.Owner ?? Application.OpenForms[0]).Icon;
 
       _editor = editor.Editor;
+      _positionParent = editor;
       _renderer = new SearchResultBackgroundRenderer();
 
       txtFind.TextChanged += txtFind_TextChanged;
       DisplayReplace(false);
+
+      this.StartPosition = FormStartPosition.Manual;
+
+      var offset = Properties.Settings.Default.FindReplace_Location;
+      if (offset == Point.Empty)
+      {
+        offset = new Point(editor.Width - this.DesktopBounds.Width, 0);
+      }
+
+      SearchMode newMode;
+      if (Enum.TryParse<SearchMode>(Properties.Settings.Default.FindReplace_LastMode, out newMode))
+      {
+        SetMode(newMode);
+      }
+
+      var relative = editor.PointToScreen(editor.Location);
+      relative.Offset(offset);
+      var screenDim = SystemInformation.VirtualScreen;
+      var newX = Math.Min(Math.Max(relative.X, 0), screenDim.Width - this.DesktopBounds.Width);
+      var newY = Math.Min(Math.Max(relative.Y, 0), screenDim.Height - this.DesktopBounds.Height);
+      this.DesktopLocation = new Point(newX, newY);
     }
 
     void txtFind_TextChanged(object sender, EventArgs e)
@@ -58,6 +83,17 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       UpdateSearch();
     }
 
+    protected override void OnActivated(EventArgs e)
+    {
+      base.OnActivated(e);
+      this.Opacity = 1.0;
+      txtFind.Focus();
+    }
+    protected override void OnDeactivate(EventArgs e)
+    {
+      base.OnDeactivate(e);
+      this.Opacity = 0.3;
+    }
     protected override void OnLoad(EventArgs e)
     {
       base.OnLoad(e);
@@ -73,6 +109,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     protected override void OnFormClosed(FormClosedEventArgs e)
     {
       base.OnFormClosed(e);
+      SaveFormBounds();
       _editor.TextArea.TextView.BackgroundRenderers.Remove(_renderer);
       _editor.TextArea.DocumentChanged -= new EventHandler(this.textArea_DocumentChanged);
       if (_currentDoc != null)
@@ -139,26 +176,26 @@ namespace Aras.Tools.InnovatorAdmin.Editor
 
     private void DoSearch(bool changeSelection)
     {
-	    if (this.IsDisposed)
-	      return;
+      if (this.IsDisposed)
+        return;
 
       _renderer.CurrentResults.Clear();
-	    if (!string.IsNullOrEmpty(txtFind.Text))
-	    {
-		    var offset = _editor.TextArea.Caret.Offset;
-		    if (changeSelection)
-		      _editor.TextArea.ClearSelection();
+      if (!string.IsNullOrEmpty(txtFind.Text))
+      {
+        var offset = _editor.TextArea.Caret.Offset;
+        if (changeSelection)
+          _editor.TextArea.ClearSelection();
 
         foreach (var searchResult in _strategy.FindAll(_editor.TextArea.Document, 0
           , _editor.TextArea.Document.TextLength).OfType<TextSegment>())
-		    {
+        {
           if (changeSelection && searchResult.StartOffset >= offset)
-				  {
-					  this.SelectResult(searchResult);
-					  changeSelection = false;
-				  }
+          {
+            this.SelectResult(searchResult);
+            changeSelection = false;
+          }
           _renderer.CurrentResults.Add(searchResult);
-		    }
+        }
         //if (!_renderer.CurrentResults.Any<SearchResult>())
         //{
         //  this.messageView.IsOpen = true;
@@ -169,8 +206,8 @@ namespace Aras.Tools.InnovatorAdmin.Editor
         //{
         //  this.messageView.IsOpen = false;
         //}
-	    }
-	    _editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+      }
+      _editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
     }
 
     private void SelectResult(TextSegment result)
@@ -284,37 +321,47 @@ namespace Aras.Tools.InnovatorAdmin.Editor
         _xPath = xPath;
       }
 
+
       public IEnumerable<ISearchResult> FindAll(ITextSource document, int offset, int length)
       {
-        using (var stream = new StringReader(document.Text))
+        try
+        {
+          return FindAllValidating(document, offset, length).ToList();
+        }
+        catch (XmlException)
+        {
+          return FindAllForwardOnly(document, offset, length);
+        }
+        catch (Exception)
+        {
+          return Enumerable.Empty<ISearchResult>();
+        }
+      }
+
+      public IEnumerable<ISearchResult> FindAllValidating(ITextSource document, int offset, int length)
+      {
+        using (var stream = document.CreateReader())
         {
           var doc = (IDocument)document;
-          XPathDocument xmlDoc = null;
-          try
-          {
-            xmlDoc = new XPathDocument(stream);
-          }
-          catch (XmlException)
-          {
-            yield break;
-          }
+          var xmlDoc = new XPathDocument(stream);;
           var navigator = xmlDoc.CreateNavigator();
 
           XPathExpression expr = null;
+          XPathNodeIterator iterator;
           try
           {
             expr = navigator.Compile(_xPath);
+            iterator = navigator.Select(expr);
           }
-          catch (XPathException)
+          catch (System.Xml.XPath.XPathException)
           {
             yield break;
           }
 
-          var iterator = navigator.Select(expr);
           while (iterator.MoveNext())
           {
             var current = iterator.Current;
-            var segment = XmlSegment(doc, current as IXmlLineInfo);
+            var segment = XmlSegment(doc, ((IXmlLineInfo)current).LineNumber, ((IXmlLineInfo)current).LinePosition);
             if (segment != null && segment.Offset >= offset && segment.EndOffset <= (offset + length))
             {
               yield return new XPathSearchResult()
@@ -327,10 +374,63 @@ namespace Aras.Tools.InnovatorAdmin.Editor
         }
       }
 
-      private ISegment XmlSegment(IDocument doc, IXmlLineInfo start)
+      public IEnumerable<ISearchResult> FindAllForwardOnly(ITextSource document, int offset, int length)
       {
-        if (start == null || start.LineNumber < 1) return null;
-        var offset = doc.GetOffset(start.LineNumber, start.LinePosition) - 1;
+        var xc = new XPathCollection();
+        try
+        {
+          xc.Add(_xPath);
+        }
+        catch (Exception)
+        {
+          yield break;
+        }
+        using (var reader = new XmlTextReader(document.CreateReader()))
+        using (var xpathReader = new XPathReader(reader, xc))
+        {
+          var lineInfo = xpathReader as IXmlLineInfo;
+          var doc = (IDocument)document;
+          ISegment segment;
+
+          while (Read(xpathReader))
+          {
+            if (xpathReader.Match(0) && xpathReader.NodeType != XmlNodeType.EndElement)
+            {
+              segment = null;
+              try
+              {
+                segment = XmlSegment(doc, lineInfo.LineNumber, lineInfo.LinePosition);
+              }
+              catch (Exception) { }
+              if (segment != null && segment.Offset >= offset && segment.EndOffset <= (offset + length))
+              {
+                yield return new XPathSearchResult()
+                {
+                  StartOffset = segment.Offset,
+                  Length = segment.Length
+                };
+              }
+            }
+          }
+        }
+      }
+
+      private bool Read(XmlReader reader)
+      {
+        try
+        {
+          return reader.Read();
+        }
+        catch (Exception)
+        {
+          return false;
+        }
+      }
+
+      private ISegment XmlSegment(IDocument doc, int lineNumber, int linePosition)
+      {
+        if (lineNumber < 1) return null;
+        var offset = doc.GetOffset(lineNumber, linePosition) - 1;
         using (var stream = new StringReader(doc.GetText(offset, doc.TextLength - offset)))
         using (var reader = new XmlTextReader(stream))
         {
@@ -358,7 +458,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
               return new TextSegment()
               {
                 StartOffset = offset,
-                Length = doc.GetOffset(reader.LineNumber + start.LineNumber - 1, reader.LinePosition) - offset
+                Length = doc.GetOffset(reader.LineNumber + lineNumber - 1, reader.LinePosition) - offset
               };
             }
           }
@@ -554,6 +654,27 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     private void btnShowReplace_Click(object sender, EventArgs e)
     {
       DisplayReplace(!txtReplace.Visible);
+    }
+
+
+    protected override void OnMove(EventArgs e)
+    {
+      base.OnMove(e);
+      SaveFormBounds();
+    }
+    protected override void OnResizeEnd(EventArgs e)
+    {
+      base.OnResizeEnd(e);
+      SaveFormBounds();
+    }
+    private void SaveFormBounds()
+    {
+      Properties.Settings.Default.FindReplace_LastMode = _mode.ToString();
+      var relative = _positionParent.PointToScreen(_positionParent.Location);
+      Properties.Settings.Default.FindReplace_Location = new Point(
+        this.DesktopLocation.X - relative.X, this.DesktopLocation.Y - relative.Y
+      );
+      Properties.Settings.Default.Save();
     }
 
   }

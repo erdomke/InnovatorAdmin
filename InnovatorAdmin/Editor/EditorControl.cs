@@ -13,14 +13,8 @@ using System.Windows.Threading;
 using System.Xml;
 using System.IO;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
-  public enum EditorMode
-  {
-    Xml,
-    Text
-  }
-
   public class EditorControl : UserControl
   {
     //private CompletionHelper _helper;
@@ -54,21 +48,12 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       editor.Options.EnableRectangularSelection = true;
       editor.Options.IndentationSize = 2;
       editor.ShowLineNumbers = true;
-      //editor.SyntaxHighlighting = ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance.GetDefinitionByExtension(".xml");
       editor.TextArea.TextEntering += TextArea_TextEntering;
       editor.TextArea.TextEntered += TextArea_TextEntered;
       editor.TextArea.KeyDown += TextArea_KeyDown;
       host.Child = _extEditor;
 
-      using (var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("Aras.Tools.InnovatorAdmin.resources.Aml.xshd"))
-      {
-        using (var reader = new System.Xml.XmlTextReader(stream))
-        {
-          editor.SyntaxHighlighting =
-              ICSharpCode.AvalonEdit.Highlighting.Xshd.HighlightingLoader.Load(reader,
-              ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance);
-        }
-      }
+      
 
       editor.TextArea.IndentationStrategy = new ICSharpCode.AvalonEdit.Indentation.DefaultIndentationStrategy();
 
@@ -94,7 +79,8 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       else if ((e.Key == System.Windows.Input.Key.Enter && IsControlDown(e.KeyboardDevice))
         || (e.Key == System.Windows.Input.Key.E && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice)))
       {
-        OnRunRequested(new RunRequestedEventArgs(Helper.GetCurrentQuery(Editor.Text, Editor.CaretOffset)));
+        var query = Helper.GetCurrentQuery(Editor.Text, Editor.CaretOffset);
+        OnRunRequested(new RunRequestedEventArgs(string.IsNullOrEmpty(query) ? Editor.Text : query));
       }
       else if (e.Key == System.Windows.Input.Key.T && IsControlDown(e.KeyboardDevice)) // Indent the code
       {
@@ -106,7 +92,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
           _findReplace = new FindReplace(this);
         if (_findReplace.IsDisposed)
           _findReplace = new FindReplace(this);
-        _findReplace.Show();
+        _findReplace.Show(this);
 
       }
 
@@ -165,7 +151,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     void TextArea_TextEntering(object sender, System.Windows.Input.TextCompositionEventArgs e)
     {
       if (e.Text.Length > 0 && completionWindow != null
-        && !completionWindow.CompletionList.CompletionData.OfType<AmlEditorHelper.SqlGeneral>().Any())
+        && !completionWindow.CompletionList.CompletionData.OfType<SqlGeneralCompletionData>().Any())
       {
         switch (e.Text[0])
         {

@@ -1,4 +1,4 @@
-namespace Aras.Tools.InnovatorAdmin.Dialog
+namespace InnovatorAdmin.Dialog
 {
     partial class FileDialogControlBase
     {

@@ -1,4 +1,4 @@
-﻿namespace Aras.Tools.InnovatorAdmin.Controls
+﻿namespace InnovatorAdmin.Controls
 {
   partial class ExportResolve
   {
@@ -43,7 +43,7 @@
       this.mniRemoveReferences = new System.Windows.Forms.ToolStripMenuItem();
       this.mniReset = new System.Windows.Forms.ToolStripMenuItem();
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-      this.btnActions = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnActions = new InnovatorAdmin.Controls.FlatButton();
       ((System.ComponentModel.ISupportInitialize)(this.resolveGrid)).BeginInit();
       this.conStrip.SuspendLayout();
       this.tableLayoutPanel1.SuspendLayout();
@@ -192,7 +192,7 @@
       this.btnActions.Size = new System.Drawing.Size(75, 29);
       this.btnActions.TabIndex = 1;
       this.btnActions.Text = "Actions ▼";
-      this.btnActions.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnActions.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnActions.UseVisualStyleBackColor = false;
       this.btnActions.Click += new System.EventHandler(this.btnActions_Click);
       // 

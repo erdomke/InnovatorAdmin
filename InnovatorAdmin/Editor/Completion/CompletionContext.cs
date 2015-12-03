@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
-  public class CompletionData
+  public class CompletionContext
   {
     public IEnumerable<string> Items { get; set; }
     public bool MultiValueAttribute { get; set; }
     public int Overlap { get; set; }
     public CompletionType State { get; set; }
 
-    public CompletionData()
+    public CompletionContext()
     {
       Items = Enumerable.Empty<string>();
       Overlap = 0;

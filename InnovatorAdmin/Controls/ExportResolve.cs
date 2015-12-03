@@ -8,7 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 
-namespace Aras.Tools.InnovatorAdmin.Controls
+namespace InnovatorAdmin.Controls
 {
   public partial class ExportResolve : UserControl, IWizardStep
   {

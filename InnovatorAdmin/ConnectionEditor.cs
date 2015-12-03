@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Windows.Forms;
-using Aras.Tools.InnovatorAdmin.Connections;
+using InnovatorAdmin.Connections;
 using System.Collections.Generic;
 using System.Linq;
 using Innovator.Client;
+using System.Data.SqlClient;
 
-namespace Aras.Tools.InnovatorAdmin
+namespace InnovatorAdmin
 {
   public partial class ConnectionEditor : UserControl
   {
     private BindingSource _bs = new BindingSource();
     private static int _newConnNumber = 0;
-
 
     public event EventHandler SelectionChanged;
     public event EventHandler ConnectionSelected;
@@ -38,6 +38,8 @@ namespace Aras.Tools.InnovatorAdmin
       InitializeComponent();
       this.MultiSelect = false;
       _bs.CurrentChanged += _bs_CurrentChanged;
+      cmbType.DataSource = Enum.GetValues(typeof(ConnectionType));
+      cmbAuth.DataSource = Enum.GetValues(typeof(Authentication));
     }
 
     void _bs_CurrentChanged(object sender, EventArgs e)
@@ -79,6 +81,8 @@ namespace Aras.Tools.InnovatorAdmin
         txtPassword.DataBindings.Add("Text", _bs, "Password");
         txtUrl.DataBindings.Add("Text", _bs, "Url");
         txtUser.DataBindings.Add("Text", _bs, "UserName");
+        cmbType.DataBindings.Add("SelectedItem", _bs, "Type");
+        cmbAuth.DataBindings.Add("SelectedItem", _bs, "Authentication");
 
         if (lstConnections.Items.Count > 0 && !this.MultiSelect)
           lstConnections.SetItemSelected(0, true);
@@ -108,18 +112,30 @@ namespace Aras.Tools.InnovatorAdmin
 
     public static IAsyncConnection Login(ConnectionData credentials)
     {
-      var conn = Factory.GetConnection(credentials.Url, "InnovatorAdmin");
-      conn.Login(new ExplicitCredentials(credentials.Database, credentials.UserName, credentials.Password));
-      return conn;
+      return Login(credentials, false).Value;
     }
     public static IPromise<IAsyncConnection> Login(ConnectionData credentials, bool async)
     {
+      ICredentials cred;
+      switch (credentials.Authentication)
+      {
+        case Authentication.Anonymous:
+          cred = new AnonymousCredentials(credentials.Database);
+          break;
+        case Authentication.Windows:
+          cred = new WindowsCredentials(credentials.Database);
+          break;
+        default:
+          cred = new ExplicitCredentials(credentials.Database, credentials.UserName, credentials.Password);
+          break;
+      }
+
       return Factory.GetConnection(credentials.Url
         , new ConnectionPreferences() { UserAgent = "InnovatorAdmin" }
         , async)
       .Continue(c =>
       {
-        return c.Login(new ExplicitCredentials(credentials.Database, credentials.UserName, credentials.Password), async)
+        return c.Login(cred, async)
           .Convert(u => (IAsyncConnection)c);
       });
     }
@@ -208,34 +224,50 @@ namespace Aras.Tools.InnovatorAdmin
 
     private void cmbDatabase_DropDown(object sender, EventArgs e)
     {
+      if (txtUrl.Text == _lastDatabaseUrl)
+        return;
+
       try
       {
-        if (txtUrl.Text != _lastDatabaseUrl)
+        var selected = (cmbDatabase.Items.Count > 0 ? cmbDatabase.SelectedItem : null);
+        var data = (ConnectionData)_bs.Current;
+
+        _lastDatabaseUrl = txtUrl.Text;
+        cmbDatabase.Items.Clear();
+
+        switch (data.Type)
         {
-          var selected = (cmbDatabase.Items.Count > 0 ? cmbDatabase.SelectedItem : null);
-
-          _lastDatabaseUrl = txtUrl.Text;
-          cmbDatabase.Items.Clear();
-
-          //get dbs from test connection
-          try
-          {
+          case ConnectionType.Innovator:
             foreach (var db in Factory.GetConnection(_lastDatabaseUrl, "InnovatorAdmin").GetDatabases())
             {
               cmbDatabase.Items.Add(db);
             }
-
-            if (selected != null) cmbDatabase.SelectedItem = selected;
-          }
-          catch (Exception err)
-          {
-            Utils.HandleError(err);
-          }
+            break;
+          case ConnectionType.SqlServer:
+            using (var conn = SqlEditorProxy.GetConnection(data))
+            {
+              conn.Open();
+              // Set up a command with the given query and associate
+              // this with the current connection.
+              using (var cmd = new SqlCommand("SELECT name from sys.databases order by name", conn))
+              {
+                using (var dr = cmd.ExecuteReader())
+                {
+                  while (dr.Read())
+                  {
+                    cmbDatabase.Items.Add(dr[0].ToString());
+                  }
+                }
+              }
+            }
+            break;
         }
+
+        if (selected != null) cmbDatabase.SelectedItem = selected;
       }
-      catch (Exception ex)
+      catch (Exception err)
       {
-        Utils.HandleError(ex);
+        Utils.HandleError(err);
       }
     }
 
@@ -271,6 +303,19 @@ namespace Aras.Tools.InnovatorAdmin
             btnColor.BackColor = dialog.Color;
           }
         }
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void cmbAuth_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      try
+      {
+        txtUser.Enabled = ((Authentication)cmbAuth.SelectedItem) == Authentication.Explicit;
+        txtPassword.Enabled = txtUser.Enabled;
       }
       catch (Exception ex)
       {

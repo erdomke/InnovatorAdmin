@@ -11,7 +11,7 @@ using System.Diagnostics;
 using System.Xml;
 using System.Windows.Forms.Integration;
 
-namespace Aras.Tools.InnovatorAdmin.Controls
+namespace InnovatorAdmin.Controls
 {
   public partial class Compare : UserControl, IWizardStep
   {

@@ -1,4 +1,4 @@
-﻿namespace Aras.Tools.InnovatorAdmin.Controls
+﻿namespace InnovatorAdmin.Controls
 {
   partial class ExportOptions
   {
@@ -39,10 +39,10 @@
       this.label3 = new System.Windows.Forms.Label();
       this.label4 = new System.Windows.Forms.Label();
       this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-      this.btnPackageFile = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnDbPackage = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnInstall = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
-      this.btnCompare = new Aras.Tools.InnovatorAdmin.Controls.FlatButton();
+      this.btnPackageFile = new InnovatorAdmin.Controls.FlatButton();
+      this.btnDbPackage = new InnovatorAdmin.Controls.FlatButton();
+      this.btnInstall = new InnovatorAdmin.Controls.FlatButton();
+      this.btnCompare = new InnovatorAdmin.Controls.FlatButton();
       this.toolTipManager = new System.Windows.Forms.ToolTip(this.components);
       this.tableLayoutPanel2.SuspendLayout();
       this.flowLayoutPanel1.SuspendLayout();
@@ -181,7 +181,7 @@
       this.btnPackageFile.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnPackageFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.btnPackageFile.ForeColor = System.Drawing.Color.Black;
-      this.btnPackageFile.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.innPkg32;
+      this.btnPackageFile.Image = global::InnovatorAdmin.Properties.Resources.innPkg32;
       this.btnPackageFile.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
       this.btnPackageFile.Location = new System.Drawing.Point(3, 3);
       this.btnPackageFile.Name = "btnPackageFile";
@@ -190,7 +190,7 @@
       this.btnPackageFile.TabIndex = 5;
       this.btnPackageFile.Text = "&Package File(s)";
       this.btnPackageFile.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-      this.btnPackageFile.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnPackageFile.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnPackageFile.UseVisualStyleBackColor = true;
       this.btnPackageFile.Click += new System.EventHandler(this.btnPackageFile_Click);
       // 
@@ -206,7 +206,7 @@
       this.btnDbPackage.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnDbPackage.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnDbPackage.ForeColor = System.Drawing.Color.Black;
-      this.btnDbPackage.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.packageDefinition;
+      this.btnDbPackage.Image = global::InnovatorAdmin.Properties.Resources.packageDefinition;
       this.btnDbPackage.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
       this.btnDbPackage.Location = new System.Drawing.Point(120, 3);
       this.btnDbPackage.Name = "btnDbPackage";
@@ -215,7 +215,7 @@
       this.btnDbPackage.TabIndex = 6;
       this.btnDbPackage.Text = "Package &Definition (Db)";
       this.btnDbPackage.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-      this.btnDbPackage.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnDbPackage.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnDbPackage.UseVisualStyleBackColor = true;
       this.btnDbPackage.Click += new System.EventHandler(this.btnDbPackage_Click);
       // 
@@ -229,7 +229,7 @@
       this.btnInstall.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnInstall.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnInstall.ForeColor = System.Drawing.Color.Black;
-      this.btnInstall.Image = global::Aras.Tools.InnovatorAdmin.Properties.Resources.install32;
+      this.btnInstall.Image = global::InnovatorAdmin.Properties.Resources.install32;
       this.btnInstall.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
       this.btnInstall.Location = new System.Drawing.Point(262, 3);
       this.btnInstall.Name = "btnInstall";
@@ -238,7 +238,7 @@
       this.btnInstall.TabIndex = 7;
       this.btnInstall.Text = "&Install (Db)";
       this.btnInstall.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-      this.btnInstall.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnInstall.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnInstall.UseVisualStyleBackColor = true;
       this.btnInstall.Click += new System.EventHandler(this.btnInstall_Click);
       // 
@@ -260,7 +260,7 @@
       this.btnCompare.TabIndex = 8;
       this.btnCompare.Text = "&Compare";
       this.btnCompare.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-      this.btnCompare.Theme = Aras.Tools.InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnCompare.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnCompare.UseVisualStyleBackColor = true;
       this.btnCompare.Click += new System.EventHandler(this.btnCompare_Click);
       // 

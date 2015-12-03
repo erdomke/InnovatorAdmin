@@ -6,18 +6,24 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
-  public class CompletionHelper
+  public class CompletionHelper : ISqlMetadataProvider
   {
-    private IAsyncConnection _conn;
+    protected IAsyncConnection _conn;
     private ItemTypeCollection _itemTypes = new ItemTypeCollection();
     private IPromise<IEnumerable<string>> _methods;
+    private SqlCompletionHelper _sql;
 
-    public IPromise<CompletionData> GetCompletions(string xml, int caret, string soapAction)
+    public CompletionHelper()
+    {
+      _sql = new SqlCompletionHelper(this);
+    }
+
+    public IPromise<CompletionContext> GetCompletions(string xml, int caret, string soapAction)
     {
       //var overlap = 0;
-      if (string.IsNullOrEmpty(xml)) return Promises.Resolved<CompletionData>(new CompletionData());
+      if (string.IsNullOrEmpty(xml)) return Promises.Resolved<CompletionContext>(new CompletionContext());
 
       var path = new List<AmlNode>();
       string attrName = null;
@@ -57,7 +63,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
         return true;
       });
       if (state == XmlState.Tag && (xml.Last() == '"' || xml.Last() == '\''))
-        return Promises.Resolved<CompletionData>(new CompletionData());
+        return Promises.Resolved<CompletionContext>(new CompletionContext());
 
       IPromise<IEnumerable<string>> items = null;
       var filter = string.Empty;
@@ -309,7 +315,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
             }
             if (path.Count == 1 && path.First().LocalName.Equals("sql", StringComparison.OrdinalIgnoreCase) && soapAction == "ApplySQL")
             {
-              return SqlCompletions(value, xml, caret, cdata);
+              return _sql.Completions(value, xml, caret, cdata ? "]]>" : "<");
             }
             else
             {
@@ -351,7 +357,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
                   else if (path.Last().Condition == "in"
                     || path.Last().LocalName.Equals("sql", StringComparison.OrdinalIgnoreCase))
                   {
-                    return SqlCompletions(value, xml, caret, cdata);
+                    return _sql.Completions(value, xml, caret, cdata ? "]]>" : "<");
                   }
                   else
                   {
@@ -364,7 +370,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
                         {
                           if (p.Type == PropertyType.item && p.Restrictions.Any())
                           {
-                            return p.Restrictions.Select(type => "Item type=\"" + type + "\"");
+                            return p.Restrictions.Select(type => "Item type='" + type + "'");
                           }
                           else
                           {
@@ -383,9 +389,9 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       }
 
       if (items == null)
-        return Promises.Resolved(new CompletionData());
+        return Promises.Resolved(new CompletionContext());
 
-      return items.Convert(i => new CompletionData() {
+      return items.Convert(i => new CompletionContext() {
         Items = string.IsNullOrEmpty(filter) ? i.OrderBy(j => j) : FilterAndSort(i, filter),
         MultiValueAttribute = multiValueAttribute,
         Overlap = (filter ?? "").Length,
@@ -406,130 +412,6 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       return CompletionType.Other;
     }
 
-    private IPromise<CompletionData> SqlCompletions(string prefix, string all, int caret, bool cdata)
-    {
-      try
-      {
-        var lastIndex = cdata ? all.IndexOf("]]>", caret) : all.IndexOf('<', caret);
-        var sql = prefix + (lastIndex < 0 ? all.Substring(caret) : all.Substring(caret, lastIndex - caret));
-        var parseTree = new SqlTokenizer(sql).Parse();
-        if (!parseTree.Any())
-          return Promises.Resolved(new CompletionData());
-
-        var currNode = parseTree.NodeByOffset(prefix.Length);
-        var literal = currNode as SqlLiteral;
-
-        if (literal != null)
-        {
-
-          if (literal.Text.Equals("from", StringComparison.OrdinalIgnoreCase)
-            || literal.Text.Equals("join", StringComparison.OrdinalIgnoreCase)
-            || literal.Text.Equals("apply", StringComparison.OrdinalIgnoreCase))
-          {
-            return Promises.Resolved(new CompletionData()
-            {
-              Items = _itemTypes.Values.Select(i => i.Name.Replace(' ', '_'))
-                .Concat(Enumerable.Repeat("Innovator", 1)
-                .OrderBy(i => i)),
-              State = CompletionType.SqlObjectName,
-              Overlap = 0
-            });
-          }
-          else if (literal.Text == ".")
-          {
-            var name = literal.Parent as SqlNameDefinition;
-            if (name != null)
-            {
-              var idx = name.IndexOf(literal);
-              if (name[idx - 1].Text.Equals("innovator", StringComparison.OrdinalIgnoreCase))
-              {
-                return Promises.Resolved(new CompletionData()
-                {
-                  Items = _itemTypes.Values.Select(i => i.Name.Replace(' ', '_')).Concat(Enumerable.Repeat("innovator", 1)),
-                  State = CompletionType.SqlObjectName,
-                  Overlap = 0
-                });
-              }
-            }
-            else
-            {
-              var group = literal.Parent as SqlGroup;
-              if (group != null)
-              {
-                var idx = group.IndexOf(literal);
-                var context = GetAliasContext(literal);
-                string fullName;
-                ItemType type;
-                if (idx > 0 && group[idx - 1] is SqlLiteral
-                  && context.TryGetValue(((SqlLiteral)group[idx - 1]).Text.ToLowerInvariant(), out fullName)
-                  && _itemTypes.TryGetValue(fullName.Replace('_', ' '), out type))
-                {
-                  return GetProperties(type)
-                    .Convert(p => new CompletionData()
-                    {
-                      Items = p.Select(i => i.Name),
-                      State = CompletionType.SqlGeneral
-                    });
-                }
-              }
-            }
-          }
-          else if (SqlTokenizer.IsKeyword(literal.Text)
-            || literal.Type == SqlType.Operator)
-          {
-            var group = literal.Parent as SqlGroup;
-            if (group != null)
-            {
-              var types = GetTypes(group.OfType<SqlNameDefinition>().Select(n => n.Name));
-              return Promises.All(types
-                .Select(t => (IPromise)GetProperties(t)).ToArray())
-                .Convert(l => new CompletionData()
-                {
-                  Items = l.OfType<IEnumerable<Property>>()
-                    .SelectMany(i => i)
-                    .Select(i => i.Name)
-                    .Distinct()
-                    .OrderBy(i => i),
-                  State = CompletionType.SqlGeneral
-                });
-            }
-          }
-        }
-
-        //System.Diagnostics.Debug.Print(parseTree.NodeByOffset(prefix.Length).ToString());
-        return Promises.Resolved(new CompletionData());
-      }
-      catch (Exception ex)
-      {
-        return Promises.Rejected<CompletionData>(ex);
-      }
-    }
-
-    private IEnumerable<ItemType> GetTypes(IEnumerable<string> names)
-    {
-      return from n in names
-             where _itemTypes.ContainsKey(n)
-             select _itemTypes[n];
-    }
-
-    private IDictionary<string, string> GetAliasContext(SqlNode node)
-    {
-      var result = new Dictionary<string, string>();
-
-      var group = node.Parent as SqlGroup;
-      while (group != null)
-      {
-        foreach (var name in group.OfType<SqlNameDefinition>())
-        {
-          if (name.Alias != null && !result.ContainsKey(name.Alias.ToLowerInvariant()))
-            result[name.Alias.ToLowerInvariant()] = name.Name;
-          result[name.Name.ToLowerInvariant()] = name.Name;
-        }
-        group = group.Parent as SqlGroup;
-      }
-
-      return result;
-    }
 
     private void RecurseProperties(ItemType itemType, IEnumerable<string> remainingPath, Action<ItemType> callback)
     {
@@ -623,8 +505,9 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       if (conn != null)
       {
         _conn = conn;
-        _conn.ApplyAsync("<AML><Item action=\"get\" type=\"ItemType\" select=\"name\" /><Item action=\"get\" type=\"RelationshipType\" related_expand=\"0\" select=\"related_id,source_id,relationship_id,name\" /></AML>"
-          , true, false)
+        var cmd = new Command("<AML><Item action=\"get\" type=\"ItemType\" select=\"name\" /><Item action=\"get\" type=\"RelationshipType\" related_expand=\"0\" select=\"related_id,source_id,relationship_id,name\" /></AML>");
+        cmd.WithAction(CommandAction.ApplyAML);
+        _conn.ApplyAsync(cmd, true, false)
           .Done(r => LoadItemTypes(r.Items()));
       }
     }
@@ -819,6 +702,26 @@ namespace Aras.Tools.InnovatorAdmin.Editor
       public string Type { get; set; }
       public string Action { get; set; }
       public string Condition { get; set; }
+    }
+
+    public IEnumerable<string> GetSchemaNames()
+    {
+      return Enumerable.Repeat("innovator", 1);
+    }
+
+    public IEnumerable<string> GetTableNames()
+    {
+      return _itemTypes.Values
+        .Select(i => "innovator.[" + i.Name.Replace(' ', '_') + "]");
+    }
+
+    public IPromise<IEnumerable<string>> GetColumnNames(string tableName)
+    {
+      ItemType itemType;
+      if (_itemTypes.TryGetValue(tableName.Replace('_', ' '), out itemType))
+        return GetProperties(itemType).Convert(p => p.Select(i => i.Name));
+
+      return Promises.Resolved(Enumerable.Empty<string>());
     }
   }
 }

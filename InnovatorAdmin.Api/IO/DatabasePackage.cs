@@ -5,7 +5,7 @@ using System.Text;
 using System.Xml;
 using Innovator.Client;
 
-namespace Aras.Tools.InnovatorAdmin
+namespace InnovatorAdmin
 {
   public class DatabasePackage
   {

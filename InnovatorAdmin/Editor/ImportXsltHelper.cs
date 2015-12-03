@@ -5,7 +5,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Schema;
 
-namespace Aras.Tools.InnovatorAdmin.Editor
+namespace InnovatorAdmin.Editor
 {
   public class ImportXsltHelper : XmlCompletionDataProvider
   {
@@ -53,7 +53,7 @@ namespace Aras.Tools.InnovatorAdmin.Editor
     private static XmlSchema LoadSchema()
     {
       var schema = new XmlSchema();
-      using (var stream = typeof(XmlCompletionDataProvider).Assembly.GetManifestResourceStream("Aras.Tools.InnovatorAdmin.Editor.xslt.xsd"))
+      using (var stream = typeof(XmlCompletionDataProvider).Assembly.GetManifestResourceStream("InnovatorAdmin.Editor.xslt.xsd"))
       {
         using (var reader = XmlReader.Create(stream))
         {
