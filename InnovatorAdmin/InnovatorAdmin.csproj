@@ -128,6 +128,7 @@
     <Compile Include="AppFileType.cs" />
     <Compile Include="AssemblyInfo.Version.cs" />
     <Compile Include="Connections\Authentication.cs" />
+    <Compile Include="Connections\ConnectionDataExtensions.cs" />
     <Compile Include="Connections\ConnectionType.cs" />
     <Compile Include="Controls\Compare.cs">
       <SubType>UserControl</SubType>

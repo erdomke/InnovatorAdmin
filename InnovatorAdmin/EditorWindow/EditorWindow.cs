@@ -113,13 +113,13 @@ namespace InnovatorAdmin
     {
       if (_proxy != null)
         _proxy.Dispose();
-      
+
       _proxy = proxy;
 
       if (proxy == null)
         return;
-      
-      
+
+
       if (_proxy.GetActions().Any())
       {
         _proxy.Action = _soapAction;
@@ -356,7 +356,7 @@ namespace InnovatorAdmin
                 outputEditor.CollapseAll();
               }
 
-              tbcOutputView.SelectedTab = result.PreferTable ? pgTableOutput : pgAmlOutput;
+              tbcOutputView.SelectedTab = result.PreferTable ? pgTableOutput : pgTextOutput;
               EnsureDataTable();
 
               dgvItems.AllowUserToAddRows = _outputTable != null
@@ -825,5 +825,17 @@ namespace InnovatorAdmin
       }
     }
 
+    private void exploreButton_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        var connData = _proxy.ConnData;
+        connData.Explore();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
   }
 }

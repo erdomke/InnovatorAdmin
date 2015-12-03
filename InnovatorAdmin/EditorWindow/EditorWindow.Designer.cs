@@ -38,7 +38,7 @@
       this.inputEditor = new InnovatorAdmin.Editor.EditorControl();
       this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
       this.tbcOutputView = new System.Windows.Forms.TabControl();
-      this.pgAmlOutput = new System.Windows.Forms.TabPage();
+      this.pgTextOutput = new System.Windows.Forms.TabPage();
       this.outputEditor = new InnovatorAdmin.Editor.EditorControl();
       this.pgTableOutput = new System.Windows.Forms.TabPage();
       this.dgvItems = new System.Windows.Forms.DataGridView();
@@ -71,6 +71,7 @@
       this.mniLocale = new System.Windows.Forms.ToolStripMenuItem();
       this.mniTimeZone = new System.Windows.Forms.ToolStripMenuItem();
       this.mniTimeout = new System.Windows.Forms.ToolStripMenuItem();
+      this.exploreButton = new System.Windows.Forms.ToolStripButton();
       this.btnSubmit = new System.Windows.Forms.ToolStripSplitButton();
       this.mniRunAll = new System.Windows.Forms.ToolStripMenuItem();
       this.mniRunCurrent = new System.Windows.Forms.ToolStripMenuItem();
@@ -87,7 +88,7 @@
       this.tableLayoutPanel3.SuspendLayout();
       this.tableLayoutPanel2.SuspendLayout();
       this.tbcOutputView.SuspendLayout();
-      this.pgAmlOutput.SuspendLayout();
+      this.pgTextOutput.SuspendLayout();
       this.pgTableOutput.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.dgvItems)).BeginInit();
       this.conTable.SuspendLayout();
@@ -214,7 +215,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.tableLayoutPanel2.SetColumnSpan(this.tbcOutputView, 3);
-      this.tbcOutputView.Controls.Add(this.pgAmlOutput);
+      this.tbcOutputView.Controls.Add(this.pgTextOutput);
       this.tbcOutputView.Controls.Add(this.pgTableOutput);
       this.tbcOutputView.Location = new System.Drawing.Point(0, 0);
       this.tbcOutputView.Margin = new System.Windows.Forms.Padding(0);
@@ -225,15 +226,15 @@
       this.tbcOutputView.TabIndex = 5;
       this.tbcOutputView.SelectedIndexChanged += new System.EventHandler(this.tbcOutputView_SelectedIndexChanged);
       // 
-      // pgAmlOutput
+      // pgTextOutput
       // 
-      this.pgAmlOutput.Controls.Add(this.outputEditor);
-      this.pgAmlOutput.Location = new System.Drawing.Point(4, 22);
-      this.pgAmlOutput.Name = "pgAmlOutput";
-      this.pgAmlOutput.Size = new System.Drawing.Size(687, 277);
-      this.pgAmlOutput.TabIndex = 0;
-      this.pgAmlOutput.Text = "AML";
-      this.pgAmlOutput.UseVisualStyleBackColor = true;
+      this.pgTextOutput.Controls.Add(this.outputEditor);
+      this.pgTextOutput.Location = new System.Drawing.Point(4, 22);
+      this.pgTextOutput.Name = "pgTextOutput";
+      this.pgTextOutput.Size = new System.Drawing.Size(687, 277);
+      this.pgTextOutput.TabIndex = 0;
+      this.pgTextOutput.Text = "Text";
+      this.pgTextOutput.UseVisualStyleBackColor = true;
       // 
       // outputEditor
       // 
@@ -251,7 +252,7 @@
       this.pgTableOutput.Location = new System.Drawing.Point(4, 22);
       this.pgTableOutput.Margin = new System.Windows.Forms.Padding(0);
       this.pgTableOutput.Name = "pgTableOutput";
-      this.pgTableOutput.Size = new System.Drawing.Size(833, 356);
+      this.pgTableOutput.Size = new System.Drawing.Size(687, 277);
       this.pgTableOutput.TabIndex = 1;
       this.pgTableOutput.Text = "Table";
       this.pgTableOutput.UseVisualStyleBackColor = true;
@@ -264,7 +265,7 @@
       this.dgvItems.Location = new System.Drawing.Point(0, 0);
       this.dgvItems.Margin = new System.Windows.Forms.Padding(0);
       this.dgvItems.Name = "dgvItems";
-      this.dgvItems.Size = new System.Drawing.Size(833, 356);
+      this.dgvItems.Size = new System.Drawing.Size(687, 277);
       this.dgvItems.TabIndex = 0;
       // 
       // conTable
@@ -400,6 +401,7 @@
             this.toolStripSeparator2,
             this.toolStripDropDownButton2,
             this.toolStripDropDownButton1,
+            this.exploreButton,
             this.btnSubmit});
       this.menuStrip.Location = new System.Drawing.Point(0, 0);
       this.menuStrip.Name = "menuStrip";
@@ -538,6 +540,16 @@
       this.mniTimeout.Text = "Timeout...";
       this.mniTimeout.Click += new System.EventHandler(this.mniTimeout_Click);
       // 
+      // exploreButton
+      // 
+      this.exploreButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+      this.exploreButton.Image = ((System.Drawing.Image)(resources.GetObject("exploreButton.Image")));
+      this.exploreButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+      this.exploreButton.Name = "exploreButton";
+      this.exploreButton.Size = new System.Drawing.Size(49, 22);
+      this.exploreButton.Text = "Explore";
+      this.exploreButton.Click += new System.EventHandler(this.exploreButton_Click);
+      // 
       // btnSubmit
       // 
       this.btnSubmit.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
@@ -604,7 +616,7 @@
       this.tableLayoutPanel3.ResumeLayout(false);
       this.tableLayoutPanel2.ResumeLayout(false);
       this.tbcOutputView.ResumeLayout(false);
-      this.pgAmlOutput.ResumeLayout(false);
+      this.pgTextOutput.ResumeLayout(false);
       this.pgTableOutput.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this.dgvItems)).EndInit();
       this.conTable.ResumeLayout(false);
@@ -628,7 +640,7 @@
     private Controls.FlatButton btnCancel;
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
     private System.Windows.Forms.TabControl tbcOutputView;
-    private System.Windows.Forms.TabPage pgAmlOutput;
+    private System.Windows.Forms.TabPage pgTextOutput;
     private System.Windows.Forms.TabPage pgTableOutput;
     private System.Windows.Forms.DataGridView dgvItems;
     private System.Windows.Forms.Label lblItems;
@@ -662,5 +674,6 @@
     private System.Windows.Forms.ToolStripMenuItem mniTimeout;
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
     private System.Windows.Forms.Label lblConnColor;
+    private System.Windows.Forms.ToolStripButton exploreButton;
   }
 }

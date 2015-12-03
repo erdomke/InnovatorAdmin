@@ -593,7 +593,7 @@ namespace InnovatorAdmin.Editor
         result = groups.Pop();
       if (result.Count == 1 && result[0] is SqlGroup)
         result = result[0] as SqlGroup;
-      else if (result.Any() && result.Last() is SqlGroup && !((SqlGroup)result.Last()).Any()) 
+      else if (result.Any() && result.Last() is SqlGroup && !((SqlGroup)result.Last()).Any())
       {
         result.Remove(result.Last());
       }

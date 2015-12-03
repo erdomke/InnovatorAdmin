@@ -185,7 +185,7 @@ namespace InnovatorAdmin.Connections
     {
       if (!password.IsGuid())
       {
-        password = ScalcMD5(password);
+        password = ConnectionDataExtensions.ScalcMD5(password);
       }
       return RijndaelSimple.Encrypt(_encryptKey, password);
     }
@@ -209,31 +209,6 @@ namespace InnovatorAdmin.Connections
         + color.R.ToString("X2")
         + color.G.ToString("X2")
         + color.B.ToString("X2");
-    }
-
-    public static string ScalcMD5(string val)
-    {
-      string result;
-      using (var mD5CryptoServiceProvider = new MD5CryptoServiceProvider())
-      {
-        var aSCIIEncoding = new ASCIIEncoding();
-        var bytes = aSCIIEncoding.GetBytes(val);
-        string text = "";
-        var array = mD5CryptoServiceProvider.ComputeHash(bytes);
-        short num = 0;
-        while ((int)num < array.GetLength(0))
-        {
-          string text2 = Convert.ToString(array[(int)num], 16).ToLowerInvariant();
-          if (text2.Length == 1)
-          {
-            text2 = "0" + text2;
-          }
-          text += text2;
-          num += 1;
-        }
-        result = text;
-      }
-      return result;
     }
 
     private static Color[] _tabColors;

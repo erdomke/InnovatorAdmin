@@ -16,7 +16,7 @@ namespace InnovatorAdmin
       switch (conn.Type)
       {
         case ConnectionType.Innovator:
-          return ConnectionEditor.Login(conn, true)
+          return conn.ArasLogin(true)
             .Convert(c => (IEditorProxy)new ArasEditorProxy(c, conn.ConnectionName)
             {
               ConnData = conn

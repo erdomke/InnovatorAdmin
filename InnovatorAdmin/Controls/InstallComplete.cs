@@ -40,7 +40,7 @@ namespace InnovatorAdmin.Controls
         {
           foreach (var conn in rsc.SelectedConnections)
           {
-            var arasConn = ConnectionEditor.Login(conn);
+            var arasConn = conn.ArasLogin();
             arasConn.Process(new Command("<Item/>").WithAction("ResetServerCache"));
           }
         }

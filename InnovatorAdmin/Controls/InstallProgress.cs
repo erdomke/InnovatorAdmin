@@ -70,7 +70,7 @@ namespace InnovatorAdmin.Controls
       {
         if (!isLoggedIn)
         {
-          var conn = ConnectionEditor.Login(_connections.First());
+          var conn = _connections.First().ArasLogin();
           _wizard.InstallProcessor.ActionComplete -= InstallProcessor_ActionComplete;
           _wizard.InstallProcessor.ErrorRaised -= InstallProcessor_ErrorRaised;
           _wizard.InstallProcessor.ProgressChanged -= InstallProcessor_ProgressChanged;

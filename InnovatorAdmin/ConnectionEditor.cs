@@ -94,7 +94,7 @@ namespace InnovatorAdmin
       try
       {
         lblMessage.Text="Testing...";
-        Login((ConnectionData)_bs.Current, true)
+        ((ConnectionData)_bs.Current).ArasLogin(true)
           .UiPromise(this)
           .Done(c => lblMessage.Text = "Success")
           .Fail(ex => lblMessage.Text = ex.Message);
@@ -108,36 +108,6 @@ namespace InnovatorAdmin
     private void ClearMessage()
     {
       lblMessage.Text="";
-    }
-
-    public static IAsyncConnection Login(ConnectionData credentials)
-    {
-      return Login(credentials, false).Value;
-    }
-    public static IPromise<IAsyncConnection> Login(ConnectionData credentials, bool async)
-    {
-      ICredentials cred;
-      switch (credentials.Authentication)
-      {
-        case Authentication.Anonymous:
-          cred = new AnonymousCredentials(credentials.Database);
-          break;
-        case Authentication.Windows:
-          cred = new WindowsCredentials(credentials.Database);
-          break;
-        default:
-          cred = new ExplicitCredentials(credentials.Database, credentials.UserName, credentials.Password);
-          break;
-      }
-
-      return Factory.GetConnection(credentials.Url
-        , new ConnectionPreferences() { UserAgent = "InnovatorAdmin" }
-        , async)
-      .Continue(c =>
-      {
-        return c.Login(cred, async)
-          .Convert(u => (IAsyncConnection)c);
-      });
     }
 
     private void btnNew_Click(object sender, EventArgs e)
@@ -323,5 +293,19 @@ namespace InnovatorAdmin
       }
     }
 
+    private void exploreButton_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        lblMessage.Text = "Opening Browser...";
+        Application.DoEvents();
+        ((ConnectionData)_bs.Current).Explore();
+        lblMessage.Text = "";
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
   }
 }

@@ -53,7 +53,7 @@ namespace InnovatorAdmin.Controls
         _wizard.ConnectionInfo = connEditor.SelectedConnections;
         try
         {
-          var conn = ConnectionEditor.Login(_wizard.ConnectionInfo.First());
+          var conn = _wizard.ConnectionInfo.First().ArasLogin();
           _wizard.Connection = conn;
           this.GoNextAction();
         }
