@@ -918,5 +918,21 @@ namespace Aras.Tools.InnovatorAdmin
       }
     }
 
-  }
+        private void exploreButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Application.DoEvents();
+                string arasUrl;
+                
+                arasUrl = _connData.Url + "?database=" + _connData.Database + "&username=" + _connData.UserName + "&password=" + ConnectionData.ScalcMD5(_connData.Password);
+                System.Diagnostics.Process.Start(arasUrl);
+                           }
+            catch (Exception ex)
+            {
+                Utils.HandleError(ex);
+            }
+
+        }
+    }
 }

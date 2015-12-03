@@ -278,5 +278,24 @@ namespace Aras.Tools.InnovatorAdmin
       }
     }
 
-  }
+        private void exploreButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                lblMessage.Text = "Opening Browser...";
+                Application.DoEvents();
+                string arasUrl;
+                ConnectionData cd = (ConnectionData)_bs.Current;
+
+                arasUrl = cd.Url + "?database=" + cd.Database + "&username=" + cd.UserName + "&password=" + ConnectionData.ScalcMD5(cd.Password);
+                System.Diagnostics.Process.Start(arasUrl);
+                lblMessage.Text = "";
+            }
+            catch (Exception ex)
+            {
+                Utils.HandleError(ex);
+            }
+
+        }
+    }
 }
