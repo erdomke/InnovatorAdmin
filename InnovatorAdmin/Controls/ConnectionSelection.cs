@@ -68,5 +68,17 @@ namespace InnovatorAdmin.Controls
     {
       if (_wizard != null) _wizard.NextEnabled = connEditor.SelectedConnections.Any();
     }
+
+    private void connEditor_ConnectionSelected(object sender, EventArgs e)
+    {
+      try
+      {
+        this.GoNext();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
   }
 }

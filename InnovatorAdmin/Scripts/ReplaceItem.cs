@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Scripts
 {
+  [DisplayName("Replace Item")]
   public class ReplaceItem : IAsyncScript
   {
     [DisplayName("Original ID"), Description("The ID of the original item which will be replaced")]

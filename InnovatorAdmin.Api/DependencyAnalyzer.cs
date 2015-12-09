@@ -20,77 +20,17 @@ namespace InnovatorAdmin
     private Dictionary<ItemReference, HashSet<ItemReference>> _allItemDependencies = new Dictionary<ItemReference, HashSet<ItemReference>>();
 
     //// Temporary variables only used within a set of scans
-    private Dictionary<ItemProperty, ItemReference> _customProps;
     private HashSet<ItemReference> _definitions = new HashSet<ItemReference>();
     private HashSet<ItemReference> _dependencies = new HashSet<ItemReference>();
+    private ArasMetadataProvider _metadata;
     private XmlElement _elem;
-
-    private HashSet<ItemReference> _coreMethods;
-    private Dictionary<string, ItemReference> _systemIdentities;
-    private Dictionary<string, ItemType> _itemTypes;
-    private Dictionary<string, ItemReference> _sql;
 
     private SqlParser _parser = new SqlParser();
 
-    public ItemReference GetSystemIdentity(string id)
-    {
-      ItemReference result;
-      if (!_systemIdentities.TryGetValue(id, out result)) result = null;
-      return result;
-    }
-
-    public DependencyAnalyzer(IAsyncConnection _conn, Dictionary<string, ItemType> itemTypes)
+    public DependencyAnalyzer(ArasMetadataProvider metadata)
     {
       _parser.SchemaToKeep = "innovator";
-
-
-      var methodItems = _conn.Apply(Properties.Resources.GetCoreMethods)
-        .Items()
-        .Select(i => new ItemReference("Method", "[Method].[config_id] = '" + i.ConfigId().Value + "'") {
-          KeyedName = i.Property("id").KeyedName().Value
-        });
-
-      _coreMethods = new HashSet<ItemReference>(methodItems);
-
-      var sysIdents = _conn.Apply(Properties.Resources.SystemIdentities)
-        .Items()
-        .Select(i => {
-          var itemRef = ItemReference.FromFullItem(i, false);
-          itemRef.KeyedName = i.Property("name").AsString("");
-          return itemRef;
-        });
-      _systemIdentities = sysIdents.ToDictionary(i => i.Unique);
-
-      var sqlItems = _conn.Apply(Properties.Resources.SqlItems)
-        .Items()
-        .Select(i =>
-        {
-          var itemRef = ItemReference.FromFullItem(i, false);
-          itemRef.KeyedName = i.Property("name").AsString("");
-          return itemRef;
-        });
-      _sql = sqlItems.ToDictionary(i => i.KeyedName.ToLowerInvariant());
-
-
-      _customProps = new Dictionary<ItemProperty, ItemReference>();
-      var customPropItems = _conn.Apply(Properties.Resources.CustomUserProperties).Items();
-      IReadOnlyItem itemType;
-      foreach (var customProp in customPropItems)
-      {
-        itemType = customProp.SourceItem();
-        _customProps.Add(new ItemProperty()
-        {
-          ItemType = itemType.Property("name").Value,
-          ItemTypeId = itemType.Id(),
-          Property = customProp.Property("name").Value,
-          PropertyId = customProp.Id()
-        }, new ItemReference("Property", customProp.Id())
-        {
-          KeyedName = customProp.Property("name").Value
-        });
-      }
-
-      _itemTypes = itemTypes;
+      _metadata = metadata;
     }
 
     public void Reset()
@@ -236,15 +176,15 @@ namespace InnovatorAdmin
         _dependencies.Remove(defn);
         _allDefinitions.Add(defn, itemRef);
       }
-      _dependencies.ExceptWith(_systemIdentities.Values);
-      _dependencies.ExceptWith(_coreMethods);
-      _dependencies.ExceptWith(_itemTypes.Values.Where(i => i.IsCore).Select(i => i.Reference));
+      _dependencies.ExceptWith(_metadata.SystemIdentities);
+      _dependencies.ExceptWith(_metadata.CoreMethods);
+      _dependencies.ExceptWith(_metadata.ItemTypes.Where(i => i.IsCore).Select(i => i.Reference));
       _dependencies.ExceptWith(_dependencies.Where(d =>
       {
         if (d.Type == "ItemType" && !string.IsNullOrEmpty(d.KeyedName))
         {
           ItemType it;
-          if (_itemTypes.TryGetValue(d.KeyedName, out it) && it.IsCore) return true;
+          if (_metadata.ItemTypeByName(d.KeyedName, out it) && it.IsCore) return true;
         }
         return false;
       }).ToList());
@@ -297,7 +237,7 @@ namespace InnovatorAdmin
       if (elem.LocalName == "Item" && elem.HasAttribute("type"))
       {
         ItemType itemType;
-        if ( _itemTypes.TryGetValue(elem.Attribute("type").ToLowerInvariant(), out itemType))
+        if (_metadata.ItemTypeByName(elem.Attribute("type").ToLowerInvariant(), out itemType))
         {
           AddDependency(itemType.Reference, elem, elem, masterRef);
         }
@@ -327,11 +267,11 @@ namespace InnovatorAdmin
         ItemReference sql;
         foreach (var name in names)
         {
-          if (_itemTypes.TryGetValue(name.Replace('_', ' '), out itemType))
+          if (_metadata.ItemTypeByName(name.Replace('_', ' '), out itemType))
           {
             AddDependency(itemType.Reference, elem.Parent(), elem, masterRef);
           }
-          else if (_sql.TryGetValue(name, out sql))
+          else if (_metadata.SqlRefByName(name, out sql))
           {
             AddDependency(sql, elem.Parent(), elem, masterRef);
           }
@@ -344,7 +284,7 @@ namespace InnovatorAdmin
         if (parent != null && parent.LocalName == "Item" && parent.Attribute("type") == "Property")
         {
           var keyedName = elem.Attribute("keyed_name");
-          var itemtype = _itemTypes.Values.FirstOrDefault(i => i.Reference.Unique == elem.Parent().Parent().Parent().Attribute("id") && i.IsPolymorphic);
+          var itemtype = _metadata.ItemTypes.FirstOrDefault(i => i.Reference.Unique == elem.Parent().Parent().Parent().Attribute("id") && i.IsPolymorphic);
           if (itemtype == null)
           {
             var dataType = parent.Element("data_type");
@@ -400,7 +340,7 @@ namespace InnovatorAdmin
               ItemTypeId = (elem.HasAttribute("typeid") ? elem.Attributes["typeid"].Value : null),
               Property = child.LocalName
             };
-            if (_customProps.TryGetValue(newProp, out propRef))
+            if (_metadata.CustomPropertyByPath(newProp, out propRef))
             {
               propRef = propRef.Clone();
               AddDependency(propRef, elem, child, masterRef);

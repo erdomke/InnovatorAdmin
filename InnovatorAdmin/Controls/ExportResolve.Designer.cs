@@ -29,9 +29,9 @@
     private void InitializeComponent()
     {
       this.components = new System.ComponentModel.Container();
-      System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-      System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-      System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+      System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+      System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+      System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
       this.resolveGrid = new System.Windows.Forms.DataGridView();
       this.colName = new System.Windows.Forms.DataGridViewTextBoxColumn();
       this.colOrigin = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -44,6 +44,8 @@
       this.mniReset = new System.Windows.Forms.ToolStripMenuItem();
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
       this.btnActions = new InnovatorAdmin.Controls.FlatButton();
+      this.label1 = new System.Windows.Forms.Label();
+      this.txtFilter = new System.Windows.Forms.TextBox();
       ((System.ComponentModel.ISupportInitialize)(this.resolveGrid)).BeginInit();
       this.conStrip.SuspendLayout();
       this.tableLayoutPanel1.SuspendLayout();
@@ -53,39 +55,40 @@
       // 
       this.resolveGrid.AllowUserToAddRows = false;
       this.resolveGrid.AllowUserToDeleteRows = false;
-      dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-      dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Control;
-      dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.WindowText;
-      dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-      dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-      dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-      this.resolveGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle4;
+      dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+      dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+      dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+      dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+      dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+      dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+      this.resolveGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
       this.resolveGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
       this.resolveGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colName,
             this.colOrigin,
             this.colType});
-      dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-      dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Window;
-      dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.ControlText;
-      dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-      dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-      dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-      this.resolveGrid.DefaultCellStyle = dataGridViewCellStyle5;
+      this.tableLayoutPanel1.SetColumnSpan(this.resolveGrid, 3);
+      dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+      dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+      dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+      dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+      dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+      dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+      this.resolveGrid.DefaultCellStyle = dataGridViewCellStyle2;
       this.resolveGrid.Dock = System.Windows.Forms.DockStyle.Fill;
       this.resolveGrid.Location = new System.Drawing.Point(3, 38);
       this.resolveGrid.Name = "resolveGrid";
       this.resolveGrid.ReadOnly = true;
-      dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-      dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
-      dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.WindowText;
-      dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-      dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-      dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-      this.resolveGrid.RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
+      dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+      dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
+      dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+      dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+      dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+      dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+      this.resolveGrid.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
       this.resolveGrid.RowHeadersVisible = false;
       this.resolveGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
       this.resolveGrid.Size = new System.Drawing.Size(517, 265);
@@ -125,7 +128,7 @@
             this.mniRemoveReferences,
             this.mniReset});
       this.conStrip.Name = "conStrip";
-      this.conStrip.Size = new System.Drawing.Size(216, 136);
+      this.conStrip.Size = new System.Drawing.Size(216, 114);
       // 
       // mniEdit
       // 
@@ -165,10 +168,14 @@
       // tableLayoutPanel1
       // 
       this.tableLayoutPanel1.BackColor = System.Drawing.Color.White;
-      this.tableLayoutPanel1.ColumnCount = 1;
+      this.tableLayoutPanel1.ColumnCount = 3;
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tableLayoutPanel1.Controls.Add(this.resolveGrid, 0, 1);
       this.tableLayoutPanel1.Controls.Add(this.btnActions, 0, 0);
+      this.tableLayoutPanel1.Controls.Add(this.label1, 1, 0);
+      this.tableLayoutPanel1.Controls.Add(this.txtFilter, 2, 0);
       this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
       this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -195,6 +202,25 @@
       this.btnActions.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnActions.UseVisualStyleBackColor = false;
       this.btnActions.Click += new System.EventHandler(this.btnActions_Click);
+      // 
+      // label1
+      // 
+      this.label1.Anchor = System.Windows.Forms.AnchorStyles.Left;
+      this.label1.AutoSize = true;
+      this.label1.Location = new System.Drawing.Point(382, 11);
+      this.label1.Name = "label1";
+      this.label1.Size = new System.Drawing.Size(32, 13);
+      this.label1.TabIndex = 2;
+      this.label1.Text = "Filter:";
+      // 
+      // txtFilter
+      // 
+      this.txtFilter.Anchor = System.Windows.Forms.AnchorStyles.Left;
+      this.txtFilter.Location = new System.Drawing.Point(420, 7);
+      this.txtFilter.Name = "txtFilter";
+      this.txtFilter.Size = new System.Drawing.Size(100, 20);
+      this.txtFilter.TabIndex = 3;
+      this.txtFilter.TextChanged += new System.EventHandler(this.txtFilter_TextChanged);
       // 
       // ExportResolve
       // 
@@ -225,5 +251,7 @@
     private System.Windows.Forms.DataGridViewTextBoxColumn colOrigin;
     private System.Windows.Forms.DataGridViewTextBoxColumn colType;
     private FlatButton btnActions;
+    private System.Windows.Forms.Label label1;
+    private System.Windows.Forms.TextBox txtFilter;
   }
 }

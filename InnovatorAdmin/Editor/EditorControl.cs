@@ -12,6 +12,7 @@ using System.Windows.Forms.Integration;
 using System.Windows.Threading;
 using System.Xml;
 using System.IO;
+using ICSharpCode.AvalonEdit;
 
 namespace InnovatorAdmin.Editor
 {
@@ -53,7 +54,7 @@ namespace InnovatorAdmin.Editor
       editor.TextArea.KeyDown += TextArea_KeyDown;
       host.Child = _extEditor;
 
-      
+
 
       editor.TextArea.IndentationStrategy = new ICSharpCode.AvalonEdit.Indentation.DefaultIndentationStrategy();
 
@@ -70,22 +71,65 @@ namespace InnovatorAdmin.Editor
       if (RunRequested != null) RunRequested.Invoke(this, e);
     }
 
+    private string GetCurrentQuery()
+    {
+      if (Editor.TextArea.Selection.IsEmpty)
+      {
+        var query = Helper.GetCurrentQuery(Editor.Text, Editor.CaretOffset);
+        return string.IsNullOrEmpty(query) ? Editor.Text : query;
+      }
+      var doc = Editor.Document;
+      var start = doc.GetOffset(Editor.TextArea.Selection.StartPosition.Location);
+      var end = doc.GetOffset(Editor.TextArea.Selection.EndPosition.Location);
+      return doc.GetText(start, end - start);
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+      base.OnKeyDown(e);
+    }
+
     void TextArea_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
+      // F5 or F9
       if (e.Key == System.Windows.Input.Key.F9 || e.Key == System.Windows.Input.Key.F5)
       {
         OnRunRequested(new RunRequestedEventArgs(Editor.Text));
       }
+      // Ctrl+Enter or Ctrl+Shift+E
       else if ((e.Key == System.Windows.Input.Key.Enter && IsControlDown(e.KeyboardDevice))
         || (e.Key == System.Windows.Input.Key.E && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice)))
       {
-        var query = Helper.GetCurrentQuery(Editor.Text, Editor.CaretOffset);
-        OnRunRequested(new RunRequestedEventArgs(string.IsNullOrEmpty(query) ? Editor.Text : query));
+        OnRunRequested(new RunRequestedEventArgs(GetCurrentQuery()));
       }
+      // Ctrl+Shift+Up
+      else if ((e.Key == System.Windows.Input.Key.Up && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
+        || (e.Key == System.Windows.Input.Key.Up && IsAltDown(e.KeyboardDevice)))
+      {
+        MoveLineUp();
+      }
+      // Ctrl+Shift+Down
+      else if ((e.Key == System.Windows.Input.Key.Down && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
+        || (e.Key == System.Windows.Input.Key.Down && IsAltDown(e.KeyboardDevice)))
+      {
+        MoveLineDown();
+      }
+      // Ctrl+T
       else if (e.Key == System.Windows.Input.Key.T && IsControlDown(e.KeyboardDevice)) // Indent the code
       {
         TidyXml();
       }
+      // Ctrl+Shift+U
+      else if (e.Key == System.Windows.Input.Key.U && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
+      {
+        TransformUppercase();
+      }
+      // Ctrl+U
+      else if (e.Key == System.Windows.Input.Key.U && IsControlDown(e.KeyboardDevice))
+      {
+        TransformLowercase();
+      }
+      // Ctrl+F
       else if (e.Key == System.Windows.Input.Key.F && IsControlDown(e.KeyboardDevice))
       {
         if (_findReplace == null)
@@ -98,6 +142,136 @@ namespace InnovatorAdmin.Editor
 
     }
 
+    public void ReplaceSelectionSegments(Func<string, string> insert)
+    {
+      if (Editor.TextArea.Selection is RectangleSelection)
+      {
+        var doc = Editor.Document;
+        using (doc.RunUpdate())
+        {
+          var sel = Editor.TextArea.Selection;
+          var segs = sel.Segments.Select(s => Tuple.Create(s.StartOffset, s.Length)).ToArray();
+          var start = sel.StartPosition;
+          var end = sel.EndPosition.Location;
+          var delta = 0;
+          var lastDiff = 0;
+          string replacement;
+          foreach (var seg in segs)
+          {
+            replacement = insert.Invoke(doc.GetText(seg.Item1 + delta, seg.Item2));
+            doc.Replace(seg.Item1 + delta, seg.Item2, replacement);
+            lastDiff = replacement.Length - seg.Item2;
+            delta += lastDiff;
+          }
+          Editor.TextArea.Selection = new RectangleSelection(Editor.TextArea, start,
+            new TextViewPosition(end.Line, end.Column + lastDiff));
+        }
+      }
+      else if (Editor.TextArea.Selection.IsEmpty)
+      {
+        Editor.Document.Insert(Editor.CaretOffset, insert.Invoke(string.Empty));
+      }
+      else
+      {
+        Editor.SelectedText = insert.Invoke(Editor.SelectedText);
+      }
+    }
+
+    private void OffsetLines(int offset)
+    {
+      offset = Math.Sign(offset);
+      if (offset == 0) return;
+
+      var loc = Editor.TextArea.Caret.Location;
+      var start = Editor.TextArea.Selection.IsEmpty ? loc : Editor.TextArea.Selection.StartPosition.Location;
+      var end = Editor.TextArea.Selection.IsEmpty ? loc : Editor.TextArea.Selection.EndPosition.Location;
+      var isRectangle = Editor.TextArea.Selection is RectangleSelection;
+      if (start.Line > 1)
+      {
+        var doc = Editor.Document;
+        using (doc.RunUpdate())
+        {
+          var firstLine = doc.GetLineByNumber(start.Line);
+          var lastLine = end.Line == start.Line
+            ? firstLine
+            : (end.Line == start.Line + 1
+              ? firstLine.NextLine
+              : doc.GetLineByNumber(end.Line));
+          var text = doc.GetText(firstLine.Offset, (lastLine.Offset + lastLine.TotalLength) - firstLine.Offset);
+
+          if (offset > 0)
+          {
+            var nextLine = lastLine.NextLine;
+            doc.Remove(firstLine.Offset, text.Length);
+            doc.Insert(firstLine.Offset + nextLine.TotalLength, text);
+          }
+          else
+          {
+            var prevLine = firstLine.PreviousLine;
+            doc.Remove(firstLine.Offset, text.Length);
+            doc.Insert(prevLine.Offset, text);
+          }
+
+          if (!start.Equals(end))
+          {
+            if (isRectangle)
+            {
+              Editor.TextArea.Selection = new RectangleSelection(Editor.TextArea
+                , new TextViewPosition(start.Line + offset, start.Column)
+                , new TextViewPosition(end.Line + offset, end.Column));
+            }
+            else
+            {
+              var startOffset = doc.GetOffset(start.Line + offset, start.Column);
+              var endOffset = doc.GetOffset(end.Line + offset, end.Column);
+              Editor.SelectionStart = startOffset;
+              Editor.SelectionLength = endOffset - startOffset;
+            }
+          }
+          Editor.TextArea.Caret.Location = new TextLocation(loc.Line + offset, loc.Column);
+        }
+      }
+    }
+
+    public void MoveLineDown()
+    {
+      OffsetLines(1);
+    }
+
+    public void MoveLineUp()
+    {
+      OffsetLines(-1);
+    }
+
+
+
+    public void TransformUppercase()
+    {
+      ReplaceSelectionSegments(t => t.ToUpperInvariant());
+    }
+    public void TransformLowercase()
+    {
+      ReplaceSelectionSegments(t => t.ToLowerInvariant());
+    }
+
+    //private void TransformSelection(Func<string, string> transform)
+    //{
+    //  var doc = Editor.Document;
+    //  using (doc.RunUpdate())
+    //  {
+    //    string text;
+    //    foreach (var segment in Editor.TextArea.Selection.Segments)
+    //    {
+    //      text = doc.GetText(segment);
+    //      doc.Replace(segment, transform.Invoke(text));
+    //    }
+    //  }
+    //}
+
+    private bool IsAltDown(System.Windows.Input.KeyboardDevice keyboard)
+    {
+      return keyboard.IsKeyDown(System.Windows.Input.Key.LeftAlt) || keyboard.IsKeyDown(System.Windows.Input.Key.RightAlt);
+    }
     private bool IsControlDown(System.Windows.Input.KeyboardDevice keyboard)
     {
       return keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl) || keyboard.IsKeyDown(System.Windows.Input.Key.RightCtrl);
@@ -195,7 +369,7 @@ namespace InnovatorAdmin.Editor
         }
       }
     }
-    
+
     protected override void Dispose(bool disposing)
     {
       base.Dispose(disposing);

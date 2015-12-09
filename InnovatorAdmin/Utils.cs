@@ -1,6 +1,7 @@
 ﻿using Innovator.Client;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -170,6 +171,29 @@ namespace InnovatorAdmin
     public static IPromise<T> UiPromise<T>(this IPromise<T> promise, Control ctrl)
     {
       return promise.WithInvoker((d, a) => ctrl.Invoke(d, a));
+    }
+
+    public static bool CellIsNull(this DataRow row, DataColumn col)
+    {
+      if (row.RowState == DataRowState.Deleted)
+        return row.IsNull(col, DataRowVersion.Original);
+      return row.IsNull(col);
+    }
+    public static bool CellIsNull(this DataRow row, string col)
+    {
+      return row.CellIsNull(row.Table.Columns[col]);
+    }
+    public static object CellValue(this DataRow row, DataColumn col)
+    {
+      if (row.RowState == DataRowState.Deleted)
+        return row[col, DataRowVersion.Original];
+      return row[col];
+    }
+    public static object CellValue(this DataRow row, string col)
+    {
+      if (row.RowState == DataRowState.Deleted)
+        return row[col, DataRowVersion.Original];
+      return row[col];
     }
   }
 }

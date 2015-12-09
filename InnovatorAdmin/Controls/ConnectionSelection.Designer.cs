@@ -59,6 +59,7 @@
       this.connEditor.Size = new System.Drawing.Size(542, 239);
       this.connEditor.TabIndex = 0;
       this.connEditor.SelectionChanged += new System.EventHandler(this.connEditor_SelectionChanged);
+      this.connEditor.ConnectionSelected += new System.EventHandler(this.connEditor_ConnectionSelected);
       // 
       // ConnectionSelection
       // 

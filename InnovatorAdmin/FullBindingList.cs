@@ -87,6 +87,10 @@ namespace InnovatorAdmin
       _list.ListChanged += _list_ListChanged;
       this.RaiseListChangedEvents = true;
     }
+    public FullBindingList(IEnumerable<T> items) : this()
+    {
+      AddRange(items);
+    }
     //public FullBindingList(IBindingList list)
     //{
     //  _list = list;

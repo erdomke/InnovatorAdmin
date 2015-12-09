@@ -14,8 +14,10 @@ namespace InnovatorAdmin.Controls
   {
     private T _progress;
     private IWizard _wizard;
+    private System.Windows.Forms.Timer _clock = new System.Windows.Forms.Timer();
     private System.Windows.Forms.Timer _timer = new System.Windows.Forms.Timer();
     private bool _unlinked = false;
+    private DateTime _start = DateTime.UtcNow;
 
     public Action<T> MethodInvoke { get; set; }
     public Action GoNextAction { get; set; }
@@ -30,6 +32,15 @@ namespace InnovatorAdmin.Controls
 
       _timer.Interval = 50;
       _timer.Tick += _timer_Tick;
+
+      _clock.Interval = 250;
+      _clock.Tick += _clock_Tick;
+      _clock.Enabled = true;
+    }
+
+    void _clock_Tick(object sender, EventArgs e)
+    {
+      lblTime.Text = (DateTime.UtcNow - _start).ToString(@"hh\:mm\:ss");
     }
 
     private void UnLink()
@@ -79,8 +90,8 @@ namespace InnovatorAdmin.Controls
     protected override void OnLoad(EventArgs e)
     {
       base.OnLoad(e);
-      var thread = new Thread(o => this.MethodInvoke(_progress));
-      thread.Start();
+      var _background = new Thread(o => this.MethodInvoke(_progress));
+      _background.Start();
     }
 
     public void Configure(IWizard wizard)

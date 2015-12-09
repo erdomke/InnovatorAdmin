@@ -69,7 +69,7 @@ namespace InnovatorAdmin
     {
       if (conn.Type == ConnectionType.Innovator)
       {
-        var arasUrl = conn.Url + "?database=" + conn.Database + "&username=" + conn.UserName + "&password=" + ScalcMD5(conn.Password);
+        var arasUrl = conn.Url + "?bypass_logon_form=1&database=" + conn.Database + "&username=" + conn.UserName + "&password=" + ScalcMD5(conn.Password);
         using (var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\IEXPLORE.EXE"))
         {
           if (key != null)

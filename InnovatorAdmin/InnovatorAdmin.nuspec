@@ -2,7 +2,7 @@
   <package>
     <metadata>
       <id>InnovatorAdmin</id>
-      <version>2015.12.02.2315</version>
+      <version>2015.12.09.0956</version>
       <authors>eric.domke</authors>
       <requireLicenseAcceptance>false</requireLicenseAcceptance>
       <description>Application for administrating an Aras Innovator instance</description>
@@ -26,6 +26,7 @@
 <file src="bin\Release\Mono.Cecil.Rocks.dll" target="lib/net45" />
 <file src="bin\Release\Mvp.Xml.dll" target="lib/net45" />
 <file src="bin\Release\NuGet.Squirrel.dll" target="lib/net45" />
+<file src="bin\Release\ObjectListView.dll" target="lib/net45" />
 <file src="bin\Release\Splat.dll" target="lib/net45" />
 <file src="bin\Release\Squirrel.dll" target="lib/net45" />
 <file src="bin\Release\InnovatorAdmin.exe" target="lib/net45" />

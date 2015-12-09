@@ -22,8 +22,8 @@
 
   <Color name="MethodCall" foreground="MidnightBlue" fontWeight="bold" />
 
-  <Color name="Variable" foreground="Red"  exampleText="@Variable" />
-  <Color name="Variable1" foreground="Red" exampleText="@@Variable" />
+  <Color name="Variable" foreground="DarkOrange"  exampleText="@Variable" />
+  <Color name="Variable1" foreground="DarkOrange" exampleText="@@Variable" />
 
   <Color name="ObjectReference" foreground="Teal" exampleText="Customer.Name" />
   <Color name="ObjectReference1" foreground="Teal" exampleText="dbo.Customer.Name" />
@@ -40,7 +40,11 @@
       <End color="XmlTag">&lt;/sql&gt;</End>
     </Span>
     <Span ruleSet="SqlScriptSet" multiline="true">
-      <Begin color="XmlTag"> condition="in"&gt;</Begin>
+      <Begin color="XmlTag">&lt;[^&gt;]+\s+condition=['"]in['"][^&gt;]*&gt;</Begin>
+      <End color="XmlTag">&lt;/\w+&gt;</End>
+    </Span>
+    <Span ruleSet="SqlScriptSet" multiline="true">
+      <Begin color="XmlTag"> condition='in'&gt;</Begin>
       <End color="XmlTag">&lt;/</End>
     </Span>
     <Span color="Comment" multiline="true">
@@ -459,5 +463,7 @@
       [\w\d\#]*
       #missing ;
     </Rule>
+  
+    <Rule color="Variable">@([\w]+)</Rule>
   </RuleSet>
 </SyntaxDefinition>

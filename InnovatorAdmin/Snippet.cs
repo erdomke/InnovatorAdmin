@@ -16,7 +16,7 @@ namespace InnovatorAdmin
     public Snippet(string fileContent)
     {
       var newLine = fileContent.IndexOfAny(_newLineChars);
-      if (newLine < 0) throw new ArgumentException();
+      if (newLine < 0) return;
       this.Action = fileContent.Substring(0, newLine).TrimEnd(_newLineChars);
       this.Text = fileContent.Substring(newLine).TrimStart(_newLineChars);
     }

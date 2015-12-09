@@ -69,5 +69,20 @@ namespace InnovatorAdmin.Controls
         Utils.HandleError(ex);
       }
     }
+
+    private void btnScripts_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        var script = Scripts.ScriptManager.Instance.PromptForScript(this
+          , this.RectangleToScreen(btnScripts.Bounds));
+        if (script != null)
+          new Scripts.ScriptWindow().WithScript(script).Show();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
   }
 }

@@ -13,7 +13,7 @@ namespace InnovatorAdmin.Controls
   public partial class ExportResolve : UserControl, IWizardStep
   {
     private IWizard _wizard;
-    private BindingList<ImportStepResolve> _items;
+    private FullBindingList<ImportStepResolve> _items;
     private bool _changes = false;
 
     public ExportResolve()
@@ -27,7 +27,8 @@ namespace InnovatorAdmin.Controls
       _wizard = wizard;
       _wizard.NextEnabled = true;
       _wizard.Message = "Please review the install script and modify as necessary";
-      _items = new BindingList<ImportStepResolve>(_wizard.InstallScript.Lines.Select(i => new ImportStepResolve() { Item = i }).ToList());
+      _items = new FullBindingList<ImportStepResolve>(
+        _wizard.InstallScript.Lines.Select(i => new ImportStepResolve() { Item = i }));
       resolveGrid.DataSource = _items;
     }
 
@@ -40,7 +41,7 @@ namespace InnovatorAdmin.Controls
           _wizard.InstallScript.Lines = (from i in _items
                                          where !i.HasChanges
                                          select i.Item).ToList();
-          e.Export(_wizard.InstallScript, 
+          e.Export(_wizard.InstallScript,
             e.NormalizeRequest(from i in _items
                                where i.HasChanges
                                select i.Item.Reference));
@@ -64,11 +65,11 @@ namespace InnovatorAdmin.Controls
       private InstallItem _item;
       private InstallType _type;
 
-      public InstallItem Item 
+      public InstallItem Item
       {
         get { return _item; }
-        set 
-        { 
+        set
+        {
           _item = value;
           _type = _item.Type;
         }
@@ -96,7 +97,7 @@ namespace InnovatorAdmin.Controls
         _type = _item.Type;
       }
     }
-    
+
     private void resolveGrid_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
     {
       try
@@ -171,12 +172,16 @@ namespace InnovatorAdmin.Controls
       using (var dialog = new EditorWindow())
       {
         dialog.AllowRun = false;
-        dialog.AmlGetter = o => Utils.FormatXml(((ImportStepResolve)o).Item.Script);
-        dialog.AmlSetter = (o,a) => ((ImportStepResolve)o).Item.SetScript(a);
-        dialog.DisplayMember = "Name";
-        dialog.DataSource = SelectedRows().ToList();
+        //dialog.AmlGetter = o => Utils.FormatXml(((ImportStepResolve)o).Item.Script);
+        //dialog.AmlSetter = (o,a) => ((ImportStepResolve)o).Item.SetScript(a);
+        //dialog.DisplayMember = "Name";
+        //dialog.DataSource = SelectedRows().ToList();
+        dialog.Script = Utils.FormatXml(SelectedRows().First().Item.Script);
         dialog.SetConnection(_wizard.Connection, _wizard.ConnectionInfo.First().ConnectionName);
-        dialog.ShowDialog(this);
+        if (dialog.ShowDialog(this) == DialogResult.OK)
+        {
+          SelectedRows().First().Item.SetScript(dialog.Script);
+        }
       }
     }
 
@@ -243,6 +248,25 @@ namespace InnovatorAdmin.Controls
     private void btnActions_Click(object sender, EventArgs e)
     {
       ShowContextMenu(btnActions.Parent.PointToScreen(new Point(btnActions.Left, btnActions.Bottom)));
+    }
+
+    private void txtFilter_TextChanged(object sender, EventArgs e)
+    {
+      try
+      {
+        if (string.IsNullOrEmpty(txtFilter.Text))
+        {
+          _items.RemoveFilter();
+        }
+        else
+        {
+          _items.ApplyFilter(i => i.Name.IndexOf(txtFilter.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+        }
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
     }
   }
 }

@@ -372,7 +372,7 @@ namespace ADiff
 
 
     ///// <summary>
-    ///// 
+    /////
     ///// </summary>
     ///// <param name="oldValue"></param>
     ///// <param name="newValue"></param>
@@ -447,7 +447,7 @@ namespace ADiff
 
     //  for (var i = 0; i < newNums.Length - 1; i++)
     //  {
-    //    if (newNums[i] >= 0 
+    //    if (newNums[i] >= 0
     //      && newNums[i] < (oldNums.Length - 1)
     //      && newNums[i + 1] < 0
     //      && newSymbols[i+1].Symbol == oldSymbols[newNums[i]+1].Symbol)
@@ -469,7 +469,6 @@ namespace ADiff
     //    }
     //  }
 
-    //  System.Diagnostics.Debug.Print("hit");
     //}
 
     //private enum SymbolCount
@@ -488,7 +487,7 @@ namespace ADiff
     //    get { return (SymbolCount)((_counts >> 2) & 0x3); }
     //  }
     //  public int OldLineNumber { get; set; }
-    //  public SymbolCount OldCount 
+    //  public SymbolCount OldCount
     //  {
     //    get { return (SymbolCount)(_counts & 0x3); }
     //  }
@@ -553,12 +552,12 @@ namespace ADiff
     //  LeftAndParent = 6,
     //  All = 7
     //}
-    
+
     public MergeDocument diff_three_way(string parent, string text1, string text2)
     {
       List<string> lineArray;
       var diffs = diff_three_way(parent, text1, text2, DateTime.Now.AddMilliseconds(5000), out lineArray);
-      
+
       var leftBuilder = new StringBuilder();
       int leftCount = 0;
       var rightBuilder = new StringBuilder();
@@ -570,7 +569,7 @@ namespace ADiff
       int currAllEqual;
 
       var result = new MergeDocument();
-      
+
       Action processBuilders = () => {
         var block = new MergeBlock();
         block.Alternates.Add(new MergeAlternate(block) {
@@ -579,12 +578,12 @@ namespace ADiff
           Location = MergeLocation.Left
         });
         result.Blocks.Add(block);
-        
+
         if (rightBuilder.ToString() == block.Alternates[0].Text)
         {
           block.Alternates[0].Location |= MergeLocation.Right;
         }
-        else 
+        else
         {
           block.Alternates.Add(new MergeAlternate(block)
           {
@@ -625,13 +624,13 @@ namespace ADiff
           {
             block.Alternates.First(b => b.Location != MergeLocation.Parent).Location |= MergeLocation.Output;
           }
-          else 
+          else
           {
             block.Alternates.First(b => (b.Location & MergeLocation.Parent) == 0).Location |= MergeLocation.Output;
           }
           block.IsConflict = false;
         }
-        else 
+        else
         {
           block.IsConflict = true;
         }
@@ -650,7 +649,7 @@ namespace ADiff
         currAllEqual = (diff.Parent >= 0 && diff.Left >= 0 && diff.Right >= 0 ? 1 : 0);
         if (lastAllEqual >= 0 && lastAllEqual != currAllEqual)
         {
-          processBuilders(); 
+          processBuilders();
         }
         text = lineArray[Math.Max(Math.Max(diff.Left, diff.Parent), diff.Right)];
         if (diff.Left >= 0)
@@ -690,7 +689,7 @@ namespace ADiff
 
       lineArray = new List<string>();
       Dictionary<string, int> lineHash = new Dictionary<string, int>();
-      
+
       // "\x00" is a valid character, but various debuggers don't like it.
       // So we'll insert a junk entry to avoid generating a null character.
       lineArray.Add(string.Empty);
@@ -1547,7 +1546,7 @@ namespace ADiff
           string bestEquality1 = equality1;
           string bestEdit = edit;
           string bestEquality2 = equality2;
-          int bestScore = 
+          int bestScore =
               diff_cleanupSemanticScore_Line(lines[(int)equality1.Last()], lines[(int)edit[0]]) +
               diff_cleanupSemanticScore_Line(lines[(int)edit.Last()], lines[(int)equality2[0]]);
           while (edit.Length != 0 && equality2.Length != 0
@@ -1556,7 +1555,7 @@ namespace ADiff
             equality1 += edit[0];
             edit = edit.Substring(1) + equality2[0];
             equality2 = equality2.Substring(1);
-            int score = 
+            int score =
               diff_cleanupSemanticScore_Line(lines[(int)equality1.Last()], lines[(int)edit[0]]) +
               diff_cleanupSemanticScore_Line(lines[(int)edit.Last()], lines[(int)equality2[0]]);
             // The >= encourages trailing rather than leading whitespace on

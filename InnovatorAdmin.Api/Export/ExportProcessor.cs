@@ -7,6 +7,7 @@ using System.Xml.Xsl;
 using System.IO;
 using System.Diagnostics;
 using Innovator.Client;
+using System.Threading.Tasks;
 
 namespace InnovatorAdmin
 {
@@ -22,8 +23,7 @@ namespace InnovatorAdmin
 
     private IAsyncConnection _conn;
     private DependencyAnalyzer _dependAnalyzer;
-    private Dictionary<string, ItemType> _itemTypesById;
-    private Dictionary<string, ItemType> _itemTypesByName;
+    private ArasMetadataProvider _metadata;
     XslCompiledTransform _resultTransform;
     public event EventHandler<ActionCompleteEventArgs> ActionComplete;
     public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
@@ -31,12 +31,14 @@ namespace InnovatorAdmin
     public ExportProcessor(IAsyncConnection conn)
     {
       _conn = conn;
+      _metadata = ArasMetadataProvider.Cached(conn);
+      _dependAnalyzer = new DependencyAnalyzer(_metadata);
     }
 
     public void Export(InstallScript script, IEnumerable<ItemReference> items)
     {
       ReportProgress(0, "Loading system data");
-      EnsureSystemData();
+      _metadata.Wait();
 
       var uniqueItems = new HashSet<ItemReference>(items);
       if (script.Lines != null) uniqueItems.ExceptWith(script.Lines.Select(l => l.Reference));
@@ -50,15 +52,15 @@ namespace InnovatorAdmin
 
       ConvertPolyItemReferencesToActualType(itemList);
       string itemType;
-      foreach (var typeItems in (from i in itemList
-                                 group i by new { Type = i.Type, Levels = i.Levels } into typeGroup
-                                 select typeGroup))
+
+      var groups = itemList.PagedGroupBy(i => new { Type = i.Type, Levels = i.Levels }, 25);
+      foreach (var typeItems in groups)
       {
         whereClause.Length = 0;
         itemType = typeItems.Key.Type;
 
         // For versionable item types, get the latest generation
-        if (_itemTypesByName.TryGetValue(typeItems.Key.Type.ToLowerInvariant(), out metaData) && metaData.IsVersionable)
+        if (_metadata.ItemTypeByName(typeItems.Key.Type.ToLowerInvariant(), out metaData) && metaData.IsVersionable)
         {
           queryElem = outputDoc.CreateElement("Item")
             .Attr("action", "get")
@@ -127,7 +129,16 @@ namespace InnovatorAdmin
               typeItems.Where(i => !i.Unique.IsGuid()).Select(i => i.Unique).Aggregate((p, c) => p + " or " + c));
           }
 
-          queryElem.SetAttribute("where", "(" + whereClause.ToString() + ") " + Properties.Resources.ListSqlCriteria);
+          queryElem.SetAttribute("where", "(" + whereClause.ToString() + @") and not [List].[id] in (
+            select l.id
+            from innovator.LIST l
+            inner join innovator.PROPERTY p
+            on l.id = p.DATA_SOURCE
+            and p.name = 'itemtype'
+            inner join innovator.ITEMTYPE it
+            on it.id = p.SOURCE_ID
+            and it.IMPLEMENTATION_TYPE = 'polymorphic'
+            )");
         }
         else
         {
@@ -152,14 +163,13 @@ namespace InnovatorAdmin
           queryElem.SetAttribute("where", whereClause.ToString());
         }
 
-        SetQueryAttributes(queryElem, typeItems.Key.Type, typeItems.Key.Levels, typeItems);
+        SetQueryAttributes(queryElem, itemType, typeItems.Key.Levels, typeItems);
         outputDoc.DocumentElement.AppendChild(queryElem);
       }
 
       try
       {
         ReportProgress(0, "Loading system data");
-        EnsureSystemData();
 
         FixFederatedRelationships(outputDoc.DocumentElement);
         var result = ExecuteExportQuery(outputDoc.DocumentElement);
@@ -183,6 +193,7 @@ namespace InnovatorAdmin
         RemoveKeyedNameAttributes(doc);
         ExpandSystemIdentities(doc);
         FixFormFieldsPointingToSystemProperties(doc);
+        RemoveVersionableRelIds(doc);
         //TODO: Replace references to poly item lists
 
         Export(script, doc, warnings);
@@ -210,11 +221,13 @@ namespace InnovatorAdmin
     {
       try
       {
-        EnsureSystemData();
+        _metadata.Wait();
         FixPolyItemReferences(doc);
+        FixPolyItemListReferences(doc);
         FixForeignProperties(doc);
         FixCyclicalWorkflowLifeCycleRefs(doc);
         FixCyclicalWorkflowItemTypeRefs(doc);
+        
         MoveFormRefsInline(doc, (script.Lines ?? Enumerable.Empty<InstallItem>()).Where(l => l.Type == InstallType.Create || l.Type == InstallType.Script));
 
         // Sort the resulting nodes as appropriate
@@ -536,7 +549,7 @@ namespace InnovatorAdmin
                                  group i by i.Type into typeGroup
                                  select typeGroup).ToList())
       {
-        if (_itemTypesByName.TryGetValue(typeItems.Key.ToLowerInvariant(), out metaData) && metaData.IsPolymorphic)
+        if (_metadata.ItemTypeByName(typeItems.Key.ToLowerInvariant(), out metaData) && metaData.IsPolymorphic)
         {
           whereClause.Length = 0;
 
@@ -576,7 +589,7 @@ namespace InnovatorAdmin
           foreach (var polyItem in polyItems)
           {
             newRef = ItemReference.FromFullItem(polyItem, true);
-            realType = _itemTypesByName.Values.FirstOrDefault(t => t.Id == polyItem.Property("itemtype").AsString(""));
+            realType = _metadata.ItemTypes.FirstOrDefault(t => t.Id == polyItem.Property("itemtype").AsString(""));
             if (realType != null) newRef.Type = realType.Name;
             itemList.Add(newRef);
           }
@@ -588,37 +601,25 @@ namespace InnovatorAdmin
     /// </summary>
     private XmlDocument ExecuteExportQuery(XmlNode query)
     {
-      var result = new XmlDocument();
-      result.AppendChild(result.CreateElement("Result"));
-      IEnumerable<IReadOnlyItem> resultItems;
       var queryItems = query.Elements("Item").ToList();
-      var i = 0;
-      ReportProgress(4, string.Format("Searching for data ({0} of {1})", i, queryItems.Count));
-      foreach (var item in queryItems)
-      {
-        resultItems = _conn.Apply(item).Items();
-        XmlDocument doc;
-        foreach (var resultItem in resultItems)
+      ReportProgress(4, "Searching for data...");
+
+      var promises = queryItems.Select(q => (Func<IPromise>)(
+          () => _conn.ApplyAsync(q, true, false)
+            .Convert(r => r.Items().Select(i => i.ToAml())))
+        ).ToArray();
+      var items = Promises.Pooled(30, promises)
+        .Progress((i, m) =>
         {
-          doc = new XmlDocument();
-          doc.LoadXml(resultItem.ToAml());
-          result.DocumentElement.AppendChild(result.ImportNode(doc.DocumentElement, true));
-        }
-        i++;
-        ReportProgress(4 + (int)(i * 90.0 / queryItems.Count), string.Format("Searching for data ({0} of {1})", i, queryItems.Count));
-      }
+          ReportProgress(4 + (int)(i * 0.9), "Searching for data...");
+        }).Wait();
+
+      var reader = new StringEnumerableReader(Enumerable.Repeat("<Result>", 1)
+        .Concat(items.SelectMany(r => (IEnumerable<string>)r))
+        .Concat(Enumerable.Repeat("</Result>", 1)));
+      var result = new XmlDocument();
+      result.Load(reader);
       return result;
-    }
-
-    private void EnsureSystemData()
-    {
-      if (_itemTypesByName == null)
-      {
-        EnsureSystemData(_conn, ref _itemTypesByName);
-        _itemTypesById = _itemTypesByName.Values.ToDictionary(i => i.Id);
-
-        _dependAnalyzer = new DependencyAnalyzer(_conn, _itemTypesByName);
-      }
     }
 
     /// <summary>
@@ -629,7 +630,7 @@ namespace InnovatorAdmin
       ItemReference ident;
       foreach (var elem in doc.ElementsByXPath("//self::node()[local-name() != 'Item' and local-name() != 'id' and local-name() != 'config_id' and local-name() != 'source_id' and @type='Identity' and not(Item)]").ToList())
       {
-        ident = _dependAnalyzer.GetSystemIdentity(elem.InnerText);
+        ident = _metadata.GetSystemIdentity(elem.InnerText);
         if (ident != null)
         {
           elem.InnerXml = "<Item type=\"Identity\" action=\"get\" select=\"id\"><name>" + ident.KeyedName + "</name></Item>";
@@ -706,7 +707,7 @@ namespace InnovatorAdmin
       foreach (var item in query.ChildNodes.OfType<XmlElement>())
       {
         if (item.Attribute("levels") == "1"
-          && _itemTypesByName.TryGetValue(item.Attribute("type").ToLowerInvariant(), out itemType)
+          && _metadata.ItemTypeByName(item.Attribute("type").ToLowerInvariant(), out itemType)
           && itemType.Relationships.Any(r => r.IsFederated))
         {
           item.RemoveAttribute("levels");
@@ -795,9 +796,9 @@ namespace InnovatorAdmin
     private void FixPolyItemReferences(XmlDocument doc)
     {
       var polyQuery = "//*["
-        + (from i in _itemTypesByName
-           where i.Value.IsPolymorphic
-           select "@type='" + i.Value.Name + "'")
+        + (from i in _metadata.ItemTypes
+           where i.IsPolymorphic
+           select "@type='" + i.Name + "'")
           .Aggregate((p, c) => p + " or " + c)
         + "]";
       var elements = doc.ElementsByXPath(polyQuery);
@@ -827,7 +828,7 @@ namespace InnovatorAdmin
         {
           if (elementsByRef.TryGetValue(ItemReference.FromFullItem(item, false), out fixElems))
           {
-            fullType = _itemTypesById[item.Property("itemtype").AsString("")];
+            fullType = _metadata.TypeById(item.Property("itemtype").AsString(""));
             if (fullType != null)
             {
               foreach (var elem in fixElems)
@@ -857,7 +858,7 @@ namespace InnovatorAdmin
         var item = _conn.Apply(whereQuery.Query).Items().FirstOrDefault();
         if (elementsByRef.TryGetValue(whereQuery.Ref, out fixElems))
         {
-          fullType = _itemTypesById[item.Property("itemtype").AsString("")];
+          fullType = _metadata.TypeById(item.Property("itemtype").AsString(""));
           if (fullType != null)
           {
             foreach (var elem in fixElems)
@@ -866,6 +867,27 @@ namespace InnovatorAdmin
             }
           }
         }
+      }
+    }
+
+    /// <summary>
+    /// Convert references to polyitem lists (which are not exported as they are auto-generated)
+    /// to AML gets
+    /// </summary>
+    private void FixPolyItemListReferences(XmlDocument doc)
+    {
+      var query = "//*["
+        + (from i in _metadata.PolyItemLists
+           select "text()='" + i.Unique + "'")
+          .Aggregate((p, c) => p + " or " + c)
+        + "]";
+      var elements = doc.ElementsByXPath(query);
+      
+      ItemReference itemRef;
+      foreach (var elem in elements)
+      {
+        itemRef = _metadata.PolyItemLists.Single(i => i.Unique == elem.InnerText);
+        elem.InnerXml = "<Item type='List' action='get'><name>" + itemRef.KeyedName + "</name></Item>";
       }
     }
 
@@ -894,7 +916,7 @@ namespace InnovatorAdmin
         // Find all of the elements referencing versionable item types
         if (!e.HasAttribute(XmlFlags.Attr_Float)
           && !string.IsNullOrEmpty(type)
-          && _itemTypesByName.TryGetValue(type.ToLowerInvariant(), out itemType)
+          && _metadata.ItemTypeByName(type.ToLowerInvariant(), out itemType)
           && itemType.IsVersionable)
         {
           ItemType parent;
@@ -906,7 +928,7 @@ namespace InnovatorAdmin
                 && e.Parent().Parent().LocalName == "Item"
                 && e.Attribute("action", "") != "get")
               {
-                if (_itemTypesByName.TryGetValue(e.Parent().Parent().Attribute("type").ToLowerInvariant(), out parent)
+                if (_metadata.ItemTypeByName(e.Parent().Parent().Attribute("type").ToLowerInvariant(), out parent)
                   && parent.FloatProperties.Contains(e.Parent().LocalName))
                 {
                   e.SetAttribute(XmlFlags.Attr_Float, "1");
@@ -923,7 +945,7 @@ namespace InnovatorAdmin
               // For item properties (with no Item tag) set to float, make sure they float
               if (!e.Elements().Any()
                 && e.Parent().LocalName == "Item"
-                && _itemTypesByName.TryGetValue(e.Parent().Attribute("type").ToLowerInvariant(), out parent)
+                && _metadata.ItemTypeByName(e.Parent().Attribute("type").ToLowerInvariant(), out parent)
                 && parent.FloatProperties.Contains(e.LocalName))
               {
                 refs.Add(Tuple.Create(itemType, e.InnerText));
@@ -1035,7 +1057,7 @@ namespace InnovatorAdmin
 
       foreach (var form in doc.ElementsByXPath("//Item[@type='Form' and @action and @id]").ToList())
       {
-        var references = doc.ElementsByXPath(".//self::node()[local-name() != 'Item' and local-name() != 'id' and local-name() != 'config_id' and @type='Form' and not(Item) and text() = $p0]", form.Attribute("id", ""))
+        var references = doc.ElementsByXPath(".//related_id[@type='Form' and not(Item) and text() = $p0]", form.Attribute("id", ""))
           //.Concat(otherDocs.SelectMany(d => d.ElementsByXPath("//self::node()[local-name() != 'Item' and local-name() != 'id' and local-name() != 'config_id' and @type='Form' and not(Item) and text() = $p0]", form.Attribute("id", "")))).ToList();
           .ToList();
         if (references.Any())
@@ -1052,7 +1074,7 @@ namespace InnovatorAdmin
 
         foreach (var line in lines)
         {
-          references = line.Script.ElementsByXPath(".//self::node()[local-name() != 'Item' and local-name() != 'id' and local-name() != 'config_id' and @type='Form' and not(Item) and text() = $p0]", form.Attribute("id", "")).ToList();
+          references = line.Script.ElementsByXPath(".//related_id[@type='Form' and not(Item) and text() = $p0]", form.Attribute("id", "")).ToList();
           if (references.Any())
           {
             if (formItemRef == null) formItemRef = ItemReference.FromFullItem(form, false);
@@ -1111,6 +1133,30 @@ namespace InnovatorAdmin
         attr.Detatch();
       }
     }
+
+    /// <summary>
+    /// Remove related items from relationships to non-dependent itemtypes (they should be exported separately).
+    /// </summary>
+    /// <remarks>
+    /// Floating relationships to versionable items are flagged to float.
+    /// </remarks>
+    private void RemoveVersionableRelIds(XmlDocument doc)
+    {
+      var query = "//Item["
+        + (from i in _metadata.ItemTypes
+           where i.IsVersionable
+           select "@type='" + i.Name + "'")
+          .Aggregate((p, c) => p + " or " + c)
+        + "]/Relationships/Item[@id]";
+      var elements = doc.ElementsByXPath(query).ToList();
+      foreach (var elem in elements)
+      {
+        elem.RemoveAttribute("id");
+      }
+    }
+    
+
+
     /// <summary>
     /// Remove related items from relationships to non-dependent itemtypes (they should be exported separately).
     /// </summary>
@@ -1136,7 +1182,7 @@ namespace InnovatorAdmin
         }
 
         Debug.Print(parents.GroupConcat(" > ", p => ItemReference.FromFullItem(p, true).ToString()) + " > " + ItemReference.FromFullItem(elem.Element("Item"), true).ToString());
-        if (parents.Count >= levels && _itemTypesByName.TryGetValue(elem.Element("Item").Attribute("type").ToLowerInvariant(), out itemType) && !itemType.IsDependent)
+        if (parents.Count >= levels && _metadata.ItemTypeByName(elem.Element("Item").Attribute("type").ToLowerInvariant(), out itemType) && !itemType.IsDependent)
         {
           Debug.Print("Removing");
           if (itemType.IsVersionable && elem.Parent().Element("behavior", "").IndexOf("float") >= 0)
@@ -1205,7 +1251,7 @@ namespace InnovatorAdmin
         case "Life Cycle Map":
         case "Workflow Map":
           queryElem.SetAttribute("levels", "3");
-          levels = 1;
+          levels = 3;
           break;
         default:
           levels = (levels < 0 ? 1 : levels);
@@ -1304,7 +1350,7 @@ namespace InnovatorAdmin
       if (_itemTypes == null)
       {
         _itemTypes = new Dictionary<string, ItemType>();
-        var itemTypes = _conn.Apply(Properties.Resources.ItemTypeData).Items();
+        var itemTypes = _conn.Apply(@"<Item type='ItemType' action='get' select='is_versionable,is_dependent,implementation_type,core,name'></Item>").Items();
         ItemType result;
         foreach (var itemTypeData in itemTypes)
         {
@@ -1320,7 +1366,7 @@ namespace InnovatorAdmin
           _itemTypes[result.Name.ToLowerInvariant()] = result;
         }
 
-        var relationships = _conn.Apply(Properties.Resources.RelationshipData).Items();
+        var relationships = _conn.Apply(@"<Item action='get' type='RelationshipType' related_expand='0' select='related_id,source_id,relationship_id,name' />").Items();
         ItemType relType;
         foreach (var rel in relationships)
         {
@@ -1333,7 +1379,16 @@ namespace InnovatorAdmin
           }
         }
 
-        var floatProps = _conn.Apply(Properties.Resources.FloatProperties).Items();
+        var floatProps = _conn.Apply(@"<Item type='Property' action='get' select='source_id,item_behavior,name' related_expand='0'>
+                                        <data_type>item</data_type>
+                                        <data_source>
+                                          <Item type='ItemType' action='get'>
+                                            <is_versionable>1</is_versionable>
+                                          </Item>
+                                        </data_source>
+                                        <item_behavior>float</item_behavior>
+                                        <name condition='not in'>'config_id','id'</name>
+                                      </Item>").Items();
         foreach (var floatProp in floatProps)
         {
           if (_itemTypes.TryGetValue(floatProp.SourceId().Attribute("name").Value.ToLowerInvariant(), out result))

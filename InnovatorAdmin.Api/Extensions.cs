@@ -155,5 +155,52 @@ namespace InnovatorAdmin
       }
       return result;
     }
+
+    public static IEnumerable<IGrouping<TKey, T>> PagedGroupBy<T, TKey>(this IEnumerable<T> items, Func<T, TKey> keySelector, int batchSize)
+    {
+      var elems = new Dictionary<TKey, Grouping<TKey, T>>();
+      TKey key;
+      Grouping<TKey, T> list;
+
+      foreach (var item in items)
+      {
+        key = keySelector(item);
+        if (!elems.TryGetValue(key, out list) || list == null)
+        {
+          list = new Grouping<TKey, T>();
+          list.Key = key;
+          elems[key] = list;
+        }
+        list.Values.Add(item);
+        if (list.Values.Count >= batchSize)
+        {
+          yield return list;
+          elems[key] = null;
+        }
+      }
+
+      foreach (var kvp in elems.Where(k => k.Value != null))
+      {
+        yield return kvp.Value;
+      }
+    }
+
+    private class Grouping<TKey, T> : IGrouping<TKey, T>
+    {
+      private List<T> _values = new List<T>();
+
+      public TKey Key { get; internal set; }
+      internal IList<T> Values { get { return _values; } }
+
+      public IEnumerator<T> GetEnumerator()
+      {
+        return _values.GetEnumerator();
+      }
+
+      System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+      {
+        return this.GetEnumerator();
+      }
+    }
   }
 }

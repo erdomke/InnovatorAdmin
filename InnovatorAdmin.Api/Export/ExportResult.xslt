@@ -197,8 +197,11 @@
   <xsl:template match="Item[@type='Property' and data_type!='item' ]/item_behavior"/>
   <xsl:template match="Relationships/Item/source_id" />
 
-  <!-- Eliminate current value property from Sequences -->
-  <xsl:template match="Item[@type='sequence']/current_value"/>
+  <!-- Eliminate current_value property from Sequences -->
+  <xsl:template match="Item[@type='Sequence']/current_value"/>
+
+  <!-- Eliminate execution_count property from SQL items -->
+  <xsl:template match="Item[@type='SQL']/execution_count"/>
 
   <!-- Eliminate meaningless classificaton properties -->
   <xsl:template match="classification[text() = '' or text() = '/*']"/>

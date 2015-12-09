@@ -31,21 +31,24 @@
     {
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
       this.lblMessage = new System.Windows.Forms.Label();
-      this.progBar = new System.Windows.Forms.ProgressBar();
       this.btnCancel = new InnovatorAdmin.Controls.FlatButton();
+      this.progBar = new System.Windows.Forms.ProgressBar();
+      this.lblTime = new System.Windows.Forms.Label();
       this.tableLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
       // 
       // tableLayoutPanel1
       // 
       this.tableLayoutPanel1.BackColor = System.Drawing.Color.White;
-      this.tableLayoutPanel1.ColumnCount = 3;
+      this.tableLayoutPanel1.ColumnCount = 4;
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
-      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
       this.tableLayoutPanel1.Controls.Add(this.lblMessage, 1, 1);
+      this.tableLayoutPanel1.Controls.Add(this.btnCancel, 2, 3);
       this.tableLayoutPanel1.Controls.Add(this.progBar, 1, 2);
-      this.tableLayoutPanel1.Controls.Add(this.btnCancel, 1, 3);
+      this.tableLayoutPanel1.Controls.Add(this.lblTime, 1, 3);
       this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
       this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -60,20 +63,12 @@
       // lblMessage
       // 
       this.lblMessage.AutoSize = true;
+      this.tableLayoutPanel1.SetColumnSpan(this.lblMessage, 2);
       this.lblMessage.Location = new System.Drawing.Point(103, 239);
       this.lblMessage.Margin = new System.Windows.Forms.Padding(3);
       this.lblMessage.Name = "lblMessage";
       this.lblMessage.Size = new System.Drawing.Size(0, 13);
       this.lblMessage.TabIndex = 0;
-      // 
-      // progBar
-      // 
-      this.progBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-      this.progBar.Location = new System.Drawing.Point(103, 258);
-      this.progBar.Name = "progBar";
-      this.progBar.Size = new System.Drawing.Size(499, 23);
-      this.progBar.TabIndex = 1;
       // 
       // btnCancel
       // 
@@ -95,6 +90,25 @@
       this.btnCancel.UseVisualStyleBackColor = false;
       this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
       // 
+      // progBar
+      // 
+      this.progBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.tableLayoutPanel1.SetColumnSpan(this.progBar, 2);
+      this.progBar.Location = new System.Drawing.Point(103, 258);
+      this.progBar.Name = "progBar";
+      this.progBar.Size = new System.Drawing.Size(499, 23);
+      this.progBar.TabIndex = 1;
+      // 
+      // lblTime
+      // 
+      this.lblTime.AutoSize = true;
+      this.lblTime.Location = new System.Drawing.Point(103, 287);
+      this.lblTime.Margin = new System.Windows.Forms.Padding(3);
+      this.lblTime.Name = "lblTime";
+      this.lblTime.Size = new System.Drawing.Size(0, 13);
+      this.lblTime.TabIndex = 3;
+      // 
       // ProgressStep
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -114,5 +128,6 @@
     private System.Windows.Forms.Label lblMessage;
     private System.Windows.Forms.ProgressBar progBar;
     private FlatButton btnCancel;
+    private System.Windows.Forms.Label lblTime;
   }
 }

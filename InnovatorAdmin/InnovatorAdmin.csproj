@@ -61,7 +61,8 @@
       <HintPath>..\packages\squirrel.windows.1.2.1\lib\Net45\ICSharpCode.SharpZipLib.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Innovator.Client">
+    <Reference Include="Innovator.Client, Version=2015.12.7.1658, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\Innovator.Client.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
@@ -96,6 +97,10 @@
     </Reference>
     <Reference Include="NuGet.Squirrel, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\squirrel.windows.1.2.1\lib\Net45\NuGet.Squirrel.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ObjectListView, Version=2.9.0.25611, Culture=neutral, PublicKeyToken=b1c5bf581481bcd4, processorArchitecture=MSIL">
+      <HintPath>..\packages\ObjectListView.Official.2.9.0\lib\net20\ObjectListView.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PresentationCore" />
@@ -175,10 +180,11 @@
     </Compile>
     <Compile Include="Dialog\structs.cs" />
     <Compile Include="Dialog\Win32.cs" />
-    <Compile Include="EditorWindow\EditorWindow.cs">
+    <Compile Include="Ide\EditorTreeNode.cs" />
+    <Compile Include="Ide\EditorWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="EditorWindow\EditorWindow.Designer.cs">
+    <Compile Include="Ide\EditorWindow.Designer.cs">
       <DependentUpon>EditorWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="ConnectionEditor.cs">
@@ -245,51 +251,58 @@
     <Compile Include="Controls\Welcome.Designer.cs">
       <DependentUpon>Welcome.cs</DependentUpon>
     </Compile>
-    <Compile Include="EditorWindow\ICommand.cs" />
-    <Compile Include="EditorWindow\IEditorProxy.cs" />
-    <Compile Include="EditorWindow\InputBox.cs">
+    <Compile Include="Ide\ICommand.cs" />
+    <Compile Include="Ide\IEditorProxy.cs" />
+    <Compile Include="Ide\IEditorTreeNode.cs" />
+    <Compile Include="Ide\InputBox.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="EditorWindow\InputBox.Designer.cs">
+    <Compile Include="Ide\InputBox.Designer.cs">
       <DependentUpon>InputBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="EditorWindow\ArasEditorProxy.cs" />
-    <Compile Include="EditorWindow\IResultObject.cs" />
-    <Compile Include="EditorWindow\ProxyFactory.cs" />
-    <Compile Include="EditorWindow\SqlEditorProxy.cs" />
-    <Compile Include="Editor\Completion\ISqlMetadataProvider.cs" />
-    <Compile Include="Editor\Completion\SqlGeneralCompletionData.cs" />
-    <Compile Include="Editor\Completion\SqlObjectCompletionData.cs" />
-    <Compile Include="Editor\Schema\ItemType.cs" />
-    <Compile Include="Editor\Schema\ItemTypeCollection.cs" />
-    <Compile Include="Editor\Schema\Property.cs" />
-    <Compile Include="Editor\Schema\PropertyCollection.cs" />
-    <Compile Include="Editor\Schema\PropertyType.cs" />
-    <Compile Include="Editor\Schema\SqlColumn.cs" />
-    <Compile Include="Editor\Schema\SqlObject.cs" />
-    <Compile Include="Editor\Completion\CompletionType.cs" />
-    <Compile Include="Editor\Completion\CompletionContext.cs" />
-    <Compile Include="Editor\Completion\CompletionHelper.cs" />
-    <Compile Include="Editor\Completion\SqlCompletionHelper.cs" />
-    <Compile Include="Editor\Completion\SqlGroup.cs" />
-    <Compile Include="Editor\Completion\SqlGroupBase.cs" />
-    <Compile Include="Editor\Completion\SqlLiteral.cs" />
-    <Compile Include="Editor\Completion\SqlNode.cs" />
-    <Compile Include="Editor\Completion\SqlNameDefinition.cs" />
-    <Compile Include="Editor\Completion\SqlTokenizer.cs" />
-    <Compile Include="Editor\Completion\SqlType.cs" />
+    <Compile Include="Ide\ArasEditorProxy.cs" />
+    <Compile Include="Ide\IResultObject.cs" />
+    <Compile Include="Ide\ProxyFactory.cs" />
+    <Compile Include="Ide\EditorScript.cs" />
+    <Compile Include="Ide\SqlEditorProxy.cs" />
+    <Compile Include="Ide\SqlResultObject.cs" />
+    <Compile Include="Ide\TreeImages.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TreeImages.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Editor\Aml\AttributeCompletionData.cs" />
+    <Compile Include="Editor\Aml\AttributeValueCompletionData.cs" />
+    <Compile Include="Editor\CompletionData\CompletionExtensions.cs" />
+    <Compile Include="Editor\CompletionData\IContextCompletions.cs" />
+    <Compile Include="Editor\CompletionData\IMutableCompletionData.cs" />
+    <Compile Include="Editor\Sql\SqlGeneralCompletionData.cs" />
+    <Compile Include="Editor\Sql\ISqlMetadataProvider.cs" />
+    <Compile Include="Editor\Sql\SqlObjectCompletionData.cs" />
+    <Compile Include="Editor\Sql\SqlColumn.cs" />
+    <Compile Include="Editor\Sql\SqlObject.cs" />
+    <Compile Include="Editor\Aml\CompletionContext.cs" />
+    <Compile Include="Editor\Aml\CompletionHelper.cs" />
+    <Compile Include="Editor\Sql\SqlCompletionHelper.cs" />
+    <Compile Include="Editor\Sql\SqlGroup.cs" />
+    <Compile Include="Editor\Sql\SqlGroupBase.cs" />
+    <Compile Include="Editor\Sql\SqlLiteral.cs" />
+    <Compile Include="Editor\Sql\SqlNode.cs" />
+    <Compile Include="Editor\Sql\SqlNameDefinition.cs" />
+    <Compile Include="Editor\Sql\SqlTokenizer.cs" />
+    <Compile Include="Editor\Sql\SqlType.cs" />
     <Compile Include="Editor\IFoldingStrategy.cs" />
     <Compile Include="Editor\SearchResultBackgroundRenderer.cs" />
     <Compile Include="Editor\ShellHelper.cs" />
     <Compile Include="Editor\SimpleToolstripRenderer.cs" />
-    <Compile Include="Editor\SqlEditorHelper.cs" />
-    <Compile Include="Editor\SqlExtension.cs" />
+    <Compile Include="Editor\Sql\SqlEditorHelper.cs" />
+    <Compile Include="Editor\Sql\SqlExtension.cs" />
     <Compile Include="Editor\ToolStripSpringTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Editor\AmlEditorHelper.cs" />
-    <Compile Include="Editor\AmlFoldingStrategy.cs" />
-    <Compile Include="Editor\Completion\BasicCompletionData.cs" />
+    <Compile Include="Editor\Aml\AmlEditorHelper.cs" />
+    <Compile Include="Editor\Aml\AmlFoldingStrategy.cs" />
+    <Compile Include="Editor\CompletionData\BasicCompletionData.cs" />
     <Compile Include="Editor\EditorControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -307,8 +320,8 @@
     <Compile Include="Editor\XmlParser.cs" />
     <Compile Include="Editor\XmlSchemaCompletionData.cs" />
     <Compile Include="Editor\XmlSchemaCompletionDataCollection.cs" />
-    <Compile Include="Editor\Completion\XmlState.cs" />
-    <Compile Include="Editor\Completion\XmlUtils.cs" />
+    <Compile Include="Editor\Aml\XmlState.cs" />
+    <Compile Include="Editor\Aml\XmlUtils.cs" />
     <Compile Include="ErrorWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -322,6 +335,9 @@
       <DependentUpon>FindReplace.cs</DependentUpon>
     </Compile>
     <Compile Include="FullBindingList.cs" />
+    <Compile Include="Ide\TreeListView.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="IWizard.cs" />
     <Compile Include="IWizardStep.cs" />
     <Compile Include="Main.cs">
@@ -336,11 +352,11 @@
     <Compile Include="MultiselectListBox.Designer.cs">
       <DependentUpon>MultiselectListBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="EditorWindow\QueryParameter.cs" />
-    <Compile Include="EditorWindow\ParameterWindow.cs">
+    <Compile Include="Ide\QueryParameter.cs" />
+    <Compile Include="Ide\ParameterWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="EditorWindow\ParameterWindow.Designer.cs">
+    <Compile Include="Ide\ParameterWindow.Designer.cs">
       <DependentUpon>ParameterWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
@@ -356,9 +372,16 @@
       <DependentUpon>Messages.resx</DependentUpon>
     </Compile>
     <Compile Include="Release.cs" />
+    <Compile Include="Scripts\FastObjectFactory.cs" />
     <Compile Include="Scripts\GenerateCtClass.cs" />
-    <Compile Include="Scripts\IRemoteScript.cs" />
     <Compile Include="Scripts\ReplaceItem.cs" />
+    <Compile Include="Scripts\ScriptManager.cs" />
+    <Compile Include="Scripts\ScriptWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Scripts\ScriptWindow.Designer.cs">
+      <DependentUpon>ScriptWindow.cs</DependentUpon>
+    </Compile>
     <Compile Include="Snippet.cs" />
     <Compile Include="SnippetManager.cs" />
     <Compile Include="Utils.cs" />
@@ -433,14 +456,18 @@
     <EmbeddedResource Include="Dialog\ImportSelectDialog.resx">
       <DependentUpon>ImportSelectDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="EditorWindow\EditorWindow.resx">
+    <EmbeddedResource Include="Ide\EditorWindow.resx">
       <DependentUpon>EditorWindow.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="EditorWindow\InputBox.resx">
+    <EmbeddedResource Include="Ide\InputBox.resx">
       <DependentUpon>InputBox.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="EditorWindow\ParameterWindow.resx">
+    <EmbeddedResource Include="Ide\ParameterWindow.resx">
       <DependentUpon>ParameterWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Ide\TreeImages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TreeImages.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Editor\FindReplace.resx">
       <DependentUpon>FindReplace.cs</DependentUpon>
@@ -464,6 +491,9 @@
     <EmbeddedResource Include="resources\Messages.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Messages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Scripts\ScriptWindow.resx">
+      <DependentUpon>ScriptWindow.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
   </ItemGroup>
@@ -561,6 +591,21 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\icons\tree\class-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\icons\tree\folder-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\icons\tree\folder-special-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\icons\tree\property-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\icons\tree\xml-tag-16.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

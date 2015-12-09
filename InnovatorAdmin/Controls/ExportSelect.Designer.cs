@@ -39,6 +39,7 @@
       this.tbcSearch = new System.Windows.Forms.TabControl();
       this.pgSearchBy = new System.Windows.Forms.TabPage();
       this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+      this.btnRecentlyModified = new InnovatorAdmin.Controls.FlatButton();
       this.btnDbPackage = new InnovatorAdmin.Controls.FlatButton();
       this.btnPackageFile = new InnovatorAdmin.Controls.FlatButton();
       this.btnItem = new InnovatorAdmin.Controls.FlatButton();
@@ -71,7 +72,6 @@
       this.mniLevels6 = new System.Windows.Forms.ToolStripMenuItem();
       this.mniLevels7 = new System.Windows.Forms.ToolStripMenuItem();
       this.mniLevels8 = new System.Windows.Forms.ToolStripMenuItem();
-      this.btnRecentlyModified = new InnovatorAdmin.Controls.FlatButton();
       ((System.ComponentModel.ISupportInitialize)(this.gridSelected)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.gridAvailable)).BeginInit();
       this.tableLayoutPanel1.SuspendLayout();
@@ -236,6 +236,29 @@
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel2.Size = new System.Drawing.Size(257, 261);
       this.tableLayoutPanel2.TabIndex = 0;
+      // 
+      // btnRecentlyModified
+      // 
+      this.btnRecentlyModified.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.btnRecentlyModified.AutoSize = true;
+      this.btnRecentlyModified.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnRecentlyModified.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnRecentlyModified.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnRecentlyModified.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnRecentlyModified.ForeColor = System.Drawing.Color.Black;
+      this.btnRecentlyModified.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+      this.btnRecentlyModified.Location = new System.Drawing.Point(3, 155);
+      this.btnRecentlyModified.Name = "btnRecentlyModified";
+      this.btnRecentlyModified.Padding = new System.Windows.Forms.Padding(2);
+      this.btnRecentlyModified.Size = new System.Drawing.Size(122, 70);
+      this.btnRecentlyModified.TabIndex = 5;
+      this.btnRecentlyModified.Text = "Recently Modified";
+      this.btnRecentlyModified.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+      this.btnRecentlyModified.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.toolTipManager.SetToolTip(this.btnRecentlyModified, "Use previously created Innovator package file (*.innpkg)");
+      this.btnRecentlyModified.UseVisualStyleBackColor = true;
+      this.btnRecentlyModified.Click += new System.EventHandler(this.btnRecentlyModified_Click);
       // 
       // btnDbPackage
       // 
@@ -646,29 +669,6 @@
       this.mniLevels8.Size = new System.Drawing.Size(80, 22);
       this.mniLevels8.Text = "8";
       this.mniLevels8.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mniLevelItem_Click);
-      // 
-      // btnRecentlyModified
-      // 
-      this.btnRecentlyModified.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-      this.btnRecentlyModified.AutoSize = true;
-      this.btnRecentlyModified.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.btnRecentlyModified.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
-      this.btnRecentlyModified.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
-      this.btnRecentlyModified.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-      this.btnRecentlyModified.ForeColor = System.Drawing.Color.Black;
-      this.btnRecentlyModified.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-      this.btnRecentlyModified.Location = new System.Drawing.Point(3, 155);
-      this.btnRecentlyModified.Name = "btnRecentlyModified";
-      this.btnRecentlyModified.Padding = new System.Windows.Forms.Padding(2);
-      this.btnRecentlyModified.Size = new System.Drawing.Size(122, 70);
-      this.btnRecentlyModified.TabIndex = 5;
-      this.btnRecentlyModified.Text = "Recently Modified";
-      this.btnRecentlyModified.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
-      this.btnRecentlyModified.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
-      this.toolTipManager.SetToolTip(this.btnRecentlyModified, "Use previously created Innovator package file (*.innpkg)");
-      this.btnRecentlyModified.UseVisualStyleBackColor = true;
-      this.btnRecentlyModified.Click += new System.EventHandler(this.btnRecentlyModified_Click);
       // 
       // ExportSelect
       // 

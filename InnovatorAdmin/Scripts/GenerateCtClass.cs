@@ -9,16 +9,37 @@ using Microsoft.VisualBasic;
 
 namespace InnovatorAdmin.Scripts
 {
+  [DisplayName("Generate CT+ Class"), Description("Generate a CT+ class file for the given Item Type"), DefaultProperty("ItemType")]
   public class GenerateCtClass : IAsyncScript
   {
-    [DisplayName("Item Type"), Description("The name of the item type to generate a class for")]
+    [ DisplayName("Item Type")
+    , Category("Main")
+    , Description("The name of the item type to generate a class for")]
     public string ItemType { get; set; }
-    [DisplayName("Is Base?"), Description("If the class is core to Aras and will go in Gentex.Data.Aras")]
+    [ DisplayName("Merge File Path")
+    , Category("Main")
+    , Description("The path to the file to merge the results into. {0} will be replaced with the ItemType name (spaces removed).")]
+    public string MergePath { get; set; }
+    [ DisplayName("Is Base?")
+    , Category("Optional")
+    , DefaultValue(false)
+    , Description("If the class is core to Aras and will go in Gentex.Data.Aras")]
     public bool IsBase { get; set; }
-    [DisplayName("Get Properties"), Description("Whether to hard code the property access (which migh help with performance) such as is done with the Part model")]
+    [ DisplayName("Get Properties")
+    , Category("Optional")
+    , DefaultValue(false)
+    , Description("Whether to hard code the property access (which migh help with performance) such as is done with the Part model")]
     public bool GetProperties { get; set; }
-    [DisplayName("Include Sort Order"), Description("Whether or not to include the sort_order property in the class")]
+    [ DisplayName("Include Sort Order")
+    , Category("Optional")
+    , DefaultValue(false)
+    , Description("Whether or not to include the sort_order property in the class")]
     public bool IncludeSortOrder { get; set; }
+
+    public GenerateCtClass()
+    {
+      this.MergePath = @"C:\path\to\file\{0}.vb";
+    }
 
 
     public IPromise<string> Execute(IAsyncConnection conn)
@@ -116,9 +137,9 @@ namespace InnovatorAdmin.Scripts
       {
         classBuilder.AppendFormat("  Public Class {0}", Strings.StrConv(this.ItemType, VbStrConv.ProperCase).Replace(" ", "")).AppendLine();
         if (itemTypeInfo.Property("is_versionable").AsBoolean(false))
-          classBuilder.AppendLine("    Inherits IVersionableItem");
+          classBuilder.AppendLine("    Inherits VersionableItem");
         else
-          classBuilder.AppendLine("    Inherits IItem");
+          classBuilder.AppendLine("    Inherits Item");
       }
       classBuilder.AppendLine();
 
@@ -486,6 +507,7 @@ namespace InnovatorAdmin.Scripts
             case "list":
             case "filter list":
             case "mv_list":
+              DataType = "String";
               this.List = item.Property("data_source").AsString("");
               this.ListFilter = item.Property("pattern").AsString("");
               break;

@@ -70,5 +70,17 @@ namespace InnovatorAdmin.Properties {
                 this["FindReplace_LastMode"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastConnection {
+            get {
+                return ((string)(this["LastConnection"]));
+            }
+            set {
+                this["LastConnection"] = value;
+            }
+        }
     }
 }

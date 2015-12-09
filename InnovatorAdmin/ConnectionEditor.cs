@@ -47,8 +47,11 @@ namespace InnovatorAdmin
       try
       {
         var connData = _bs.Current as ConnectionData;
-        if (connData != null && txtUrl.Text != _lastDatabaseUrl && !string.IsNullOrEmpty(connData.Database))
+        if (connData != null
+          && connData.Url != _lastDatabaseUrl
+          && !string.IsNullOrEmpty(connData.Database))
         {
+          _lastDatabaseUrl = null;
           cmbDatabase.Items.Clear();
           cmbDatabase.Items.Add(connData.Database);
           cmbDatabase.SelectedIndex = 0;
@@ -202,7 +205,7 @@ namespace InnovatorAdmin
         var selected = (cmbDatabase.Items.Count > 0 ? cmbDatabase.SelectedItem : null);
         var data = (ConnectionData)_bs.Current;
 
-        _lastDatabaseUrl = txtUrl.Text;
+        _lastDatabaseUrl = data.Url;
         cmbDatabase.Items.Clear();
 
         switch (data.Type)
@@ -214,7 +217,7 @@ namespace InnovatorAdmin
             }
             break;
           case ConnectionType.SqlServer:
-            using (var conn = SqlEditorProxy.GetConnection(data))
+            using (var conn = SqlEditorProxy.GetConnection(data, "master"))
             {
               conn.Open();
               // Set up a command with the given query and associate

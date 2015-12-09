@@ -57,6 +57,11 @@ namespace InnovatorAdmin
     public static ItemReference FromFullItem(IReadOnlyItem elem, bool getKeyedName)
     {
       var result = new ItemReference();
+      FillItemRef(result, elem, getKeyedName);
+      return result;
+    }
+    internal static void FillItemRef(ItemReference result, IReadOnlyItem elem, bool getKeyedName)
+    {
       result.Type = elem.Type().Value;
       if (elem.Attribute("id").Exists)
       {
@@ -101,8 +106,6 @@ namespace InnovatorAdmin
           }
         }
       }
-
-      return result;
     }
     public static ItemReference FromFullItem(XmlElement elem, bool getKeyedName)
     {
