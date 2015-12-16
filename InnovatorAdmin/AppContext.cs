@@ -68,8 +68,16 @@ namespace InnovatorAdmin
       {
         try
         {
-          if (_updates != null) _updates.Dispose();
-          if (_mgr != null) _mgr.Dispose();
+
+          if (_updates != null)
+            _updates.Dispose();
+          if (_mgr != null)
+          {
+            var disposable = _mgr.Result as IDisposable;
+            if (disposable != null)
+              disposable.Dispose();
+            _mgr.Dispose();
+          }
         }
         catch (Exception) { }
       }

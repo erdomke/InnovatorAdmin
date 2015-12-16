@@ -90,8 +90,8 @@ namespace InnovatorAdmin
           this.Size = bounds.Size;
         }
 
-        GoToStep(new Controls.Welcome());
-        //GoToStep(new Controls.MergeInterface().Initialize(new HgMergeOperation(@"C:\Users\edomke\Documents\Local_Projects\ArasUpgrade")));
+        //GoToStep(new Controls.Welcome());
+        GoToStep(new Controls.MergeInterface().Initialize(new HgMergeOperation(@"C:\Users\edomke\Documents\Local_Projects\ArasUpgrade")));
       }
       catch (Exception ex)
       {
