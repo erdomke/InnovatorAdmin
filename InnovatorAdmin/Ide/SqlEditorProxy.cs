@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Innovator.Client;
+using InnovatorAdmin.Editor;
 
 namespace InnovatorAdmin
 {
@@ -134,10 +135,99 @@ namespace InnovatorAdmin
       _conn.Dispose();
     }
 
+    private const string ProgrammabilityFolder = "Programmability";
 
     public IPromise<IEnumerable<IEditorTreeNode>> GetNodes()
     {
-      return Promises.Resolved(Enumerable.Empty<IEditorTreeNode>());
+      var metadata = SqlMetadata.Cached(_conn);
+      return metadata.Objects
+        .Convert(RootFolder);
+    }
+
+    private IEnumerable<IEditorTreeNode> RootFolder(IEnumerable<SqlObject> objects)
+    {
+      yield return FolderNode("Tables", objects.Where(o =>
+        string.Equals(o.Type, "table", StringComparison.OrdinalIgnoreCase)));
+      yield return FolderNode("Views", objects.Where(o =>
+        string.Equals(o.Type, "view", StringComparison.OrdinalIgnoreCase)));
+      yield return new EditorTreeNode()
+      {
+        Name = "Programmability",
+        ImageKey = "folder-16",
+        HasChildren = true,
+        Children = new IEditorTreeNode[] {
+          FolderNode("Stored Procedures", objects.Where(o =>
+            string.Equals(o.Type, "PROCEDURE", StringComparison.OrdinalIgnoreCase))),
+          FolderNode("Table-valued Functions", objects.Where(o =>
+            string.Equals(o.Type, "FUNCTION", StringComparison.OrdinalIgnoreCase) && o.IsTableValued)),
+          FolderNode("Scalar-valued Functions", objects.Where(o =>
+            string.Equals(o.Type, "FUNCTION", StringComparison.OrdinalIgnoreCase) && !o.IsTableValued)),
+        }
+      };
+    }
+
+    private EditorTreeNode FolderNode(string name, IEnumerable<SqlObject> children)
+    {
+      return new EditorTreeNode()
+      {
+        Name = name,
+        ImageKey = "folder-16",
+        HasChildren = true,
+        Children = children.Select(GetNode).OrderBy(n => n.Name)
+      };
+    }
+
+    private IEditorTreeNode GetNode(SqlObject obj)
+    {
+      var metadata = SqlMetadata.Cached(_conn);
+
+      if (string.Equals(obj.Type, "table", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(obj.Type, "view", StringComparison.OrdinalIgnoreCase))
+      {
+        return new EditorTreeNode()
+        {
+          Name = obj.Schema + "." + obj.Name,
+          ImageKey = "class-16",
+          HasChildren = true,
+          Children = new IEditorTreeNode[] {
+            new EditorTreeNode() {
+              Name = "Columns",
+              ImageKey = "folder-16",
+              HasChildren = true,
+              ChildGetter = () => metadata.GetColumns(obj.Name, obj.Schema).Wait()
+                .Select(c => new EditorTreeNode()
+                {
+                  Name = c.Name,
+                  Description = c.Type,
+                  ImageKey = "property-16"
+                }).OrderBy(n => n.Name)
+            }
+          },
+          Scripts = GetScripts(obj)
+        };
+      }
+      else
+      {
+        return new EditorTreeNode()
+        {
+          Name = obj.Schema + "." + obj.Name,
+          ImageKey = "xml-tag-16",
+          HasChildren = false,
+          Scripts = GetScripts(obj)
+        };
+      }
+    }
+
+    private IEnumerable<EditorScript> GetScripts(SqlObject obj)
+    {
+      if (!string.IsNullOrWhiteSpace(obj.Definition))
+      {
+        yield return new EditorScript()
+        {
+          Name = "Definition",
+          Script = obj.Definition
+        };
+      }
     }
   }
 }

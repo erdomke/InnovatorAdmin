@@ -9,6 +9,7 @@ namespace InnovatorAdmin.Editor
   public class SqlNameDefinition : SqlGroupBase<SqlLiteral>
   {
     public string Name { get; set; }
+    public string FullName { get; set; }
     public string Alias { get; set; }
 
     public bool TryAdd(SqlLiteral token)
@@ -28,6 +29,7 @@ namespace InnovatorAdmin.Editor
       {
         this.Add(token);
         this.Name = ProcessName(token.Text);
+        this.FullName = (string.IsNullOrWhiteSpace(this.FullName) ? "" : this.FullName + ".") + this.Name;
         return true;
       }
       else if (this.Last().Text.Equals("as", StringComparison.OrdinalIgnoreCase)

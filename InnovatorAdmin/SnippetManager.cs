@@ -14,6 +14,7 @@ namespace InnovatorAdmin
     private BlockingCollection<Action> _queue = new BlockingCollection<Action>(100);
     private Thread _thread;
 
+    [System.Diagnostics.DebuggerStepThrough()]
     public SnippetManager()
     {
       _thread = new Thread(() =>

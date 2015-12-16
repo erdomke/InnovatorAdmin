@@ -121,8 +121,8 @@ namespace InnovatorAdmin.Editor
         foreach (var name in group.OfType<SqlNameDefinition>())
         {
           if (name.Alias != null && !result.ContainsKey(name.Alias.ToLowerInvariant()))
-            result[name.Alias.ToLowerInvariant()] = name.Name;
-          result[name.Name.ToLowerInvariant()] = name.Name;
+            result[name.Alias.ToLowerInvariant()] = name.FullName;
+          result[name.FullName.ToLowerInvariant()] = name.FullName;
         }
         group = group.Parent as SqlGroup;
       }

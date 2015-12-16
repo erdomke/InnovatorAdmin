@@ -194,6 +194,7 @@
     </Compile>
     <Compile Include="Dialog\structs.cs" />
     <Compile Include="Dialog\Win32.cs" />
+    <Compile Include="Editor\Sql\SqlMetadata.cs" />
     <Compile Include="GlobalProgress.cs" />
     <Compile Include="Ide\EditorTreeNode.cs" />
     <Compile Include="Ide\EditorWindow.cs">

@@ -46,5 +46,12 @@ namespace InnovatorAdmin
 
       return result;
     }
+
+    public static async Task<string> GetFieldStringAsync(this DbDataReader reader, int fieldIndex)
+    {
+      if (await reader.IsDBNullAsync(fieldIndex))
+        return null;
+      return await reader.GetFieldValueAsync<string>(fieldIndex);
+    }
   }
 }

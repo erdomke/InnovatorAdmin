@@ -74,6 +74,7 @@ namespace InnovatorAdmin.Editor
         return Promises.Resolved<CompletionContext>(new CompletionContext() { IsXmlTag = true });
 
       IPromise<IEnumerable<ICompletionData>> items = null;
+      IEnumerable<ICompletionData> appendItems = Enumerable.Empty<ICompletionData>();
       var filter = string.Empty;
 
       if (path.Count < 1)
@@ -342,6 +343,10 @@ namespace InnovatorAdmin.Editor
             filter = value;
             break;
           default:
+            if (path.Any() && state == XmlState.Tag)
+              appendItems = new ICompletionData[] { new BasicCompletionData() { Text = "/" + path.Last().LocalName + ">" } };
+
+
             if (path.Count == 1 && path.First().LocalName == "AML")
             {
               items = CompletionExtensions.GetPromise<BasicCompletionData>("Item");
@@ -472,7 +477,9 @@ namespace InnovatorAdmin.Editor
         return Promises.Resolved(new CompletionContext());
 
       return items.Convert(i => new CompletionContext() {
-        Items = string.IsNullOrEmpty(filter) ? i.OrderBy(j => j.Text) : FilterAndSort(i, filter),
+        Items = string.IsNullOrEmpty(filter) 
+          ? i.Concat(appendItems).OrderBy(j => j.Text) 
+          : FilterAndSort(i.Concat(appendItems), filter),
         Overlap = (filter ?? "").Length
       });
     }
@@ -582,6 +589,9 @@ namespace InnovatorAdmin.Editor
           case XmlNodeType.EndElement:
             path.RemoveAt(path.Count - 1);
             isOpenTag = false;
+            break;
+          case XmlNodeType.Attribute:
+            // Do nothing
             break;
           default:
             isOpenTag = false;

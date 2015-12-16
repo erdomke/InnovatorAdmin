@@ -381,7 +381,7 @@ namespace InnovatorAdmin
       };
       yield return new EditorTreeNode()
       {
-        Name = "All Item Types",
+        Name = "Item Types",
         ImageKey = "folder-special-16",
         HasChildren = true,
         Children = ArasMetadataProvider.Cached(_conn).ItemTypes
@@ -391,7 +391,7 @@ namespace InnovatorAdmin
       };
       yield return new EditorTreeNode()
       {
-        Name = "All Relationship Types",
+        Name = "Relationship Types",
         ImageKey = "folder-special-16",
         HasChildren = true,
         Children = ArasMetadataProvider.Cached(_conn).ItemTypes
@@ -554,7 +554,7 @@ namespace InnovatorAdmin
       },
       new EditorScript() {
         Name = "Get InBasket Items",
-        Action = "GenerateNewGUIDEx",
+        Action = "GetAssignedTasks",
         Script = @"<!--
 @inBasketViewMode = Enumeration: Active|Both|Pending
 @workflowTasks = Boolean: 0 or 1 indicating whether to include

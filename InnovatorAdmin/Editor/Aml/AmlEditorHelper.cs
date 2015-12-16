@@ -70,6 +70,7 @@ namespace InnovatorAdmin.Editor
               if (!control.Editor.Text.Substring(control.Editor.CaretOffset).StartsWith(insert))
               {
                 control.Editor.Document.Insert(control.Editor.CaretOffset, insert, AnchorMovementType.BeforeInsertion);
+                control.HideCompletionWindow();
               }
             }
             break;

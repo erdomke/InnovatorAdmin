@@ -10,27 +10,13 @@ using System.Threading;
 
 namespace InnovatorAdmin.Editor
 {
-  public class SqlEditorHelper : IEditorHelper, ISqlMetadataProvider
+  public class SqlEditorHelper : IEditorHelper
   {
     private SqlCompletionHelper _sql;
-    private SqlConnection _conn;
-    private Dictionary<string, SqlObject> _objects;
-    private string[] _schemas;
 
     public SqlEditorHelper(SqlConnection conn)
     {
-      _sql = new SqlCompletionHelper(this);
-      _conn = conn;
-
-      new SqlCommand("SELECT * FROM information_schema.tables", conn)
-        .GetListAsync<SqlObject>(async (r) => new SqlObject() {
-          Schema = await r.GetFieldValueAsync<string>(1),
-          Name = await r.GetFieldValueAsync<string>(2),
-          Type = await r.GetFieldValueAsync<string>(3)
-        }).ContinueWith(l => {
-          _objects = l.Result.ToDictionary(o => o.Name, StringComparer.OrdinalIgnoreCase);
-          _schemas = l.Result.Select(o => o.Schema).Distinct().ToArray();
-        });
+      _sql = new SqlCompletionHelper(SqlMetadata.Cached(conn));
     }
 
     public IEnumerable<string> GetParameterNames(string query)
@@ -152,44 +138,6 @@ namespace InnovatorAdmin.Editor
 
           return data;
         });
-    }
-
-    public IEnumerable<string> GetSchemaNames()
-    {
-      return _schemas;
-    }
-
-    public IEnumerable<string> GetTableNames()
-    {
-      return _objects.Values.Select(o => o.Schema + ".[" + o.Name + "]");
-    }
-
-    public Innovator.Client.IPromise<IEnumerable<string>> GetColumnNames(string tableName)
-    {
-      SqlObject obj;
-      if (!_objects.TryGetValue(tableName, out obj))
-        return Promises.Resolved(Enumerable.Empty<string>());
-
-      if (obj.Columns == null)
-      {
-        var cmd = new SqlCommand(
-          @"SELECT column_name
-              , data_type + isnull('(' + cast(character_maximum_length as nvarchar(10)) + ')', '') + case DATA_TYPE when 'int' then '' else isnull('(' + cast(NUMERIC_PRECISION as nvarchar(10)) + ',' + cast(NUMERIC_SCALE as nvarchar(10)) + ')', '') end data_type
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_NAME = @table", _conn);
-        cmd.Parameters.AddWithValue("table", tableName);
-
-        var cts = new CancellationTokenSource();
-        obj.Columns = cmd.GetListAsync<SqlColumn>(async (r) => new SqlColumn()
-          {
-            Name = await r.GetFieldValueAsync<string>(0),
-            Type = await r.GetFieldValueAsync<string>(1)
-          }, cts.Token)
-          .ToPromise(cts)
-          .Convert(c => (IEnumerable<SqlColumn>)c.OrderBy(l => l.Name));
-      }
-
-      return obj.Columns.Convert(l => l.Select(c => c.Name));
     }
   }
 }

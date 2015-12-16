@@ -11,6 +11,8 @@ namespace InnovatorAdmin.Editor
     public string Schema { get; set; }
     public string Name { get; set; }
     public string Type { get; set; }
+    public string Definition { get; set; }
+    public bool IsTableValued { get; set; }
     public IPromise<IEnumerable<SqlColumn>> Columns { get; set; }
   }
 }

@@ -209,8 +209,26 @@ namespace InnovatorAdmin.Controls
           || MessageBox.Show("The merge file appears not to have changed.  Do you still want to mark it resolved anyway?", 
           "Merge Resolution", MessageBoxButtons.YesNo) == DialogResult.Yes)
           item.ResolutionStatus = MergeStatus.ResolvedConflict;
+
+        CleanupTempFiles(paths.Base, paths.Local, paths.Merged, paths.Remote);
       }
       ProcessManualUpdate();
+    }
+
+    private void CleanupTempFiles(params string[] paths)
+    {
+      var tempDir = Path.GetTempPath().TrimEnd('\\');
+
+      foreach (var path in paths)
+      {
+        try
+        {
+          if (Path.GetDirectoryName(path).StartsWith(tempDir, StringComparison.OrdinalIgnoreCase)
+            && File.Exists(path))
+            File.Delete(path);
+        }
+        catch (IOException) { }
+      }
     }
 
     private string Md5HashFile(string path)

@@ -313,6 +313,11 @@ namespace InnovatorAdmin.Editor
         };
       }
     }
+    public void HideCompletionWindow()
+    {
+      if (completionWindow != null)
+        completionWindow.Close();
+    }
 
     void TextArea_TextEntered(object sender, System.Windows.Input.TextCompositionEventArgs e)
     {
@@ -376,12 +381,12 @@ namespace InnovatorAdmin.Editor
         var elementHost = this.Controls.OfType<ElementHost>().FirstOrDefault();
         if (elementHost != null)
           elementHost.Child = null;
-        
+
         if (_findReplace != null)
           _findReplace.Dispose();
         if (_extEditor != null)
           _extEditor.Dispose();
-        
+
       }
     }
   }
