@@ -173,5 +173,23 @@ namespace InnovatorAdmin
       }
       return stringBuilder.ToString();
     }
+
+    /// <summary>
+    /// Removes invalid characters from the path
+    /// </summary>
+    public static string CleanFileName(string path)
+    {
+      var invalidChars = System.IO.Path.GetInvalidFileNameChars();
+      Array.Sort(invalidChars);
+      var builder = new System.Text.StringBuilder(path.Length);
+      for (int i = 0; i < path.Length; i++)
+      {
+        if (Array.BinarySearch(invalidChars, path[i]) < 0 && path[i] != '/')
+        {
+          builder.Append(path[i]);
+        }
+      }
+      return builder.ToString();
+    }
   }
 }

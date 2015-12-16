@@ -17,6 +17,8 @@ namespace InnovatorAdmin.Controls
     private Exception _ex;
     private bool _unlinked = false;
     private List<Connections.ConnectionData> _connections;
+    private System.Windows.Forms.Timer _clock = new System.Windows.Forms.Timer();
+    private DateTime _start = DateTime.UtcNow;
 
     public InstallProgress()
     {
@@ -24,12 +26,24 @@ namespace InnovatorAdmin.Controls
 
       _timer.Interval = 50;
       _timer.Tick += _timer_Tick;
+
+      _clock.Interval = 250;
+      _clock.Tick += _clock_Tick;
+      _clock.Enabled = true;
+
+      GlobalProgress.Instance.Start();
+    }
+
+    void _clock_Tick(object sender, EventArgs e)
+    {
+      lblTime.Text = (DateTime.UtcNow - _start).ToString(@"hh\:mm\:ss");
     }
 
     void _timer_Tick(object sender, EventArgs e)
     {
       try
       {
+        GlobalProgress.Instance.Stop();
         if (_ex == null)
         {
           _connections.RemoveAt(0);
@@ -115,7 +129,9 @@ namespace InnovatorAdmin.Controls
     {
       this.UiThreadInvoke(() =>
       {
+        GlobalProgress.Instance.Error();
         ErrorWindow.HandleEvent(e);
+        GlobalProgress.Instance.Start();
       });
     }
 
@@ -125,12 +141,13 @@ namespace InnovatorAdmin.Controls
       {
         progBar.Value = e.Progress;
         lblMessage.Text = _wizard.Connection.Database + ": " + (e.Message ?? lblMessage.Text);
+        GlobalProgress.Instance.Value(e.Progress);
       });
     }
 
     public void GoNext()
     {
-      throw new NotSupportedException();
+      throw new NotSupportedException("You cannot manually go next");
     }
   }
 }

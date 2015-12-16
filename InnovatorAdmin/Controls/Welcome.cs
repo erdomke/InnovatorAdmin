@@ -28,7 +28,7 @@ namespace InnovatorAdmin.Controls
 
     public void GoNext()
     {
-      throw new NotSupportedException();
+      throw new NotSupportedException("You cannot manually go next");
     }
 
     private void btnCreate_Click(object sender, EventArgs e)

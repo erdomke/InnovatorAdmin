@@ -78,7 +78,7 @@ namespace InnovatorAdmin
 
     public static void HandleError(Exception ex)
     {
-      MessageBox.Show(ex.Message);
+      MessageBox.Show(ex.ToString());
     }
 
     //public static IEnumerable<Item> AsEnum(this Item item)
@@ -116,7 +116,7 @@ namespace InnovatorAdmin
           path = @"{0}\{1}\autosave.xslt";
           break;
         default:
-          throw new NotSupportedException();
+          throw new NotSupportedException("Unexpected app file path");
       }
       return string.Format(path, Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Application.ProductName);
     }
@@ -194,6 +194,23 @@ namespace InnovatorAdmin
       if (row.RowState == DataRowState.Deleted)
         return row[col, DataRowVersion.Original];
       return row[col];
+    }
+
+    /// <summary>
+    /// Call a method and wait synchronously for completion for at most <see cref="timeout"/>
+    /// milliseconds
+    /// </summary>
+    /// <param name="timeout">Maximum time to wait in milliseconds</param>
+    /// <param name="method">Method to execute</param>
+    public static bool CallWithTimeout(int timeout, Action method)
+    {
+      var wait = new System.Threading.ManualResetEvent(false);
+      method.BeginInvoke(iar =>
+      {
+        ((Action)iar.AsyncState).EndInvoke(iar);
+        wait.Set();
+      }, method);
+      return wait.WaitOne(timeout);
     }
   }
 }

@@ -22,31 +22,31 @@ namespace InnovatorAdmin
     public string Version { get; set; }
     public Uri Website { get; set; }
 
-    public IEnumerable<IEnumerable<InstallItem>> GroupLines(Func<InstallItem, bool> predicate = null)
-    {
-      var linesToExport = Lines.Where(l => l.Script != null && l.Type != InstallType.Warning);
-      if (predicate != null) linesToExport = linesToExport.Where(predicate);
+    //public IEnumerable<IEnumerable<InstallItem>> GroupLines(Func<InstallItem, bool> predicate = null)
+    //{
+    //  var linesToExport = Lines.Where(l => l.Script != null && l.Type != InstallType.Warning);
+    //  if (predicate != null) linesToExport = linesToExport.Where(predicate);
 
-      bool first = true;
-      List<InstallItem> buffer = null;
-      foreach (var line in linesToExport)
-      {
-        if (line.Type == InstallType.Script && !first)
-        {
-          buffer.Add(line);
-        }
-        else
-        {
-          if (buffer != null) yield return buffer;
+    //  bool first = true;
+    //  List<InstallItem> buffer = null;
+    //  foreach (var line in linesToExport)
+    //  {
+    //    if (line.Type == InstallType.Script && !first)
+    //    {
+    //      buffer.Add(line);
+    //    }
+    //    else
+    //    {
+    //      if (buffer != null) yield return buffer;
 
-          buffer = new List<InstallItem>();
-          buffer.Add(line);
-        }
+    //      buffer = new List<InstallItem>();
+    //      buffer.Add(line);
+    //    }
 
-        first = false;
-      }
+    //    first = false;
+    //  }
 
-      if (buffer != null) yield return buffer;
-    }
+    //  if (buffer != null) yield return buffer;
+    //}
   }
 }

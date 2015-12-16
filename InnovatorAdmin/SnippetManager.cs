@@ -12,10 +12,11 @@ namespace InnovatorAdmin
     private const string LastQueryKey = "___LastQuery";
     private Dictionary<string, Snippet> _cache = new Dictionary<string, Snippet>();
     private BlockingCollection<Action> _queue = new BlockingCollection<Action>(100);
+    private Thread _thread;
 
     public SnippetManager()
     {
-      var thread = new Thread(() =>
+      _thread = new Thread(() =>
       {
         Action action;
         while (!_queue.IsCompleted)
@@ -31,7 +32,7 @@ namespace InnovatorAdmin
             action.Invoke();
         }
       });
-      thread.Start();
+      _thread.Start();
     }
 
     public Snippet LastQuery
@@ -102,6 +103,7 @@ namespace InnovatorAdmin
     public void Close()
     {
       _queue.CompleteAdding();
+      _thread.Join(3000);
     }
 
     internal static string GetFolder()

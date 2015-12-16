@@ -9,8 +9,6 @@ namespace InnovatorAdmin
 {
   internal class DependencyAnalyzer
   {
-    private const string PreAnalyzed = "_dependencies_analyzed";
-
     //// Persistent variables between scans
     // Pointer from a child reference to the master reference that defines it
     private Dictionary<ItemReference, ItemReference> _allDefinitions = new Dictionary<ItemReference,ItemReference>();
@@ -102,7 +100,7 @@ namespace InnovatorAdmin
       {
         foreach (var node in refs.GetContexts())
         {
-          if (node.ParentNode == null || node.Attribute(PreAnalyzed) == "1")
+          if (node.ParentNode == null || node.Attribute(XmlFlags.Attr_DependenciesAnalyzed) == "1")
           {
             yield return node;
           }
@@ -138,7 +136,7 @@ namespace InnovatorAdmin
       {
         foreach (var node in refs.GetReferences())
         {
-          if (node.ParentNode == null || node.Attribute(PreAnalyzed) == "1")
+          if (node.ParentNode == null || node.Attribute(XmlFlags.Attr_DependenciesAnalyzed) == "1")
           {
             yield return node;
           }
@@ -174,7 +172,15 @@ namespace InnovatorAdmin
       foreach (var defn in _definitions)
       {
         _dependencies.Remove(defn);
-        _allDefinitions.Add(defn, itemRef);
+        try
+        {
+          _allDefinitions.Add(defn, itemRef);
+        }
+        catch (ArgumentException)
+        {
+          throw new ArgumentException(string.Format("Error: {0} is defined twice, once in {1} and another time in {2}", 
+            defn, _allDefinitions[defn], itemRef));
+        }
       }
       _dependencies.ExceptWith(_metadata.SystemIdentities);
       _dependencies.ExceptWith(_metadata.CoreMethods);
@@ -208,7 +214,7 @@ namespace InnovatorAdmin
         }
       }
 
-      elem.SetAttribute(PreAnalyzed, "1");
+      elem.SetAttribute(XmlFlags.Attr_DependenciesAnalyzed, "1");
 
       _dependencies.Clear();
       _definitions.Clear();

@@ -10,6 +10,9 @@ namespace InnovatorAdmin
 {
   public static class Extensions
   {
+    /// <summary>
+    /// Determines if a string is an Aras-styled GUID
+    /// </summary>
     public static bool IsGuid(this string value)
     {
       if (value == null || value.Length != 32) return false;
@@ -156,6 +159,9 @@ namespace InnovatorAdmin
       return result;
     }
 
+    /// <summary>
+    /// Groups a list of items and pages the results by batch size
+    /// </summary>
     public static IEnumerable<IGrouping<TKey, T>> PagedGroupBy<T, TKey>(this IEnumerable<T> items, Func<T, TKey> keySelector, int batchSize)
     {
       var elems = new Dictionary<TKey, Grouping<TKey, T>>();
@@ -201,6 +207,24 @@ namespace InnovatorAdmin
       {
         return this.GetEnumerator();
       }
+    }
+
+    /// <summary>
+    /// Whether the enumerable has more than one item or more than one item matching the criteria
+    /// if criteria is provided
+    /// </summary>
+    public static bool HasMultiple<T>(this IEnumerable<T> items, Func<T, bool> predicate = null)
+    {
+      var count = 0;
+      foreach (var item in items)
+      {
+        if (predicate == null || predicate(item))
+        {
+          count++;
+          if (count > 1) return true;
+        }
+      }
+      return false;
     }
   }
 }

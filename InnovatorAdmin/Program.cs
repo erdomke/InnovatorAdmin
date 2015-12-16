@@ -16,23 +16,27 @@ namespace InnovatorAdmin
     {
       Application.EnableVisualStyles();
       Application.SetCompatibleTextRenderingDefault(false);
-      
-      var amlStudioStart = args.FirstOrDefault(a => 
-        a.StartsWith("/amlstudio:", StringComparison.OrdinalIgnoreCase));
-      if (string.IsNullOrEmpty(amlStudioStart))
-      {
-        Application.Run(new AppContext(new Main()));
-      }
-      else
-      {
-        var connName = amlStudioStart.Substring(11);
-        var conn = ConnectionManager.Current.Library.Connections.FirstOrDefault(c =>
-          c.ConnectionName.Equals(connName, StringComparison.OrdinalIgnoreCase));
-        var win = new EditorWindow();
-        if (conn != null) win.SetConnection(conn);
-        Application.Run(new AppContext(win));
-      }
 
+      var amlStudioStart = args.FirstOrDefault(a =>
+        a.StartsWith("/amlstudio:", StringComparison.OrdinalIgnoreCase));
+
+      try
+      {
+        if (string.IsNullOrEmpty(amlStudioStart))
+        {
+          Application.Run(new AppContext(new Main()));
+        }
+        else
+        {
+          var connName = amlStudioStart.Substring(11);
+          var conn = ConnectionManager.Current.Library.Connections.FirstOrDefault(c =>
+            c.ConnectionName.Equals(connName, StringComparison.OrdinalIgnoreCase));
+          var win = new EditorWindow();
+          if (conn != null) win.SetConnection(conn);
+          Application.Run(new AppContext(win));
+        }
+      }
+      catch (Exception) { }   // Eat the error for now
     }
 
     public static string AssemblyPath

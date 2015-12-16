@@ -9,6 +9,12 @@ namespace InnovatorAdmin
 {
   public static class XmlUtils
   {
+    public static XmlDocument NewDoc(this XmlNode node)
+    {
+      var doc = (node as XmlDocument) ?? node.OwnerDocument;
+      return new XmlDocument(doc == null ? new NameTable() : doc.NameTable);
+    }
+
     public static XmlElement Elem(this XmlNode node, string localName)
     {
       if (node == null) return null;

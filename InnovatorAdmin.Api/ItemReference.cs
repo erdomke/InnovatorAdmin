@@ -73,36 +73,44 @@ namespace InnovatorAdmin
       }
       if (getKeyedName)
       {
-        var node = elem.Property("id");
-        if (node.Exists && node.KeyedName().Exists)
+        if (result.Type == "FileType" && elem.Property("mimetype").HasValue())
         {
-          result.KeyedName = node.KeyedName().Value;
+          result.KeyedName = elem.Property("extension").AsString("") + ", "
+            + elem.Property("mimetype").AsString("");
         }
         else
         {
-          result.KeyedName = node.Attribute("_keyed_name").Value
-                          ?? elem.KeyedName().AsString(null)
-                          ?? elem.Property("name").AsString(null);
-        }
-
-        node = elem.SourceId();
-        if (node.Exists && node.KeyedName().Exists)
-        {
-          if (result.KeyedName.IsGuid())
+          var node = elem.Property("id");
+          if (node.Exists && node.KeyedName().Exists)
           {
-            var related = elem.RelatedId();
-            if (related.Exists && related.KeyedName().Exists)
-            {
-              result.KeyedName = node.Attribute("keyed_name").Value + " > " + related.Attribute("keyed_name").Value;
-            }
-            else
-            {
-              result.KeyedName = node.Attribute("keyed_name").Value + ": " + result.KeyedName;
-            }
+            result.KeyedName = node.KeyedName().Value;
           }
-          else if (!string.IsNullOrEmpty(node.Attribute("keyed_name").Value))
+          else
           {
-            result.KeyedName += " {" + node.Attribute("keyed_name").Value + "}";
+            result.KeyedName = node.Attribute("_keyed_name").Value
+                            ?? elem.KeyedName().AsString(null)
+                            ?? elem.Property("name").AsString(null);
+          }
+
+          node = elem.SourceId();
+          if (node.Exists && node.KeyedName().Exists)
+          {
+            if (result.KeyedName.IsGuid())
+            {
+              var related = elem.RelatedId();
+              if (related.Exists && related.KeyedName().Exists)
+              {
+                result.KeyedName = node.Attribute("keyed_name").Value + " > " + related.Attribute("keyed_name").Value;
+              }
+              else
+              {
+                result.KeyedName = node.Attribute("keyed_name").Value + ": " + result.KeyedName;
+              }
+            }
+            else if (!string.IsNullOrEmpty(node.Attribute("keyed_name").Value))
+            {
+              result.KeyedName += " {" + node.Attribute("keyed_name").Value + "}";
+            }
           }
         }
       }
@@ -121,36 +129,47 @@ namespace InnovatorAdmin
       }
       if (getKeyedName)
       {
-        var node = elem.Elements(e => e.LocalName == "id" && e.HasAttribute("keyed_name")).SingleOrDefault();
-        if (node != null)
+        if (result.Type == "FileType" && !string.IsNullOrEmpty(elem.Element("mimetype", null)))
         {
-          result.KeyedName = node.Attribute("keyed_name");
+          result.KeyedName = elem.Element("extension", "") + ", " + elem.Element("mimetype", "");
+        }
+        else if (result.Type == "Identity" && !string.IsNullOrEmpty(elem.Element("name", null)))
+        {
+          result.KeyedName = elem.Element("name", "");
         }
         else
         {
-          result.KeyedName = elem.Attribute("_keyed_name", null)
-                          ?? elem.Element("keyed_name", null)
-                          ?? elem.Element("name", null);
-        }
-
-        node = elem.Elements(e => e.LocalName == "source_id" && e.HasAttribute("keyed_name")).SingleOrDefault();
-        if (node != null)
-        {
-          if (result.KeyedName.IsGuid())
+          var node = elem.Elements(e => e.LocalName == "id" && e.HasAttribute("keyed_name")).SingleOrDefault();
+          if (node != null)
           {
-            var related = elem.Elements(e => e.LocalName == "related_id" && e.HasAttribute("keyed_name")).SingleOrDefault();
-            if (related == null)
-            {
-              result.KeyedName = node.Attribute("keyed_name") + ": " + result.KeyedName;
-            }
-            else
-            {
-              result.KeyedName = node.Attribute("keyed_name") + " > " + related.Attribute("keyed_name");
-            }
+            result.KeyedName = node.Attribute("keyed_name");
           }
-          else if (!string.IsNullOrEmpty(node.Attribute("keyed_name")))
+          else
           {
-            result.KeyedName += " {" + node.Attribute("keyed_name") + "}";
+            result.KeyedName = elem.Attribute("_keyed_name", null)
+                            ?? elem.Element("keyed_name", null)
+                            ?? elem.Element("name", null);
+          }
+
+          node = elem.Elements(e => e.LocalName == "source_id" && e.HasAttribute("keyed_name")).SingleOrDefault();
+          if (node != null)
+          {
+            if (result.KeyedName.IsGuid())
+            {
+              var related = elem.Elements(e => e.LocalName == "related_id" && e.HasAttribute("keyed_name")).SingleOrDefault();
+              if (related == null)
+              {
+                result.KeyedName = node.Attribute("keyed_name") + ": " + result.KeyedName;
+              }
+              else
+              {
+                result.KeyedName = node.Attribute("keyed_name") + " > " + related.Attribute("keyed_name");
+              }
+            }
+            else if (!string.IsNullOrEmpty(node.Attribute("keyed_name")))
+            {
+              result.KeyedName += " {" + node.Attribute("keyed_name") + "}";
+            }
           }
         }
       }

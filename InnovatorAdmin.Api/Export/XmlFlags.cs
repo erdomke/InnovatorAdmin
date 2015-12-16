@@ -11,5 +11,7 @@ namespace InnovatorAdmin
     public const string Attr_Float = "_float";
     public const string Attr_SqlScript = "_sql_script";
     public const string Attr_ConfigId = "_config_id";
+    public const string Attr_ScriptType = "_scriptType";
+    public const string Attr_DependenciesAnalyzed = "_dependencies_analyzed";
   }
 }

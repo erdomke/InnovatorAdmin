@@ -57,7 +57,7 @@ namespace InnovatorAdmin.Controls
 
     public void GoNext()
     {
-      throw new NotSupportedException();
+      throw new NotSupportedException("You cannot manually go next");
     }
 
     private void btnPackageFile_Click(object sender, EventArgs e)
@@ -75,27 +75,30 @@ namespace InnovatorAdmin.Controls
             dialog.Filter = "Innovator Package (Single file)|*.innpkg|Innovator Package (Multiple files: for development)|*.innpkg|Manifest (Backwards compatible)|*.mf";
             if (dialog.ShowDialog() == DialogResult.OK)
             {
-              switch (dialog.FilterIndex)
+              ProgressDialog.Display(this, () =>
               {
-                case 2:
-                  var pkgFolder = new InnovatorPackageFolder(dialog.FileName);
-                  if (!_wizard.InstallScript.Created.HasValue) _wizard.InstallScript.Created = DateTime.Now;
-                  _wizard.InstallScript.Modified = DateTime.Now;
-                  pkgFolder.Write(_wizard.InstallScript);
-                  break;
-                case 3:
-                  var manifest = new ManifestFolder(dialog.FileName);
-                  manifest.Write(_wizard.InstallScript);
-                  break;
-                default:
-                  using (var pkgFile = new InnovatorPackageFile(dialog.FileName))
-                  {
+                switch (dialog.FilterIndex)
+                {
+                  case 2:
+                    var pkgFolder = new InnovatorPackageFolder(dialog.FileName);
                     if (!_wizard.InstallScript.Created.HasValue) _wizard.InstallScript.Created = DateTime.Now;
                     _wizard.InstallScript.Modified = DateTime.Now;
-                    pkgFile.Write(_wizard.InstallScript);
-                  }
-                  break;
-              }
+                    pkgFolder.Write(_wizard.InstallScript);
+                    break;
+                  case 3:
+                    var manifest = new ManifestFolder(dialog.FileName);
+                    manifest.Write(_wizard.InstallScript);
+                    break;
+                  default:
+                    using (var pkgFile = new InnovatorPackageFile(dialog.FileName))
+                    {
+                      if (!_wizard.InstallScript.Created.HasValue) _wizard.InstallScript.Created = DateTime.Now;
+                      _wizard.InstallScript.Modified = DateTime.Now;
+                      pkgFile.Write(_wizard.InstallScript);
+                    }
+                    break;
+                }
+              });
             }
           }
         }

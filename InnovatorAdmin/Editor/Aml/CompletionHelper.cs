@@ -27,11 +27,13 @@ namespace InnovatorAdmin.Editor
       if (string.IsNullOrEmpty(xml)) return Promises.Resolved<CompletionContext>(new CompletionContext());
 
       var path = new List<AmlNode>();
+      var existingAttributes = new HashSet<string>();
+      Func<string, bool> notExisting = s => !existingAttributes.Contains(s);
       string attrName = null;
       string value = null;
       bool cdata = false;
 
-      var state = XmlUtils.ProcessFragment(xml.Substring(0, caret), (r, o) =>
+      var state = XmlUtils.ProcessFragment(xml.Substring(0, caret), (r, o, st) =>
       {
         switch (r.NodeType)
         {
@@ -44,12 +46,16 @@ namespace InnovatorAdmin.Editor
                 Action = r.GetAttribute("action"),
                 Condition = r.GetAttribute("condition")
               });
+
+            existingAttributes.Clear();
             break;
           case XmlNodeType.EndElement:
             path.RemoveAt(path.Count - 1);
             break;
           case XmlNodeType.Attribute:
-            attrName = r.LocalName;
+            existingAttributes.Add(r.LocalName);
+            if (st == XmlState.Attribute || st == XmlState.AttributeValue)
+              attrName = r.LocalName;
             value = r.Value;
             break;
           case XmlNodeType.CDATA:
@@ -63,8 +69,9 @@ namespace InnovatorAdmin.Editor
         }
         return true;
       });
-      if (state == XmlState.Tag && (xml.Last() == '"' || xml.Last() == '\''))
-        return Promises.Resolved<CompletionContext>(new CompletionContext());
+
+      if (caret > 0 && state == XmlState.Tag && (xml[caret - 1] == '"' || xml[caret - 1] == '\''))
+        return Promises.Resolved<CompletionContext>(new CompletionContext() { IsXmlTag = true });
 
       IPromise<IEnumerable<ICompletionData>> items = null;
       var filter = string.Empty;
@@ -104,22 +111,22 @@ namespace InnovatorAdmin.Editor
               case "SQL":
                 break;
               case "Path":
-                items = new string[] { "id" }.GetPromise<AttributeCompletionData>();
+                items = new string[] { "id" }.Where(notExisting).GetPromise<AttributeCompletionData>();
                 break;
               case "Task":
-                items = new string[] {"id", "completed"}.GetPromise<AttributeCompletionData>();
+                items = new string[] { "id", "completed" }.Where(notExisting).GetPromise<AttributeCompletionData>();
                 break;
               case "Variable":
-                items = new string[] { "id" }.GetPromise<AttributeCompletionData>();
+                items = new string[] { "id" }.Where(notExisting).GetPromise<AttributeCompletionData>();
                 break;
               case "Authentication":
-                items = new string[] { "mode" }.GetPromise<AttributeCompletionData>();
+                items = new string[] { "mode" }.Where(notExisting).GetPromise<AttributeCompletionData>();
                 break;
               case "Item":
                 switch (soapAction)
                 {
                   case "GenerateNewGUIDEx":
-                    items = CompletionExtensions.GetPromise<AttributeCompletionData>("quantity");
+                    items = new string[] { "quantity" }.Where(notExisting).GetPromise<AttributeCompletionData>();
                     break;
                   case "":
                     break;
@@ -158,12 +165,12 @@ namespace InnovatorAdmin.Editor
                       attributes.Add("repeatTimes");
                     }
 
-                    items = attributes.GetPromise<AttributeCompletionData>();
+                    items = attributes.Where(notExisting).GetPromise<AttributeCompletionData>();
                     break;
                 }
                 break;
               default:
-                items = new string[] { "condition", "is_null" }.GetPromise<AttributeCompletionData>();
+                items = new string[] { "condition", "is_null" }.Where(notExisting).GetPromise<AttributeCompletionData>();
                 break;
             }
 
@@ -466,7 +473,6 @@ namespace InnovatorAdmin.Editor
 
       return items.Convert(i => new CompletionContext() {
         Items = string.IsNullOrEmpty(filter) ? i.OrderBy(j => j.Text) : FilterAndSort(i, filter),
-        IsXmlAttribute = (state == XmlState.Attribute || state == XmlState.AttributeStart),
         Overlap = (filter ?? "").Length
       });
     }
@@ -506,7 +512,7 @@ namespace InnovatorAdmin.Editor
       var depth = 0;
       string result = null;
 
-      XmlUtils.ProcessFragment(xml, (r, o) =>
+      XmlUtils.ProcessFragment(xml, (r, o, st) =>
       {
         switch (r.NodeType)
         {
@@ -560,7 +566,7 @@ namespace InnovatorAdmin.Editor
       bool isOpenTag = false;
       var path = new List<AmlNode>();
 
-      var state = XmlUtils.ProcessFragment(xml, (r, o) =>
+      var state = XmlUtils.ProcessFragment(xml, (r, o, st) =>
       {
         switch (r.NodeType)
         {

@@ -26,7 +26,7 @@ namespace InnovatorAdmin
     public XmlDocument Read(out string title)
     {
       var result = new XmlDocument();
-      var pkgDoc = new XmlDocument();
+      var pkgDoc = new XmlDocument(result.NameTable);
       pkgDoc.Load(_path);
       string folderPath;
       result.AppendChild(result.CreateElement("AML"));
@@ -38,7 +38,7 @@ namespace InnovatorAdmin
       {
         title = pkg.Attribute("name", "");
         folderPath = pkg.Attribute("path");
-        if (folderPath == ".\\") folderPath = InnovatorPackage.CleanFileName(title).Replace('.', '\\');
+        if (folderPath == ".\\") folderPath = Utils.CleanFileName(title).Replace('.', '\\');
         foreach (var file in Directory.GetFiles(Path.Combine(Path.GetDirectoryName(_path), folderPath), "*.xml", SearchOption.AllDirectories))
         {
           child = result.CreateElement("AML");
@@ -64,18 +64,18 @@ namespace InnovatorAdmin
         {
           if (script.Title.StartsWith("com.aras.innovator.solution."))
           {
-            _baseFolderPath = InnovatorPackage.CleanFileName(script.Title).Substring(28).Replace('.', '\\') + "\\Import";
+            _baseFolderPath = Utils.CleanFileName(script.Title).Substring(28).Replace('.', '\\') + "\\Import";
             xml.WriteAttributeString("path", _baseFolderPath);
           }
           else
           {
-            _baseFolderPath = InnovatorPackage.CleanFileName(script.Title).Replace('.', '\\');
+            _baseFolderPath = Utils.CleanFileName(script.Title).Replace('.', '\\');
             xml.WriteAttributeString("path", ".\\");
           }
         }
         else
         {
-          _baseFolderPath = InnovatorPackage.CleanFileName(script.Title) + "\\Import";
+          _baseFolderPath = Utils.CleanFileName(script.Title) + "\\Import";
           xml.WriteAttributeString("path", _baseFolderPath);
         }
 
@@ -86,24 +86,16 @@ namespace InnovatorAdmin
       _baseFolderPath = Path.Combine(Path.GetDirectoryName(_path), _baseFolderPath);
 
       XmlWriter writer;
-      InstallItem first;
       var existingPaths = new HashSet<string>();
       string newPath;
-      foreach (var group in script.GroupLines(i => i.Type != InstallType.DependencyCheck))
+      foreach (var line in script.Lines.Where(l => l.Type == InstallType.Create || l.Type == InstallType.Script))
       {
-        first = group.First();
-        newPath = first.Reference.Type + "\\" + InnovatorPackage.CleanFileName(first.Reference.KeyedName ?? first.Reference.Unique) + ".xml";
-        if (existingPaths.Contains(newPath))
-          newPath = first.Reference.Type + "\\" + InnovatorPackage.CleanFileName((first.Reference.KeyedName ?? "") + "_" + first.Reference.Unique) + ".xml";
-
+        newPath = line.FilePath(existingPaths);
         writer = GetWriter(newPath);
         try
         {
           writer.WriteStartElement("AML");
-          foreach (var line in group)
-          {
-            line.Script.WriteTo(writer);
-          }
+          line.Script.WriteTo(writer);
           writer.WriteEndElement();
           writer.Flush();
         }

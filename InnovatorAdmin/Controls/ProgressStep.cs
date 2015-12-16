@@ -36,6 +36,8 @@ namespace InnovatorAdmin.Controls
       _clock.Interval = 250;
       _clock.Tick += _clock_Tick;
       _clock.Enabled = true;
+
+      GlobalProgress.Instance.Start();
     }
 
     void _clock_Tick(object sender, EventArgs e)
@@ -55,6 +57,7 @@ namespace InnovatorAdmin.Controls
 
     void _timer_Tick(object sender, EventArgs e)
     {
+      GlobalProgress.Instance.Stop();
       UnLink();
       this.GoNextAction();
       _timer.Enabled = false;
@@ -83,6 +86,7 @@ namespace InnovatorAdmin.Controls
         {
           progBar.Value = e.Progress;
           lblMessage.Text = e.Message ?? lblMessage.Text;
+          GlobalProgress.Instance.Value(e.Progress);
         });
       }
     }

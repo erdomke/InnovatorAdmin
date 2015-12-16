@@ -19,7 +19,11 @@ namespace InnovatorAdmin
         return _restrictions;
       }
     }
+    public string TypeName { get; set; }
     public PropertyType Type { get; set; }
+    public int StoredLength { get; set; }
+    public int Precision { get; set; }
+    public int Scale { get; set; }
 
     public Property()
     {
@@ -37,6 +41,7 @@ namespace InnovatorAdmin
 
     public void SetType(string typeName)
     {
+      this.TypeName = typeName;
       switch (typeName)
       {
         case "string":

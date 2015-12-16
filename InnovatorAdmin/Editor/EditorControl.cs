@@ -54,8 +54,6 @@ namespace InnovatorAdmin.Editor
       editor.TextArea.KeyDown += TextArea_KeyDown;
       host.Child = _extEditor;
 
-
-
       editor.TextArea.IndentationStrategy = new ICSharpCode.AvalonEdit.Indentation.DefaultIndentationStrategy();
 
       this.Controls.Add(host);
@@ -375,8 +373,15 @@ namespace InnovatorAdmin.Editor
       base.Dispose(disposing);
       if (disposing)
       {
+        var elementHost = this.Controls.OfType<ElementHost>().FirstOrDefault();
+        if (elementHost != null)
+          elementHost.Child = null;
+        
         if (_findReplace != null)
           _findReplace.Dispose();
+        if (_extEditor != null)
+          _extEditor.Dispose();
+        
       }
     }
   }

@@ -20,17 +20,18 @@ namespace InnovatorAdmin.Editor
   /// <summary>
   /// Interaction logic for ExtendedEditor.xaml
   /// </summary>
-  public partial class ExtendedEditor : UserControl
+  public partial class ExtendedEditor : UserControl, IDisposable
   {
     private IEditorHelper _helper;
     private FoldingManager _foldingManager;
     private IFoldingStrategy _foldingStrategy;
-    
-    public IEditorHelper Helper 
+    private DispatcherTimer _foldingUpdateTimer = new DispatcherTimer();
+
+    public IEditorHelper Helper
     {
       get { return _helper; }
-      set 
-      { 
+      set
+      {
         _helper = value;
         _foldingStrategy = value == null ? null : value.FoldingStrategy;
         this.editor.SyntaxHighlighting = value == null ? null : value.GetHighlighting();
@@ -50,10 +51,9 @@ namespace InnovatorAdmin.Editor
       _foldingManager = FoldingManager.Install(this.editor.TextArea);
       UpdateFoldings();
 
-      var foldingUpdateTimer = new DispatcherTimer();
-      foldingUpdateTimer.Interval = TimeSpan.FromSeconds(2);
-      foldingUpdateTimer.Tick += delegate { UpdateFoldings(); };
-      foldingUpdateTimer.Start();
+      _foldingUpdateTimer.Interval = TimeSpan.FromSeconds(2);
+      _foldingUpdateTimer.Tick += delegate { UpdateFoldings(); };
+      _foldingUpdateTimer.Start();
 
       this.editor.TextArea.MouseRightButtonDown += TextArea_MouseRightButtonDown;
     }
@@ -218,6 +218,16 @@ namespace InnovatorAdmin.Editor
       {
         Utils.HandleError(ex);
       }
+    }
+
+    public void Dispose()
+    {
+      _helper = null;
+      _foldingManager = null;
+      _foldingStrategy = null;
+      if (_foldingUpdateTimer != null)
+        _foldingUpdateTimer.Stop();
+      _foldingUpdateTimer = null;
     }
   }
 }

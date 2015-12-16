@@ -13,8 +13,8 @@ namespace InnovatorAdmin
     string Name { get; }
     string Description { get; }
     bool HasChildren { get; }
-    IEnumerable<EditorScript> Scripts { get; }
 
+    IEnumerable<EditorScript> GetScripts();
     IEnumerable<IEditorTreeNode> GetChildren();
   }
 }

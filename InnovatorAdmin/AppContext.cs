@@ -28,7 +28,15 @@ namespace InnovatorAdmin
       UpdateJumpList();
 #if !DEBUG
       _mgr = UpdateManager.GitHubUpdateManager("https://github.com/erdomke/InnovatorAdmin");
-      _mgr.ContinueWith(t => _updates = t.Result.UpdateApp());
+      _mgr.ContinueWith(t => {
+        var listener = this.MainForm as IUpdateListener;
+        _updates = t.Result.UpdateApp(listener == null ? (Action<int>)null : listener.UpdateCheckProgress);
+        _updates.ContinueWith(r =>
+        {
+          if (listener != null)
+            listener.UpdateCheckComplete(r.Result == default(ReleaseEntry) ? default(Version) : r.Result.Version.Version);
+        });
+      });
 #endif
     }
 
@@ -40,16 +48,16 @@ namespace InnovatorAdmin
       }
       else
       {
-        #if !DEBUG
         try
         {
-          if (_updates != null) _updates.Wait();
+          SnippetManager.Instance.Close();
+          GenerateBatFile();
+          base.OnMainFormClosed(sender, e);
+          #if !DEBUG
+            if (_updates != null) _updates.Wait();
+          #endif
         }
-        catch (Exception) {}
-        #endif
-        SnippetManager.Instance.Close();
-        GenerateBatFile();
-        base.OnMainFormClosed(sender, e);
+        catch (Exception) {}  // Eat the error for now
       }
     }
 
@@ -58,8 +66,12 @@ namespace InnovatorAdmin
       base.Dispose(disposing);
       if (disposing)
       {
-        if (_updates != null) _updates.Dispose();
-        if (_mgr != null) _mgr.Dispose();
+        try
+        {
+          if (_updates != null) _updates.Dispose();
+          if (_mgr != null) _mgr.Dispose();
+        }
+        catch (Exception) { }
       }
     }
 

@@ -24,7 +24,7 @@ namespace InnovatorAdmin
         case ConnectionType.SqlServer:
           return Promises.Resolved<IEditorProxy>(new SqlEditorProxy(conn));
       }
-      return Promises.Rejected<IEditorProxy>(new NotSupportedException());
+      return Promises.Rejected<IEditorProxy>(new NotSupportedException("Unsupported connection type"));
     }
   }
 }

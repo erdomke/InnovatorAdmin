@@ -57,10 +57,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\AvalonEdit.5.0.2\lib\Net40\ICSharpCode.AvalonEdit.dll</HintPath>
     </Reference>
-    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\squirrel.windows.1.2.1\lib\Net45\ICSharpCode.SharpZipLib.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Innovator.Client, Version=2015.12.7.1658, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\Innovator.Client.dll</HintPath>
@@ -158,6 +154,12 @@
     <Compile Include="Controls\FlatButton.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Controls\MergeInterface.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\MergeInterface.Designer.cs">
+      <DependentUpon>MergeInterface.cs</DependentUpon>
+    </Compile>
     <Compile Include="Controls\RecentlyModifiedSearch.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -178,8 +180,21 @@
     <Compile Include="Dialog\HelperTypes.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="Dialog\LightBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialog\LightBox.Designer.cs">
+      <DependentUpon>LightBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialog\ProgressDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialog\ProgressDialog.Designer.cs">
+      <DependentUpon>ProgressDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Dialog\structs.cs" />
     <Compile Include="Dialog\Win32.cs" />
+    <Compile Include="GlobalProgress.cs" />
     <Compile Include="Ide\EditorTreeNode.cs" />
     <Compile Include="Ide\EditorWindow.cs">
       <SubType>Form</SubType>
@@ -226,10 +241,10 @@
     <Compile Include="Controls\ExportSelect.Designer.cs">
       <DependentUpon>ExportSelect.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\FilterSelect.cs">
+    <Compile Include="Dialog\FilterSelect.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Controls\FilterSelect.Designer.cs">
+    <Compile Include="Dialog\FilterSelect.Designer.cs">
       <DependentUpon>FilterSelect.cs</DependentUpon>
     </Compile>
     <Compile Include="Controls\InstallSource.cs">
@@ -338,6 +353,7 @@
     <Compile Include="Ide\TreeListView.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="IUpdateListener.cs" />
     <Compile Include="IWizard.cs" />
     <Compile Include="IWizardStep.cs" />
     <Compile Include="Main.cs">
@@ -346,6 +362,12 @@
     <Compile Include="Main.Designer.cs">
       <DependentUpon>Main.cs</DependentUpon>
     </Compile>
+    <Compile Include="Merge\FileCompare.cs" />
+    <Compile Include="Merge\FileStatus.cs" />
+    <Compile Include="Merge\HgMergeOperation.cs" />
+    <Compile Include="Merge\IMergeOperation.cs" />
+    <Compile Include="Merge\MergeFilePaths.cs" />
+    <Compile Include="Merge\MergeStatus.cs" />
     <Compile Include="MultiselectListBox.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -384,6 +406,7 @@
     </Compile>
     <Compile Include="Snippet.cs" />
     <Compile Include="SnippetManager.cs" />
+    <Compile Include="Merge\Upgrade.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="Editor\XPathReader\arraymanager.cs" />
     <Compile Include="Editor\XPathReader\astnode.cs" />
@@ -432,7 +455,10 @@
     <EmbeddedResource Include="Controls\ExportSelect.resx">
       <DependentUpon>ExportSelect.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Controls\FilterSelect.resx">
+    <EmbeddedResource Include="Controls\MergeInterface.resx">
+      <DependentUpon>MergeInterface.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialog\FilterSelect.resx">
       <DependentUpon>FilterSelect.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\InstallComplete.resx">
@@ -455,6 +481,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Dialog\ImportSelectDialog.resx">
       <DependentUpon>ImportSelectDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialog\ProgressDialog.resx">
+      <DependentUpon>ProgressDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Ide\EditorWindow.resx">
       <DependentUpon>EditorWindow.cs</DependentUpon>
@@ -501,6 +530,10 @@
     <ProjectReference Include="..\ADiff\ADiff.Ui.csproj">
       <Project>{f74031e5-f623-46e7-b21a-ac093dbadd2e}</Project>
       <Name>ADiff.Ui</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HgSharp.Core\HgSharp.Core.csproj">
+      <Project>{7a342412-e7f3-42a2-a902-349d45c5eafa}</Project>
+      <Name>HgSharp.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\InnovatorAdmin.Api\InnovatorAdmin.Api.csproj">
       <Project>{7C397623-C59E-4DB2-8879-8A3385DABCD9}</Project>

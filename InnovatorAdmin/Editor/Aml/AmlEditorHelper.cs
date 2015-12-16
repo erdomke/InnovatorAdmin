@@ -50,7 +50,7 @@ namespace InnovatorAdmin.Editor
             ShowCompletions(control)
               .Done(data =>
               {
-                if (data != null && data.IsXmlAttribute && !data.Items.Any()
+                if (data != null && data.IsXmlTag && !data.Items.Any()
                   && control.Editor.CaretOffset < control.Editor.Document.TextLength)
                 {
                   var doc = control.Editor.TextArea.Document;

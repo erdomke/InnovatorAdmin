@@ -29,6 +29,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		readme.md = readme.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HgSharp.Core", "HgSharp.Core\HgSharp.Core.csproj", "{7A342412-E7F3-42A2-A902-349D45C5EAFA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,16 @@ Global
 		{F74031E5-F623-46E7-B21A-AC093DBADD2E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{F74031E5-F623-46E7-B21A-AC093DBADD2E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{F74031E5-F623-46E7-B21A-AC093DBADD2E}.Release|x86.ActiveCfg = Release|Any CPU
+		{7A342412-E7F3-42A2-A902-349D45C5EAFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A342412-E7F3-42A2-A902-349D45C5EAFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A342412-E7F3-42A2-A902-349D45C5EAFA}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{7A342412-E7F3-42A2-A902-349D45C5EAFA}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{7A342412-E7F3-42A2-A902-349D45C5EAFA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7A342412-E7F3-42A2-A902-349D45C5EAFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A342412-E7F3-42A2-A902-349D45C5EAFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A342412-E7F3-42A2-A902-349D45C5EAFA}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{7A342412-E7F3-42A2-A902-349D45C5EAFA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{7A342412-E7F3-42A2-A902-349D45C5EAFA}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

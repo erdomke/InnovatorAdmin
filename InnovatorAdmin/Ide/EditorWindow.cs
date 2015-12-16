@@ -16,6 +16,7 @@ namespace InnovatorAdmin
 {
   public partial class EditorWindow : Form
   {
+    private bool _panelCollapsed;
     private bool _autoTabSelect = true;
     private bool _loadingConnection = false;
     private bool _disposeProxy = true;
@@ -28,6 +29,8 @@ namespace InnovatorAdmin
     private string _locale;
     private string _timeZone;
     private int _timeout = Innovator.Client.Connection.DefaultHttpService.DefaultTimeout;
+    private Timer _clock = new Timer();
+    private DateTime _start = DateTime.UtcNow;
 
     public bool AllowRun
     {
@@ -74,6 +77,16 @@ namespace InnovatorAdmin
       treeItems.SmallImageList.Images.Add("folder-special-16", InnovatorAdmin.Ide.TreeImages.folder_special_16);
       treeItems.SmallImageList.Images.Add("property-16", InnovatorAdmin.Ide.TreeImages.property_16);
       treeItems.SmallImageList.Images.Add("xml-tag-16", InnovatorAdmin.Ide.TreeImages.xml_tag_16);
+
+      _clock.Interval = 250;
+      _clock.Tick += _clock_Tick;
+      _panelCollapsed = Properties.Settings.Default.EditorWindowPanelCollapsed;
+      UpdatePanelCollapsed();
+    }
+
+    void _clock_Tick(object sender, EventArgs e)
+    {
+      lblItems.Text = string.Format(@"Processing... {0:hh\:mm\:ss}", DateTime.UtcNow - _start);
     }
 
     public void SetConnection(IAsyncConnection conn, string name = null)
@@ -122,8 +135,17 @@ namespace InnovatorAdmin
 
     private void DisposeProxy()
     {
-      if (_proxy != null && _disposeProxy)
-        _proxy.Dispose();
+      if (_proxy != null)
+      {
+        var arasProxy = _proxy as ArasEditorProxy;
+        if (arasProxy != null)
+        {
+          var remote = arasProxy.Connection as IRemoteConnection;
+          if (remote != null)
+            remote.DefaultSettings(r => { });
+        }
+        if (_disposeProxy) _proxy.Dispose();
+      }
     }
 
     public void SetConnection(IEditorProxy proxy)
@@ -362,6 +384,8 @@ namespace InnovatorAdmin
       {
         outputEditor.Text = "Processing...";
         lblItems.Text = "Processing...";
+        _start = DateTime.UtcNow;
+        _clock.Enabled = true;
         btnSubmit.Text = "Cancel";
 
         var cmd = _proxy.NewCommand().WithQuery(query).WithAction(this.SoapAction);
@@ -409,6 +433,7 @@ namespace InnovatorAdmin
               var milliseconds = st.ElapsedMilliseconds;
 
               _result = result;
+              _clock.Enabled = false;
               if (result.ItemCount > 0)
               {
                 lblItems.Text = string.Format("{0} item(s) found in {1} ms.", result.ItemCount, milliseconds);
@@ -438,6 +463,7 @@ namespace InnovatorAdmin
           })
           .Always(() =>
           {
+            _clock.Enabled = false;
             _currentQuery = null;
             btnSubmit.Text = "► Run";
           });
@@ -445,6 +471,7 @@ namespace InnovatorAdmin
       catch (Exception err)
       {
         outputEditor.Text = err.Message;
+        _clock.Enabled = false;
         lblItems.Text = "Error";
         _currentQuery = null;
         btnSubmit.Text = "► Run";
@@ -906,9 +933,9 @@ namespace InnovatorAdmin
       try
       {
         var node = e.Model as IEditorTreeNode;
-        if (node != null && node.Scripts != null && node.Scripts.Any())
+        if (node != null && node.GetScripts().Any())
         {
-          var script = node.Scripts.First();
+          var script = node.GetScripts().First();
           this.SoapAction = script.Action;
           this.Script = script.Script;
         }
@@ -1002,5 +1029,66 @@ namespace InnovatorAdmin
         Utils.HandleError(ex);
       }
     }
+
+    private void treeItems_CellToolTipShowing(object sender, BrightIdeasSoftware.ToolTipShowingEventArgs e)
+    {
+      try
+      {
+        var node = (IEditorTreeNode)e.Model;
+        if (e.Column.AspectName == "Name" && !string.IsNullOrWhiteSpace(node.Description))
+        {
+          e.Text = node.Description;
+        }
+      }
+      catch (Exception) { }
+    }
+
+    private void treeItems_Expanding(object sender, BrightIdeasSoftware.TreeBranchExpandingEventArgs e)
+    {
+      try
+      {
+        if (treeItems.CanExpand(e.Model) && !treeItems.GetChildren(e.Model).OfType<IEditorTreeNode>().Any())
+          treeItems.RefreshObject(e.Model);
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void UpdatePanelCollapsed()
+    {
+      splitMain.IsSplitterFixed = _panelCollapsed;
+      treeItems.Visible = !_panelCollapsed;
+      if (_panelCollapsed)
+      {
+        btnPanelToggle.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+        btnPanelToggle.Orientation = Orientation.Vertical;
+        splitMain.SplitterDistance = btnPanelToggle.Width;
+      }
+      else
+      {
+        btnPanelToggle.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+        btnPanelToggle.Orientation = Orientation.Horizontal;
+        btnPanelToggle.Height = 25;
+        splitMain.SplitterDistance = 220;
+      }
+    }
+
+    private void btnPanelToggle_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        _panelCollapsed = !_panelCollapsed;
+        UpdatePanelCollapsed();
+        Properties.Settings.Default.EditorWindowPanelCollapsed = _panelCollapsed;
+        Properties.Settings.Default.Save();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
   }
 }

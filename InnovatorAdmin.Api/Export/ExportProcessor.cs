@@ -28,14 +28,23 @@ namespace InnovatorAdmin
     public event EventHandler<ActionCompleteEventArgs> ActionComplete;
     public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
 
+    /// <summary>
+    /// Construct a new <see cref="ExportProcessor"/> from a connection to Aras
+    /// </summary>
+    /// <param name="conn"></param>
     public ExportProcessor(IAsyncConnection conn)
     {
       _conn = conn;
       _metadata = ArasMetadataProvider.Cached(conn);
+      _metadata.Reset();
       _dependAnalyzer = new DependencyAnalyzer(_metadata);
     }
 
-    public void Export(InstallScript script, IEnumerable<ItemReference> items)
+    /// <summary>
+    /// Fill an install script with exports of the specified items
+    /// </summary>
+    public void Export(InstallScript script, IEnumerable<ItemReference> items
+      , bool checkDependencies = true)
     {
       ReportProgress(0, "Loading system data");
       _metadata.Wait();
@@ -172,7 +181,7 @@ namespace InnovatorAdmin
         ReportProgress(0, "Loading system data");
 
         FixFederatedRelationships(outputDoc.DocumentElement);
-        var result = ExecuteExportQuery(outputDoc.DocumentElement);
+        var result = ExecuteExportQuery(ref outputDoc, items);
 
         // Add warnings for embedded relationships
         var warnings = new HashSet<ItemReference>();
@@ -184,20 +193,20 @@ namespace InnovatorAdmin
           warnings.Add(warning);
         }
 
-        RemoveRelatedItems(result, items);
-        CleanUpSystemProps(result, items, false);
+        //RemoveRelatedItems(result, items);
+        //CleanUpSystemProps(result.DocumentElement.Elements(), items, false);
         FixPolyItemReferences(result);
         FloatVersionableRefs(result);
-        var doc = TransformResults(result.DocumentElement);
+        var doc = TransformResults(ref result);
         NormalizeClassStructure(doc);
-        RemoveKeyedNameAttributes(doc);
-        ExpandSystemIdentities(doc);
         FixFormFieldsPointingToSystemProperties(doc);
+        RemoveKeyedNameAttributes(doc.DocumentElement);
+        ExpandSystemIdentities(doc);
         RemoveVersionableRelIds(doc);
         //TODO: Replace references to poly item lists
 
-        Export(script, doc, warnings);
-        CleanUpSystemProps(doc, items, true);
+        Export(script, doc, warnings, checkDependencies);
+        CleanUpSystemProps(doc.DocumentElement.Elements(), items.ToDictionary(i => i), true);
         ConvertFloatProps(doc);
 
         if (string.IsNullOrWhiteSpace(script.Title))
@@ -211,13 +220,29 @@ namespace InnovatorAdmin
             script.Title = items.First().ToString();
           }
         }
+
+        // Rename the FileTypes and identities to make comparing easier
+        ItemReference newRef;
+        foreach (var line in script.Lines.Where(l => l.Reference.Type == "FileType" || l.Reference.Type == "Identity"))
+        {
+          newRef = ItemReference.FromFullItem(line.Script.DescendantsAndSelf(e => e.LocalName == "Item").First(), true);
+          if (newRef.Type == line.Reference.Type && !String.Equals(newRef.KeyedName, line.Reference.KeyedName))
+          {
+            line.Reference.KeyedName = newRef.KeyedName;
+          }
+        }
       }
       catch (Exception ex)
       {
         this.OnActionComplete(new ActionCompleteEventArgs() { Exception = ex });
       }
     }
-    public void Export(InstallScript script, XmlDocument doc, HashSet<ItemReference> warnings = null)
+
+    /// <summary>
+    /// Fill an install script with exports of the items in the XmlDocument
+    /// </summary>
+    public void Export(InstallScript script, XmlDocument doc
+      , HashSet<ItemReference> warnings = null, bool checkDependencies = true)
     {
       try
       {
@@ -227,7 +252,11 @@ namespace InnovatorAdmin
         FixForeignProperties(doc);
         FixCyclicalWorkflowLifeCycleRefs(doc);
         FixCyclicalWorkflowItemTypeRefs(doc);
-        
+
+        RemoveEmptyRelationshipTags(doc);
+        RemoveVersionableRelIds(doc);
+        SortRelationshipTags(doc);
+
         MoveFormRefsInline(doc, (script.Lines ?? Enumerable.Empty<InstallItem>()).Where(l => l.Type == InstallType.Create || l.Type == InstallType.Script));
 
         // Sort the resulting nodes as appropriate
@@ -236,33 +265,51 @@ namespace InnovatorAdmin
         while (itemNode != null && itemNode.LocalName != "Item") itemNode = itemNode.Elements().FirstOrDefault();
         if (itemNode == null) throw new InvalidOperationException(); //TODO: Give better error information here (e.g. interpret an error item if present)
 
-        int loops = 0;
-        CycleState state = CycleState.ResolvedCycle;
         IEnumerable<InstallItem> results = null;
-        while (loops < 10 && state == CycleState.ResolvedCycle)
+        if (checkDependencies)
         {
-          // Only reset if this is not a rescan
-          if (script.Lines != null)
+          int loops = 0;
+          CycleState state = CycleState.ResolvedCycle;
+          while (loops < 10 && state == CycleState.ResolvedCycle)
           {
-            _dependAnalyzer.Reset(from l in script.Lines where l.Type == InstallType.Create || l.Type == InstallType.Script select l.Reference);
+            // Only reset if this is not a rescan
+            if (script.Lines != null)
+            {
+              _dependAnalyzer.Reset(from l in script.Lines where l.Type == InstallType.Create || l.Type == InstallType.Script select l.Reference);
+            }
+            else
+            {
+              _dependAnalyzer.Reset();
+            }
+            var newInstallItems = (from e in itemNode.ParentNode.Elements()
+                                   where e.LocalName == "Item" && e.HasAttribute("type")
+                                   select InstallItem.FromScript(e)).ToList();
+
+            foreach (var newInstallItem in newInstallItems)
+            {
+              _dependAnalyzer.GatherDependencies(newInstallItem.Script, newInstallItem.Reference, newInstallItem.CoreDependencies);
+            }
+            _dependAnalyzer.CleanDependencies();
+
+            results = GetDependencyList((script.Lines ?? Enumerable.Empty<InstallItem>())
+                                          .Concat(newInstallItems), out state).ToList();
+            loops++;
           }
-          else
-          {
-            _dependAnalyzer.Reset();
-          }
+        }
+        else
+        {
           var newInstallItems = (from e in itemNode.ParentNode.Elements()
                                  where e.LocalName == "Item" && e.HasAttribute("type")
                                  select InstallItem.FromScript(e)).ToList();
-          foreach (var newInstallItem in newInstallItems)
-          {
-            _dependAnalyzer.GatherDependencies(newInstallItem.Script, newInstallItem.Reference, newInstallItem.CoreDependencies);
-          }
-          _dependAnalyzer.CleanDependencies();
+          //foreach (var item in newInstallItems)
+          //{
+          //  item.Script.SetAttribute(XmlFlags.Attr_DependenciesAnalyzed, "1");
+          //}
 
-          results = GetDependencyList((script.Lines ?? Enumerable.Empty<InstallItem>())
-                                        .Concat(newInstallItems), out state).ToList();
-          loops++;
+          results = (script.Lines ?? Enumerable.Empty<InstallItem>())
+            .Concat(newInstallItems).ToList();
         }
+
 
         if (warnings == null) warnings = new HashSet<ItemReference>();
         warnings.ExceptWith(results.Select(r => r.Reference));
@@ -284,6 +331,10 @@ namespace InnovatorAdmin
       }
     }
 
+    /// <summary>
+    /// Normalize a list of item references.  Used in the resolution step to know which parent items
+    /// to add given a dependency on a child.
+    /// </summary>
     public IEnumerable<ItemReference> NormalizeRequest(IEnumerable<ItemReference> items)
     {
       foreach (var item in items)
@@ -316,28 +367,43 @@ namespace InnovatorAdmin
       }
     }
 
+    /// <summary>
+    /// Removes all Items that reference the given item
+    /// </summary>
     public void RemoveReferencingItems(InstallScript script, ItemReference itemRef)
     {
       var nodes = _dependAnalyzer.RemoveDependencyContexts(itemRef);
       script.Lines = script.Lines.Where(l => !(l.Type == InstallType.Create || l.Type == InstallType.Script) || !nodes.Contains(l.Script)).ToList();
     }
 
+    /// <summary>
+    /// Removes all the properties that reference the given item
+    /// </summary>
     public void RemoveReferences(InstallScript script, ItemReference itemRef)
     {
       var nodes = _dependAnalyzer.RemoveDependencyReferences(itemRef);
       script.Lines = script.Lines.Where(l => !(l.Type == InstallType.Create || l.Type == InstallType.Script) || !nodes.Contains(l.Script)).ToList();
     }
 
+    /// <summary>
+    /// Invoke the ProgressChanged event
+    /// </summary>
     protected virtual void ReportProgress(int progress, string message)
     {
       OnProgressChanged(new ProgressChangedEventArgs(message, progress));
     }
 
+    /// <summary>
+    /// Invoke the ActionComplete event
+    /// </summary>
     protected virtual void OnActionComplete(ActionCompleteEventArgs e)
     {
       if (this.ActionComplete != null) ActionComplete(this, e);
     }
 
+    /// <summary>
+    /// Invoke the ProgressChanged event
+    /// </summary>
     protected virtual void OnProgressChanged(ProgressChangedEventArgs e)
     {
       if (this.ProgressChanged != null) ProgressChanged(this, e);
@@ -363,16 +429,16 @@ namespace InnovatorAdmin
     /// properties are removed.  Properties included in the SQL script are kept for dependency checking.  The run with <paramref name="cleanAll"/>
     /// set to <c>true</c> removes the remaining system properties.
     /// </remarks>
-    private void CleanUpSystemProps(XmlDocument doc, IEnumerable<ItemReference> items, bool cleanAll)
+    private void CleanUpSystemProps(IEnumerable<XmlElement> elems
+      , IDictionary<ItemReference, ItemReference> itemDict, bool cleanAll)
     {
-      var itemDict = items.ToDictionary(i => i);
       ItemReference itemRef;
       ItemReference itemRefOpts;
       SystemPropertyGroup group;
       var updateQuery = new StringBuilder(128);
       IEnumerable<XmlElement> itemElems;
 
-      foreach (var elem in doc.DocumentElement.Elements())
+      foreach (var elem in elems)
       {
         itemRef = ItemReference.FromFullItem(elem, false);
         group = SystemPropertyGroup.None;
@@ -538,8 +604,6 @@ namespace InnovatorAdmin
     /// </summary>
     private void ConvertPolyItemReferencesToActualType(List<ItemReference> itemList)
     {
-      var outputDoc = new XmlDocument();
-      XmlElement queryElem;
       ItemType metaData;
       ItemType realType;
       ItemReference newRef;
@@ -552,8 +616,6 @@ namespace InnovatorAdmin
         if (_metadata.ItemTypeByName(typeItems.Key.ToLowerInvariant(), out metaData) && metaData.IsPolymorphic)
         {
           whereClause.Length = 0;
-
-          queryElem = outputDoc.CreateElement("Item").Attr("action", "get").Attr("type", typeItems.Key);
 
           if (typeItems.Any(i => i.Unique.IsGuid()))
           {
@@ -568,8 +630,6 @@ namespace InnovatorAdmin
             whereClause.AppendSeparator(" or ",
               typeItems.Where(i => !i.Unique.IsGuid()).Select(i => i.Unique).Aggregate((p, c) => p + " or " + c));
           }
-          queryElem.SetAttribute("where", whereClause.ToString());
-
 
           // Remove the items from the list
           var idx = 0;
@@ -585,7 +645,7 @@ namespace InnovatorAdmin
             }
           }
 
-          var polyItems = _conn.Apply(queryElem.OuterXml).Items();
+          var polyItems = _conn.Apply("<Item action='get' type='@0' where='@1' />", typeItems.Key, whereClause.ToString()).Items();
           foreach (var polyItem in polyItems)
           {
             newRef = ItemReference.FromFullItem(polyItem, true);
@@ -599,27 +659,60 @@ namespace InnovatorAdmin
     /// <summary>
     /// Execute the query to get all the relevant data from the database regarding the items to export.
     /// </summary>
-    private XmlDocument ExecuteExportQuery(XmlNode query)
+    private XmlDocument ExecuteExportQuery(ref XmlDocument query, IEnumerable<ItemReference> itemRefs)
     {
-      var queryItems = query.Elements("Item").ToList();
+      var itemDic = itemRefs.ToDictionary(i => i);
+      var queryItems = query.DocumentElement.Elements("Item");
+      var result = query.NewDoc();
       ReportProgress(4, "Searching for data...");
 
       var promises = queryItems.Select(q => (Func<IPromise>)(
-          () => _conn.ApplyAsync(q, true, false)
-            .Convert(r => r.Items().Select(i => i.ToAml())))
+          () => _conn.Process(q, true)
+            .Convert(s => {
+              return (IEnumerable<XmlElement>)(Items(result, s, itemDic).ToArray());
+            })
+          )
         ).ToArray();
+      query = null; // Release the query memory as soon as possible;
       var items = Promises.Pooled(30, promises)
         .Progress((i, m) =>
         {
           ReportProgress(4 + (int)(i * 0.9), "Searching for data...");
         }).Wait();
 
-      var reader = new StringEnumerableReader(Enumerable.Repeat("<Result>", 1)
-        .Concat(items.SelectMany(r => (IEnumerable<string>)r))
-        .Concat(Enumerable.Repeat("</Result>", 1)));
-      var result = new XmlDocument();
-      result.Load(reader);
+      ReportProgress(95, "Loading results into memory...");
+      var elems = items.SelectMany(r => (IEnumerable<XmlElement>)r);
+      var root = result.Elem("Result");
+
+      foreach (var elem in elems)
+      {
+        root.AppendChild(elem);
+      }
       return result;
+    }
+
+    private IEnumerable<XmlElement> Items(XmlDocument doc, Stream stream
+      , IDictionary<ItemReference, ItemReference> itemDict)
+    {
+      var settings = new XmlReaderSettings();
+      settings.NameTable = doc.NameTable ?? new NameTable();
+      using (var reader = XmlReader.Create(stream, settings))
+      {
+        while(!reader.EOF)
+        {
+          if (reader.NodeType == XmlNodeType.Element && reader.LocalName == "Item")
+          {
+            var elem = (XmlElement)doc.ReadNode(reader);
+            RemoveRelatedItems(elem, itemDict);
+            CleanUpSystemProps(Enumerable.Repeat(elem, 1), itemDict, false);
+            yield return elem;
+          }
+          else
+          {
+            reader.Read();
+          }
+        }
+      }
     }
 
     /// <summary>
@@ -669,6 +762,7 @@ namespace InnovatorAdmin
           sourceId.SetAttribute("keyed_name", type.Element("id").Attribute("keyed_name", ""));
           sourceId.InnerText = type.Attribute("id");
         }
+        workflowRef.Attr(XmlFlags.Attr_ScriptType, "3");
         type = workflowRef.Parents().Last(e => e.LocalName == "Item");
         while (type.NextSibling.Attribute("action") == "edit") type = (XmlElement)type.NextSibling;
         workflowRef.ParentNode.RemoveChild(workflowRef);
@@ -689,6 +783,7 @@ namespace InnovatorAdmin
       {
         fix = (XmlElement)workflowRef.ParentNode.CloneNode(false);
         fix.SetAttribute("action", "edit");
+        fix.SetAttribute(XmlFlags.Attr_ScriptType, "4");
         fix.IsEmpty = true;
         fix.AppendChild(workflowRef.CloneNode(true));
         map = workflowRef.Parents().First(e => e.LocalName == "Item" && e.Attribute("type", "") == "Life Cycle Map");
@@ -734,6 +829,7 @@ namespace InnovatorAdmin
       {
         fix = (XmlElement)itemType.CloneNode(false);
         fix.SetAttribute("action", "edit");
+        fix.SetAttribute(XmlFlags.Attr_ScriptType, "5");
         fix.IsEmpty = true;
         fix = (XmlElement)fix.AppendChild(doc.CreateElement("Relationships"));
         var uppermostItem = itemType.Parents().LastOrDefault(e => e.LocalName == "Item" && !string.IsNullOrEmpty(e.Attribute("type", ""))) ?? itemType;
@@ -754,6 +850,8 @@ namespace InnovatorAdmin
     {
       const string sysProps = "|behavior|classification|config_id|created_by_id|created_on|css|current_state|generation|history_id|id|is_current|is_released|keyed_name|release_date|effective_date|locked_by_id|major_rev|managed_by_id|minor_rev|modified_by_id|modified_on|new_version|not_lockable|owned_by_id|permission_id|related_id|sort_order|source_id|state|itemtype|superseded_date|team_id|";
       var fields = doc.ElementsByXPath("//Item[@type='Field'][contains($p0,concat('|',propertytype_id/@keyed_name,'|'))]", sysProps).ToList();
+      if (fields.Count < 1) return;
+
       var query = "<Item type=\"Property\" action=\"get\" idlist=\"" + fields.GroupConcat(",", f => f.Element("propertytype_id", "")) + "\" select=\"name,source_id\" />";
 
       // Get all the property information from the database
@@ -777,13 +875,17 @@ namespace InnovatorAdmin
           propType = field.Element("propertytype_id");
           propType.RemoveAll();
 
-          tempDoc = new XmlDocument();
+          tempDoc = doc.NewDoc();
           tempDoc.LoadXml(propData);
 
           propType.AppendChild(propType.OwnerDocument.ImportNode(tempDoc.DocumentElement, true));
           propType.Detatch();
           parentItem = field.Parents().Last(e => e.LocalName == "Item");
-          script = parentItem.OwnerDocument.CreateElement("Item").Attr("type", field.Attribute("type")).Attr("id", field.Attribute("id")).Attr("action", "edit");
+          script = parentItem.OwnerDocument.CreateElement("Item")
+            .Attr("type", field.Attribute("type"))
+            .Attr("id", field.Attribute("id"))
+            .Attr("action", "edit")
+            .Attr(XmlFlags.Attr_ScriptType, "6");
           script.AppendChild(propType);
           parentItem.Parent().InsertAfter(script, parentItem);
         }
@@ -882,7 +984,7 @@ namespace InnovatorAdmin
           .Aggregate((p, c) => p + " or " + c)
         + "]";
       var elements = doc.ElementsByXPath(query);
-      
+
       ItemReference itemRef;
       foreach (var elem in elements)
       {
@@ -1111,35 +1213,37 @@ namespace InnovatorAdmin
       XmlDocument classDoc;
       foreach (var classStruct in classStructs)
       {
-        classDoc = new XmlDocument();
-        classDoc.LoadXml(classStruct.InnerText);
-        using (var output = new StringWriter())
+        classDoc = doc.NewDoc();
+        var text = classStruct.InnerText;
+        classDoc.LoadXml(text);
+        var sb = new StringBuilder((int)(text.Length * 1.4));
+        using (var output = new StringWriter(sb))
         {
           using (var writer = XmlTextWriter.Create(output, settings))
           {
             WriteClassStruct(Enumerable.Repeat((XmlNode)classDoc.DocumentElement, 1), writer);
           }
-          classStruct.InnerXml = "<![CDATA[" + output.ToString() + "]]>";
+          classStruct.IsEmpty = true;
+          classStruct.AppendChild(doc.CreateCDataSection(output.ToString()));
         }
       }
     }
     /// <summary>
     /// Remove keyed_name attributes to make diffing easier
     /// </summary>
-    private void RemoveKeyedNameAttributes(XmlDocument doc)
+    private void RemoveKeyedNameAttributes(XmlElement node)
     {
-      foreach (var attr in doc.XPath("@keyed_name").OfType<XmlAttribute>().ToList())
-      {
-        attr.Detatch();
-      }
+      if (node.HasAttribute("keyed_name"))
+        node.RemoveAttribute("keyed_name");
+      foreach (var elem in node.Elements())
+        RemoveKeyedNameAttributes(elem);
     }
 
     /// <summary>
-    /// Remove related items from relationships to non-dependent itemtypes (they should be exported separately).
+    /// Remove the ID attribute from relationships from versionable items.  This will improve the
+    /// compare process and the import process should handle the import of these items without an
+    /// ID.
     /// </summary>
-    /// <remarks>
-    /// Floating relationships to versionable items are flagged to float.
-    /// </remarks>
     private void RemoveVersionableRelIds(XmlDocument doc)
     {
       var query = "//Item["
@@ -1154,7 +1258,55 @@ namespace InnovatorAdmin
         elem.RemoveAttribute("id");
       }
     }
-    
+
+    /// <summary>
+    /// Remove empty &lt;Relationship/&gt; tags that weren't dealt with by the xslt template
+    /// </summary>
+    private void RemoveEmptyRelationshipTags(XmlDocument doc)
+    {
+      var elements = doc.Descendants(e => e.LocalName == "Relationships" && e.IsEmpty).ToList();
+      foreach (var elem in elements)
+      {
+        elem.Detatch();
+      }
+    }
+
+    /// <summary>
+    /// Reorder the Relationship tags in cases where the ItemTypes are not intrinsically sorted on
+    /// gets (e.g. the Property Item Type is intrinsically sorted).
+    /// </summary>
+    private void SortRelationshipTags(XmlDocument doc)
+    {
+      var unsortedTypes = new HashSet<string>(_metadata.ItemTypes.Where(i => !i.IsSorted).Select(i => i.Name));
+      var elements = doc.Descendants(e =>
+        e.LocalName == "Relationships"
+        && e.Elements().HasMultiple(c => c.HasAttribute("id")
+          && c.HasAttribute("type")
+          && unsortedTypes.Contains(c.Attribute("type")))).ToList();
+      foreach (var elem in elements)
+      {
+        var children = elem.Elements().Select((e, i) => new
+        {
+          Element = e,
+          Type = e.Attribute("type"),
+          SortKey = e.HasAttribute("id") && e.HasAttribute("type")
+            && unsortedTypes.Contains(e.Attribute("type"))
+            ? e.Attribute("id") : i.ToString("D5")
+        })
+        .OrderBy(e => e.Type)
+        .ThenBy(e => e.SortKey)
+        .ToArray();
+        foreach (var child in children)
+        {
+          child.Element.Detatch();
+        }
+        foreach (var child in children)
+        {
+          elem.AppendChild(child.Element);
+        }
+      }
+    }
+
 
 
     /// <summary>
@@ -1163,16 +1315,14 @@ namespace InnovatorAdmin
     /// <remarks>
     /// Floating relationships to versionable items are flagged to float.
     /// </remarks>
-    private void RemoveRelatedItems(XmlDocument doc, IEnumerable<ItemReference> items)
+    private void RemoveRelatedItems(XmlNode doc, IDictionary<ItemReference, ItemReference> itemDict)
     {
-      var itemDict = items.ToDictionary(i => i);
-
       ItemReference itemRefOpts;
       ItemType itemType;
       List<XmlElement> parents;
       int levels;
 
-      foreach (var elem in doc.ElementsByXPath("//Relationships/Item/related_id[Item/@id!='']").ToList())
+      foreach (var elem in doc.ElementsByXPath(".//Relationships/Item/related_id[Item/@id!='']").ToList())
       {
         parents = elem.Parents().Where(e => e.LocalName == "Item").Skip(1).ToList();
         levels = 1;
@@ -1268,22 +1418,36 @@ namespace InnovatorAdmin
     /// <summary>
     /// Transform the results to normalize the output using the XSLT
     /// </summary>
-    private XmlDocument TransformResults(XmlNode results)
+    private XmlDocument TransformResults(ref XmlDocument results)
     {
       EnsureTransforms();
 
-      var doc = new XmlDocument();
+      var doc = results.NewDoc();
       // Transform the output
       ReportProgress(94, "Transforming the results");
-      using (var output = new StringWriter())
+      using (var memStream = new MemoryStream(results.DocumentElement.ChildNodes.Count * 1000))
+      using (var output = new StreamWriter(memStream))
       {
-        using (var reader = new XmlNodeReader(results))
+        using (var reader = new XmlNodeReader(results.DocumentElement))
         {
           _resultTransform.Transform(reader, null, output);
-          output.Flush();
         }
-        doc.LoadXml(output.ToString());
+        // Nullify the original document immediately to reclaim the memory ASAP
+        results = null;
+
+        output.Flush();
+        memStream.Position = 0;
+        doc.Load(memStream);
+
       }
+
+      // Make sure empty elements truly empty
+      var emptyElements = doc.Descendants(e => !e.HasChildNodes && !e.IsEmpty).ToArray();
+      foreach (var emptyElem in emptyElements)
+      {
+        emptyElem.IsEmpty = true;
+      }
+
       return doc;
     }
     /// <summary>

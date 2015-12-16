@@ -72,6 +72,7 @@
       this.mniLevels6 = new System.Windows.Forms.ToolStripMenuItem();
       this.mniLevels7 = new System.Windows.Forms.ToolStripMenuItem();
       this.mniLevels8 = new System.Windows.Forms.ToolStripMenuItem();
+      this.chkDependencies = new System.Windows.Forms.CheckBox();
       ((System.ComponentModel.ISupportInitialize)(this.gridSelected)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.gridAvailable)).BeginInit();
       this.tableLayoutPanel1.SuspendLayout();
@@ -95,12 +96,13 @@
       this.gridSelected.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colTypeSelected,
             this.colNameSelected});
-      this.gridSelected.Location = new System.Drawing.Point(314, 23);
+      this.tableLayoutPanel1.SetColumnSpan(this.gridSelected, 2);
+      this.gridSelected.Location = new System.Drawing.Point(315, 23);
       this.gridSelected.Name = "gridSelected";
       this.gridSelected.ReadOnly = true;
       this.gridSelected.RowHeadersVisible = false;
       this.gridSelected.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-      this.gridSelected.Size = new System.Drawing.Size(272, 260);
+      this.gridSelected.Size = new System.Drawing.Size(271, 260);
       this.gridSelected.TabIndex = 1;
       this.gridSelected.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.gridSelected_CellMouseClick);
       this.gridSelected.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.gridSelected_CellMouseDoubleClick);
@@ -169,16 +171,18 @@
       // tableLayoutPanel1
       // 
       this.tableLayoutPanel1.BackColor = System.Drawing.Color.White;
-      this.tableLayoutPanel1.ColumnCount = 3;
-      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.tableLayoutPanel1.ColumnCount = 4;
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 60F));
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tableLayoutPanel1.Controls.Add(this.tbcSearch, 0, 1);
       this.tableLayoutPanel1.Controls.Add(this.gridSelected, 2, 1);
       this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel4, 1, 1);
       this.tableLayoutPanel1.Controls.Add(this.label2, 0, 0);
       this.tableLayoutPanel1.Controls.Add(this.label3, 2, 0);
-      this.tableLayoutPanel1.Controls.Add(this.btnAdvanced, 2, 2);
+      this.tableLayoutPanel1.Controls.Add(this.btnAdvanced, 3, 2);
+      this.tableLayoutPanel1.Controls.Add(this.chkDependencies, 2, 2);
       this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
       this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -186,8 +190,6 @@
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
       this.tableLayoutPanel1.Size = new System.Drawing.Size(589, 319);
       this.tableLayoutPanel1.TabIndex = 2;
       // 
@@ -200,7 +202,7 @@
       this.tbcSearch.Name = "tbcSearch";
       this.tableLayoutPanel1.SetRowSpan(this.tbcSearch, 2);
       this.tbcSearch.SelectedIndex = 0;
-      this.tbcSearch.Size = new System.Drawing.Size(271, 293);
+      this.tbcSearch.Size = new System.Drawing.Size(272, 293);
       this.tbcSearch.TabIndex = 0;
       // 
       // pgSearchBy
@@ -209,7 +211,7 @@
       this.pgSearchBy.Location = new System.Drawing.Point(4, 22);
       this.pgSearchBy.Name = "pgSearchBy";
       this.pgSearchBy.Padding = new System.Windows.Forms.Padding(3);
-      this.pgSearchBy.Size = new System.Drawing.Size(263, 267);
+      this.pgSearchBy.Size = new System.Drawing.Size(264, 267);
       this.pgSearchBy.TabIndex = 0;
       this.pgSearchBy.Text = "List items by...";
       this.pgSearchBy.UseVisualStyleBackColor = true;
@@ -234,7 +236,7 @@
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel2.Size = new System.Drawing.Size(257, 261);
+      this.tableLayoutPanel2.Size = new System.Drawing.Size(258, 261);
       this.tableLayoutPanel2.TabIndex = 0;
       // 
       // btnRecentlyModified
@@ -251,7 +253,7 @@
       this.btnRecentlyModified.Location = new System.Drawing.Point(3, 155);
       this.btnRecentlyModified.Name = "btnRecentlyModified";
       this.btnRecentlyModified.Padding = new System.Windows.Forms.Padding(2);
-      this.btnRecentlyModified.Size = new System.Drawing.Size(122, 70);
+      this.btnRecentlyModified.Size = new System.Drawing.Size(123, 70);
       this.btnRecentlyModified.TabIndex = 5;
       this.btnRecentlyModified.Text = "Recently Modified";
       this.btnRecentlyModified.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -276,7 +278,7 @@
       this.btnDbPackage.Location = new System.Drawing.Point(3, 3);
       this.btnDbPackage.Name = "btnDbPackage";
       this.btnDbPackage.Padding = new System.Windows.Forms.Padding(2);
-      this.btnDbPackage.Size = new System.Drawing.Size(122, 70);
+      this.btnDbPackage.Size = new System.Drawing.Size(123, 70);
       this.btnDbPackage.TabIndex = 0;
       this.btnDbPackage.Text = "Package Definition (Db)";
       this.btnDbPackage.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -300,7 +302,7 @@
       this.btnPackageFile.Location = new System.Drawing.Point(3, 79);
       this.btnPackageFile.Name = "btnPackageFile";
       this.btnPackageFile.Padding = new System.Windows.Forms.Padding(2);
-      this.btnPackageFile.Size = new System.Drawing.Size(122, 70);
+      this.btnPackageFile.Size = new System.Drawing.Size(123, 70);
       this.btnPackageFile.TabIndex = 2;
       this.btnPackageFile.Text = "Innovator Package (File)";
       this.btnPackageFile.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -321,7 +323,7 @@
       this.btnItem.ForeColor = System.Drawing.Color.Black;
       this.btnItem.Image = global::InnovatorAdmin.Properties.Resources.search32;
       this.btnItem.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-      this.btnItem.Location = new System.Drawing.Point(131, 3);
+      this.btnItem.Location = new System.Drawing.Point(132, 3);
       this.btnItem.Name = "btnItem";
       this.btnItem.Padding = new System.Windows.Forms.Padding(2);
       this.btnItem.Size = new System.Drawing.Size(123, 70);
@@ -345,7 +347,7 @@
       this.btnAmlStudio.ForeColor = System.Drawing.Color.Black;
       this.btnAmlStudio.Image = global::InnovatorAdmin.Properties.Resources.amlStudio32black;
       this.btnAmlStudio.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-      this.btnAmlStudio.Location = new System.Drawing.Point(131, 79);
+      this.btnAmlStudio.Location = new System.Drawing.Point(132, 79);
       this.btnAmlStudio.Name = "btnAmlStudio";
       this.btnAmlStudio.Padding = new System.Windows.Forms.Padding(2);
       this.btnAmlStudio.Size = new System.Drawing.Size(123, 70);
@@ -424,7 +426,7 @@
       this.tableLayoutPanel4.Controls.Add(this.btnSelect, 0, 2);
       this.tableLayoutPanel4.Controls.Add(this.btnUnselect, 0, 1);
       this.tableLayoutPanel4.Controls.Add(this.btnUnselectAll, 0, 0);
-      this.tableLayoutPanel4.Location = new System.Drawing.Point(277, 20);
+      this.tableLayoutPanel4.Location = new System.Drawing.Point(278, 20);
       this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(0);
       this.tableLayoutPanel4.Name = "tableLayoutPanel4";
       this.tableLayoutPanel4.RowCount = 4;
@@ -521,8 +523,9 @@
       // label3
       // 
       this.label3.AutoSize = true;
+      this.tableLayoutPanel1.SetColumnSpan(this.label3, 2);
       this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.label3.Location = new System.Drawing.Point(314, 3);
+      this.label3.Location = new System.Drawing.Point(315, 3);
       this.label3.Margin = new System.Windows.Forms.Padding(3);
       this.label3.Name = "label3";
       this.label3.Size = new System.Drawing.Size(151, 13);
@@ -670,6 +673,19 @@
       this.mniLevels8.Text = "8";
       this.mniLevels8.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mniLevelItem_Click);
       // 
+      // chkDependencies
+      // 
+      this.chkDependencies.AutoSize = true;
+      this.chkDependencies.Checked = true;
+      this.chkDependencies.CheckState = System.Windows.Forms.CheckState.Checked;
+      this.chkDependencies.Location = new System.Drawing.Point(315, 289);
+      this.chkDependencies.Name = "chkDependencies";
+      this.chkDependencies.Size = new System.Drawing.Size(129, 17);
+      this.chkDependencies.TabIndex = 9;
+      this.chkDependencies.Text = "Check Dependencies";
+      this.chkDependencies.UseVisualStyleBackColor = true;
+      this.chkDependencies.Visible = false;
+      // 
       // ExportSelect
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -741,5 +757,6 @@
     private System.Windows.Forms.ToolStripMenuItem mniLevels7;
     private System.Windows.Forms.ToolStripMenuItem mniLevels8;
     private FlatButton btnRecentlyModified;
+    private System.Windows.Forms.CheckBox chkDependencies;
   }
 }

@@ -11,7 +11,7 @@ using System.Drawing;
 
 namespace InnovatorAdmin
 {
-  public partial class Main : Form, IWizard
+  public partial class Main : Form, IWizard, IUpdateListener
   {
     private IAsyncConnection _conn;
     private Stack<IWizardStep> _history = new Stack<IWizardStep>();
@@ -91,6 +91,7 @@ namespace InnovatorAdmin
         }
 
         GoToStep(new Controls.Welcome());
+        //GoToStep(new Controls.MergeInterface().Initialize(new HgMergeOperation(@"C:\Users\edomke\Documents\Local_Projects\ArasUpgrade")));
       }
       catch (Exception ex)
       {
@@ -190,6 +191,42 @@ namespace InnovatorAdmin
         Properties.Settings.Default.Main_Bounds = this.DesktopBounds;
         Properties.Settings.Default.Save();
       }
+    }
+
+    public void UpdateCheckComplete(Version latestVersion)
+    {
+      try
+      {
+        var currVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        if (latestVersion == default(Version))
+        {
+          this.lblVersion.Text = string.Format("v{0} (No updates available)", currVer);
+        }
+        else
+        {
+          var newVer = latestVersion.ToString();
+
+          if (newVer != currVer)
+          {
+            this.lblVersion.Text = string.Format("v{0} (Restart to install v{1}!)", currVer, newVer);
+          }
+          else
+          {
+            this.lblVersion.Text = string.Format("v{0} (No updates available)", currVer);
+          }
+        }
+      }
+      catch (Exception) { }
+    }
+
+    public void UpdateCheckProgress(int progress)
+    {
+      try
+      {
+        var currVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        this.lblVersion.Text = string.Format("v{0} (Checking updates: {1}%)", currVer, progress);
+      }
+      catch (Exception) { }
     }
   }
 }

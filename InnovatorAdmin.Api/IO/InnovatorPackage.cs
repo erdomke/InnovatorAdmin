@@ -49,7 +49,7 @@ namespace InnovatorAdmin
             }
             else
             {
-              doc = new XmlDocument();
+              doc = new XmlDocument(manifest.NameTable);
               doc.Load(GetExistingStream(path));
             }
 
@@ -90,46 +90,36 @@ namespace InnovatorAdmin
           if (script.Website != null)
             manifestWriter.WriteAttributeString("website", script.Website.ToString());
 
-          InstallItem first;
-          foreach (var group in script.GroupLines())
+          foreach (var line in script.Lines)
           {
-            first = group.First();
-            if (first.Type == InstallType.DependencyCheck)
+            if (line.Type == InstallType.Warning)
             {
-              foreach (var line in group)
-              {
-                line.Script.WriteTo(manifestWriter);
-              }
+              // Do nothing
+            }
+            else if (line.Type == InstallType.DependencyCheck)
+            {
+              line.Script.WriteTo(manifestWriter);
             }
             else
             {
-              switch (first.Reference.Type)
+              if (line.Reference.Type == "Report" && line.Type != InstallType.Script)
               {
-                case "Report":
-                  newPath = first.Reference.Type + "\\" + CleanFileName(first.Reference.KeyedName ?? first.Reference.Unique) + ".xslt";
-                  if (existingPaths.Contains(newPath))
-                    newPath = first.Reference.Type + "\\" + CleanFileName((first.Reference.KeyedName ?? "") + "_" + first.Reference.Unique) + ".xslt";
+                newPath = line.FilePath(existingPaths, ".xslt");
+                WriteReport(line, newPath);
+              }
+              else
+              {
+                newPath = line.FilePath(existingPaths);
 
-                  WriteReport(group, newPath);
-                  break;
-                default:
-                  newPath = first.Reference.Type + "\\" + CleanFileName(first.Reference.KeyedName ?? first.Reference.Unique) + ".xml";
-                  if (existingPaths.Contains(newPath))
-                    newPath = first.Reference.Type + "\\" + CleanFileName((first.Reference.KeyedName ?? "") + "_" + first.Reference.Unique) + ".xml";
-
-                  using (var stream = GetNewStream(newPath))
+                using (var stream = GetNewStream(newPath))
+                {
+                  using (var writer = GetWriter(stream))
                   {
-                    using (var writer = GetWriter(stream))
-                    {
-                      writer.WriteStartElement("AML");
-                      foreach (var line in group)
-                      {
-                        line.Script.WriteTo(writer);
-                      }
-                      writer.WriteEndElement();
-                    }
+                    writer.WriteStartElement("AML");
+                    line.Script.WriteTo(writer);
+                    writer.WriteEndElement();
                   }
-                  break;
+                }
               }
 
               existingPaths.Add(newPath);
@@ -191,9 +181,8 @@ namespace InnovatorAdmin
 
       return result;
     }
-    private void WriteReport(IEnumerable<InstallItem> reportLines, string path)
+    private void WriteReport(InstallItem line, string path)
     {
-      var first = reportLines.First();
       var dataFile = "<Result><Item></Item></Result>";
 
       using (var writer = new StreamWriter(GetNewStream(path)))
@@ -211,10 +200,7 @@ namespace InnovatorAdmin
             };
 
             xml.WriteStartElement("AML");
-            foreach (var line in reportLines)
-            {
-              line.Script.WriteTo(xml);
-            }
+            line.Script.WriteTo(xml);
             xml.WriteEndElement();
           }
         }
@@ -223,7 +209,7 @@ namespace InnovatorAdmin
         writer.WriteLine(aml);
         writer.WriteLine(_reportEnd);
 
-        var xsltElem = first.Script.SelectSingleNode(".//xsl_stylesheet") as XmlElement;
+        var xsltElem = line.Script.SelectSingleNode(".//xsl_stylesheet") as XmlElement;
         if (xsltElem != null)
         {
           var xslt = xsltElem.InnerText;
@@ -262,24 +248,6 @@ namespace InnovatorAdmin
       settings.CloseOutput = true;
 
       return XmlTextWriter.Create(stream, settings);
-    }
-
-    /// <summary>
-    /// Removes invalid characters from the path
-    /// </summary>
-    internal static string CleanFileName(string path)
-    {
-      var invalidChars = System.IO.Path.GetInvalidFileNameChars();
-      Array.Sort(invalidChars);
-      var builder = new StringBuilder(path.Length);
-      for (int i = 0; i < path.Length; i++)
-      {
-        if (Array.BinarySearch(invalidChars, path[i]) < 0 && path[i] != '/')
-        {
-          builder.Append(path[i]);
-        }
-      }
-      return builder.ToString();
     }
 
     private const int ZIP_LEAD_BYTES = 0x04034b50;

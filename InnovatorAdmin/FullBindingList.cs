@@ -80,6 +80,10 @@ namespace InnovatorAdmin
     {
       get { return _list.Count; }
     }
+    public IEnumerable<T> Unfiltered
+    {
+      get { return _list.OfType<T>(); }
+    }
 
     public FullBindingList()
     {
@@ -254,7 +258,7 @@ namespace InnovatorAdmin
       get { return _filterString; }
       set
       {
-        throw new NotSupportedException();
+        throw new NotSupportedException("You cannot set the filter string");
       }
     }
     public bool SupportsFiltering
@@ -383,6 +387,10 @@ namespace InnovatorAdmin
     }
     public void ApplySort(string sortDefn)
     {
+      ApplySort(new ListSortDescriptionCollection(SortDescriptors(sortDefn).ToArray()));
+    }
+    public IEnumerable<ListSortDescription> SortDescriptors(string sortDefn)
+    {
       var typedList = this as ITypedList;
       PropertyDescriptorCollection props = default(PropertyDescriptorCollection);
       if (typedList == null)
@@ -393,9 +401,8 @@ namespace InnovatorAdmin
       {
         props = typedList.GetItemProperties(null);
       }
-
-      ApplySort(new ListSortDescriptionCollection((from c in (sortDefn ?? "").Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                                                   select ExtractSortDescrip(props, c)).ToArray()));
+      return (from c in (sortDefn ?? "").Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+              select ExtractSortDescrip(props, c));
     }
     public void ApplySort(Comparison<T> comparison)
     {
@@ -422,6 +429,11 @@ namespace InnovatorAdmin
     }
     public void ApplySort(System.ComponentModel.ListSortDescriptionCollection sorts)
     {
+      var args = new SortChangingEventArgs() { Sort = sorts, Handled = false };
+      OnSortChanging(args);
+      if (args.Handled)
+        sorts = args.Sort;
+
       _descrips = sorts;
       if (sorts == null || sorts.Count < 1)
       {
@@ -540,7 +552,17 @@ namespace InnovatorAdmin
     }
     private void CopyToCore(System.Array array, int index)
     {
-      _list.CopyTo(array, index);
+      if (IsFilteredOrSorted())
+      {
+        for (var i = 0; i < this.Count; i++)
+        {
+          array.SetValue(this[i], index + i);
+        }
+      }
+      else
+      {
+        _list.CopyTo(array, index);
+      }
     }
     void System.Collections.ICollection.CopyTo(System.Array array, int index)
     {
@@ -622,6 +644,7 @@ namespace InnovatorAdmin
 
     public event ListChangedEventHandler ListChanged;
     public event ListChangedEventHandler CoreListChanged;
+    public event EventHandler<SortChangingEventArgs> SortChanging;
 
     public void ResetBindings()
     {
@@ -641,6 +664,11 @@ namespace InnovatorAdmin
       {
         ListChanged(this, e);
       }
+    }
+
+    protected virtual void OnSortChanging(SortChangingEventArgs e)
+    {
+      if (SortChanging != null) SortChanging(this, e);
     }
 
     private void _list_ListChanged(object sender, System.ComponentModel.ListChangedEventArgs e)
@@ -856,5 +884,10 @@ namespace InnovatorAdmin
         }
       }
     }
+  }
+
+  public class SortChangingEventArgs : HandledEventArgs
+  {
+    public ListSortDescriptionCollection Sort { get; set; }
   }
 }

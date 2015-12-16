@@ -30,11 +30,11 @@
     {
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
       this.tblLayout = new System.Windows.Forms.TableLayoutPanel();
-      this.lblMessage = new System.Windows.Forms.Label();
       this.picHome = new System.Windows.Forms.PictureBox();
       this.lblLine = new System.Windows.Forms.Label();
       this.lblLine2 = new System.Windows.Forms.Label();
       this.lblVersion = new System.Windows.Forms.Label();
+      this.lblMessage = new System.Windows.Forms.Label();
       this.btnNext = new InnovatorAdmin.Controls.FlatButton();
       this.btnPrevious = new InnovatorAdmin.Controls.FlatButton();
       this.btnClose = new InnovatorAdmin.Controls.FlatButton();
@@ -71,17 +71,6 @@
       this.tblLayout.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tblLayout.Size = new System.Drawing.Size(599, 449);
       this.tblLayout.TabIndex = 1;
-      // 
-      // lblMessage
-      // 
-      this.lblMessage.AutoSize = true;
-      this.tblLayout.SetColumnSpan(this.lblMessage, 3);
-      this.lblMessage.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lblMessage.Location = new System.Drawing.Point(51, 52);
-      this.lblMessage.Margin = new System.Windows.Forms.Padding(3, 3, 3, 10);
-      this.lblMessage.Name = "lblMessage";
-      this.lblMessage.Size = new System.Drawing.Size(0, 15);
-      this.lblMessage.TabIndex = 4;
       // 
       // picHome
       // 
@@ -128,6 +117,17 @@
       this.lblVersion.Name = "lblVersion";
       this.lblVersion.Size = new System.Drawing.Size(0, 13);
       this.lblVersion.TabIndex = 6;
+      // 
+      // lblMessage
+      // 
+      this.lblMessage.AutoSize = true;
+      this.tblLayout.SetColumnSpan(this.lblMessage, 3);
+      this.lblMessage.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.lblMessage.Location = new System.Drawing.Point(51, 52);
+      this.lblMessage.Margin = new System.Windows.Forms.Padding(3, 3, 3, 10);
+      this.lblMessage.Name = "lblMessage";
+      this.lblMessage.Size = new System.Drawing.Size(0, 15);
+      this.lblMessage.TabIndex = 4;
       // 
       // btnNext
       // 

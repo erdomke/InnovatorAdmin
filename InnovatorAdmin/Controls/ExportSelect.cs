@@ -54,7 +54,7 @@ namespace InnovatorAdmin.Controls
           _wizard.InstallScript.ExportUri = new Uri(_wizard.ConnectionInfo.First().Url);
           _wizard.InstallScript.ExportDb = _wizard.ConnectionInfo.First().Database;
           _wizard.InstallScript.Lines = Enumerable.Empty<InstallItem>();
-          e.Export(_wizard.InstallScript, _selectedRefs);
+          e.Export(_wizard.InstallScript, _selectedRefs, chkDependencies.Checked);
         };
         prog.GoNextAction = () => _wizard.GoToStep(new ExportResolve());
         _wizard.GoToStep(prog);
@@ -161,6 +161,7 @@ namespace InnovatorAdmin.Controls
     void _selectedRefs_ListChanged(object sender, ListChangedEventArgs e)
     {
       _wizard.NextEnabled = _selectedRefs.Any();
+      chkDependencies.Visible = _selectedRefs.Count > 100;
     }
 
     private void btnDbPackage_Click(object sender, EventArgs e)

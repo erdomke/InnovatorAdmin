@@ -36,7 +36,7 @@ namespace InnovatorAdmin.Editor
     }
 
     //[DebuggerStepThrough()]
-    public static XmlState ProcessFragment(string fragment, Func<XmlReader, int, bool> processor)
+    public static XmlState ProcessFragment(string fragment, Func<XmlReader, int, XmlState, bool> processor)
     {
       var lineOffsets = new List<int>() {0};
       var state = XmlState.Other;
@@ -198,18 +198,15 @@ namespace InnovatorAdmin.Editor
           {
             keepGoing = processor.Invoke(reader, lineOffsets[lineInfo.LineNumber - 1]
                                                 + lineInfo.LinePosition
-                                                - (reader.NodeType == XmlNodeType.Element ? 2 : 1));
+                                                - (reader.NodeType == XmlNodeType.Element ? 2 : 1), state);
             if (reader.NodeType == XmlNodeType.Element
               && lineInfo.LineNumber == lastTag.Key
               && lineInfo.LinePosition == lastTag.Value)
             {
-              switch (state)
+              for (var i = 0; i < reader.AttributeCount; i++)
               {
-                case XmlState.Attribute:
-                case XmlState.AttributeValue:
-                  reader.MoveToAttribute(reader.AttributeCount - 1);
-                  keepGoing = processor.Invoke(reader, lineOffsets[lineInfo.LineNumber - 1] + lineInfo.LinePosition - 1);
-                  break;
+                reader.MoveToAttribute(i);
+                keepGoing = processor.Invoke(reader, lineOffsets[lineInfo.LineNumber - 1] + lineInfo.LinePosition - 1, state);
               }
             }
           }

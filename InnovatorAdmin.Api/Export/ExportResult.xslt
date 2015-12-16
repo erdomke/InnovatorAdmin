@@ -196,6 +196,9 @@
   <xsl:template match="itemtype"/>
   <xsl:template match="Item[@type='Property' and data_type!='item' ]/item_behavior"/>
   <xsl:template match="Relationships/Item/source_id" />
+  
+  <!-- Custom property -->
+  <xsl:template match="Item[@type='Method']/checksum"/>
 
   <!-- Eliminate current_value property from Sequences -->
   <xsl:template match="Item[@type='Sequence']/current_value"/>
@@ -250,6 +253,7 @@
         <xsl:copy-of select="@type"/>
         <xsl:copy-of select="@id"/>
         <xsl:attribute name="action">edit</xsl:attribute>
+        <xsl:attribute name="_scriptType">1</xsl:attribute>
         <Relationships>
           <xsl:apply-templates mode="fix" select="Relationships/Item[@type='Property'][is_keyed='1'][not(contains($systemProperties,concat('|',name,'|')))]"/>
           <xsl:apply-templates mode="fix" select="$modifiedSystemProps"/>
@@ -293,7 +297,8 @@
   </xsl:template>
   <!-- Fix for Morphae  -->
   <xsl:template mode="fix" match="Item[@type='Morphae']">
-    <Item type="ItemType" id="{../../@id}" action="edit">
+    <Item type="ItemType" id="{../../@id}" action="edit" >
+      <xsl:attribute name="_scriptType">2.<xsl:value-of select="related_id" /></xsl:attribute>
       <Relationships>
         <xsl:copy>
           <xsl:copy-of select="@type"/>

@@ -15,16 +15,16 @@ namespace InnovatorAdmin
     private InstallType _type;
 
     internal IEnumerable<ItemReference> CoreDependencies { get { return _dependencies; } }
-    public InstallType Type { 
+    public InstallType Type {
       get { return _type; }
       set { _type = value; }
     }
     public ItemReference Reference { get { return _itemRef; } }
     public string InstalledId { get; set; }
-    public string Name 
+    public string Name
     {
-      get 
-      { 
+      get
+      {
         if (_name == null)
         {
           switch (_type)
@@ -34,10 +34,10 @@ namespace InnovatorAdmin
             case InstallType.DependencyCheck:
               return "Check of Dependency " + this.Reference.ToString();
             case InstallType.Script:
-              return "Script: " + this.Reference.KeyedName;
+              return this.Reference.KeyedName;
           }
         }
-        return _name; 
+        return _name;
       }
       set { _name = value; }
     }
@@ -53,7 +53,7 @@ namespace InnovatorAdmin
       {
         _elem = aml.Elements().Single();
       }
-      else 
+      else
       {
         _elem = aml;
       }
@@ -64,8 +64,10 @@ namespace InnovatorAdmin
       return this.Name;
     }
 
-    public static InstallItem FromScript(XmlElement elem)
+    public static InstallItem FromScript(XmlElement elem
+      , Func<XmlElement, string> keyedNameGetter = null)
     {
+
       var result = new InstallItem();
       result._elem = elem;
       result._itemRef = ItemReference.FromFullItem(elem, true);
@@ -137,9 +139,9 @@ namespace InnovatorAdmin
           case "update":
           case "ValidateWorkflowMap":
           case "version":
-            if ((elem.Attributes["type"].Value != "Form" && elem.Attributes["type"].Value != "View") 
+            if ((elem.Attributes["type"].Value != "Form" && elem.Attributes["type"].Value != "View")
               || elem.Attributes["action"].Value != "delete")
-            result._dependencies = Enumerable.Repeat(result._itemRef, 1);
+              result._dependencies = Enumerable.Repeat(result._itemRef, 1);
             result._itemRef = new ItemReference("*Script", result._itemRef.ToString() + " " + Utils.GetChecksum(Encoding.UTF8.GetBytes(elem.OuterXml)))
             {
               KeyedName = RenderAttributes(elem)
@@ -202,12 +204,48 @@ namespace InnovatorAdmin
     private static string RenderAttributes(XmlElement elem)
     {
       var builder = new StringBuilder();
-      foreach (var attr in elem.Attributes.OfType<XmlAttribute>())
+
+      if (elem.HasAttribute("action"))
       {
-        if (builder.Length > 0) builder.Append(' ');
-        builder.Append(attr.LocalName).Append("=\"").Append(attr.Value).Append('\"');
+        var action = elem.Attribute("action");
+        builder.Append(char.ToUpper(action[0]))
+          .Append(action.Substring(1))
+          .Append(" of");
       }
+      if (elem.HasAttribute("where"))
+      {
+        builder.Append(" ").Append(elem.Attribute("where"));
+      }
+      else
+      {
+        if (elem.HasAttribute("type"))
+        {
+          builder.Append(" ").Append(elem.Attribute("type")).Append(":");
+        }
+        if (elem.HasAttribute("id"))
+        {
+          builder.Append(" ").Append(elem.Attribute("id"));
+        }
+      }
+
+      if (elem.HasAttribute(XmlFlags.Attr_ScriptType))
+      {
+        builder.Append(" (").Append(elem.Attribute(XmlFlags.Attr_ScriptType)).Append(")");
+      }
+
       return builder.ToString();
+    }
+  }
+
+  public static class InstallItemExtensions
+  {
+    public static string FilePath(this InstallItem line, HashSet<string> existingPaths, string extension = ".xml")
+    {
+      var folder = line.Type == InstallType.Script ? "_Scripts" : line.Reference.Type;
+      var newPath = folder + "\\" + Utils.CleanFileName(line.Reference.KeyedName ?? line.Reference.Unique) + extension;
+      if (existingPaths.Contains(newPath))
+        newPath = folder + "\\" + Utils.CleanFileName((line.Reference.KeyedName ?? "") + "_" + line.Reference.Unique) + extension;
+      return newPath;
     }
   }
 }

@@ -32,9 +32,11 @@
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EditorWindow));
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
       this.splitMain = new System.Windows.Forms.SplitContainer();
+      this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
       this.treeItems = new InnovatorAdmin.TreeListView();
       this.colName = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
       this.colDescription = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+      this.btnPanelToggle = new InnovatorAdmin.Controls.FlatButton();
       this.splitEditors = new System.Windows.Forms.SplitContainer();
       this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
       this.inputEditor = new InnovatorAdmin.Editor.EditorControl();
@@ -95,6 +97,7 @@
       this.splitMain.Panel1.SuspendLayout();
       this.splitMain.Panel2.SuspendLayout();
       this.splitMain.SuspendLayout();
+      this.tableLayoutPanel4.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.treeItems)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.splitEditors)).BeginInit();
       this.splitEditors.Panel1.SuspendLayout();
@@ -142,14 +145,29 @@
       // 
       // splitMain.Panel1
       // 
-      this.splitMain.Panel1.Controls.Add(this.treeItems);
+      this.splitMain.Panel1.Controls.Add(this.tableLayoutPanel4);
       // 
       // splitMain.Panel2
       // 
       this.splitMain.Panel2.Controls.Add(this.splitEditors);
       this.splitMain.Size = new System.Drawing.Size(695, 444);
-      this.splitMain.SplitterDistance = 202;
+      this.splitMain.SplitterDistance = 220;
       this.splitMain.TabIndex = 0;
+      // 
+      // tableLayoutPanel4
+      // 
+      this.tableLayoutPanel4.ColumnCount = 1;
+      this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.tableLayoutPanel4.Controls.Add(this.treeItems, 0, 1);
+      this.tableLayoutPanel4.Controls.Add(this.btnPanelToggle, 0, 0);
+      this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 0);
+      this.tableLayoutPanel4.Name = "tableLayoutPanel4";
+      this.tableLayoutPanel4.RowCount = 2;
+      this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.tableLayoutPanel4.Size = new System.Drawing.Size(220, 444);
+      this.tableLayoutPanel4.TabIndex = 1;
       // 
       // treeItems
       // 
@@ -159,18 +177,22 @@
       this.treeItems.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colName,
             this.colDescription});
+      this.treeItems.Cursor = System.Windows.Forms.Cursors.Default;
       this.treeItems.Dock = System.Windows.Forms.DockStyle.Fill;
       this.treeItems.HighlightBackgroundColor = System.Drawing.Color.Empty;
       this.treeItems.HighlightForegroundColor = System.Drawing.Color.Empty;
-      this.treeItems.Location = new System.Drawing.Point(0, 0);
+      this.treeItems.Location = new System.Drawing.Point(0, 25);
+      this.treeItems.Margin = new System.Windows.Forms.Padding(0);
       this.treeItems.Name = "treeItems";
       this.treeItems.ShowGroups = false;
-      this.treeItems.Size = new System.Drawing.Size(202, 444);
+      this.treeItems.Size = new System.Drawing.Size(220, 419);
       this.treeItems.TabIndex = 0;
       this.treeItems.UseCompatibleStateImageBehavior = false;
       this.treeItems.View = System.Windows.Forms.View.Details;
       this.treeItems.VirtualMode = true;
       this.treeItems.ModelDoubleClick += new System.EventHandler<InnovatorAdmin.ModelDoubleClickEventArgs>(this.treeItems_ModelDoubleClick);
+      this.treeItems.Expanding += new System.EventHandler<BrightIdeasSoftware.TreeBranchExpandingEventArgs>(this.treeItems_Expanding);
+      this.treeItems.CellToolTipShowing += new System.EventHandler<BrightIdeasSoftware.ToolTipShowingEventArgs>(this.treeItems_CellToolTipShowing);
       // 
       // colName
       // 
@@ -182,8 +204,32 @@
       // colDescription
       // 
       this.colDescription.AspectName = "Description";
+      this.colDescription.FillsFreeSpace = true;
       this.colDescription.Text = "Description";
       this.colDescription.Width = 200;
+      // 
+      // btnPanelToggle
+      // 
+      this.btnPanelToggle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.btnPanelToggle.AutoSize = true;
+      this.btnPanelToggle.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnPanelToggle.FlatAppearance.BorderSize = 0;
+      this.btnPanelToggle.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnPanelToggle.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnPanelToggle.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnPanelToggle.ForeColor = System.Drawing.Color.Black;
+      this.btnPanelToggle.Location = new System.Drawing.Point(0, 0);
+      this.btnPanelToggle.Margin = new System.Windows.Forms.Padding(0);
+      this.btnPanelToggle.Name = "btnPanelToggle";
+      this.btnPanelToggle.Orientation = System.Windows.Forms.Orientation.Horizontal;
+      this.btnPanelToggle.Padding = new System.Windows.Forms.Padding(2);
+      this.btnPanelToggle.Size = new System.Drawing.Size(220, 25);
+      this.btnPanelToggle.TabIndex = 1;
+      this.btnPanelToggle.Text = "Table of Contents";
+      this.btnPanelToggle.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnPanelToggle.UseVisualStyleBackColor = false;
+      this.btnPanelToggle.Click += new System.EventHandler(this.btnPanelToggle_Click);
       // 
       // splitEditors
       // 
@@ -199,7 +245,7 @@
       // splitEditors.Panel2
       // 
       this.splitEditors.Panel2.Controls.Add(this.tableLayoutPanel2);
-      this.splitEditors.Size = new System.Drawing.Size(489, 444);
+      this.splitEditors.Size = new System.Drawing.Size(471, 444);
       this.splitEditors.SplitterDistance = 137;
       this.splitEditors.TabIndex = 0;
       // 
@@ -216,7 +262,7 @@
       this.tableLayoutPanel3.RowCount = 2;
       this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-      this.tableLayoutPanel3.Size = new System.Drawing.Size(489, 137);
+      this.tableLayoutPanel3.Size = new System.Drawing.Size(471, 137);
       this.tableLayoutPanel3.TabIndex = 1;
       // 
       // inputEditor
@@ -227,7 +273,7 @@
       this.inputEditor.Location = new System.Drawing.Point(3, 3);
       this.inputEditor.Name = "inputEditor";
       this.inputEditor.ReadOnly = false;
-      this.inputEditor.Size = new System.Drawing.Size(483, 131);
+      this.inputEditor.Size = new System.Drawing.Size(465, 131);
       this.inputEditor.TabIndex = 0;
       this.inputEditor.RunRequested += new System.EventHandler<InnovatorAdmin.Editor.RunRequestedEventArgs>(this.inputEditor_RunRequested);
       // 
@@ -245,7 +291,7 @@
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-      this.tableLayoutPanel2.Size = new System.Drawing.Size(489, 303);
+      this.tableLayoutPanel2.Size = new System.Drawing.Size(471, 303);
       this.tableLayoutPanel2.TabIndex = 0;
       // 
       // tbcOutputView
@@ -261,7 +307,7 @@
       this.tbcOutputView.Name = "tbcOutputView";
       this.tbcOutputView.Padding = new System.Drawing.Point(0, 0);
       this.tbcOutputView.SelectedIndex = 0;
-      this.tbcOutputView.Size = new System.Drawing.Size(489, 303);
+      this.tbcOutputView.Size = new System.Drawing.Size(471, 303);
       this.tbcOutputView.TabIndex = 5;
       this.tbcOutputView.SelectedIndexChanged += new System.EventHandler(this.tbcOutputView_SelectedIndexChanged);
       // 
@@ -270,7 +316,7 @@
       this.pgTextOutput.Controls.Add(this.outputEditor);
       this.pgTextOutput.Location = new System.Drawing.Point(4, 22);
       this.pgTextOutput.Name = "pgTextOutput";
-      this.pgTextOutput.Size = new System.Drawing.Size(481, 277);
+      this.pgTextOutput.Size = new System.Drawing.Size(463, 277);
       this.pgTextOutput.TabIndex = 0;
       this.pgTextOutput.Text = "Text";
       this.pgTextOutput.UseVisualStyleBackColor = true;
@@ -282,7 +328,7 @@
       this.outputEditor.Location = new System.Drawing.Point(0, 0);
       this.outputEditor.Name = "outputEditor";
       this.outputEditor.ReadOnly = false;
-      this.outputEditor.Size = new System.Drawing.Size(481, 277);
+      this.outputEditor.Size = new System.Drawing.Size(463, 277);
       this.outputEditor.TabIndex = 0;
       // 
       // pgTableOutput
@@ -291,7 +337,7 @@
       this.pgTableOutput.Location = new System.Drawing.Point(4, 22);
       this.pgTableOutput.Margin = new System.Windows.Forms.Padding(0);
       this.pgTableOutput.Name = "pgTableOutput";
-      this.pgTableOutput.Size = new System.Drawing.Size(481, 277);
+      this.pgTableOutput.Size = new System.Drawing.Size(463, 277);
       this.pgTableOutput.TabIndex = 1;
       this.pgTableOutput.Text = "Table";
       this.pgTableOutput.UseVisualStyleBackColor = true;
@@ -304,7 +350,7 @@
       this.dgvItems.Location = new System.Drawing.Point(0, 0);
       this.dgvItems.Margin = new System.Windows.Forms.Padding(0);
       this.dgvItems.Name = "dgvItems";
-      this.dgvItems.Size = new System.Drawing.Size(481, 277);
+      this.dgvItems.Size = new System.Drawing.Size(463, 277);
       this.dgvItems.TabIndex = 0;
       this.dgvItems.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgvItems_CellFormatting);
       // 
@@ -380,6 +426,7 @@
       this.btnOk.ForeColor = System.Drawing.Color.Black;
       this.btnOk.Location = new System.Drawing.Point(542, 458);
       this.btnOk.Name = "btnOk";
+      this.btnOk.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnOk.Padding = new System.Windows.Forms.Padding(2);
       this.btnOk.Size = new System.Drawing.Size(75, 29);
       this.btnOk.TabIndex = 1;
@@ -400,6 +447,7 @@
       this.btnCancel.ForeColor = System.Drawing.Color.Black;
       this.btnCancel.Location = new System.Drawing.Point(623, 458);
       this.btnCancel.Name = "btnCancel";
+      this.btnCancel.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnCancel.Padding = new System.Windows.Forms.Padding(2);
       this.btnCancel.Size = new System.Drawing.Size(75, 29);
       this.btnCancel.TabIndex = 2;
@@ -747,6 +795,8 @@
       this.splitMain.Panel2.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this.splitMain)).EndInit();
       this.splitMain.ResumeLayout(false);
+      this.tableLayoutPanel4.ResumeLayout(false);
+      this.tableLayoutPanel4.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.treeItems)).EndInit();
       this.splitEditors.Panel1.ResumeLayout(false);
       this.splitEditors.Panel2.ResumeLayout(false);
@@ -828,5 +878,7 @@
     private System.Windows.Forms.ToolStripMenuItem insertToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem mniInsertNewGuid;
     private System.Windows.Forms.ToolStripMenuItem mniEntityToXml;
+    private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
+    private Controls.FlatButton btnPanelToggle;
   }
 }

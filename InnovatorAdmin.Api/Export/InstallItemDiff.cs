@@ -40,7 +40,7 @@ namespace InnovatorAdmin
             case InstallType.DependencyCheck:
               return "Check of Dependency " + this.Reference.ToString();
             case InstallType.Script:
-              return "Script: " + this.Reference.KeyedName;
+              return this.Reference.KeyedName;
           }
         }
         return _name;
@@ -65,7 +65,7 @@ namespace InnovatorAdmin
       var rightList = right.Where(i => i.Type != InstallType.Warning).ToArray();
       var compares = ListCompare.Create(leftList, rightList, i => i.Reference);
       var results = new List<InstallItemDiff>();
-      
+
       foreach (var compare in compares)
       {
         if (compare.Base < 0)
@@ -94,7 +94,7 @@ namespace InnovatorAdmin
           {
             _itemRef = leftList[compare.Base].Reference,
             _type = leftList[compare.Base].Type,
-            DiffType = (AmlDiff.IsDifferent(leftList[compare.Base].Script.OuterXml, rightList[compare.Compare].Script.OuterXml) ? 
+            DiffType = (AmlDiff.IsDifferent(leftList[compare.Base].Script.OuterXml, rightList[compare.Compare].Script.OuterXml) ?
                         DiffType.Different : DiffType.Identical),
             LeftScript = leftList[compare.Base].Script,
             RightScript = rightList[compare.Compare].Script

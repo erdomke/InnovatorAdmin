@@ -337,9 +337,9 @@ namespace InnovatorAdmin
 
     public IPromise<IEnumerable<IEditorTreeNode>> GetNodes()
     {
-      return _conn.ApplyAsync(new Command("<Item/>").WithAction(CommandAction.GetMainTreeItems)
-          , true, false)
-        .Convert(r => r.AssertItem()
+      return Promises.All(_conn.ApplyAsync(new Command("<Item/>").WithAction(CommandAction.GetMainTreeItems)
+          , true, false), ArasMetadataProvider.Cached(_conn).CompletePromise())
+        .Convert(r => ((IReadOnlyResult)r[0]).AssertItem()
             .Property("root")
             .Elements().OfType<IReadOnlyItem>()
             .Select(ProcessTreeNode)
@@ -358,13 +358,13 @@ namespace InnovatorAdmin
         ImageKey = "folder-special-16",
         Description = "Useful AML Scripts",
         HasChildren = true,
-        ChildGetter = () => Enumerable.Repeat(new EditorTreeNode()
+        Children = Enumerable.Repeat(new EditorTreeNode()
         {
           Name = "Exports",
           ImageKey = "folder-special-16",
           Description = "Metadata Export Scripts",
           HasChildren = true,
-          ChildGetter = () => _exports.Select(s => new EditorTreeNode()
+          Children = _exports.Select(s => new EditorTreeNode()
           {
             Name = s.Name,
             ImageKey = "xml-tag-16",
@@ -379,19 +379,136 @@ namespace InnovatorAdmin
           Scripts = Enumerable.Repeat(s, 1)
         }))
       };
-
+      yield return new EditorTreeNode()
+      {
+        Name = "All Item Types",
+        ImageKey = "folder-special-16",
+        HasChildren = true,
+        Children = ArasMetadataProvider.Cached(_conn).ItemTypes
+          .Where(i => !i.IsRelationship)
+          .Select(ItemTypeNode)
+          .OrderBy(n => n.Name)
+      };
+      yield return new EditorTreeNode()
+      {
+        Name = "All Relationship Types",
+        ImageKey = "folder-special-16",
+        HasChildren = true,
+        Children = ArasMetadataProvider.Cached(_conn).ItemTypes
+          .Where(i => i.IsRelationship)
+          .Select(ItemTypeNode)
+          .OrderBy(n => n.Name)
+      };
     }
 
     private IEditorTreeNode ProcessTreeNode(IReadOnlyItem item)
     {
+      switch (item.Classification().Value.ToLowerInvariant())
+      {
+        case "tree node/savedsearchintoc":
+          return new EditorTreeNode()
+          {
+            Name = item.Property("label").Value,
+            Description = "Saved Search",
+            ImageKey = "xml-tag-16",
+            HasChildren = item.Relationships("Tree Node Child").Any(),
+            Children = item.Relationships().Select(r => ProcessTreeNode(r.RelatedItem())),
+            ScriptGetter = () => Enumerable.Repeat(
+              new EditorScript() {
+                Name = item.Property("label").Value,
+                Action = "ApplyItem",
+                Script = _conn.Apply("<Item type='SavedSearch' action='get' select='criteria' id='@0' />", item.Property("saved_search_id").Value)
+                  .AssertItem().Property("criteria").Value
+              }, 1)
+          };
+        case "tree node/itemtypeintoc":
+          return new EditorTreeNode()
+          {
+            Name = item.Property("label").Value,
+            ImageKey = "class-16",
+            Description = "ItemType: " + item.Property("name").Value,
+            HasChildren = true,
+            Children = ItemTypeChildren(item.Property("itemtype_id").Value)
+            .Concat(item.Relationships().Select(r => ProcessTreeNode(r.RelatedItem())))
+          };
+        default:
+          return new EditorTreeNode()
+          {
+            Name = item.Property("label").Value,
+            ImageKey = "folder-16",
+            HasChildren = item.Relationships("Tree Node Child").Any(),
+            Children = item.Relationships().Select(r => ProcessTreeNode(r.RelatedItem()))
+          };
+      }
+    }
+
+    private IEnumerable<IEditorTreeNode> ItemTypeChildren(string typeId)
+    {
+      var result = new List<IEditorTreeNode>() {
+        new EditorTreeNode()
+        {
+          Name = "Properties",
+          ImageKey = "folder-16",
+          HasChildren = true,
+          ChildGetter = () => ArasMetadataProvider.Cached(_conn)
+            .GetPropertiesByTypeId(typeId).Wait()
+            .Select(p => new EditorTreeNode()
+            {
+              Name = p.Label ?? p.Name,
+              ImageKey = "property-16",
+              Description = GetPropertyDescription(p)
+            })
+            .OrderBy(n => n.Name)
+        }
+      };
+      var rels = ArasMetadataProvider.Cached(_conn).TypeById(typeId).Relationships;
+      if (rels.Any())
+      {
+        result.Add(new EditorTreeNode()
+        {
+          Name = "Relationships",
+          ImageKey = "folder-16",
+          HasChildren = true,
+          ChildGetter = () => ArasMetadataProvider.Cached(_conn)
+            .TypeById(typeId).Relationships
+            .Select(ItemTypeNode)
+            .OrderBy(n => n.Name)
+        });
+      }
+      return result;
+    }
+
+    private EditorTreeNode ItemTypeNode(ItemType itemType)
+    {
       return new EditorTreeNode()
       {
-        Name = item.Property("label").Value,
-        ImageKey = item.Classification().Value == "Tree Node/ItemTypeInToc" ? "class-16" : "folder-16",
-        Description = item.Classification().Value == "Tree Node/ItemTypeInToc" ? "ItemType[" + item.Property("name").Value + "]" : "",
-        HasChildren = item.Relationships("Tree Node Child").Any(),
-        ChildGetter = () => item.Relationships().Select(r => ProcessTreeNode(r.RelatedItem()))
+        Name = itemType.Label ?? itemType.Name,
+        ImageKey = "class-16",
+        Description = "ItemType: " + itemType.Name,
+        HasChildren = true,
+        Children = ItemTypeChildren(itemType.Id)
       };
+    }
+
+    private string GetPropertyDescription(Property prop)
+    {
+      var builder = new StringBuilder("Property ")
+        .Append(prop.Name)
+        .Append(": ")
+        .Append(prop.TypeName);
+      if (prop.Restrictions.Any())
+      {
+        builder.Append("[").Append(prop.Restrictions.First()).Append("]");
+      }
+      else if (prop.StoredLength > 0)
+      {
+        builder.Append("[").Append(prop.StoredLength).Append("]");
+      }
+      else if (prop.Precision > 0 || prop.Scale > 0)
+      {
+        builder.Append("[").Append(prop.Precision).Append(",").Append(prop.Scale).Append("]");
+      }
+      return builder.ToString();
     }
 
     #region "Scripts"
@@ -763,40 +880,40 @@ order by 1
 
 <AML>
   <Item type='Action' action='get' select='config_id'></Item>
-	<Item type='Chart' action='get' select='config_id'></Item>
-	<Item type='ConversionServer' action='get' select='config_id'></Item>
-	<Item type='Dashboard' action='get' select='config_id'></Item>
-	<Item type='EMail Message' action='get' select='config_id'></Item>
-	<Item type='FileType' action='get' select='config_id'></Item>
-	<Item type='Form' action='get' select='config_id'></Item>
-	<Item type='Grid' action='get' select='config_id'></Item>
-	<Item type='History Action' action='get' select='config_id'></Item>
-	<Item type='History Template' action='get' select='config_id'></Item>
-	<Item type='Identity' action='get' select='config_id'><or><is_alias>0</is_alias><id condition='in'>'DBA5D86402BF43D5976854B8B48FCDD1','E73F43AD85CD4A95951776D57A4D517B'</id></or></Item>
-	<Item type='ItemType' action='get' select='config_id'></Item>
-	<Item type='Language' action='get' select='config_id'></Item>
-	<Item type='Life Cycle Map' action='get' select='config_id'></Item>
-	<Item type='List' action='get' select='config_id'></Item>
-	<Item type='Locale' action='get' select='config_id'></Item>
-	<Item type='Method' action='get' select='config_id'></Item>
-	<Item type='Metric' action='get' select='config_id'></Item>
-	<Item type='Permission' action='get' select='config_id'></Item>
-	<Item type='PreferenceTypes' action='get' select='config_id'></Item>
-	<Item type='PresentationConfiguration' action='get' select='config_id'></Item>
-	<Item type='Report' action='get' select='config_id'></Item>
-	<Item type='Revision' action='get' select='config_id'></Item>
-	<Item type='SearchMode' action='get' select='config_id'></Item>
-	<Item type='SecureMessageViewTemplate' action='get' select='config_id'></Item>
-	<Item type='Sequence' action='get' select='config_id'></Item>
-	<Item type='SQL' action='get' select='config_id'></Item>
-	<Item type='SSVCPresentationConfiguration' action='get' select='config_id'></Item>
-	<Item type='SystemFileContainer' action='get' select='config_id'></Item>
-	<Item type='Team' action='get' select='config_id'></Item>
-	<Item type='UserMessage' action='get' select='config_id'></Item>
-	<Item type='Variable' action='get' select='config_id'></Item>
-	<Item type='Vault' action='get' select='config_id'></Item>
-	<Item type='Viewer' action='get' select='config_id'></Item>
-	<Item type='Workflow Map' action='get' select='config_id'></Item>
+  <Item type='Chart' action='get' select='config_id'></Item>
+  <Item type='ConversionServer' action='get' select='config_id'></Item>
+  <Item type='Dashboard' action='get' select='config_id'></Item>
+  <Item type='EMail Message' action='get' select='config_id'></Item>
+  <Item type='FileType' action='get' select='config_id'></Item>
+  <Item type='Form' action='get' select='config_id'></Item>
+  <Item type='Grid' action='get' select='config_id'></Item>
+  <Item type='History Action' action='get' select='config_id'></Item>
+  <Item type='History Template' action='get' select='config_id'></Item>
+  <Item type='Identity' action='get' select='config_id'><or><is_alias>0</is_alias><id condition='in'>'DBA5D86402BF43D5976854B8B48FCDD1','E73F43AD85CD4A95951776D57A4D517B'</id></or></Item>
+  <Item type='ItemType' action='get' select='config_id'></Item>
+  <Item type='Language' action='get' select='config_id'></Item>
+  <Item type='Life Cycle Map' action='get' select='config_id'></Item>
+  <Item type='List' action='get' select='config_id'></Item>
+  <Item type='Locale' action='get' select='config_id'></Item>
+  <Item type='Method' action='get' select='config_id'></Item>
+  <Item type='Metric' action='get' select='config_id'></Item>
+  <Item type='Permission' action='get' select='config_id'></Item>
+  <Item type='PreferenceTypes' action='get' select='config_id'></Item>
+  <Item type='PresentationConfiguration' action='get' select='config_id'></Item>
+  <Item type='Report' action='get' select='config_id'></Item>
+  <Item type='Revision' action='get' select='config_id'></Item>
+  <Item type='SearchMode' action='get' select='config_id'></Item>
+  <Item type='SecureMessageViewTemplate' action='get' select='config_id'></Item>
+  <Item type='Sequence' action='get' select='config_id'></Item>
+  <Item type='SQL' action='get' select='config_id'></Item>
+  <Item type='SSVCPresentationConfiguration' action='get' select='config_id'></Item>
+  <Item type='SystemFileContainer' action='get' select='config_id'></Item>
+  <Item type='Team' action='get' select='config_id'></Item>
+  <Item type='UserMessage' action='get' select='config_id'></Item>
+  <Item type='Variable' action='get' select='config_id'></Item>
+  <Item type='Vault' action='get' select='config_id'></Item>
+  <Item type='Viewer' action='get' select='config_id'></Item>
+  <Item type='Workflow Map' action='get' select='config_id'></Item>
 </AML>"
       }
     };

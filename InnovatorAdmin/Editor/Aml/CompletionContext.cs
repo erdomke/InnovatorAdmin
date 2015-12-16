@@ -9,7 +9,7 @@ namespace InnovatorAdmin.Editor
   public class CompletionContext
   {
     public IEnumerable<ICompletionData> Items { get; set; }
-    public bool IsXmlAttribute { get; set; }
+    public bool IsXmlTag { get; set; }
     public int Overlap { get; set; }
 
     public CompletionContext()
