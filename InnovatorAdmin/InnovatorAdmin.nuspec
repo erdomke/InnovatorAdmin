@@ -2,7 +2,7 @@
   <package>
     <metadata>
       <id>InnovatorAdmin</id>
-      <version>2015.12.16.0909</version>
+      <version>2015.12.16.0916</version>
       <authors>eric.domke</authors>
       <requireLicenseAcceptance>false</requireLicenseAcceptance>
       <description>Application for administrating an Aras Innovator instance</description>

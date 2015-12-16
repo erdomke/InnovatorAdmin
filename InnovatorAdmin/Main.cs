@@ -18,6 +18,7 @@ namespace InnovatorAdmin
     private ExportProcessor _export;
     //private ImportProcessor _import;
     private InstallProcessor _install;
+    private bool _updateCheckComplete = false;
 
     public IAsyncConnection Connection
     {
@@ -90,8 +91,8 @@ namespace InnovatorAdmin
           this.Size = bounds.Size;
         }
 
-        //GoToStep(new Controls.Welcome());
-        GoToStep(new Controls.MergeInterface().Initialize(new HgMergeOperation(@"C:\Users\edomke\Documents\Local_Projects\ArasUpgrade")));
+        GoToStep(new Controls.Welcome());
+        //GoToStep(new Controls.MergeInterface().Initialize(new HgMergeOperation(@"C:\Users\edomke\Documents\Local_Projects\ArasUpgrade")));
       }
       catch (Exception ex)
       {
@@ -197,6 +198,7 @@ namespace InnovatorAdmin
     {
       try
       {
+        _updateCheckComplete = true;
         var currVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         if (latestVersion == default(Version))
         {
@@ -223,8 +225,11 @@ namespace InnovatorAdmin
     {
       try
       {
-        var currVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        this.lblVersion.Text = string.Format("v{0} (Checking updates: {1}%)", currVer, progress);
+        if (!_updateCheckComplete)
+        {
+          var currVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+          this.lblVersion.Text = string.Format("v{0} (Checking updates: {1}%)", currVer, progress);
+        }
       }
       catch (Exception) { }
     }
