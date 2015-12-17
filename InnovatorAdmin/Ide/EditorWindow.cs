@@ -107,7 +107,8 @@ namespace InnovatorAdmin
     }
     public void SetConnection(ConnectionData conn)
     {
-      if (!_loadingConnection)
+      if (!_loadingConnection && !string.IsNullOrEmpty(conn.Url)
+        && !string.IsNullOrEmpty(conn.Database))
       {
         _loadingConnection = true;
 
@@ -233,7 +234,8 @@ namespace InnovatorAdmin
         btnOk.Visible = this.Modal;
         btnCancel.Visible = this.Modal;
 
-        lblConnection.Visible = _proxy != null && _proxy.ConnData != null;
+        //lblConnection.Visible = _proxy != null && _proxy.ConnData != null;
+        lblConnection.Visible = true;
         btnEditConnections.Visible = lblConnection.Visible;
 
         if (_proxy == null)
