@@ -65,6 +65,7 @@ namespace InnovatorAdmin
       inputEditor.Helper = new Editor.AmlEditorHelper();
       var lastQuery = SnippetManager.Instance.LastQuery;
       inputEditor.Text = lastQuery.Text;
+      inputEditor.CleanUndoStack();
       this.SoapAction = lastQuery.Action;
       menuStrip.Renderer = new SimpleToolstripRenderer();
 
@@ -82,6 +83,12 @@ namespace InnovatorAdmin
       _clock.Tick += _clock_Tick;
       _panelCollapsed = Properties.Settings.Default.EditorWindowPanelCollapsed;
       UpdatePanelCollapsed();
+
+      inputEditor.BindToolStripItem(mniCut, System.Windows.Input.ApplicationCommands.Cut);
+      inputEditor.BindToolStripItem(mniCopy, System.Windows.Input.ApplicationCommands.Copy);
+      inputEditor.BindToolStripItem(mniPaste, System.Windows.Input.ApplicationCommands.Paste);
+      inputEditor.BindToolStripItem(mniUndo, System.Windows.Input.ApplicationCommands.Undo);
+      inputEditor.BindToolStripItem(mniRedo, System.Windows.Input.ApplicationCommands.Redo);
     }
 
     void _clock_Tick(object sender, EventArgs e)
@@ -628,7 +635,9 @@ namespace InnovatorAdmin
     {
       try
       {
-        Clipboard.SetText(GetTableChangeAml());
+        var aml = GetTableChangeAml();
+        if (!string.IsNullOrEmpty(aml))
+          Clipboard.SetText(aml);
       }
       catch (Exception ex)
       {
@@ -673,7 +682,7 @@ namespace InnovatorAdmin
     {
       var changes = _outputTable.GetChanges(DataRowState.Added | DataRowState.Deleted | DataRowState.Modified);
       if (changes == null)
-        return null;
+        return string.Empty;
 
       var settings = new System.Xml.XmlWriterSettings();
       settings.OmitXmlDeclaration = true;
@@ -730,7 +739,7 @@ namespace InnovatorAdmin
         }
         xml.WriteEndElement();
         xml.Flush();
-        return writer.ToString();
+        return writer.ToString() ?? string.Empty;
       }
     }
 
@@ -1089,6 +1098,44 @@ namespace InnovatorAdmin
         Utils.HandleError(ex);
       }
     }
+
+    private void mniDoubleToSingleQuotes_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        inputEditor.ReplaceSelectionSegments(t => t.Replace('"', '\''));
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void mniSingleToDoubleQuotes_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        inputEditor.ReplaceSelectionSegments(t => t.Replace('\'', '"'));
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void mniMd5Encode_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        inputEditor.ReplaceSelectionSegments(t => ConnectionDataExtensions.CalcMD5(t));
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    
 
   }
 }

@@ -22,6 +22,7 @@ namespace InnovatorAdmin.Editor
     //private bool _isInitialized;
     private ExtendedEditor _extEditor;
     private FindReplace _findReplace;
+    private List<IDisposable> _itemsToDispose = new List<IDisposable>();
 
     public event EventHandler<RunRequestedEventArgs> RunRequested;
 
@@ -184,9 +185,11 @@ namespace InnovatorAdmin.Editor
       var start = Editor.TextArea.Selection.IsEmpty ? loc : Editor.TextArea.Selection.StartPosition.Location;
       var end = Editor.TextArea.Selection.IsEmpty ? loc : Editor.TextArea.Selection.EndPosition.Location;
       var isRectangle = Editor.TextArea.Selection is RectangleSelection;
-      if (start.Line > 1)
+      var doc = Editor.Document;
+      
+      if ((offset < 0 && start.Line > 1)
+        || (offset > 0 && start.Line < doc.LineCount))
       {
-        var doc = Editor.Document;
         using (doc.RunUpdate())
         {
           var firstLine = doc.GetLineByNumber(start.Line);
@@ -287,7 +290,11 @@ namespace InnovatorAdmin.Editor
     public override string Text
     {
       get { return Editor.Text; }
-      set { Editor.Text = value; }
+      set 
+      {
+        Editor.Document.Text = (value ?? string.Empty);
+        Editor.CaretOffset = 0;
+      }
     }
 
     CompletionWindow completionWindow;
@@ -378,6 +385,12 @@ namespace InnovatorAdmin.Editor
       base.Dispose(disposing);
       if (disposing)
       {
+        foreach (var itemToDispose in _itemsToDispose)
+        {
+          itemToDispose.Dispose();
+        }
+        _itemsToDispose.Clear();
+
         var elementHost = this.Controls.OfType<ElementHost>().FirstOrDefault();
         if (elementHost != null)
           elementHost.Child = null;
@@ -387,6 +400,49 @@ namespace InnovatorAdmin.Editor
         if (_extEditor != null)
           _extEditor.Dispose();
 
+      }
+    }
+
+    public void BindToolStripItem(ToolStripItem item, System.Windows.Input.RoutedCommand command)
+    {
+      _itemsToDispose.Add(new ToolStripBinding(item, command, Editor.TextArea));
+    }
+    public void CleanUndoStack()
+    {
+      Editor.Document.UndoStack.ClearAll();
+    }
+
+    private class ToolStripBinding : IDisposable
+    {
+      private ToolStripItem _item;
+      private System.Windows.Input.RoutedCommand _command;
+      private System.Windows.IInputElement _input;
+
+      public ToolStripBinding(ToolStripItem item, 
+        System.Windows.Input.RoutedCommand command, 
+        System.Windows.IInputElement input)
+      {
+        _item = item;
+        _command = command;
+        _input = input;
+
+        _item.Click += Invoke;
+        _command.CanExecuteChanged += EnableChanged;
+      }
+
+      private void EnableChanged(object sender, EventArgs e)
+      {
+        _item.Enabled = _command.CanExecute(null, _input);
+      }
+      private void Invoke(object sender, EventArgs e)
+      {
+        _command.Execute(null, _input);
+      }
+      
+      public void Dispose()
+      {
+        _item.Click -= Invoke;
+        _command.CanExecuteChanged -= EnableChanged;
       }
     }
   }

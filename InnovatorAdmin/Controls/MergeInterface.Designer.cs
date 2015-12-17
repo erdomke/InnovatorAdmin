@@ -63,7 +63,7 @@
       this.grid.Location = new System.Drawing.Point(3, 38);
       this.grid.Name = "grid";
       this.grid.ReadOnly = true;
-      this.tableLayoutPanel1.SetRowSpan(this.grid, 2);
+      this.tableLayoutPanel1.SetRowSpan(this.grid, 3);
       this.grid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
       this.grid.Size = new System.Drawing.Size(437, 347);
       this.grid.TabIndex = 0;
@@ -108,7 +108,8 @@
       this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
       this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-      this.tableLayoutPanel1.RowCount = 3;
+      this.tableLayoutPanel1.RowCount = 4;
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -126,6 +127,7 @@
       this.btnActions.ForeColor = System.Drawing.Color.Black;
       this.btnActions.Location = new System.Drawing.Point(3, 3);
       this.btnActions.Name = "btnActions";
+      this.btnActions.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnActions.Padding = new System.Windows.Forms.Padding(2);
       this.btnActions.Size = new System.Drawing.Size(75, 29);
       this.btnActions.TabIndex = 4;

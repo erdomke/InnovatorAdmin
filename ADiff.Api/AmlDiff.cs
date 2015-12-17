@@ -51,6 +51,8 @@ namespace ADiff
       var diffs = TwoWayDiff(baseXml, compareXml, out baseFormatted, out compareFormatted);
       return diffs.Any(d => d.IsDifferent || d.Base < 0 || d.Compare < 0);
     }
+
+
     public static IList<ListCompare> TwoWayDiff(string baseXml, string compareXml, out string baseFormatted, out string compareFormatted)
     {
       var baseElem = GetFirstItemElem(XElement.Parse(baseXml));
@@ -82,7 +84,7 @@ namespace ADiff
         results.Add(new ListCompare(baseWriter.CurrentLine + 1, compareWriter.CurrentLine + 1) { IsDifferent = false });
         TwoWayDiff(baseElem, compareElem, baseWriter, compareWriter, results);
       }
-      
+
       baseWriter.WriteEndElement();
       baseFormatted = baseWriter.ToString();
       compareWriter.WriteEndElement();
@@ -112,7 +114,7 @@ namespace ADiff
       {
         var baseRelateds = baseElem.Elements().Select(e => Tuple.Create(GetRelatedId(e), e)).ToList();
         var compareRelateds = compareElem.Elements().Select(e => Tuple.Create(GetRelatedId(e), e)).ToList();
-        if (!baseRelateds.Any(t => string.IsNullOrEmpty(t.Item1)) 
+        if (!baseRelateds.Any(t => string.IsNullOrEmpty(t.Item1))
           && !compareRelateds.Any(t => string.IsNullOrEmpty(t.Item1))
           && baseRelateds.Select(t => t.Item1).Distinct().Count() == baseRelateds.Count
           && compareRelateds.Select(t => t.Item1).Distinct().Count() == compareRelateds.Count)
@@ -191,8 +193,8 @@ namespace ADiff
       ChangeElement changeElem;
       ThreeWayStatus status;
 
-      while (basePtr <= baseList.Count 
-        && leftPtr <= leftList.Count 
+      while (basePtr <= baseList.Count
+        && leftPtr <= leftList.Count
         && rightPtr <= rightList.Count)
       {
         changeElem = new ChangeElement();
@@ -209,7 +211,7 @@ namespace ADiff
               changeElem.Right = rightList[rightPtr].Item2;
               changeElem.RightChange = Change.Add;
             }
-            else 
+            else
             {
               changeElem.Left = leftList[leftPtr].Item2;
               changeElem.LeftChange = Change.Add;
@@ -278,14 +280,14 @@ namespace ADiff
       {
         if (mode == KeyMode.Undefined)
         {
-          if (elem.Name.LocalName == "Item" 
-            && (elem.Attribute("action") == null || elem.Attribute("action").Value != "get") 
+          if (elem.Name.LocalName == "Item"
+            && (elem.Attribute("action") == null || elem.Attribute("action").Value != "get")
             && elem.Attribute("type") != null
             && (elem.Attribute("id") != null || elem.Attribute("where") != null || elem.Attribute("idlist") != null))
           {
             mode = KeyMode.ItemId;
           }
-          else 
+          else
           {
             mode = KeyMode.ElementName;
           }

@@ -185,7 +185,7 @@ namespace InnovatorAdmin.Connections
     {
       if (!password.IsGuid())
       {
-        password = ConnectionDataExtensions.ScalcMD5(password);
+        password = ConnectionDataExtensions.CalcMD5(password);
       }
       return RijndaelSimple.Encrypt(_encryptKey, password);
     }

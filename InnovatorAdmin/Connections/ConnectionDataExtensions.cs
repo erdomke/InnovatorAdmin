@@ -12,29 +12,18 @@ namespace InnovatorAdmin
 {
   public static class ConnectionDataExtensions
   {
-    public static string ScalcMD5(string val)
+    public static string CalcMD5(string value)
     {
-      string result;
-      using (var mD5CryptoServiceProvider = new MD5CryptoServiceProvider())
+      using (var md5 = new MD5CryptoServiceProvider())
       {
-        var aSCIIEncoding = new ASCIIEncoding();
-        var bytes = aSCIIEncoding.GetBytes(val);
-        string text = "";
-        var array = mD5CryptoServiceProvider.ComputeHash(bytes);
-        short num = 0;
-        while ((int)num < array.GetLength(0))
+        var result = new StringBuilder();
+        var hash = md5.ComputeHash(Encoding.ASCII.GetBytes(value));
+        for (var i = 0; i < hash.Length; i++)
         {
-          string text2 = Convert.ToString(array[(int)num], 16).ToLowerInvariant();
-          if (text2.Length == 1)
-          {
-            text2 = "0" + text2;
-          }
-          text += text2;
-          num += 1;
+          result.AppendFormat("{0:x2}", hash[i]);
         }
-        result = text;
+        return result.ToString();
       }
-      return result;
     }
     public static IAsyncConnection ArasLogin(this ConnectionData credentials)
     {
@@ -69,7 +58,7 @@ namespace InnovatorAdmin
     {
       if (conn.Type == ConnectionType.Innovator)
       {
-        var arasUrl = conn.Url + "?bypass_logon_form=1&database=" + conn.Database + "&username=" + conn.UserName + "&password=" + ScalcMD5(conn.Password);
+        var arasUrl = conn.Url + "?bypass_logon_form=1&database=" + conn.Database + "&username=" + conn.UserName + "&password=" + CalcMD5(conn.Password);
         using (var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\IEXPLORE.EXE"))
         {
           if (key != null)

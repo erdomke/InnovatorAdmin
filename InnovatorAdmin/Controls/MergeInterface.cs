@@ -16,6 +16,7 @@ namespace InnovatorAdmin.Controls
   {
     private IMergeOperation _mergeOp;
     private FullBindingList<FileCompare> _mergeData;
+    private IWizard _wizard;
 
     public MergeInterface()
     {
@@ -83,12 +84,21 @@ namespace InnovatorAdmin.Controls
 
     public void Configure(IWizard wizard)
     {
-      wizard.NextEnabled = false;
+      wizard.NextEnabled = true;
+      wizard.NextLabel = "Process Remaining";
+      _wizard = wizard;
     }
 
     public void GoNext()
     {
-      // Do nothing
+      var processor = new ProcessFiles();
+      var prog = new ProgressStep<ProcessFiles>(processor);
+      prog.MethodInvoke = e =>
+      {
+        e.Execute(_mergeData.Unfiltered, _mergeOp);
+      };
+      prog.GoNextAction = () => _wizard.GoToStep(this);
+      _wizard.GoToStep(prog);
     }
 
     private void chkStatus_ItemCheck(object sender, ItemCheckEventArgs e)
@@ -252,14 +262,6 @@ namespace InnovatorAdmin.Controls
         foreach (var item in items)
         {
           item.ResolutionStatus = MergeStatus.TakeLocal;
-          //if (item.InLocal == FileStatus.DoesntExist)
-          //{
-          //  File.Delete(_mergeOp.MergePath(item.Path));
-          //}
-          //else
-          //{
-          //  _mergeOp.GetLocal(item.Path).CopyTo(File.OpenWrite(_mergeOp.MergePath(item.Path)));
-          //}
         }
         ProcessManualUpdate();
       }
@@ -277,14 +279,6 @@ namespace InnovatorAdmin.Controls
         foreach (var item in items)
         {
           item.ResolutionStatus = MergeStatus.TakeRemote;
-          //if (item.InRemote == FileStatus.DoesntExist)
-          //{
-          //  File.Delete(_mergeOp.MergePath(item.Path));
-          //}
-          //else
-          //{
-          //  _mergeOp.GetRemote(item.Path).CopyTo(File.OpenWrite(_mergeOp.MergePath(item.Path)));
-          //}
         }
         ProcessManualUpdate();
       }
@@ -336,6 +330,153 @@ namespace InnovatorAdmin.Controls
       catch (Exception ex)
       {
         Utils.HandleError(ex);
+      }
+    }
+
+    private class ProcessFiles : IProgressReporter
+    {
+      public event EventHandler<ActionCompleteEventArgs> ActionComplete;
+      public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
+
+      private static int ExecCmd(string fileName, string args, string workingDir, StringBuilder output = null)
+      {
+        var startInfo = new ProcessStartInfo();
+        startInfo.FileName = fileName;
+        startInfo.Arguments = args;
+        startInfo.WorkingDirectory = workingDir;
+        startInfo.RedirectStandardOutput = true;
+        startInfo.UseShellExecute = false;
+        var proc = Process.Start(startInfo);
+        char chr;
+        while (!proc.StandardOutput.EndOfStream)
+        {
+          chr = Convert.ToChar(proc.StandardOutput.Read());
+          Console.Write(chr);
+          if (output != null) output.Append(chr);
+        }
+        proc.WaitForExit();
+        return proc.ExitCode;
+      }
+
+      private enum WorkingDirStatus
+      {
+        Removed,
+        Added,
+        Modified
+      }
+
+      private Dictionary<string, WorkingDirStatus> GetStatus(string statusText)
+      {
+        string line;
+        WorkingDirStatus status;
+        var result = new Dictionary<string, WorkingDirStatus>(StringComparer.OrdinalIgnoreCase);
+
+        using (var reader = new StringReader(statusText))
+        {
+          while (reader.Peek() > 0)
+          {
+            line = reader.ReadLine();
+            if (!string.IsNullOrWhiteSpace(line) && line.Length > 2)
+            {
+              status = WorkingDirStatus.Modified;
+              switch (line[0])
+              {
+                case 'M':
+                  status = WorkingDirStatus.Modified;
+                  break;
+                case 'A':
+                  status = WorkingDirStatus.Added;
+                  break;
+                case '!':
+                  status = WorkingDirStatus.Removed;
+                  break;
+              }
+
+              result.Add(line.Substring(2).Replace('\\', '/'), status);
+            }
+          }
+        }
+
+        return result;
+      }
+
+      public void Execute(IEnumerable<FileCompare> files, IMergeOperation mergeOp)
+      {
+        try
+        {
+          var output = new StringBuilder();
+          ExecCmd("hg", "status", mergeOp.MergePath(""), output);
+          var statuses = GetStatus(output.ToString());
+          WorkingDirStatus status;
+
+          var toProcess = files.Where(f =>
+                f.ResolutionStatus == MergeStatus.TakeLocal
+              || f.ResolutionStatus == MergeStatus.TakeRemote)
+            .ToArray();
+
+          FileCompare file;
+          for (var i = 0; i < toProcess.Length; i++ )
+          {
+            file = toProcess[i];
+            var path = mergeOp.MergePath(file.Path);
+            if (file.ResolutionStatus == MergeStatus.TakeLocal)
+            {
+              if (file.InLocal == FileStatus.DoesntExist)
+              {
+                if (File.Exists(path))
+                  File.Delete(path);
+              }
+              else
+              {
+                if (statuses.ContainsKey(file.Path))
+                {
+                  Directory.CreateDirectory(Path.GetDirectoryName(path));
+                  using (var write = File.OpenWrite(path))
+                  {
+                    mergeOp.GetLocal(file.Path).CopyTo(write);
+                  }
+                }
+              }
+            }
+            else
+            {
+              if (file.InRemote == FileStatus.DoesntExist)
+              {
+                if (File.Exists(path))
+                  File.Delete(path);
+              }
+              else
+              {
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                using (var write = File.OpenWrite(path))
+                {
+                  mergeOp.GetRemote(file.Path).CopyTo(write);
+                }
+              }
+            }
+            OnProgressChanged("Processing files...", ((i + 1) * 100) / toProcess.Length);
+          }
+
+          OnActionComplete();
+        }
+        catch (Exception ex)
+        {
+          OnActionComplete(ex);
+        }
+      }
+
+      protected virtual void OnActionComplete(Exception ex = null)
+      {
+        if (ActionComplete != null)
+          ActionComplete.Invoke(this, new ActionCompleteEventArgs()
+          {
+            Exception = ex
+          });
+      }
+      protected virtual void OnProgressChanged(string message, int progress)
+      {
+        if (ProgressChanged != null)
+          ProgressChanged.Invoke(this, new ProgressChangedEventArgs(message, progress));
       }
     }
   }

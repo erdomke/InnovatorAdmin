@@ -363,6 +363,7 @@
     <Compile Include="Main.Designer.cs">
       <DependentUpon>Main.cs</DependentUpon>
     </Compile>
+    <Compile Include="Merge\AmlDiff.cs" />
     <Compile Include="Merge\FileCompare.cs" />
     <Compile Include="Merge\FileStatus.cs" />
     <Compile Include="Merge\HgMergeOperation.cs" />
@@ -407,7 +408,6 @@
     </Compile>
     <Compile Include="Snippet.cs" />
     <Compile Include="SnippetManager.cs" />
-    <Compile Include="Merge\Upgrade.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="Editor\XPathReader\arraymanager.cs" />
     <Compile Include="Editor\XPathReader\astnode.cs" />

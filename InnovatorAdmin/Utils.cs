@@ -212,5 +212,24 @@ namespace InnovatorAdmin
       }, method);
       return wait.WaitOne(timeout);
     }
+
+    public static IEnumerable<XElement> Parents(this XElement x)
+    {
+      var curr = x.Parent;
+      while (curr != null)
+      {
+        yield return curr;
+        curr = curr.Parent;
+      }
+    }
+    public static IEnumerable<XElement> ParentsAndSelf(this XElement x)
+    {
+      return Enumerable.Repeat(x, 1).Concat(Parents(x));
+    }
+    public static XElement ReplaceWithElement(this XElement x, XElement replacement)
+    {
+      x.ReplaceWith(replacement);
+      return replacement;
+    }
   }
 }
