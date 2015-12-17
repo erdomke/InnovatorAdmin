@@ -477,9 +477,7 @@ namespace InnovatorAdmin.Editor
         return Promises.Resolved(new CompletionContext());
 
       return items.Convert(i => new CompletionContext() {
-        Items = string.IsNullOrEmpty(filter) 
-          ? i.Concat(appendItems).OrderBy(j => j.Text) 
-          : FilterAndSort(i.Concat(appendItems), filter),
+        Items = FilterAndSort(i.Concat(appendItems), filter),
         Overlap = (filter ?? "").Length
       });
     }
@@ -606,28 +604,16 @@ namespace InnovatorAdmin.Editor
 
     private IEnumerable<ICompletionData> FilterAndSort(IEnumerable<ICompletionData> values, string substring)
     {
-      var result = values
-        .Where(i => i.Text.IndexOf(substring, StringComparison.OrdinalIgnoreCase) >= 0)
-        .ToList();
-      result.Sort((x, y) =>
-      {
-        var xStart = x.Text.StartsWith(substring, StringComparison.OrdinalIgnoreCase);
-        var yStart = y.Text.StartsWith(substring, StringComparison.OrdinalIgnoreCase);
-        if (xStart && !yStart)
-        {
-          return -1;
-        }
-        else if (yStart && !xStart)
-        {
-          return 1;
-        }
-        else
-        {
-          return x.Text.CompareTo(y.Text);
-        }
-      });
-      return result;
+      return values
+        .Where(i => string.IsNullOrEmpty(substring) 
+          || i.Text.IndexOf(substring, StringComparison.OrdinalIgnoreCase) >= 0)
+        .OrderBy(i => (string.IsNullOrEmpty(substring) 
+          || i.Text.StartsWith(substring, StringComparison.CurrentCultureIgnoreCase)) ? 0 : 1)
+        .ThenBy(i => i.Text.StartsWith("/") ? 1 : 0)
+        .ThenBy(i => i.Text)
+        .ToArray();
     }
+
 
     private List<string> SelectPath(string selectStr, out string partial)
     {
