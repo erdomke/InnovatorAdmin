@@ -385,14 +385,23 @@ namespace InnovatorAdmin
       {
         _currentQuery.Cancel();
         _currentQuery = null;
+        outputEditor.Text = "";
+        lblItems.Text = "";
+        _clock.Enabled = false;
         btnSubmit.Text = "► Run";
         return;
       }
-
+      if (_proxy.ConnData.Confirm)
+      {
+        if (MessageBox.Show("Do you want to run this query on " + _proxy.ConnData.ConnectionName +"?", "Confirm Execution", MessageBoxButtons.YesNo) == DialogResult.No)
+        {
+          return;
+        }
+      }
       try
       {
         outputEditor.Text = "Processing...";
-        lblItems.Text = "Processing...";
+       lblItems.Text = "Processing...";
         _start = DateTime.UtcNow;
         _clock.Enabled = true;
         btnSubmit.Text = "Cancel";
@@ -1137,7 +1146,7 @@ namespace InnovatorAdmin
       }
     }
 
-    
+
 
   }
 }

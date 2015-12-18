@@ -86,6 +86,7 @@ namespace InnovatorAdmin
         txtUser.DataBindings.Add("Text", _bs, "UserName");
         cmbType.DataBindings.Add("SelectedItem", _bs, "Type");
         cmbAuth.DataBindings.Add("SelectedItem", _bs, "Authentication");
+        cb_confirm.DataBindings.Add("Checked", _bs, "Confirm");
 
         if (lstConnections.Items.Count > 0 && !this.MultiSelect)
           lstConnections.SetItemSelected(0, true);
@@ -309,6 +310,12 @@ namespace InnovatorAdmin
       {
         Utils.HandleError(ex);
       }
+    }
+
+    private void cb_confirm_CheckedChanged(object sender, EventArgs e)
+    {
+      var connData = _bs.Current as ConnectionData;
+      connData.Confirm = cb_confirm.Checked;
     }
   }
 }
