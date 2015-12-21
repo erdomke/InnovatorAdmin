@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActionCompleteEventArgs.cs" />
+    <Compile Include="AmlDiff.cs" />
     <Compile Include="Metadata\ArasMetadataProvider.cs" />
     <Compile Include="Connection\IProgressCallback.cs" />
     <Compile Include="DependencyAnalyzer.cs" />

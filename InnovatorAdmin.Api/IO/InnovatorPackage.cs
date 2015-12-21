@@ -140,15 +140,15 @@ namespace InnovatorAdmin
     private const string _reportEnd = "METADATA-END-->";
     private const string _reportStart = "<!--METADATA-START";
 
-    private XmlDocument ReadReport(string path)
+    public static XmlDocument ReadReport(string path, Func<string, Stream> fileGetter)
     {
       string file;
-      using (var reader = new StreamReader(GetExistingStream(path)))
+      using (var reader = new StreamReader(fileGetter(path)))
       {
         file = reader.ReadToEnd();
       }
       string dataFile = null;
-      var dataFileStream = GetExistingStream(path + ".xml");
+      var dataFileStream = fileGetter(path + ".xml");
       if (dataFileStream != null)
       {
         using (var reader = new StreamReader(dataFileStream))
@@ -180,6 +180,11 @@ namespace InnovatorAdmin
       }
 
       return result;
+    }
+
+    private XmlDocument ReadReport(string path)
+    {
+      return ReadReport(path, GetExistingStream);
     }
     private void WriteReport(InstallItem line, string path)
     {

@@ -14,7 +14,7 @@ namespace InnovatorAdmin
     string Description { get; }
     bool HasChildren { get; }
 
-    IEnumerable<EditorScript> GetScripts();
+    IEnumerable<IEditorScript> GetScripts();
     IEnumerable<IEditorTreeNode> GetChildren();
   }
 }

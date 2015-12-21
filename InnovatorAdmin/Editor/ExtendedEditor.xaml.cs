@@ -39,6 +39,14 @@ namespace InnovatorAdmin.Editor
     }
     public System.Windows.Forms.Control Host { get; set; }
 
+    public void ResetFoldingManager()
+    {
+      if (_foldingManager != null)
+        FoldingManager.Uninstall(_foldingManager);
+      _foldingManager = FoldingManager.Install(this.editor.TextArea);
+      UpdateFoldings();
+    }
+
     public ICSharpCode.AvalonEdit.TextEditor Editor
     {
       get { return this.editor; }

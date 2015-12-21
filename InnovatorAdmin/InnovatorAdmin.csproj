@@ -199,6 +199,7 @@
     <Compile Include="Dialog\structs.cs" />
     <Compile Include="Dialog\Win32.cs" />
     <Compile Include="Editor\Sql\SqlMetadata.cs" />
+    <Compile Include="Editor\TextDocumentWriter.cs" />
     <Compile Include="GlobalProgress.cs" />
     <Compile Include="Ide\EditorTreeNode.cs" />
     <Compile Include="Ide\EditorWindow.cs">
@@ -273,6 +274,7 @@
     </Compile>
     <Compile Include="Ide\ICommand.cs" />
     <Compile Include="Ide\IEditorProxy.cs" />
+    <Compile Include="Ide\IEditorScript.cs" />
     <Compile Include="Ide\IEditorTreeNode.cs" />
     <Compile Include="Ide\InputBox.cs">
       <SubType>Form</SubType>
@@ -367,10 +369,13 @@
     <Compile Include="Main.Designer.cs">
       <DependentUpon>Main.cs</DependentUpon>
     </Compile>
-    <Compile Include="Merge\AmlDiff.cs" />
     <Compile Include="Merge\FileCompare.cs" />
+    <Compile Include="Merge\FileDiff.cs" />
     <Compile Include="Merge\FileStatus.cs" />
+    <Compile Include="Merge\HgDiffDirectory.cs" />
     <Compile Include="Merge\HgMergeOperation.cs" />
+    <Compile Include="Merge\IDiffDirectory.cs" />
+    <Compile Include="Merge\IDiffFile.cs" />
     <Compile Include="Merge\IMergeOperation.cs" />
     <Compile Include="Merge\MergeFilePaths.cs" />
     <Compile Include="Merge\MergeStatus.cs" />

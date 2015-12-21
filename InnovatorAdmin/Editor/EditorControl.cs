@@ -31,6 +31,15 @@ namespace InnovatorAdmin.Editor
       set { _extEditor.Helper = value; }
     }
     public ICSharpCode.AvalonEdit.TextEditor Editor { get { return _extEditor.Editor; } }
+    public TextDocument Document
+    {
+      get { return _extEditor.Editor.Document; }
+      set
+      {
+        _extEditor.Editor.Document = value;
+        _extEditor.ResetFoldingManager();
+      }
+    }
     //public string SoapAction { get; set; }
 
     public EditorControl()
@@ -64,6 +73,7 @@ namespace InnovatorAdmin.Editor
     {
       _extEditor.CollapseAll();
     }
+
 
     protected virtual void OnRunRequested(RunRequestedEventArgs e)
     {

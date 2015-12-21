@@ -7,10 +7,11 @@ using System.Xml;
 using System.IO;
 using System.Data;
 using System.ComponentModel;
+using ICSharpCode.AvalonEdit.Document;
 
 namespace InnovatorAdmin
 {
-  class ArasEditorProxy : IEditorProxy
+  public class ArasEditorProxy : IEditorProxy
   {
     #region "Default Actions"
     private static readonly string[] _defaultActions = new string[] {
@@ -142,12 +143,12 @@ namespace InnovatorAdmin
       _name = name;
     }
 
-    public IEnumerable<string> GetActions()
+    public virtual IEnumerable<string> GetActions()
     {
       return _defaultActions;
     }
 
-    public Innovator.Client.IPromise<IResultObject> Process(ICommand request, bool async)
+    public virtual Innovator.Client.IPromise<IResultObject> Process(ICommand request, bool async)
     {
       var innCmd = request as InnovatorCommand;
       if (innCmd == null)
@@ -159,13 +160,13 @@ namespace InnovatorAdmin
         cmd.Aml = "<AML>" + cmd.Aml + "</AML>";
       }
       return _conn.Process(cmd, async)
-        .Convert(s => (IResultObject)new ResultObject(s.AsString())
+        .Convert(s => (IResultObject)new ResultObject(s)
         {
           PreferTable = cmd.Action == CommandAction.ApplySQL
         });
     }
 
-    public IEditorProxy Clone()
+    public virtual IEditorProxy Clone()
     {
       return new ArasEditorProxy(_conn, _name) { ConnData = _connData };
     }
@@ -181,9 +182,10 @@ namespace InnovatorAdmin
 
     private class ResultObject : IResultObject
     {
-      private string _aml;
+      private TextDocument _doc;
       private int _count;
       private DataTable _table;
+      private int _amlLength;
 
       public bool PreferTable { get; set; }
 
@@ -192,28 +194,44 @@ namespace InnovatorAdmin
         get { return _count; }
       }
 
-      public ResultObject(string aml)
+      public ResultObject(Stream aml)
       {
-        _aml = IndentXml(aml, out _count);
+        _doc = new TextDocument();
+        using (var reader = new StreamReader(aml))
+        using (var writer = new TextDocumentWriter(_doc))
+        {
+          IndentXml(reader, writer, out _count);
+        }
+        _amlLength = _doc.TextLength;
+        _doc.SetOwnerThread(null);
       }
 
-      public string GetText()
+      public TextDocument GetDocument()
       {
-        return _aml;
+        return _doc;
       }
 
       public System.Data.DataTable GetTable()
       {
-        if (_table == null && !string.IsNullOrEmpty(_aml))
+        if (_table == null && _amlLength > 0)
         {
           var doc = new XmlDocument();
-          doc.LoadXml(_aml);
+          doc.Load(_doc.CreateReader());
           _table = Extensions.GetItemTable(doc);
         }
         return _table;
       }
 
       private string IndentXml(string xmlContent, out int itemCount)
+      {
+        using (var strReader = new StringReader(xmlContent))
+        using (var strWriter = new StringWriter())
+        {
+          IndentXml(strReader, strWriter, out itemCount);
+          return strWriter.ToString();
+        }
+      }
+      private void IndentXml(TextReader xmlContent, TextWriter writer, out int itemCount)
       {
         itemCount = 0;
         char[] writeNodeBuffer = null;
@@ -226,9 +244,7 @@ namespace InnovatorAdmin
         settings.IndentChars = "  ";
         settings.CheckCharacters = true;
 
-        using (var strReader = new StringReader(xmlContent))
-        using (var reader = XmlReader.Create(strReader))
-        using (var writer = new StringWriter())
+        using (var reader = XmlReader.Create(xmlContent))
         using (var xmlWriter = XmlWriter.Create(writer, settings))
         {
           bool canReadValueChunk = reader.CanReadValueChunk;
@@ -296,7 +312,7 @@ namespace InnovatorAdmin
 
           xmlWriter.Flush();
           itemCount = levels.FirstOrDefault(i => i > 0);
-          return writer.ToString();
+          writer.Flush();
         }
       }
     }
@@ -486,9 +502,111 @@ namespace InnovatorAdmin
         ImageKey = "class-16",
         Description = "ItemType: " + itemType.Name,
         HasChildren = true,
-        Children = ItemTypeChildren(itemType.Id)
+        Children = ItemTypeChildren(itemType.Id),
+        Scripts = new EditorScript[]
+        {
+          new EditorScript()
+          {
+            Name = "SQL Select",
+            Action = "ApplySQL",
+            ScriptGetter = () => SqlSelect(itemType)
+          }
+        }
       };
     }
+
+    private string SqlSelect(ItemType itemType)
+    {
+      var metadata = ArasMetadataProvider.Cached(_conn);
+      var props = metadata
+        .GetProperties(itemType)
+        .Wait();
+
+      var script = new StringBuilder("<sql>").AppendLine().AppendLine("select");
+      var relations = new StringBuilder();
+      var aliases = new Dictionary<string, string>();
+      var primary = GetAlias(itemType, aliases);
+      string alias;
+      var first = true;
+
+      foreach (var prop in props.OrderBy(p => p.Label ?? p.Name))
+      {
+        if (string.Equals(prop.TypeName, "federated", StringComparison.OrdinalIgnoreCase))
+        {
+          script.Append("  /* ").Append(prop.Name);
+          if (!string.IsNullOrEmpty(prop.Label))
+          {
+            script.Append(" (").Append(prop.Label).Append(")");
+          }
+          script.Append(" is federated */");
+        }
+        else
+        {
+          if (first)
+          {
+            script.Append("  ");
+            first = false;
+          }
+          else
+          {
+            script.Append(", ");
+          }
+
+          if (!string.IsNullOrEmpty(prop.ForeignTypeName))
+          {
+            alias = GetAlias(metadata.ItemTypeByName(prop.ForeignTypeName), aliases, (n, a) =>
+            {
+              relations.Append("inner join innovator.[").Append(n.Replace(' ', '_')).Append("] ")
+                .AppendLine(a);
+              relations.Append("on ").Append(primary).Append(".").Append(prop.ForeignLinkPropName)
+                .Append(" = ").Append(a).AppendLine(".id");
+            });
+            script.Append(alias).Append(".").Append(prop.ForeignPropName);
+          }
+          else
+          {
+            script.Append(primary).Append(".").Append(prop.Name);
+          }
+
+          if (!string.IsNullOrEmpty(prop.Label))
+          {
+            script.Append(" \"").Append(prop.Label).Append("\"");
+          }
+        }
+        script.AppendLine();
+      }
+      script.Append("from innovator.[").Append(itemType.Name.Replace(' ', '_')).Append("] ")
+        .Append(primary).AppendLine();
+      script.Append(relations.ToString());
+      script.Append("where ").Append(primary).AppendLine(".is_current = 1");
+      script.AppendLine("</sql>");
+      return script.ToString();
+    }
+
+    private string GetAlias(ItemType itemType, Dictionary<string, string> existing
+      , Action<string, string> itemAdded = null)
+    {
+      var mapping = existing.FirstOrDefault(k => k.Value == itemType.Name);
+      if (!string.IsNullOrEmpty(mapping.Key))
+        return mapping.Key;
+
+      var words = (itemType.Label ?? itemType.Name).Split(' ');
+      var aliasBase = (words.FirstOrDefault(w => w.Length == 3)
+        ?? string.Join("", words.Select(w => w[0].ToString()))).ToLowerInvariant();
+      var alias = aliasBase;
+      var i = 1;
+
+      while (existing.ContainsKey(alias))
+      {
+        alias = aliasBase + i.ToString();
+        i++;
+      }
+      existing[alias] = itemType.Name;
+      if (itemAdded != null)
+        itemAdded(itemType.Name, alias);
+      return alias;
+    }
+
 
     private string GetPropertyDescription(Property prop)
     {

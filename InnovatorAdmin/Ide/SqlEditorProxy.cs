@@ -72,6 +72,7 @@ namespace InnovatorAdmin
         .ToPromise(cts)
         .Convert(r => {
           r.SetText(_builder.ToString() + Environment.NewLine + r.GetText());
+          r.GetDocument().SetOwnerThread(null);
           return (IResultObject)r;
         });
     }

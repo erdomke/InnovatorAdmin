@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ICSharpCode.AvalonEdit.Document;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -10,12 +11,12 @@ namespace InnovatorAdmin
   public class SqlResultObject : IResultObject
   {
     private DataTable _table;
-    private string _text;
+    private TextDocument _doc;
 
     public SqlResultObject(DataTable table, string text)
     {
       _table = table;
-      _text = text;
+      _doc = new TextDocument(text);
     }
 
     public int ItemCount
@@ -25,11 +26,15 @@ namespace InnovatorAdmin
 
     public string GetText()
     {
-      return _text;
+      return _doc.Text;
+    }
+    public TextDocument GetDocument()
+    {
+      return _doc;
     }
     public void SetText(string value)
     {
-      _text = value;
+      _doc.Text = value;
     }
 
     public DataTable GetTable()

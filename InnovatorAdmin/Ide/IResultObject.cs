@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ICSharpCode.AvalonEdit.Document;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace InnovatorAdmin
   {
     bool PreferTable { get; }
     int ItemCount { get; }
-    string GetText();
+    TextDocument GetDocument();
     DataTable GetTable();
   }
 }

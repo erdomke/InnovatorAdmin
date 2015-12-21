@@ -384,6 +384,8 @@ namespace InnovatorAdmin
       if (_currentQuery != null)
       {
         _currentQuery.Cancel();
+        _clock.Enabled = false;
+        lblItems.Text = "Canceled";
         _currentQuery = null;
         outputEditor.Text = "";
         lblItems.Text = "";
@@ -460,7 +462,9 @@ namespace InnovatorAdmin
               {
                 lblItems.Text = string.Format("No items found in {0} ms.", milliseconds);
               }
-              outputEditor.Text = result.GetText();
+              var doc = result.GetDocument();
+              doc.SetOwnerThread(System.Threading.Thread.CurrentThread);
+              outputEditor.Document = doc;
 
               if (result.ItemCount > 1 && outputEditor.Editor.LineCount > 100)
               {

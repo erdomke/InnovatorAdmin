@@ -85,6 +85,10 @@ namespace InnovatorAdmin
     {
       return _itemTypesById.TryGetValue(id, out type);
     }
+    public ItemType ItemTypeByName(string name)
+    {
+      return _itemTypesByName[name];
+    }
     /// <summary>
     /// Try to get an Item Type by name
     /// </summary>
@@ -237,7 +241,7 @@ namespace InnovatorAdmin
               method.KeyedName = i.Property("name").AsString("");
               method.IsCore = i.Property("core").AsBoolean(false);
               return method;
-            });
+            }).ToArray();
 
             return _conn.ApplyAsync(@"<Item type='Identity' action='get' select='id,name'>
                                       <name condition='in'>'World', 'Creator', 'Owner', 'Manager', 'Innovator Admin', 'Super User'</name>
@@ -327,7 +331,7 @@ namespace InnovatorAdmin
       if (_conn == null || itemType.Properties.Count > 0)
         return Promises.Resolved<IEnumerable<Property>>(itemType.Properties.Values);
 
-      return _conn.ApplyAsync("<AML><Item action=\"get\" type=\"ItemType\" select=\"name\"><name>@0</name><Relationships><Item action=\"get\" type=\"Property\" select=\"name,label,data_type,data_source,stored_length,prec,scale\" /></Relationships></Item></AML>"
+      return _conn.ApplyAsync("<AML><Item action=\"get\" type=\"ItemType\" select=\"name\"><name>@0</name><Relationships><Item action=\"get\" type=\"Property\" select=\"name,label,data_type,data_source,stored_length,prec,scale,foreign_property(name,source_id)\" /></Relationships></Item></AML>"
         , true, true, itemType.Name)
         .Convert(r =>
         {
@@ -380,6 +384,13 @@ namespace InnovatorAdmin
         newProp.Precision = prop.Property("prec").AsInt(-1);
         newProp.Scale = prop.Property("scale").AsInt(-1);
         newProp.StoredLength = prop.Property("stored_length").AsInt(-1);
+        var foreign = prop.Property("foreign_property").AsItem();
+        if (foreign.Exists)
+        {
+          newProp.ForeignLinkPropName = prop.Property("data_source").KeyedName().Value;
+          newProp.ForeignPropName = foreign.Property("name").Value;
+          newProp.ForeignTypeName = foreign.SourceId().KeyedName().Value;
+        }
         if (newProp.Type == PropertyType.item && prop.Property("data_source").Attribute("name").HasValue())
         {
           newProp.Restrictions.Add(prop.Property("data_source").Attribute("name").Value);

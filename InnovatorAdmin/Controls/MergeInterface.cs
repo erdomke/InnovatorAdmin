@@ -431,7 +431,7 @@ namespace InnovatorAdmin.Controls
                 if (statuses.ContainsKey(file.Path))
                 {
                   Directory.CreateDirectory(Path.GetDirectoryName(path));
-                  using (var write = File.OpenWrite(path))
+                  using (var write = new FileStream(path, FileMode.Create, FileAccess.Write))
                   {
                     mergeOp.GetLocal(file.Path).CopyTo(write);
                   }
@@ -440,15 +440,13 @@ namespace InnovatorAdmin.Controls
             }
             else
             {
-              if (file.InRemote == FileStatus.DoesntExist)
-              {
-                if (File.Exists(path))
-                  File.Delete(path);
-              }
-              else
+              if (File.Exists(path))
+                File.Delete(path);
+
+              if (file.InRemote != FileStatus.DoesntExist)
               {
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
-                using (var write = File.OpenWrite(path))
+                using (var write = new FileStream(path, FileMode.Create, FileAccess.Write))
                 {
                   mergeOp.GetRemote(file.Path).CopyTo(write);
                 }

@@ -16,13 +16,17 @@ namespace InnovatorAdmin
     private HgChangeset _remote;
     private HgChangeset _baseRev;
 
-    public HgMergeOperation(string repoPath)
+    public HgMergeOperation(string repoPath, int local = -1, int remote = -1)
     {
       _repo = new HgRepository(repoPath);
 
       var heads = _repo.GetHeads().Select(h => _repo.Changelog[h.NodeID]).ToArray();
-      _local = heads.FirstOrDefault(h => h.Branch.Name == "default") ?? heads.First();
-      _remote = heads.First(h => h.Metadata.NodeID != _local.Metadata.NodeID);
+      _local = local < 0
+        ? heads.FirstOrDefault(h => h.Branch.Name == "default") ?? heads.First()
+        : _repo.Changelog[(uint)local];
+      _remote = remote < 0
+        ? heads.First(h => h.Metadata.NodeID != _local.Metadata.NodeID)
+        : _repo.Changelog[(uint)remote];
       _baseRev = _repo.CommonParent(_local, _remote);
 
       var dict = new Dictionary<string, FileCompare>();
@@ -111,5 +115,41 @@ namespace InnovatorAdmin
     {
       return Path.Combine(_repo.FullPath, relPath);
     }
+
+    public IDiffDirectory GetDirectory(int rev)
+    {
+      var heads = _repo.GetHeads().Select(h => _repo.Changelog[h.NodeID]).ToArray();
+      var ch = rev < 0
+        ? heads.FirstOrDefault(h => h.Branch.Name == "default") ?? heads.First()
+        : _repo.Changelog[(uint)rev];
+      return new HgDiffDirectory(_repo, ch);
+    }
+
+    public static void Test()
+    {
+      var repo = new HgMergeOperation(@"C:\Users\edomke\Documents\Local_Projects\ArasUpgrade");
+      var baseDir = repo.GetDirectory(2);
+      var compareDir = repo.GetDirectory(-1);
+      baseDir.WriteAmlMergeScripts(compareDir, @"C:\Users\edomke\Documents\Local_Projects\ArasUpgradeMerge\");
+      //var diffs = baseDir.GetDiffs(compareDir);
+      var thing = 2;
+    }
+
+
+    //public IEnumerable<FileDiff> GetDiffMergeToLocal(int localRev, int mergeRev)
+    //{
+    //  var local = _repo.GetChangesets().Single(c => c.Metadata.Revision == localRev);
+    //  var merge = _repo.GetChangesets().Single(c => c.Metadata.Revision == mergeRev);
+
+    //  var localPaths = ChangesetManifestPaths(_repo, local).OrderBy(i => i).ToArray();
+    //  var mergePaths = ChangesetManifestPaths(_repo, merge).OrderBy(i => i).ToArray();
+
+    //  var results = new List<FileDiff>();
+    //  localPaths.MergeSorted(mergePaths, i => i, (i, l, m) =>
+    //  {
+
+    //  });
+    //  return results;
+    //}
   }
 }

@@ -253,6 +253,7 @@ namespace InnovatorAdmin.Editor
     {
       int firstErrorOffset;
       IEnumerable<NewFolding> foldings = CreateNewFoldings(document, out firstErrorOffset);
+      var errors = foldings.Where(f => f.StartOffset < 0 || f.EndOffset > document.TextLength).ToArray();
       manager.UpdateFoldings(foldings, firstErrorOffset);
     }
     static int GetOffset(TextDocument document, XmlReader reader)

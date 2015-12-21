@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace InnovatorAdmin
 {
@@ -225,6 +226,65 @@ namespace InnovatorAdmin
         }
       }
       return false;
+    }
+
+
+    public static IEnumerable<XElement> Parents(this XElement x)
+    {
+      var curr = x.Parent;
+      while (curr != null)
+      {
+        yield return curr;
+        curr = curr.Parent;
+      }
+    }
+    public static IEnumerable<XElement> ParentsAndSelf(this XElement x)
+    {
+      return Enumerable.Repeat(x, 1).Concat(Parents(x));
+    }
+    public static XElement ReplaceWithElement(this XElement x, XElement replacement)
+    {
+      x.ReplaceWith(replacement);
+      return replacement;
+    }
+
+    public static void MergeSorted<T, TKey>(this IList<T> start, IList<T> dest,
+      Func<T, TKey> keyGetter, Action<int, T, T> callback) where TKey : IComparable
+    {
+      var startPtr = 0;
+      var destPtr = 0;
+      int status;
+
+      while (startPtr < start.Count && destPtr < dest.Count)
+      {
+        status = keyGetter(start[startPtr]).CompareTo(keyGetter(dest[destPtr]));
+        switch (status)
+        {
+          case -1:
+            callback(status, start[startPtr], default(T));
+            startPtr++;
+            break;
+          case 1:
+            callback(status, default(T), dest[destPtr]);
+            destPtr++;
+            break;
+          default:
+            callback(0, start[startPtr], dest[destPtr]);
+            startPtr++;
+            destPtr++;
+            break;
+        }
+      }
+      while (startPtr < start.Count)
+      {
+        callback(-1, start[startPtr], default(T));
+        startPtr++;
+      }
+      while (destPtr < dest.Count)
+      {
+        callback(1, default(T), dest[destPtr]);
+        destPtr++;
+      }
     }
   }
 }

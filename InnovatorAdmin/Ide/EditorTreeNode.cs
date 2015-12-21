@@ -13,7 +13,7 @@ namespace InnovatorAdmin
     private bool _childrenLoaded;
     private bool _scriptsLoaded;
     private IEnumerable<IEditorTreeNode> _children;
-    private IEnumerable<EditorScript> _scripts;
+    private IEnumerable<IEditorScript> _scripts;
 
     public string ImageKey { get; set; }
     public string Name { get; set; }
@@ -29,7 +29,7 @@ namespace InnovatorAdmin
       }
     }
     public Func<IEnumerable<IEditorTreeNode>> ChildGetter { get; set; }
-    public IEnumerable<EditorScript> Scripts
+    public IEnumerable<IEditorScript> Scripts
     {
       get { return _scripts; }
       set
@@ -38,7 +38,7 @@ namespace InnovatorAdmin
         _scriptsLoaded = true;
       }
     }
-    public Func<IEnumerable<EditorScript>> ScriptGetter { get; set; }
+    public Func<IEnumerable<IEditorScript>> ScriptGetter { get; set; }
 
     public IEnumerable<IEditorTreeNode> GetChildren()
     {
@@ -53,7 +53,7 @@ namespace InnovatorAdmin
       return _children ?? Enumerable.Empty<IEditorTreeNode>();
     }
 
-    public IEnumerable<EditorScript> GetScripts()
+    public IEnumerable<IEditorScript> GetScripts()
     {
       if (!_scriptsLoaded)
       {
@@ -63,7 +63,7 @@ namespace InnovatorAdmin
           Utils.CallWithTimeout(5000, () => _scripts = this.ScriptGetter.Invoke());
         }
       }
-      return _scripts ?? Enumerable.Empty<EditorScript>();
+      return _scripts ?? Enumerable.Empty<IEditorScript>();
     }
   }
 }

@@ -10,6 +10,7 @@ namespace InnovatorAdmin
   {
     private List<string> _restrictions = new List<string>();
 
+    public string Id { get; set; }
     public string Label { get; set; }
     public string Name { get; set; }
     public List<string> Restrictions
@@ -24,6 +25,9 @@ namespace InnovatorAdmin
     public int StoredLength { get; set; }
     public int Precision { get; set; }
     public int Scale { get; set; }
+    public string ForeignLinkPropName { get; set; }
+    public string ForeignPropName { get; set; }
+    public string ForeignTypeName { get; set; }
 
     public Property()
     {

@@ -16,31 +16,56 @@ namespace InnovatorAdmin
       ElementName
     }
 
+    public static bool IsDifferent(string start, string dest)
+    {
+      return GetMergeScript(start, dest).Elements().Any();
+    }
+
     public static XElement GetMergeScript(string start, string dest)
     {
-      if (string.IsNullOrWhiteSpace(start) || string.IsNullOrWhiteSpace(dest))
+      if (string.IsNullOrWhiteSpace(start))
         return new XElement("AML");
 
       var startElem = XElement.Parse(start);
-      var destElem = XElement.Parse(dest);
       var result = new XElement(startElem.Name);
+
+      // Create deletes
+      if (string.IsNullOrEmpty(dest))
+      {
+        var itemTag = startElem.DescendantsAndSelf().First(e => e.Name.LocalName == "Item");
+        var items = itemTag.Parent.Elements("Item").Where(e => e.Attribute("action") != null
+          && (e.Attribute("action").Value == "merge" || e.Attribute("action").Value == "add"
+            || e.Attribute("action").Value == "create"));
+        XElement newItem;
+        foreach (var item in items)
+        {
+          newItem = new XElement(item.Name, item.Attributes()
+            .Where(a => a.Name == "id" || a.Name == "where" || a.Name == "idlist" || a.Name == "type"));
+          newItem.SetAttributeValue("action", "delete");
+        }
+        return result;
+      }
+
+      // Create merges/deletes as necessary
+      var destElem = XElement.Parse(dest);
       GetMergeScript(startElem, destElem, result);
+      foreach (var elem in result.DescendantsAndSelf())
+        elem.RemoveAnnotations<ElementKey>();
       return result;
     }
 
     private static void GetMergeScript(XElement start, XElement dest, XElement result)
     {
-      var startList = GetKeys(start.Elements()).OrderBy(t => t.Item1).ToArray();
-      var destList = GetKeys(dest.Elements()).OrderBy(t => t.Item1).ToArray();
+      var startList = SetKeys(start.Elements()).OrderBy(t => t.Annotation<ElementKey>().Key).ToArray();
+      var destList = SetKeys(dest.Elements()).OrderBy(t => t.Annotation<ElementKey>().Key).ToArray();
       XElement res;
-      XElement clone;
 
-      MergeSorted(startList, destList, t => t.Item1, (i, s, d) =>
+      startList.MergeSorted(destList, t => t.Annotation<ElementKey>().Key, (i, s, d) =>
       {
         switch (i)
         {
           case -1:
-            res = EnsurePath(s.Item2, result);
+            res = EnsurePath(s, result);
             if (res.Name.LocalName == "Item")
             {
               res.SetAttributeValue("action", "delete");
@@ -52,23 +77,22 @@ namespace InnovatorAdmin
             }
             break;
           case 1:
-            res = EnsurePath(d.Item2, result);
-            SetItemEdits(res.ReplaceWithElement(new XElement(d.Item2)));
+            res = EnsurePath(d, result);
+            SetItemEdits(res.ReplaceWithElement(new XElement(d)));
             break;
           default:
-            if (TextDiffers(s.Item2, d.Item2))
+            if (TextDiffers(s, d))
             {
-              res = EnsurePath(s.Item2, result);
-              SetItemEdits(res.ReplaceWithElement(new XElement(d.Item2)));
+              res = EnsurePath(s, result);
+              SetItemEdits(res.ReplaceWithElement(new XElement(d)));
             }
             else
             {
-              GetMergeScript(s.Item2, d.Item2, result);
+              GetMergeScript(s, d, result);
             }
             break;
         }
       });
-
     }
 
     private static XElement SetItemEdits(XElement child)
@@ -109,6 +133,7 @@ namespace InnovatorAdmin
         {
           match = new XElement(elem.Name, elem.Attributes()
             .Where(a => a.Name == "id" || a.Name == "where" || a.Name == "idlist" || a.Name == "type"));
+          match.AddAnnotation(elem.Annotation<ElementKey>());
           curr.Add(match);
         }
         curr = match;
@@ -132,50 +157,17 @@ namespace InnovatorAdmin
         if (canonical.Attribute("idlist") != null
           && (compare.Attribute("idlist") == null
           || compare.Attribute("idlist").Value != canonical.Attribute("idlist").Value)) return false;
+
+        if (canonical.Attribute("id") == null
+          && canonical.Attribute("where") == null
+          && compare.Attribute("idlist") == null
+          && canonical.Annotation<ElementKey>().Key != compare.Annotation<ElementKey>().Key)
+          return false;
       }
       return true;
     }
 
-    private static void MergeSorted<T, TKey>(IList<T> start, IList<T> dest,
-      Func<T, TKey> keyGetter, Action<int, T, T> callback) where TKey : IComparable
-    {
-      var startPtr = 0;
-      var destPtr = 0;
-      int status;
-
-      while (startPtr < start.Count && destPtr < dest.Count)
-      {
-        status = keyGetter(start[startPtr]).CompareTo(keyGetter(dest[destPtr]));
-        switch (status)
-        {
-          case -1:
-            callback(status, start[startPtr], default(T));
-            startPtr++;
-            break;
-          case 1:
-            callback(status, default(T), dest[destPtr]);
-            destPtr++;
-            break;
-          default:
-            callback(0, start[startPtr], dest[destPtr]);
-            startPtr++;
-            destPtr++;
-            break;
-        }
-      }
-      while (startPtr < start.Count)
-      {
-        callback(-1, start[startPtr], default(T));
-        startPtr++;
-      }
-      while (destPtr < dest.Count)
-      {
-        callback(1, default(T), dest[destPtr]);
-        destPtr++;
-      }
-    }
-
-    private static IList<Tuple<string, XElement>> GetKeys(IEnumerable<XElement> elems)
+    private static IEnumerable<XElement> SetKeys(IEnumerable<XElement> elems)
     {
       var mode = KeyMode.Undefined;
       var results = new List<Tuple<string, XElement>>();
@@ -186,8 +178,7 @@ namespace InnovatorAdmin
         {
           if (elem.Name.LocalName == "Item"
             && (elem.Attribute("action") == null || elem.Attribute("action").Value != "get")
-            && elem.Attribute("type") != null
-            && (elem.Attribute("id") != null || elem.Attribute("where") != null || elem.Attribute("idlist") != null))
+            && elem.Attribute("type") != null)
           {
             mode = KeyMode.ItemId;
           }
@@ -197,29 +188,72 @@ namespace InnovatorAdmin
           }
         }
 
+        elem.AddAnnotation(ElementKey.FromElement(elem, mode));
+      }
+
+      return elems;
+    }
+
+    private class ElementKey
+    {
+      public string Key { get; set; }
+
+      private ElementKey(string key)
+      {
+        this.Key = key;
+      }
+
+      public static ElementKey FromElement(XElement elem, KeyMode mode)
+      {
         if (mode == KeyMode.ItemId)
         {
           if (elem.Attribute("id") != null)
           {
-            results.Add(Tuple.Create(elem.Attribute("id").Value, elem));
+            return new ElementKey(elem.Attribute("id").Value);
           }
           else if (elem.Attribute("idlist") != null)
           {
-            results.Add(Tuple.Create(elem.Attribute("idlist").Value, elem));
+            return new ElementKey(elem.Attribute("idlist").Value);
           }
           else if (elem.Attribute("where") != null)
           {
-            results.Add(Tuple.Create(elem.Attribute("where").Value, elem));
+            return new ElementKey(elem.Attribute("where").Value);
           }
+          else if (elem.Element("related_id") != null)
+          {
+            var textNode = elem.Element("related_id").Nodes().OfType<XText>().FirstOrDefault();
+            if (textNode == null)
+            {
+              var item = elem.Element("related_id").Element("Item");
+              if (item != null && item.Attribute("id") != null)
+                return new ElementKey(item.Attribute("id").Value);
+            }
+            else
+            {
+              return new ElementKey(textNode.Value);
+            }
+          }
+
+          return new ElementKey(elem.Name.LocalName + "[" + ElementIndex(elem).ToString() + "]");
         }
         else
         {
-          results.Add(Tuple.Create(elem.Name.LocalName, elem));
+          var lang = elem.Attribute(XNamespace.Xml + "lang");
+          return new ElementKey(elem.Name.LocalName + (lang == null ? "" : "[" + lang.Value + "]"));
         }
       }
 
-      //results.Sort((x, y) => x.Item1.CompareTo(y.Item1));
-      return results;
+      private static int ElementIndex(XElement elem)
+      {
+        var curr = elem.PreviousNode;
+        var i = 0;
+        while (curr != null)
+        {
+          i++;
+          curr = curr.PreviousNode;
+        }
+        return i;
+      }
     }
   }
 }
