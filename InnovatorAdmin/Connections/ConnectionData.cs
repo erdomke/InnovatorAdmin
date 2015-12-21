@@ -29,6 +29,9 @@ namespace InnovatorAdmin.Connections
     public string UserName { get; set; }
     [DisplayName("Color")]
     public Color Color { get; set; }
+    [DisplayName("Confirm")]
+    public Boolean Confirm { get; set; }
+
 
     public ConnectionData()
     {
@@ -46,7 +49,8 @@ namespace InnovatorAdmin.Connections
         UserName = this.UserName,
         Color = this.Color,
         Type = this.Type,
-        Authentication = this.Authentication
+        Authentication = this.Authentication,
+        Confirm = this.Confirm
       };
     }
 
@@ -106,6 +110,11 @@ namespace InnovatorAdmin.Connections
             if (Enum.TryParse<ConnectionType>(reader.ReadElementString(reader.LocalName), out newType))
               this.Type = newType;
             break;
+          case "Confirm":
+            Boolean newConfirm;
+            if (Boolean.TryParse(reader.ReadElementString(reader.LocalName), out newConfirm))
+              this.Confirm = newConfirm;
+            break;
           default:
             reader.ReadOuterXml();
             reader.MoveToContent();
@@ -131,6 +140,7 @@ namespace InnovatorAdmin.Connections
       writer.WriteElementString("Color", ToHex(this.Color));
       writer.WriteElementString("Type", this.Type.ToString());
       writer.WriteElementString("Authentication", this.Authentication.ToString());
+      writer.WriteElementString("Confirm", this.Confirm.ToString());
       writer.Flush();
     }
 
