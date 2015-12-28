@@ -13,6 +13,7 @@ namespace InnovatorAdmin
     public string Id { get; set; }
     public string Label { get; set; }
     public string Name { get; set; }
+    public string DataSource { get; set; }
     public List<string> Restrictions
     {
       get
@@ -67,6 +68,9 @@ namespace InnovatorAdmin
         case "list":
         case "filter list":
           this.Type = PropertyType.list;
+          break;
+        case "boolean":
+          this.Type = PropertyType.boolean;
           break;
         default:
           this.Type = PropertyType.unknown;

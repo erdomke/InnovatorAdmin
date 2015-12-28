@@ -14,5 +14,6 @@ namespace InnovatorAdmin
     int ItemCount { get; }
     TextDocument GetDocument();
     DataTable GetTable();
+    string Title { get; }
   }
 }

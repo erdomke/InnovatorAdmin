@@ -21,6 +21,12 @@ namespace InnovatorAdmin
     public string Title { get; set; }
     public string Version { get; set; }
     public Uri Website { get; set; }
+    public bool DependencySorted { get; set; }
+
+    public InstallScript()
+    {
+      this.DependencySorted = true;
+    }
 
     //public IEnumerable<IEnumerable<InstallItem>> GroupLines(Func<InstallItem, bool> predicate = null)
     //{

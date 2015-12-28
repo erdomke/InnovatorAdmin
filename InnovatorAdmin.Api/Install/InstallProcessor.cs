@@ -59,7 +59,11 @@ namespace InnovatorAdmin
     {
       _log.Length = 0;
       _script = script;
-      _lines = _script.Lines.Where(l => l.Script != null && l.Type != InstallType.Warning).ToList();
+      _lines = (_script.DependencySorted
+        ? _script.Lines
+        : ExportProcessor.SortByDependencies(script.Lines, _conn)
+          .Where(l => l.Type != InstallType.DependencyCheck)
+      ).Where(l => l.Script != null && l.Type != InstallType.Warning).ToList();
       _currLine = -1;
     }
 
@@ -91,6 +95,7 @@ namespace InnovatorAdmin
         XmlNode query;
         XmlElement newQuery;
         ItemType itemType;
+        string configId;
 
         ReportProgress(0, "Starting install.");
         _conn.Apply(@"<Item type='DatabaseUpgrade' action='merge' id='@0'>
@@ -119,7 +124,8 @@ namespace InnovatorAdmin
             try
             {
               // If the original item uses a where clause or is versionable or the target item is versionable
-              if (query.Attribute(XmlFlags.Attr_ConfigId) != null && query.Attribute("action") == "merge"
+
+              if ((query.Attribute("action") == "merge" || query.Attribute("action") == "edit") && TryGetConfigId(query, out configId) 
                  && (query.Attribute("where") != null || (_itemTypes.TryGetValue(query.Attribute("type").ToLowerInvariant(), out itemType)) && itemType.IsVersionable ))
               {
                 newQuery = query.Clone() as XmlElement;
@@ -131,13 +137,13 @@ namespace InnovatorAdmin
                 if (newQuery.Attribute("where") == null)
                 {
                   newQuery.RemoveAttribute("id");
-                  newQuery.SetAttribute("where", string.Format("[{0}].[config_id] = '{1}'", query.Attribute("type", "").Replace(' ', '_'), query.Attribute(XmlFlags.Attr_ConfigId)));
+                  newQuery.SetAttribute("where", string.Format("[{0}].[config_id] = '{1}'", query.Attribute("type", "").Replace(' ', '_'), configId));
                 }
 
                 // If the item exists, get the id for use in the relationships
                 // If the item doesn't exist, make sure the id = config_id for the add
                 items = _conn.Apply(newQuery).Items();
-                string sourceId = items.Any() ? items.First().Attribute("id").Value : query.Attribute(XmlFlags.Attr_ConfigId);
+                string sourceId = items.Any() ? items.First().Attribute("id").Value : configId;
                 newQuery = query.Clone() as XmlElement;
                 newQuery.SetAttribute("id", sourceId);
                 newQuery.RemoveAttribute("where");
@@ -254,6 +260,23 @@ namespace InnovatorAdmin
         _conn.Apply("<Item type=\"DatabaseUpgrade\" action=\"merge\" id=\"@0\"><upgrade_status>2</upgrade_status></Item>", upgradeId); //.AssertNoError();
         OnActionComplete(new ActionCompleteEventArgs() { Exception = ex });
       }
+    }
+
+    private bool TryGetConfigId(XmlNode query, out string configId)
+    {
+      configId = query.Attribute(XmlFlags.Attr_ConfigId);
+      if (configId != null) return true;
+      var where = query.Attribute("where");
+      if (string.IsNullOrWhiteSpace(where)) return false;
+      var type = query.Attribute("type");
+      if (string.IsNullOrWhiteSpace(type)) return false;
+      var prefix = string.Format("[{0}].[config_id] = '", type.Replace(' ', '_'));
+      if (where.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) && where.Length >= (prefix.Length + 33))
+      {
+        configId = prefix.Substring(prefix.Length, 32);
+        return true;
+      }
+      return false;
     }
 
     protected virtual void OnActionComplete(ActionCompleteEventArgs e)

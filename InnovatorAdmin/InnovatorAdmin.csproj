@@ -95,6 +95,14 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Mvp.Xml.2.3.0\lib\net20\Mvp.Xml.dll</HintPath>
     </Reference>
+    <Reference Include="Nancy, Version=1.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nancy.1.4.3\lib\net40\Nancy.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Nancy.Hosting.Self, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nancy.Hosting.Self.1.4.1\lib\net40\Nancy.Hosting.Self.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="NuGet.Squirrel, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\squirrel.windows.1.2.1\lib\Net45\NuGet.Squirrel.dll</HintPath>
       <Private>True</Private>
@@ -198,8 +206,14 @@
     </Compile>
     <Compile Include="Dialog\structs.cs" />
     <Compile Include="Dialog\Win32.cs" />
+    <Compile Include="Editor\AmlLinkElementGenerator.cs" />
+    <Compile Include="Editor\Aml\AmlSimpleEditorHelper.cs" />
+    <Compile Include="Editor\CompletionData\CustomCompletionData.cs" />
+    <Compile Include="Editor\Overload.cs" />
+    <Compile Include="Editor\RegexHelper.cs" />
     <Compile Include="Editor\Sql\SqlMetadata.cs" />
     <Compile Include="Editor\TextDocumentWriter.cs" />
+    <Compile Include="Editor\VisualLineLinkText.cs" />
     <Compile Include="GlobalProgress.cs" />
     <Compile Include="Ide\EditorTreeNode.cs" />
     <Compile Include="Ide\EditorWindow.cs">
@@ -379,10 +393,10 @@
     <Compile Include="Merge\IMergeOperation.cs" />
     <Compile Include="Merge\MergeFilePaths.cs" />
     <Compile Include="Merge\MergeStatus.cs" />
-    <Compile Include="MultiselectListBox.cs">
+    <Compile Include="Controls\MultiselectListBox.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MultiselectListBox.Designer.cs">
+    <Compile Include="Controls\MultiselectListBox.Designer.cs">
       <DependentUpon>MultiselectListBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Ide\QueryParameter.cs" />
@@ -444,6 +458,7 @@
     <Compile Include="Editor\XPathReader\xpathreader.cs" />
     <Compile Include="Editor\XPathReader\XPathReaderException.cs" />
     <Compile Include="Editor\XPathReader\xpathscanner.cs" />
+    <Compile Include="WebServerBootstrapper.cs" />
     <EmbeddedResource Include="ConnectionEditor.resx">
       <DependentUpon>ConnectionEditor.cs</DependentUpon>
     </EmbeddedResource>
@@ -514,7 +529,7 @@
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MultiselectListBox.resx">
+    <EmbeddedResource Include="Controls\MultiselectListBox.resx">
       <DependentUpon>MultiselectListBox.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -535,6 +550,7 @@
       <DependentUpon>ScriptWindow.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
+    <EmbeddedResource Include="resources\Regex.xshd" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ADiff\ADiff.Ui.csproj">

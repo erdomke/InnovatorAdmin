@@ -18,6 +18,8 @@ namespace InnovatorAdmin
       InitializeComponent();
 
       this.Icon = (this.Owner ?? Application.OpenForms[0]).Icon;
+      this.txtErrorDetails.Helper = new Editor.AmlSimpleEditorHelper();
+      this.txtQuery.Helper = new Editor.AmlSimpleEditorHelper();
     }
 
     protected override void OnLoad(EventArgs e)

@@ -7,6 +7,8 @@ namespace InnovatorAdmin.Editor
 {
   public class BasicCompletionData : IMutableCompletionData
   {
+    private object _content;
+
     public BasicCompletionData() { }
     public BasicCompletionData(string text)
     {
@@ -26,9 +28,10 @@ namespace InnovatorAdmin.Editor
     public virtual string Text { get; set; }
 
     // Use this property if you want to show a fancy UIElement in the list.
-    public object Content
+    public virtual object Content
     {
-      get { return this.Text; }
+      get { return _content ?? this.Text; }
+      set { _content = value; }
     }
 
     public object Description { get; set; }

@@ -1,30 +1,30 @@
-﻿using ICSharpCode.AvalonEdit.CodeCompletion;
+﻿using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
-using ICSharpCode.AvalonEdit.Folding;
+using ICSharpCode.AvalonEdit.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
-using System.Windows.Threading;
-using System.Xml;
-using System.IO;
-using ICSharpCode.AvalonEdit;
+using System.Windows.Media;
 
 namespace InnovatorAdmin.Editor
 {
   public class EditorControl : UserControl
   {
-    //private CompletionHelper _helper;
-    //private bool _isInitialized;
+    private System.Windows.Controls.ToolTip _toolTip;
     private ExtendedEditor _extEditor;
     private FindReplace _findReplace;
     private List<IDisposable> _itemsToDispose = new List<IDisposable>();
+    private bool _singleLine;
 
     public event EventHandler<RunRequestedEventArgs> RunRequested;
+    public event EventHandler<SelectionChangedEventArgs> SelectionChanged;
 
     public IEditorHelper Helper {
       get { return _extEditor.Helper; }
@@ -40,7 +40,38 @@ namespace InnovatorAdmin.Editor
         _extEditor.ResetFoldingManager();
       }
     }
-    //public string SoapAction { get; set; }
+    public bool ShowLineNumbers
+    {
+      get { return _extEditor.Editor.ShowLineNumbers; }
+      set
+      {
+        _extEditor.Editor.ShowLineNumbers = value;
+        if (!value)
+          _extEditor.Editor.TextArea.LeftMargins.Clear();
+      }
+    }
+    public bool ShowScrollbars
+    {
+      get { return _extEditor.Editor.HorizontalScrollBarVisibility != System.Windows.Controls.ScrollBarVisibility.Hidden; }
+      set
+      {
+        _extEditor.editor.HorizontalScrollBarVisibility = value
+          ? System.Windows.Controls.ScrollBarVisibility.Auto
+          : System.Windows.Controls.ScrollBarVisibility.Hidden;
+        _extEditor.editor.VerticalScrollBarVisibility = _extEditor.editor.HorizontalScrollBarVisibility;
+      }
+    }
+    public bool SingleLine
+    {
+      get { return _singleLine; }
+      set
+      {
+        _singleLine = value;
+        Editor.FontFamily = _singleLine
+          ? new System.Windows.Media.FontFamily("Helvetica")
+          : new System.Windows.Media.FontFamily("Consolas");
+      }
+    }
 
     public EditorControl()
     {
@@ -59,14 +90,111 @@ namespace InnovatorAdmin.Editor
       editor.Options.EnableRectangularSelection = true;
       editor.Options.IndentationSize = 2;
       editor.ShowLineNumbers = true;
+      editor.TextArea.PreviewKeyDown += TextArea_PreviewKeyDown;
       editor.TextArea.TextEntering += TextArea_TextEntering;
       editor.TextArea.TextEntered += TextArea_TextEntered;
       editor.TextArea.KeyDown += TextArea_KeyDown;
+      editor.TextArea.TextView.MouseHover += TextView_MouseHover;
+      editor.TextArea.TextView.MouseHoverStopped += TextView_MouseHoverStopped;
+      editor.TextArea.TextView.VisualLinesChanged += TextView_VisualLinesChanged;
+      editor.TextArea.SelectionChanged += TextArea_SelectionChanged;
+      editor.TextArea.Caret.PositionChanged += Caret_PositionChanged;
+      editor.TextChanged += editor_TextChanged;
+
       host.Child = _extEditor;
 
       editor.TextArea.IndentationStrategy = new ICSharpCode.AvalonEdit.Indentation.DefaultIndentationStrategy();
 
       this.Controls.Add(host);
+    }
+
+    void editor_TextChanged(object sender, EventArgs e)
+    {
+      OnTextChanged(e);
+    }
+
+    void TextArea_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+      if (e.Key == System.Windows.Input.Key.Enter && this.SingleLine && !IsControlDown(e.KeyboardDevice) && !IsAltDown(e.KeyboardDevice) && !IsShiftDown(e.KeyboardDevice))
+      {
+        OnRunRequested(new RunRequestedEventArgs(this.Text));
+        e.Handled = true;
+      }
+      else if (e.Key == System.Windows.Input.Key.Tab && this.SingleLine && !IsControlDown(e.KeyboardDevice) && !IsAltDown(e.KeyboardDevice))
+      {
+        e.Handled = true;
+        var frm = this.FindForm();
+        frm.SelectNextControl(this, !IsShiftDown(e.KeyboardDevice), true, true, true);
+      }
+    }
+
+    void Caret_PositionChanged(object sender, EventArgs e)
+    {
+      if (SelectionChanged != null)
+        SelectionChanged.Invoke(sender, new SelectionChangedEventArgs(_extEditor.Editor.TextArea));
+    }
+
+    void TextArea_SelectionChanged(object sender, EventArgs e)
+    {
+      if (SelectionChanged != null)
+        SelectionChanged.Invoke(sender, new SelectionChangedEventArgs(_extEditor.Editor.TextArea));
+    }
+
+    void TextView_VisualLinesChanged(object sender, EventArgs e)
+    {
+      if (_toolTip != null)
+      {
+        _toolTip.IsOpen = false;
+      }
+    }
+
+    void TextView_MouseHoverStopped(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+      if (_toolTip != null)
+      {
+        _toolTip.IsOpen = false;
+        e.Handled = true;
+      }
+    }
+
+    public new void Focus()
+    {
+      _extEditor.Editor.Focus();
+    }
+
+    void TextView_MouseHover(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+      var pos = _extEditor.Editor.GetPositionFromPoint(e.GetPosition(_extEditor.Editor));
+      if (pos.HasValue)
+      {
+        var visLine = _extEditor.Editor.TextArea.TextView.GetVisualLine(pos.Value.Line);
+        if (visLine != null)
+        {
+          var link = visLine.Elements.OfType<VisualLineLinkText>()
+            .FirstOrDefault(l => l.VisualColumn <= pos.Value.VisualColumn
+              && pos.Value.VisualColumn < (l.VisualColumn + l.VisualLength));
+          if (link != null && _toolTip == null)
+          {
+            _toolTip = new System.Windows.Controls.ToolTip();
+            _toolTip.Closed += _toolTip_Closed;
+            _toolTip.PlacementTarget = _extEditor.Editor;
+            _toolTip.Content = "CTRL+click to follow link";
+            _toolTip.IsOpen = true;
+            e.Handled = true;
+          }
+        }
+      }
+    }
+
+    void _toolTip_Closed(object sender, System.Windows.RoutedEventArgs e)
+    {
+      _toolTip.Closed -= _toolTip_Closed;
+      _toolTip = null;
+    }
+
+    public IList<VisualLineElementGenerator> ElementGenerators
+    {
+      get { return _extEditor.Editor.TextArea.TextView.ElementGenerators; }
     }
 
     public void CollapseAll()
@@ -112,14 +240,16 @@ namespace InnovatorAdmin.Editor
         OnRunRequested(new RunRequestedEventArgs(GetCurrentQuery()));
       }
       // Ctrl+Shift+Up
-      else if ((e.Key == System.Windows.Input.Key.Up && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
-        || (e.Key == System.Windows.Input.Key.Up && IsAltDown(e.KeyboardDevice)))
+      else if (!SingleLine
+        && ((e.Key == System.Windows.Input.Key.Up && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
+          || (e.Key == System.Windows.Input.Key.Up && IsAltDown(e.KeyboardDevice))))
       {
         MoveLineUp();
       }
       // Ctrl+Shift+Down
-      else if ((e.Key == System.Windows.Input.Key.Down && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
-        || (e.Key == System.Windows.Input.Key.Down && IsAltDown(e.KeyboardDevice)))
+      else if (!SingleLine
+        && ((e.Key == System.Windows.Input.Key.Down && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
+          || (e.Key == System.Windows.Input.Key.Down && IsAltDown(e.KeyboardDevice))))
       {
         MoveLineDown();
       }
@@ -139,16 +269,39 @@ namespace InnovatorAdmin.Editor
         TransformLowercase();
       }
       // Ctrl+F
-      else if (e.Key == System.Windows.Input.Key.F && IsControlDown(e.KeyboardDevice))
+      else if (e.Key == System.Windows.Input.Key.F && IsControlDown(e.KeyboardDevice) && !SingleLine)
       {
-        if (_findReplace == null)
-          _findReplace = new FindReplace(this);
-        if (_findReplace.IsDisposed)
-          _findReplace = new FindReplace(this);
-        _findReplace.Show(this);
-
+        Find();
+      }
+      // Ctrl+H
+      else if (e.Key == System.Windows.Input.Key.H && IsControlDown(e.KeyboardDevice) && !SingleLine)
+      {
+        Replace();
       }
 
+      OnKeyDown(new KeyEventArgs((System.Windows.Forms.Keys)System.Windows.Input.KeyInterop.VirtualKeyFromKey(e.Key)));
+    }
+
+    private FindReplace InitFindReplace()
+    {
+      if (_findReplace == null)
+        _findReplace = new FindReplace(this);
+      if (_findReplace.IsDisposed)
+        _findReplace = new FindReplace(this);
+      _findReplace.FindText = Editor.SelectedText;
+      _findReplace.Show(this);
+      return _findReplace;
+    }
+
+    public void Find()
+    {
+      InitFindReplace();
+    }
+
+    public void Replace()
+    {
+      var fd = InitFindReplace();
+      fd.DisplayReplace(true);
     }
 
     public void ReplaceSelectionSegments(Func<string, string> insert)
@@ -196,7 +349,7 @@ namespace InnovatorAdmin.Editor
       var end = Editor.TextArea.Selection.IsEmpty ? loc : Editor.TextArea.Selection.EndPosition.Location;
       var isRectangle = Editor.TextArea.Selection is RectangleSelection;
       var doc = Editor.Document;
-      
+
       if ((offset < 0 && start.Line > 1)
         || (offset > 0 && start.Line < doc.LineCount))
       {
@@ -300,7 +453,7 @@ namespace InnovatorAdmin.Editor
     public override string Text
     {
       get { return Editor.Text; }
-      set 
+      set
       {
         Editor.Document.Text = (value ?? string.Empty);
         Editor.CaretOffset = 0;
@@ -428,8 +581,8 @@ namespace InnovatorAdmin.Editor
       private System.Windows.Input.RoutedCommand _command;
       private System.Windows.IInputElement _input;
 
-      public ToolStripBinding(ToolStripItem item, 
-        System.Windows.Input.RoutedCommand command, 
+      public ToolStripBinding(ToolStripItem item,
+        System.Windows.Input.RoutedCommand command,
         System.Windows.IInputElement input)
       {
         _item = item;
@@ -448,7 +601,7 @@ namespace InnovatorAdmin.Editor
       {
         _command.Execute(null, _input);
       }
-      
+
       public void Dispose()
       {
         _item.Click -= Invoke;
@@ -468,6 +621,50 @@ namespace InnovatorAdmin.Editor
     public RunRequestedEventArgs(string query)
     {
       _query = query;
+    }
+  }
+
+  public class SelectionChangedEventArgs : EventArgs
+  {
+    private TextArea _area;
+
+    public int CaretLine
+    {
+      get { return _area.Caret.Line; }
+    }
+    public int CaretColumn
+    {
+      get { return _area.Caret.Column; }
+    }
+    public int SelectionLength
+    {
+      get { return _area.Selection.Length; }
+    }
+    public string GetText(int length = -1)
+    {
+      if (length < 0)
+        return _area.Selection.GetText();
+      if (!_area.Selection.Segments.Any())
+        return string.Empty;
+
+      var ch = new char[length];
+      var i = 0;
+      foreach (var segment in _area.Selection.Segments)
+      {
+        using (var reader = _area.Document.CreateReader(segment.StartOffset, segment.Length))
+        {
+          i += reader.Read(ch, i, length - i);
+          if (i >= length)
+            return new string(ch, 0, i);
+        }
+      }
+
+      return new string(ch, 0, i);
+    }
+
+    public SelectionChangedEventArgs(TextArea area)
+    {
+      _area = area;
     }
   }
 }

@@ -8,6 +8,8 @@ namespace InnovatorAdmin
 {
   public class InstallItem
   {
+    public const string ScriptType = "*Script";
+
     private IEnumerable<ItemReference> _dependencies;
     private XmlElement _elem;
     private ItemReference _itemRef;
@@ -142,7 +144,7 @@ namespace InnovatorAdmin
             if ((elem.Attributes["type"].Value != "Form" && elem.Attributes["type"].Value != "View")
               || elem.Attributes["action"].Value != "delete")
               result._dependencies = Enumerable.Repeat(result._itemRef, 1);
-            result._itemRef = new ItemReference("*Script", result._itemRef.ToString() + " " + Utils.GetChecksum(Encoding.UTF8.GetBytes(elem.OuterXml)))
+            result._itemRef = new ItemReference(ScriptType, result._itemRef.ToString() + " " + Utils.GetChecksum(Encoding.UTF8.GetBytes(elem.OuterXml)))
             {
               KeyedName = RenderAttributes(elem)
             };
@@ -153,7 +155,7 @@ namespace InnovatorAdmin
             {
               KeyedName = elem.Attributes["action"].Value
             }, 1);
-            result._itemRef = new ItemReference("*Script", result._itemRef.ToString() + " " + Utils.GetChecksum(Encoding.UTF8.GetBytes(elem.OuterXml)))
+            result._itemRef = new ItemReference(ScriptType, result._itemRef.ToString() + " " + Utils.GetChecksum(Encoding.UTF8.GetBytes(elem.OuterXml)))
             {
               KeyedName = RenderAttributes(elem)
             };
@@ -201,7 +203,7 @@ namespace InnovatorAdmin
       return result;
     }
 
-    private static string RenderAttributes(XmlElement elem)
+    internal static string RenderAttributes(XmlElement elem, string keyedName = null)
     {
       var builder = new StringBuilder();
 
@@ -222,7 +224,11 @@ namespace InnovatorAdmin
         {
           builder.Append(" ").Append(elem.Attribute("type")).Append(":");
         }
-        if (elem.HasAttribute("id"))
+        if (!string.IsNullOrEmpty(keyedName))
+        {
+          builder.Append(" ").Append(keyedName);
+        }
+        else if (elem.HasAttribute("id"))
         {
           builder.Append(" ").Append(elem.Attribute("id"));
         }
@@ -246,6 +252,19 @@ namespace InnovatorAdmin
       if (existingPaths.Contains(newPath))
         newPath = folder + "\\" + Utils.CleanFileName((line.Reference.KeyedName ?? "") + "_" + line.Reference.Unique) + extension;
       return newPath;
+    }
+    public static void CleanKeyedNames(this IEnumerable<InstallItem> lines)
+    {
+      var existing = lines.Where(l => l.Type == InstallType.Create)
+        .ToDictionary(l => l.Reference.Unique);
+      InstallItem item;
+      foreach (var line in lines.Where(l => l.Type == InstallType.Script))
+      {
+        if (existing.TryGetValue(line.InstalledId, out item))
+        {
+          line.Reference.KeyedName = InstallItem.RenderAttributes(line.Script, item.Reference.KeyedName);
+        }
+      }
     }
   }
 }

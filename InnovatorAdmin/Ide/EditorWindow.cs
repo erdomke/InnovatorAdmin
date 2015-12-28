@@ -11,6 +11,8 @@ using System.Diagnostics;
 using Innovator.Client;
 using InnovatorAdmin.Controls;
 using System.Globalization;
+using System.Threading.Tasks;
+using Nancy;
 
 namespace InnovatorAdmin
 {
@@ -31,6 +33,8 @@ namespace InnovatorAdmin
     private int _timeout = Innovator.Client.Connection.DefaultHttpService.DefaultTimeout;
     private Timer _clock = new Timer();
     private DateTime _start = DateTime.UtcNow;
+    private Editor.AmlLinkElementGenerator _linkGenerator;
+    private string _uid;
 
     public bool AllowRun
     {
@@ -45,7 +49,7 @@ namespace InnovatorAdmin
     public IEditorProxy Proxy
     {
       get { return _proxy; }
-      set { SetConnection(value); }
+      set { SetProxy(value); }
     }
     public string SoapAction
     {
@@ -57,12 +61,14 @@ namespace InnovatorAdmin
         btnSoapAction.Text = value + " ▼";
       }
     }
+    public string Uid { get { return _uid; } }
 
     public EditorWindow()
     {
       InitializeComponent();
 
-      inputEditor.Helper = new Editor.AmlEditorHelper();
+      _uid = GetUid();
+
       var lastQuery = SnippetManager.Instance.LastQuery;
       inputEditor.Text = lastQuery.Text;
       inputEditor.CleanUndoStack();
@@ -89,6 +95,53 @@ namespace InnovatorAdmin
       inputEditor.BindToolStripItem(mniPaste, System.Windows.Input.ApplicationCommands.Paste);
       inputEditor.BindToolStripItem(mniUndo, System.Windows.Input.ApplicationCommands.Undo);
       inputEditor.BindToolStripItem(mniRedo, System.Windows.Input.ApplicationCommands.Redo);
+      inputEditor.SelectionChanged += inputEditor_SelectionChanged;
+
+      _linkGenerator = new Editor.AmlLinkElementGenerator();
+      _linkGenerator.AmlLinkClicked += _linkGenerator_AmlLinkClicked;
+
+      tbcOutputView.SelectedTab = pgTools;
+    }
+
+    void inputEditor_SelectionChanged(object sender, Editor.SelectionChangedEventArgs e)
+    {
+      try
+      {
+        if (e.SelectionLength < 1)
+        {
+          lblSelection.Text = string.Format("Ln: {0}  Col: {1}  Sel: {2} ['' = 0x0 = 0]"
+            , e.CaretLine, e.CaretColumn, e.SelectionLength);
+        }
+        else
+        {
+          var text = e.GetText(1);
+          lblSelection.Text = string.Format("Ln: {0}  Col: {1}  Sel: {2} ['{3}' = 0x{4:x} = {4}]"
+            , e.CaretLine, e.CaretColumn, e.SelectionLength, text, (int)text[0]);
+        }
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+
+    void _linkGenerator_AmlLinkClicked(object sender, Editor.AmlLinkClickedEventArgs e)
+    {
+      try
+      {
+        var window = NewWindow();
+        var query = "<Item type='" + e.Type + "' action='get' id='" + e.Id + "' levels='1' />";
+        window.inputEditor.Text = query;
+        window.SoapAction = "ApplyItem";
+        window.Submit(query);
+        window.Show();
+        Task.Delay(200).ContinueWith(_ => window.Activate(), TaskScheduler.FromCurrentSynchronizationContext());
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
     }
 
     void _clock_Tick(object sender, EventArgs e)
@@ -102,7 +155,7 @@ namespace InnovatorAdmin
       exploreButton.Visible = true;
       mniLocale.Visible = true;
       mniTimeZone.Visible = true;
-      SetConnection(new ArasEditorProxy(conn, name ?? conn.Database));
+      SetProxy(new ArasEditorProxy(conn, name ?? conn.Database));
       _disposeProxy = false;
     }
     public void SetConnection(ConnectionData conn)
@@ -114,7 +167,6 @@ namespace InnovatorAdmin
 
         try
         {
-
           btnEditConnections.Text = "Connecting... ▼";
           exploreButton.Visible = conn.Type == ConnectionType.Innovator;
           mniLocale.Visible = exploreButton.Visible;
@@ -123,7 +175,7 @@ namespace InnovatorAdmin
             .UiPromise(this)
             .Done(proxy =>
             {
-              SetConnection(proxy);
+              SetProxy(proxy);
               _disposeProxy = true;
             })
             .Fail(ex =>
@@ -156,7 +208,7 @@ namespace InnovatorAdmin
       }
     }
 
-    public void SetConnection(IEditorProxy proxy)
+    public void SetProxy(IEditorProxy proxy)
     {
       DisposeProxy();
 
@@ -199,7 +251,13 @@ namespace InnovatorAdmin
     private void InitializeUi(ArasEditorProxy proxy)
     {
       if (proxy == null || proxy.Connection.AmlContext == null)
+      {
+        outputEditor.ElementGenerators.Remove(_linkGenerator);
         return;
+      }
+
+      if (!outputEditor.ElementGenerators.Contains(_linkGenerator))
+        outputEditor.ElementGenerators.Add(_linkGenerator);
 
       var local = proxy.Connection.AmlContext.LocalizationContext;
       var remote = proxy.Connection as IRemoteConnection;
@@ -260,6 +318,8 @@ namespace InnovatorAdmin
         {
           this.Size = bounds.Size;
         }
+
+        inputEditor.Focus();
       }
       catch (Exception ex)
       {
@@ -374,7 +434,7 @@ namespace InnovatorAdmin
     private EditorWindow NewWindow()
     {
       var window = new EditorWindow();
-      window.SetConnection(_proxy.Clone());
+      window.SetProxy(_proxy.Clone());
       window._disposeProxy = false;
       return window;
     }
@@ -442,6 +502,7 @@ namespace InnovatorAdmin
         };
         Properties.Settings.Default.LastConnection = _proxy.ConnData.ConnectionName;
         Properties.Settings.Default.Save();
+        Properties.Settings.Default.Reload();
 
         var st = Stopwatch.StartNew();
         _currentQuery = _proxy.Process(cmd, true)
@@ -473,6 +534,8 @@ namespace InnovatorAdmin
 
               if (_autoTabSelect) tbcOutputView.SelectedTab = result.PreferTable ? pgTableOutput : pgTextOutput;
               EnsureDataTable();
+
+              this.Text = result.Title + " [AmlStudio]";
             }
             catch (Exception ex)
             {
@@ -921,6 +984,7 @@ namespace InnovatorAdmin
       {
         Properties.Settings.Default.EditorWindow_Bounds = this.DesktopBounds;
         Properties.Settings.Default.Save();
+        Properties.Settings.Default.Reload();
       }
     }
 
@@ -1034,7 +1098,27 @@ namespace InnovatorAdmin
     {
       try
       {
-        inputEditor.ReplaceSelectionSegments(t => t.Replace("<", "&lt;").Replace(">", "&gt;"));
+        inputEditor.ReplaceSelectionSegments(t => {
+          try
+          {
+            var sb = new System.Text.StringBuilder();
+            var settings = new XmlWriterSettings();
+            settings.Indent = false;
+            settings.OmitXmlDeclaration = true;
+            using (var strWriter = new StringWriter(sb))
+            using (var writer = XmlWriter.Create(strWriter, settings))
+            {
+              writer.WriteStartElement("a");
+              writer.WriteValue(t);
+              writer.WriteEndElement();
+            }
+            return sb.ToString(3, sb.Length - 7);
+          }
+          catch (XmlException)
+          {
+            return t.Replace("<", "&lt;").Replace(">", "&gt;").Replace("&", "&amp;");
+          }
+        });
       }
       catch (Exception ex)
       {
@@ -1046,7 +1130,28 @@ namespace InnovatorAdmin
     {
       try
       {
-        inputEditor.ReplaceSelectionSegments(t => t.Replace("&lt;", "<").Replace("&gt;", ">"));
+        inputEditor.ReplaceSelectionSegments(t => {
+          try
+          {
+            var xml = "<a>" + t + "</a>";
+            using (var strReader = new StringReader(xml))
+            using (var reader = XmlReader.Create(strReader))
+            {
+              while (reader.Read())
+              {
+                if (reader.NodeType == XmlNodeType.Text)
+                {
+                  return reader.Value;
+                }
+              }
+            }
+          }
+          catch (XmlException)
+          {
+            return t.Replace("&lt;", "<").Replace("&gt;", ">").Replace("&amp;", "&");
+          }
+          return t;
+        });
       }
       catch (Exception ex)
       {
@@ -1107,6 +1212,7 @@ namespace InnovatorAdmin
         UpdatePanelCollapsed();
         Properties.Settings.Default.EditorWindowPanelCollapsed = _panelCollapsed;
         Properties.Settings.Default.Save();
+        Properties.Settings.Default.Reload();
       }
       catch (Exception ex)
       {
@@ -1150,7 +1256,48 @@ namespace InnovatorAdmin
       }
     }
 
+    private string GetUid()
+    {
+      return Convert.ToBase64String(Guid.NewGuid().ToByteArray()).Replace('+', '-').Replace('/', '_');
+    }
 
+    private void btnInstall_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        var main = new Main();
+        main.GoToStep(new InstallSource());
+        main.Show();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void btnCreate_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        var main = new Main();
+        var connSelect = new ConnectionSelection();
+        connSelect.MultiSelect = false;
+        connSelect.GoNextAction = () => main.GoToStep(new ExportSelect());
+        main.GoToStep(connSelect);
+        main.Show();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    //public Response GetResponse(NancyContext context, string rootPath)
+    //{
+    //  if (context.Request.Method != "GET") return null;
+
+
+    //}
 
   }
 }

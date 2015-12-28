@@ -29,8 +29,17 @@
     private void InitializeComponent()
     {
       this.components = new System.ComponentModel.Container();
+      ICSharpCode.AvalonEdit.Document.TextDocument textDocument1 = new ICSharpCode.AvalonEdit.Document.TextDocument();
+      System.ComponentModel.Design.ServiceContainer serviceContainer1 = new System.ComponentModel.Design.ServiceContainer();
+      ICSharpCode.AvalonEdit.Document.UndoStack undoStack1 = new ICSharpCode.AvalonEdit.Document.UndoStack();
+      ICSharpCode.AvalonEdit.Document.TextDocument textDocument2 = new ICSharpCode.AvalonEdit.Document.TextDocument();
+      System.ComponentModel.Design.ServiceContainer serviceContainer2 = new System.ComponentModel.Design.ServiceContainer();
+      ICSharpCode.AvalonEdit.Document.UndoStack undoStack2 = new ICSharpCode.AvalonEdit.Document.UndoStack();
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EditorWindow));
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+      this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
+      this.lblItems = new System.Windows.Forms.Label();
+      this.lblSelection = new System.Windows.Forms.Label();
       this.splitMain = new System.Windows.Forms.SplitContainer();
       this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
       this.treeItems = new InnovatorAdmin.TreeListView();
@@ -54,9 +63,15 @@
       this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
       this.mniAcceptChanges = new System.Windows.Forms.ToolStripMenuItem();
       this.mniResetChanges = new System.Windows.Forms.ToolStripMenuItem();
+      this.pgHtml = new System.Windows.Forms.TabPage();
+      this.pgTools = new System.Windows.Forms.TabPage();
+      this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
+      this.picHome = new System.Windows.Forms.PictureBox();
+      this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+      this.btnInstall = new InnovatorAdmin.Controls.FlatButton();
+      this.btnCreate = new InnovatorAdmin.Controls.FlatButton();
       this.btnOk = new InnovatorAdmin.Controls.FlatButton();
       this.btnCancel = new InnovatorAdmin.Controls.FlatButton();
-      this.lblItems = new System.Windows.Forms.Label();
       this.lblConnColor = new System.Windows.Forms.Label();
       this.menuStrip = new System.Windows.Forms.ToolStrip();
       this.lblConnection = new System.Windows.Forms.ToolStripLabel();
@@ -105,6 +120,7 @@
       this.mniRunCurrent = new System.Windows.Forms.ToolStripMenuItem();
       this.mniRunCurrentNewWindow = new System.Windows.Forms.ToolStripMenuItem();
       this.tableLayoutPanel1.SuspendLayout();
+      this.tableLayoutPanel5.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
       this.splitMain.Panel1.SuspendLayout();
       this.splitMain.Panel2.SuspendLayout();
@@ -122,6 +138,10 @@
       this.pgTableOutput.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.dgvItems)).BeginInit();
       this.conTable.SuspendLayout();
+      this.pgTools.SuspendLayout();
+      this.tableLayoutPanel6.SuspendLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.picHome)).BeginInit();
+      this.flowLayoutPanel1.SuspendLayout();
       this.menuStrip.SuspendLayout();
       this.SuspendLayout();
       // 
@@ -132,10 +152,10 @@
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel5, 0, 2);
       this.tableLayoutPanel1.Controls.Add(this.splitMain, 0, 1);
       this.tableLayoutPanel1.Controls.Add(this.btnOk, 1, 2);
       this.tableLayoutPanel1.Controls.Add(this.btnCancel, 2, 2);
-      this.tableLayoutPanel1.Controls.Add(this.lblItems, 0, 2);
       this.tableLayoutPanel1.Controls.Add(this.lblConnColor, 0, 0);
       this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 25);
@@ -146,6 +166,43 @@
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel1.Size = new System.Drawing.Size(701, 490);
       this.tableLayoutPanel1.TabIndex = 0;
+      // 
+      // tableLayoutPanel5
+      // 
+      this.tableLayoutPanel5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+      this.tableLayoutPanel5.AutoSize = true;
+      this.tableLayoutPanel5.ColumnCount = 2;
+      this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.tableLayoutPanel5.Controls.Add(this.lblItems, 0, 0);
+      this.tableLayoutPanel5.Controls.Add(this.lblSelection, 1, 0);
+      this.tableLayoutPanel5.Location = new System.Drawing.Point(0, 460);
+      this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(0);
+      this.tableLayoutPanel5.Name = "tableLayoutPanel5";
+      this.tableLayoutPanel5.RowCount = 1;
+      this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.tableLayoutPanel5.Size = new System.Drawing.Size(539, 25);
+      this.tableLayoutPanel5.TabIndex = 0;
+      // 
+      // lblItems
+      // 
+      this.lblItems.Anchor = System.Windows.Forms.AnchorStyles.Left;
+      this.lblItems.AutoEllipsis = true;
+      this.lblItems.AutoSize = true;
+      this.lblItems.Location = new System.Drawing.Point(3, 3);
+      this.lblItems.Margin = new System.Windows.Forms.Padding(3, 3, 3, 9);
+      this.lblItems.Name = "lblItems";
+      this.lblItems.Size = new System.Drawing.Size(0, 13);
+      this.lblItems.TabIndex = 3;
+      // 
+      // lblSelection
+      // 
+      this.lblSelection.Anchor = System.Windows.Forms.AnchorStyles.Left;
+      this.lblSelection.AutoSize = true;
+      this.lblSelection.Location = new System.Drawing.Point(272, 6);
+      this.lblSelection.Name = "lblSelection";
+      this.lblSelection.Size = new System.Drawing.Size(0, 13);
+      this.lblSelection.TabIndex = 4;
       // 
       // splitMain
       // 
@@ -281,6 +338,12 @@
       // 
       this.tableLayoutPanel3.SetColumnSpan(this.inputEditor, 2);
       this.inputEditor.Dock = System.Windows.Forms.DockStyle.Fill;
+      textDocument1.FileName = null;
+      textDocument1.ServiceProvider = serviceContainer1;
+      textDocument1.Text = "";
+      undoStack1.SizeLimit = 2147483647;
+      textDocument1.UndoStack = undoStack1;
+      this.inputEditor.Document = textDocument1;
       this.inputEditor.Helper = null;
       this.inputEditor.Location = new System.Drawing.Point(3, 3);
       this.inputEditor.Name = "inputEditor";
@@ -314,6 +377,8 @@
       this.tableLayoutPanel2.SetColumnSpan(this.tbcOutputView, 3);
       this.tbcOutputView.Controls.Add(this.pgTextOutput);
       this.tbcOutputView.Controls.Add(this.pgTableOutput);
+      this.tbcOutputView.Controls.Add(this.pgHtml);
+      this.tbcOutputView.Controls.Add(this.pgTools);
       this.tbcOutputView.Location = new System.Drawing.Point(0, 0);
       this.tbcOutputView.Margin = new System.Windows.Forms.Padding(0);
       this.tbcOutputView.Name = "tbcOutputView";
@@ -336,6 +401,12 @@
       // outputEditor
       // 
       this.outputEditor.Dock = System.Windows.Forms.DockStyle.Fill;
+      textDocument2.FileName = null;
+      textDocument2.ServiceProvider = serviceContainer2;
+      textDocument2.Text = "";
+      undoStack2.SizeLimit = 2147483647;
+      textDocument2.UndoStack = undoStack2;
+      this.outputEditor.Document = textDocument2;
       this.outputEditor.Helper = null;
       this.outputEditor.Location = new System.Drawing.Point(0, 0);
       this.outputEditor.Name = "outputEditor";
@@ -426,6 +497,115 @@
       this.mniResetChanges.Text = "Reset Changes";
       this.mniResetChanges.Click += new System.EventHandler(this.mniResetChanges_Click);
       // 
+      // pgHtml
+      // 
+      this.pgHtml.Location = new System.Drawing.Point(4, 22);
+      this.pgHtml.Name = "pgHtml";
+      this.pgHtml.Padding = new System.Windows.Forms.Padding(3);
+      this.pgHtml.Size = new System.Drawing.Size(463, 277);
+      this.pgHtml.TabIndex = 2;
+      this.pgHtml.Text = "HTML";
+      this.pgHtml.UseVisualStyleBackColor = true;
+      // 
+      // pgTools
+      // 
+      this.pgTools.Controls.Add(this.tableLayoutPanel6);
+      this.pgTools.Location = new System.Drawing.Point(4, 22);
+      this.pgTools.Name = "pgTools";
+      this.pgTools.Padding = new System.Windows.Forms.Padding(3);
+      this.pgTools.Size = new System.Drawing.Size(463, 277);
+      this.pgTools.TabIndex = 3;
+      this.pgTools.Text = "Tools";
+      this.pgTools.UseVisualStyleBackColor = true;
+      // 
+      // tableLayoutPanel6
+      // 
+      this.tableLayoutPanel6.ColumnCount = 1;
+      this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.tableLayoutPanel6.Controls.Add(this.picHome, 0, 0);
+      this.tableLayoutPanel6.Controls.Add(this.flowLayoutPanel1, 0, 1);
+      this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 3);
+      this.tableLayoutPanel6.Name = "tableLayoutPanel6";
+      this.tableLayoutPanel6.RowCount = 2;
+      this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.tableLayoutPanel6.Size = new System.Drawing.Size(457, 271);
+      this.tableLayoutPanel6.TabIndex = 5;
+      // 
+      // picHome
+      // 
+      this.picHome.Cursor = System.Windows.Forms.Cursors.Hand;
+      this.picHome.Image = global::InnovatorAdmin.Properties.Resources.Header;
+      this.picHome.Location = new System.Drawing.Point(8, 12);
+      this.picHome.Margin = new System.Windows.Forms.Padding(8, 12, 3, 3);
+      this.picHome.Name = "picHome";
+      this.picHome.Size = new System.Drawing.Size(348, 34);
+      this.picHome.TabIndex = 6;
+      this.picHome.TabStop = false;
+      // 
+      // flowLayoutPanel1
+      // 
+      this.flowLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.flowLayoutPanel1.Controls.Add(this.btnInstall);
+      this.flowLayoutPanel1.Controls.Add(this.btnCreate);
+      this.flowLayoutPanel1.Location = new System.Drawing.Point(15, 64);
+      this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(15);
+      this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+      this.flowLayoutPanel1.Size = new System.Drawing.Size(427, 192);
+      this.flowLayoutPanel1.TabIndex = 4;
+      // 
+      // btnInstall
+      // 
+      this.btnInstall.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.btnInstall.AutoSize = true;
+      this.btnInstall.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnInstall.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnInstall.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnInstall.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnInstall.ForeColor = System.Drawing.Color.Black;
+      this.btnInstall.Image = global::InnovatorAdmin.Properties.Resources.install32;
+      this.btnInstall.Location = new System.Drawing.Point(3, 3);
+      this.btnInstall.MinimumSize = new System.Drawing.Size(120, 40);
+      this.btnInstall.Name = "btnInstall";
+      this.btnInstall.Orientation = System.Windows.Forms.Orientation.Horizontal;
+      this.btnInstall.Padding = new System.Windows.Forms.Padding(2);
+      this.btnInstall.Size = new System.Drawing.Size(120, 61);
+      this.btnInstall.TabIndex = 2;
+      this.btnInstall.Text = "Install Package";
+      this.btnInstall.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+      this.btnInstall.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnInstall.UseVisualStyleBackColor = true;
+      this.btnInstall.Click += new System.EventHandler(this.btnInstall_Click);
+      // 
+      // btnCreate
+      // 
+      this.btnCreate.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.btnCreate.AutoSize = true;
+      this.btnCreate.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnCreate.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnCreate.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnCreate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnCreate.ForeColor = System.Drawing.Color.Black;
+      this.btnCreate.Image = global::InnovatorAdmin.Properties.Resources.innPkg32;
+      this.btnCreate.Location = new System.Drawing.Point(129, 3);
+      this.btnCreate.MinimumSize = new System.Drawing.Size(120, 40);
+      this.btnCreate.Name = "btnCreate";
+      this.btnCreate.Orientation = System.Windows.Forms.Orientation.Horizontal;
+      this.btnCreate.Padding = new System.Windows.Forms.Padding(2);
+      this.btnCreate.Size = new System.Drawing.Size(120, 61);
+      this.btnCreate.TabIndex = 3;
+      this.btnCreate.Text = "Create Package";
+      this.btnCreate.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+      this.btnCreate.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnCreate.UseVisualStyleBackColor = true;
+      this.btnCreate.Click += new System.EventHandler(this.btnCreate_Click);
+      // 
       // btnOk
       // 
       this.btnOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -467,17 +647,6 @@
       this.btnCancel.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnCancel.UseVisualStyleBackColor = true;
       this.btnCancel.Visible = false;
-      // 
-      // lblItems
-      // 
-      this.lblItems.Anchor = System.Windows.Forms.AnchorStyles.Left;
-      this.lblItems.AutoEllipsis = true;
-      this.lblItems.AutoSize = true;
-      this.lblItems.Location = new System.Drawing.Point(3, 463);
-      this.lblItems.Margin = new System.Windows.Forms.Padding(3, 3, 3, 9);
-      this.lblItems.Name = "lblItems";
-      this.lblItems.Size = new System.Drawing.Size(0, 13);
-      this.lblItems.TabIndex = 3;
       // 
       // lblConnColor
       // 
@@ -896,6 +1065,8 @@
       this.Text = "AmlStudio";
       this.tableLayoutPanel1.ResumeLayout(false);
       this.tableLayoutPanel1.PerformLayout();
+      this.tableLayoutPanel5.ResumeLayout(false);
+      this.tableLayoutPanel5.PerformLayout();
       this.splitMain.Panel1.ResumeLayout(false);
       this.splitMain.Panel2.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this.splitMain)).EndInit();
@@ -914,6 +1085,11 @@
       this.pgTableOutput.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this.dgvItems)).EndInit();
       this.conTable.ResumeLayout(false);
+      this.pgTools.ResumeLayout(false);
+      this.tableLayoutPanel6.ResumeLayout(false);
+      ((System.ComponentModel.ISupportInitialize)(this.picHome)).EndInit();
+      this.flowLayoutPanel1.ResumeLayout(false);
+      this.flowLayoutPanel1.PerformLayout();
       this.menuStrip.ResumeLayout(false);
       this.menuStrip.PerformLayout();
       this.ResumeLayout(false);
@@ -997,5 +1173,14 @@
     private System.Windows.Forms.ToolStripMenuItem mniSingleToDoubleQuotes;
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
     private System.Windows.Forms.ToolStripMenuItem mniMd5Encode;
+    private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
+    private System.Windows.Forms.Label lblSelection;
+    private System.Windows.Forms.TabPage pgHtml;
+    private System.Windows.Forms.TabPage pgTools;
+    private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
+    private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+    private Controls.FlatButton btnInstall;
+    private Controls.FlatButton btnCreate;
+    private System.Windows.Forms.PictureBox picHome;
   }
 }

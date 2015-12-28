@@ -170,7 +170,12 @@ namespace InnovatorAdmin
 
     public static IPromise<T> UiPromise<T>(this IPromise<T> promise, Control ctrl)
     {
-      return promise.WithInvoker((d, a) => ctrl.Invoke(d, a));
+      return promise.WithInvoker((d, a) => {
+        if (ctrl.InvokeRequired)
+          ctrl.Invoke(d, a);
+        else
+          d.DynamicInvoke(a);
+      });
     }
 
     public static bool CellIsNull(this DataRow row, DataColumn col)

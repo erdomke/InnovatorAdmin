@@ -97,7 +97,7 @@ namespace InnovatorAdmin
       _list.Dock = DockStyle.Fill;
       _checked.Dock = DockStyle.Fill;
 
-      _checked.CheckOnClick = true;
+      //_checked.CheckOnClick = true;
 
       this.Controls.Add(_list);
       _list.SelectedIndexChanged += _list_SelectedIndexChanged;

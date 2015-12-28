@@ -43,6 +43,16 @@ namespace InnovatorAdmin.Editor
       XPath
     }
 
+    public string FindText
+    {
+      get { return txtFind.Text; }
+      set
+      {
+        txtFind.Text = value;
+        UpdateSearch();
+      }
+    }
+
     public FindReplace(EditorControl editor)
     {
       InitializeComponent();
@@ -53,7 +63,13 @@ namespace InnovatorAdmin.Editor
       _positionParent = editor;
       _renderer = new SearchResultBackgroundRenderer();
 
+      txtFind.SingleLine = true;
       txtFind.TextChanged += txtFind_TextChanged;
+      txtFind.RunRequested += txtFind_RunRequested;
+      txtFind.KeyDown += textbox_KeyDown;
+      txtReplace.SingleLine = true;
+      txtReplace.RunRequested += txtReplace_RunRequested;
+      txtReplace.KeyDown += textbox_KeyDown;
       DisplayReplace(false);
 
       this.StartPosition = FormStartPosition.Manual;
@@ -78,9 +94,27 @@ namespace InnovatorAdmin.Editor
       this.DesktopLocation = new Point(newX, newY);
     }
 
+    void textbox_KeyDown(object sender, KeyEventArgs e)
+    {
+      if (e.KeyCode == Keys.Escape)
+      {
+        this.Close();
+      }
+    }
+
+    void txtReplace_RunRequested(object sender, RunRequestedEventArgs e)
+    {
+      Replace();
+    }
+
     void txtFind_TextChanged(object sender, EventArgs e)
     {
       UpdateSearch();
+    }
+
+    void txtFind_RunRequested(object sender, RunRequestedEventArgs e)
+    {
+      FindNext();
     }
 
     protected override void OnActivated(EventArgs e)
@@ -125,7 +159,14 @@ namespace InnovatorAdmin.Editor
 
     private void btnFind_Click(object sender, EventArgs e)
     {
-      FindNext();
+      try
+      {
+        FindNext();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
     }
 
     private void FindNext()
@@ -141,6 +182,41 @@ namespace InnovatorAdmin.Editor
       }
     }
 
+    public void Replace()
+    {
+      var searchResult = _renderer.CurrentResults.FindFirstSegmentWithStartAfter(_editor.TextArea.Caret.Offset) as ISearchResult;
+      if (searchResult == null)
+      {
+        searchResult = _renderer.CurrentResults.FirstSegment as ISearchResult;
+      }
+      if (searchResult != null)
+      {
+        var newText = searchResult.ReplaceWith(txtReplace.Text);
+        _currentDoc.Replace(searchResult, newText);
+        this.SelectResult(new TextSegment() { StartOffset = searchResult.Offset, Length = newText.Length });
+        _renderer.CurrentResults.Remove((TextSegment)searchResult);
+      }
+    }
+
+    public void ReplaceAll()
+    {
+      using (_currentDoc.RunUpdate())
+      {
+        var offset = 0;
+        string newText;
+        foreach (var result in _renderer.CurrentResults.OfType<ISearchResult>().ToList())
+        {
+          newText = result.ReplaceWith(txtReplace.Text);
+          _currentDoc.Replace(result.Offset + offset, result.Length, newText);
+          offset += newText.Length - result.Length;
+        }
+      }
+      _renderer.CurrentResults.Clear();
+      _editor.SelectionLength = 0;
+    }
+
+
+
     private void UpdateSearch()
     {
       var mode = _mode;
@@ -152,26 +228,34 @@ namespace InnovatorAdmin.Editor
         searchText = StringHelper.StringFromCSharpLiteral(searchText);
       }
 
-      if (mode == SearchMode.XPath)
+      try
       {
-        this._strategy = new XPathSearchStrategy(searchText);
+        if (mode == SearchMode.XPath)
+        {
+          this._strategy = new XPathSearchStrategy(searchText);
+        }
+        else
+        {
+          this._strategy = SearchStrategyFactory.Create(searchText ?? ""
+            , !chkCaseSensitive.Checked, false
+            , (ICSharpCode.AvalonEdit.Search.SearchMode)mode);
+        }
+        this.DoSearch(true);
       }
-      else
+      catch (SearchPatternException)
       {
-        this._strategy = SearchStrategyFactory.Create(searchText ?? ""
-          , !chkCaseSensitive.Checked, false
-          , (ICSharpCode.AvalonEdit.Search.SearchMode)mode);
+        // Eat any regex parse errors
       }
-      this.DoSearch(true);
     }
 
-    private void DisplayReplace(bool visible)
+    public void DisplayReplace(bool visible)
     {
       txtReplace.Visible = visible;
       btnReplaceAll.Visible = visible;
       btnReplaceNext.Visible = visible;
       this.Height = visible ? 120 : 90;
       btnShowReplace.Text = visible ? "▲" : "▼";
+      if (visible) txtReplace.Focus();
     }
 
     private void DoSearch(bool changeSelection)
@@ -210,10 +294,10 @@ namespace InnovatorAdmin.Editor
       _editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
     }
 
-    private void SelectResult(TextSegment result)
+    private void SelectResult(ISegment result)
     {
-      _editor.TextArea.Caret.Offset = result.StartOffset;
-      _editor.TextArea.Selection = Selection.Create(_editor.TextArea, result.StartOffset, result.EndOffset);
+      _editor.TextArea.Caret.Offset = result.Offset;
+      _editor.TextArea.Selection = Selection.Create(_editor.TextArea, result.Offset, result.EndOffset);
       _editor.TextArea.Caret.BringCaretToView();
       _editor.TextArea.Caret.Show();
     }
@@ -249,6 +333,7 @@ namespace InnovatorAdmin.Editor
           chkExtended.Checked = false;
           chkRegExp.Checked = false;
           chkXPath.Checked = false;
+          txtFind.Helper = null;
           switch (mode)
           {
             case SearchMode.Extended:
@@ -259,6 +344,8 @@ namespace InnovatorAdmin.Editor
               break;
             case SearchMode.RegEx:
               chkRegExp.Checked = true;
+              txtFind.Helper = new RegexHelper();
+              txtReplace.Helper = new RegexHelper();
               break;
             case SearchMode.XPath:
               chkXPath.Checked = true;
@@ -273,16 +360,6 @@ namespace InnovatorAdmin.Editor
         }
       }
 
-    }
-
-    private void txtFind_KeyDown(object sender, KeyEventArgs e)
-    {
-      switch (e.KeyCode)
-      {
-        case Keys.Enter:
-          FindNext();
-          break;
-      }
     }
 
     private void textArea_Document_TextChanged(object sender, EventArgs e)
@@ -653,7 +730,14 @@ namespace InnovatorAdmin.Editor
 
     private void btnShowReplace_Click(object sender, EventArgs e)
     {
-      DisplayReplace(!txtReplace.Visible);
+      try
+      {
+        DisplayReplace(!txtReplace.Visible);
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
     }
 
 
@@ -675,7 +759,33 @@ namespace InnovatorAdmin.Editor
         this.DesktopLocation.X - relative.X, this.DesktopLocation.Y - relative.Y
       );
       Properties.Settings.Default.Save();
+      Properties.Settings.Default.Reload();
     }
+
+    private void btnReplaceNext_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        Replace();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void btnReplaceAll_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        ReplaceAll();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
 
   }
 }

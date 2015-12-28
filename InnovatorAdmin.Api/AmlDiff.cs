@@ -39,8 +39,7 @@ namespace InnovatorAdmin
         XElement newItem;
         foreach (var item in items)
         {
-          newItem = new XElement(item.Name, item.Attributes()
-            .Where(a => a.Name == "id" || a.Name == "where" || a.Name == "idlist" || a.Name == "type"));
+          newItem = new XElement(item.Name, item.Attributes().Where(IsAttributeToCopy));
           newItem.SetAttributeValue("action", "delete");
         }
         return result;
@@ -110,8 +109,10 @@ namespace InnovatorAdmin
       var xText = x.Nodes().OfType<XText>().FirstOrDefault();
       var yText = y.Nodes().OfType<XText>().FirstOrDefault();
 
-      if (xText == null || yText == null)
+      if (xText == null && yText == null)
         return false;
+      if (xText == null || yText == null)
+        return true;
       return !string.Equals(xText.Value, yText.Value);
     }
 
@@ -131,8 +132,7 @@ namespace InnovatorAdmin
         match = curr.Elements().Where(e => PathMatches(elem, e)).FirstOrDefault();
         if (match == null)
         {
-          match = new XElement(elem.Name, elem.Attributes()
-            .Where(a => a.Name == "id" || a.Name == "where" || a.Name == "idlist" || a.Name == "type"));
+          match = new XElement(elem.Name, elem.Attributes().Where(IsAttributeToCopy));
           match.AddAnnotation(elem.Annotation<ElementKey>());
           curr.Add(match);
         }
@@ -140,6 +140,21 @@ namespace InnovatorAdmin
       }
 
       return curr;
+    }
+
+    private static bool IsAttributeToCopy(XAttribute a)
+    {
+      switch (a.Name.LocalName)
+      {
+        case "id":
+        case "where":
+        case "idlist":
+        case "type":
+        case XmlFlags.Attr_ConfigId:
+        case "_keyed_name":
+          return true;
+      }
+      return false;
     }
 
     private static bool PathMatches(XElement canonical, XElement compare)

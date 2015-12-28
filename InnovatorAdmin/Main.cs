@@ -91,8 +91,8 @@ namespace InnovatorAdmin
           this.Size = bounds.Size;
         }
 
-        //GoToStep(new Controls.Welcome());
-        GoToStep(new Controls.MergeInterface().Initialize(new HgMergeOperation(@"C:\Users\edomke\Documents\Local_Projects\ArasUpgrade", 2, 1)));
+        if (!_history.Any()) GoToStep(new Controls.Welcome());
+        //GoToStep(new Controls.MergeInterface().Initialize(new HgMergeOperation(@"C:\Users\edomke\Documents\Local_Projects\ArasUpgrade", 2, 1)));
       }
       catch (Exception ex)
       {
@@ -191,6 +191,7 @@ namespace InnovatorAdmin
       {
         Properties.Settings.Default.Main_Bounds = this.DesktopBounds;
         Properties.Settings.Default.Save();
+        Properties.Settings.Default.Reload();
       }
     }
 

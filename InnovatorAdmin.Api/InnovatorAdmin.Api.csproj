@@ -94,6 +94,7 @@
     <Compile Include="ItemProperty.cs" />
     <Compile Include="ItemReference.cs" />
     <Compile Include="Metadata\ItemType.cs" />
+    <Compile Include="Metadata\ListValue.cs" />
     <Compile Include="Metadata\Method.cs" />
     <Compile Include="Metadata\Property.cs" />
     <Compile Include="Metadata\PropertyType.cs" />

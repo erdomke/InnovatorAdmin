@@ -13,7 +13,7 @@ namespace InnovatorAdmin
     private const string _manifestPath = "manifest.innpkg";
     private bool _isDisposed;
     private Package _package;
-    
+
     public InnovatorPackageFile(string path)
     {
       _package = System.IO.Packaging.Package.Open(path, FileMode.OpenOrCreate);
@@ -78,6 +78,19 @@ namespace InnovatorAdmin
     {
       if (!_isDisposed) ((IDisposable)_package).Dispose();
       _isDisposed = true;
+    }
+
+    protected override bool PathExists(string path)
+    {
+      var uri = PackUriHelper.CreatePartUri(new Uri(path, UriKind.Relative));
+      return _package.PartExists(uri);
+    }
+
+    protected override IEnumerable<string> GetPaths()
+    {
+      return _package.GetParts()
+        .Select(p => PackUriHelper.GetPartUri(p.Uri).ToString().TrimStart('\\'))
+        .Where(p => !string.Equals(p, _manifestPath, StringComparison.OrdinalIgnoreCase));
     }
   }
 }

@@ -7,6 +7,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.Threading.Tasks;
+using System.Windows.Documents;
+using System.Windows.Media;
 
 namespace InnovatorAdmin.Editor
 {
@@ -15,6 +18,7 @@ namespace InnovatorAdmin.Editor
     protected IAsyncConnection _conn;
     private ArasMetadataProvider _metadata;
     private SqlCompletionHelper _sql;
+    private UploadCommand _upload;
 
     public CompletionHelper()
     {
@@ -246,6 +250,18 @@ namespace InnovatorAdmin.Editor
                 case "serverEvents":
                   items = CompletionExtensions.GetPromise<AttributeValueCompletionData>("0", "1");
                   break;
+                case "id":
+                  var newGuid = new CustomCompletionData()
+                  {
+                    Text = "(New Guid)",
+                    Content = new Run("(New Guid)")
+                    {
+                      Foreground = Brushes.Purple
+                    },
+                    Action = () => Guid.NewGuid().ToString("N").ToUpperInvariant()
+                  };
+                  items = Promises.Resolved(Enumerable.Repeat<ICompletionData>(newGuid, 1));
+                  break;
                 case "queryType":
                   items = CompletionExtensions.GetPromise<AttributeValueCompletionData>("Effective", "Latest", "Released");
                   break;
@@ -347,11 +363,11 @@ namespace InnovatorAdmin.Editor
               appendItems = new ICompletionData[] { new BasicCompletionData() { Text = "/" + path.Last().LocalName + ">" } };
 
 
-            if (path.Count == 1 && path.First().LocalName == "AML")
+            if (path.Count == 1 && path.First().LocalName == "AML" && state == XmlState.Tag)
             {
               items = CompletionExtensions.GetPromise<BasicCompletionData>("Item");
             }
-            if (path.Count == 1 && path.First().LocalName.Equals("sql", StringComparison.OrdinalIgnoreCase) && soapAction == "ApplySQL")
+            else if (path.Count == 1 && path.First().LocalName.Equals("sql", StringComparison.OrdinalIgnoreCase) && soapAction == "ApplySQL")
             {
               return _sql.Completions(value, xml, caret, cdata ? "]]>" : "<");
             }
@@ -360,7 +376,7 @@ namespace InnovatorAdmin.Editor
               var j = path.Count - 1;
               while (path[j].LocalName == "and" || path[j].LocalName == "not" || path[j].LocalName == "or") j--;
               var last = path[j];
-              if (last.LocalName == "Item")
+              if (state == XmlState.Tag && last.LocalName == "Item")
               {
                 switch (last.Action)
                 {
@@ -403,7 +419,20 @@ namespace InnovatorAdmin.Editor
                       && _metadata.ItemTypeByName(last.Type, out itemType))
                     {
                       items = _metadata.GetProperties(itemType)
-                          .Convert(p => p.Select(i => new BasicCompletionData() { Text = i.Name, Description = i.Label }).Concat(buffer));
+                        .Convert(p => {
+                          var hash = new HashSet<string>(p.Select(pr => pr.Name), StringComparer.CurrentCultureIgnoreCase);
+                          return p.Select(i => new BasicCompletionData() { Text = i.Name, Description = i.Label })
+                            .Concat(p.Where(pr => !string.IsNullOrWhiteSpace(pr.Label) && !hash.Contains(pr.Label.Replace(' ', '_')))
+                                     .Select(pr => new CustomCompletionData() {
+                                       Text = pr.Label + " (" + pr.Name + ")",
+                                       Description = pr.Name,
+                                       Content = new Run(pr.Label + " (" + pr.Name + ")") {
+                                         Foreground = Brushes.Gray
+                                       },
+                                       Action = () => pr.Name
+                                     }))
+                            .Concat(buffer);
+                        });
                     }
                     else
                     {
@@ -412,19 +441,19 @@ namespace InnovatorAdmin.Editor
                     break;
                 }
               }
-              else if (last.LocalName == "params" && soapAction == "GetAssignedTasks")
+              else if (state == XmlState.Tag && last.LocalName == "params" && soapAction == "GetAssignedTasks")
               {
                 items = new string[] { "inBasketViewMode", "workflowTasks", "projectTasks", "actionTasks", "userID" }.GetPromise<BasicCompletionData>();
               }
-              else if (last.LocalName == "Paths" && path.Count > 1 && path[path.Count - 2].Action == "EvaluateActivity")
+              else if (state == XmlState.Tag && last.LocalName == "Paths" && path.Count > 1 && path[path.Count - 2].Action == "EvaluateActivity")
               {
                 items = new string[] { "Path" }.GetPromise<BasicCompletionData>();
               }
-              else if (last.LocalName == "Tasks" && path.Count > 1 && path[path.Count - 2].Action == "EvaluateActivity")
+              else if (state == XmlState.Tag && last.LocalName == "Tasks" && path.Count > 1 && path[path.Count - 2].Action == "EvaluateActivity")
               {
                 items = new string[] { "Task" }.GetPromise<BasicCompletionData>();
               }
-              else if (last.LocalName == "Variables" && path.Count > 1 && path[path.Count - 2].Action == "EvaluateActivity")
+              else if (state == XmlState.Tag && last.LocalName == "Variables" && path.Count > 1 && path[path.Count - 2].Action == "EvaluateActivity")
               {
                 items = new string[] { "Variable" }.GetPromise<BasicCompletionData>();
               }
@@ -448,20 +477,7 @@ namespace InnovatorAdmin.Editor
                     if (!string.IsNullOrEmpty(lastItem.Type)
                       && _metadata.ItemTypeByName(lastItem.Type, out itemType))
                     {
-                      items = _metadata.GetProperty(itemType, path.Last().LocalName)
-                        .Convert(p =>
-                        {
-                          if (p.Type == PropertyType.item && p.Restrictions.Any())
-                          {
-                            return p.Restrictions
-                              .Select(type => "Item type='" + type + "'")
-                              .GetCompletions<BasicCompletionData>();
-                          }
-                          else
-                          {
-                            return Enumerable.Empty<ICompletionData>();
-                          }
-                        });
+                      items = PropertyCompletion(itemType, state, path).ToPromise();
                     }
                   }
                 }
@@ -480,6 +496,87 @@ namespace InnovatorAdmin.Editor
         Items = FilterAndSort(i.Concat(appendItems), filter),
         Overlap = (filter ?? "").Length
       });
+    }
+
+    private async Task<IEnumerable<ICompletionData>> PropertyCompletion(ItemType itemType, XmlState state, IList<AmlNode> path)
+    {
+      var p = await _metadata.GetProperty(itemType, path.Last().LocalName).ToTask();
+
+      if (p.Type == PropertyType.item && p.Restrictions.Any())
+      {
+        var completions = p.Restrictions
+          .Select(type => (state != XmlState.Tag ? "<" : "") + "Item type='" + type + "'")
+          .GetCompletions<BasicCompletionData>();
+
+        if (p.Restrictions.Any(r => string.Equals(r, "File", StringComparison.OrdinalIgnoreCase)))
+        {
+          var uploadComplete = new CustomCompletionData()
+          {
+            Text = "Select file to upload...",
+            Content = new Run("Select file to upload...")
+            {
+              Foreground = Brushes.Purple
+            },
+            Action = () =>
+            {
+              using (var dialog = new System.Windows.Forms.OpenFileDialog())
+              {
+                dialog.Multiselect = false;
+                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                  var upload = _conn.CreateUploadCommand();
+                  var query = upload.AddFile(Guid.NewGuid().ToString("N").ToUpperInvariant(),
+                    dialog.FileName);
+                  if (state == XmlState.Tag)
+                    query = query.TrimStart('<');
+                  return query;
+                }
+              }
+              return string.Empty;
+            }
+          };
+          completions = completions.Concat(Enumerable.Repeat(uploadComplete, 1));
+        }
+
+        return completions;
+      }
+      else if (p.Type == PropertyType.boolean)
+      {
+        return new string[] { "0", "1" }.GetCompletions<BasicCompletionData>();
+      }
+      else if (p.Type == PropertyType.list && !string.IsNullOrEmpty(p.DataSource))
+      {
+        var values = await _metadata.ListValues(p.DataSource).ToTask();
+
+        var hash = new HashSet<string>(values.Select(v => v.Value), StringComparer.CurrentCultureIgnoreCase);
+        return values
+          .Select(v => v.Value)
+          .GetCompletions<BasicCompletionData>()
+          .Concat(values.Where(v => !string.IsNullOrWhiteSpace(v.Label) && !hash.Contains(v.Label))
+                  .Select(v => new CustomCompletionData() {
+                    Text = v.Label + " (" + v.Value + ")",
+                    Description = v.Value,
+                    Content = new Run(v.Label + " (" + v.Value + ")")
+                    {
+                      Foreground = Brushes.Gray
+                    },
+                    Action = () => v.Value
+                  }));
+      }
+      else if (p.Name == "name" && itemType.Name == "Method" && path[path.Count - 2].Action == "get")
+      {
+        return _metadata.MethodNames.GetCompletions<BasicCompletionData>();
+      }
+      else if (p.Name == "name" && itemType.Name == "ItemType" && path[path.Count - 2].Action == "get")
+      {
+        return _metadata.ItemTypes
+          .Select(it => it.Name)
+          .GetCompletions<BasicCompletionData>();
+      }
+      else
+      {
+        return Enumerable.Empty<ICompletionData>();
+      }
     }
 
     private void RecurseProperties(ItemType itemType, IEnumerable<string> remainingPath, Action<ItemType> callback)
@@ -605,9 +702,9 @@ namespace InnovatorAdmin.Editor
     private IEnumerable<ICompletionData> FilterAndSort(IEnumerable<ICompletionData> values, string substring)
     {
       return values
-        .Where(i => string.IsNullOrEmpty(substring) 
+        .Where(i => string.IsNullOrEmpty(substring)
           || i.Text.IndexOf(substring, StringComparison.OrdinalIgnoreCase) >= 0)
-        .OrderBy(i => (string.IsNullOrEmpty(substring) 
+        .OrderBy(i => (string.IsNullOrEmpty(substring)
           || i.Text.StartsWith(substring, StringComparison.CurrentCultureIgnoreCase)) ? 0 : 1)
         .ThenBy(i => i.Text.StartsWith("/") ? 1 : 0)
         .ThenBy(i => i.Text)

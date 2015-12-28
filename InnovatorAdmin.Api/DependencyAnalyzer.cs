@@ -17,6 +17,8 @@ namespace InnovatorAdmin
     // All the dependencies for a given item based on the reference
     private Dictionary<ItemReference, HashSet<ItemReference>> _allItemDependencies = new Dictionary<ItemReference, HashSet<ItemReference>>();
 
+    private const string ItemTypeByNameWhere = "[ItemType].[name] = '";
+
     //// Temporary variables only used within a set of scans
     private HashSet<ItemReference> _definitions = new HashSet<ItemReference>();
     private HashSet<ItemReference> _dependencies = new HashSet<ItemReference>();
@@ -178,7 +180,7 @@ namespace InnovatorAdmin
         }
         catch (ArgumentException)
         {
-          throw new ArgumentException(string.Format("Error: {0} is defined twice, once in {1} and another time in {2}", 
+          throw new ArgumentException(string.Format("Error: {0} is defined twice, once in {1} and another time in {2}",
             defn, _allDefinitions[defn], itemRef));
         }
       }
@@ -231,6 +233,22 @@ namespace InnovatorAdmin
             kvp.Value.Remove(value);
             kvp.Value.Add(topDefn);
           }
+          else if (value.Unique.StartsWith(ItemTypeByNameWhere))
+          {
+            // If there is a dependency on an item type solely by name, add dependences on the
+            // item type creation script and all subsequent edit scripts
+            topDefn = _allDefinitions.Values
+              .Where(v => v.KeyedName == value.KeyedName
+                && v.Type == "ItemType")
+              .FirstOrDefault();
+            if (topDefn != null)
+            {
+              kvp.Value.Remove(value);
+              kvp.Value.Add(topDefn);
+              kvp.Value.UnionWith(_allItemDependencies.Keys
+                .Where(k => k.Type == InstallItem.ScriptType && k.Unique.Contains(topDefn.Unique)));
+            }
+          }
         }
       }
     }
@@ -249,7 +267,7 @@ namespace InnovatorAdmin
         }
         else
         {
-          AddDependency(new ItemReference("ItemType", "[ItemType].[name] = '" + elem.Attributes["type"].Value + "'")
+          AddDependency(new ItemReference("ItemType", ItemTypeByNameWhere + elem.Attributes["type"].Value + "'")
           {
             KeyedName = elem.Attributes["type"].Value
           }, elem, elem, masterRef);

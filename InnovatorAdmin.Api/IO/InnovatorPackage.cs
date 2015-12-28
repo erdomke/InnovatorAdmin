@@ -18,7 +18,8 @@ namespace InnovatorAdmin
       XmlDocument doc;
       var scripts = new List<InstallItem>();
       var manifest = new XmlDocument();
-      string path;
+      string currPath;
+      IEnumerable<string> paths;
       manifest.Load(GetExistingStream(null));
 
       if (manifest.DocumentElement.HasAttribute("created"))
@@ -40,8 +41,16 @@ namespace InnovatorAdmin
         }
         else
         {
-          path = child.GetAttribute("path");
-          if (!string.IsNullOrEmpty(path))
+          currPath = child.GetAttribute("path");
+          paths = string.IsNullOrEmpty(currPath)
+            ? Enumerable.Empty<string>()
+            : (currPath == "*"
+              ? GetPaths()
+              : Enumerable.Repeat(currPath, 1));
+
+          if (currPath == "*") result.DependencySorted = false;
+
+          foreach (var path in paths)
           {
             if (path.EndsWith(".xslt", StringComparison.OrdinalIgnoreCase))
             {
@@ -61,6 +70,7 @@ namespace InnovatorAdmin
         }
       }
       result.Lines = scripts;
+      result.Lines.CleanKeyedNames();
 
       return result;
     }
@@ -174,6 +184,10 @@ namespace InnovatorAdmin
         xsltElem.InnerText = xslt;
         reportItem.AppendChild(xsltElem);
       }
+      else if (file.StartsWith("<AML>"))
+      {
+        result.LoadXml(file);
+      }
       else
       {
         throw new ArgumentException("Invalid xslt file");
@@ -243,6 +257,8 @@ namespace InnovatorAdmin
 
     protected abstract Stream GetExistingStream(string path);
     protected abstract Stream GetNewStream(string path);
+    protected abstract bool PathExists(string path);
+    protected abstract IEnumerable<string> GetPaths();
 
     private XmlWriter GetWriter(Stream stream)
     {

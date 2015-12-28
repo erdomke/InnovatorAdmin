@@ -1,0 +1,77 @@
+﻿<SyntaxDefinition name="XML" extensions=".xml;.aml" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+  <Color foreground="Green" name="Comment" exampleText="&lt;!-- comment --&gt;" />
+  <Color name="Character" foreground="Magenta" exampleText=""/>
+  <Color name="CharClass" foreground="DarkOrange" fontWeight="bold" exampleText=""/>
+  <Color name="CharClassGroup" foreground="DarkOrange" fontWeight="bold" exampleText=""/>
+  <Color name="Group" foreground="Green" fontWeight="bold" exampleText=""/>
+  <Color name="Anchor" foreground="Magenta" exampleText=""/>
+  <Color name="Quantifier" foreground="Blue" fontWeight="bold" exampleText=""/>
+  <Color name="CharClassDefault" foreground="Black" fontWeight="normal" exampleText=""/>
+
+  <RuleSet>
+
+    <Keywords color="Character">
+      <Word>\a</Word>
+      <Word>\b</Word>
+      <Word>\t</Word>
+      <Word>\r</Word>
+      <Word>\v</Word>
+      <Word>\f</Word>
+      <Word>\n</Word>
+      <Word>\e</Word>
+    </Keywords>
+    
+    <Rule color="Character">\\[0-7]{3}</Rule>
+    <Rule color="Character">\\x[0-9a-fA-F]{2}</Rule>
+    <Rule color="Character">\\c[A-Z]</Rule>
+    <Rule color="Character">\\u[0-9a-fA-F]{4}</Rule>
+    <Rule color="Character">\\[^xcu0-7]?</Rule>
+
+    <Keywords color="CharClass">
+      <Word>\w</Word>
+      <Word>\W</Word>
+      <Word>\s</Word>
+      <Word>\S</Word>
+      <Word>\d</Word>
+      <Word>\D</Word>
+    </Keywords>
+
+    <Span color="CharClassGroup">
+      <Begin>\[</Begin>
+      <End>\]</End>
+
+      <RuleSet>
+        <Rule color="CharClassDefault">[^-^]+</Rule>
+      </RuleSet>
+    </Span>
+    
+    <Rule color="CharClass">\\[pP]\{\w+\}</Rule>
+    <Rule color="CharClass">\.</Rule>
+    
+    <Keywords color="Anchor">
+      <Word>^</Word>
+      <Word>$</Word>
+      <Word>\A</Word>
+      <Word>\Z</Word>
+      <Word>\z</Word>
+      <Word>\G</Word>
+      <Word>\b</Word>
+      <Word>\B</Word>
+    </Keywords>
+
+    <Keywords color="Quantifier">
+      <Word>*</Word>
+      <Word>+</Word>
+      <Word>?</Word>
+      <Word>|</Word>
+    </Keywords>
+
+    <Rule color="Quantifier">\{\d+(,(\d+)?)?\}\??</Rule>
+
+    <Rule color="Group">\((\?:|\?=|\?!|\?&lt;=|\?&lt;!|\?&gt;)?</Rule>
+
+    <Keywords color="Group">
+      <Word>)</Word>
+    </Keywords>
+  </RuleSet>
+</SyntaxDefinition>

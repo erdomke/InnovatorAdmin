@@ -291,8 +291,9 @@ namespace InnovatorAdmin
             }
             _dependAnalyzer.CleanDependencies();
 
-            results = GetDependencyList((script.Lines ?? Enumerable.Empty<InstallItem>())
-                                          .Concat(newInstallItems), out state).ToList();
+            results = GetDependencyList(_dependAnalyzer
+              , (script.Lines ?? Enumerable.Empty<InstallItem>()).Concat(newInstallItems)
+              , out state).ToList();
             loops++;
           }
         }
@@ -329,6 +330,29 @@ namespace InnovatorAdmin
       {
         this.OnActionComplete(new ActionCompleteEventArgs() { Exception = ex });
       }
+    }
+
+    public static IEnumerable<InstallItem> SortByDependencies(IEnumerable<InstallItem> items, IAsyncConnection conn)
+    {
+      int loops = 0;
+      var state = CycleState.ResolvedCycle;
+      var results = items;
+      var metadata = ArasMetadataProvider.Cached(conn);
+      metadata.Wait();
+      var analyzer = new DependencyAnalyzer(metadata);
+      while (loops < 10 && state == CycleState.ResolvedCycle)
+      {
+        foreach (var newInstallItem in items)
+        {
+          analyzer.GatherDependencies(newInstallItem.Script, newInstallItem.Reference, newInstallItem.CoreDependencies);
+        }
+        analyzer.CleanDependencies();
+
+        results = GetDependencyList(analyzer, items, out state).ToList();
+        loops++;
+      }
+
+      return results;
     }
 
     /// <summary>
@@ -1077,7 +1101,8 @@ namespace InnovatorAdmin
       });
     }
 
-    private IEnumerable<InstallItem> GetDependencyList(IEnumerable<InstallItem> values, out CycleState cycleState)
+    private static IEnumerable<InstallItem> GetDependencyList(DependencyAnalyzer dependAnalyzer
+      , IEnumerable<InstallItem> values, out CycleState cycleState)
     {
       cycleState = CycleState.NoCycle;
       var lookup = (from i in values
@@ -1096,7 +1121,7 @@ namespace InnovatorAdmin
         {
           var ii = r as InstallItem;
           if (ii == null) return Enumerable.Empty<ItemReference>();
-          return _dependAnalyzer.GetDependencies(ii.Reference);
+          return dependAnalyzer.GetDependencies(ii.Reference);
         });
         return Enumerable.Empty<ItemReference>();
       }, ref cycle, false);
@@ -1108,7 +1133,7 @@ namespace InnovatorAdmin
         cycleState = CycleState.UnresolvedCycle;
         for (int i = (cycle[0] == null ? 2 : 1); i < cycle.Count; i++)
         {
-          refs = _dependAnalyzer.GetReferences(cycle[i - 1], cycle[i]).ToList();
+          refs = dependAnalyzer.GetReferences(cycle[i - 1], cycle[i]).ToList();
           if (refs.Count == 1)
           {
             var relTag = refs[0].Parents().FirstOrDefault(e => e.LocalName == "Relationships");

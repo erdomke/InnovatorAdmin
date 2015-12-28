@@ -21,6 +21,9 @@ namespace InnovatorAdmin
     private IPromise _secondaryMetadata;
     private Dictionary<string, ItemReference> _sql;
     private Dictionary<string, ItemReference> _systemIdentities;
+    private Dictionary<string, IEnumerable<ListValue>> _listValues 
+      = new Dictionary<string,IEnumerable<ListValue>>();
+    
 
     /// <summary>
     /// Enumerable of methods where core = 1
@@ -111,6 +114,26 @@ namespace InnovatorAdmin
       return _sql.TryGetValue(name, out sql);
     }
 
+    public IPromise<IEnumerable<ListValue>> ListValues(string id)
+    {
+      IEnumerable<ListValue> result;
+      if (_listValues.TryGetValue(id, out result))
+        return Promises.Resolved(result);
+
+      return _conn.ApplyAsync("<Item type='Value' action='get' select='label,value'><source_id>@0</source_id></Item>"
+        , true, false, id)
+        .Convert(r => {
+          var values = (IEnumerable<ListValue>)r.Items()
+            .Select(i => new ListValue() 
+            { 
+              Label = i.Property("label").Value, 
+              Value = i.Property("value").Value
+            }).ToArray();
+          _listValues[id] = values;
+          return values;
+        });
+    }
+
     /// <summary>
     /// Constructor for the ArasMetadataProvider class
     /// </summary>
@@ -140,6 +163,7 @@ namespace InnovatorAdmin
     {
       if (_metadataComplete == null || _metadataComplete.IsRejected || _metadataComplete.IsResolved)
       {
+        _listValues.Clear();
         _customProps.Clear();
         _itemTypesByName.Clear();
         _itemTypesById = null;
@@ -391,6 +415,7 @@ namespace InnovatorAdmin
           newProp.ForeignPropName = foreign.Property("name").Value;
           newProp.ForeignTypeName = foreign.SourceId().KeyedName().Value;
         }
+        newProp.DataSource = prop.Property("data_source").Value;
         if (newProp.Type == PropertyType.item && prop.Property("data_source").Attribute("name").HasValue())
         {
           newProp.Restrictions.Add(prop.Property("data_source").Attribute("name").Value);

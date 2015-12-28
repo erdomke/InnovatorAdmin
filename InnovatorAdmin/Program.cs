@@ -24,7 +24,7 @@ namespace InnovatorAdmin
       {
         if (string.IsNullOrEmpty(amlStudioStart))
         {
-          Application.Run(new AppContext(new Main()));
+          Application.Run(new AppContext(new EditorWindow()));
         }
         else
         {

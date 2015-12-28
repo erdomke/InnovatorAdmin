@@ -8,16 +8,22 @@ namespace InnovatorAdmin
 {
   public class InnovatorPackageFolder : InnovatorPackage
   {
-    private string _basePath;
+    private string _manifestPath;
+    private string _baseFolder;
 
     public InnovatorPackageFolder(string path)
     {
-      _basePath = path;
+      _manifestPath = path;
+      _baseFolder = Path.GetDirectoryName(_manifestPath);
     }
 
     protected override System.IO.Stream GetExistingStream(string path)
     {
-      return new FileStream(GetRelativePath(path), FileMode.Open, FileAccess.Read);
+      var relPath = GetRelativePath(path);
+      if (!File.Exists(relPath))
+        return null;
+
+      return new FileStream(relPath, FileMode.Open, FileAccess.Read);
     }
 
     protected override System.IO.Stream GetNewStream(string path)
@@ -27,8 +33,8 @@ namespace InnovatorAdmin
 
     private string GetRelativePath(string path)
     {
-      if (string.IsNullOrEmpty(path)) return _basePath;
-      return Path.Combine(Path.GetDirectoryName(_basePath), path);
+      if (string.IsNullOrEmpty(path)) return _manifestPath;
+      return Path.Combine(_baseFolder, path);
     }
     private string EnsureRelativePath(string path)
     {
@@ -36,6 +42,18 @@ namespace InnovatorAdmin
       var dir = Path.GetDirectoryName(fullPath);
       if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
       return fullPath;
+    }
+
+    protected override bool PathExists(string path)
+    {
+      return File.Exists(GetRelativePath(path));
+    }
+
+    protected override IEnumerable<string> GetPaths()
+    {
+      return Directory.GetFiles(_baseFolder, "*.*", SearchOption.AllDirectories)
+        .Where(p => !string.Equals(p, _manifestPath, StringComparison.OrdinalIgnoreCase))
+        .Select(p => p.Substring(_baseFolder.Length).TrimStart('\\'));
     }
   }
 }

@@ -46,5 +46,11 @@ namespace InnovatorAdmin
     {
       get { return _table.Rows.Count > 0; }
     }
+
+
+    public string Title
+    {
+      get { return ""; }
+    }
   }
 }

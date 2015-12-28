@@ -73,6 +73,7 @@ namespace InnovatorAdmin.Editor
                 control.HideCompletionWindow();
               }
             }
+            ShowCompletions(control);
             break;
         }
       }
@@ -126,7 +127,7 @@ namespace InnovatorAdmin.Editor
       return paramNames.Distinct().OrderBy(n => n);
     }
 
-    private static IHighlightingDefinition _highlighter;
+    internal static IHighlightingDefinition _highlighter;
 
     static AmlEditorHelper()
     {

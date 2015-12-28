@@ -155,15 +155,40 @@ namespace InnovatorAdmin
         throw new NotSupportedException("Cannot run commands created by a different proxy");
 
       var cmd = innCmd.Internal;
+
+      // Check for file uploads and process if need be
+      var elem = System.Xml.Linq.XElement.Parse(cmd.Aml);
+      var files = elem.DescendantsAndSelf("Item")
+        .Where(e => e.Attributes("type").Any(a => a.Value == "File")
+                  && e.Elements("actual_filename").Any(p => !string.IsNullOrEmpty(p.Value))
+                  && e.Attributes("id").Any(p => !string.IsNullOrEmpty(p.Value))
+                  && e.Attributes("action").Any(p => !string.IsNullOrEmpty(p.Value)));
+      if (files.Any())
+      {
+        var upload = _conn.CreateUploadCommand();
+        upload.AddFileQuery(cmd.Aml);
+        upload.WithAction(cmd.ActionString);
+        foreach (var param in innCmd.Parameters)
+        {
+          upload.WithParam(param.Key, param.Value);
+        }
+        cmd = upload;
+      }
+
       if (cmd.Action == CommandAction.ApplyAML && cmd.Aml.IndexOf("<AML>") < 0)
       {
         cmd.Aml = "<AML>" + cmd.Aml + "</AML>";
       }
-      return _conn.Process(cmd, async)
+      return ProcessCommand(cmd, async)
         .Convert(s => (IResultObject)new ResultObject(s)
         {
           PreferTable = cmd.Action == CommandAction.ApplySQL
         });
+    }
+
+    protected virtual IPromise<Stream> ProcessCommand(Command cmd, bool async)
+    {
+      return _conn.Process(cmd, async);
     }
 
     public virtual IEditorProxy Clone()
@@ -186,6 +211,8 @@ namespace InnovatorAdmin
       private int _count;
       private DataTable _table;
       private int _amlLength;
+      private string _title;
+
 
       public bool PreferTable { get; set; }
 
@@ -256,6 +283,10 @@ namespace InnovatorAdmin
                 if (reader.LocalName == "Item") levels[level]++;
                 xmlWriter.WriteStartElement(reader.Prefix, reader.LocalName, reader.NamespaceURI);
                 xmlWriter.WriteAttributes(reader, false);
+                if (reader.LocalName == "id" && _title == null)
+                {
+                  _title = reader.GetAttribute("type") + " " + reader.GetAttribute("keyed_name");
+                }
                 if (reader.IsEmptyElement)
                 {
                   xmlWriter.WriteEndElement();
@@ -314,16 +345,29 @@ namespace InnovatorAdmin
           itemCount = levels.FirstOrDefault(i => i > 0);
           writer.Flush();
         }
+
+        if (itemCount > 1) _title = "";
+      }
+
+
+      public string Title
+      {
+        get { return _title; }
       }
     }
 
     private class InnovatorCommand : ICommand
     {
       private Command _internal = new Command();
+      private Dictionary<string, object> _params = new Dictionary<string,object>();
 
       public Command Internal
       {
         get { return _internal; }
+      }
+      public Dictionary<string, object> Parameters
+      {
+        get { return _params; }
       }
 
       public ICommand WithAction(string action)
@@ -334,6 +378,7 @@ namespace InnovatorAdmin
       public ICommand WithParam(string name, object value)
       {
         _internal.WithParam(name, value);
+        _params[name] = value;
         return this;
       }
       public ICommand WithQuery(string query)
