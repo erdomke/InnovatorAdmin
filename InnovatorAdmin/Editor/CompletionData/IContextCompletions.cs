@@ -9,6 +9,6 @@ namespace InnovatorAdmin.Editor
 {
   public interface IContextCompletions : ICompletionData
   {
-    void SetContext(IEditorHelper parent, EditorControl control);
+    void SetContext(IEditorHelper parent, EditorWinForm control);
   }
 }

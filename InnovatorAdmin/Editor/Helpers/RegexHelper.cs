@@ -30,7 +30,7 @@ namespace InnovatorAdmin.Editor
       get { return null; }
     }
 
-    public void HandleTextEntered(EditorControl control, string insertText)
+    public void HandleTextEntered(EditorWinForm control, string insertText)
     {
       switch (insertText)
       {
@@ -117,7 +117,7 @@ namespace InnovatorAdmin.Editor
       new string[] { "B", "Match does not occur on a \\b boundary"}
     };
 
-    public Innovator.Client.IPromise<CompletionContext> ShowCompletions(EditorControl control)
+    public Innovator.Client.IPromise<CompletionContext> ShowCompletions(EditorWinForm control)
     {
       var length = control.Editor.Document.TextLength;
       var caret = control.Editor.CaretOffset;

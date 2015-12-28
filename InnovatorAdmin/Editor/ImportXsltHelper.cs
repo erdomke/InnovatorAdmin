@@ -11,7 +11,7 @@ namespace InnovatorAdmin.Editor
   {
     public ImportXsltHelper() : base(LoadSchema()) { }
 
-    public override void HandleTextEntered(EditorControl control, string insertText)
+    public override void HandleTextEntered(EditorWinForm control, string insertText)
     {
       var text = control.Editor.Text.Substring(0, control.Editor.CaretOffset);
 

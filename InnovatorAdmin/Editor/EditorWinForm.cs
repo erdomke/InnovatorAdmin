@@ -5,6 +5,7 @@ using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Rendering;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
@@ -15,22 +16,28 @@ using System.Windows.Media;
 
 namespace InnovatorAdmin.Editor
 {
-  public class EditorControl : UserControl
+  public class EditorWinForm : UserControl
   {
+    private static System.Windows.Media.FontFamily _fixedWidth = new System.Windows.Media.FontFamily("Consolas");
+    private static System.Windows.Media.FontFamily _sansSerif = new System.Windows.Media.FontFamily("Helvetica");
+
     private System.Windows.Controls.ToolTip _toolTip;
     private ExtendedEditor _extEditor;
-    private FindReplace _findReplace;
     private List<IDisposable> _itemsToDispose = new List<IDisposable>();
     private bool _singleLine;
+    private Placeholder _placeholder;
 
     public event EventHandler<RunRequestedEventArgs> RunRequested;
     public event EventHandler<SelectionChangedEventArgs> SelectionChanged;
 
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public IEditorHelper Helper {
       get { return _extEditor.Helper; }
       set { _extEditor.Helper = value; }
     }
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public ICSharpCode.AvalonEdit.TextEditor Editor { get { return _extEditor.Editor; } }
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public TextDocument Document
     {
       get { return _extEditor.Editor.Document; }
@@ -38,6 +45,27 @@ namespace InnovatorAdmin.Editor
       {
         _extEditor.Editor.Document = value;
         _extEditor.ResetFoldingManager();
+      }
+    }
+    public string PlaceholderText
+    {
+      get { return _placeholder == null ? string.Empty : (_placeholder.PlaceholderText ?? string.Empty); }
+      set
+      {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+          Editor.TextArea.TextView.BackgroundRenderers.Remove(_placeholder);
+          _placeholder = null;
+        }
+        else
+        {
+          if (_placeholder == null)
+          {
+            _placeholder = new Placeholder();
+            Editor.TextArea.TextView.BackgroundRenderers.Add(_placeholder);
+          }
+          _placeholder.PlaceholderText = value;
+        }
       }
     }
     public bool ShowLineNumbers
@@ -68,12 +96,26 @@ namespace InnovatorAdmin.Editor
       {
         _singleLine = value;
         Editor.FontFamily = _singleLine
-          ? new System.Windows.Media.FontFamily("Helvetica")
-          : new System.Windows.Media.FontFamily("Consolas");
+          ? _sansSerif
+          : _fixedWidth;
+      }
+    }
+    public bool ReadOnly
+    {
+      get { return Editor.IsReadOnly; }
+      set { Editor.IsReadOnly = value; }
+    }
+    public override string Text
+    {
+      get { return Editor.Text; }
+      set
+      {
+        Editor.Document.Text = (value ?? string.Empty);
+        Editor.CaretOffset = 0;
       }
     }
 
-    public EditorControl()
+    public EditorWinForm()
     {
       var host = new ElementHost();
       host.Size = new Size(200, 100);
@@ -84,7 +126,7 @@ namespace InnovatorAdmin.Editor
       _extEditor.Host = this;
 
       var editor = _extEditor.editor;
-      editor.FontFamily = new System.Windows.Media.FontFamily("Consolas");
+      editor.FontFamily = _fixedWidth;
       editor.FontSize = 12.0;
       editor.Options.ConvertTabsToSpaces = true;
       editor.Options.EnableRectangularSelection = true;
@@ -107,6 +149,34 @@ namespace InnovatorAdmin.Editor
 
       this.Controls.Add(host);
     }
+
+    private class Placeholder : IBackgroundRenderer
+    {
+      public string PlaceholderText { get; set; }
+
+      public void Draw(TextView textView, DrawingContext drawingContext)
+      {
+        if (textView.Document.TextLength <= 0)
+        {
+          var text = new FormattedText(this.PlaceholderText
+            , CultureInfo.CurrentCulture
+            , System.Windows.FlowDirection.LeftToRight
+            , new Typeface(_sansSerif
+              , System.Windows.FontStyles.Normal
+              , System.Windows.FontWeights.Normal
+              , System.Windows.FontStretches.Normal)
+            , textView.DefaultLineHeight - 2
+            , System.Windows.Media.Brushes.DimGray);
+          drawingContext.DrawText(text, new System.Windows.Point(1, 1));
+        }
+      }
+
+      public KnownLayer Layer
+      {
+        get { return KnownLayer.Background; }
+      }
+    }
+
 
     void editor_TextChanged(object sender, EventArgs e)
     {
@@ -228,80 +298,63 @@ namespace InnovatorAdmin.Editor
 
     void TextArea_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
+      var key = (e.Key == System.Windows.Input.Key.System ? e.SystemKey : e.Key);
+
       // F5 or F9
-      if (e.Key == System.Windows.Input.Key.F9 || e.Key == System.Windows.Input.Key.F5)
+      if (key == System.Windows.Input.Key.F9 || key == System.Windows.Input.Key.F5)
       {
         OnRunRequested(new RunRequestedEventArgs(Editor.Text));
       }
       // Ctrl+Enter or Ctrl+Shift+E
-      else if ((e.Key == System.Windows.Input.Key.Enter && IsControlDown(e.KeyboardDevice))
-        || (e.Key == System.Windows.Input.Key.E && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice)))
+      else if ((key == System.Windows.Input.Key.Enter && IsControlDown(e.KeyboardDevice))
+        || (key == System.Windows.Input.Key.E && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice)))
       {
         OnRunRequested(new RunRequestedEventArgs(GetCurrentQuery()));
       }
       // Ctrl+Shift+Up
       else if (!SingleLine
-        && ((e.Key == System.Windows.Input.Key.Up && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
-          || (e.Key == System.Windows.Input.Key.Up && IsAltDown(e.KeyboardDevice))))
+        && ((key == System.Windows.Input.Key.Up && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
+          || (key == System.Windows.Input.Key.Up && IsAltDown(e.KeyboardDevice))))
       {
         MoveLineUp();
       }
       // Ctrl+Shift+Down
       else if (!SingleLine
-        && ((e.Key == System.Windows.Input.Key.Down && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
-          || (e.Key == System.Windows.Input.Key.Down && IsAltDown(e.KeyboardDevice))))
+        && ((key == System.Windows.Input.Key.Down && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
+          || (key == System.Windows.Input.Key.Down && IsAltDown(e.KeyboardDevice))))
       {
         MoveLineDown();
       }
       // Ctrl+T
-      else if (e.Key == System.Windows.Input.Key.T && IsControlDown(e.KeyboardDevice)) // Indent the code
+      else if (key == System.Windows.Input.Key.T && IsControlDown(e.KeyboardDevice)) // Indent the code
       {
         TidyXml();
       }
       // Ctrl+Shift+U
-      else if (e.Key == System.Windows.Input.Key.U && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
+      else if (key == System.Windows.Input.Key.U && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
       {
         TransformUppercase();
       }
       // Ctrl+U
-      else if (e.Key == System.Windows.Input.Key.U && IsControlDown(e.KeyboardDevice))
+      else if (key == System.Windows.Input.Key.U && IsControlDown(e.KeyboardDevice))
       {
         TransformLowercase();
       }
-      // Ctrl+F
-      else if (e.Key == System.Windows.Input.Key.F && IsControlDown(e.KeyboardDevice) && !SingleLine)
-      {
-        Find();
-      }
-      // Ctrl+H
-      else if (e.Key == System.Windows.Input.Key.H && IsControlDown(e.KeyboardDevice) && !SingleLine)
-      {
-        Replace();
-      }
 
-      OnKeyDown(new KeyEventArgs((System.Windows.Forms.Keys)System.Windows.Input.KeyInterop.VirtualKeyFromKey(e.Key)));
+      OnKeyDown(WinFormsKey(e));
     }
 
-    private FindReplace InitFindReplace()
+    private KeyEventArgs WinFormsKey(System.Windows.Input.KeyEventArgs e)
     {
-      if (_findReplace == null)
-        _findReplace = new FindReplace(this);
-      if (_findReplace.IsDisposed)
-        _findReplace = new FindReplace(this);
-      _findReplace.FindText = Editor.SelectedText;
-      _findReplace.Show(this);
-      return _findReplace;
-    }
-
-    public void Find()
-    {
-      InitFindReplace();
-    }
-
-    public void Replace()
-    {
-      var fd = InitFindReplace();
-      fd.DisplayReplace(true);
+      var key = (e.Key == System.Windows.Input.Key.System ? e.SystemKey : e.Key);
+      var keys = (System.Windows.Forms.Keys)System.Windows.Input.KeyInterop.VirtualKeyFromKey(key);
+      if (e.KeyboardDevice.IsKeyDown(System.Windows.Input.Key.LeftAlt)
+        || e.KeyboardDevice.IsKeyDown(System.Windows.Input.Key.RightAlt)) keys |= Keys.Alt;
+      if (e.KeyboardDevice.IsKeyDown(System.Windows.Input.Key.LeftCtrl)
+        || e.KeyboardDevice.IsKeyDown(System.Windows.Input.Key.RightCtrl)) keys |= Keys.Control;
+      if (e.KeyboardDevice.IsKeyDown(System.Windows.Input.Key.LeftShift)
+        || e.KeyboardDevice.IsKeyDown(System.Windows.Input.Key.RightShift)) keys |= Keys.Shift;
+      return new KeyEventArgs(keys);
     }
 
     public void ReplaceSelectionSegments(Func<string, string> insert)
@@ -418,20 +471,6 @@ namespace InnovatorAdmin.Editor
       ReplaceSelectionSegments(t => t.ToLowerInvariant());
     }
 
-    //private void TransformSelection(Func<string, string> transform)
-    //{
-    //  var doc = Editor.Document;
-    //  using (doc.RunUpdate())
-    //  {
-    //    string text;
-    //    foreach (var segment in Editor.TextArea.Selection.Segments)
-    //    {
-    //      text = doc.GetText(segment);
-    //      doc.Replace(segment, transform.Invoke(text));
-    //    }
-    //  }
-    //}
-
     private bool IsAltDown(System.Windows.Input.KeyboardDevice keyboard)
     {
       return keyboard.IsKeyDown(System.Windows.Input.Key.LeftAlt) || keyboard.IsKeyDown(System.Windows.Input.Key.RightAlt);
@@ -443,21 +482,6 @@ namespace InnovatorAdmin.Editor
     private bool IsShiftDown(System.Windows.Input.KeyboardDevice keyboard)
     {
       return keyboard.IsKeyDown(System.Windows.Input.Key.LeftShift) || keyboard.IsKeyDown(System.Windows.Input.Key.RightShift);
-    }
-
-    public bool ReadOnly
-    {
-      get { return Editor.IsReadOnly; }
-      set { Editor.IsReadOnly = value; }
-    }
-    public override string Text
-    {
-      get { return Editor.Text; }
-      set
-      {
-        Editor.Document.Text = (value ?? string.Empty);
-        Editor.CaretOffset = 0;
-      }
     }
 
     CompletionWindow completionWindow;
@@ -558,21 +582,12 @@ namespace InnovatorAdmin.Editor
         if (elementHost != null)
           elementHost.Child = null;
 
-        if (_findReplace != null)
-          _findReplace.Dispose();
-        if (_extEditor != null)
-          _extEditor.Dispose();
-
       }
     }
 
     public void BindToolStripItem(ToolStripItem item, System.Windows.Input.RoutedCommand command)
     {
       _itemsToDispose.Add(new ToolStripBinding(item, command, Editor.TextArea));
-    }
-    public void CleanUndoStack()
-    {
-      Editor.Document.UndoStack.ClearAll();
     }
 
     private class ToolStripBinding : IDisposable

@@ -1,5 +1,4 @@
-﻿<SyntaxDefinition name="XML" extensions=".xml;.aml" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
-  <Color foreground="Green" name="Comment" exampleText="&lt;!-- comment --&gt;" />
+﻿<SyntaxDefinition name="Regex" extensions="" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
   <Color name="Character" foreground="Magenta" exampleText=""/>
   <Color name="CharClass" foreground="DarkOrange" fontWeight="bold" exampleText=""/>
   <Color name="CharClassGroup" foreground="DarkOrange" fontWeight="bold" exampleText=""/>

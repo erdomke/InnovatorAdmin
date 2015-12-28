@@ -209,8 +209,21 @@
     <Compile Include="Editor\AmlLinkElementGenerator.cs" />
     <Compile Include="Editor\Aml\AmlSimpleEditorHelper.cs" />
     <Compile Include="Editor\CompletionData\CustomCompletionData.cs" />
+    <Compile Include="Editor\FullEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Editor\FullEditor.Designer.cs">
+      <DependentUpon>FullEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="Editor\Overload.cs" />
-    <Compile Include="Editor\RegexHelper.cs" />
+    <Compile Include="Editor\Helpers\StringLiteralHelper.cs" />
+    <Compile Include="Editor\Helpers\RegexReplacementHelper.cs" />
+    <Compile Include="Editor\Helpers\RegexHelper.cs" />
+    <Compile Include="Editor\SearchStrategy\RegexSearchStrategy.cs" />
+    <Compile Include="Editor\SearchStrategy\SearchFactory.cs" />
+    <Compile Include="Editor\SearchStrategy\SearchMode.cs" />
+    <Compile Include="Editor\SearchStrategy\StringHelper.cs" />
+    <Compile Include="Editor\SearchStrategy\XPathSearchStrategy.cs" />
     <Compile Include="Editor\Sql\SqlMetadata.cs" />
     <Compile Include="Editor\TextDocumentWriter.cs" />
     <Compile Include="Editor\VisualLineLinkText.cs" />
@@ -339,11 +352,11 @@
     <Compile Include="Editor\Aml\AmlEditorHelper.cs" />
     <Compile Include="Editor\Aml\AmlFoldingStrategy.cs" />
     <Compile Include="Editor\CompletionData\BasicCompletionData.cs" />
-    <Compile Include="Editor\EditorControl.cs">
+    <Compile Include="Editor\EditorWinForm.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Editor\ExtendedEditor.xaml.cs">
-      <DependentUpon>ExtendedEditor.xaml</DependentUpon>
+    <Compile Include="Editor\EditorWpf.xaml.cs">
+      <DependentUpon>EditorWpf.xaml</DependentUpon>
     </Compile>
     <Compile Include="Editor\IEditorHelper.cs" />
     <Compile Include="Editor\ImportXsltHelper.cs" />
@@ -363,12 +376,6 @@
     </Compile>
     <Compile Include="ErrorWindow.Designer.cs">
       <DependentUpon>ErrorWindow.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Editor\FindReplace.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Editor\FindReplace.Designer.cs">
-      <DependentUpon>FindReplace.cs</DependentUpon>
     </Compile>
     <Compile Include="FullBindingList.cs" />
     <Compile Include="Ide\TreeListView.cs">
@@ -510,6 +517,9 @@
     <EmbeddedResource Include="Dialog\ProgressDialog.resx">
       <DependentUpon>ProgressDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Editor\FullEditor.resx">
+      <DependentUpon>FullEditor.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Ide\EditorWindow.resx">
       <DependentUpon>EditorWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -522,9 +532,6 @@
     <EmbeddedResource Include="Ide\TreeImages.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>TreeImages.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Editor\FindReplace.resx">
-      <DependentUpon>FindReplace.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
@@ -551,6 +558,8 @@
     </EmbeddedResource>
     <None Include="app.config" />
     <EmbeddedResource Include="resources\Regex.xshd" />
+    <EmbeddedResource Include="resources\RegexReplace.xshd" />
+    <EmbeddedResource Include="resources\StringLiteral.xshd" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ADiff\ADiff.Ui.csproj">
@@ -646,7 +655,7 @@
     <None Include="resources\icons\function14.png" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Editor\ExtendedEditor.xaml">
+    <Page Include="Editor\EditorWpf.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

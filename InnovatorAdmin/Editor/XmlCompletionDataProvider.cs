@@ -56,7 +56,7 @@ namespace InnovatorAdmin.Editor
       this.defaultNamespacePrefix = string.Empty;
     }
 
-    public virtual void HandleTextEntered(EditorControl control, string insertText)
+    public virtual void HandleTextEntered(EditorWinForm control, string insertText)
     {
       var text = control.Editor.Text.Substring(0, control.Editor.CaretOffset);
       ICompletionData[] result = null;
@@ -237,7 +237,7 @@ namespace InnovatorAdmin.Editor
     }
 
 
-    public Innovator.Client.IPromise<CompletionContext> ShowCompletions(EditorControl control)
+    public Innovator.Client.IPromise<CompletionContext> ShowCompletions(EditorWinForm control)
     {
       throw new NotImplementedException();
     }

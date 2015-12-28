@@ -44,7 +44,7 @@
       this.btnSubmit = new System.Windows.Forms.ToolStripButton();
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
       this.lblConnColor = new System.Windows.Forms.Label();
-      this.outputEditor = new InnovatorAdmin.Editor.EditorControl();
+      this.outputEditor = new InnovatorAdmin.Editor.EditorWinForm();
       ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
       this.splitContainer1.Panel1.SuspendLayout();
       this.splitContainer1.Panel2.SuspendLayout();
@@ -242,7 +242,7 @@
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
     private System.Windows.Forms.ToolStripMenuItem mniClose;
     private System.Windows.Forms.PropertyGrid propGrid;
-    private Editor.EditorControl outputEditor;
+    private Editor.EditorWinForm outputEditor;
     private System.Windows.Forms.ToolStripLabel lblScriptName;
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;

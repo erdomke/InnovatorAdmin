@@ -84,6 +84,8 @@ namespace InnovatorAdmin
       var result = new DataTable();
       try
       {
+
+
         result.BeginLoadData();
         while (node != null && node.LocalName != "Item") node = node.ChildNodes.OfType<XmlElement>().FirstOrDefault();
         if (node != null)

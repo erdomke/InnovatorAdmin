@@ -26,7 +26,7 @@ namespace InnovatorAdmin.Editor
       get { return _foldingStrategy; }
     }
 
-    public void HandleTextEntered(EditorControl control, string insertText)
+    public void HandleTextEntered(EditorWinForm control, string insertText)
     {
       // Do nothing
     }
@@ -36,7 +36,7 @@ namespace InnovatorAdmin.Editor
       return text;
     }
 
-    public Innovator.Client.IPromise<CompletionContext> ShowCompletions(EditorControl control)
+    public Innovator.Client.IPromise<CompletionContext> ShowCompletions(EditorWinForm control)
     {
       return Promises.Resolved(new CompletionContext());
     }

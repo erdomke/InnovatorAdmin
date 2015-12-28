@@ -21,9 +21,9 @@ namespace InnovatorAdmin
     private IPromise _secondaryMetadata;
     private Dictionary<string, ItemReference> _sql;
     private Dictionary<string, ItemReference> _systemIdentities;
-    private Dictionary<string, IEnumerable<ListValue>> _listValues 
+    private Dictionary<string, IEnumerable<ListValue>> _listValues
       = new Dictionary<string,IEnumerable<ListValue>>();
-    
+
 
     /// <summary>
     /// Enumerable of methods where core = 1
@@ -124,9 +124,9 @@ namespace InnovatorAdmin
         , true, false, id)
         .Convert(r => {
           var values = (IEnumerable<ListValue>)r.Items()
-            .Select(i => new ListValue() 
-            { 
-              Label = i.Property("label").Value, 
+            .Select(i => new ListValue()
+            {
+              Label = i.Property("label").Value,
               Value = i.Property("value").Value
             }).ToArray();
           _listValues[id] = values;
@@ -355,7 +355,7 @@ namespace InnovatorAdmin
       if (_conn == null || itemType.Properties.Count > 0)
         return Promises.Resolved<IEnumerable<Property>>(itemType.Properties.Values);
 
-      return _conn.ApplyAsync("<AML><Item action=\"get\" type=\"ItemType\" select=\"name\"><name>@0</name><Relationships><Item action=\"get\" type=\"Property\" select=\"name,label,data_type,data_source,stored_length,prec,scale,foreign_property(name,source_id)\" /></Relationships></Item></AML>"
+      return _conn.ApplyAsync("<AML><Item action=\"get\" type=\"ItemType\" select=\"name\"><name>@0</name><Relationships><Item action=\"get\" type=\"Property\" select=\"name,label,data_type,data_source,stored_length,prec,scale,foreign_property(name,source_id),hidden,hidden2\" /></Relationships></Item></AML>"
         , true, true, itemType.Name)
         .Convert(r =>
         {
@@ -420,6 +420,9 @@ namespace InnovatorAdmin
         {
           newProp.Restrictions.Add(prop.Property("data_source").Attribute("name").Value);
         }
+        newProp.Visibility =
+          (prop.Property("hidden").AsBoolean(false) ? PropertyVisibility.MainGrid : PropertyVisibility.None)
+          | (prop.Property("hidden2").AsBoolean(false) ? PropertyVisibility.RelationshipGrid : PropertyVisibility.None);
         type.Properties.Add(newProp.Name, newProp);
       }
     }

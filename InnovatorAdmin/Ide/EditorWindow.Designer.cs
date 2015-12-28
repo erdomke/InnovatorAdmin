@@ -29,12 +29,6 @@
     private void InitializeComponent()
     {
       this.components = new System.ComponentModel.Container();
-      ICSharpCode.AvalonEdit.Document.TextDocument textDocument1 = new ICSharpCode.AvalonEdit.Document.TextDocument();
-      System.ComponentModel.Design.ServiceContainer serviceContainer1 = new System.ComponentModel.Design.ServiceContainer();
-      ICSharpCode.AvalonEdit.Document.UndoStack undoStack1 = new ICSharpCode.AvalonEdit.Document.UndoStack();
-      ICSharpCode.AvalonEdit.Document.TextDocument textDocument2 = new ICSharpCode.AvalonEdit.Document.TextDocument();
-      System.ComponentModel.Design.ServiceContainer serviceContainer2 = new System.ComponentModel.Design.ServiceContainer();
-      ICSharpCode.AvalonEdit.Document.UndoStack undoStack2 = new ICSharpCode.AvalonEdit.Document.UndoStack();
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EditorWindow));
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
       this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
@@ -48,11 +42,11 @@
       this.btnPanelToggle = new InnovatorAdmin.Controls.FlatButton();
       this.splitEditors = new System.Windows.Forms.SplitContainer();
       this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
-      this.inputEditor = new InnovatorAdmin.Editor.EditorControl();
+      this.inputEditor = new InnovatorAdmin.Editor.FullEditor();
       this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
       this.tbcOutputView = new System.Windows.Forms.TabControl();
       this.pgTextOutput = new System.Windows.Forms.TabPage();
-      this.outputEditor = new InnovatorAdmin.Editor.EditorControl();
+      this.outputEditor = new InnovatorAdmin.Editor.FullEditor();
       this.pgTableOutput = new System.Windows.Forms.TabPage();
       this.dgvItems = new System.Windows.Forms.DataGridView();
       this.conTable = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -336,15 +330,9 @@
       // 
       // inputEditor
       // 
+      this.inputEditor.BackColor = System.Drawing.Color.White;
       this.tableLayoutPanel3.SetColumnSpan(this.inputEditor, 2);
       this.inputEditor.Dock = System.Windows.Forms.DockStyle.Fill;
-      textDocument1.FileName = null;
-      textDocument1.ServiceProvider = serviceContainer1;
-      textDocument1.Text = "";
-      undoStack1.SizeLimit = 2147483647;
-      textDocument1.UndoStack = undoStack1;
-      this.inputEditor.Document = textDocument1;
-      this.inputEditor.Helper = null;
       this.inputEditor.Location = new System.Drawing.Point(3, 3);
       this.inputEditor.Name = "inputEditor";
       this.inputEditor.ReadOnly = false;
@@ -400,17 +388,11 @@
       // 
       // outputEditor
       // 
+      this.outputEditor.BackColor = System.Drawing.Color.White;
       this.outputEditor.Dock = System.Windows.Forms.DockStyle.Fill;
-      textDocument2.FileName = null;
-      textDocument2.ServiceProvider = serviceContainer2;
-      textDocument2.Text = "";
-      undoStack2.SizeLimit = 2147483647;
-      textDocument2.UndoStack = undoStack2;
-      this.outputEditor.Document = textDocument2;
-      this.outputEditor.Helper = null;
       this.outputEditor.Location = new System.Drawing.Point(0, 0);
       this.outputEditor.Name = "outputEditor";
-      this.outputEditor.ReadOnly = false;
+      this.outputEditor.ReadOnly = true;
       this.outputEditor.Size = new System.Drawing.Size(463, 277);
       this.outputEditor.TabIndex = 0;
       // 
@@ -1136,11 +1118,11 @@
     private System.Windows.Forms.ToolStripButton exploreButton;
     private System.Windows.Forms.SplitContainer splitEditors;
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
-    private Editor.EditorControl inputEditor;
+    private Editor.FullEditor inputEditor;
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
     private System.Windows.Forms.TabControl tbcOutputView;
     private System.Windows.Forms.TabPage pgTextOutput;
-    private Editor.EditorControl outputEditor;
+    private Editor.FullEditor outputEditor;
     private System.Windows.Forms.TabPage pgTableOutput;
     private System.Windows.Forms.DataGridView dgvItems;
     private TreeListView treeItems;

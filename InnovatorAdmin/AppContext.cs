@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Splat;
+using System.Reflection;
 
 namespace InnovatorAdmin
 {
@@ -62,22 +63,26 @@ namespace InnovatorAdmin
       this.MainForm.Shown -= MainForm_Shown;
       UpdateJumpList();
 #if !DEBUG
-      _mgr = UpdateManager.GitHubUpdateManager("https://github.com/erdomke/InnovatorAdmin");
-      _mgr.ContinueWith(t => {
-        var listener = this.MainForm as IUpdateListener;
-        _updates = t.Result.UpdateApp(listener == null ? (Action<int>)null : listener.UpdateCheckProgress);
-        _updates.ContinueWith(r =>
+      if (SingleInstance.IsFirstInstance(Assembly.GetEntryAssembly().FullName))
+      {
+        _mgr = UpdateManager.GitHubUpdateManager("https://github.com/erdomke/InnovatorAdmin");
+        _mgr.ContinueWith(t =>
         {
-          if (r.IsFaulted)
+          var listener = this.MainForm as IUpdateListener;
+          _updates = t.Result.UpdateApp(listener == null ? (Action<int>)null : listener.UpdateCheckProgress);
+          _updates.ContinueWith(r =>
           {
-            Utils.HandleError(r.Exception);
-          }
-          else if (!r.IsCanceled && listener != null)
-          {
-            listener.UpdateCheckComplete(r.Result == default(ReleaseEntry) ? default(Version) : r.Result.Version.Version);
-          }
+            if (r.IsFaulted)
+            {
+              Utils.HandleError(r.Exception);
+            }
+            else if (!r.IsCanceled && listener != null)
+            {
+              listener.UpdateCheckComplete(r.Result == default(ReleaseEntry) ? default(Version) : r.Result.Version.Version);
+            }
+          });
         });
-      });
+      }
 #endif
     }
 

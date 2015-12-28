@@ -12,8 +12,8 @@ namespace InnovatorAdmin.Editor
     IHighlightingDefinition GetHighlighting();
     IEnumerable<string> GetParameterNames(string query);
     IFoldingStrategy FoldingStrategy { get; }
-    void HandleTextEntered(EditorControl control, string insertText);
+    void HandleTextEntered(EditorWinForm control, string insertText);
     string GetCurrentQuery(string text, int offset);
-    IPromise<CompletionContext> ShowCompletions(EditorControl control);
+    IPromise<CompletionContext> ShowCompletions(EditorWinForm control);
   }
 }

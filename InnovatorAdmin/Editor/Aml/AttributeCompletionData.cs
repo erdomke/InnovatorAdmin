@@ -11,10 +11,10 @@ namespace InnovatorAdmin.Editor
   public class AttributeCompletionData : BasicCompletionData, IContextCompletions
   {
     private IEditorHelper _parent;
-    private EditorControl _control;
+    private EditorWinForm _control;
 
 
-    public void SetContext(IEditorHelper parent, EditorControl control)
+    public void SetContext(IEditorHelper parent, EditorWinForm control)
     {
       _parent = parent;
       _control = control;

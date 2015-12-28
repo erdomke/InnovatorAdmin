@@ -36,10 +36,10 @@
       this.txtMessage = new System.Windows.Forms.TextBox();
       this.tbcMain = new System.Windows.Forms.TabControl();
       this.tabPage1 = new System.Windows.Forms.TabPage();
-      this.txtErrorDetails = new InnovatorAdmin.Editor.EditorControl();
+      this.txtErrorDetails = new InnovatorAdmin.Editor.EditorWinForm();
       this.tabPage2 = new System.Windows.Forms.TabPage();
       this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-      this.txtQuery = new InnovatorAdmin.Editor.EditorControl();
+      this.txtQuery = new InnovatorAdmin.Editor.EditorWinForm();
       this.tableLayout.SuspendLayout();
       this.tbcMain.SuspendLayout();
       this.tabPage1.SuspendLayout();
@@ -261,7 +261,7 @@
     private Controls.FlatButton btnIgnore;
     private Controls.FlatButton btnAbort;
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
-    private Editor.EditorControl txtErrorDetails;
-    private Editor.EditorControl txtQuery;
+    private Editor.EditorWinForm txtErrorDetails;
+    private Editor.EditorWinForm txtQuery;
   }
 }

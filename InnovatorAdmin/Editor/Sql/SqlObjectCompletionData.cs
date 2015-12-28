@@ -11,7 +11,7 @@ namespace InnovatorAdmin.Editor
   public class SqlObjectCompletionData : BasicCompletionData, IContextCompletions
   {
     private IEditorHelper _parent;
-    private EditorControl _control;
+    private EditorWinForm _control;
     private string _fullName;
 
     public override string Text
@@ -36,7 +36,7 @@ namespace InnovatorAdmin.Editor
       }
     }
 
-    public void SetContext(IEditorHelper parent, EditorControl control)
+    public void SetContext(IEditorHelper parent, EditorWinForm control)
     {
       _parent = parent;
       _control = control;

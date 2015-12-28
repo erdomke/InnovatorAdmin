@@ -1,0 +1,37 @@
+﻿<SyntaxDefinition name="RegexReplace" extensions="" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+  <Color name="Character" foreground="Magenta" exampleText=""/>
+  <Color name="Group" foreground="Green" fontWeight="bold" exampleText=""/>
+  
+  <RuleSet>
+
+    <Keywords color="Character">
+      <Word>\"</Word>
+      <Word>\'</Word>
+      <Word>\\</Word>
+      <Word>\0</Word>
+      <Word>\a</Word>
+      <Word>\b</Word>
+      <Word>\f</Word>
+      <Word>\n</Word>
+      <Word>\r</Word>
+      <Word>\t</Word>
+      <Word>\v</Word>
+    </Keywords>
+    
+    <Rule color="Character">\\x[0-9a-fA-F]{1,4}</Rule>
+    <Rule color="Character">\\u[0-9a-fA-F]{4}</Rule>
+    <Rule color="Character">\\U0000[0-9a-fA-F]{4}</Rule>
+    
+    <Keywords color="Group">
+      <Word>$$</Word>
+      <Word>$&amp;</Word>
+      <Word>$`</Word>
+      <Word>$'</Word>
+      <Word>$+</Word>
+      <Word>$_</Word>
+    </Keywords>
+    
+    <Rule color="Group">\$(\d|\{\w+\})</Rule>
+  
+  </RuleSet>
+</SyntaxDefinition>

@@ -29,6 +29,7 @@ namespace InnovatorAdmin
     public string ForeignLinkPropName { get; set; }
     public string ForeignPropName { get; set; }
     public string ForeignTypeName { get; set; }
+    public PropertyVisibility Visibility { get; set; }
 
     public Property()
     {
