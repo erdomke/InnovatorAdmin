@@ -24,7 +24,7 @@ namespace InnovatorAdmin
     private bool _disposeProxy = true;
     private IEditorProxy _proxy;
     private IResultObject _result;
-    private DataTable _outputTable;
+    private DataSet _outputSet;
     private string _soapAction;
     private Dictionary<string, QueryParameter> _paramCache = new Dictionary<string, QueryParameter>();
     private IPromise _currentQuery;
@@ -327,41 +327,84 @@ namespace InnovatorAdmin
       }
     }
 
+    private const string GeneratedPage = "__GeneratedPage_";
     private void EnsureDataTable()
     {
-      if (_result != null && tbcOutputView.SelectedTab == pgTableOutput)
+      if (_outputSet == null && _result != null && tbcOutputView.SelectedTab == pgTableOutput)
       {
-        _outputTable = _result.GetTable();
-        dgvItems.DataSource = _outputTable;
-        FormatDataGrid();
+        _outputSet = _result.GetDataSet();
+        if (_outputSet.Tables.Count > 0)
+        {
+          dgvItems.DataSource = _outputSet.Tables[0];
+          FormatDataGrid(dgvItems);
+          pgTableOutput.Text = _outputSet.Tables[0].TableName;
 
-        dgvItems.AllowUserToAddRows = _outputTable != null
-                && _outputTable.Columns.Contains("id")
-                && _outputTable.Columns.Contains("type");
-        dgvItems.AllowUserToDeleteRows = dgvItems.AllowUserToAddRows;
-        dgvItems.ReadOnly = !dgvItems.AllowUserToAddRows;
+          var i = 1;
+          foreach (var tbl in _outputSet.Tables.OfType<DataTable>().Skip(1))
+          {
+            var pg = new TabPage(tbl.TableName);
+            pg.Name = GeneratedPage + i.ToString();
+            var grid = new DataGridView();
+            grid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            grid.ContextMenuStrip = this.conTable;
+            grid.DataSource = tbl;
+            grid.Dock = System.Windows.Forms.DockStyle.Fill;
+            grid.Location = new System.Drawing.Point(0, 0);
+            grid.Margin = new System.Windows.Forms.Padding(0);
+            grid.TabIndex = 0;
+            grid.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgvItems_CellFormatting);
+            pg.Controls.Add(grid);
+            tbcOutputView.TabPages.Add(pg);
+            FormatDataGrid(grid);
+            i++;
+          }
+        }
       }
     }
 
-    private void FormatDataGrid()
+    private void FormatDataGrid(DataGridView grid)
     {
-      dgvItems.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCellsExceptHeader);
-      var minWidths = dgvItems.Columns.OfType<DataGridViewColumn>().Select(c => c.Width).ToArray();
-      dgvItems.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-      var maxWidths = dgvItems.Columns.OfType<DataGridViewColumn>().Select(c => c.Width).ToArray();
-      var maxWidth = (int)(dgvItems.Width * 0.8);
+      grid.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCellsExceptHeader);
+      var minWidths = grid.Columns.OfType<DataGridViewColumn>().Select(c => c.Width).ToArray();
+      grid.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+      var maxWidths = grid.Columns.OfType<DataGridViewColumn>().Select(c => c.Width).ToArray();
+      var maxWidth = (int)(grid.Width * 0.8);
 
-      for (var i = 0; i < dgvItems.Columns.Count; i++)
+      DataColumn boundColumn;
+      for (var i = 0; i < grid.Columns.Count; i++)
       {
-        dgvItems.Columns[i].Width = Math.Min(maxWidths[i] < 100 ? maxWidths[i] :
+        grid.Columns[i].Width = Math.Min(maxWidths[i] < 100 ? maxWidths[i] :
             (maxWidths[i] < minWidths[i] + 60 ? maxWidths[i] : minWidths[i] + 60)
           , maxWidth);
-        dgvItems.Columns[i].DefaultCellStyle.Alignment =
-          (IsNumericType(dgvItems.Columns[i].ValueType)
+        grid.Columns[i].DefaultCellStyle.Alignment =
+          (IsNumericType(grid.Columns[i].ValueType)
             ? DataGridViewContentAlignment.TopRight
             : DataGridViewContentAlignment.TopLeft);
-        //dgvItems.Columns[i].nul
+        boundColumn = ((DataTable)grid.DataSource).Columns[grid.Columns[i].DataPropertyName];
+        grid.Columns[i].HeaderText = boundColumn.Caption;
+        grid.Columns[i].Visible = boundColumn.IsUiVisible();
       }
+
+      var orderedColumns = grid.Columns.OfType<DataGridViewColumn>()
+        .Select(c => new 
+        { 
+          Column = c,
+          SortOrder = ((DataTable)grid.DataSource).Columns[c.DataPropertyName].SortOrder() 
+        })
+        .OrderBy(c => c.SortOrder)
+        .ThenBy(c => c.Column.HeaderText)
+        .Select((c, i) => new { Column = c.Column, Index = i })
+        .ToArray();
+      foreach (var col in orderedColumns)
+      {
+        col.Column.DisplayIndex = col.Index;
+      }
+
+      grid.AllowUserToAddRows = _outputSet != null
+        && ((DataTable)grid.DataSource).Columns.Contains("id")
+        && ((DataTable)grid.DataSource).Columns.Contains("type");
+      grid.AllowUserToDeleteRows = grid.AllowUserToAddRows;
+      grid.ReadOnly = !grid.AllowUserToAddRows;
     }
     private bool IsNumericType(Type type)
     {
@@ -492,7 +535,14 @@ namespace InnovatorAdmin
         }
 
         _result = null;
-        _outputTable = null;
+        _outputSet = null;
+        var pagesToRemove = tbcOutputView.TabPages.OfType<TabPage>()
+                .Where(p => p.Name.StartsWith(GeneratedPage)).ToArray();
+        foreach (var page in pagesToRemove)
+        {
+          tbcOutputView.TabPages.Remove(page);
+        }
+        pgTableOutput.Text = "Table";
         dgvItems.DataSource = null;
 
         SnippetManager.Instance.LastQuery = new Snippet()
@@ -620,15 +670,15 @@ namespace InnovatorAdmin
         dialog.SetConnection(conn);
         dialog._autoTabSelect = false;
         if (dialog.ShowDialog() == DialogResult.OK
-          && dialog._outputTable.Columns.Contains("type")
-          && dialog._outputTable.Columns.Contains("id"))
+          && dialog._outputSet.Tables[0].Columns.Contains("type")
+          && dialog._outputSet.Tables[0].Columns.Contains("id"))
         {
           return dialog.dgvItems.SelectedRows
                        .OfType<DataGridViewRow>()
                        .Where(r => r.Index != r.DataGridView.NewRowIndex)
                        .Select(r => ((DataRowView)r.DataBoundItem).Row)
                        .Select(r => new ItemReference((string)r["type"], (string)r["id"]) {
-                         KeyedName = dialog._outputTable.Columns.Contains("keyed_name") ? (string)r["keyed_name"] : null
+                         KeyedName = dialog._outputSet.Tables[0].Columns.Contains("keyed_name") ? (string)r["keyed_name"] : null
                        }).ToList();
         }
         return Enumerable.Empty<ItemReference>();
@@ -689,7 +739,7 @@ namespace InnovatorAdmin
     {
       try
       {
-        _outputTable.AcceptChanges();
+        _outputSet.AcceptChanges();
       }
       catch (Exception ex)
       {
@@ -701,7 +751,7 @@ namespace InnovatorAdmin
     {
       try
       {
-        _outputTable.RejectChanges();
+        _outputSet.RejectChanges();
       }
       catch (Exception ex)
       {
@@ -713,7 +763,7 @@ namespace InnovatorAdmin
     {
       try
       {
-        var aml = GetTableChangeAml();
+        var aml = GetTableChangeAml((DataTable)tbcOutputView.SelectedTab.Controls.OfType<DataGridView>().Single().DataSource);
         if (!string.IsNullOrEmpty(aml))
           Clipboard.SetText(aml);
       }
@@ -731,7 +781,7 @@ namespace InnovatorAdmin
         {
           if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
           {
-            System.IO.File.WriteAllText(dialog.FileName, GetTableChangeAml());
+            System.IO.File.WriteAllText(dialog.FileName, GetTableChangeAml((DataTable)tbcOutputView.SelectedTab.Controls.OfType<DataGridView>().Single().DataSource));
           }
         }
       }
@@ -746,7 +796,7 @@ namespace InnovatorAdmin
       try
       {
         var window = NewWindow();
-        window.inputEditor.Text = GetTableChangeAml();
+        window.inputEditor.Text = GetTableChangeAml((DataTable)tbcOutputView.SelectedTab.Controls.OfType<DataGridView>().Single().DataSource);
         window.SoapAction = this.SoapAction;
         window.Show();
       }
@@ -756,9 +806,9 @@ namespace InnovatorAdmin
       }
     }
 
-    private string GetTableChangeAml()
+    private string GetTableChangeAml(DataTable table)
     {
-      var changes = _outputTable.GetChanges(DataRowState.Added | DataRowState.Deleted | DataRowState.Modified);
+      var changes = table.GetChanges(DataRowState.Added | DataRowState.Deleted | DataRowState.Modified);
       if (changes == null)
         return string.Empty;
 
@@ -767,7 +817,7 @@ namespace InnovatorAdmin
       settings.Indent = true;
       settings.IndentChars = "  ";
 
-      var types = _outputTable.AsEnumerable()
+      var types = table.AsEnumerable()
         .Select(r => r.CellValue("type").ToString())
         .Where(t => !string.IsNullOrEmpty(t))
         .Distinct().ToList();
@@ -1285,6 +1335,22 @@ namespace InnovatorAdmin
         connSelect.GoNextAction = () => main.GoToStep(new ExportSelect());
         main.GoToStep(connSelect);
         main.Show();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void mniColumns_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        using (var dialog = new ColumnSelect())
+        {
+          dialog.DataSource = dgvItems;
+          dialog.ShowDialog(this);
+        }
       }
       catch (Exception ex)
       {

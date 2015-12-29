@@ -18,12 +18,21 @@ namespace InnovatorAdmin
       if (cmd.Connection.State == ConnectionState.Closed)
         await cmd.Connection.OpenAsync(token);
 
-      using (var reader = await cmd.ExecuteReaderAsync(token))
+      using (var reader = await cmd.ExecuteReaderAsync())
       {
-        var table = new DataTable();
-        table.Load(reader);
-        return new SqlResultObject(table,
-          string.Format("({0} row(s) affected)", Math.Max(table.Rows.Count, reader.RecordsAffected)));
+        var dataSet = new DataSet();
+        var nextResult = true;
+        while (nextResult)
+        {
+          var table = new DataTable();
+          table.Load(reader);
+          dataSet.Tables.Add(table);
+          nextResult = await reader.NextResultAsync();
+        }
+
+        return new SqlResultObject(dataSet, dataSet.Tables.Count > 0
+          ? dataSet.Tables.OfType<DataTable>().GroupConcat(Environment.NewLine, t => string.Format("({0} row(s) affected)", t.Rows.Count))
+          : string.Format("({0} row(s) affected)", reader.RecordsAffected));
       }
     }
 

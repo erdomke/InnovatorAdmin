@@ -188,7 +188,7 @@ namespace InnovatorAdmin
             }
 
             _itemTypesById = _itemTypesByName.Values.ToDictionary(i => i.Id);
-            return _conn.ApplyAsync(@"<Item action='get' type='RelationshipType' related_expand='0' select='related_id,source_id,relationship_id,name' />", true, true);
+            return _conn.ApplyAsync(@"<Item action='get' type='RelationshipType' related_expand='0' select='related_id,source_id,relationship_id,name,label' />", true, true);
           })
           .Continue(r =>
           {
@@ -205,6 +205,7 @@ namespace InnovatorAdmin
               {
                 source.Relationships.Add(relType);
                 relType.Source = source;
+                relType.TabLabel = rel.Property("label").AsString(null);
                 if (rel.RelatedId().Attribute("name").HasValue()
                   && _itemTypesByName.TryGetValue(rel.RelatedId().Attribute("name").Value, out related))
                 {
@@ -355,7 +356,7 @@ namespace InnovatorAdmin
       if (_conn == null || itemType.Properties.Count > 0)
         return Promises.Resolved<IEnumerable<Property>>(itemType.Properties.Values);
 
-      return _conn.ApplyAsync("<AML><Item action=\"get\" type=\"ItemType\" select=\"name\"><name>@0</name><Relationships><Item action=\"get\" type=\"Property\" select=\"name,label,data_type,data_source,stored_length,prec,scale,foreign_property(name,source_id),hidden,hidden2\" /></Relationships></Item></AML>"
+      return _conn.ApplyAsync("<AML><Item action=\"get\" type=\"ItemType\" select=\"name\"><name>@0</name><Relationships><Item action=\"get\" type=\"Property\" select=\"name,label,data_type,data_source,stored_length,prec,scale,foreign_property(name,source_id),is_hidden,is_hidden2,sort_order,default_value,column_width,is_required,readonly\" /></Relationships></Item></AML>"
         , true, true, itemType.Name)
         .Convert(r =>
         {
@@ -421,8 +422,15 @@ namespace InnovatorAdmin
           newProp.Restrictions.Add(prop.Property("data_source").Attribute("name").Value);
         }
         newProp.Visibility =
-          (prop.Property("hidden").AsBoolean(false) ? PropertyVisibility.MainGrid : PropertyVisibility.None)
-          | (prop.Property("hidden2").AsBoolean(false) ? PropertyVisibility.RelationshipGrid : PropertyVisibility.None);
+          (prop.Property("is_hidden").AsBoolean(false) ? PropertyVisibility.None : PropertyVisibility.MainGrid)
+          | (prop.Property("is_hidden2").AsBoolean(false) ? PropertyVisibility.None : PropertyVisibility.RelationshipGrid);
+        newProp.SortOrder = prop.Property("sort_order").AsInt(int.MaxValue);
+        newProp.ColumnWidth = prop.Property("column_width").AsInt(100);
+        newProp.IsRequired = prop.Property("is_required").AsBoolean(false);
+        newProp.ReadOnly = prop.Property("readonly").AsBoolean(false);
+
+        //default_value,column_width,is_required,readonly
+
         type.Properties.Add(newProp.Name, newProp);
       }
     }

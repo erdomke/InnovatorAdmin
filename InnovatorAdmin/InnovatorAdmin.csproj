@@ -178,6 +178,12 @@
     <Compile Include="Controls\RecentlyModifiedSearch.Designer.cs">
       <DependentUpon>RecentlyModifiedSearch.cs</DependentUpon>
     </Compile>
+    <Compile Include="Dialog\ColumnSelect.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialog\ColumnSelect.Designer.cs">
+      <DependentUpon>ColumnSelect.cs</DependentUpon>
+    </Compile>
     <Compile Include="Dialog\Enums.cs" />
     <Compile Include="Dialog\Extensions.cs" />
     <Compile Include="Dialog\FileDialogControlBase.cs">
@@ -208,6 +214,7 @@
     <Compile Include="Dialog\Win32.cs" />
     <Compile Include="Editor\AmlLinkElementGenerator.cs" />
     <Compile Include="Editor\Aml\AmlSimpleEditorHelper.cs" />
+    <Compile Include="Editor\Aml\XmlFragmentReader.cs" />
     <Compile Include="Editor\CompletionData\CustomCompletionData.cs" />
     <Compile Include="Editor\FullEditor.cs">
       <SubType>UserControl</SubType>
@@ -436,6 +443,7 @@
     <Compile Include="Scripts\ScriptWindow.Designer.cs">
       <DependentUpon>ScriptWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="SingleInstance.cs" />
     <Compile Include="Snippet.cs" />
     <Compile Include="SnippetManager.cs" />
     <Compile Include="Utils.cs" />
@@ -489,6 +497,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\MergeInterface.resx">
       <DependentUpon>MergeInterface.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialog\ColumnSelect.resx">
+      <DependentUpon>ColumnSelect.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialog\FilterSelect.resx">
       <DependentUpon>FilterSelect.cs</DependentUpon>

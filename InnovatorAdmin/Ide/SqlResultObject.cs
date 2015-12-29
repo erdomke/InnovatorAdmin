@@ -10,18 +10,18 @@ namespace InnovatorAdmin
 {
   public class SqlResultObject : IResultObject
   {
-    private DataTable _table;
+    private DataSet _dataSet;
     private TextDocument _doc;
 
-    public SqlResultObject(DataTable table, string text)
+    public SqlResultObject(DataSet dataSet, string text)
     {
-      _table = table;
+      _dataSet = dataSet;
       _doc = new TextDocument(text);
     }
 
     public int ItemCount
     {
-      get { return _table.Rows.Count; }
+      get { return _dataSet.Tables.OfType<DataTable>().Sum(t => t.Rows.Count); }
     }
 
     public string GetText()
@@ -37,14 +37,14 @@ namespace InnovatorAdmin
       _doc.Text = value;
     }
 
-    public DataTable GetTable()
+    public DataSet GetDataSet()
     {
-      return _table;
+      return _dataSet;
     }
 
     public bool PreferTable
     {
-      get { return _table.Rows.Count > 0; }
+      get { return _dataSet.Tables.Count > 0 && _dataSet.Tables[0].Rows.Count > 0; }
     }
 
 

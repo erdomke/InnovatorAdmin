@@ -180,7 +180,7 @@ namespace InnovatorAdmin
         cmd.Aml = "<AML>" + cmd.Aml + "</AML>";
       }
       return ProcessCommand(cmd, async)
-        .Convert(s => (IResultObject)new ResultObject(s)
+        .Convert(s => (IResultObject)new ResultObject(s, _conn)
         {
           PreferTable = cmd.Action == CommandAction.ApplySQL
         });
@@ -209,9 +209,10 @@ namespace InnovatorAdmin
     {
       private TextDocument _doc;
       private int _count;
-      private DataTable _table;
+      private DataSet _dataSet;
       private int _amlLength;
       private string _title;
+      private IAsyncConnection _conn;
 
 
       public bool PreferTable { get; set; }
@@ -221,7 +222,7 @@ namespace InnovatorAdmin
         get { return _count; }
       }
 
-      public ResultObject(Stream aml)
+      public ResultObject(Stream aml, IAsyncConnection conn)
       {
         _doc = new TextDocument();
         using (var reader = new StreamReader(aml))
@@ -231,6 +232,7 @@ namespace InnovatorAdmin
         }
         _amlLength = _doc.TextLength;
         _doc.SetOwnerThread(null);
+        _conn = conn;
       }
 
       public TextDocument GetDocument()
@@ -238,15 +240,16 @@ namespace InnovatorAdmin
         return _doc;
       }
 
-      public System.Data.DataTable GetTable()
+      public System.Data.DataSet GetDataSet()
       {
-        if (_table == null && _amlLength > 0)
+        if (_dataSet == null && _amlLength > 0)
         {
           var doc = new XmlDocument();
           doc.Load(_doc.CreateReader());
-          _table = Extensions.GetItemTable(doc);
+          _dataSet = Extensions.GetItemTable(_conn.AmlContext.FromXml(doc.DocumentElement)
+            , ArasMetadataProvider.Cached(_conn));
         }
-        return _table;
+        return _dataSet;
       }
 
       private string IndentXml(string xmlContent, out int itemCount)

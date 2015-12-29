@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
+using Innovator.Client;
 
 namespace InnovatorAdmin
 {
@@ -79,71 +80,249 @@ namespace InnovatorAdmin
       }
     }
 
-    public static DataTable GetItemTable(XmlNode node)
+    private class TypeProperties : IEnumerable<KeyValuePair<string, HashSet<string>>>
     {
-      var result = new DataTable();
+      private Dictionary<string, HashSet<string>> _types = new Dictionary<string, HashSet<string>>();
+
+      public void Add(string type, string property)
+      {
+        HashSet<string> props;
+        if (!_types.TryGetValue(type, out props))
+        {
+          props = new HashSet<string>();
+          _types.Add(type, props);
+        }
+        props.Add(property);
+      }
+
+      public IEnumerator<KeyValuePair<string, HashSet<string>>> GetEnumerator()
+      {
+        return _types.GetEnumerator();
+      }
+
+      System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+      {
+        return this.GetEnumerator();
+      }
+    }
+
+    public static bool IsUiVisible(this DataColumn column)
+    {
+      return (bool)column.ExtendedProperties["visible"];
+    }
+    private static void IsUiVisible(this DataColumn column, bool value)
+    {
+      column.ExtendedProperties["visible"] = value;
+    }
+    public static int ColumnWidth(this DataColumn column)
+    {
+      if (column.ExtendedProperties.ContainsKey("column_width"))
+        return (int)column.ExtendedProperties["column_width"];
+      return 100;
+    }
+    private static void ColumnWidth(this DataColumn column, int value)
+    {
+      column.ExtendedProperties["column_width"] = value;
+    }
+    public static int SortOrder(this DataColumn column)
+    {
+      if (column.ExtendedProperties.ContainsKey("sort_order"))
+        return (int)column.ExtendedProperties["sort_order"];
+      return 999999;
+    }
+    private static void SortOrder(this DataColumn column, int value)
+    {
+      column.ExtendedProperties["sort_order"] = value;
+    }
+
+    public static DataSet GetItemTable(IReadOnlyResult res, ArasMetadataProvider metadata)
+    {
+      var ds = new DataSet();
+      string mainType = null;
+
+      List<IReadOnlyItem> items;
       try
       {
-
-
-        result.BeginLoadData();
-        while (node != null && node.LocalName != "Item") node = node.ChildNodes.OfType<XmlElement>().FirstOrDefault();
-        if (node != null)
+        items = res.Items().ToList();
+        if (items.Count == 1)
         {
-          var items = node.ParentNode.ChildNodes.OfType<XmlElement>().Where(e => e.LocalName == "Item");
-          var props = new HashSet<string>();
-          if (items.Any(i => i.HasAttribute("type") || i.Element("id") != null)) props.Add("type");
-          if (items.Any(i => i.HasAttribute("typeId") || i.Element("itemtype") != null)) props.Add("itemtype");
-          if (items.Any(i => i.Element("keyed_name") != null || i.Element("id") != null)) props.Add("keyed_name");
-          if (items.Any(i => i.HasAttribute("id") || i.Element("id") != null)) props.Add("id");
+          mainType = items[0].Type().Value;
+          items.AddRange(items[0].Relationships());
+        }
 
+        if (items.Count < 1)
+          return ds;
+      }
+      catch (ServerException)
+      {
+        return ds;
+      }
 
-          foreach (var elem in items.SelectMany(i => i.Elements()))
+      var types = new TypeProperties();
+      string type;
+
+      foreach (var i in items)
+      {
+        type = (i.Type().Exists || i.Property("id").Exists)
+          ? i.Type().AsString(i.Property("id").Type().AsString(""))
+          : string.Empty;
+
+        if (!string.IsNullOrEmpty(type)) types.Add(type, "type");
+        if (i.TypeId().Exists || i.Property("itemtype").Exists) types.Add(type, "itemtype");
+        if (i.KeyedName().Exists || i.Property("id").Exists) types.Add(type, "keyed_name");
+        if (!string.IsNullOrEmpty(i.Id())) types.Add(type, "id");
+
+        foreach (var elem in i.Elements().OfType<IReadOnlyProperty>())
+        {
+          if (elem.Name != "id" && elem.Name != "config_id")
           {
-            if (elem.LocalName != "id" && elem.LocalName != "config_id")
+            if (elem.Type().Exists) types.Add(type, elem.Name + "/type");
+            if (elem.KeyedName().Exists) types.Add(type, elem.Name + "/keyed_name");
+          }
+          types.Add(type, elem.Name);
+        }
+      }
+
+
+      ItemType itemType;
+      Property pMeta;
+      DataRow row;
+      string propName;
+      string propAddendum;
+      int split;
+      DataColumn newColumn;
+      foreach (var kvp in types)
+      {
+        var result = new DataTable(kvp.Key);
+        try
+        {
+          result.BeginLoadData();
+
+          foreach (var prop in kvp.Value)
+          {
+            if (prop != "type"
+              && prop != "itemtype"
+              && !string.IsNullOrEmpty(kvp.Key)
+              && metadata != null
+              && metadata.ItemTypeByName(kvp.Key, out itemType))
             {
-              if (elem.HasAttribute("type")) props.Add(elem.LocalName + "/type");
-              if (elem.HasAttribute("keyed_name")) props.Add(elem.LocalName + "/keyed_name");
+              result.TableName = itemType.TabLabel ?? (itemType.Label ?? itemType.Name);
+
+              split = prop.IndexOf('/');
+              propAddendum = string.Empty;
+              propName = prop;
+              if (split > 0)
+              {
+                propName = prop.Substring(0, split);
+                propAddendum = prop.Substring(split);
+              }
+
+              try
+              {
+                pMeta = metadata.GetProperty(itemType, propName).Wait();
+
+                switch (pMeta.Type)
+                {
+                  case PropertyType.boolean:
+                    newColumn = new DataColumn(prop, typeof(bool));
+                    break;
+                  case PropertyType.date:
+                    newColumn = new DataColumn(prop, typeof(DateTime));
+                    break;
+                  case PropertyType.number:
+                    if (string.Equals(pMeta.TypeName, "integer", StringComparison.OrdinalIgnoreCase))
+                    {
+                      newColumn = new DataColumn(prop, typeof(int));
+                    }
+                    else
+                    {
+                      newColumn = new DataColumn(prop, typeof(double));
+                    }
+                    break;
+                  default:
+                    newColumn = new DataColumn(prop, typeof(string));
+                    if (pMeta.StoredLength > 0) newColumn.MaxLength = pMeta.StoredLength;
+                    break;
+                }
+                newColumn.Caption = (pMeta.Label ?? pMeta.Name) + propAddendum;
+                if (pMeta.DefaultValue != null) newColumn.DefaultValue = pMeta.DefaultValue;
+                newColumn.ReadOnly = pMeta.ReadOnly;
+                newColumn.AllowDBNull = !pMeta.IsRequired;
+                newColumn.IsUiVisible(string.IsNullOrEmpty(mainType) && itemType.Name != mainType
+                  ? (pMeta.Visibility & PropertyVisibility.RelationshipGrid) > 0
+                  : (pMeta.Visibility & PropertyVisibility.MainGrid) > 0);
+                newColumn.ColumnWidth(pMeta.ColumnWidth);
+                newColumn.SortOrder(pMeta.SortOrder);
+              }
+              catch (KeyNotFoundException)
+              {
+                newColumn = new DataColumn(prop, typeof(string));
+                newColumn.IsUiVisible(string.IsNullOrEmpty(kvp.Key) || metadata == null);
+              }
             }
-            props.Add(elem.LocalName);
+            else
+            {
+              newColumn = new DataColumn(prop, typeof(string));
+              newColumn.IsUiVisible(string.IsNullOrEmpty(kvp.Key) || metadata == null);
+            }
+            result.Columns.Add(newColumn);
           }
 
-          foreach (var prop in props)
-          {
-            result.Columns.Add(prop, typeof(string));
-          }
-
-          DataRow row;
-          int split;
-          foreach (var item in items)
+          foreach (var item in items
+            .Where(i => string.IsNullOrEmpty(kvp.Key)
+              || i.Type().AsString(i.Property("id").Type().Value) == kvp.Key))
           {
             row = result.NewRow();
             row.BeginEdit();
-            foreach (var prop in props)
+            foreach (var prop in kvp.Value)
             {
               switch (prop)
               {
                 case "id":
-                  row[prop] = item.Attribute("id", item.Element("id", null));
+                  row[prop] = item.Id();
                   break;
                 case "keyed_name":
-                  row[prop] = item.Element("keyed_name", item.Element("id").Attribute("keyed_name"));
+                  row[prop] = item.KeyedName().AsString(item.Property("id").KeyedName().Value);
                   break;
                 case "type":
-                  row[prop] = item.Attribute("type", item.Element("id").Attribute("type"));
+                  row[prop] = item.Type().AsString(item.Property("id").Type().Value);
                   break;
                 case "itemtype":
-                  row[prop] = item.Attribute("typeId", item.Element("itemtype", null));
+                  row[prop] = item.TypeId().AsString(item.Property("itemtype").Value);
                   break;
                 default:
                   split = prop.IndexOf('/');
                   if (split > 0)
                   {
-                    row[prop] = item.Element(prop.Substring(0, split)).Attribute(prop.Substring(split + 1));
+                    row[prop] = item.Property(prop.Substring(0, split)).Attribute(prop.Substring(split + 1)).Value;
+                  }
+                  else if (item.Property(prop).HasValue())
+                  {
+                    newColumn = result.Columns[prop];
+                    if (newColumn.DataType == typeof(bool))
+                    {
+                      row[prop] = item.Property(prop).AsBoolean(false);
+                    }
+                    else if (newColumn.DataType == typeof(DateTime))
+                    {
+                      row[prop] = item.Property(prop).AsDateTime(DateTime.MinValue);
+                    }
+                    else if (newColumn.DataType == typeof(int))
+                    {
+                      row[prop] = item.Property(prop).AsInt(int.MinValue);
+                    }
+                    else if (newColumn.DataType == typeof(double))
+                    {
+                      row[prop] = item.Property(prop).AsDouble(double.MinValue);
+                    }
+                    else
+                    {
+                      row[prop] = item.Property(prop).Value;
+                    }
                   }
                   else
                   {
-                    row[prop] = item.Element(prop, null);
+                    row[prop] = DBNull.Value;
                   }
                   break;
               }
@@ -153,13 +332,16 @@ namespace InnovatorAdmin
             result.Rows.Add(row);
           }
         }
+        finally
+        {
+          result.EndLoadData();
+          result.AcceptChanges();
+        }
+
+        ds.Tables.Add(result);
       }
-      finally
-      {
-        result.EndLoadData();
-        result.AcceptChanges();
-      }
-      return result;
+
+      return ds;
     }
 
     /// <summary>

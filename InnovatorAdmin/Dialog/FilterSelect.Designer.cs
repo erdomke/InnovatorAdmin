@@ -97,6 +97,7 @@
       this.btnOK.ForeColor = System.Drawing.Color.Black;
       this.btnOK.Location = new System.Drawing.Point(147, 230);
       this.btnOK.Name = "btnOK";
+      this.btnOK.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnOK.Padding = new System.Windows.Forms.Padding(2);
       this.btnOK.Size = new System.Drawing.Size(65, 29);
       this.btnOK.TabIndex = 2;
@@ -115,6 +116,7 @@
       this.btnCancel.ForeColor = System.Drawing.Color.Black;
       this.btnCancel.Location = new System.Drawing.Point(218, 230);
       this.btnCancel.Name = "btnCancel";
+      this.btnCancel.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnCancel.Padding = new System.Windows.Forms.Padding(2);
       this.btnCancel.Size = new System.Drawing.Size(63, 29);
       this.btnCancel.TabIndex = 3;

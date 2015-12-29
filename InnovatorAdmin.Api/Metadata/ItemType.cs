@@ -92,6 +92,7 @@ namespace InnovatorAdmin
     /// Related item type (if this item type is a relationship)
     /// </summary>
     public ItemType Related { get; set; }
+    public string TabLabel { get; set; }
 
     /// <summary>
     /// Whether the given object is equal to this one

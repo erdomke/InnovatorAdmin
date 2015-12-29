@@ -38,8 +38,7 @@ namespace InnovatorAdmin.Editor
       var offset = startOffset - start;
       var text = base.CurrentContext.GetText(start, stop - start).Text;
 
-      using (var strReader = new StringReader(text))
-      using (var reader = XmlReader.Create(strReader, settings))
+      using (var reader = new XmlFragmentReader(base.CurrentContext.Document.CreateReader(start, stop - start)))
       {
         var lineInfo = reader as IXmlLineInfo;
         string type = null;
@@ -61,7 +60,7 @@ namespace InnovatorAdmin.Editor
                   {
                     Id = reader.Value,
                     Type = type,
-                    Offset = lineInfo.LinePosition + start - 1
+                    Offset = lineInfo.LinePosition + start
                   };
                 break;
             }

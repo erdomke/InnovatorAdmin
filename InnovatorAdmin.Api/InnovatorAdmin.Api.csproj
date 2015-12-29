@@ -98,6 +98,7 @@
     <Compile Include="Metadata\Method.cs" />
     <Compile Include="Metadata\Property.cs" />
     <Compile Include="Metadata\PropertyType.cs" />
+    <Compile Include="Metadata\PropertyVisibility.cs" />
     <Compile Include="ProgressChangedEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RecoverableErrorEventArgs.cs" />

@@ -13,7 +13,7 @@ namespace InnovatorAdmin
     bool PreferTable { get; }
     int ItemCount { get; }
     TextDocument GetDocument();
-    DataTable GetTable();
+    DataSet GetDataSet();
     string Title { get; }
   }
 }

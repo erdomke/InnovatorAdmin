@@ -30,6 +30,11 @@ namespace InnovatorAdmin
     public string ForeignPropName { get; set; }
     public string ForeignTypeName { get; set; }
     public PropertyVisibility Visibility { get; set; }
+    public int SortOrder { get; set; }
+    public object DefaultValue { get; set; }
+    public int ColumnWidth { get; set; }
+    public bool IsRequired { get; set; }
+    public bool ReadOnly { get; set; }
 
     public Property()
     {
