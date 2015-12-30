@@ -57,10 +57,11 @@ namespace InnovatorAdmin
     protected override void Dispose(bool disposing)
     {
       base.Dispose(disposing);
-      if (disposing)
+      if (disposing && _doc != null)
       {
         _doc.EndUpdate();
         _doc.UndoStack.SizeLimit = _undoStackSize;
+        _doc = null;
       }
     }
   }

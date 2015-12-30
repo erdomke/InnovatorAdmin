@@ -25,6 +25,7 @@ namespace InnovatorAdmin.Editor
       get { return null; }
     }
 
+    public Func<string> Action { get; set; }
     public virtual string Text { get; set; }
 
     // Use this property if you want to show a fancy UIElement in the list.
@@ -39,7 +40,7 @@ namespace InnovatorAdmin.Editor
     public virtual void Complete(TextArea textArea, ISegment completionSegment,
         EventArgs insertionRequestEventArgs)
     {
-      textArea.Document.Replace(completionSegment, this.Text);
+      textArea.Document.Replace(completionSegment, Action == null ? this.Text : Action.Invoke());
     }
 
     public double Priority

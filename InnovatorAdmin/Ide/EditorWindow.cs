@@ -1,55 +1,60 @@
-﻿using InnovatorAdmin.Connections;
+﻿using Innovator.Client;
+using InnovatorAdmin.Connections;
+using InnovatorAdmin.Controls;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
-using System.Linq;
-using System.Diagnostics;
-using Innovator.Client;
-using InnovatorAdmin.Controls;
-using System.Globalization;
-using System.Threading.Tasks;
-using Nancy;
 
 namespace InnovatorAdmin
 {
-  public partial class EditorWindow : Form
+  public partial class EditorWindow : Form, IUpdateListener
   {
-    private bool _panelCollapsed;
-    private bool _autoTabSelect = true;
-    private bool _loadingConnection = false;
+    private const string GeneratedPage = "__GeneratedPage_";
+
+    private Timer _clock = new Timer();
+    private UiCommandManager _commands;
+    private IPromise _currentQuery;
     private bool _disposeProxy = true;
+    private Editor.AmlLinkElementGenerator _linkGenerator;
+    private bool _loadingConnection = false;
+    private string _locale;
+    private DataSet _outputSet;
+    private bool _panelCollapsed;
+    private Dictionary<string, QueryParameter> _paramCache = new Dictionary<string, QueryParameter>();
     private IEditorProxy _proxy;
     private IResultObject _result;
-    private DataSet _outputSet;
+    private bool _richResult = true; // Whether the results includes text and multiple tables (as opposed to a single table)
     private string _soapAction;
-    private Dictionary<string, QueryParameter> _paramCache = new Dictionary<string, QueryParameter>();
-    private IPromise _currentQuery;
-    private string _locale;
-    private string _timeZone;
-    private int _timeout = Innovator.Client.Connection.DefaultHttpService.DefaultTimeout;
-    private Timer _clock = new Timer();
     private DateTime _start = DateTime.UtcNow;
-    private Editor.AmlLinkElementGenerator _linkGenerator;
+    private int _timeout = Innovator.Client.Connection.DefaultHttpService.DefaultTimeout;
+    private string _timeZone;
     private string _uid;
+    private bool _updateCheckComplete = false;
 
     public bool AllowRun
     {
       get { return !splitEditors.Panel2Collapsed; }
       set { splitEditors.Panel2Collapsed  = !value; }
     }
-    public string Script
-    {
-      get { return inputEditor.Text; }
-      set { inputEditor.Text = value; }
-    }
     public IEditorProxy Proxy
     {
       get { return _proxy; }
       set { SetProxy(value); }
+    }
+
+    public string Script
+    {
+      get { return inputEditor.Text; }
+      set { inputEditor.Text = value; }
     }
     public string SoapAction
     {
@@ -67,13 +72,22 @@ namespace InnovatorAdmin
     {
       InitializeComponent();
 
+      this.KeyPreview = true;
+
       _uid = GetUid();
+      var assy = Assembly.GetExecutingAssembly().GetName().Version;
+      this.lblVersion.Text = "v" + assy.ToString();
 
       var lastQuery = SnippetManager.Instance.LastQuery;
       inputEditor.Text = lastQuery.Text;
       inputEditor.CleanUndoStack();
       this.SoapAction = lastQuery.Action;
       menuStrip.Renderer = new SimpleToolstripRenderer();
+
+      btnSoapAction.Visible = false;
+      lblSoapAction.Visible = false;
+      exploreButton.Visible = false;
+      btnSubmit.Visible = false;
 
       treeItems.CanExpandGetter = m => ((IEditorTreeNode)m).HasChildren;
       treeItems.ChildrenGetter = m => ((IEditorTreeNode)m).GetChildren();
@@ -90,17 +104,283 @@ namespace InnovatorAdmin
       _panelCollapsed = Properties.Settings.Default.EditorWindowPanelCollapsed;
       UpdatePanelCollapsed();
 
+      _linkGenerator = new Editor.AmlLinkElementGenerator();
+      _linkGenerator.AmlLinkClicked += _linkGenerator_AmlLinkClicked;
+
+      tbcOutputView.SelectedTab = pgTools;
+
+      inputEditor.SelectionChanged += inputEditor_SelectionChanged;
       inputEditor.BindToolStripItem(mniCut, System.Windows.Input.ApplicationCommands.Cut);
       inputEditor.BindToolStripItem(mniCopy, System.Windows.Input.ApplicationCommands.Copy);
       inputEditor.BindToolStripItem(mniPaste, System.Windows.Input.ApplicationCommands.Paste);
       inputEditor.BindToolStripItem(mniUndo, System.Windows.Input.ApplicationCommands.Undo);
       inputEditor.BindToolStripItem(mniRedo, System.Windows.Input.ApplicationCommands.Redo);
-      inputEditor.SelectionChanged += inputEditor_SelectionChanged;
 
-      _linkGenerator = new Editor.AmlLinkElementGenerator();
-      _linkGenerator.AmlLinkClicked += _linkGenerator_AmlLinkClicked;
+      // Wire up the commands
+      _commands = new UiCommandManager(this);
+      inputEditor.KeyDown += _commands.OnKeyDown;
+      outputEditor.KeyDown += _commands.OnKeyDown;
+      _commands.Add<Control>(btnEditConnections, e => e.KeyCode == Keys.O && e.Control, ChangeConnection);
+      _commands.Add<Control>(btnSoapAction, e => e.KeyCode == Keys.M && e.Control, ChangeSoapAction);
+      _commands.Add<Editor.FullEditor>(mniFind, null, c => c.Find());
+      _commands.Add<Editor.FullEditor>(mniFindNext, null, c => c.FindNext());
+      _commands.Add<Editor.FullEditor>(mniFindPrevious, null, c => c.FindPrevious());
+      _commands.Add<Editor.FullEditor>(mniReplace, null, c => c.Replace());
+      _commands.Add<Editor.FullEditor>(mniGoTo, e => e.KeyCode == Keys.G && e.Control, c =>
+      {
+        using (var dialog = new InputBox())
+        {
+          dialog.Caption = "Go To Line";
+          dialog.Message = string.Format("Line Number (1 - {0}):", c.Editor.LineCount);
+          int line;
+          if (dialog.ShowDialog(this) == System.Windows.Forms.DialogResult.OK
+            && int.TryParse(dialog.Value, out line)
+            && line >= 1
+            && line <= c.Editor.LineCount)
+          {
+            var targetLine = c.Editor.TextArea.TextView.GetOrConstructVisualLine(c.Editor.Document.GetLineByNumber(line));
+            var docHeight = c.Editor.TextArea.TextView.DocumentHeight;
+            var winHeight = c.Editor.TextArea.TextView.ActualHeight;
+            var target = Math.Min(docHeight, Math.Max(0, (int)(targetLine.VisualTop - (winHeight - targetLine.Height) / 2.0)));
+            c.Editor.ScrollToVerticalOffset(target);
+            c.Editor.TextArea.Caret.Line = line;
+          }
+        }
+      });
+      _commands.Add<Editor.FullEditor>(mniMd5Encode, null, c => c.ReplaceSelectionSegments(t => ConnectionDataExtensions.CalcMD5(t)));
+      _commands.Add<Editor.FullEditor>(mniDoubleToSingleQuotes, null, c => c.ReplaceSelectionSegments(t => t.Replace('"', '\'')));
+      _commands.Add<Editor.FullEditor>(mniSingleToDoubleQuotes, null, c => c.ReplaceSelectionSegments(t => t.Replace('\'', '"')));
+      _commands.Add<Editor.FullEditor>(mniUppercase, null, c => c.TransformUppercase());
+      _commands.Add<Editor.FullEditor>(mniLowercase, null, c => c.TransformLowercase());
+      _commands.Add<Editor.FullEditor>(mniMoveUpCurrentLine, null, c => c.MoveLineUp());
+      _commands.Add<Editor.FullEditor>(mniMoveDownCurrentLine, null, c => c.MoveLineDown());
+      _commands.Add<Editor.FullEditor>(mniInsertNewGuid, null, c => c.ReplaceSelectionSegments(t => Guid.NewGuid().ToString("N").ToUpperInvariant()));
+      _commands.Add<Editor.FullEditor>(mniXmlToEntity, null, c => c.ReplaceSelectionSegments(t => {
+          try
+          {
+            var sb = new System.Text.StringBuilder();
+            var settings = new XmlWriterSettings();
+            settings.Indent = false;
+            settings.OmitXmlDeclaration = true;
+            using (var strWriter = new StringWriter(sb))
+            using (var writer = XmlWriter.Create(strWriter, settings))
+            {
+              writer.WriteStartElement("a");
+              writer.WriteValue(t);
+              writer.WriteEndElement();
+            }
+            return sb.ToString(3, sb.Length - 7);
+          }
+          catch (XmlException)
+          {
+            return t.Replace("<", "&lt;").Replace(">", "&gt;").Replace("&", "&amp;");
+          }
+        }));
+      _commands.Add<Editor.FullEditor>(mniEntityToXml, null, c => c.ReplaceSelectionSegments(t => {
+          try
+          {
+            var xml = "<a>" + t + "</a>";
+            using (var strReader = new StringReader(xml))
+            using (var reader = XmlReader.Create(strReader))
+            {
+              while (reader.Read())
+              {
+                if (reader.NodeType == XmlNodeType.Text)
+                {
+                  return reader.Value;
+                }
+              }
+            }
+          }
+          catch (XmlException)
+          {
+            return t.Replace("&lt;", "<").Replace("&gt;", ">").Replace("&amp;", "&");
+          }
+          return t;
+        }));
+    }
 
-      tbcOutputView.SelectedTab = pgTools;
+    public void SetConnection(IAsyncConnection conn, string name = null)
+    {
+      if (conn == null) throw new ArgumentNullException("conn");
+      exploreButton.Visible = true;
+      mniLocale.Visible = true;
+      mniTimeZone.Visible = true;
+      SetProxy(new ArasEditorProxy(conn, name ?? conn.Database));
+      _disposeProxy = false;
+    }
+
+    public void SetConnection(ConnectionData conn)
+    {
+      if (!_loadingConnection && !string.IsNullOrEmpty(conn.Url)
+        && !string.IsNullOrEmpty(conn.Database))
+      {
+        _loadingConnection = true;
+        btnSoapAction.Visible = false;
+        lblSoapAction.Visible = false;
+        exploreButton.Visible = false;
+        btnSubmit.Visible = false;
+
+        try
+        {
+          btnEditConnections.Text = "Connecting... ▼";
+          ProxyFactory.FromConn(conn)
+            .UiPromise(this)
+            .Done(proxy =>
+            {
+              btnSubmit.Visible = true;
+              SetProxy(proxy);
+              _disposeProxy = true;
+            })
+            .Fail(ex =>
+            {
+              lblItems.Text = ex.Message;
+              btnEditConnections.Text = "Not Connected ▼";
+              lblConnection.Visible = true;
+              btnEditConnections.Visible = lblConnection.Visible;
+            }).Always(() => _loadingConnection = false);
+        }
+        catch (Exception ex)
+        {
+          MessageBox.Show(ex.Message);
+        }
+      }
+    }
+
+    public void SetProxy(IEditorProxy proxy)
+    {
+      DisposeProxy();
+
+      _proxy = proxy;
+
+      if (proxy == null)
+        return;
+
+      if (_proxy.GetActions().Any())
+      {
+        _proxy.Action = _soapAction;
+        btnSoapAction.Visible = true;
+      }
+      else
+      {
+        btnSoapAction.Visible = false;
+      }
+      lblSoapAction.Visible = btnSoapAction.Visible;
+
+      inputEditor.Helper = _proxy.GetHelper();
+      outputEditor.Helper = _proxy.GetHelper();
+      btnEditConnections.Text = string.Format("{0} ▼", _proxy.Name);
+
+      if (proxy.ConnData != null)
+      {
+        lblConnection.Visible = true;
+        btnEditConnections.Visible = lblConnection.Visible;
+        lblConnColor.BackColor = proxy.ConnData.Color;
+      }
+      InitializeUi(_proxy as ArasEditorProxy);
+      treeItems.Roots = null;
+      treeItems.RebuildAll(false);
+      _proxy.GetNodes()
+        .UiPromise(this)
+        .Done(r =>
+        {
+          treeItems.Roots = r;
+        });
+    }
+
+    public static IEnumerable<ItemReference> GetItems(Connections.ConnectionData conn)
+    {
+      using (var dialog = new EditorWindow())
+      {
+        dialog.dgvItems.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        dialog.tbcOutputView.Appearance = TabAppearance.FlatButtons;
+        dialog.tbcOutputView.ItemSize = new Size(0, 1);
+        dialog.tbcOutputView.SelectedTab = dialog.pgTableOutput;
+        dialog.tbcOutputView.SizeMode = TabSizeMode.Fixed;
+        dialog.SetConnection(conn);
+        dialog._richResult = false;
+        if (dialog.ShowDialog() == DialogResult.OK
+          && dialog._outputSet.Tables[0].Columns.Contains(Extensions.AmlTable_TypeName)
+          && dialog._outputSet.Tables[0].Columns.Contains("id"))
+        {
+          return dialog.dgvItems.SelectedRows
+                       .OfType<DataGridViewRow>()
+                       .Where(r => r.Index != r.DataGridView.NewRowIndex)
+                       .Select(r => ((DataRowView)r.DataBoundItem).Row)
+                       .Select(r => new ItemReference((string)r[Extensions.AmlTable_TypeName], (string)r["id"])
+                       {
+                         KeyedName = dialog._outputSet.Tables[0].Columns.Contains("keyed_name") ? (string)r["keyed_name"] : null
+                       }).ToList();
+        }
+        return Enumerable.Empty<ItemReference>();
+      }
+    }
+
+    protected override void OnFormClosed(FormClosedEventArgs e)
+    {
+      base.OnFormClosed(e);
+      SaveFormBounds();
+      DisposeProxy();
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+      base.OnKeyDown(e);
+      _commands.OnKeyDown(this, e);
+    }
+
+    protected override void OnLoad(EventArgs e)
+    {
+      try
+      {
+        base.OnLoad(e);
+        btnOk.Visible = this.Modal;
+        btnCancel.Visible = this.Modal;
+
+        //lblConnection.Visible = _proxy != null && _proxy.ConnData != null;
+        lblConnection.Visible = true;
+        btnEditConnections.Visible = lblConnection.Visible;
+
+        if (_proxy == null)
+        {
+          var conn = ConnectionManager.Current.Library.Connections
+            .FirstOrDefault(c => c.ConnectionName == Properties.Settings.Default.LastConnection)
+            ?? ConnectionManager.Current.Library.Connections.FirstOrDefault();
+          if (conn != null)
+            SetConnection(conn);
+        }
+
+        var bounds = Properties.Settings.Default.EditorWindow_Bounds;
+        if (bounds.Width < 100 || bounds.Height < 100)
+        {
+          // Do nothing
+        }
+        else if (bounds != Rectangle.Empty && bounds.IntersectsWith(SystemInformation.VirtualScreen))
+        {
+          this.DesktopBounds = bounds;
+        }
+        else
+        {
+          this.Size = bounds.Size;
+        }
+
+        inputEditor.Focus();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+    protected override void OnMove(EventArgs e)
+    {
+      base.OnMove(e);
+      SaveFormBounds();
+    }
+
+    protected override void OnResizeEnd(EventArgs e)
+    {
+      base.OnResizeEnd(e);
+      SaveFormBounds();
     }
 
     void inputEditor_SelectionChanged(object sender, Editor.SelectionChangedEventArgs e)
@@ -148,49 +428,11 @@ namespace InnovatorAdmin
     {
       lblItems.Text = string.Format(@"Processing... {0:hh\:mm\:ss}", DateTime.UtcNow - _start);
     }
-
-    public void SetConnection(IAsyncConnection conn, string name = null)
+    private void ConfigureRequest(IHttpRequest req)
     {
-      if (conn == null) throw new ArgumentNullException("conn");
-      exploreButton.Visible = true;
-      mniLocale.Visible = true;
-      mniTimeZone.Visible = true;
-      SetProxy(new ArasEditorProxy(conn, name ?? conn.Database));
-      _disposeProxy = false;
-    }
-    public void SetConnection(ConnectionData conn)
-    {
-      if (!_loadingConnection && !string.IsNullOrEmpty(conn.Url)
-        && !string.IsNullOrEmpty(conn.Database))
-      {
-        _loadingConnection = true;
-
-        try
-        {
-          btnEditConnections.Text = "Connecting... ▼";
-          exploreButton.Visible = conn.Type == ConnectionType.Innovator;
-          mniLocale.Visible = exploreButton.Visible;
-          mniTimeZone.Visible = exploreButton.Visible;
-          ProxyFactory.FromConn(conn)
-            .UiPromise(this)
-            .Done(proxy =>
-            {
-              SetProxy(proxy);
-              _disposeProxy = true;
-            })
-            .Fail(ex =>
-            {
-              lblItems.Text = ex.Message;
-              btnEditConnections.Text = "Not Connected ▼";
-              lblConnection.Visible = true;
-              btnEditConnections.Visible = lblConnection.Visible;
-            }).Always(() => _loadingConnection = false);
-        }
-        catch (Exception ex)
-        {
-          MessageBox.Show(ex.Message);
-        }
-      }
+      req.SetHeader("LOCALE", _locale);
+      req.SetHeader("TIMEZONE_NAME", _timeZone);
+      req.Timeout = _timeout;
     }
 
     private void DisposeProxy()
@@ -207,127 +449,6 @@ namespace InnovatorAdmin
         if (_disposeProxy) _proxy.Dispose();
       }
     }
-
-    public void SetProxy(IEditorProxy proxy)
-    {
-      DisposeProxy();
-
-      _proxy = proxy;
-
-      if (proxy == null)
-        return;
-
-      if (_proxy.GetActions().Any())
-      {
-        _proxy.Action = _soapAction;
-        btnSoapAction.Visible = true;
-      }
-      else
-      {
-        btnSoapAction.Visible = true;
-      }
-      lblSoapAction.Visible = btnSoapAction.Visible;
-
-      inputEditor.Helper = _proxy.GetHelper();
-      outputEditor.Helper = _proxy.GetHelper();
-      btnEditConnections.Text = string.Format("{0} ▼", _proxy.Name);
-
-      if (proxy.ConnData != null)
-      {
-        lblConnection.Visible = true;
-        btnEditConnections.Visible = lblConnection.Visible;
-        lblConnColor.BackColor = proxy.ConnData.Color;
-      }
-      InitializeUi(_proxy as ArasEditorProxy);
-      treeItems.Roots = null;
-      treeItems.RebuildAll(false);
-      _proxy.GetNodes()
-        .UiPromise(this)
-        .Done(r =>
-        {
-          treeItems.Roots = r;
-        });
-    }
-    private void InitializeUi(ArasEditorProxy proxy)
-    {
-      if (proxy == null || proxy.Connection.AmlContext == null)
-      {
-        outputEditor.ElementGenerators.Remove(_linkGenerator);
-        return;
-      }
-
-      if (!outputEditor.ElementGenerators.Contains(_linkGenerator))
-        outputEditor.ElementGenerators.Add(_linkGenerator);
-
-      var local = proxy.Connection.AmlContext.LocalizationContext;
-      var remote = proxy.Connection as IRemoteConnection;
-      _locale = local.Locale;
-      _timeZone = local.TimeZone;
-      mniLocale.ShortcutKeyDisplayString = "(" + _locale + ")";
-      mniTimeZone.ShortcutKeyDisplayString = "(" + _timeZone + ")";
-      mniTimeout.ShortcutKeyDisplayString = "(" + (_timeout / 1000) + "s)";
-
-      mniLocale.Enabled = remote != null;
-      mniTimeZone.Enabled = mniLocale.Enabled;
-      mniTimeout.Visible = mniLocale.Enabled;
-
-      if (remote != null)
-      {
-        remote.DefaultSettings(ConfigureRequest);
-      }
-    }
-
-    private void ConfigureRequest(IHttpRequest req)
-    {
-      req.SetHeader("LOCALE", _locale);
-      req.SetHeader("TIMEZONE_NAME", _timeZone);
-      req.Timeout = _timeout;
-    }
-
-    protected override void OnLoad(EventArgs e)
-    {
-      try
-      {
-        base.OnLoad(e);
-        btnOk.Visible = this.Modal;
-        btnCancel.Visible = this.Modal;
-
-        //lblConnection.Visible = _proxy != null && _proxy.ConnData != null;
-        lblConnection.Visible = true;
-        btnEditConnections.Visible = lblConnection.Visible;
-
-        if (_proxy == null)
-        {
-          var conn = ConnectionManager.Current.Library.Connections
-            .FirstOrDefault(c => c.ConnectionName == Properties.Settings.Default.LastConnection)
-            ?? ConnectionManager.Current.Library.Connections.FirstOrDefault();
-          if (conn != null)
-            SetConnection(conn);
-        }
-
-        var bounds = Properties.Settings.Default.EditorWindow_Bounds;
-        if (bounds.Width < 100 || bounds.Height < 100)
-        {
-          // Do nothing
-        }
-        else if (bounds != Rectangle.Empty && bounds.IntersectsWith(SystemInformation.VirtualScreen))
-        {
-          this.DesktopBounds = bounds;
-        }
-        else
-        {
-          this.Size = bounds.Size;
-        }
-
-        inputEditor.Focus();
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private const string GeneratedPage = "__GeneratedPage_";
     private void EnsureDataTable()
     {
       if (_outputSet == null && _result != null && tbcOutputView.SelectedTab == pgTableOutput)
@@ -335,6 +456,11 @@ namespace InnovatorAdmin
         _outputSet = _result.GetDataSet();
         if (_outputSet.Tables.Count > 0)
         {
+          if (!_richResult)
+          {
+
+          }
+
           dgvItems.DataSource = _outputSet.Tables[0];
           FormatDataGrid(dgvItems);
           pgTableOutput.Text = _outputSet.Tables[0].TableName;
@@ -385,11 +511,19 @@ namespace InnovatorAdmin
         grid.Columns[i].Visible = boundColumn.IsUiVisible();
       }
 
+      if (!grid.Columns.OfType<DataGridViewColumn>().Any(c => c.Visible))
+      {
+        foreach (var col in grid.Columns.OfType<DataGridViewColumn>())
+        {
+          col.Visible = true;
+        }
+      }
+
       var orderedColumns = grid.Columns.OfType<DataGridViewColumn>()
-        .Select(c => new 
-        { 
+        .Select(c => new
+        {
           Column = c,
-          SortOrder = ((DataTable)grid.DataSource).Columns[c.DataPropertyName].SortOrder() 
+          SortOrder = ((DataTable)grid.DataSource).Columns[c.DataPropertyName].SortOrder()
         })
         .OrderBy(c => c.SortOrder)
         .ThenBy(c => c.Column.HeaderText)
@@ -402,10 +536,48 @@ namespace InnovatorAdmin
 
       grid.AllowUserToAddRows = _outputSet != null
         && ((DataTable)grid.DataSource).Columns.Contains("id")
-        && ((DataTable)grid.DataSource).Columns.Contains("type");
+        && ((DataTable)grid.DataSource).Columns.Contains(Extensions.AmlTable_TypeName);
       grid.AllowUserToDeleteRows = grid.AllowUserToAddRows;
       grid.ReadOnly = !grid.AllowUserToAddRows;
     }
+
+    private string GetUid()
+    {
+      return Convert.ToBase64String(Guid.NewGuid().ToByteArray()).Replace('+', '-').Replace('/', '_');
+    }
+    private void InitializeUi(ArasEditorProxy proxy)
+    {
+      if (proxy == null || proxy.Connection.AmlContext == null)
+      {
+        outputEditor.ElementGenerators.Remove(_linkGenerator);
+        return;
+      }
+
+      exploreButton.Visible = true;
+      mniLocale.Visible = true;
+      mniTimeZone.Visible = true;
+
+      if (!outputEditor.ElementGenerators.Contains(_linkGenerator))
+        outputEditor.ElementGenerators.Add(_linkGenerator);
+
+      var local = proxy.Connection.AmlContext.LocalizationContext;
+      var remote = proxy.Connection as IRemoteConnection;
+      _locale = local.Locale;
+      _timeZone = local.TimeZone;
+      mniLocale.ShortcutKeyDisplayString = "(" + _locale + ")";
+      mniTimeZone.ShortcutKeyDisplayString = "(" + _timeZone + ")";
+      mniTimeout.ShortcutKeyDisplayString = "(" + (_timeout / 1000) + "s)";
+
+      mniLocale.Enabled = remote != null;
+      mniTimeZone.Enabled = mniLocale.Enabled;
+      mniTimeout.Visible = mniLocale.Enabled;
+
+      if (remote != null)
+      {
+        remote.DefaultSettings(ConfigureRequest);
+      }
+    }
+
     private bool IsNumericType(Type type)
     {
       return type == typeof(byte)
@@ -414,6 +586,35 @@ namespace InnovatorAdmin
         || type == typeof(long) || type == typeof(ulong)
         || type == typeof(float) || type == typeof(double)
         || type == typeof(decimal);
+    }
+
+    private void SaveFormBounds()
+    {
+      if (this.WindowState == FormWindowState.Normal)
+      {
+        Properties.Settings.Default.EditorWindow_Bounds = this.DesktopBounds;
+        Properties.Settings.Default.Save();
+        Properties.Settings.Default.Reload();
+      }
+    }
+
+    private void UpdatePanelCollapsed()
+    {
+      splitMain.IsSplitterFixed = _panelCollapsed;
+      treeItems.Visible = !_panelCollapsed;
+      if (_panelCollapsed)
+      {
+        btnPanelToggle.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+        btnPanelToggle.Orientation = Orientation.Vertical;
+        splitMain.SplitterDistance = btnPanelToggle.Width;
+      }
+      else
+      {
+        btnPanelToggle.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+        btnPanelToggle.Orientation = Orientation.Horizontal;
+        btnPanelToggle.Height = 25;
+        splitMain.SplitterDistance = 220;
+      }
     }
 
     #region Run Query
@@ -582,7 +783,7 @@ namespace InnovatorAdmin
                 outputEditor.CollapseAll();
               }
 
-              if (_autoTabSelect) tbcOutputView.SelectedTab = result.PreferTable ? pgTableOutput : pgTextOutput;
+              if (_richResult) tbcOutputView.SelectedTab = (result.PreferTable && result.ItemCount > 0) ? pgTableOutput : pgTextOutput;
               EnsureDataTable();
 
               this.Text = result.Title + " [AmlStudio]";
@@ -624,25 +825,18 @@ namespace InnovatorAdmin
       return result;
     }
 
-    private void btnEditConnections_Click(object sender, EventArgs e)
+    private void ChangeConnection(Control active)
     {
-      try
+      using (var dialog = new ConnectionEditorForm())
       {
-        using (var dialog = new ConnectionEditorForm())
+        dialog.Multiselect = false;
+        if (_proxy != null && _proxy.ConnData != null)
+          dialog.SetSelected(_proxy.ConnData);
+        if (dialog.ShowDialog(this, menuStrip.RectangleToScreen(btnEditConnections.Bounds)) ==
+          System.Windows.Forms.DialogResult.OK)
         {
-          dialog.Multiselect = false;
-          if (_proxy != null && _proxy.ConnData != null)
-            dialog.SetSelected(_proxy.ConnData);
-          if (dialog.ShowDialog(this, menuStrip.RectangleToScreen(btnEditConnections.Bounds)) ==
-            System.Windows.Forms.DialogResult.OK)
-          {
-            SetConnection(dialog.SelectedConnections.First());
-          }
+          SetConnection(dialog.SelectedConnections.First());
         }
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
       }
     }
 
@@ -657,34 +851,6 @@ namespace InnovatorAdmin
         Utils.HandleError(ex);
       }
     }
-
-    public static IEnumerable<ItemReference> GetItems(Connections.ConnectionData conn)
-    {
-      using (var dialog = new EditorWindow())
-      {
-        dialog.dgvItems.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        dialog.tbcOutputView.Appearance = TabAppearance.FlatButtons;
-        dialog.tbcOutputView.ItemSize = new Size(0, 1);
-        dialog.tbcOutputView.SelectedTab = dialog.pgTableOutput;
-        dialog.tbcOutputView.SizeMode = TabSizeMode.Fixed;
-        dialog.SetConnection(conn);
-        dialog._autoTabSelect = false;
-        if (dialog.ShowDialog() == DialogResult.OK
-          && dialog._outputSet.Tables[0].Columns.Contains("type")
-          && dialog._outputSet.Tables[0].Columns.Contains("id"))
-        {
-          return dialog.dgvItems.SelectedRows
-                       .OfType<DataGridViewRow>()
-                       .Where(r => r.Index != r.DataGridView.NewRowIndex)
-                       .Select(r => ((DataRowView)r.DataBoundItem).Row)
-                       .Select(r => new ItemReference((string)r["type"], (string)r["id"]) {
-                         KeyedName = dialog._outputSet.Tables[0].Columns.Contains("keyed_name") ? (string)r["keyed_name"] : null
-                       }).ToList();
-        }
-        return Enumerable.Empty<ItemReference>();
-      }
-    }
-
     private class AmlAction
     {
       private Stopwatch _stopwatch = Stopwatch.StartNew();
@@ -710,26 +876,19 @@ namespace InnovatorAdmin
       }
     }
 
-    private void btnSoapAction_Click(object sender, EventArgs e)
+    private void ChangeSoapAction(Control active)
     {
-      try
-      {
-        if (_proxy == null) return;
+      if (_proxy == null) return;
 
-        using (var dialog = new FilterSelect<string>())
-        {
-          dialog.DataSource = _proxy.GetActions();
-          dialog.Message = "Select an action to perform";
-          if (dialog.ShowDialog(this, menuStrip.RectangleToScreen(btnSoapAction.Bounds)) ==
-            DialogResult.OK && dialog.SelectedItem != null)
-          {
-            this.SoapAction = dialog.SelectedItem;
-          }
-        }
-      }
-      catch (Exception ex)
+      using (var dialog = new FilterSelect<string>())
       {
-        Utils.HandleError(ex);
+        dialog.DataSource = _proxy.GetActions();
+        dialog.Message = "Select an action to perform";
+        if (dialog.ShowDialog(this, menuStrip.RectangleToScreen(btnSoapAction.Bounds)) ==
+          DialogResult.OK && dialog.SelectedItem != null)
+        {
+          this.SoapAction = dialog.SelectedItem;
+        }
       }
     }
 
@@ -818,7 +977,7 @@ namespace InnovatorAdmin
       settings.IndentChars = "  ";
 
       var types = table.AsEnumerable()
-        .Select(r => r.CellValue("type").ToString())
+        .Select(r => r.CellValue(Extensions.AmlTable_TypeName).ToString())
         .Where(t => !string.IsNullOrEmpty(t))
         .Distinct().ToList();
       var singleType = types.Count == 1 ? types[0] : null;
@@ -831,7 +990,7 @@ namespace InnovatorAdmin
         foreach (var row in changes.AsEnumerable())
         {
           xml.WriteStartElement("Item");
-          xml.WriteAttributeString("type", singleType ?? row.CellValue("type").ToString());
+          xml.WriteAttributeString("type", singleType ?? row.CellValue(Extensions.AmlTable_TypeName).ToString());
           xml.WriteAttributeString("id", row.CellIsNull("id")
             ? Guid.NewGuid().ToString("N").ToUpperInvariant()
             : row.CellValue("id").ToString());
@@ -1011,39 +1170,15 @@ namespace InnovatorAdmin
         Utils.HandleError(ex);
       }
     }
-
-    protected override void OnFormClosed(FormClosedEventArgs e)
-    {
-      base.OnFormClosed(e);
-      SaveFormBounds();
-      DisposeProxy();
-    }
-    protected override void OnMove(EventArgs e)
-    {
-      base.OnMove(e);
-      SaveFormBounds();
-    }
-    protected override void OnResizeEnd(EventArgs e)
-    {
-      base.OnResizeEnd(e);
-      SaveFormBounds();
-    }
-    private void SaveFormBounds()
-    {
-      if (this.WindowState == FormWindowState.Normal)
-      {
-        Properties.Settings.Default.EditorWindow_Bounds = this.DesktopBounds;
-        Properties.Settings.Default.Save();
-        Properties.Settings.Default.Reload();
-      }
-    }
-
     private void exploreButton_Click(object sender, EventArgs e)
     {
       try
       {
-        var connData = _proxy.ConnData;
-        connData.Explore();
+        if (_proxy != null && _proxy.ConnData != null)
+        {
+          var connData = _proxy.ConnData;
+          connData.Explore();
+        }
       }
       catch (Exception ex)
       {
@@ -1066,142 +1201,26 @@ namespace InnovatorAdmin
       }
     }
 
-    private void treeItems_ModelDoubleClick(object sender, ModelDoubleClickEventArgs e)
+
+    private void treeItems_CellRightClick(object sender, BrightIdeasSoftware.CellRightClickEventArgs e)
     {
       try
       {
         var node = e.Model as IEditorTreeNode;
-        if (node != null && node.GetScripts().Any())
+        var scripts = node.GetScripts();
+        if (node != null && scripts.Any())
         {
-          var script = node.GetScripts().First();
-          this.SoapAction = script.Action;
-          this.Script = script.Script;
+          var con = new ContextMenuStrip();
+          foreach (var script in scripts)
+          {
+            con.Items.Add(new ToolStripMenuItem(script.Name, null, (s, ev) =>
+            {
+              this.SoapAction = script.Action;
+              this.Script = script.Script;
+            }));
+          }
+          con.Show(treeItems.PointToScreen(e.Location));
         }
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private void mniUppercase_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        inputEditor.TransformUppercase();
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private void mniLowercase_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        inputEditor.TransformLowercase();
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private void mniMoveUpCurrentLine_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        inputEditor.MoveLineUp();
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private void mniMoveDownCurrentLine_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        inputEditor.MoveLineDown();
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private void mniInsertNewGuid_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        inputEditor.ReplaceSelectionSegments(t => Guid.NewGuid().ToString("N").ToUpperInvariant());
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private void mniXmlToEntity_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        inputEditor.ReplaceSelectionSegments(t => {
-          try
-          {
-            var sb = new System.Text.StringBuilder();
-            var settings = new XmlWriterSettings();
-            settings.Indent = false;
-            settings.OmitXmlDeclaration = true;
-            using (var strWriter = new StringWriter(sb))
-            using (var writer = XmlWriter.Create(strWriter, settings))
-            {
-              writer.WriteStartElement("a");
-              writer.WriteValue(t);
-              writer.WriteEndElement();
-            }
-            return sb.ToString(3, sb.Length - 7);
-          }
-          catch (XmlException)
-          {
-            return t.Replace("<", "&lt;").Replace(">", "&gt;").Replace("&", "&amp;");
-          }
-        });
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private void mniEntityToXml_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        inputEditor.ReplaceSelectionSegments(t => {
-          try
-          {
-            var xml = "<a>" + t + "</a>";
-            using (var strReader = new StringReader(xml))
-            using (var reader = XmlReader.Create(strReader))
-            {
-              while (reader.Read())
-              {
-                if (reader.NodeType == XmlNodeType.Text)
-                {
-                  return reader.Value;
-                }
-              }
-            }
-          }
-          catch (XmlException)
-          {
-            return t.Replace("&lt;", "<").Replace("&gt;", ">").Replace("&amp;", "&");
-          }
-          return t;
-        });
       }
       catch (Exception ex)
       {
@@ -1235,22 +1254,21 @@ namespace InnovatorAdmin
       }
     }
 
-    private void UpdatePanelCollapsed()
+    private void treeItems_ModelDoubleClick(object sender, ModelDoubleClickEventArgs e)
     {
-      splitMain.IsSplitterFixed = _panelCollapsed;
-      treeItems.Visible = !_panelCollapsed;
-      if (_panelCollapsed)
+      try
       {
-        btnPanelToggle.Anchor = AnchorStyles.Top | AnchorStyles.Left;
-        btnPanelToggle.Orientation = Orientation.Vertical;
-        splitMain.SplitterDistance = btnPanelToggle.Width;
+        var node = e.Model as IEditorTreeNode;
+        if (node != null && node.GetScripts().Any())
+        {
+          var script = node.GetScripts().First();
+          this.SoapAction = script.Action;
+          this.Script = script.Script;
+        }
       }
-      else
+      catch (Exception ex)
       {
-        btnPanelToggle.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-        btnPanelToggle.Orientation = Orientation.Horizontal;
-        btnPanelToggle.Height = 25;
-        splitMain.SplitterDistance = 220;
+        Utils.HandleError(ex);
       }
     }
 
@@ -1268,47 +1286,6 @@ namespace InnovatorAdmin
       {
         Utils.HandleError(ex);
       }
-    }
-
-    private void mniDoubleToSingleQuotes_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        inputEditor.ReplaceSelectionSegments(t => t.Replace('"', '\''));
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private void mniSingleToDoubleQuotes_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        inputEditor.ReplaceSelectionSegments(t => t.Replace('\'', '"'));
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private void mniMd5Encode_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        inputEditor.ReplaceSelectionSegments(t => ConnectionDataExtensions.CalcMD5(t));
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private string GetUid()
-    {
-      return Convert.ToBase64String(Guid.NewGuid().ToByteArray()).Replace('+', '-').Replace('/', '_');
     }
 
     private void btnInstall_Click(object sender, EventArgs e)
@@ -1365,5 +1342,45 @@ namespace InnovatorAdmin
 
     //}
 
+
+    public void UpdateCheckComplete(Version latestVersion)
+    {
+      try
+      {
+        _updateCheckComplete = true;
+        var currVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        if (latestVersion == default(Version))
+        {
+          this.lblVersion.Text = string.Format("v{0} (No updates available)", currVer);
+        }
+        else
+        {
+          var newVer = latestVersion.ToString();
+
+          if (newVer != currVer)
+          {
+            this.lblVersion.Text = string.Format("v{0} (Restart to install v{1}!)", currVer, newVer);
+          }
+          else
+          {
+            this.lblVersion.Text = string.Format("v{0} (No updates available)", currVer);
+          }
+        }
+      }
+      catch (Exception) { }
+    }
+
+    public void UpdateCheckProgress(int progress)
+    {
+      try
+      {
+        if (!_updateCheckComplete)
+        {
+          var currVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+          this.lblVersion.Text = string.Format("v{0} (Checking updates: {1}%)", currVer, progress);
+        }
+      }
+      catch (Exception) { }
+    }
   }
 }

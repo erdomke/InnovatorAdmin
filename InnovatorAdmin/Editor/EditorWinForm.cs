@@ -9,10 +9,10 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
 using System.Windows.Media;
+using System.Xml;
 
 namespace InnovatorAdmin.Editor
 {
@@ -185,16 +185,23 @@ namespace InnovatorAdmin.Editor
 
     void TextArea_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
-      if (e.Key == System.Windows.Input.Key.Enter && this.SingleLine && !IsControlDown(e.KeyboardDevice) && !IsAltDown(e.KeyboardDevice) && !IsShiftDown(e.KeyboardDevice))
+      try
       {
-        OnRunRequested(new RunRequestedEventArgs(this.Text));
-        e.Handled = true;
+        if (e.Key == System.Windows.Input.Key.Enter && this.SingleLine && !IsControlDown(e.KeyboardDevice) && !IsAltDown(e.KeyboardDevice) && !IsShiftDown(e.KeyboardDevice))
+        {
+          OnRunRequested(new RunRequestedEventArgs(this.Text));
+          e.Handled = true;
+        }
+        else if (e.Key == System.Windows.Input.Key.Tab && this.SingleLine && !IsControlDown(e.KeyboardDevice) && !IsAltDown(e.KeyboardDevice))
+        {
+          e.Handled = true;
+          var frm = this.FindForm();
+          frm.SelectNextControl(this, !IsShiftDown(e.KeyboardDevice), true, true, true);
+        }
       }
-      else if (e.Key == System.Windows.Input.Key.Tab && this.SingleLine && !IsControlDown(e.KeyboardDevice) && !IsAltDown(e.KeyboardDevice))
+      catch (Exception ex)
       {
-        e.Handled = true;
-        var frm = this.FindForm();
-        frm.SelectNextControl(this, !IsShiftDown(e.KeyboardDevice), true, true, true);
+        Utils.HandleError(ex);
       }
     }
 
@@ -298,50 +305,59 @@ namespace InnovatorAdmin.Editor
 
     void TextArea_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
-      var key = (e.Key == System.Windows.Input.Key.System ? e.SystemKey : e.Key);
+      try
+      {
+        var key = (e.Key == System.Windows.Input.Key.System ? e.SystemKey : e.Key);
 
-      // F5 or F9
-      if (key == System.Windows.Input.Key.F9 || key == System.Windows.Input.Key.F5)
-      {
-        OnRunRequested(new RunRequestedEventArgs(Editor.Text));
-      }
-      // Ctrl+Enter or Ctrl+Shift+E
-      else if ((key == System.Windows.Input.Key.Enter && IsControlDown(e.KeyboardDevice))
-        || (key == System.Windows.Input.Key.E && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice)))
-      {
-        OnRunRequested(new RunRequestedEventArgs(GetCurrentQuery()));
-      }
-      // Ctrl+Shift+Up
-      else if (!SingleLine
-        && ((key == System.Windows.Input.Key.Up && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
-          || (key == System.Windows.Input.Key.Up && IsAltDown(e.KeyboardDevice))))
-      {
-        MoveLineUp();
-      }
-      // Ctrl+Shift+Down
-      else if (!SingleLine
-        && ((key == System.Windows.Input.Key.Down && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
-          || (key == System.Windows.Input.Key.Down && IsAltDown(e.KeyboardDevice))))
-      {
-        MoveLineDown();
-      }
-      // Ctrl+T
-      else if (key == System.Windows.Input.Key.T && IsControlDown(e.KeyboardDevice)) // Indent the code
-      {
-        TidyXml();
-      }
-      // Ctrl+Shift+U
-      else if (key == System.Windows.Input.Key.U && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
-      {
-        TransformUppercase();
-      }
-      // Ctrl+U
-      else if (key == System.Windows.Input.Key.U && IsControlDown(e.KeyboardDevice))
-      {
-        TransformLowercase();
-      }
+        // F5 or F9
+        if (key == System.Windows.Input.Key.F9 || key == System.Windows.Input.Key.F5)
+        {
+          OnRunRequested(new RunRequestedEventArgs(Editor.Text));
+        }
+        // Ctrl+Enter or Ctrl+Shift+E
+        else if ((key == System.Windows.Input.Key.Enter && IsControlDown(e.KeyboardDevice))
+          || (key == System.Windows.Input.Key.E && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice)))
+        {
+          OnRunRequested(new RunRequestedEventArgs(GetCurrentQuery()));
+        }
+        // Ctrl+Shift+Up
+        else if (!SingleLine
+          && ((key == System.Windows.Input.Key.Up && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
+            || (key == System.Windows.Input.Key.Up && IsAltDown(e.KeyboardDevice))))
+        {
+          MoveLineUp();
+        }
+        // Ctrl+Shift+Down
+        else if (!SingleLine
+          && ((key == System.Windows.Input.Key.Down && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
+            || (key == System.Windows.Input.Key.Down && IsAltDown(e.KeyboardDevice))))
+        {
+          MoveLineDown();
+        }
+        // Ctrl+T
+        else if (key == System.Windows.Input.Key.T && IsControlDown(e.KeyboardDevice)) // Indent the code
+        {
+          TidyXml();
+        }
+        // Ctrl+Shift+U
+        else if (key == System.Windows.Input.Key.U && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
+        {
+          TransformUppercase();
+        }
+        // Ctrl+U
+        else if (key == System.Windows.Input.Key.U && IsControlDown(e.KeyboardDevice))
+        {
+          TransformLowercase();
+        }
 
-      OnKeyDown(WinFormsKey(e));
+        var winArgs = WinFormsKey(e);
+        OnKeyDown(winArgs);
+        e.Handled = winArgs.Handled;
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
     }
 
     private KeyEventArgs WinFormsKey(System.Windows.Input.KeyEventArgs e)
@@ -359,6 +375,8 @@ namespace InnovatorAdmin.Editor
 
     public void ReplaceSelectionSegments(Func<string, string> insert)
     {
+      if (Editor.IsReadOnly) return;
+
       if (Editor.TextArea.Selection is RectangleSelection)
       {
         var doc = Editor.Document;
@@ -556,14 +574,39 @@ namespace InnovatorAdmin.Editor
     /// <returns>Tidied Xml</returns>
     public void TidyXml()
     {
-      string buffer = Editor.TextArea.Document.Text;
-      if (buffer.Length < 30000
+      if (Editor.TextArea.Document.TextLength < 30000
         || MessageBox.Show("Validating large requests may take several moments.  Continue?", "AML Studio", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
       {
-        if (Utils.IndentXml(buffer, out buffer) == null)
+        var readerSettings = new XmlReaderSettings();
+        readerSettings.IgnoreWhitespace = true;
+        readerSettings.ConformanceLevel = ConformanceLevel.Fragment;
+
+        var settings = new XmlWriterSettings();
+        settings.OmitXmlDeclaration = true;
+        settings.Indent = true;
+        settings.IndentChars = "  ";
+        settings.CheckCharacters = true;
+        settings.CloseOutput = true;
+        settings.ConformanceLevel = ConformanceLevel.Fragment;
+
+        var newDoc = new TextDocument();
+
+        try
         {
-          Editor.TextArea.Document.Text = buffer;
+          using (var reader = this.Document.CreateReader())
+          using (var xmlReader = XmlReader.Create(reader, readerSettings))
+          using (var writer = new TextDocumentWriter(newDoc))
+          using (var xmlWriter = XmlWriter.Create(writer, settings))
+          {
+            while (!xmlReader.EOF)
+            {
+              xmlWriter.WriteNode(xmlReader, true);
+            }
+            xmlWriter.Flush();
+            this.Document = newDoc;
+          }
         }
+        catch (XmlException) { } // Eat it for now
       }
     }
 

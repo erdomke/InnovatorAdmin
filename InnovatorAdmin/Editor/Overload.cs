@@ -28,6 +28,11 @@ namespace InnovatorAdmin.Editor
     {
       _overloads.Add(new Overload(header, content));
     }
+    public OverloadList AddRange(IEnumerable<Overload> overloads)
+    {
+      _overloads.AddRange(overloads);
+      return this;
+    }
 
     public int Count
     {

@@ -19,7 +19,7 @@ namespace InnovatorAdmin
     private IEnumerable<Method> _methods = Enumerable.Empty<Method>();
     private IEnumerable<ItemReference> _polyItemLists = Enumerable.Empty<ItemReference>();
     private IPromise _secondaryMetadata;
-    private Dictionary<string, ItemReference> _sql;
+    private Dictionary<string, Sql> _sql;
     private Dictionary<string, ItemReference> _systemIdentities;
     private Dictionary<string, IEnumerable<ListValue>> _listValues
       = new Dictionary<string,IEnumerable<ListValue>>();
@@ -111,7 +111,18 @@ namespace InnovatorAdmin
     /// </summary>
     public bool SqlRefByName(string name, out ItemReference sql)
     {
-      return _sql.TryGetValue(name, out sql);
+      Sql buffer;
+      sql = null;
+      if (_sql.TryGetValue(name, out buffer))
+      {
+        sql = buffer;
+        return true;
+      }
+      return false;
+    }
+    public IEnumerable<Sql> Sqls()
+    {
+      return _sql.Values;
     }
 
     public IPromise<IEnumerable<ListValue>> ListValues(string id)
@@ -283,14 +294,15 @@ namespace InnovatorAdmin
               });
             _systemIdentities = sysIdents.ToDictionary(i => i.Unique);
 
-            return _conn.ApplyAsync(@"<Item type='SQL' action='get' select='id,name'></Item>", true, false);
+            return _conn.ApplyAsync(@"<Item type='SQL' action='get' select='id,name,type'></Item>", true, false);
           }).Continue(r =>
           {
             var sqlItems = r.Items()
               .Select(i =>
               {
-                var itemRef = ItemReference.FromFullItem(i, false);
+                var itemRef = Sql.FromFullItem(i, false);
                 itemRef.KeyedName = i.Property("name").AsString("");
+                itemRef.Type = i.Property("type").AsString("");
                 return itemRef;
               });
             _sql = sqlItems.ToDictionary(i => i.KeyedName.ToLowerInvariant(), StringComparer.OrdinalIgnoreCase);

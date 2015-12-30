@@ -12,6 +12,9 @@ namespace InnovatorAdmin
 {
   public static class Extensions
   {
+    public const string AmlTable_TypeName = "__type";
+    public const string AmlTable_TypeId = "__itemtype";
+
     /// <summary>
     /// Determines if a string is an Aras-styled GUID
     /// </summary>
@@ -84,6 +87,8 @@ namespace InnovatorAdmin
     {
       private Dictionary<string, HashSet<string>> _types = new Dictionary<string, HashSet<string>>();
 
+      public int Count { get { return _types.Count; } }
+
       public void Add(string type, string property)
       {
         HashSet<string> props;
@@ -103,6 +108,26 @@ namespace InnovatorAdmin
       System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
       {
         return this.GetEnumerator();
+      }
+
+      public bool AllTypesTheSame()
+      {
+        if (_types.Count < 2) return true;
+        var lists = _types.Values.ToArray();
+        var counts = lists[0].ToDictionary(i => i, i => 1);
+        int count;
+
+        foreach (var list in lists.Skip(1))
+        {
+          foreach (var prop in list)
+          {
+            if (!counts.TryGetValue(prop, out count))
+              return false;
+            counts[prop] = count + 1;
+          }
+        }
+
+        return counts.Values.All(v => v == _types.Count);
       }
     }
 
@@ -163,13 +188,13 @@ namespace InnovatorAdmin
 
       foreach (var i in items)
       {
-        type = (i.Type().Exists || i.Property("id").Exists)
+        type = (i.Type().Exists || i.Property("id").Type().Exists)
           ? i.Type().AsString(i.Property("id").Type().AsString(""))
           : string.Empty;
 
-        if (!string.IsNullOrEmpty(type)) types.Add(type, "type");
-        if (i.TypeId().Exists || i.Property("itemtype").Exists) types.Add(type, "itemtype");
-        if (i.KeyedName().Exists || i.Property("id").Exists) types.Add(type, "keyed_name");
+        if (!string.IsNullOrEmpty(type)) types.Add(type, AmlTable_TypeName);
+        if (i.TypeId().Exists || i.Property("itemtype").Exists) types.Add(type, AmlTable_TypeId);
+        if (i.KeyedName().Exists || i.Property("id").KeyedName().Exists) types.Add(type, "keyed_name");
         if (!string.IsNullOrEmpty(i.Id())) types.Add(type, "id");
 
         foreach (var elem in i.Elements().OfType<IReadOnlyProperty>())
@@ -191,7 +216,12 @@ namespace InnovatorAdmin
       string propAddendum;
       int split;
       DataColumn newColumn;
-      foreach (var kvp in types)
+
+      var typesEnum = types.Count > 1 && types.AllTypesTheSame()
+        ? Enumerable.Repeat(new KeyValuePair<string, HashSet<string>>(string.Empty, types.First().Value), 1)
+        : types;
+
+      foreach (var kvp in typesEnum)
       {
         var result = new DataTable(kvp.Key);
         try
@@ -200,8 +230,8 @@ namespace InnovatorAdmin
 
           foreach (var prop in kvp.Value)
           {
-            if (prop != "type"
-              && prop != "itemtype"
+            if (prop != AmlTable_TypeName
+              && prop != AmlTable_TypeId
               && !string.IsNullOrEmpty(kvp.Key)
               && metadata != null
               && metadata.ItemTypeByName(kvp.Key, out itemType))
@@ -284,10 +314,10 @@ namespace InnovatorAdmin
                 case "keyed_name":
                   row[prop] = item.KeyedName().AsString(item.Property("id").KeyedName().Value);
                   break;
-                case "type":
+                case AmlTable_TypeName:
                   row[prop] = item.Type().AsString(item.Property("id").Type().Value);
                   break;
-                case "itemtype":
+                case AmlTable_TypeId:
                   row[prop] = item.TypeId().AsString(item.Property("itemtype").Value);
                   break;
                 default:

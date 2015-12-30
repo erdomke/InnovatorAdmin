@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace InnovatorAdmin
 {
-  public class ListValue
+  public class ListValue : IListValue
   {
     public string Value { get; set; }
     public string Label { get; set; }

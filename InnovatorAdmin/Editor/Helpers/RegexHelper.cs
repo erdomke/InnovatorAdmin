@@ -128,11 +128,8 @@ namespace InnovatorAdmin.Editor
         data.Items = _completionInfo
           .OrderBy(i => i[0].ToLowerInvariant())
           .ThenBy(i => i[1])
-          .Select(i => new CustomCompletionData() {
-            Content = GetSpan(new Run(i[0] + " "), new Run(i[1])
-            {
-              Foreground = Brushes.Gray
-            }),
+          .Select(i => new BasicCompletionData() {
+            Content = FormatText.Span(FormatText.Text(i[0] + " "), FormatText.MutedText(i[1])),
             Text = i[0],
             Action = () => i[0]
           });
@@ -151,13 +148,6 @@ namespace InnovatorAdmin.Editor
       }
 
       return Promises.Resolved(data);
-    }
-
-    private static Span GetSpan(params Run[] runs)
-    {
-      var result = new Span();
-      result.Inlines.AddRange(runs);
-      return result;
     }
 
     internal static IHighlightingDefinition _highlighter;

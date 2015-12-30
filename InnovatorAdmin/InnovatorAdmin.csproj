@@ -214,8 +214,9 @@
     <Compile Include="Dialog\Win32.cs" />
     <Compile Include="Editor\AmlLinkElementGenerator.cs" />
     <Compile Include="Editor\Aml\AmlSimpleEditorHelper.cs" />
+    <Compile Include="Editor\Aml\PropertyCompletionFactory.cs" />
     <Compile Include="Editor\Aml\XmlFragmentReader.cs" />
-    <Compile Include="Editor\CompletionData\CustomCompletionData.cs" />
+    <Compile Include="Editor\FormatText.cs" />
     <Compile Include="Editor\FullEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -235,6 +236,7 @@
     <Compile Include="Editor\TextDocumentWriter.cs" />
     <Compile Include="Editor\VisualLineLinkText.cs" />
     <Compile Include="GlobalProgress.cs" />
+    <Compile Include="Ide\UiCommandManager.cs" />
     <Compile Include="Ide\EditorTreeNode.cs" />
     <Compile Include="Ide\EditorWindow.cs">
       <SubType>Form</SubType>

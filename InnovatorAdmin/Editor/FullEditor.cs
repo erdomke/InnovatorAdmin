@@ -1,22 +1,13 @@
-﻿using System;
+﻿using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Editing;
+using ICSharpCode.AvalonEdit.Rendering;
+using ICSharpCode.AvalonEdit.Search;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using ICSharpCode.AvalonEdit.Document;
-using ICSharpCode.AvalonEdit;
-using ICSharpCode.AvalonEdit.Search;
-using ICSharpCode.AvalonEdit.Rendering;
-using ICSharpCode.AvalonEdit.Editing;
-using System.Globalization;
-using System.Xml;
-using System.IO;
-using GotDotNet.XPath;
-using System.Xml.XPath;
 
 namespace InnovatorAdmin.Editor
 {
@@ -29,7 +20,7 @@ namespace InnovatorAdmin.Editor
       Find,
       Replace
     }
-    
+
     public event EventHandler<RunRequestedEventArgs> RunRequested;
     public event EventHandler<SelectionChangedEventArgs> SelectionChanged;
 
@@ -69,6 +60,60 @@ namespace InnovatorAdmin.Editor
       set { editor.Text = value; }
     }
 
+    private FindReplaceState FindReplaceMode
+    {
+      get
+      {
+        if (txtReplace.Visible)
+          return FindReplaceState.Replace;
+        if (findReplacePanel.Visible)
+          return FindReplaceState.Find;
+        return FindReplaceState.None;
+      }
+      set
+      {
+        if (_currentDoc != null)
+        {
+          _currentDoc.TextChanged -= new EventHandler(this.textArea_Document_TextChanged);
+        }
+
+        findReplacePanel.Visible = (value != FindReplaceState.None);
+        txtReplace.Visible = (value == FindReplaceState.Replace);
+        btnReplaceAll.Visible = txtReplace.Visible;
+        btnReplaceNext.Visible = txtReplace.Visible;
+
+        if (value == FindReplaceState.None)
+        {
+          _currentDoc = null;
+          editor.Focus();
+        }
+        else
+        {
+          _currentDoc = editor.Document;
+          if (_currentDoc != null)
+          {
+            _currentDoc.TextChanged += new EventHandler(this.textArea_Document_TextChanged);
+            this.DoSearch(false);
+          }
+
+          SearchMode newMode;
+          if (Enum.TryParse<SearchMode>(Properties.Settings.Default.FindReplace_LastMode, out newMode))
+          {
+            SetMode(newMode);
+          }
+
+          txtFind.Focus();
+          var selection = editor.Editor.SelectedText;
+          if (!string.IsNullOrEmpty(selection))
+          {
+            txtFind.Text = selection;
+            txtFind.Editor.SelectionStart = 0;
+            txtFind.Editor.SelectionLength = selection.Length;
+          }
+        }
+      }
+    }
+
     public FullEditor()
     {
       InitializeComponent();
@@ -88,17 +133,17 @@ namespace InnovatorAdmin.Editor
       txtReplace.SingleLine = true;
       txtReplace.RunRequested += txtReplace_RunRequested;
       txtReplace.KeyDown += textbox_KeyDown;
-      
-      ToggleFindReplace(FindReplaceState.None);
+
+      FindReplaceMode = FindReplaceState.None;
     }
 
-    public void Find() 
+    public void Find()
     {
-      ToggleFindReplace(FindReplaceState.Find);
+      FindReplaceMode = FindReplaceState.Find;
     }
-    public void Replace() 
+    public void Replace()
     {
-      ToggleFindReplace(FindReplaceState.Replace);
+      FindReplaceMode = FindReplaceState.Replace;
     }
 
     private void textArea_Document_TextChanged(object sender, EventArgs e)
@@ -119,51 +164,10 @@ namespace InnovatorAdmin.Editor
         this.DoSearch(false);
       }
     }
-    private void ToggleFindReplace(FindReplaceState state)
-    {
-      if (_currentDoc != null)
-      {
-        _currentDoc.TextChanged -= new EventHandler(this.textArea_Document_TextChanged);
-      }
-
-      findReplacePanel.Visible = (state != FindReplaceState.None);
-      txtReplace.Visible = (state == FindReplaceState.Replace);
-      btnReplaceAll.Visible = txtReplace.Visible;
-      btnReplaceNext.Visible = txtReplace.Visible;
-
-      if (state == FindReplaceState.None)
-      {
-        _currentDoc = null;
-      }
-      else
-      {
-        _currentDoc = editor.Document;
-        if (_currentDoc != null)
-        {
-          _currentDoc.TextChanged += new EventHandler(this.textArea_Document_TextChanged);
-          this.DoSearch(false);
-        }
-
-        SearchMode newMode;
-        if (Enum.TryParse<SearchMode>(Properties.Settings.Default.FindReplace_LastMode, out newMode))
-        {
-          SetMode(newMode);
-        }
-
-        txtFind.Focus();
-        var selection = editor.Editor.SelectedText;
-        if (!string.IsNullOrEmpty(selection))
-        {
-          txtFind.Text = selection;
-          txtFind.Editor.SelectionStart = 0;
-          txtFind.Editor.SelectionLength = selection.Length;
-        }
-      }
-    }
 
     public void BindToolStripItem(ToolStripItem item, System.Windows.Input.RoutedCommand command)
-    { 
-      editor.BindToolStripItem(item, command); 
+    {
+      editor.BindToolStripItem(item, command);
     }
     public void CleanUndoStack()
     {
@@ -181,16 +185,36 @@ namespace InnovatorAdmin.Editor
     {
       if (e.KeyCode == Keys.Escape)
       {
-        ToggleFindReplace(FindReplaceState.None);
+        FindReplaceMode = FindReplaceState.None;
       }
-      else if (e.KeyCode == Keys.F && e.Control)
+      HandleGlobalKeys(e);
+    }
+
+    private bool HandleGlobalKeys(KeyEventArgs e)
+    {
+      if (e.KeyCode == Keys.F && e.Control)
       {
-        ToggleFindReplace(FindReplaceState.Find);
+        FindReplaceMode = FindReplaceState.Find;
+        e.Handled = true;
+        return true;
       }
       else if (e.KeyCode == Keys.H && e.Control)
       {
-        ToggleFindReplace(FindReplaceState.Replace);
+        FindReplaceMode = FindReplaceState.Replace;
+        e.Handled = true;
+        return true;
       }
+      else if (e.KeyCode == Keys.F3 && e.Shift)
+      {
+        if (FindReplaceMode != FindReplaceState.None)
+          FindPrevious();
+      }
+      else if (e.KeyCode == Keys.F3)
+      {
+        if (FindReplaceMode != FindReplaceState.None)
+          FindNext();
+      }
+      return false;
     }
 
     void txtReplace_RunRequested(object sender, RunRequestedEventArgs e)
@@ -210,15 +234,8 @@ namespace InnovatorAdmin.Editor
 
     void editor_KeyDown(object sender, KeyEventArgs e)
     {
-      if (e.Control && e.KeyCode == Keys.F)
-      {
-        Find();
-      }
-      else if (e.Control && e.KeyCode == Keys.H)
-      {
-        Replace();
-      }
-      OnKeyDown(e);
+      if (!HandleGlobalKeys(e))
+        OnKeyDown(e);
     }
 
     void editor_RunRequested(object sender, RunRequestedEventArgs e)
@@ -232,18 +249,44 @@ namespace InnovatorAdmin.Editor
       if (SelectionChanged != null)
         SelectionChanged.Invoke(this, e);
     }
-    
+
     void editor_TextChanged(object sender, EventArgs e)
     {
       OnTextChanged(e);
     }
 
-    private void FindNext()
+    private TextSegment GetSelectionSegment()
     {
-      var searchResult = _renderer.CurrentResults.FindFirstSegmentWithStartAfter(editor.Editor.TextArea.Caret.Offset + 1);
+      if (editor.Editor.SelectionLength < 1) return null;
+      var segment = editor.Editor.TextArea.Selection.Segments.First();
+      return _renderer.CurrentResults.FirstOrDefault(s => s.StartOffset == segment.StartOffset && s.EndOffset == segment.EndOffset);
+    }
+
+    public void FindNext()
+    {
+      var currResult = GetSelectionSegment();
+      var searchResult = currResult != null
+        ? _renderer.CurrentResults.GetNextSegment(currResult)
+        : _renderer.CurrentResults.FindFirstSegmentWithStartAfter(editor.Editor.TextArea.Caret.Offset + 1);
       if (searchResult == null)
       {
         searchResult = _renderer.CurrentResults.FirstSegment;
+      }
+      if (searchResult != null)
+      {
+        this.SelectResult(searchResult);
+      }
+    }
+
+    public void FindPrevious()
+    {
+      var currResult = GetSelectionSegment();
+      var searchResult = currResult != null
+        ? _renderer.CurrentResults.GetPreviousSegment(currResult)
+        : _renderer.CurrentResults.FindFirstSegmentWithStartAfter(editor.Editor.TextArea.Caret.Offset + 1);
+      if (searchResult == null)
+      {
+        searchResult = _renderer.CurrentResults.LastSegment;
       }
       if (searchResult != null)
       {
@@ -453,7 +496,7 @@ namespace InnovatorAdmin.Editor
     {
       try
       {
-        ToggleFindReplace(FindReplaceState.None);
+        FindReplaceMode = FindReplaceState.None;
       }
       catch (Exception ex)
       {

@@ -47,7 +47,7 @@ namespace InnovatorAdmin.Editor
       var idx = _fullName.IndexOf('.');
       if (idx > 0 && idx < _fullName.Length - 1)
       {
-        if (textArea.Document.Text.Substring(completionSegment.Offset - idx + 1, idx + 1).Equals(_fullName.Substring(0, idx + 1), StringComparison.OrdinalIgnoreCase))
+        if (textArea.Document.GetText(completionSegment.Offset - idx + 1, idx + 1).Equals(_fullName.Substring(0, idx + 1), StringComparison.OrdinalIgnoreCase))
         {
           textArea.Document.Replace(completionSegment, "[" + this.Text + "]");
         }

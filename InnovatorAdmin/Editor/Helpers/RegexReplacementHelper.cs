@@ -99,7 +99,7 @@ namespace InnovatorAdmin.Editor
           data.Items = completions
             .OrderBy(i => i[0].ToLowerInvariant())
             .ThenBy(i => i[1])
-            .Select(i => new CustomCompletionData() {
+            .Select(i => new BasicCompletionData() {
               Content = GetSpan(new Run(i[0] + " "), new Run(i[1])
               {
                 Foreground = Brushes.Gray

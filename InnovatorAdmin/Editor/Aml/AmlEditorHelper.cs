@@ -47,6 +47,7 @@ namespace InnovatorAdmin.Editor
           case ",":
           case "(":
           case ".":
+            _sql.CurrentTextArea = control.Editor.TextArea;
             ShowCompletions(control)
               .Done(data =>
               {

@@ -51,9 +51,7 @@ namespace InnovatorAdmin.Editor
           name = null;
         }
 
-        if (token.Text.Equals("from", StringComparison.OrdinalIgnoreCase)
-          || token.Text.Equals("join", StringComparison.OrdinalIgnoreCase)
-          || token.Text.Equals("apply", StringComparison.OrdinalIgnoreCase))
+        if (KeywordPrecedesTable(token.Text))
         {
           name = new SqlNameDefinition();
         }
@@ -61,6 +59,20 @@ namespace InnovatorAdmin.Editor
       }
       if (name != null && name.Any())
         yield return name;
+    }
+
+    public static bool KeywordPrecedesTable(string value)
+    {
+      switch (value.ToLowerInvariant())
+      {
+        case "from":
+        case "join":
+        case "apply":
+        case "update":
+        case "into":
+          return true;
+      }
+      return false;
     }
 
     public IEnumerable<SqlLiteral> BasicEnumerator()
@@ -597,6 +609,14 @@ namespace InnovatorAdmin.Editor
       {
         result.Remove(result.Last());
       }
+
+      while (groups.Any())
+      {
+        var newResult = groups.Pop();
+        newResult.Add(result);
+        result = newResult;
+      }
+
       return result;
     }
   }

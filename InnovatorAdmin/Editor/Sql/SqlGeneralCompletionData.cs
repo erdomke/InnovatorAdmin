@@ -6,7 +6,23 @@ using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Editor
 {
-  public class SqlGeneralCompletionData : BasicCompletionData
+  public class SqlGeneralCompletionData : BasicCompletionData, IContextCompletions
   {
+    private IEditorHelper _parent;
+    private EditorWinForm _control;
+
+    public void SetContext(IEditorHelper parent, EditorWinForm control)
+    {
+      _parent = parent;
+      _control = control;
+    }
+
+    public override void Complete(ICSharpCode.AvalonEdit.Editing.TextArea textArea, ICSharpCode.AvalonEdit.Document.ISegment completionSegment, EventArgs insertionRequestEventArgs)
+    {
+      var insertion = Action == null ? this.Text : Action.Invoke();
+      textArea.Document.Replace(completionSegment, insertion);
+      if (insertion.EndsWith("("))
+        _parent.ShowCompletions(_control);
+    }
   }
 }

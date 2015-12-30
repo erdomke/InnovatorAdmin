@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace InnovatorAdmin
 {
-  public class Property
+  public class Property : IListValue
   {
     private List<string> _restrictions = new List<string>();
 
@@ -83,5 +83,11 @@ namespace InnovatorAdmin
           break;
       }
     }
+
+    string IListValue.Value
+    {
+      get { return this.Name; }
+    }
+
   }
 }

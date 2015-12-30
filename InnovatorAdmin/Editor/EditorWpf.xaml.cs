@@ -138,14 +138,17 @@ namespace InnovatorAdmin.Editor
     {
       string amlQuery;
       var settings = new System.Xml.XmlReaderSettings();
+      System.IO.TextReader reader;
+
       if (this.Helper == null)
       {
-        amlQuery = doc.Text;
+        reader = doc.CreateReader();
       }
       else
       {
         amlQuery = this.Helper.GetCurrentQuery(doc.Text, caret.Offset);
-        var loc = doc.GetLocation(doc.Text.IndexOf(amlQuery));
+        var loc = doc.GetLocation(doc.IndexOf(amlQuery, 0, doc.TextLength, StringComparison.Ordinal));
+        reader = new System.IO.StringReader(amlQuery);
         settings.LineNumberOffset = loc.Line;
       }
 
@@ -153,60 +156,57 @@ namespace InnovatorAdmin.Editor
       string lastId = null;
       var elems = new Stack<string>();
 
-
-      using (var reader = new System.IO.StringReader(amlQuery))
+      using (reader)
+      using (var xmlReader = System.Xml.XmlReader.Create(reader))
       {
-        using (var xmlReader = System.Xml.XmlReader.Create(reader))
+        var lineInfo = (System.Xml.IXmlLineInfo)xmlReader;
+        while (xmlReader.Read())
         {
-          var lineInfo = (System.Xml.IXmlLineInfo)xmlReader;
-          while (xmlReader.Read())
+          switch (xmlReader.NodeType)
           {
-            switch (xmlReader.NodeType)
-            {
-              case System.Xml.XmlNodeType.Element:
-              case System.Xml.XmlNodeType.EndElement:
-                if (lineInfo.LineNumber > this.editor.TextArea.Caret.Line
-                  || (lineInfo.LineNumber == this.editor.TextArea.Caret.Line && (lineInfo.LinePosition - 1) > this.editor.TextArea.Caret.Column))
-                {
-                  return lastId ?? lastItemId;
-                }
-                break;
-            }
+            case System.Xml.XmlNodeType.Element:
+            case System.Xml.XmlNodeType.EndElement:
+              if (lineInfo.LineNumber > this.editor.TextArea.Caret.Line
+                || (lineInfo.LineNumber == this.editor.TextArea.Caret.Line && (lineInfo.LinePosition - 1) > this.editor.TextArea.Caret.Column))
+              {
+                return lastId ?? lastItemId;
+              }
+              break;
+          }
 
-            switch (xmlReader.NodeType)
-            {
-              case System.Xml.XmlNodeType.Element:
-                switch (xmlReader.LocalName)
+          switch (xmlReader.NodeType)
+          {
+            case System.Xml.XmlNodeType.Element:
+              switch (xmlReader.LocalName)
+              {
+                case "Item":
+                  lastItemId = xmlReader.GetAttribute("id");
+                  lastId = xmlReader.GetAttribute("id");
+                  break;
+              }
+              if (!xmlReader.IsEmptyElement) elems.Push(xmlReader.LocalName);
+              break;
+            case System.Xml.XmlNodeType.Text:
+              if (xmlReader.Value.IsGuid())
+              {
+                switch (elems.Peek())
                 {
-                  case "Item":
-                    lastItemId = xmlReader.GetAttribute("id");
-                    lastId = xmlReader.GetAttribute("id");
+                  case "id":
+                    lastItemId = xmlReader.Value;
+                    break;
+                  default:
+                    lastId = xmlReader.Value;
                     break;
                 }
-                if (!xmlReader.IsEmptyElement) elems.Push(xmlReader.LocalName);
-                break;
-              case System.Xml.XmlNodeType.Text:
-                if (xmlReader.Value.IsGuid())
-                {
-                  switch (elems.Peek())
-                  {
-                    case "id":
-                      lastItemId = xmlReader.Value;
-                      break;
-                    default:
-                      lastId = xmlReader.Value;
-                      break;
-                  }
-                }
-                break;
-              case System.Xml.XmlNodeType.EndElement:
-                lastId = null;
-                if (elems.Pop() == "Item")
-                {
-                  lastItemId = null;
-                }
-                break;
-            }
+              }
+              break;
+            case System.Xml.XmlNodeType.EndElement:
+              lastId = null;
+              if (elems.Pop() == "Item")
+              {
+                lastItemId = null;
+              }
+              break;
           }
         }
       }

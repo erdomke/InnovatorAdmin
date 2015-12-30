@@ -17,8 +17,7 @@ namespace InnovatorAdmin.Editor
   {
     protected IAsyncConnection _conn;
     private ArasMetadataProvider _metadata;
-    private SqlCompletionHelper _sql;
-    private UploadCommand _upload;
+    protected SqlCompletionHelper _sql;
 
     public CompletionHelper()
     {
@@ -251,13 +250,10 @@ namespace InnovatorAdmin.Editor
                   items = CompletionExtensions.GetPromise<AttributeValueCompletionData>("0", "1");
                   break;
                 case "id":
-                  var newGuid = new CustomCompletionData()
+                  var newGuid = new BasicCompletionData()
                   {
                     Text = "(New Guid)",
-                    Content = new Run("(New Guid)")
-                    {
-                      Foreground = Brushes.Purple
-                    },
+                    Content = FormatText.ColorText("(New Guid)", Brushes.Purple),
                     Action = () => Guid.NewGuid().ToString("N").ToUpperInvariant()
                   };
                   items = Promises.Resolved(Enumerable.Repeat<ICompletionData>(newGuid, 1));
@@ -272,11 +268,7 @@ namespace InnovatorAdmin.Editor
                     var lastComma = value.LastIndexOf(",");
                     if (lastComma >= 0) value = value.Substring(lastComma + 1).Trim();
 
-                    items = _metadata.GetProperties(itemType)
-                      .Convert(p => p.SelectMany(i => new ICompletionData[] {
-                        new AttributeValueCompletionData() { Text = i.Name, Description = i.Label, MultiValue = true },
-                        new AttributeValueCompletionData() { Text = i.Name + " DESC", Description = i.Label, MultiValue = true }
-                      }));
+                    items = new OrderByPropertyFactory(_metadata, itemType).GetPromise();
                   }
                   break;
                 case "select":
@@ -291,12 +283,7 @@ namespace InnovatorAdmin.Editor
                     RecurseProperties(itemType, selectPath, it => itPromise.Resolve(it));
 
                     items = itPromise
-                      .Continue(it => _metadata.GetProperties(it))
-                      .Convert(p => p.Select(i => (ICompletionData)new AttributeValueCompletionData() {
-                        Text = i.Name,
-                        Description = i.Label,
-                        MultiValue = true
-                      }));
+                      .Continue(it => new SelectPropertyFactory(_metadata, it).GetPromise());
                   }
                   break;
                 case "type":
@@ -307,24 +294,19 @@ namespace InnovatorAdmin.Editor
                     if (!string.IsNullOrEmpty(path[path.Count - 3].Type)
                       && _metadata.ItemTypeByName(path[path.Count - 3].Type, out itemType))
                     {
-                      items = CompletionExtensions.GetPromise<AttributeValueCompletionData>(itemType.Relationships.Select(r => r.Name));
+                      items = Promises.Resolved(ItemTypeCompletion<AttributeValueCompletionData>(itemType.Relationships));
                     }
                   }
                   else
                   {
-                    items = CompletionExtensions.GetPromise<AttributeValueCompletionData>(_metadata.ItemTypes.Select(i => i.Name));
+                    items = Promises.Resolved(ItemTypeCompletion<AttributeValueCompletionData>(_metadata.ItemTypes));
                   }
                   break;
                 case "where":
                   if (!string.IsNullOrEmpty(path.Last().Type)
                     && _metadata.ItemTypeByName(path.Last().Type, out itemType))
                   {
-                    items = _metadata.GetProperties(itemType)
-                      .Convert(i => i.Select(p => (ICompletionData)new AttributeValueCompletionData() {
-                        Text = "[" + itemType.Name + "].[" + p.Name + "]",
-                        Description = p.Label,
-                        MultiValue = true
-                      }));
+                    items = new WherePropertyFactory(_metadata, itemType).GetPromise();
                   }
                   break;
               }
@@ -418,21 +400,7 @@ namespace InnovatorAdmin.Editor
                     if (!string.IsNullOrEmpty(last.Type)
                       && _metadata.ItemTypeByName(last.Type, out itemType))
                     {
-                      items = _metadata.GetProperties(itemType)
-                        .Convert(p => {
-                          var hash = new HashSet<string>(p.Select(pr => pr.Name), StringComparer.CurrentCultureIgnoreCase);
-                          return p.Select(i => new BasicCompletionData() { Text = i.Name, Description = i.Label })
-                            .Concat(p.Where(pr => !string.IsNullOrWhiteSpace(pr.Label) && !hash.Contains(pr.Label.Replace(' ', '_')))
-                                     .Select(pr => new CustomCompletionData() {
-                                       Text = pr.Label + " (" + pr.Name + ")",
-                                       Description = pr.Name,
-                                       Content = new Run(pr.Label + " (" + pr.Name + ")") {
-                                         Foreground = Brushes.Gray
-                                       },
-                                       Action = () => pr.Name
-                                     }))
-                            .Concat(buffer);
-                        });
+                      items = new PropertyCompletionFactory(_metadata, itemType).GetPromise(buffer);
                     }
                     else
                     {
@@ -477,7 +445,7 @@ namespace InnovatorAdmin.Editor
                     if (!string.IsNullOrEmpty(lastItem.Type)
                       && _metadata.ItemTypeByName(lastItem.Type, out itemType))
                     {
-                      items = PropertyCompletion(itemType, state, path).ToPromise();
+                      items = PropertyValueCompletion(itemType, state, path).ToPromise();
                     }
                   }
                 }
@@ -498,7 +466,28 @@ namespace InnovatorAdmin.Editor
       });
     }
 
-    private async Task<IEnumerable<ICompletionData>> PropertyCompletion(ItemType itemType, XmlState state, IList<AmlNode> path)
+    private IEnumerable<ICompletionData> ItemTypeCompletion<T>(IEnumerable<ItemType> itemTypes) where T : BasicCompletionData, new()
+    {
+      return itemTypes.Select(i =>
+      {
+        var result = new T();
+        result.Text = i.Name;
+        if (!string.IsNullOrWhiteSpace(i.Label)) result.Description = i.Label;
+        return result;
+      }).Concat(itemTypes.Where(i => !string.IsNullOrWhiteSpace(i.Label) &&
+                                     !string.Equals(i.Name, i.Label, StringComparison.OrdinalIgnoreCase))
+          .Select(i =>
+          {
+            var result = new T();
+            result.Text = i.Label;
+            result.Description = i.Name;
+            result.Content = FormatText.MutedText(i.Label);
+            result.Action = () => i.Name;
+            return result;
+          }));
+    }
+
+    private async Task<IEnumerable<ICompletionData>> PropertyValueCompletion(ItemType itemType, XmlState state, IList<AmlNode> path)
     {
       var p = await _metadata.GetProperty(itemType, path.Last().LocalName).ToTask();
 
@@ -510,13 +499,10 @@ namespace InnovatorAdmin.Editor
 
         if (p.Restrictions.Any(r => string.Equals(r, "File", StringComparison.OrdinalIgnoreCase)))
         {
-          var uploadComplete = new CustomCompletionData()
+          var uploadComplete = new BasicCompletionData()
           {
             Text = "Select file to upload...",
-            Content = new Run("Select file to upload...")
-            {
-              Foreground = Brushes.Purple
-            },
+            Content = FormatText.ColorText("Select file to upload...", Brushes.Purple),
             Action = () =>
             {
               using (var dialog = new System.Windows.Forms.OpenFileDialog())
@@ -553,13 +539,10 @@ namespace InnovatorAdmin.Editor
           .Select(v => v.Value)
           .GetCompletions<BasicCompletionData>()
           .Concat(values.Where(v => !string.IsNullOrWhiteSpace(v.Label) && !hash.Contains(v.Label))
-                  .Select(v => new CustomCompletionData() {
+                  .Select(v => new BasicCompletionData() {
                     Text = v.Label + " (" + v.Value + ")",
                     Description = v.Value,
-                    Content = new Run(v.Label + " (" + v.Value + ")")
-                    {
-                      Foreground = Brushes.Gray
-                    },
+                    Content = FormatText.MutedText(v.Label + " (" + v.Value + ")"),
                     Action = () => v.Value
                   }));
       }
@@ -569,9 +552,7 @@ namespace InnovatorAdmin.Editor
       }
       else if (p.Name == "name" && itemType.Name == "ItemType" && path[path.Count - 2].Action == "get")
       {
-        return _metadata.ItemTypes
-          .Select(it => it.Name)
-          .GetCompletions<BasicCompletionData>();
+        return ItemTypeCompletion<BasicCompletionData>(_metadata.ItemTypes);
       }
       else
       {
@@ -757,16 +738,89 @@ namespace InnovatorAdmin.Editor
     public IEnumerable<string> GetTableNames()
     {
       return _metadata.ItemTypes
-        .Select(i => "innovator.[" + i.Name.Replace(' ', '_') + "]");
+        .Select(i => "innovator.[" + i.Name.Replace(' ', '_') + "]")
+        .Concat(_metadata.Sqls()
+          .Where(s => string.Equals(s.Type, "type", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(s.Type, "view", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(s.Type, "function", StringComparison.OrdinalIgnoreCase))
+          .Select(s => "innovator.[" + s.KeyedName + "]"));
     }
 
-    public IPromise<IEnumerable<string>> GetColumnNames(string tableName)
+    public IPromise<IEnumerable<ListValue>> GetColumnNames(string tableName)
     {
       ItemType itemType;
-      if (_metadata.ItemTypeByName(tableName.Replace('_', ' '), out itemType))
-        return _metadata.GetProperties(itemType).Convert(p => p.Select(i => i.Name));
+      if (tableName.StartsWith("innovator.", StringComparison.OrdinalIgnoreCase))
+        tableName = tableName.Substring(10);
 
-      return Promises.Resolved(Enumerable.Empty<string>());
+      if (_metadata.ItemTypeByName(tableName.Replace('_', ' '), out itemType))
+        return _metadata.GetProperties(itemType).Convert(p => p.Select(i => new ListValue()
+        {
+          Value = i.Name,
+          Label = i.Label
+        }));
+
+      return Promises.Resolved(Enumerable.Empty<ListValue>());
+    }
+
+
+    private class SelectPropertyFactory : PropertyCompletionFactory
+    {
+      public SelectPropertyFactory(ArasMetadataProvider metadata, ItemType itemType) :
+        base(metadata, itemType) { }
+
+      protected override BasicCompletionData CreateCompletion()
+      {
+        return new AttributeValueCompletionData() { MultiValue = true };
+      }
+    }
+
+    private class OrderByPropertyFactory : PropertyCompletionFactory
+    {
+      public OrderByPropertyFactory(ArasMetadataProvider metadata, ItemType itemType) :
+        base(metadata, itemType) { }
+
+      protected override BasicCompletionData CreateCompletion()
+      {
+        return new AttributeValueCompletionData() { MultiValue = true };
+      }
+
+      protected override IEnumerable<ICompletionData> GetCompletions(IEnumerable<IListValue> normal, IEnumerable<IListValue> byLabel)
+      {
+        return base.GetCompletions(normal, byLabel)
+          .Concat(normal.Select(i =>
+          {
+            var data = ConfigureNormalProperty(CreateCompletion(), i);
+            data.Text += " DESC";
+            data.Description += " DESC";
+            return data;
+          }))
+          .Concat(byLabel.Select(i =>
+          {
+            var data = ConfigureLabeledProperty(CreateCompletion(), i);
+            data.Text += " DESC";
+            data.Description += " DESC";
+            data.Content = FormatText.MutedText(data.Text);
+            data.Action = () => i.Value + " DESC";
+            return data;
+          }));
+      }
+    }
+
+    private class WherePropertyFactory : PropertyCompletionFactory
+    {
+      public WherePropertyFactory(ArasMetadataProvider metadata, ItemType itemType) :
+        base(metadata, itemType) { }
+
+      protected override BasicCompletionData CreateCompletion()
+      {
+        return new AttributeValueCompletionData() { MultiValue = true };
+      }
+      protected override BasicCompletionData ConfigureNormalProperty(BasicCompletionData data, IListValue prop)
+      {
+        var res = base.ConfigureNormalProperty(data, prop);
+        res.Action = () => "[" + _itemType.Name.Replace(' ', '_') + "].[" + prop.Value + "]";
+        return res;
+      }
     }
   }
 }

@@ -25,5 +25,22 @@ namespace InnovatorAdmin.Editor
       if (literal == null) return false;
       return base.Equals(obj) && this.Text == literal.Text;
     }
+
+    public SqlLiteral PreviousLiteral()
+    {
+      var group = this.Parent as SqlGroup;
+
+      while (group != null)
+      {
+        var idx = group.IndexOf(this);
+        if (idx < 0)
+          return null;
+        else if (idx == 0)
+          group = group.Parent as SqlGroup;
+        else
+          return group[idx - 1] as SqlLiteral;
+      }
+      return null;
+    }
   }
 }

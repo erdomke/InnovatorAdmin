@@ -93,12 +93,14 @@
     <Compile Include="IProgressReporter.cs" />
     <Compile Include="ItemProperty.cs" />
     <Compile Include="ItemReference.cs" />
+    <Compile Include="Metadata\IListValue.cs" />
     <Compile Include="Metadata\ItemType.cs" />
     <Compile Include="Metadata\ListValue.cs" />
     <Compile Include="Metadata\Method.cs" />
     <Compile Include="Metadata\Property.cs" />
     <Compile Include="Metadata\PropertyType.cs" />
     <Compile Include="Metadata\PropertyVisibility.cs" />
+    <Compile Include="Metadata\Sql.cs" />
     <Compile Include="ProgressChangedEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RecoverableErrorEventArgs.cs" />

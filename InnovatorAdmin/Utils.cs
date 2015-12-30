@@ -13,6 +13,27 @@ namespace InnovatorAdmin
 {
   public static class Utils
   {
+    public static Control FindFocusedControl(this IContainerControl container)
+    {
+      Control control = null;
+      while (container != null)
+      {
+        control = container.ActiveControl;
+        container = control as IContainerControl;
+      }
+      return control;
+    }
+
+    public static IEnumerable<Control> ParentsAndSelf(this Control control)
+    {
+      var parent = control;
+      while (parent != null)
+      {
+        yield return parent;
+        parent = parent.Parent;
+      }
+    }
+
     public static string IndentXml(string xml)
     {
       string result;

@@ -14,11 +14,13 @@ namespace InnovatorAdmin.Editor
 
     public override void Complete(TextArea textArea, ISegment completionSegment, EventArgs insertionRequestEventArgs)
     {
-      textArea.Document.Replace(completionSegment, this.Text);
+      var insertion = Action == null ? this.Text : Action.Invoke();
+      textArea.Document.Replace(completionSegment, insertion);
+      base.Complete(textArea, completionSegment, insertionRequestEventArgs);
 
       if (!this.MultiValue)
       {
-        var offset = completionSegment.Offset + this.Text.Length;
+        var offset = completionSegment.Offset + insertion.Length;
         var doc = textArea.Document;
         var quote = doc.GetCharAt(completionSegment.Offset - 1);
         if (doc.TextLength > offset && doc.GetCharAt(offset) == quote

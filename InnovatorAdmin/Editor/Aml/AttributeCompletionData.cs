@@ -22,7 +22,7 @@ namespace InnovatorAdmin.Editor
 
     public override void Complete(TextArea textArea, ISegment completionSegment, EventArgs insertionRequestEventArgs)
     {
-      textArea.Document.Replace(completionSegment, this.Text + "=''");
+      textArea.Document.Replace(completionSegment, (Action == null ? this.Text : Action.Invoke()) + "=''");
       textArea.Caret.Offset -= 1;
       _parent.ShowCompletions(_control);
     }

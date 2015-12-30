@@ -10,6 +10,6 @@ namespace InnovatorAdmin.Editor
   {
     IEnumerable<string> GetSchemaNames();
     IEnumerable<string> GetTableNames();
-    IPromise<IEnumerable<string>> GetColumnNames(string tableName);
+    IPromise<IEnumerable<ListValue>> GetColumnNames(string tableName);
   }
 }
