@@ -24,6 +24,19 @@ namespace InnovatorAdmin.Editor
       _sql = new SqlCompletionHelper(this);
     }
 
+    private string GetType(XmlReader reader)
+    {
+      var type = reader.GetAttribute("type");
+      if (!string.IsNullOrEmpty(type))
+        return type;
+      var typeId = reader.GetAttribute("typeId");
+      ItemType itemType;
+      if (!string.IsNullOrEmpty(typeId) && _metadata != null && _metadata.TypeById(typeId, out itemType))
+        return itemType.Name;
+      
+      return null;
+    }
+
     public IPromise<CompletionContext> GetCompletions(string xml, int caret, string soapAction)
     {
       //var overlap = 0;
@@ -45,7 +58,7 @@ namespace InnovatorAdmin.Editor
               path.Add(new AmlNode()
               {
                 LocalName = r.LocalName,
-                Type = r.GetAttribute("type"),
+                Type = GetType(r),
                 Action = r.GetAttribute("action"),
                 Condition = r.GetAttribute("condition")
               });
@@ -154,7 +167,7 @@ namespace InnovatorAdmin.Editor
                       , "select"
                       , "serverEvents"
                       , "type"
-                      , "typeID"
+                      , "typeId"
                       , "version"
                       , "where"};
                     if (path.Last().Action == "getPermissions")
@@ -250,7 +263,7 @@ namespace InnovatorAdmin.Editor
                   items = CompletionExtensions.GetPromise<AttributeValueCompletionData>("0", "1");
                   break;
                 case "id":
-                  var newGuid = new BasicCompletionData()
+                  var newGuid = new AttributeValueCompletionData()
                   {
                     Text = "(New Guid)",
                     Content = FormatText.ColorText("(New Guid)", Brushes.Purple),
@@ -287,7 +300,14 @@ namespace InnovatorAdmin.Editor
                   }
                   break;
                 case "type":
-                  if (path.Count > 2
+                  if (string.IsNullOrEmpty(value) && !string.IsNullOrEmpty(path.Last().Type))
+                  {
+                    items = Promises.Resolved(Enumerable.Repeat<ICompletionData>(new AttributeValueCompletionData()
+                    {
+                      Text = path.Last().Type
+                    }, 1));
+                  }
+                  else if (path.Count > 2
                     && path[path.Count - 3].LocalName == "Item"
                     && path[path.Count - 2].LocalName == "Relationships")
                   {
@@ -301,6 +321,31 @@ namespace InnovatorAdmin.Editor
                   {
                     items = Promises.Resolved(ItemTypeCompletion<AttributeValueCompletionData>(_metadata.ItemTypes));
                   }
+                  break;
+                case "typeId":
+                  if (!string.IsNullOrEmpty(path.Last().Type)
+                    && _metadata.ItemTypeByName(path.Last().Type, out itemType))
+                  {
+                    items = Promises.Resolved(Enumerable.Repeat<ICompletionData>(new AttributeValueCompletionData()
+                    {
+                      Text = itemType.Id
+                    }, 1));
+                  }
+                  else if (path.Count > 2
+                    && path[path.Count - 3].LocalName == "Item"
+                    && path[path.Count - 2].LocalName == "Relationships")
+                  {
+                    if (!string.IsNullOrEmpty(path[path.Count - 3].Type)
+                      && _metadata.ItemTypeByName(path[path.Count - 3].Type, out itemType))
+                    {
+                      items = Promises.Resolved(ItemTypeCompletion<AttributeValueCompletionData>(itemType.Relationships, true));
+                    }
+                  }
+                  else
+                  {
+                    items = Promises.Resolved(ItemTypeCompletion<AttributeValueCompletionData>(_metadata.ItemTypes, true));
+                  }
+                  break;
                   break;
                 case "where":
                   if (!string.IsNullOrEmpty(path.Last().Type)
@@ -466,12 +511,13 @@ namespace InnovatorAdmin.Editor
       });
     }
 
-    private IEnumerable<ICompletionData> ItemTypeCompletion<T>(IEnumerable<ItemType> itemTypes) where T : BasicCompletionData, new()
+    private IEnumerable<ICompletionData> ItemTypeCompletion<T>(IEnumerable<ItemType> itemTypes, bool insertId = false) where T : BasicCompletionData, new()
     {
       return itemTypes.Select(i =>
       {
         var result = new T();
         result.Text = i.Name;
+        if (insertId) result.Action = () => i.Id;
         if (!string.IsNullOrWhiteSpace(i.Label)) result.Description = i.Label;
         return result;
       }).Concat(itemTypes.Where(i => !string.IsNullOrWhiteSpace(i.Label) &&
@@ -482,7 +528,10 @@ namespace InnovatorAdmin.Editor
             result.Text = i.Label;
             result.Description = i.Name;
             result.Content = FormatText.MutedText(i.Label);
-            result.Action = () => i.Name;
+            if (insertId)
+              result.Action = () => i.Id;
+            else
+              result.Action = () => i.Name;
             return result;
           }));
     }
@@ -546,6 +595,11 @@ namespace InnovatorAdmin.Editor
                     Action = () => v.Value
                   }));
       }
+      else if (p.Name == "classification")
+      {
+        var paths = await _metadata.GetClassPaths(itemType).ToTask();
+        return paths.GetCompletions<BasicCompletionData>();
+      }
       else if (p.Name == "name" && itemType.Name == "Method" && path[path.Count - 2].Action == "get")
       {
         return _metadata.MethodNames.GetCompletions<BasicCompletionData>();
@@ -605,10 +659,11 @@ namespace InnovatorAdmin.Editor
             {
               start = o;
             }
+
             if (r.IsEmptyElement)
             {
               end = xml.IndexOf("/>", o) + 2;
-              if (offset >= start && offset < end)
+              if (depth == 0 && offset >= start && offset < end)
               {
                 result = xml.Substring(start, end - start);
                 return false;

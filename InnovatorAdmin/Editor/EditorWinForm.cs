@@ -313,12 +313,14 @@ namespace InnovatorAdmin.Editor
         if (key == System.Windows.Input.Key.F9 || key == System.Windows.Input.Key.F5)
         {
           OnRunRequested(new RunRequestedEventArgs(Editor.Text));
+          e.Handled = true;
         }
         // Ctrl+Enter or Ctrl+Shift+E
         else if ((key == System.Windows.Input.Key.Enter && IsControlDown(e.KeyboardDevice))
           || (key == System.Windows.Input.Key.E && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice)))
         {
           OnRunRequested(new RunRequestedEventArgs(GetCurrentQuery()));
+          e.Handled = true;
         }
         // Ctrl+Shift+Up
         else if (!SingleLine
@@ -326,6 +328,7 @@ namespace InnovatorAdmin.Editor
             || (key == System.Windows.Input.Key.Up && IsAltDown(e.KeyboardDevice))))
         {
           MoveLineUp();
+          e.Handled = true;
         }
         // Ctrl+Shift+Down
         else if (!SingleLine
@@ -333,26 +336,30 @@ namespace InnovatorAdmin.Editor
             || (key == System.Windows.Input.Key.Down && IsAltDown(e.KeyboardDevice))))
         {
           MoveLineDown();
+          e.Handled = true;
         }
         // Ctrl+T
         else if (key == System.Windows.Input.Key.T && IsControlDown(e.KeyboardDevice)) // Indent the code
         {
           TidyXml();
+          e.Handled = true;
         }
         // Ctrl+Shift+U
         else if (key == System.Windows.Input.Key.U && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
         {
           TransformUppercase();
+          e.Handled = true;
         }
         // Ctrl+U
         else if (key == System.Windows.Input.Key.U && IsControlDown(e.KeyboardDevice))
         {
           TransformLowercase();
+          e.Handled = true;
         }
 
         var winArgs = WinFormsKey(e);
         OnKeyDown(winArgs);
-        e.Handled = winArgs.Handled;
+        e.Handled = e.Handled || winArgs.Handled;
       }
       catch (Exception ex)
       {
@@ -508,7 +515,10 @@ namespace InnovatorAdmin.Editor
     {
       if (completionItems.Any())
       {
-        completionWindow = new CompletionWindow(Editor.TextArea);
+        //if (completionWindow != null)
+        //  completionWindow.Close();
+
+        completionWindow = new CompletionWindowEx(Editor.TextArea);
         completionWindow.StartOffset -= overlap;
         IList<ICompletionData> data = completionWindow.CompletionList.CompletionData;
         foreach (var item in completionItems)
@@ -539,29 +549,31 @@ namespace InnovatorAdmin.Editor
 
     void TextArea_TextEntering(object sender, System.Windows.Input.TextCompositionEventArgs e)
     {
-      if (e.Text.Length > 0 && completionWindow != null
-        && !completionWindow.CompletionList.CompletionData.OfType<SqlGeneralCompletionData>().Any())
+      if (e.Text.Length > 0 && completionWindow != null)
       {
-        switch (e.Text[0])
+        if (!completionWindow.CompletionList.CompletionData.OfType<SqlGeneralCompletionData>().Any())
         {
-          case '"':
-          case '\'':
-            // Whenever a non-letter is typed while the completion window is open,
-            // insert the currently selected element.
-            completionWindow.CompletionList.RequestInsertion(e);
-            break;
-          case '>':
-            if (Editor.CaretOffset > 0)
-            {
-              var prev = Editor.Document.GetCharAt(Editor.CaretOffset - 1);
-              if (prev != ' ')
-                completionWindow.CompletionList.RequestInsertion(e);
-            }
-            break;
-          case ' ':
-            if (!completionWindow.CompletionList.CompletionData.Any(d => d.Text.IndexOf(' ') >= 0))
+          switch (e.Text[0])
+          {
+            case '"':
+            case '\'':
+              // Whenever a non-letter is typed while the completion window is open,
+              // insert the currently selected element.
               completionWindow.CompletionList.RequestInsertion(e);
-            break;
+              break;
+            case '>':
+              if (Editor.CaretOffset > 0)
+              {
+                var prev = Editor.Document.GetCharAt(Editor.CaretOffset - 1);
+                if (prev != ' ')
+                  completionWindow.CompletionList.RequestInsertion(e);
+              }
+              break;
+            case ' ':
+              if (!completionWindow.CompletionList.CompletionData.Any(d => d.Text.IndexOf(' ') >= 0))
+                completionWindow.CompletionList.RequestInsertion(e);
+              break;
+          }
         }
       }
       // Do not set e.Handled=true.
@@ -664,6 +676,38 @@ namespace InnovatorAdmin.Editor
       {
         _item.Click -= Invoke;
         _command.CanExecuteChanged -= EnableChanged;
+      }
+    }
+
+    private class CompletionWindowEx : CompletionWindow
+    {
+      private bool _allowEnter = false;
+
+      public CompletionWindowEx(TextArea textArea) : base(textArea) { }
+
+      protected override void OnKeyDown(System.Windows.Input.KeyEventArgs e)
+      {
+        switch (e.Key)
+        {
+          case System.Windows.Input.Key.Prior:
+          case System.Windows.Input.Key.Next:
+          case System.Windows.Input.Key.Up:
+          case System.Windows.Input.Key.Down:
+            _allowEnter = true;
+            break;
+        }
+
+        if (!_allowEnter &&
+          ( e.Key == System.Windows.Input.Key.Enter
+          || e.Key == System.Windows.Input.Key.End
+          || e.Key == System.Windows.Input.Key.Home))
+        {
+          this.Close();
+        }
+        else
+        {
+          base.OnKeyDown(e);
+        }
       }
     }
   }

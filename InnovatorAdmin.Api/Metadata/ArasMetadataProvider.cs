@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Innovator.Client;
+using System.Xml;
 
 namespace InnovatorAdmin
 {
@@ -23,7 +24,6 @@ namespace InnovatorAdmin
     private Dictionary<string, ItemReference> _systemIdentities;
     private Dictionary<string, IEnumerable<ListValue>> _listValues
       = new Dictionary<string,IEnumerable<ListValue>>();
-
 
     /// <summary>
     /// Enumerable of methods where core = 1
@@ -358,6 +358,71 @@ namespace InnovatorAdmin
       if (!_itemTypesById.TryGetValue(id, out itemType))
         return Promises.Rejected<IEnumerable<Property>>(new KeyNotFoundException());
       return GetProperties(itemType);
+    }
+
+    public IPromise<IEnumerable<string>> GetClassPaths(ItemType itemType)
+    {
+      if (_conn == null || itemType.ClassPaths != null)
+        return Promises.Resolved(itemType.ClassPaths);
+
+      return _conn.ApplyAsync("<AML><Item action=\"get\" type=\"ItemType\" id=\"@0\" select='class_structure'></Item></AML>"
+        , true, true, itemType.Id)
+        .Convert(r =>
+        {
+          var structure = r.AssertItem().Property("class_structure").Value;
+          if (string.IsNullOrEmpty(structure))
+          {
+            itemType.ClassPaths = Enumerable.Empty<string>();
+          }
+          else
+          {
+            try
+            {
+              itemType.ClassPaths = ParseClassStructure(new System.IO.StringReader(structure)).ToArray();
+            }
+            catch (XmlException)
+            {
+              itemType.ClassPaths = Enumerable.Empty<string>();
+            }
+          }
+          return itemType.ClassPaths;
+        });
+    }
+
+    private IEnumerable<string> ParseClassStructure(System.IO.TextReader structure)
+    {
+      var path = new List<string>();
+      var returned = 0;
+
+      using (var reader = XmlReader.Create(structure))
+      {
+        while (reader.Read())
+        {
+          if (reader.NodeType == XmlNodeType.Element && reader.LocalName == "class")
+          {
+            if (reader.IsEmptyElement)
+            {
+              returned = path.Count;
+              yield return path.Concat(Enumerable.Repeat(reader.GetAttribute("name"), 1)).GroupConcat("/");
+            }
+            else
+            {
+              var name = reader.GetAttribute("name");
+              if (!string.IsNullOrEmpty(name))
+                path.Add(name);
+            }
+          }
+          else if (reader.NodeType == XmlNodeType.EndElement && reader.LocalName == "class")
+          {
+            if (returned < path.Count)
+              yield return path.GroupConcat("/");
+
+            if (path.Count > 0)
+              path.RemoveAt(path.Count - 1);
+            returned = path.Count;
+          }
+        }
+      }
     }
 
     /// <summary>

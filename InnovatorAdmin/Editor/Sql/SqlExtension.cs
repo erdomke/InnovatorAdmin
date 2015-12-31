@@ -27,7 +27,13 @@ namespace InnovatorAdmin
           var table = new DataTable();
           table.Load(reader);
           dataSet.Tables.Add(table);
-          nextResult = await reader.NextResultAsync();
+
+          for (var i = 0; i < table.Columns.Count; i++)
+          {
+            table.Columns[i].SortOrder(i * 10);
+          }
+
+          nextResult = !reader.IsClosed && reader.HasRows;
         }
 
         return new SqlResultObject(dataSet, dataSet.Tables.Count > 0

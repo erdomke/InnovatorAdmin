@@ -133,7 +133,7 @@ namespace InnovatorAdmin
 
     public static bool IsUiVisible(this DataColumn column)
     {
-      return (bool)column.ExtendedProperties["visible"];
+      return !column.ExtendedProperties.ContainsKey("visible") || (bool)column.ExtendedProperties["visible"];
     }
     private static void IsUiVisible(this DataColumn column, bool value)
     {
@@ -155,7 +155,7 @@ namespace InnovatorAdmin
         return (int)column.ExtendedProperties["sort_order"];
       return 999999;
     }
-    private static void SortOrder(this DataColumn column, int value)
+    public static void SortOrder(this DataColumn column, int value)
     {
       column.ExtendedProperties["sort_order"] = value;
     }
@@ -164,6 +164,7 @@ namespace InnovatorAdmin
     {
       var ds = new DataSet();
       string mainType = null;
+      string mainId = null;
 
       List<IReadOnlyItem> items;
       try
@@ -172,6 +173,7 @@ namespace InnovatorAdmin
         if (items.Count == 1)
         {
           mainType = items[0].Type().Value;
+          mainId = items[0].Id();
           items.AddRange(items[0].Relationships());
         }
 
@@ -228,13 +230,29 @@ namespace InnovatorAdmin
         {
           result.BeginLoadData();
 
+          if (string.IsNullOrEmpty(kvp.Key)
+              || metadata == null
+              || !metadata.ItemTypeByName(kvp.Key, out itemType))
+          {
+            itemType = null;
+          }
+          else
+          {
+            result.RowChanging += (s, e) =>
+            {
+              if (e.Action == DataRowAction.Add)
+              {
+                var newId = Guid.NewGuid().ToString("N").ToUpperInvariant();
+                e.Row.Table.Columns["id"].DefaultValue = newId;
+              }
+            };
+          }
+
           foreach (var prop in kvp.Value)
           {
             if (prop != AmlTable_TypeName
               && prop != AmlTable_TypeId
-              && !string.IsNullOrEmpty(kvp.Key)
-              && metadata != null
-              && metadata.ItemTypeByName(kvp.Key, out itemType))
+              && itemType != null)
             {
               result.TableName = itemType.TabLabel ?? (itemType.Label ?? itemType.Name);
 
@@ -255,6 +273,8 @@ namespace InnovatorAdmin
                 {
                   case PropertyType.boolean:
                     newColumn = new DataColumn(prop, typeof(bool));
+                    if (pMeta.IsRequired && pMeta.DefaultValue == null)
+                      newColumn.DefaultValue = false;
                     break;
                   case PropertyType.date:
                     newColumn = new DataColumn(prop, typeof(DateTime));
@@ -276,8 +296,20 @@ namespace InnovatorAdmin
                 }
                 newColumn.Caption = (pMeta.Label ?? pMeta.Name) + propAddendum;
                 if (pMeta.DefaultValue != null) newColumn.DefaultValue = pMeta.DefaultValue;
+                if (kvp.Key != mainType && !string.IsNullOrEmpty(mainId) && pMeta.Name == "source_id")
+                  newColumn.DefaultValue = mainId;
                 newColumn.ReadOnly = pMeta.ReadOnly;
                 newColumn.AllowDBNull = !pMeta.IsRequired;
+                // Ignore constraints on the following columns
+                switch (pMeta.Name)
+                {
+                  case "config_id":
+                  case "created_by_id":
+                  case "created_on":
+                  case "permission_id":
+                    newColumn.AllowDBNull = true;
+                    break;
+                }
                 newColumn.IsUiVisible(string.IsNullOrEmpty(mainType) && itemType.Name != mainType
                   ? (pMeta.Visibility & PropertyVisibility.RelationshipGrid) > 0
                   : (pMeta.Visibility & PropertyVisibility.MainGrid) > 0);

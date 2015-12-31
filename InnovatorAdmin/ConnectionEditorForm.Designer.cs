@@ -67,6 +67,7 @@
       this.btnClose.Location = new System.Drawing.Point(519, 203);
       this.btnClose.MinimumSize = new System.Drawing.Size(75, 0);
       this.btnClose.Name = "btnClose";
+      this.btnClose.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnClose.Padding = new System.Windows.Forms.Padding(2);
       this.btnClose.Size = new System.Drawing.Size(75, 29);
       this.btnClose.TabIndex = 2;
@@ -98,6 +99,7 @@
       this.btnOk.Location = new System.Drawing.Point(438, 203);
       this.btnOk.MinimumSize = new System.Drawing.Size(75, 0);
       this.btnOk.Name = "btnOk";
+      this.btnOk.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnOk.Padding = new System.Windows.Forms.Padding(2);
       this.btnOk.Size = new System.Drawing.Size(75, 29);
       this.btnOk.TabIndex = 1;

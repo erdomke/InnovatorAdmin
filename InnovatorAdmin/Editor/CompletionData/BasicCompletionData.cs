@@ -27,6 +27,7 @@ namespace InnovatorAdmin.Editor
 
     public Func<string> Action { get; set; }
     public virtual string Text { get; set; }
+    public int CaretOffset { get; set; }
 
     // Use this property if you want to show a fancy UIElement in the list.
     public virtual object Content
@@ -41,6 +42,8 @@ namespace InnovatorAdmin.Editor
         EventArgs insertionRequestEventArgs)
     {
       textArea.Document.Replace(completionSegment, Action == null ? this.Text : Action.Invoke());
+      if (CaretOffset != 0)
+        textArea.Caret.Offset += CaretOffset;
     }
 
     public double Priority

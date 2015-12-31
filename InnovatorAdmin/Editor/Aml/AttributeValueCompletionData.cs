@@ -15,15 +15,16 @@ namespace InnovatorAdmin.Editor
     public override void Complete(TextArea textArea, ISegment completionSegment, EventArgs insertionRequestEventArgs)
     {
       var insertion = Action == null ? this.Text : Action.Invoke();
+      var start = completionSegment.Offset;
+      var end = completionSegment.Offset + insertion.Length;
       textArea.Document.Replace(completionSegment, insertion);
-      base.Complete(textArea, completionSegment, insertionRequestEventArgs);
+      //base.Complete(textArea, completionSegment, insertionRequestEventArgs);
 
       if (!this.MultiValue)
       {
-        var offset = completionSegment.Offset + insertion.Length;
         var doc = textArea.Document;
-        var quote = doc.GetCharAt(completionSegment.Offset - 1);
-        if (doc.TextLength > offset && doc.GetCharAt(offset) == quote
+        var quote = doc.GetCharAt(start - 1);
+        if (doc.TextLength > end && doc.GetCharAt(end) == quote
           && (quote == '\'' || quote == '"'))
         {
           textArea.Caret.Offset += 1;

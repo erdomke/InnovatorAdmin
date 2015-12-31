@@ -39,10 +39,10 @@
       this.label2 = new System.Windows.Forms.Label();
       this.label3 = new System.Windows.Forms.Label();
       this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-      this.bs = new System.Windows.Forms.BindingSource(this.components);
       this.btnCancel = new InnovatorAdmin.Controls.FlatButton();
       this.btnIgnore = new InnovatorAdmin.Controls.FlatButton();
       this.btnReplace = new InnovatorAdmin.Controls.FlatButton();
+      this.bs = new System.Windows.Forms.BindingSource(this.components);
       this.tableLayoutPanel1.SuspendLayout();
       this.tableLayoutPanel2.SuspendLayout();
       this.flowLayoutPanel1.SuspendLayout();
@@ -173,6 +173,7 @@
       // 
       this.btnCancel.AutoSize = true;
       this.btnCancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
       this.btnCancel.FlatAppearance.BorderSize = 0;
       this.btnCancel.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnCancel.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
@@ -180,6 +181,7 @@
       this.btnCancel.ForeColor = System.Drawing.Color.Black;
       this.btnCancel.Location = new System.Drawing.Point(287, 3);
       this.btnCancel.Name = "btnCancel";
+      this.btnCancel.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnCancel.Padding = new System.Windows.Forms.Padding(2);
       this.btnCancel.Size = new System.Drawing.Size(75, 27);
       this.btnCancel.TabIndex = 0;
@@ -199,6 +201,7 @@
       this.btnIgnore.ForeColor = System.Drawing.Color.Black;
       this.btnIgnore.Location = new System.Drawing.Point(206, 3);
       this.btnIgnore.Name = "btnIgnore";
+      this.btnIgnore.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnIgnore.Padding = new System.Windows.Forms.Padding(2);
       this.btnIgnore.Size = new System.Drawing.Size(75, 27);
       this.btnIgnore.TabIndex = 2;
@@ -218,6 +221,7 @@
       this.btnReplace.ForeColor = System.Drawing.Color.Black;
       this.btnReplace.Location = new System.Drawing.Point(125, 3);
       this.btnReplace.Name = "btnReplace";
+      this.btnReplace.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnReplace.Padding = new System.Windows.Forms.Padding(2);
       this.btnReplace.Size = new System.Drawing.Size(75, 27);
       this.btnReplace.TabIndex = 1;
@@ -231,6 +235,7 @@
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.BackColor = System.Drawing.Color.White;
+      this.CancelButton = this.btnCancel;
       this.ClientSize = new System.Drawing.Size(365, 192);
       this.Controls.Add(this.tableLayoutPanel1);
       this.Name = "ParameterWindow";

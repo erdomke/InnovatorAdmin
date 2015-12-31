@@ -62,6 +62,7 @@
       <Word>ALTER</Word>
       <Word>AND</Word>
       <Word>ANY</Word>
+      <Word>APPLY</Word>
       <Word>ARRAY</Word>
       <Word>ARRAYLEN</Word>
       <Word>AS</Word>
@@ -271,6 +272,7 @@
       <Word>RESTORE</Word>
       <Word>RESTRICT</Word>
       <Word>RETURN</Word>
+      <Word>RETURNS</Word>
       <Word>REVERSE</Word>
       <Word>REVERT</Word>
       <Word>REVOKE</Word>

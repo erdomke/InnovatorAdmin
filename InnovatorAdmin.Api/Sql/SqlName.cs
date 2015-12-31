@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InnovatorAdmin.Editor
+namespace InnovatorAdmin
 {
-  public class SqlNameDefinition : SqlGroupBase<SqlLiteral>
+  public class SqlName : SqlGroupBase<SqlLiteral>
   {
     public string Name { get; set; }
     public string FullName { get; set; }
     public string Alias { get; set; }
+    public bool IsTable { get; set; }
 
     public bool TryAdd(SqlLiteral token)
     {
@@ -20,7 +21,8 @@ namespace InnovatorAdmin.Editor
         this.Add(token);
         return true;
       }
-      else if (SqlTokenizer.IsKeyword(token.Text))
+      else if (token.Type == SqlType.Keyword
+        || (!this.Any() && token.Type != SqlType.Identifier))
       {
         return false;
       }
@@ -53,7 +55,7 @@ namespace InnovatorAdmin.Editor
       return false;
     }
 
-    private string ProcessName(string value)
+    internal static string ProcessName(string value)
     {
       if (value[0] == '[' || value[0] == '"')
         return value.Substring(1, value.Length - 2);

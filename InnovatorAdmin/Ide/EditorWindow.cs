@@ -1,6 +1,8 @@
 ﻿using Innovator.Client;
+using Innovator.Client.Connection;
 using InnovatorAdmin.Connections;
 using InnovatorAdmin.Controls;
+using Nancy;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -39,6 +41,7 @@ namespace InnovatorAdmin
     private string _timeZone;
     private string _uid;
     private bool _updateCheckComplete = false;
+    private IHttpService _webService = new DefaultHttpService();
 
     public bool AllowRun
     {
@@ -122,6 +125,7 @@ namespace InnovatorAdmin
       outputEditor.KeyDown += _commands.OnKeyDown;
       _commands.Add<Control>(btnEditConnections, e => e.KeyCode == Keys.O && e.Control, ChangeConnection);
       _commands.Add<Control>(btnSoapAction, e => e.KeyCode == Keys.M && e.Control, ChangeSoapAction);
+      _commands.Add<Control>(mniNewWindow, e => e.KeyCode == Keys.N && e.Control, c => NewWindow().Show());
       _commands.Add<Editor.FullEditor>(mniFind, null, c => c.Find());
       _commands.Add<Editor.FullEditor>(mniFindNext, null, c => c.FindNext());
       _commands.Add<Editor.FullEditor>(mniFindPrevious, null, c => c.FindPrevious());
@@ -707,7 +711,7 @@ namespace InnovatorAdmin
       try
       {
         outputEditor.Text = "Processing...";
-       lblItems.Text = "Processing...";
+        lblItems.Text = "Processing...";
         _start = DateTime.UtcNow;
         _clock.Enabled = true;
         btnSubmit.Text = "Cancel";
@@ -775,18 +779,35 @@ namespace InnovatorAdmin
                 lblItems.Text = string.Format("No items found in {0} ms.", milliseconds);
               }
               var doc = result.GetDocument();
-              doc.SetOwnerThread(System.Threading.Thread.CurrentThread);
-              outputEditor.Document = doc;
+              outputEditor.Document.Replace(0, outputEditor.Document.TextLength, doc);
+              System.Diagnostics.Debug.Print("{0:hh:MM:ss} Editor document set", DateTime.Now);
 
               if (result.ItemCount > 1 && outputEditor.Editor.LineCount > 100)
               {
                 outputEditor.CollapseAll();
               }
+              System.Diagnostics.Debug.Print("{0:hh:MM:ss} Editor collapsed", DateTime.Now);
 
-              if (_richResult) tbcOutputView.SelectedTab = (result.PreferTable && result.ItemCount > 0) ? pgTableOutput : pgTextOutput;
+              if (_richResult)
+              {
+                if (result.PreferredMode == OutputType.Table && result.ItemCount > 0)
+                {
+                  tbcOutputView.SelectedTab = pgTableOutput;
+                }
+                else if (result.PreferredMode == OutputType.Html)
+                {
+                  browser.Navigate(GetReportUri().ToString());
+                  tbcOutputView.SelectedTab = pgHtml;
+                }
+                else
+                {
+                  tbcOutputView.SelectedTab = pgTextOutput;
+                }
+              }
               EnsureDataTable();
 
               this.Text = result.Title + " [AmlStudio]";
+              inputEditor.Editor.Focus();
             }
             catch (Exception ex)
             {
@@ -795,6 +816,7 @@ namespace InnovatorAdmin
           }).Fail(ex =>
           {
             outputEditor.Text = ex.Message;
+            if (_richResult) tbcOutputView.SelectedTab = pgTextOutput;
             lblItems.Text = "Error";
           })
           .Always(() =>
@@ -807,6 +829,7 @@ namespace InnovatorAdmin
       catch (Exception err)
       {
         outputEditor.Text = err.Message;
+        if (_richResult) tbcOutputView.SelectedTab = pgTextOutput;
         _clock.Enabled = false;
         lblItems.Text = "Error";
         _currentQuery = null;
@@ -967,6 +990,11 @@ namespace InnovatorAdmin
 
     private string GetTableChangeAml(DataTable table)
     {
+      var arasProxy = _proxy as ArasEditorProxy;
+      var context = arasProxy == null
+        ? ElementFactory.Local.LocalizationContext
+        : arasProxy.Connection.AmlContext.LocalizationContext;
+
       var changes = table.GetChanges(DataRowState.Added | DataRowState.Deleted | DataRowState.Modified);
       if (changes == null)
         return string.Empty;
@@ -981,7 +1009,7 @@ namespace InnovatorAdmin
         .Where(t => !string.IsNullOrEmpty(t))
         .Distinct().ToList();
       var singleType = types.Count == 1 ? types[0] : null;
-      string newValue;
+      object newValue;
 
       using (var writer = new System.IO.StringWriter())
       using (var xml = XmlWriter.Create(writer, settings))
@@ -1003,7 +1031,7 @@ namespace InnovatorAdmin
               {
                 if (!row.IsNull(column) && !column.ColumnName.Contains('/'))
                 {
-                  xml.WriteElementString(column.ColumnName, row[column].ToString());
+                  xml.WriteElementString(column.ColumnName, context.Format(row[column]));
                 }
               }
               break;
@@ -1017,7 +1045,7 @@ namespace InnovatorAdmin
                 if (!column.ColumnName.Contains('/')
                   && IsChanged(row, column, out newValue))
                 {
-                  xml.WriteElementString(column.ColumnName, newValue);
+                  xml.WriteElementString(column.ColumnName, context.Format(newValue));
                 }
               }
               break;
@@ -1031,7 +1059,7 @@ namespace InnovatorAdmin
     }
 
 
-    private bool IsChanged(DataRow row, DataColumn col, out string newValue)
+    private bool IsChanged(DataRow row, DataColumn col, out object newValue)
     {
       newValue = null;
       if (!row.HasVersion(DataRowVersion.Original) || !row.HasVersion(DataRowVersion.Current))
@@ -1042,7 +1070,7 @@ namespace InnovatorAdmin
       if (orig == DBNull.Value && curr == DBNull.Value)
         return false;
 
-      newValue = curr.ToString();
+      newValue = curr;
       if (orig == DBNull.Value && curr == DBNull.Value)
         return true;
 
@@ -1064,18 +1092,6 @@ namespace InnovatorAdmin
         {
           inputEditor.TidyXml();
         }
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private void mniNewWindow_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        NewWindow().Show();
       }
       catch (Exception ex)
       {
@@ -1335,13 +1351,48 @@ namespace InnovatorAdmin
       }
     }
 
-    //public Response GetResponse(NancyContext context, string rootPath)
-    //{
-    //  if (context.Request.Method != "GET") return null;
+    public Response GetResponse(NancyContext context, string rootPath)
+    {
+      if (context.Request.Method != "GET" || _result == null)
+        return new Response().WithStatusCode(HttpStatusCode.InternalServerError);
 
+      if (string.Equals(context.Request.Url.Path, GetReportUri().LocalPath))
+      {
+        var resp = new Response().WithStatusCode(HttpStatusCode.OK);
+        resp.ContentType = "text/html";
+        resp.Contents = s =>
+        {
+          using (var writer = new StreamWriter(s))
+          {
+            writer.Write(_result.Html);
+          }
+        };
+        return resp;
+      }
+      else
+      {
+        var arasProxy = _proxy as ArasEditorProxy;
+        if (arasProxy != null && arasProxy.Connection != null)
+        {
+          var reportUrlBase = GetReportUri().LocalPath;
+          var idx = reportUrlBase.IndexOf("/Client/") + 8;
+          var relativeUrl = "../" + context.Request.Url.Path.Substring(idx);
+          var absUrl = arasProxy.Connection.MapClientUrl(relativeUrl);
+          var pResp = _webService.Execute("GET", absUrl, null, null, false, null).Wait();
+          var resp = new Response().WithStatusCode((int)pResp.StatusCode);
+          resp.ContentType = pResp.Headers["Content-Type"];
+          resp.Contents = s => pResp.AsStream.CopyTo(s);
+          return resp;
+        }
+      }
 
-    //}
+      return new Response().WithStatusCode(HttpStatusCode.NotFound);
+    }
 
+    private Uri GetReportUri()
+    {
+      return new Uri("http://localhost:" + Program.PortNumber + "/" + Uid + "/Client/Scripts/report.html");
+    }
 
     public void UpdateCheckComplete(Version latestVersion)
     {

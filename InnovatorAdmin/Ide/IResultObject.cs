@@ -10,10 +10,11 @@ namespace InnovatorAdmin
 {
   public interface IResultObject
   {
-    bool PreferTable { get; }
+    OutputType PreferredMode { get; }
     int ItemCount { get; }
-    TextDocument GetDocument();
+    ITextSource GetDocument();
     DataSet GetDataSet();
     string Title { get; }
+    string Html { get; }
   }
 }

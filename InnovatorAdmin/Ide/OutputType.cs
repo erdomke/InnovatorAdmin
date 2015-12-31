@@ -4,15 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InnovatorAdmin.Editor
+namespace InnovatorAdmin
 {
-  public enum SqlType
+  public enum OutputType
   {
-    Comment,
-    String,
-    Number,
-    Binary,
-    Identifier,
-    Operator
+    Text,
+    Html,
+    Table
   }
 }

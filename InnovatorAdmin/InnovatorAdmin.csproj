@@ -227,6 +227,7 @@
     <Compile Include="Editor\Helpers\StringLiteralHelper.cs" />
     <Compile Include="Editor\Helpers\RegexReplacementHelper.cs" />
     <Compile Include="Editor\Helpers\RegexHelper.cs" />
+    <Compile Include="Editor\RopeWriter.cs" />
     <Compile Include="Editor\SearchStrategy\RegexSearchStrategy.cs" />
     <Compile Include="Editor\SearchStrategy\SearchFactory.cs" />
     <Compile Include="Editor\SearchStrategy\SearchMode.cs" />
@@ -236,6 +237,7 @@
     <Compile Include="Editor\TextDocumentWriter.cs" />
     <Compile Include="Editor\VisualLineLinkText.cs" />
     <Compile Include="GlobalProgress.cs" />
+    <Compile Include="Ide\OutputType.cs" />
     <Compile Include="Ide\UiCommandManager.cs" />
     <Compile Include="Ide\EditorTreeNode.cs" />
     <Compile Include="Ide\EditorWindow.cs">
@@ -342,13 +344,6 @@
     <Compile Include="Editor\Aml\CompletionContext.cs" />
     <Compile Include="Editor\Aml\CompletionHelper.cs" />
     <Compile Include="Editor\Sql\SqlCompletionHelper.cs" />
-    <Compile Include="Editor\Sql\SqlGroup.cs" />
-    <Compile Include="Editor\Sql\SqlGroupBase.cs" />
-    <Compile Include="Editor\Sql\SqlLiteral.cs" />
-    <Compile Include="Editor\Sql\SqlNode.cs" />
-    <Compile Include="Editor\Sql\SqlNameDefinition.cs" />
-    <Compile Include="Editor\Sql\SqlTokenizer.cs" />
-    <Compile Include="Editor\Sql\SqlType.cs" />
     <Compile Include="Editor\IFoldingStrategy.cs" />
     <Compile Include="Editor\SearchResultBackgroundRenderer.cs" />
     <Compile Include="Editor\ShellHelper.cs" />

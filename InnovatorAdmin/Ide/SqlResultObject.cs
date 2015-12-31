@@ -1,4 +1,5 @@
 ﻿using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Utils;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -11,12 +12,12 @@ namespace InnovatorAdmin
   public class SqlResultObject : IResultObject
   {
     private DataSet _dataSet;
-    private TextDocument _doc;
+    private Rope<char> _rope;
 
     public SqlResultObject(DataSet dataSet, string text)
     {
       _dataSet = dataSet;
-      _doc = new TextDocument(text);
+      _rope = new Rope<char>(text);
     }
 
     public int ItemCount
@@ -26,15 +27,15 @@ namespace InnovatorAdmin
 
     public string GetText()
     {
-      return _doc.Text;
+      return _rope.ToString();
     }
-    public TextDocument GetDocument()
+    public ITextSource GetDocument()
     {
-      return _doc;
+      return new RopeTextSource(_rope);
     }
     public void SetText(string value)
     {
-      _doc.Text = value;
+      _rope = new Rope<char>(value);
     }
 
     public DataSet GetDataSet()
@@ -42,15 +43,19 @@ namespace InnovatorAdmin
       return _dataSet;
     }
 
-    public bool PreferTable
-    {
-      get { return _dataSet.Tables.Count > 0 && _dataSet.Tables[0].Rows.Count > 0; }
-    }
-
-
     public string Title
     {
       get { return ""; }
+    }
+
+    public OutputType PreferredMode
+    {
+      get { return _dataSet.Tables.Count > 0 && _dataSet.Tables[0].Rows.Count > 0 ? OutputType.Table : OutputType.Text; }
+    }
+
+    public string Html
+    {
+      get { return string.Empty; }
     }
   }
 }

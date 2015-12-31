@@ -46,6 +46,8 @@ namespace InnovatorAdmin
     {
       base.OnLoad(e);
       this.TopMost = false;
+      this.ActiveControl = this.connectionEditor;
+      this.connectionEditor.InitializeFocus();
     }
 
     private void btnOk_Click(object sender, EventArgs e)

@@ -12,6 +12,8 @@ namespace InnovatorAdmin.Editor
   public class SqlCompletionHelper
   {
     private ISqlMetadataProvider _provider;
+    private OverloadInsightWindow _overloadWin;
+    private string _overloadName;
 
     public TextArea CurrentTextArea { get; set; }
 
@@ -37,16 +39,23 @@ namespace InnovatorAdmin.Editor
 
         if (literal != null)
         {
-          if (SqlTokenizer.KeywordPrecedesTable(literal.Text))
+          var parGroup = literal.Parent as SqlGroup;
+          if (_overloadWin != null && (parGroup == null || !parGroup.First().TextEquals(_overloadName)))
+            _overloadWin.Close();
+          
+          if (SqlTokenizer.KeywordPrecedesTable(literal))
           {
-            return Promises.Resolved(new CompletionContext()
-            {
-              Items = _provider.GetTableNames()
-                .Concat(_provider.GetSchemaNames())
-                .GetCompletions<SqlObjectCompletionData>()
-                .OrderBy(i => i.Text),
-              Overlap = 0
-            });
+            return ContextFromData(_provider.GetTableNames()
+              .Select(t => (ICompletionData)new SqlObjectCompletionData()
+              {
+                Text = t.Split('.').Last().TrimStart('[', '"').TrimEnd(']', '"'),
+                InsertionText = t
+              })
+              .Concat(_provider.GetSchemaNames()
+                .Select(t => new SqlObjectCompletionData() {
+                  Text = t
+                }))
+              .OrderBy(i => i.Text));
           }
           else if (literal.Text == "(")
           {
@@ -62,11 +71,16 @@ namespace InnovatorAdmin.Editor
                                 select new Overload(f.Usage, f.Description);
                 if (overloads.Any())
                 {
-                  var overload = new OverloadInsightWindow(CurrentTextArea);
-                  overload.StartOffset = caret;
-                  overload.EndOffset = caret + 1;
-                  overload.Provider = new OverloadList().AddRange(overloads);
-                  overload.Show();
+                  _overloadWin = new OverloadInsightWindow(CurrentTextArea);
+                  _overloadWin.StartOffset = caret;
+                  _overloadWin.EndOffset = caret + 1;
+                  _overloadWin.Provider = new OverloadList().AddRange(overloads);
+                  _overloadWin.Show();
+                  _overloadWin.Closed += (s, e) => {
+                    _overloadWin = null;
+                    _overloadName = null;
+                  };
+                  _overloadName = prev.Text;
                 }
               }
 
@@ -78,63 +92,87 @@ namespace InnovatorAdmin.Editor
                 case "DATEFROMPARTS":
                 case "DATENAME":
                 case "DATEPART":
-                  return Promises.Resolved(new CompletionContext()
-                  {
-                    Items = _datePartNames.Select(n => new SqlGeneralCompletionData()
-                      {
-                        Text = n[0] + (n[1] == n[0] ? "" : " (" + n[1] + ")"),
-                        Description = n[1],
-                        Action = () => n[0]
-                      })
-                      .OrderBy(i => i.Text),
-                    Overlap = 0
-                  });
+                  return ContextFromData(_datePartNames.Select(n => new SqlGeneralCompletionData()
+                    {
+                      Text = n[0] + (n[1] == n[0] ? "" : " (" + n[1] + ")"),
+                      Description = n[1],
+                      Action = () => n[0]
+                    })
+                    .OrderBy(i => i.Text));
               }
             }
           }
           else if (literal.Text == ".")
           {
-            var name = literal.Parent as SqlNameDefinition;
+            var name = literal.Parent as SqlName;
             if (name != null)
             {
-              var idx = name.IndexOf(literal);
-              var schema = name[idx - 1].Text;
-              if (_provider.GetSchemaNames().Contains(schema, StringComparer.OrdinalIgnoreCase))
+              if (name.IsTable)
               {
-                return Promises.Resolved(new CompletionContext()
+                var idx = name.IndexOf(literal);
+                var schema = name[idx - 1].Text;
+                if (_provider.GetSchemaNames().Contains(schema, StringComparer.OrdinalIgnoreCase))
                 {
-                  Items = _provider.GetTableNames()
+                  return ContextFromData(_provider.GetTableNames()
                     .Where(t => t.StartsWith(schema + ".", StringComparison.OrdinalIgnoreCase))
-                    .Select(t => t.Substring(schema.Length + 1))
-                    .GetCompletions<SqlObjectCompletionData>()
-                    .OrderBy(i => i.Text),
-                  Overlap = 0
-                });
+                    .Select(t => new SqlObjectCompletionData() {
+                      Text = t.Substring(schema.Length + 1).TrimStart('[', '"').TrimEnd(']', '"'),
+                      InsertionText = t.Substring(schema.Length + 1)
+                    })
+                    .OrderBy(i => i.Text));
+                }
               }
-            }
-            else
-            {
-              var group = literal.Parent as SqlGroup;
-              if (group != null)
+              else
               {
-                var idx = group.IndexOf(literal);
-                var context = GetAliasContext(literal);
-                string fullName;
-                if (idx > 0 && group[idx - 1] is SqlLiteral
-                  && context.TryGetValue(((SqlLiteral)group[idx - 1]).Text.ToLowerInvariant(), out fullName))
+                var group = name.Parent as SqlGroup;
+                if (group != null)
                 {
-                  return _provider.GetColumnNames(fullName)
-                    .Convert(p => new CompletionContext()
+                  var idx = name.IndexOf(literal);
+                  var context = new SqlContext(group);
+                  SqlTableInfo info;
+                  if (idx > 0 && name[idx - 1] is SqlLiteral
+                    && context.TryByName(((SqlLiteral)name[idx - 1]).Text.ToLowerInvariant(), out info))
+                  {
+                    if (info.Columns != null)
                     {
-                      Items = new PropertyCompletionFactory().GetCompletions(p)
-                    });
+                      return ContextFromData(info.Columns
+                        .GetCompletions<SqlGeneralCompletionData>()
+                        .OrderBy(i => i.Text));
+                    }
+                    else
+                    {
+                      return _provider.GetColumnNames(info.Name.FullName)
+                        .Convert(p => new CompletionContext()
+                        {
+                          Items = new PropertyCompletionFactory().GetCompletions(p)
+                        });
+                    }
+                  }
                 }
               }
             }
           }
-          else if (SqlTokenizer.IsKeyword(literal.Text)
+          else if (literal.Type == SqlType.Keyword
             || literal.Type == SqlType.Operator)
           {
+            switch (literal.Text.ToLowerInvariant())
+            {
+              case "union":
+                return ContextFromData(MatchCase(literal.Text, "all", "select")
+                  .GetCompletions<SqlGeneralCompletionData>());
+              case "group":
+              case "order":
+              case "partition":
+                return ContextFromData(MatchCase(literal.Text, "by")
+                  .GetCompletions<SqlGeneralCompletionData>());
+              case "insert":
+                return ContextFromData(MatchCase(literal.Text, "into")
+                  .GetCompletions<SqlGeneralCompletionData>());
+              case "delete":
+                return ContextFromData(MatchCase(literal.Text, "from")
+                  .GetCompletions<SqlGeneralCompletionData>());
+            }
+
             var group = literal.Parent as SqlGroup;
             if (group != null)
             {
@@ -144,10 +182,15 @@ namespace InnovatorAdmin.Editor
               {
                 case "select":
                   others.Add("*");
+                  others.Add("distinct");
+                  others.Add("top");
                   break;
               }
 
-              var types = group.OfType<SqlNameDefinition>().Select(n => _provider.GetColumnNames(n.Name)).ToArray();
+              var tables = group.OfType<SqlName>()
+                .Where(n => n.IsTable).ToArray();
+              var types = tables
+                .Select(n => _provider.GetColumnNames(n.FullName)).ToArray();
               return Promises.All(types)
                 .Convert(l => new CompletionContext()
                 {
@@ -156,11 +199,10 @@ namespace InnovatorAdmin.Editor
                     .Distinct()
                     .Concat(_coreFunctions.Select(f => new SqlGeneralCompletionData()
                     {
-                      Text = f.Name + "(",
-                      Content = f.Name,
+                      Text = f.Name,
                       Description = f.Description
                     }))
-                    .Concat(others.GetCompletions<SqlGeneralCompletionData>())
+                    .Concat(MatchCase(literal.Text, others).GetCompletions<SqlGeneralCompletionData>())
                     .OrderBy(i => i.Text)
                 });
             }
@@ -175,23 +217,28 @@ namespace InnovatorAdmin.Editor
       }
     }
 
-    private IDictionary<string, string> GetAliasContext(SqlNode node)
+    private IEnumerable<string> MatchCase(string compare, params string[] values)
     {
-      var result = new Dictionary<string, string>();
-
-      var group = node.Parent as SqlGroup;
-      while (group != null)
+      return MatchCase(compare, (IEnumerable<string>)values);
+    }
+    private IEnumerable<string> MatchCase(string compare, IEnumerable<string> values)
+    {
+      bool uppercase = false;
+      if (!string.IsNullOrWhiteSpace(compare) && char.IsUpper(compare[0]))
+        uppercase = true;
+      foreach (var value in values)
       {
-        foreach (var name in group.OfType<SqlNameDefinition>())
-        {
-          if (name.Alias != null && !result.ContainsKey(name.Alias.ToLowerInvariant()))
-            result[name.Alias.ToLowerInvariant()] = name.FullName;
-          result[name.FullName.ToLowerInvariant()] = name.FullName;
-        }
-        group = group.Parent as SqlGroup;
+        yield return uppercase ? value.ToUpper() : value.ToLower();
       }
+    }
 
-      return result;
+    private IPromise<CompletionContext> ContextFromData(IEnumerable<ICompletionData> data)
+    {
+      return Promises.Resolved(new CompletionContext()
+      {
+        Items = data,
+        Overlap = 0
+      });
     }
 
     private static string[][] _datePartNames = new string[][] {

@@ -4,17 +4,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InnovatorAdmin.Editor
+namespace InnovatorAdmin
 {
   public interface ISqlGroupNode
   {
     SqlNode NodeByOffset(int offset);
     IEnumerable<SqlNode> Items { get; }
+    int IndexOf(SqlNode node);
   }
 
   public class SqlGroupBase<T> : SqlNode, ICollection<T>, ISqlGroupNode where T : SqlNode
   {
     private List<T> _nodes = new List<T>();
+
+    public SqlGroupBase()
+    {
+      this.Type = SqlType.Query;
+    }
 
     public T this[int i]
     {
@@ -95,6 +101,15 @@ namespace InnovatorAdmin.Editor
     public IEnumerable<SqlNode> Items
     {
       get { return this.OfType<SqlNode>(); }
+    }
+
+
+    int ISqlGroupNode.IndexOf(SqlNode node)
+    {
+      var ofType = node as T;
+      if (ofType == null)
+        return -1;
+      return _nodes.IndexOf(ofType);
     }
   }
 }

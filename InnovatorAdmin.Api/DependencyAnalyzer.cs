@@ -25,11 +25,8 @@ namespace InnovatorAdmin
     private ArasMetadataProvider _metadata;
     private XmlElement _elem;
 
-    private SqlParser _parser = new SqlParser();
-
     public DependencyAnalyzer(ArasMetadataProvider metadata)
     {
-      _parser.SchemaToKeep = "innovator";
       _metadata = metadata;
     }
 
@@ -281,10 +278,10 @@ namespace InnovatorAdmin
       }
       else if (elem.LocalName == "sqlserver_body" && elem.Parent().LocalName == "Item" && elem.Parent().Attribute("type") == "SQL")
       {
-        var names = _parser.FindSqlServerObjectNames(elem.InnerText)
-          .Select(n => n.StartsWith(_parser.SchemaToKeep + ".", StringComparison.OrdinalIgnoreCase) ?
-                       n.Substring(_parser.SchemaToKeep.Length+1).ToLowerInvariant() :
-                       n.ToLowerInvariant())
+        var names = GetInnovatorNames(elem.InnerText)
+          .Select(n => n.FullName.StartsWith("innovator.", StringComparison.OrdinalIgnoreCase) ?
+                       n.FullName.Substring(10).ToLowerInvariant() :
+                       n.FullName.ToLowerInvariant())
           .Distinct();
 
         ItemType itemType;
@@ -458,6 +455,14 @@ namespace InnovatorAdmin
       public XmlNode Context { get; set; }
       public ItemReference MasterRef { get; set; }
       public XmlNode Reference { get; set; }
+    }
+
+    public static IEnumerable<SqlName> GetInnovatorNames(string sql)
+    {
+      var parsed = new SqlTokenizer(sql).ToArray();
+      return parsed.OfType<SqlName>()
+        .Where(n => string.Equals(n[0].Text, "innovator", StringComparison.OrdinalIgnoreCase)
+          || (!n.Any(l => l.Text == ".") && !n[0].Text.StartsWith("@")));
     }
   }
 }

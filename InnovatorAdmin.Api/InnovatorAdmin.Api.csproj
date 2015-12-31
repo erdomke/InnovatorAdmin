@@ -105,7 +105,16 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RecoverableErrorEventArgs.cs" />
     <Compile Include="RecoveryOption.cs" />
-    <Compile Include="SqlParser.cs" />
+    <Compile Include="Sql\SqlContext.cs" />
+    <Compile Include="Sql\SqlGroup.cs" />
+    <Compile Include="Sql\SqlGroupBase.cs" />
+    <Compile Include="Sql\SqlLiteral.cs" />
+    <Compile Include="Sql\SqlName.cs" />
+    <Compile Include="Sql\SqlNode.cs" />
+    <Compile Include="Sql\SqlParseExtensions.cs" />
+    <Compile Include="Sql\SqlTableInfo.cs" />
+    <Compile Include="Sql\SqlTokenizer.cs" />
+    <Compile Include="Sql\SqlType.cs" />
     <Compile Include="StringEnumerableReader.cs" />
     <Compile Include="SystemPropertyGroup.cs" />
     <Compile Include="Utils.cs" />

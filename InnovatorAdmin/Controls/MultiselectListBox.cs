@@ -140,6 +140,12 @@ namespace InnovatorAdmin
       }
     }
 
+    public void InitializeFocus()
+    {
+      this.ActiveControl = this.Controls[0];
+      this.Controls[0].Focus();
+    }
+
     protected virtual void OnSelectionChanged(EventArgs e)
     {
       if (SelectionChanged != null) SelectionChanged.Invoke(this, e);

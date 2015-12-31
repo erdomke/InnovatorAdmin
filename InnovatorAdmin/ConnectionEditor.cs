@@ -42,6 +42,12 @@ namespace InnovatorAdmin
       cmbAuth.DataSource = Enum.GetValues(typeof(Authentication));
     }
 
+    public void InitializeFocus()
+    {
+      this.ActiveControl = lstConnections;
+      lstConnections.InitializeFocus();
+    }
+
     void _bs_CurrentChanged(object sender, EventArgs e)
     {
       try

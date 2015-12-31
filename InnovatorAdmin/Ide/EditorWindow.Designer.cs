@@ -34,6 +34,7 @@
       this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
       this.lblItems = new System.Windows.Forms.Label();
       this.lblSelection = new System.Windows.Forms.Label();
+      this.lblVersion = new System.Windows.Forms.Label();
       this.splitMain = new System.Windows.Forms.SplitContainer();
       this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
       this.treeItems = new InnovatorAdmin.TreeListView();
@@ -54,6 +55,7 @@
       this.pgTextOutput = new System.Windows.Forms.TabPage();
       this.outputEditor = new InnovatorAdmin.Editor.FullEditor();
       this.pgHtml = new System.Windows.Forms.TabPage();
+      this.browser = new System.Windows.Forms.WebBrowser();
       this.pgTableOutput = new System.Windows.Forms.TabPage();
       this.dgvItems = new System.Windows.Forms.DataGridView();
       this.conTable = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -121,7 +123,6 @@
       this.mniRunAll = new System.Windows.Forms.ToolStripMenuItem();
       this.mniRunCurrent = new System.Windows.Forms.ToolStripMenuItem();
       this.mniRunCurrentNewWindow = new System.Windows.Forms.ToolStripMenuItem();
-      this.lblVersion = new System.Windows.Forms.Label();
       this.tableLayoutPanel1.SuspendLayout();
       this.tableLayoutPanel5.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
@@ -142,6 +143,7 @@
       ((System.ComponentModel.ISupportInitialize)(this.picHome)).BeginInit();
       this.flowLayoutPanel1.SuspendLayout();
       this.pgTextOutput.SuspendLayout();
+      this.pgHtml.SuspendLayout();
       this.pgTableOutput.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.dgvItems)).BeginInit();
       this.conTable.SuspendLayout();
@@ -150,7 +152,7 @@
       // 
       // tableLayoutPanel1
       // 
-      this.tableLayoutPanel1.BackColor = System.Drawing.Color.White;
+      this.tableLayoutPanel1.BackColor = System.Drawing.Color.Transparent;
       this.tableLayoutPanel1.ColumnCount = 3;
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
@@ -174,6 +176,7 @@
       // 
       this.tableLayoutPanel5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
       this.tableLayoutPanel5.AutoSize = true;
+      this.tableLayoutPanel5.BackColor = System.Drawing.Color.Transparent;
       this.tableLayoutPanel5.ColumnCount = 3;
       this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
       this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
@@ -208,6 +211,15 @@
       this.lblSelection.Name = "lblSelection";
       this.lblSelection.Size = new System.Drawing.Size(0, 13);
       this.lblSelection.TabIndex = 4;
+      // 
+      // lblVersion
+      // 
+      this.lblVersion.Anchor = System.Windows.Forms.AnchorStyles.Left;
+      this.lblVersion.AutoSize = true;
+      this.lblVersion.Location = new System.Drawing.Point(182, 6);
+      this.lblVersion.Name = "lblVersion";
+      this.lblVersion.Size = new System.Drawing.Size(0, 13);
+      this.lblVersion.TabIndex = 5;
       // 
       // splitMain
       // 
@@ -509,6 +521,7 @@
       // 
       // pgHtml
       // 
+      this.pgHtml.Controls.Add(this.browser);
       this.pgHtml.Location = new System.Drawing.Point(4, 22);
       this.pgHtml.Name = "pgHtml";
       this.pgHtml.Padding = new System.Windows.Forms.Padding(3);
@@ -516,6 +529,15 @@
       this.pgHtml.TabIndex = 2;
       this.pgHtml.Text = "HTML";
       this.pgHtml.UseVisualStyleBackColor = true;
+      // 
+      // browser
+      // 
+      this.browser.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.browser.Location = new System.Drawing.Point(3, 3);
+      this.browser.MinimumSize = new System.Drawing.Size(20, 20);
+      this.browser.Name = "browser";
+      this.browser.Size = new System.Drawing.Size(457, 271);
+      this.browser.TabIndex = 0;
       // 
       // pgTableOutput
       // 
@@ -746,7 +768,6 @@
       this.mniNewWindow.Name = "mniNewWindow";
       this.mniNewWindow.Size = new System.Drawing.Size(145, 22);
       this.mniNewWindow.Text = "New Window";
-      this.mniNewWindow.Click += new System.EventHandler(this.mniNewWindow_Click);
       // 
       // toolStripSeparator3
       // 
@@ -1098,15 +1119,6 @@
       this.mniRunCurrentNewWindow.Text = "Run Current in New Window";
       this.mniRunCurrentNewWindow.Click += new System.EventHandler(this.mniRunCurrentNewWindow_Click);
       // 
-      // lblVersion
-      // 
-      this.lblVersion.Anchor = System.Windows.Forms.AnchorStyles.Left;
-      this.lblVersion.AutoSize = true;
-      this.lblVersion.Location = new System.Drawing.Point(182, 6);
-      this.lblVersion.Name = "lblVersion";
-      this.lblVersion.Size = new System.Drawing.Size(0, 13);
-      this.lblVersion.TabIndex = 5;
-      // 
       // EditorWindow
       // 
       this.AcceptButton = this.btnOk;
@@ -1145,6 +1157,7 @@
       this.flowLayoutPanel1.ResumeLayout(false);
       this.flowLayoutPanel1.PerformLayout();
       this.pgTextOutput.ResumeLayout(false);
+      this.pgHtml.ResumeLayout(false);
       this.pgTableOutput.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this.dgvItems)).EndInit();
       this.conTable.ResumeLayout(false);
@@ -1249,5 +1262,6 @@
     private System.Windows.Forms.ToolStripMenuItem mniReplace;
     private System.Windows.Forms.ToolStripMenuItem mniGoTo;
     private System.Windows.Forms.Label lblVersion;
+    private System.Windows.Forms.WebBrowser browser;
   }
 }

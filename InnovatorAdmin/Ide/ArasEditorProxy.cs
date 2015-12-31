@@ -8,6 +8,7 @@ using System.IO;
 using System.Data;
 using System.ComponentModel;
 using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Utils;
 
 namespace InnovatorAdmin
 {
@@ -180,9 +181,11 @@ namespace InnovatorAdmin
         cmd.Aml = "<AML>" + cmd.Aml + "</AML>";
       }
       return ProcessCommand(cmd, async)
-        .Convert(s => (IResultObject)new ResultObject(s, _conn)
-        {
-          PreferTable = cmd.Action == CommandAction.ApplySQL
+        .Convert(s => {
+          var result = new ResultObject(s, _conn);
+          if (cmd.Action == CommandAction.ApplySQL)
+            result.PreferredMode = OutputType.Table;
+          return (IResultObject)result;
         });
     }
 
@@ -207,15 +210,14 @@ namespace InnovatorAdmin
 
     private class ResultObject : IResultObject
     {
-      private TextDocument _doc;
+      private ITextSource _text;
       private int _count;
       private DataSet _dataSet;
       private int _amlLength;
       private string _title;
       private IAsyncConnection _conn;
-
-
-      public bool PreferTable { get; set; }
+      private OutputType _preferredMode = OutputType.Text;
+      private string _html;
 
       public int ItemCount
       {
@@ -224,20 +226,22 @@ namespace InnovatorAdmin
 
       public ResultObject(Stream aml, IAsyncConnection conn)
       {
-        _doc = new TextDocument();
+        System.Diagnostics.Debug.Print("{0:hh:MM:ss} Document loaded", DateTime.Now);
+        var rope = new Rope<char>();
         using (var reader = new StreamReader(aml))
-        using (var writer = new TextDocumentWriter(_doc))
+        using (var writer = new Editor.RopeWriter(rope))
         {
           IndentXml(reader, writer, out _count);
         }
-        _amlLength = _doc.TextLength;
-        _doc.SetOwnerThread(null);
+        _amlLength = rope.Length;
         _conn = conn;
+        _text = new RopeTextSource(rope);
+        System.Diagnostics.Debug.Print("{0:hh:MM:ss} Document rendered", DateTime.Now);
       }
 
-      public TextDocument GetDocument()
+      public ITextSource GetDocument()
       {
-        return _doc;
+        return _text;
       }
 
       public System.Data.DataSet GetDataSet()
@@ -245,28 +249,21 @@ namespace InnovatorAdmin
         if (_dataSet == null && _amlLength > 0)
         {
           var doc = new XmlDocument();
-          doc.Load(_doc.CreateReader());
+          doc.Load(_text.CreateReader());
           _dataSet = Extensions.GetItemTable(_conn.AmlContext.FromXml(doc.DocumentElement)
             , ArasMetadataProvider.Cached(_conn));
         }
         return _dataSet;
       }
 
-      private string IndentXml(string xmlContent, out int itemCount)
-      {
-        using (var strReader = new StringReader(xmlContent))
-        using (var strWriter = new StringWriter())
-        {
-          IndentXml(strReader, strWriter, out itemCount);
-          return strWriter.ToString();
-        }
-      }
       private void IndentXml(TextReader xmlContent, TextWriter writer, out int itemCount)
       {
         itemCount = 0;
         char[] writeNodeBuffer = null;
         var levels = new int[64];
         int level = 0;
+        string lastElement = null;
+        string value;
 
         var settings = new XmlWriterSettings();
         settings.OmitXmlDeclaration = true;
@@ -296,11 +293,12 @@ namespace InnovatorAdmin
                 }
                 else
                 {
+                  lastElement = reader.LocalName;
                   level++;
                 }
                 break;
               case XmlNodeType.Text:
-                if (canReadValueChunk)
+                if (canReadValueChunk && lastElement != "Result")
                 {
                   if (writeNodeBuffer == null)
                   {
@@ -314,7 +312,13 @@ namespace InnovatorAdmin
                 }
                 else
                 {
-                  xmlWriter.WriteString(reader.Value);
+                  value = reader.Value;
+                  if (lastElement == "Result" && value.Trim().StartsWith("<"))
+                  {
+                    _html = value;
+                    _preferredMode = OutputType.Html;
+                  }
+                  xmlWriter.WriteString(value);
                 }
                 break;
               case XmlNodeType.CDATA:
@@ -356,6 +360,17 @@ namespace InnovatorAdmin
       public string Title
       {
         get { return _title; }
+      }
+
+      public OutputType PreferredMode
+      {
+        get { return _preferredMode; }
+        set { _preferredMode = value; }
+      }
+
+      public string Html
+      {
+        get { return _html; }
       }
     }
 

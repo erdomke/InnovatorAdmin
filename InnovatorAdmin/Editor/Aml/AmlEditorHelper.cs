@@ -47,6 +47,7 @@ namespace InnovatorAdmin.Editor
           case ",":
           case "(":
           case ".":
+          case "!":
             _sql.CurrentTextArea = control.Editor.TextArea;
             ShowCompletions(control)
               .Done(data =>
@@ -85,30 +86,57 @@ namespace InnovatorAdmin.Editor
       var length = control.Editor.Document.TextLength;
       var caret = control.Editor.CaretOffset;
 
-      return this.GetCompletions(control.Editor.Text, control.Editor.CaretOffset, this.SoapAction)
-        .UiPromise(control)
-        .Convert(data => {
-          if (length != control.Editor.Document.TextLength
-            || caret != control.Editor.CaretOffset)
-          {
-            ShowCompletions(control);
-            return null;
+      if (control.Editor.CaretOffset >= 2 && control.Editor.Document.GetText(control.Editor.CaretOffset - 2, 2) == "<!")
+      {
+        var context = new CompletionContext()
+        {
+          Items = new ICompletionData[] {
+            new BasicCompletionData() {
+              Text = "--",
+              Content = "-- (Comment)",
+              Action = () => "---->",
+              CaretOffset = -3
+            },
+            new BasicCompletionData() {
+              Text = "[CDATA[",
+              Action = () => "[CDATA[]]>",
+              CaretOffset = -3
+            }
           }
+        };
 
-          if (data.Items.Any())
-          {
-            var items = data.Items.ToArray();
-            var contextItems = items.OfType<IContextCompletions>();
-            foreach (var contextItem in contextItems)
+        control.ShowCompletionWindow(context.Items, context.Overlap);
+
+        return Promises.Resolved(context);
+      }
+      else
+      {
+        return this.GetCompletions(control.Editor.Text, control.Editor.CaretOffset, this.SoapAction)
+          .UiPromise(control)
+          .Convert(data => {
+            if (length != control.Editor.Document.TextLength
+              || caret != control.Editor.CaretOffset)
             {
-              contextItem.SetContext(this, control);
+              ShowCompletions(control);
+              return null;
             }
 
-            control.ShowCompletionWindow(items, data.Overlap);
-          }
+            if (data.Items.Any())
+            {
+              var items = data.Items.ToArray();
+              var contextItems = items.OfType<IContextCompletions>();
+              foreach (var contextItem in contextItems)
+              {
+                contextItem.SetContext(this, control);
+              }
 
-          return data;
-        });
+              control.ShowCompletionWindow(items, data.Overlap);
+            }
+
+            return data;
+          });
+      }
+
     }
 
     public string GetCurrentQuery(string text, int offset)
