@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using InnovatorAdmin.Editor;
 
 namespace InnovatorAdmin
 {
@@ -67,6 +68,12 @@ namespace InnovatorAdmin
       if (await reader.IsDBNullAsync(fieldIndex))
         return null;
       return await reader.GetFieldValueAsync<string>(fieldIndex);
+    }
+    public static async Task<int> GetFieldIntAsync(this DbDataReader reader, int fieldIndex)
+    {
+      if (await reader.IsDBNullAsync(fieldIndex))
+        return -1;
+      return await reader.GetFieldValueAsync<int>(fieldIndex);
     }
   }
 }

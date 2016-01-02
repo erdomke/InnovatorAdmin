@@ -15,6 +15,8 @@ namespace InnovatorAdmin.Editor
     private readonly Regex searchPattern;
     private readonly bool matchWholeWords;
 
+    public Regex Regex { get { return searchPattern; } }
+
     public RegexSearchStrategy(Regex searchPattern, bool matchWholeWords)
     {
       if (searchPattern == null)
@@ -62,16 +64,6 @@ namespace InnovatorAdmin.Editor
         && regexSearchStrategy.searchPattern.ToString() == this.searchPattern.ToString()
         && regexSearchStrategy.searchPattern.Options == this.searchPattern.Options
         && regexSearchStrategy.searchPattern.RightToLeft == this.searchPattern.RightToLeft;
-    }
-
-    private class SearchResult : TextSegment, ISearchResult, ISegment
-    {
-      public Match Data { get; set; }
-
-      public string ReplaceWith(string replacement)
-      {
-        return this.Data.Result(replacement);
-      }
     }
   }
 }

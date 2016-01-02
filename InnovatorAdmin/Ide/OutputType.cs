@@ -8,6 +8,7 @@ namespace InnovatorAdmin
 {
   public enum OutputType
   {
+    Any,
     Text,
     Html,
     Table

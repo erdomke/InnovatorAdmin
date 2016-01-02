@@ -224,7 +224,7 @@ namespace InnovatorAdmin
             }
             break;
           case ConnectionType.SqlServer:
-            using (var conn = SqlEditorProxy.GetConnection(data, "master"))
+            using (var conn = Editor.SqlEditorProxy.GetConnection(data, "master"))
             {
               conn.Open();
               // Set up a command with the given query and associate

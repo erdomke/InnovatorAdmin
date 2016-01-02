@@ -12,6 +12,7 @@ namespace InnovatorAdmin.Editor
   {
     protected ArasMetadataProvider _metadata;
     protected ItemType _itemType;
+    private Func<string, string> _insertion;
 
     public PropertyCompletionFactory() { }
     public PropertyCompletionFactory(ArasMetadataProvider metadata, ItemType itemType)
@@ -20,9 +21,11 @@ namespace InnovatorAdmin.Editor
       _itemType = itemType;
     }
 
-    public IEnumerable<ICompletionData> GetCompletions(IEnumerable<IListValue> p)
+    public IEnumerable<ICompletionData> GetCompletions(IEnumerable<IListValue> p, string prefix = null)
     {
       var hash = new HashSet<string>(p.Select(pr => pr.Value), StringComparer.CurrentCultureIgnoreCase);
+      if (!string.IsNullOrEmpty(prefix))
+        _insertion = v => prefix + "." + v;
       return GetCompletions(p, p.Where(pr => !string.IsNullOrWhiteSpace(pr.Label) && !hash.Contains(pr.Label.Replace(' ', '_'))));
     }
 
@@ -47,6 +50,13 @@ namespace InnovatorAdmin.Editor
     {
       data.Text = prop.Value;
       data.Description = prop.Label;
+      data.Image = WpfImages.Property16;
+
+      if (_insertion != null)
+      {
+        var insertValue = _insertion(prop.Value);
+        data.Action = () => insertValue;
+      }
       return data;
     }
     protected virtual BasicCompletionData ConfigureLabeledProperty(BasicCompletionData data, IListValue prop)
@@ -55,7 +65,12 @@ namespace InnovatorAdmin.Editor
       data.Text = label;
       data.Description = prop.Value;
       data.Content = FormatText.MutedText(label);
-      data.Action = () => prop.Value;
+      data.Image = WpfImages.Property16;
+
+      var insertValue = prop.Value;
+      if (_insertion != null)
+        insertValue = _insertion(prop.Value);
+      data.Action = () => insertValue;
       return data;
     }
   }

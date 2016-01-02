@@ -21,23 +21,27 @@ namespace InnovatorAdmin.Editor
       _conn = conn;
 
       _objectPromise = new Promise<IEnumerable<SqlObject>>();
-      new SqlCommand(@"SELECT *, null data_type, null defin
-                      FROM information_schema.tables
-                      where table_type <> 'View'
-                      union all
-                      SELECT table_catalog, table_schema, table_name, 'View', null, view_definition
-                      FROM information_schema.views
-                      union all
-                      select routine_catalog, routine_schema, routine_name, routine_type, data_type, routine_definition
-                      from information_schema.routines", conn)
-        .GetListAsync<SqlObject>(async (r) => new SqlObject()
-        {
-          Schema = await r.GetFieldStringAsync(1),
-          Name = await r.GetFieldStringAsync(2),
-          Type = GetObjectType(await r.GetFieldStringAsync(3)),
-          IsTableValued = string.Equals(await r.GetFieldStringAsync(4), "table", StringComparison.OrdinalIgnoreCase),
-          Definition = await r.GetFieldStringAsync(5)
-        }).ContinueWith(l =>
+      new SqlCommand(@"SELECT SCHEMA_NAME(SCHEMA_ID) sch
+                        , name
+                        , case when type in ('D') then 'Constraint'
+                            when type in ('F', 'PK', 'UQ') then 'Key'
+                            when type in ('S', 'IT', 'U') then 'Table'
+                            when type in ('IF', 'FN', 'TF') then 'Function'
+                            when type in ('P') then 'Procedure'
+                            when type in ('V') then 'View'
+                            else type end type
+                        , case when type in ('IF', 'TF') then 1 else 0 end table_valued
+                        , object_id
+                        , parent_object_id
+                      FROM sys.objects AS SO", conn)
+        .GetListAsync<SqlObject>(async (r) => SqlObject.Create(
+          await r.GetFieldStringAsync(0),
+          await r.GetFieldStringAsync(1),
+          await r.GetFieldStringAsync(2),
+          await r.GetFieldIntAsync(4),
+          await r.GetFieldIntAsync(5),
+          (await r.GetFieldIntAsync(3) == 1)
+        )).ContinueWith(l =>
         {
           if (l.IsFaulted)
           {
@@ -49,8 +53,9 @@ namespace InnovatorAdmin.Editor
           }
           else
           {
-            _objects = l.Result.ToDictionary(o => o.Schema + "." + o.Name, StringComparer.OrdinalIgnoreCase);
-            _schemas = l.Result.Select(o => o.Schema).Distinct().ToArray();
+            var items = l.Result.Concat(_systemViews);
+            _objects = items.ToDictionary(o => o.Schema + "." + o.Name, StringComparer.OrdinalIgnoreCase);
+            _schemas = items.Where(o => !string.IsNullOrEmpty(o.Schema)).Select(o => o.Schema).Distinct().ToArray();
             _objectPromise.Resolve(_objects.Values);
           }
         });
@@ -90,6 +95,15 @@ namespace InnovatorAdmin.Editor
         .Select(o => o.Schema + ".[" + o.Name + "]");
     }
 
+
+    public IEnumerable<string> GetFunctionNames(bool tableValued)
+    {
+      return _objects.Values
+        .Where(o => string.Equals(o.Type, "function", StringComparison.OrdinalIgnoreCase)
+            && o.IsTableValued == tableValued)
+        .Select(o => o.Schema + ".[" + o.Name + "]");
+    }
+
     public Innovator.Client.IPromise<IEnumerable<ListValue>> GetColumnNames(string tableName)
     {
       return GetColumns(tableName).Convert(l => l.Select(c => new ListValue { Value = c.Name }));
@@ -114,18 +128,13 @@ namespace InnovatorAdmin.Editor
 
         var cmd = new SqlCommand();
         cmd.Connection = _conn;
-        var sql = @"SELECT column_name
-              , data_type + isnull('(' + cast(character_maximum_length as nvarchar(10)) + ')', '') + case DATA_TYPE when 'int' then '' else isnull('(' + cast(NUMERIC_PRECISION as nvarchar(10)) + ',' + cast(NUMERIC_SCALE as nvarchar(10)) + ')', '') end data_type
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_NAME = @table";
+        var sql = @"select c.name, t.name + case when c.system_type_id in (56,52,127,48) then '' when c.precision > 0 or c.scale > 0 then isnull('(' + cast(c.PRECISION as nvarchar(10)) + ',' + cast(c.SCALE as nvarchar(10)) + ')', '') else isnull('(' + cast(c.max_length as nvarchar(10)) + ')', '') end data_type, c.*
+                    from sys.[columns] c
+                    inner join sys.[types] t
+                    on c.user_type_id = t.user_type_id
+                    where c.object_id = @objectid";
 
-        if (!string.IsNullOrWhiteSpace(schema))
-        {
-          sql += " AND TABLE_SCHEMA = @schema";
-          cmd.Parameters.AddWithValue("schema", schema);
-        }
-
-        cmd.Parameters.AddWithValue("table", tableName);
+        cmd.Parameters.AddWithValue("@objectid", obj.Id);
         cmd.CommandText = sql;
 
         var cts = new CancellationTokenSource();
@@ -153,5 +162,82 @@ namespace InnovatorAdmin.Editor
       }
       return result;
     }
+
+    private static SqlObject[] _systemViews = new SqlObject[] {
+      new SqlObject() { Schema = "sys", Type = "View", Name = "allocation_units" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "objects" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "assembly_modules" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "parameters" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "check_constraints" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "partitions" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "columns" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "periods" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "computed_columns" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "procedures" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "default_constraints" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "sequences" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "events" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "service_queues" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "event_notifications" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "sql_dependencies" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "extended_procedures" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "sql_expression_dependencies" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "foreign_key_columns" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "sql_modules" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "foreign_keys" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "stats" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "function_order_columns" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "stats_columns" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "hash_indexes" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "synonyms" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "identity_columns" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "table_types" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "index_columns" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "tables" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "indexes" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "trigger_event_types" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "key_constraints" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "trigger_events" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "masked_columns" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "triggers" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "numbered_procedure_parameters" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "views" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "numbered_procedures" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "types" },
+      new SqlObject() { Schema = "sys", Type = "View", Name = "assembly_types" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "CHECK_CONSTRAINTS" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "REFERENTIAL_CONSTRAINTS" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "COLUMN_DOMAIN_USAGE" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "ROUTINES" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "COLUMN_PRIVILEGES" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "ROUTINE_COLUMNS" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "COLUMNS" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "SCHEMATA" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "CONSTRAINT_COLUMN_USAGE" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "TABLE_CONSTRAINTS" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "CONSTRAINT_TABLE_USAGE" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "TABLE_PRIVILEGES" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "DOMAIN_CONSTRAINTS" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "TABLES" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "DOMAINS" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "VIEW_COLUMN_USAGE" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "KEY_COLUMN_USAGE" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "VIEW_TABLE_USAGE" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "PARAMETERS" },
+      new SqlObject() { Schema = "INFORMATION_SCHEMA", Type = "View", Name = "VIEWS" },
+      new SqlObject() { Type = "Procedure", Name = "sp_column_privileges" },
+      new SqlObject() { Type = "Procedure", Name = "sp_special_columns" },
+      new SqlObject() { Type = "Procedure", Name = "sp_columns" },
+      new SqlObject() { Type = "Procedure", Name = "sp_sproc_columns" },
+      new SqlObject() { Type = "Procedure", Name = "sp_databases" },
+      new SqlObject() { Type = "Procedure", Name = "sp_statistics" },
+      new SqlObject() { Type = "Procedure", Name = "sp_fkeys" },
+      new SqlObject() { Type = "Procedure", Name = "sp_stored_procedures" },
+      new SqlObject() { Type = "Procedure", Name = "sp_pkeys" },
+      new SqlObject() { Type = "Procedure", Name = "sp_table_privileges" },
+      new SqlObject() { Type = "Procedure", Name = "sp_server_info" },
+      new SqlObject() { Type = "Procedure", Name = "sp_tables" }
+    };
+
   }
 }

@@ -42,19 +42,10 @@ namespace InnovatorAdmin.Editor
           var parGroup = literal.Parent as SqlGroup;
           if (_overloadWin != null && (parGroup == null || !parGroup.First().TextEquals(_overloadName)))
             _overloadWin.Close();
-          
+
           if (SqlTokenizer.KeywordPrecedesTable(literal))
           {
-            return ContextFromData(_provider.GetTableNames()
-              .Select(t => (ICompletionData)new SqlObjectCompletionData()
-              {
-                Text = t.Split('.').Last().TrimStart('[', '"').TrimEnd(']', '"'),
-                InsertionText = t
-              })
-              .Concat(_provider.GetSchemaNames()
-                .Select(t => new SqlObjectCompletionData() {
-                  Text = t
-                }))
+            return ContextFromData(Tables(null).Concat(Schemas())
               .OrderBy(i => i.Text));
           }
           else if (literal.Text == "(")
@@ -96,6 +87,7 @@ namespace InnovatorAdmin.Editor
                     {
                       Text = n[0] + (n[1] == n[0] ? "" : " (" + n[1] + ")"),
                       Description = n[1],
+                      Image = WpfImages.EnumValue16,
                       Action = () => n[0]
                     })
                     .OrderBy(i => i.Text));
@@ -113,12 +105,7 @@ namespace InnovatorAdmin.Editor
                 var schema = name[idx - 1].Text;
                 if (_provider.GetSchemaNames().Contains(schema, StringComparer.OrdinalIgnoreCase))
                 {
-                  return ContextFromData(_provider.GetTableNames()
-                    .Where(t => t.StartsWith(schema + ".", StringComparison.OrdinalIgnoreCase))
-                    .Select(t => new SqlObjectCompletionData() {
-                      Text = t.Substring(schema.Length + 1).TrimStart('[', '"').TrimEnd(']', '"'),
-                      InsertionText = t.Substring(schema.Length + 1)
-                    })
+                  return ContextFromData(Tables(schema).Concat(Functions(true, schema))
                     .OrderBy(i => i.Text));
                 }
               }
@@ -144,7 +131,7 @@ namespace InnovatorAdmin.Editor
                       return _provider.GetColumnNames(info.Name.FullName)
                         .Convert(p => new CompletionContext()
                         {
-                          Items = new PropertyCompletionFactory().GetCompletions(p)
+                          Items = new PropertyCompletionFactory().GetCompletions(p, info.Alias)
                         });
                     }
                   }
@@ -176,33 +163,57 @@ namespace InnovatorAdmin.Editor
             var group = literal.Parent as SqlGroup;
             if (group != null)
             {
-              var others = new List<string>();
+              // List of sql specific constructs for the context
+              var sqlOthers = new List<string>();
 
               switch (literal.Text.ToLowerInvariant())
               {
                 case "select":
-                  others.Add("*");
-                  others.Add("distinct");
-                  others.Add("top");
+                  sqlOthers.Add("*");
+                  sqlOthers.Add("distinct");
+                  sqlOthers.Add("top");
                   break;
               }
 
-              var tables = group.OfType<SqlName>()
-                .Where(n => n.IsTable).ToArray();
-              var types = tables
-                .Select(n => _provider.GetColumnNames(n.FullName)).ToArray();
+              // Table aliases and defined columns
+              var context = new SqlContext(group);
+              var others = context.Tables
+                .Where(t => !string.IsNullOrEmpty(t.Alias))
+                .Select(t => t.Alias)
+                .Distinct()
+                .Select(t => new SqlGeneralCompletionData()
+                {
+                  Text = t,
+                  Image = WpfImages.Class16
+                })
+                .Concat(context.Tables
+                  .Where(t => t.Columns != null)
+                  .SelectMany(t => string.IsNullOrEmpty(t.Alias)
+                    ? t.Columns.GetCompletions<SqlGeneralCompletionData>()
+                    : t.Columns.Select(c => new SqlGeneralCompletionData()
+                    {
+                      Text = c,
+                      Action = () => t.Alias + "." + c
+                    })))
+                .Concat(Functions(false, null));
+
+              // Table columns
+              var types = context.Tables
+                .Where(t => t.Columns == null)
+                .Select(t => _provider.GetColumnNames(t.Name.FullName)).ToArray();
               return Promises.All(types)
                 .Convert(l => new CompletionContext()
                 {
                   Items = l.OfType<IEnumerable<IListValue>>()
                     .SelectMany(i => new PropertyCompletionFactory().GetCompletions(i))
                     .Distinct()
-                    .Concat(_coreFunctions.Select(f => new SqlGeneralCompletionData()
+                    .Concat(MatchCase(literal.Text, sqlOthers).Select(o => new SqlGeneralCompletionData()
                     {
-                      Text = f.Name,
-                      Description = f.Description
+                      Text = o,
+                      Image = WpfImages.Operator16
                     }))
-                    .Concat(MatchCase(literal.Text, others).GetCompletions<SqlGeneralCompletionData>())
+                    .Concat(others)
+                    .Concat(Schemas())
                     .OrderBy(i => i.Text)
                 });
             }
@@ -216,6 +227,76 @@ namespace InnovatorAdmin.Editor
         return Promises.Rejected<CompletionContext>(ex);
       }
     }
+
+    private IEnumerable<ICompletionData> Schemas()
+    {
+      return _provider.GetSchemaNames().Select(s => new SqlGeneralCompletionData()
+      {
+        Text = s,
+        Image = WpfImages.Assembly16
+      });
+    }
+    private IEnumerable<ICompletionData> Functions(bool tableValued, string schema)
+    {
+      if (string.IsNullOrEmpty(schema))
+      {
+        var results = _provider.GetFunctionNames(tableValued)
+          .Select(t => new SqlGeneralCompletionData() {
+            Text = GetNameLabel(t),
+            Image = WpfImages.Method16,
+            Action = () => t
+          });
+        if (!tableValued)
+          results = results.Concat(_coreFunctions.Select(f => new SqlGeneralCompletionData()
+            {
+              Text = f.Name,
+              Description = f.Description,
+              Image = WpfImages.Method16
+            }));
+        return results;
+      }
+
+      return _provider.GetFunctionNames(tableValued)
+        .Where(t => t.StartsWith(schema + ".", StringComparison.OrdinalIgnoreCase))
+        .Select(t => new SqlGeneralCompletionData()
+        {
+          Text = GetNameLabel(t),
+          Image = WpfImages.Method16,
+          Action = () => t.Substring(schema.Length + 1)
+        });
+    }
+
+    private string GetNameLabel(string name)
+    {
+      var parts = name.Split('.');
+      if (parts.Length < 2)
+        return name;
+      return parts.Last().TrimStart('[', '"').TrimEnd(']', '"') + " (" + string.Join(".", parts, 0, parts.Length - 1) + ")";
+    }
+
+    private IEnumerable<ICompletionData> Tables(string schema)
+    {
+      if (string.IsNullOrEmpty(schema))
+      {
+        return _provider.GetTableNames()
+          .Select(t => new SqlGeneralCompletionData()
+          {
+            Text = GetNameLabel(t),
+            Image = WpfImages.Class16,
+            Action = () => t
+          });
+      }
+
+      return _provider.GetTableNames()
+        .Where(t => t.StartsWith(schema + ".", StringComparison.OrdinalIgnoreCase))
+        .Select(t => new SqlGeneralCompletionData()
+        {
+          Text = GetNameLabel(t),
+          Image = WpfImages.Class16,
+          Action = () => t.Substring(schema.Length + 1)
+        });
+    }
+
 
     private IEnumerable<string> MatchCase(string compare, params string[] values)
     {

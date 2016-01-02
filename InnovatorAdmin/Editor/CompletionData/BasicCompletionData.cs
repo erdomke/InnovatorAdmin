@@ -20,10 +20,7 @@ namespace InnovatorAdmin.Editor
       this.Description = description;
     }
 
-    public System.Windows.Media.ImageSource Image
-    {
-      get { return null; }
-    }
+    public System.Windows.Media.ImageSource Image { get; set; }
 
     public Func<string> Action { get; set; }
     public virtual string Text { get; set; }

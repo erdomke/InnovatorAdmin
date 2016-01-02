@@ -10,7 +10,7 @@ using System.ComponentModel;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Utils;
 
-namespace InnovatorAdmin
+namespace InnovatorAdmin.Editor
 {
   public class ArasEditorProxy : IEditorProxy
   {
@@ -239,7 +239,7 @@ namespace InnovatorAdmin
         System.Diagnostics.Debug.Print("{0:hh:MM:ss} Document rendered", DateTime.Now);
       }
 
-      public ITextSource GetDocument()
+      public ITextSource GetTextSource()
       {
         return _text;
       }

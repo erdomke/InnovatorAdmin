@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InnovatorAdmin
+namespace InnovatorAdmin.Editor
 {
   public class SqlResultObject : IResultObject
   {
@@ -29,7 +29,7 @@ namespace InnovatorAdmin
     {
       return _rope.ToString();
     }
-    public ITextSource GetDocument()
+    public ITextSource GetTextSource()
     {
       return new RopeTextSource(_rope);
     }

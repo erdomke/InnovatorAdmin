@@ -32,12 +32,12 @@ namespace InnovatorAdmin
         {
           case ConnectionType.Innovator:
             return conn.ArasLogin(true)
-              .Convert(c => (IEditorProxy)new ArasEditorProxy(c, conn.ConnectionName)
+              .Convert(c => (IEditorProxy)new Editor.ArasEditorProxy(c, conn.ConnectionName)
               {
                 ConnData = conn
               });
           case ConnectionType.SqlServer:
-            return Promises.Resolved<IEditorProxy>(new SqlEditorProxy(conn));
+            return Promises.Resolved<IEditorProxy>(new Editor.SqlEditorProxy(conn));
         }
         return Promises.Rejected<IEditorProxy>(new NotSupportedException("Unsupported connection type"));
       }

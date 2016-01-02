@@ -6,7 +6,10 @@ using ICSharpCode.AvalonEdit.Search;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
+using System.Drawing;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace InnovatorAdmin.Editor
@@ -30,6 +33,8 @@ namespace InnovatorAdmin.Editor
     private SearchMode _mode = SearchMode.Normal;
     private bool _programChangingCheckState;
 
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public Action<IResultObject> FindAllAction { get; set; }
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public IList<VisualLineElementGenerator> ElementGenerators
     {
@@ -77,6 +82,7 @@ namespace InnovatorAdmin.Editor
           _currentDoc.TextChanged -= new EventHandler(this.textArea_Document_TextChanged);
         }
 
+        btnFindAll.Visible = FindAllAction != null;
         findReplacePanel.Visible = (value != FindReplaceState.None);
         txtReplace.Visible = (value == FindReplaceState.Replace);
         btnReplaceAll.Visible = txtReplace.Visible;
@@ -86,6 +92,7 @@ namespace InnovatorAdmin.Editor
         {
           _currentDoc = null;
           editor.Focus();
+          _renderer.CurrentResults.Clear();
         }
         else
         {
@@ -340,7 +347,7 @@ namespace InnovatorAdmin.Editor
       try
       {
         this._strategy = SearchFactory.Create(txtFind.Text ?? ""
-          , !chkCaseSensitive.Checked, false, _mode);
+          , !mniMatchCase.Checked, false, _mode);
         this.DoSearch(true);
       }
       catch (SearchPatternException)
@@ -394,22 +401,22 @@ namespace InnovatorAdmin.Editor
     }
 
 
-    private void chkNormal_CheckedChanged(object sender, EventArgs e)
+    private void mniNormal_Click(object sender, EventArgs e)
     {
       SetMode(SearchMode.Normal);
     }
 
-    private void chkExtended_CheckedChanged(object sender, EventArgs e)
+    private void mniExtended_Click(object sender, EventArgs e)
     {
       SetMode(SearchMode.Extended);
     }
 
-    private void chkRegExp_CheckedChanged(object sender, EventArgs e)
+    private void mniRegex_Click(object sender, EventArgs e)
     {
       SetMode(SearchMode.RegEx);
     }
 
-    private void chkXPath_CheckedChanged(object sender, EventArgs e)
+    private void mniXpath_Click(object sender, EventArgs e)
     {
       SetMode(SearchMode.XPath);
     }
@@ -421,28 +428,28 @@ namespace InnovatorAdmin.Editor
         _programChangingCheckState = true;
         try
         {
-          chkNormal.Checked = false;
-          chkExtended.Checked = false;
-          chkRegExp.Checked = false;
-          chkXPath.Checked = false;
+          mniNormal.Checked = false;
+          mniExtended.Checked = false;
+          mniRegex.Checked = false;
+          mniXpath.Checked = false;
           txtFind.Helper = null;
           switch (mode)
           {
             case SearchMode.Extended:
-              chkExtended.Checked = true;
+              mniExtended.Checked = true;
               txtFind.Helper = new StringLiteralHelper();
               txtReplace.Helper = new StringLiteralHelper();
               break;
             case SearchMode.Normal:
-              chkNormal.Checked = true;
+              mniNormal.Checked = true;
               break;
             case SearchMode.RegEx:
-              chkRegExp.Checked = true;
+              mniRegex.Checked = true;
               txtFind.Helper = new RegexHelper();
               txtReplace.Helper = new RegexReplacementHelper();
               break;
             case SearchMode.XPath:
-              chkXPath.Checked = true;
+              mniXpath.Checked = true;
               break;
           }
           _mode = mode;
@@ -497,6 +504,125 @@ namespace InnovatorAdmin.Editor
       try
       {
         FindReplaceMode = FindReplaceState.None;
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private class FindReplaceResult : IResultObject
+    {
+      private ITextSource _text;
+      private DataSet _set;
+
+      public FindReplaceResult(IDocument doc, IEnumerable<ISearchResult> results, Func<int, string> nameGetter)
+      {
+        var rope = new ICSharpCode.AvalonEdit.Utils.Rope<char>();
+        var table = new DataTable();
+        table.BeginLoadData();
+
+        if (!results.Any())
+          return;
+
+        var regexResult = results.First() as SearchResult;
+        if (regexResult == null)
+        {
+          table.Columns.Add("$0", typeof(string));
+        }
+        else
+        {
+          var i = 0;
+          foreach (var group in regexResult.Data.Groups.OfType<Group>())
+          {
+            table.Columns.Add(nameGetter(i), typeof(string));
+            i++;
+          }
+        }
+
+        foreach (var result in results)
+        {
+          rope.AddRange(doc.GetText(result) + Environment.NewLine);
+
+          regexResult = result as SearchResult;
+          if (regexResult == null)
+          {
+            table.Rows.Add(doc.GetText(result));
+          }
+          else
+          {
+            table.Rows.Add(regexResult.Data.Groups.OfType<Group>().Select(g => g.Value).ToArray());
+          }
+        }
+
+        table.EndLoadData();
+        _set = new DataSet();
+        _set.Tables.Add(table);
+        _text = new RopeTextSource(rope);
+      }
+
+      public OutputType PreferredMode
+      {
+        get { return OutputType.Table; }
+      }
+
+      public int ItemCount
+      {
+        get { return _set == null ? 0 : _set.Tables[0].Rows.Count; }
+      }
+
+      public ITextSource GetTextSource()
+      {
+        return _text;
+      }
+
+      public System.Data.DataSet GetDataSet()
+      {
+        return _set;
+      }
+
+      public string Title
+      {
+        get { return "Matches"; }
+      }
+
+      public string Html
+      {
+        get { return string.Empty; }
+      }
+    }
+
+    private void btnOptions_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        var point = new Point(btnOptions.Right - conOptions.Width, btnOptions.Bottom);
+        point = btnOptions.Parent.PointToScreen(point);
+        conOptions.Show(point);
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void btnFindAll_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        if (FindAllAction != null && _renderer.CurrentResults.Any())
+        {
+          var regexStrategy = _strategy as RegexSearchStrategy;
+          Func<int, string> nameGetter;
+          if (regexStrategy == null)
+            nameGetter = i => string.Format("${0}", i);
+          else
+            nameGetter = i => string.IsNullOrEmpty(regexStrategy.Regex.GroupNameFromNumber(i))
+              ? string.Format("${0}", i)
+              : regexStrategy.Regex.GroupNameFromNumber(i);
+          var result = new FindReplaceResult(_currentDoc, _renderer.CurrentResults.OfType<ISearchResult>(), nameGetter);
+          FindAllAction.Invoke(result);
+        }
       }
       catch (Exception ex)
       {

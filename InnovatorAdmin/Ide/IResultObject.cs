@@ -12,7 +12,7 @@ namespace InnovatorAdmin
   {
     OutputType PreferredMode { get; }
     int ItemCount { get; }
-    ITextSource GetDocument();
+    ITextSource GetTextSource();
     DataSet GetDataSet();
     string Title { get; }
     string Html { get; }

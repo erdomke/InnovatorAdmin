@@ -31,7 +31,7 @@ namespace InnovatorAdmin
 
     public SqlContext(SqlGroup node)
     {
-      SqlGroup parentGroup = node.Parent as SqlGroup;
+      var parentGroup = node.Parent as SqlGroup;
       while (!node.Any(n => SqlTokenizer.KeywordPrecedesTable(n as SqlLiteral)) && parentGroup != null)
       {
         node = parentGroup;

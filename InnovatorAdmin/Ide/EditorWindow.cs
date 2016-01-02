@@ -2,6 +2,7 @@
 using Innovator.Client.Connection;
 using InnovatorAdmin.Connections;
 using InnovatorAdmin.Controls;
+using InnovatorAdmin.Editor;
 using Nancy;
 using System;
 using System.Collections.Generic;
@@ -30,11 +31,11 @@ namespace InnovatorAdmin
     private bool _loadingConnection = false;
     private string _locale;
     private DataSet _outputSet;
+    private bool _outputTextSet = false;
     private bool _panelCollapsed;
     private Dictionary<string, QueryParameter> _paramCache = new Dictionary<string, QueryParameter>();
     private IEditorProxy _proxy;
     private IResultObject _result;
-    private bool _richResult = true; // Whether the results includes text and multiple tables (as opposed to a single table)
     private string _soapAction;
     private DateTime _start = DateTime.UtcNow;
     private int _timeout = Innovator.Client.Connection.DefaultHttpService.DefaultTimeout;
@@ -48,6 +49,7 @@ namespace InnovatorAdmin
       get { return !splitEditors.Panel2Collapsed; }
       set { splitEditors.Panel2Collapsed  = !value; }
     }
+    public OutputType PreferredMode { get; set; }
     public IEditorProxy Proxy
     {
       get { return _proxy; }
@@ -76,6 +78,7 @@ namespace InnovatorAdmin
       InitializeComponent();
 
       this.KeyPreview = true;
+      this.PreferredMode = OutputType.Any;
 
       _uid = GetUid();
       var assy = Assembly.GetExecutingAssembly().GetName().Version;
@@ -113,6 +116,7 @@ namespace InnovatorAdmin
       tbcOutputView.SelectedTab = pgTools;
 
       inputEditor.SelectionChanged += inputEditor_SelectionChanged;
+      inputEditor.FindAllAction = res => SetResult(res, 0);
       inputEditor.BindToolStripItem(mniCut, System.Windows.Input.ApplicationCommands.Cut);
       inputEditor.BindToolStripItem(mniCopy, System.Windows.Input.ApplicationCommands.Copy);
       inputEditor.BindToolStripItem(mniPaste, System.Windows.Input.ApplicationCommands.Paste);
@@ -302,7 +306,7 @@ namespace InnovatorAdmin
         dialog.tbcOutputView.SelectedTab = dialog.pgTableOutput;
         dialog.tbcOutputView.SizeMode = TabSizeMode.Fixed;
         dialog.SetConnection(conn);
-        dialog._richResult = false;
+        dialog.PreferredMode = OutputType.Table;
         if (dialog.ShowDialog() == DialogResult.OK
           && dialog._outputSet.Tables[0].Columns.Contains(Extensions.AmlTable_TypeName)
           && dialog._outputSet.Tables[0].Columns.Contains("id"))
@@ -460,11 +464,6 @@ namespace InnovatorAdmin
         _outputSet = _result.GetDataSet();
         if (_outputSet.Tables.Count > 0)
         {
-          if (!_richResult)
-          {
-
-          }
-
           dgvItems.DataSource = _outputSet.Tables[0];
           FormatDataGrid(dgvItems);
           pgTableOutput.Text = _outputSet.Tables[0].TableName;
@@ -488,6 +487,22 @@ namespace InnovatorAdmin
             FormatDataGrid(grid);
             i++;
           }
+        }
+      }
+    }
+
+    private void EnsureTextResult()
+    {
+      if (!_outputTextSet && _result != null && tbcOutputView.SelectedTab == pgTableOutput)
+      {
+        _outputTextSet = true;
+
+        var text = _result.GetTextSource();
+        outputEditor.Document.Replace(0, outputEditor.Document.TextLength, text);
+
+        if (_result.ItemCount > 1 && outputEditor.Editor.LineCount > 100)
+        {
+          outputEditor.CollapseAll();
         }
       }
     }
@@ -714,6 +729,7 @@ namespace InnovatorAdmin
         lblItems.Text = "Processing...";
         _start = DateTime.UtcNow;
         _clock.Enabled = true;
+        _outputTextSet = false;
         btnSubmit.Text = "Cancel";
 
         var cmd = _proxy.NewCommand().WithQuery(query).WithAction(this.SoapAction);
@@ -767,47 +783,9 @@ namespace InnovatorAdmin
             try
             {
               var milliseconds = st.ElapsedMilliseconds;
-
-              _result = result;
               _clock.Enabled = false;
-              if (result.ItemCount > 0)
-              {
-                lblItems.Text = string.Format("{0} item(s) found in {1} ms.", result.ItemCount, milliseconds);
-              }
-              else
-              {
-                lblItems.Text = string.Format("No items found in {0} ms.", milliseconds);
-              }
-              var doc = result.GetDocument();
-              outputEditor.Document.Replace(0, outputEditor.Document.TextLength, doc);
-              System.Diagnostics.Debug.Print("{0:hh:MM:ss} Editor document set", DateTime.Now);
 
-              if (result.ItemCount > 1 && outputEditor.Editor.LineCount > 100)
-              {
-                outputEditor.CollapseAll();
-              }
-              System.Diagnostics.Debug.Print("{0:hh:MM:ss} Editor collapsed", DateTime.Now);
-
-              if (_richResult)
-              {
-                if (result.PreferredMode == OutputType.Table && result.ItemCount > 0)
-                {
-                  tbcOutputView.SelectedTab = pgTableOutput;
-                }
-                else if (result.PreferredMode == OutputType.Html)
-                {
-                  browser.Navigate(GetReportUri().ToString());
-                  tbcOutputView.SelectedTab = pgHtml;
-                }
-                else
-                {
-                  tbcOutputView.SelectedTab = pgTextOutput;
-                }
-              }
-              EnsureDataTable();
-
-              this.Text = result.Title + " [AmlStudio]";
-              inputEditor.Editor.Focus();
+              SetResult(result, milliseconds);
             }
             catch (Exception ex)
             {
@@ -816,7 +794,7 @@ namespace InnovatorAdmin
           }).Fail(ex =>
           {
             outputEditor.Text = ex.Message;
-            if (_richResult) tbcOutputView.SelectedTab = pgTextOutput;
+            tbcOutputView.SelectedTab = pgTextOutput;
             lblItems.Text = "Error";
           })
           .Always(() =>
@@ -829,12 +807,52 @@ namespace InnovatorAdmin
       catch (Exception err)
       {
         outputEditor.Text = err.Message;
-        if (_richResult) tbcOutputView.SelectedTab = pgTextOutput;
+        tbcOutputView.SelectedTab = pgTextOutput;
         _clock.Enabled = false;
         lblItems.Text = "Error";
         _currentQuery = null;
         btnSubmit.Text = "► Run";
       }
+    }
+
+    private void SetResult(IResultObject result, long milliseconds)
+    {
+      _outputTextSet = false;
+      dgvItems.DataSource = null;
+      _outputSet = null;
+
+      var mode = this.PreferredMode;
+      if (mode == OutputType.Any)
+        mode = result.PreferredMode;
+
+      _result = result;
+      if (result.ItemCount > 0)
+      {
+        lblItems.Text = string.Format("{0} item(s) found in {1} ms.", result.ItemCount, milliseconds);
+      }
+      else
+      {
+        lblItems.Text = string.Format("No items found in {0} ms.", milliseconds);
+      }
+
+      if (result.PreferredMode == OutputType.Table && result.ItemCount > 0)
+      {
+        tbcOutputView.SelectedTab = pgTableOutput;
+        EnsureDataTable();
+      }
+      else if (result.PreferredMode == OutputType.Html)
+      {
+        browser.Navigate(GetReportUri().ToString());
+        tbcOutputView.SelectedTab = pgHtml;
+      }
+      else
+      {
+        tbcOutputView.SelectedTab = pgTextOutput;
+        EnsureTextResult();
+      }
+
+      inputEditor.Editor.Focus();
+      this.Text = result.Title + " [AmlStudio]";
     }
     #endregion
 
@@ -868,12 +886,14 @@ namespace InnovatorAdmin
       try
       {
         EnsureDataTable();
+        EnsureTextResult();
       }
       catch (Exception ex)
       {
         Utils.HandleError(ex);
       }
     }
+
     private class AmlAction
     {
       private Stopwatch _stopwatch = Stopwatch.StartNew();

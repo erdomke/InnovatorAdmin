@@ -7,9 +7,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Innovator.Client;
-using InnovatorAdmin.Editor;
 
-namespace InnovatorAdmin
+namespace InnovatorAdmin.Editor
 {
   public class SqlEditorProxy : IEditorProxy
   {

@@ -224,18 +224,21 @@
       <DependentUpon>FullEditor.cs</DependentUpon>
     </Compile>
     <Compile Include="Editor\Overload.cs" />
-    <Compile Include="Editor\Helpers\StringLiteralHelper.cs" />
-    <Compile Include="Editor\Helpers\RegexReplacementHelper.cs" />
-    <Compile Include="Editor\Helpers\RegexHelper.cs" />
+    <Compile Include="Editor\SearchStrategy\StringLiteralHelper.cs" />
+    <Compile Include="Editor\SearchStrategy\RegexReplacementHelper.cs" />
+    <Compile Include="Editor\SearchStrategy\RegexHelper.cs" />
+    <Compile Include="Editor\PlainTextEditorHelper.cs" />
     <Compile Include="Editor\RopeWriter.cs" />
     <Compile Include="Editor\SearchStrategy\RegexSearchStrategy.cs" />
     <Compile Include="Editor\SearchStrategy\SearchFactory.cs" />
     <Compile Include="Editor\SearchStrategy\SearchMode.cs" />
+    <Compile Include="Editor\SearchStrategy\SearchResult.cs" />
     <Compile Include="Editor\SearchStrategy\StringHelper.cs" />
     <Compile Include="Editor\SearchStrategy\XPathSearchStrategy.cs" />
     <Compile Include="Editor\Sql\SqlMetadata.cs" />
     <Compile Include="Editor\TextDocumentWriter.cs" />
     <Compile Include="Editor\VisualLineLinkText.cs" />
+    <Compile Include="Editor\WpfImages.cs" />
     <Compile Include="GlobalProgress.cs" />
     <Compile Include="Ide\OutputType.cs" />
     <Compile Include="Ide\UiCommandManager.cs" />
@@ -320,12 +323,12 @@
     <Compile Include="Ide\InputBox.Designer.cs">
       <DependentUpon>InputBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="Ide\ArasEditorProxy.cs" />
+    <Compile Include="Editor\Aml\ArasEditorProxy.cs" />
     <Compile Include="Ide\IResultObject.cs" />
     <Compile Include="Ide\ProxyFactory.cs" />
     <Compile Include="Ide\EditorScript.cs" />
-    <Compile Include="Ide\SqlEditorProxy.cs" />
-    <Compile Include="Ide\SqlResultObject.cs" />
+    <Compile Include="Editor\Sql\SqlEditorProxy.cs" />
+    <Compile Include="Editor\Sql\SqlResultObject.cs" />
     <Compile Include="Ide\TreeImages.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -338,7 +341,6 @@
     <Compile Include="Editor\CompletionData\IMutableCompletionData.cs" />
     <Compile Include="Editor\Sql\SqlGeneralCompletionData.cs" />
     <Compile Include="Editor\Sql\ISqlMetadataProvider.cs" />
-    <Compile Include="Editor\Sql\SqlObjectCompletionData.cs" />
     <Compile Include="Editor\Sql\SqlColumn.cs" />
     <Compile Include="Editor\Sql\SqlObject.cs" />
     <Compile Include="Editor\Aml\CompletionContext.cs" />
@@ -430,6 +432,11 @@
       <DependentUpon>Messages.resx</DependentUpon>
     </Compile>
     <Compile Include="Release.cs" />
+    <Compile Include="resources\TreeImages.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TreeImages.resx</DependentUpon>
+    </Compile>
     <Compile Include="Scripts\FastObjectFactory.cs" />
     <Compile Include="Scripts\GenerateCtClass.cs" />
     <Compile Include="Scripts\ReplaceItem.cs" />
@@ -561,6 +568,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Messages.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="resources\TreeImages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TreeImages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Scripts\ScriptWindow.resx">
       <DependentUpon>ScriptWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -682,6 +693,21 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\icons\tree\xml-tag-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\icons\tree\assembly-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\icons\tree\method-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\icons\tree\namespace-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\icons\tree\operator-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\icons\tree\enum-value-16.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

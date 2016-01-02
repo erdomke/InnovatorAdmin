@@ -33,7 +33,7 @@ namespace InnovatorAdmin.Editor
       ItemType itemType;
       if (!string.IsNullOrEmpty(typeId) && _metadata != null && _metadata.TypeById(typeId, out itemType))
         return itemType.Name;
-      
+
       return null;
     }
 
@@ -876,6 +876,11 @@ namespace InnovatorAdmin.Editor
         res.Action = () => "[" + _itemType.Name.Replace(' ', '_') + "].[" + prop.Value + "]";
         return res;
       }
+    }
+
+    public IEnumerable<string> GetFunctionNames(bool tableValued)
+    {
+      return Enumerable.Empty<string>();
     }
   }
 }
