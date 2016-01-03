@@ -63,10 +63,62 @@ namespace InnovatorAdmin
             && group[0].TextEquals("(")
             && group[1].TextEquals("select"))
           {
-            var info = new SqlTableInfo() {
-              Columns = group.GetColumnNames()
-            };
-            if ((i + 1) < node.Count && node[i+1].Type == SqlType.Identifier)
+            var info = new SqlTableInfo();
+
+            var cols = group.GetColumnNames().ToList();
+            var toRemove = cols.Where(c => c.EndsWith("*")).ToArray();
+            if (toRemove.Any(c => c == "*"))
+            {
+              var ctx = new SqlContext(group);
+              cols.AddRange(ctx.Tables.Where(t => t.Columns != null).SelectMany(t => t.Columns));
+              info.AdditionalColumns = ctx.Tables.Where(t => t.Columns == null).ToArray();
+            }
+            else if (cols.Any(c => c.EndsWith("*")))
+            {
+              var ctx = new SqlContext(group);
+              var additional = new List<SqlTableInfo>();
+              SqlTableInfo colInfo;
+              foreach (var col in toRemove.Select(c => c.TrimEnd('.', '*')))
+              {
+                if (ctx.TryByName(col, out colInfo))
+                {
+                  if (colInfo.Columns == null)
+                  {
+                    additional.Add(colInfo);
+                  }
+                  else 
+                  {
+                    cols.AddRange(colInfo.Columns);
+                  }
+                }
+              }
+              info.AdditionalColumns = additional;
+            }
+
+            foreach (var item in toRemove)
+            {
+              cols.Remove(item);
+            }
+            info.Columns = cols;
+
+            if ((i + 1) < node.Count && node[i + 1].TextEquals("as"))
+              i++;
+            if ((i + 1) < node.Count && node[i + 1].Type == SqlType.Identifier)
+            {
+              i++;
+              info.Alias = ((SqlLiteral)node[i]).Text;
+            }
+            _tables.Add(info);
+          }
+          else if (group != null
+            && group.Count > 2
+            && group[0] is SqlName
+            && group[1].TextEquals("("))
+          {
+            var info = new SqlTableInfo() { Name = group[0] as SqlName };
+            if ((i + 1) < node.Count && node[i + 1].TextEquals("as"))
+              i++;
+            if ((i + 1) < node.Count && node[i + 1].Type == SqlType.Identifier)
             {
               i++;
               info.Alias = ((SqlLiteral)node[i]).Text;

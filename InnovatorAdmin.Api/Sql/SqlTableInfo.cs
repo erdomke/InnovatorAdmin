@@ -11,5 +11,6 @@ namespace InnovatorAdmin
     public SqlName Name { get; set; }
     public string Alias { get; set; }
     public IEnumerable<string> Columns { get; set; }
+    public IEnumerable<SqlTableInfo> AdditionalColumns { get; set; }
   }
 }

@@ -55,6 +55,8 @@ namespace InnovatorAdmin.Tests
       var sql = @"select 1 + 3 count
                   , isnull(id, config_id) not_null_id
                   , isnull(id, config_id) /* not-named */
+                  , isnull(id, config_id) named /* named */
+                  , isnull(id, config_id) named2 -- named asdfsdf 
                   , isnull(id, config_id)
                   , 3
                   , created_by_id
@@ -64,11 +66,68 @@ namespace InnovatorAdmin.Tests
                 from innovator.[transaction_request] tr
                 group by id, config_id, major_rev";
       var parsed = new SqlTokenizer(sql).Parse();
+      var correct = new string[] { "count", "not_null_id", "named", "named2", "created_by_id", "stuff", "major_rev", "minor_rev" };
+      var names = parsed.GetColumnNames().ToArray();
+      CollectionAssert.AreEqual(correct, names);
+    }
+
+    [TestMethod()]
+    public void SelectColumnNamesAsteriskTest()
+    {
+      var sql = @"select 1 + 3 count
+                  , *
+                  , tr.*
+                  , tr2.* /* not-named */
+                  , 3
+                  , created_by_id
+                from innovator.[transaction_request] tr
+                group by id, config_id, major_rev";
+      var parsed = new SqlTokenizer(sql).Parse();
+      var correct = new string[] { "count", "*", "tr.*", "tr2.*", "created_by_id" };
+      var names = parsed.GetColumnNames().ToArray();
+      CollectionAssert.AreEqual(correct, names);
+    }
+
+    [TestMethod()]
+    public void SelectColumnNamesEqualsTest()
+    {
+      var sql = @"select count = 1 + 3
+                  , isnull(id, config_id) not_null_id
+                  , isnull(id, config_id) /* not-named */
+                  , isnull(id, config_id)
+                  , 3
+                  , created_by_id = thing
+                  , owned_by_id stuff
+                  , major_rev = tr.major_rev2
+                  , tr.minor_rev
+                from innovator.[transaction_request] tr
+                group by id, config_id, major_rev";
+      var parsed = new SqlTokenizer(sql).Parse();
       var correct = new string[] { "count", "not_null_id", "created_by_id", "stuff", "major_rev", "minor_rev" };
       var names = parsed.GetColumnNames().ToArray();
       CollectionAssert.AreEqual(correct, names);
     }
 
+    [TestMethod()]
+    public void SelectColumnNamesSubSelectTest()
+    {
+      var sql = @"select *
+                from (
+                  select count, non_null_id, b.*
+                  from a
+                  inner join (
+                    select first, second, third
+                    from another
+                  ) b
+                  on a.thing = b.stuff
+                ) d
+                group by id, config_id, major_rev";
+      var parsed = new SqlTokenizer(sql).Parse();
+      var correct = new string[] { "count", "non_null_id", "first", "second", "third" };
+      var ctx = new SqlContext(parsed);
+      var names = ctx.Tables.Single().Columns.ToArray();
+      CollectionAssert.AreEqual(correct, names);
+    }
     [TestMethod()]
     public void SelectContextTest()
     {

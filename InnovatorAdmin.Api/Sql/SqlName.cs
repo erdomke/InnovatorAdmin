@@ -13,6 +13,11 @@ namespace InnovatorAdmin
     public string Alias { get; set; }
     public bool IsTable { get; set; }
 
+    public SqlName()
+    {
+      this.Type = SqlType.Identifier;
+    }
+
     public bool TryAdd(SqlLiteral token)
     {
       if (token.Text.Equals("as", StringComparison.OrdinalIgnoreCase)
