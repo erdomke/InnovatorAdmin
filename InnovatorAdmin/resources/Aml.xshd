@@ -40,6 +40,10 @@
       <End color="XmlTag">&lt;/sql&gt;</End>
     </Span>
     <Span ruleSet="SqlScriptSet" multiline="true">
+      <Begin color="XmlTag">&lt;sqlserver_body&gt;</Begin>
+      <End color="XmlTag">&lt;/sqlserver_body&gt;</End>
+    </Span>
+    <Span ruleSet="SqlScriptSet" multiline="true">
       <Begin color="XmlTag">&lt;[^&gt;]+\s+condition=['"]in['"][^&gt;]*&gt;</Begin>
       <End color="XmlTag">&lt;/\w+&gt;</End>
     </Span>

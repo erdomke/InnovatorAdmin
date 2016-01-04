@@ -713,35 +713,40 @@ namespace InnovatorAdmin
 
 		public SqlGroup Parse()
 		{
-			var groups = new Stack<SqlGroup>();
-			groups.Push(new SqlGroup());
-			SqlLiteral literal;
+      return Parse(this);
+		}
 
-			foreach (var node in this)
-			{
-				literal = node as SqlLiteral;
-				if (groups.Peek().Any() && literal != null)
-				{
-					if (literal.Text == "(")
-					{
-						var newGroup = new SqlGroup();
+    public static SqlGroup Parse(IEnumerable<SqlNode> tokens)
+    {
+      var groups = new Stack<SqlGroup>();
+      groups.Push(new SqlGroup());
+      SqlLiteral literal;
+
+      foreach (var node in tokens)
+      {
+        literal = node as SqlLiteral;
+        if (groups.Peek().Any() && literal != null)
+        {
+          if (literal.Text == "(")
+          {
+            var newGroup = new SqlGroup();
             newGroup.Type = SqlType.QueryExpr;
-						var last = groups.Peek().Last();
-						// Move the name of the function being called to the new group
-						if (last.Type == SqlType.Identifier)
-						{
-							groups.Peek().Remove(last);
-							newGroup.Add(last);
-						}
-						groups.Push(newGroup);
-					}
-					else if (
-						literal.Text.Equals("case", StringComparison.OrdinalIgnoreCase)
-						|| literal.Text.Equals("begin", StringComparison.OrdinalIgnoreCase)
-					)
-					{
+            var last = groups.Peek().Last();
+            // Move the name of the function being called to the new group
+            if (last.Type == SqlType.Identifier)
+            {
+              groups.Peek().Remove(last);
+              newGroup.Add(last);
+            }
+            groups.Push(newGroup);
+          }
+          else if (
+            literal.Text.Equals("case", StringComparison.OrdinalIgnoreCase)
+            || literal.Text.Equals("begin", StringComparison.OrdinalIgnoreCase)
+          )
+          {
             groups.Push(new SqlGroup() { Type = SqlType.QueryExpr });
-					}
+          }
           //else if (literal.Text == ",")
           //{
           //  var lastGroup = groups.Peek();
@@ -752,20 +757,20 @@ namespace InnovatorAdmin
           //  var newGroup = new SqlGroup();
 
           //}
-				}
-				groups.Peek().Add(node);
-				if (literal != null)
-				{
-					if (literal.Text == ")"
-						|| literal.Text.Equals("end", StringComparison.OrdinalIgnoreCase))
-					{
-						var child = groups.Pop();
-						if (!groups.Any()) groups.Push(new SqlGroup());
-						groups.Peek().Add(child);
-					}
-					else if (literal.Text == ";")
-					{
-						var child = groups.Pop();
+        }
+        groups.Peek().Add(node);
+        if (literal != null)
+        {
+          if (literal.Text == ")"
+            || literal.Text.Equals("end", StringComparison.OrdinalIgnoreCase))
+          {
+            var child = groups.Pop();
+            if (!groups.Any()) groups.Push(new SqlGroup());
+            groups.Peek().Add(child);
+          }
+          else if (literal.Text == ";")
+          {
+            var child = groups.Pop();
 
             // Deal with unclosed expressions
             while (child.Type == SqlType.QueryExpr && groups.Any())
@@ -774,37 +779,37 @@ namespace InnovatorAdmin
               child = groups.Pop();
             }
 
-						if (!groups.Any())
-						{
-							groups.Push(new SqlGroup());
-							groups.Peek().Add(child);
-						}
+            if (!groups.Any())
+            {
+              groups.Push(new SqlGroup());
+              groups.Peek().Add(child);
+            }
 
-						child = new SqlGroup();
-						groups.Peek().Add(child);
-						groups.Push(child);
-					}
-				}
-			}
+            child = new SqlGroup();
+            groups.Peek().Add(child);
+            groups.Push(child);
+          }
+        }
+      }
 
-			var result = groups.Pop();
-			if (result.Count < 1 && groups.Any())
-				result = groups.Pop();
-			if (result.Count == 1 && result[0] is SqlGroup)
-				result = result[0] as SqlGroup;
-			else if (result.Any() && result.Last() is SqlGroup && !((SqlGroup)result.Last()).Any())
-			{
-				result.Remove(result.Last());
-			}
+      var result = groups.Pop();
+      if (result.Count < 1 && groups.Any())
+        result = groups.Pop();
+      if (result.Count == 1 && result[0] is SqlGroup)
+        result = result[0] as SqlGroup;
+      else if (result.Any() && result.Last() is SqlGroup && !((SqlGroup)result.Last()).Any())
+      {
+        result.Remove(result.Last());
+      }
 
-			while (groups.Any())
-			{
-				var newResult = groups.Pop();
-				newResult.Add(result);
-				result = newResult;
-			}
+      while (groups.Any())
+      {
+        var newResult = groups.Pop();
+        newResult.Add(result);
+        result = newResult;
+      }
 
-			return result;
-		}
+      return result;
+    }
 	}
 }

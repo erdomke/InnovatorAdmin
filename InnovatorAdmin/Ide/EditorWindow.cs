@@ -1,4 +1,5 @@
-﻿using Innovator.Client;
+﻿using ICSharpCode.AvalonEdit.Document;
+using Innovator.Client;
 using Innovator.Client.Connection;
 using InnovatorAdmin.Connections;
 using InnovatorAdmin.Controls;
@@ -84,10 +85,6 @@ namespace InnovatorAdmin
       var assy = Assembly.GetExecutingAssembly().GetName().Version;
       this.lblVersion.Text = "v" + assy.ToString();
 
-      var lastQuery = SnippetManager.Instance.LastQuery;
-      inputEditor.Text = lastQuery.Text;
-      inputEditor.CleanUndoStack();
-      this.SoapAction = lastQuery.Action;
       menuStrip.Renderer = new SimpleToolstripRenderer();
 
       btnSoapAction.Visible = false;
@@ -99,11 +96,11 @@ namespace InnovatorAdmin
       treeItems.ChildrenGetter = m => ((IEditorTreeNode)m).GetChildren();
       colName.ImageGetter = m => ((IEditorTreeNode)m).ImageKey;
 
-      treeItems.SmallImageList.Images.Add("class-16", InnovatorAdmin.Ide.TreeImages.class_16);
-      treeItems.SmallImageList.Images.Add("folder-16", InnovatorAdmin.Ide.TreeImages.folder_16);
-      treeItems.SmallImageList.Images.Add("folder-special-16", InnovatorAdmin.Ide.TreeImages.folder_special_16);
-      treeItems.SmallImageList.Images.Add("property-16", InnovatorAdmin.Ide.TreeImages.property_16);
-      treeItems.SmallImageList.Images.Add("xml-tag-16", InnovatorAdmin.Ide.TreeImages.xml_tag_16);
+      treeItems.SmallImageList.Images.Add("class-16", resources.TreeImages.class_16);
+      treeItems.SmallImageList.Images.Add("folder-16", resources.TreeImages.folder_16);
+      treeItems.SmallImageList.Images.Add("folder-special-16", resources.TreeImages.folder_special_16);
+      treeItems.SmallImageList.Images.Add("property-16", resources.TreeImages.property_16);
+      treeItems.SmallImageList.Images.Add("xml-tag-16", resources.TreeImages.xml_tag_16);
 
       _clock.Interval = 250;
       _clock.Tick += _clock_Tick;
@@ -155,6 +152,8 @@ namespace InnovatorAdmin
           }
         }
       });
+      _commands.Add<Editor.FullEditor>(mniTidy, e => e.KeyCode == Keys.T && e.Control, c => TransformSelection(c, c.Helper.Format));
+      _commands.Add<Editor.FullEditor>(mniMinify, null, c => TransformSelection(c, c.Helper.Minify));
       _commands.Add<Editor.FullEditor>(mniMd5Encode, null, c => c.ReplaceSelectionSegments(t => ConnectionDataExtensions.CalcMD5(t)));
       _commands.Add<Editor.FullEditor>(mniDoubleToSingleQuotes, null, c => c.ReplaceSelectionSegments(t => t.Replace('"', '\'')));
       _commands.Add<Editor.FullEditor>(mniSingleToDoubleQuotes, null, c => c.ReplaceSelectionSegments(t => t.Replace('\'', '"')));
@@ -162,6 +161,11 @@ namespace InnovatorAdmin
       _commands.Add<Editor.FullEditor>(mniLowercase, null, c => c.TransformLowercase());
       _commands.Add<Editor.FullEditor>(mniMoveUpCurrentLine, null, c => c.MoveLineUp());
       _commands.Add<Editor.FullEditor>(mniMoveDownCurrentLine, null, c => c.MoveLineDown());
+      _commands.Add<Editor.FullEditor>(mniToggleSingleLineComment, e => e.Control && e.KeyCode == Keys.Q && !e.Shift, LineToggleComment);
+      _commands.Add<Editor.FullEditor>(mniSingleLineComment, e => e.Control && e.KeyCode == Keys.K && !e.Shift, LineComment);
+      _commands.Add<Editor.FullEditor>(mniSingleLineUncomment, e => e.Control && e.KeyCode == Keys.K && e.Shift, LineUncomment);
+      _commands.Add<Editor.FullEditor>(mniBlockComment, e => e.Control && e.KeyCode == Keys.Q && e.Shift, BlockComment);
+      _commands.Add<Editor.FullEditor>(mniBlockUncomment, null, BlockUncomment);
       _commands.Add<Editor.FullEditor>(mniInsertNewGuid, null, c => c.ReplaceSelectionSegments(t => Guid.NewGuid().ToString("N").ToUpperInvariant()));
       _commands.Add<Editor.FullEditor>(mniXmlToEntity, null, c => c.ReplaceSelectionSegments(t => {
           try
@@ -207,7 +211,7 @@ namespace InnovatorAdmin
           return t;
         }));
     }
-
+    
     public void SetConnection(IAsyncConnection conn, string name = null)
     {
       if (conn == null) throw new ArgumentNullException("conn");
@@ -228,6 +232,11 @@ namespace InnovatorAdmin
         lblSoapAction.Visible = false;
         exploreButton.Visible = false;
         btnSubmit.Visible = false;
+
+        var lastQuery = SnippetManager.Instance.GetLastQueryByConnection(conn.ConnectionName);
+        inputEditor.Text = lastQuery.Text;
+        this.SoapAction = lastQuery.Action;
+        inputEditor.CleanUndoStack();
 
         try
         {
@@ -473,7 +482,7 @@ namespace InnovatorAdmin
           {
             var pg = new TabPage(tbl.TableName);
             pg.Name = GeneratedPage + i.ToString();
-            var grid = new DataGridView();
+            var grid = new HandledDataGridView();
             grid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             grid.ContextMenuStrip = this.conTable;
             grid.DataSource = tbl;
@@ -493,7 +502,7 @@ namespace InnovatorAdmin
 
     private void EnsureTextResult()
     {
-      if (!_outputTextSet && _result != null && tbcOutputView.SelectedTab == pgTableOutput)
+      if (!_outputTextSet && _result != null && tbcOutputView.SelectedTab == pgTextOutput)
       {
         _outputTextSet = true;
 
@@ -605,6 +614,240 @@ namespace InnovatorAdmin
         || type == typeof(long) || type == typeof(ulong)
         || type == typeof(float) || type == typeof(double)
         || type == typeof(decimal);
+    }
+
+    private void LineComment(Editor.FullEditor editor)
+    {
+      if (editor.Helper == null || editor.ReadOnly) return;
+      if (string.IsNullOrWhiteSpace(editor.Helper.LineComment)
+        && !string.IsNullOrWhiteSpace(editor.Helper.BlockCommentStart))
+      {
+        BlockComment(editor);
+        return;
+      }
+      if (string.IsNullOrWhiteSpace(editor.Helper.LineComment))
+        return;
+
+      ActOnSelectedLines(editor, start => editor.Document.Insert(start, editor.Helper.LineComment + " "));
+    }
+
+    private void LineUncomment(Editor.FullEditor editor)
+    {
+      if (editor.Helper == null || editor.ReadOnly) return;
+      if (string.IsNullOrWhiteSpace(editor.Helper.LineComment)
+        && !string.IsNullOrWhiteSpace(editor.Helper.BlockCommentStart))
+      {
+        BlockUncomment(editor);
+        return;
+      }
+      if (string.IsNullOrWhiteSpace(editor.Helper.LineComment))
+        return;
+
+      ActOnSelectedLines(editor, start => { 
+        var length = editor.Helper.LineComment.Length;
+        if (start + length < editor.Document.TextLength 
+          && editor.Document.GetText(start, length) == editor.Helper.LineComment)
+        {
+          if (start + length + 1 < editor.Document.TextLength
+            && editor.Document.GetCharAt(start + length) == ' ')
+            length++;
+          editor.Document.Remove(start, length);
+        }
+      });
+    }
+
+    private void LineToggleComment(Editor.FullEditor editor)
+    {
+      if (editor.Helper == null || editor.ReadOnly) return;
+      if (string.IsNullOrWhiteSpace(editor.Helper.LineComment))
+        return;
+      
+      ActOnSelectedLines(editor, start =>
+      {
+        var length = editor.Helper.LineComment.Length;
+        if (start + length < editor.Document.TextLength
+          && editor.Document.GetText(start, length) == editor.Helper.LineComment)
+        {
+          if (start + length + 1 < editor.Document.TextLength
+            && editor.Document.GetCharAt(start + length) == ' ')
+            length++;
+          editor.Document.Remove(start, length);
+        }
+        else
+        {
+          editor.Document.Insert(start, editor.Helper.LineComment + " ");
+        }
+      });
+    }
+
+    private void ActOnSelectedLines(Editor.FullEditor editor, Action<int> callback)
+    {
+      var firstLine = editor.Document.GetLineByOffset(editor.Editor.SelectionLength > 0
+        ? editor.Editor.SelectionStart : editor.Editor.CaretOffset);
+      var lastLine = editor.Editor.SelectionLength > 0
+        ? editor.Document.GetLineByOffset(editor.Editor.SelectionStart + editor.Editor.SelectionLength)
+        : firstLine;
+      var curr = firstLine;
+      int start;
+      while (curr.LineNumber <= lastLine.LineNumber)
+      {
+        start = curr.Offset;
+        while (start < curr.EndOffset && char.IsWhiteSpace(editor.Document.GetCharAt(start)))
+          start++;
+        callback(start);
+        curr = curr.NextLine;
+      }
+    }
+
+    private void BlockComment(Editor.FullEditor editor)
+    {
+      if (editor.Helper == null || editor.ReadOnly) return;
+      if (string.IsNullOrWhiteSpace(editor.Helper.BlockCommentStart) 
+        && !string.IsNullOrWhiteSpace(editor.Helper.LineComment))
+      {
+        LineComment(editor);
+        return;
+      }
+      if (string.IsNullOrWhiteSpace(editor.Helper.BlockCommentStart))
+        return;
+
+      var segment = SelectionSegment(editor);
+      var text = editor.Helper.BlockCommentStart + " "
+        + editor.Document.GetText(segment)
+          .Replace(editor.Helper.BlockCommentEnd, NewBlockCommentEnd(editor.Helper.BlockCommentEnd))
+        + " " + editor.Helper.BlockCommentEnd;
+      editor.Document.Replace(segment, text);
+    }
+
+    private void BlockUncomment(Editor.FullEditor editor)
+    {
+      if (editor.Helper == null || editor.ReadOnly) return;
+      if (string.IsNullOrWhiteSpace(editor.Helper.BlockCommentStart)
+        && !string.IsNullOrWhiteSpace(editor.Helper.LineComment))
+      {
+        LineUncomment(editor);
+        return;
+      }
+      if (string.IsNullOrWhiteSpace(editor.Helper.BlockCommentStart))
+        return;
+
+      var segment = SelectionSegment(editor);
+      // If the selection is on the inside of the comment
+      if (editor.Document.GetText(segment.Offset, editor.Helper.BlockCommentStart.Length) != editor.Helper.BlockCommentStart
+        && segment.Offset > editor.Helper.BlockCommentStart.Length
+        && editor.Document.GetText(segment.Offset - editor.Helper.BlockCommentStart.Length - 1, editor.Helper.BlockCommentStart.Length + 1)
+          == (editor.Helper.BlockCommentStart + " "))
+      {
+        segment = new TextSegment()
+        {
+          StartOffset = segment.Offset - (editor.Helper.BlockCommentStart.Length + 1),
+          EndOffset = segment.EndOffset + editor.Helper.BlockCommentEnd.Length + 1
+        };
+      }
+      var text = editor.Document.GetText(segment);
+      var output = new System.Text.StringBuilder();
+      var newEnd = NewBlockCommentEnd(editor.Helper.BlockCommentEnd);
+      var endWithSpace = " " + editor.Helper.BlockCommentEnd;
+      bool inComment = false;
+
+      for (var i = 0; i < text.Length; i++)
+      {
+        if (!inComment && IsNext(text, editor.Helper.BlockCommentStart, i))
+        {
+          inComment = true;
+          i += editor.Helper.BlockCommentStart.Length - 1;
+          if (IsNext(text, " ", i + 1)) i++;
+        }
+        else if (inComment && IsNext(text, newEnd, i))
+        {
+          output.Append(editor.Helper.BlockCommentEnd);
+          i += newEnd.Length - 1;
+        }
+        else if (inComment && IsNext(text, endWithSpace, i))
+        {
+          inComment = false;
+          i += endWithSpace.Length - 1;
+        }
+        else if (inComment && IsNext(text, editor.Helper.BlockCommentEnd, i))
+        {
+          inComment = false;
+          i += editor.Helper.BlockCommentEnd.Length - 1;
+        }
+        else 
+        {
+          output.Append(text[i]);
+        }
+      }
+
+      editor.Document.Replace(segment, output.ToString());
+    }
+
+    private ISegment SelectionSegment(Editor.FullEditor editor)
+    {
+      if (editor.Editor.SelectionLength > 0)
+      {
+        return new TextSegment()
+        {
+          StartOffset = editor.Editor.SelectionStart,
+          Length = editor.Editor.SelectionLength
+        };
+      }
+      else
+      {
+        var line = editor.Document.GetLineByOffset(editor.Editor.CaretOffset);
+        var start = line.Offset;
+        while (start < line.EndOffset && char.IsWhiteSpace(editor.Document.GetCharAt(start)))
+          start++;
+        return new TextSegment()
+        {
+          StartOffset = start,
+          EndOffset = line.EndOffset
+        };
+      }
+    }
+
+    private bool IsNext(string search, string value, int pos)
+    {
+      if (search.Length < (pos + value.Length)) return false;
+      for (var i = 0; i < value.Length; i++)
+      {
+        if (search[pos + i] != value[i]) return false;
+      }
+      return true;
+    }
+
+    private string NewBlockCommentEnd(string oldEnd)
+    {
+      var newEnd = new char[oldEnd.Length + 1];
+      oldEnd.CopyTo(0, newEnd, 0, oldEnd.Length);
+      newEnd[newEnd.Length - 1] = newEnd[newEnd.Length - 2];
+      newEnd[newEnd.Length - 2] = '`';
+      return new string(newEnd);
+    }
+
+    private void TransformSelection(Editor.FullEditor editor, Action<TextReader, TextWriter> action)
+    {
+      if (editor.Editor.SelectionLength > 0)
+      {
+        using (var reader = new StringReader(editor.Editor.SelectedText))
+        using (var writer = new StringWriter())
+        {
+          action.Invoke(reader, writer);
+          writer.Flush();
+          editor.Editor.SelectedText = writer.ToString();
+        }
+      }
+      else
+      {
+        using (var reader = editor.Document.CreateReader())
+        using (var writer = new RopeWriter())
+        {
+          action.Invoke(reader, writer);
+          writer.Flush();
+          editor.Document.Replace(0, editor.Document.TextLength,
+            new ICSharpCode.AvalonEdit.Document.RopeTextSource(writer.Rope));
+        }
+      }
     }
 
     private void SaveFormBounds()
@@ -766,11 +1009,11 @@ namespace InnovatorAdmin
         pgTableOutput.Text = "Table";
         dgvItems.DataSource = null;
 
-        SnippetManager.Instance.LastQuery = new Snippet()
+        SnippetManager.Instance.SetLastQueryByConnection(_proxy.ConnData.ConnectionName, new Snippet()
         {
           Action = this.SoapAction,
           Text = inputEditor.Text
-        };
+        });
         Properties.Settings.Default.LastConnection = _proxy.ConnData.ConnectionName;
         Properties.Settings.Default.Save();
         Properties.Settings.Default.Reload();
@@ -965,7 +1208,9 @@ namespace InnovatorAdmin
     {
       try
       {
-        var aml = GetTableChangeAml((DataTable)tbcOutputView.SelectedTab.Controls.OfType<DataGridView>().Single().DataSource);
+        var grid = tbcOutputView.SelectedTab.Controls.OfType<DataGridView>().Single();
+        this.Validate();
+        var aml = GetTableChangeAml((DataTable)grid.DataSource);
         if (!string.IsNullOrEmpty(aml))
           Clipboard.SetText(aml);
       }
@@ -1098,26 +1343,6 @@ namespace InnovatorAdmin
     }
 
     #endregion
-
-
-    private void mniTidyXml_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        if (outputEditor.ContainsFocus)
-        {
-          outputEditor.TidyXml();
-        }
-        else
-        {
-          inputEditor.TidyXml();
-        }
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
 
     private void mniClose_Click(object sender, EventArgs e)
     {
@@ -1452,6 +1677,14 @@ namespace InnovatorAdmin
         }
       }
       catch (Exception) { }
+    }
+
+    private class HandledDataGridView : DataGridView
+    {
+      protected override void OnDataError(bool displayErrorDialogIfNoHandler, DataGridViewDataErrorEventArgs e)
+      {
+        Utils.HandleError(e.Exception);
+      }
     }
   }
 }

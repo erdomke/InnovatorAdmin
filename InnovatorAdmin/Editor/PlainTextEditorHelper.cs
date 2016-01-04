@@ -8,34 +8,59 @@ namespace InnovatorAdmin.Editor
 {
   public class PlainTextEditorHelper : IEditorHelper
   {
-    public ICSharpCode.AvalonEdit.Highlighting.IHighlightingDefinition GetHighlighting()
+    public virtual ICSharpCode.AvalonEdit.Highlighting.IHighlightingDefinition GetHighlighting()
     {
       return null;
     }
 
-    public IEnumerable<string> GetParameterNames(string query)
+    public virtual IEnumerable<string> GetParameterNames(string query)
     {
       return Enumerable.Empty<string>();
     }
 
-    public IFoldingStrategy FoldingStrategy
+    public virtual IFoldingStrategy FoldingStrategy
     {
       get { return null; }
     }
 
-    public void HandleTextEntered(EditorWinForm control, string insertText)
+    public virtual void HandleTextEntered(EditorWinForm control, string insertText)
     {
       // Do nothing
     }
 
-    public string GetCurrentQuery(string text, int offset)
+    public virtual string GetCurrentQuery(string text, int offset)
     {
       return text;
     }
 
-    public Innovator.Client.IPromise<CompletionContext> ShowCompletions(EditorWinForm control)
+    public virtual Innovator.Client.IPromise<CompletionContext> ShowCompletions(EditorWinForm control)
     {
       return Innovator.Client.Promises.Resolved(new CompletionContext());
+    }
+
+    public virtual void Format(System.IO.TextReader reader, System.IO.TextWriter writer)
+    {
+      // Do nothing
+    }
+
+    public virtual void Minify(System.IO.TextReader reader, System.IO.TextWriter writer)
+    {
+      // Do nothing
+    }
+
+    public virtual string LineComment
+    {
+      get { return string.Empty; }
+    }
+
+    public virtual string BlockCommentStart
+    {
+      get { return string.Empty; }
+    }
+
+    public virtual string BlockCommentEnd
+    {
+      get { return string.Empty; }
     }
   }
 }

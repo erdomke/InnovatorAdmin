@@ -20,7 +20,11 @@ namespace InnovatorAdmin
 
     public bool TryAdd(SqlLiteral token)
     {
-      if (token.Text.Equals("as", StringComparison.OrdinalIgnoreCase)
+      if (token == null)
+      {
+        return false;
+      }
+      else if (token.Text.Equals("as", StringComparison.OrdinalIgnoreCase)
           && !this.Any(l => l.Text.Equals("as", StringComparison.OrdinalIgnoreCase)))
       {
         this.Add(token);

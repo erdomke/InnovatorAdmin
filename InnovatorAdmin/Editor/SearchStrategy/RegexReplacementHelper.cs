@@ -11,26 +11,16 @@ using System.Windows.Media;
 
 namespace InnovatorAdmin.Editor
 {
-  public class RegexReplacementHelper : IEditorHelper
+  public class RegexReplacementHelper : PlainTextEditorHelper
   {
     private InsightWindow _currentInsight;
 
-    public ICSharpCode.AvalonEdit.Highlighting.IHighlightingDefinition GetHighlighting()
+    public override ICSharpCode.AvalonEdit.Highlighting.IHighlightingDefinition GetHighlighting()
     {
       return _highlighter;
     }
 
-    public IEnumerable<string> GetParameterNames(string query)
-    {
-      return Enumerable.Empty<string>();
-    }
-
-    public IFoldingStrategy FoldingStrategy
-    {
-      get { return null; }
-    }
-
-    public void HandleTextEntered(EditorWinForm control, string insertText)
+    public override void HandleTextEntered(EditorWinForm control, string insertText)
     {
       switch (insertText)
       {
@@ -39,11 +29,6 @@ namespace InnovatorAdmin.Editor
           ShowCompletions(control);
           break;
       }
-    }
-
-    public string GetCurrentQuery(string text, int offset)
-    {
-      return string.Empty;
     }
 
     private static string[][] _completionInfo = new string[][] {
@@ -80,7 +65,7 @@ namespace InnovatorAdmin.Editor
       new string[] { "9", "Last substring matched by group 9"}
     };
 
-    public Innovator.Client.IPromise<CompletionContext> ShowCompletions(EditorWinForm control)
+    public override Innovator.Client.IPromise<CompletionContext> ShowCompletions(EditorWinForm control)
     {
       var length = control.Editor.Document.TextLength;
       var caret = control.Editor.CaretOffset;

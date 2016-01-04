@@ -13,17 +13,12 @@ using System.Windows.Media;
 
 namespace InnovatorAdmin.Editor
 {
-  public class CompletionHelper : ISqlMetadataProvider
+  public partial class AmlEditorHelper : ISqlMetadataProvider
   {
     protected IAsyncConnection _conn;
     private ArasMetadataProvider _metadata;
     protected SqlCompletionHelper _sql;
-
-    public CompletionHelper()
-    {
-      _sql = new SqlCompletionHelper(this);
-    }
-
+    
     private string GetType(XmlReader reader)
     {
       var type = reader.GetAttribute("type");
@@ -98,16 +93,16 @@ namespace InnovatorAdmin.Editor
         switch (soapAction)
         {
           case "ApplySQL":
-            items = CompletionExtensions.GetPromise<BasicCompletionData>("sql");
+            items = Elements("sql");
             break;
           case "ApplyAML":
-            items = CompletionExtensions.GetPromise<BasicCompletionData>("AML");
+            items = Elements("AML");
             break;
           case "GetAssignedTasks":
-            items = CompletionExtensions.GetPromise<BasicCompletionData>("params");
+            items = Elements("params");
             break;
           default:
-            items = CompletionExtensions.GetPromise<BasicCompletionData>("Item");
+            items = Elements("Item");
             break;
         }
       }
@@ -128,22 +123,22 @@ namespace InnovatorAdmin.Editor
               case "SQL":
                 break;
               case "Path":
-                items = new string[] { "id" }.Where(notExisting).GetPromise<AttributeCompletionData>();
+                items = Attributes(notExisting, "id");
                 break;
               case "Task":
-                items = new string[] { "id", "completed" }.Where(notExisting).GetPromise<AttributeCompletionData>();
+                items = Attributes(notExisting, "id", "completed");
                 break;
               case "Variable":
-                items = new string[] { "id" }.Where(notExisting).GetPromise<AttributeCompletionData>();
+                items = Attributes(notExisting, "id");
                 break;
               case "Authentication":
-                items = new string[] { "mode" }.Where(notExisting).GetPromise<AttributeCompletionData>();
+                items = Attributes(notExisting, "mode");
                 break;
               case "Item":
                 switch (soapAction)
                 {
                   case "GenerateNewGUIDEx":
-                    items = new string[] { "quantity" }.Where(notExisting).GetPromise<AttributeCompletionData>();
+                    items = Attributes(notExisting, "quantity");
                     break;
                   case "":
                     break;
@@ -182,12 +177,12 @@ namespace InnovatorAdmin.Editor
                       attributes.Add("repeatTimes");
                     }
 
-                    items = attributes.Where(notExisting).GetPromise<AttributeCompletionData>();
+                    items = Attributes(notExisting, attributes.ToArray());
                     break;
                 }
                 break;
               default:
-                items = new string[] { "condition", "is_null" }.Where(notExisting).GetPromise<AttributeCompletionData>();
+                items = Attributes(notExisting, "condition", "is_null");
                 break;
             }
 
@@ -253,14 +248,14 @@ namespace InnovatorAdmin.Editor
                   items = CompletionExtensions.GetPromise<AttributeValueCompletionData>(_metadata.MethodNames.Concat(baseMethods));
                   break;
                 case "access_type":
-                  items = CompletionExtensions.GetPromise<AttributeValueCompletionData>("can_add", "can_delete", "can_get", "can_update");
+                  items = AttributeValues("can_add", "can_delete", "can_get", "can_update");
                   break;
                 case "doGetItem":
                 case "version":
                 case "isCriteria":
                 case "related_expand":
                 case "serverEvents":
-                  items = CompletionExtensions.GetPromise<AttributeValueCompletionData>("0", "1");
+                  items = AttributeValues("0", "1");
                   break;
                 case "id":
                   var newGuid = new AttributeValueCompletionData()
@@ -272,7 +267,7 @@ namespace InnovatorAdmin.Editor
                   items = Promises.Resolved(Enumerable.Repeat<ICompletionData>(newGuid, 1));
                   break;
                 case "queryType":
-                  items = CompletionExtensions.GetPromise<AttributeValueCompletionData>("Effective", "Latest", "Released");
+                  items = AttributeValues("Effective", "Latest", "Released");
                   break;
                 case "orderBy":
                   if (!string.IsNullOrEmpty(path.Last().Type)
@@ -346,12 +341,12 @@ namespace InnovatorAdmin.Editor
                     items = Promises.Resolved(ItemTypeCompletion<AttributeValueCompletionData>(_metadata.ItemTypes, true));
                   }
                   break;
-                  break;
                 case "where":
                   if (!string.IsNullOrEmpty(path.Last().Type)
                     && _metadata.ItemTypeByName(path.Last().Type, out itemType))
                   {
-                    items = new WherePropertyFactory(_metadata, itemType).GetPromise();
+                    return _sql.Completions("select * from innovator.[" + itemType.Name.Replace(' ', '_') 
+                      + "] where " + value, xml, caret, xml[caret - value.Length - 1].ToString(), true);
                   }
                   break;
               }
@@ -361,7 +356,7 @@ namespace InnovatorAdmin.Editor
               switch (attrName)
               {
                 case "condition":
-                  items = CompletionExtensions.GetPromise<AttributeValueCompletionData>("between"
+                  items = AttributeValues("between"
                     , "eq"
                     , "ge"
                     , "gt"
@@ -378,7 +373,7 @@ namespace InnovatorAdmin.Editor
                     , "not like");
                   break;
                 case "is_null":
-                  items = CompletionExtensions.GetPromise<AttributeValueCompletionData>("0", "1");
+                  items = AttributeValues("0", "1");
                   break;
               }
             }
@@ -408,38 +403,38 @@ namespace InnovatorAdmin.Editor
                 switch (last.Action)
                 {
                   case "AddHistory":
-                    items = new string[] {"action", "filename", "form_name"}.GetPromise<BasicCompletionData>();
+                    items = Elements("action", "filename", "form_name");
                     break;
                   case "GetItemsForStructureBrowser":
-                    items = new string[] { "Item" }.GetPromise<BasicCompletionData>();
+                    items = Elements("Item");
                     break;
                   case "EvaluateActivity":
-                    items = new string[] { "Activity", "ActivityAssignment", "Paths", "DelegateTo"
-                      , "Tasks", "Variables", "Authentication", "Comments", "Complete" }.GetPromise<BasicCompletionData>();
+                    items = Elements("Activity", "ActivityAssignment", "Paths", "DelegateTo"
+                      , "Tasks", "Variables", "Authentication", "Comments", "Complete");
                     break;
                   case "instantiateWorkflow":
-                    items = new string[] { "WorkflowMap" }.GetPromise<BasicCompletionData>();
+                    items = Elements("WorkflowMap");
                     break;
                   case "promoteItem":
-                    items = new string[] { "state", "comments" }.GetPromise<BasicCompletionData>();
+                    items = Elements("state", "comments");
                     break;
                   case "Run Report":
-                    items = new string[] { "report_name", "AML" }.GetPromise<BasicCompletionData>();
+                    items = Elements("report_name", "AML");
                     break;
                   case "SQL Process":
-                    items = new string[] { "name", "PROCESS", "ARG1", "ARG2", "ARG3", "ARG4"
-                      , "ARG5", "ARG6", "ARG7", "ARG8", "ARG9" }.GetPromise<BasicCompletionData>();
+                    items = Elements("name", "PROCESS", "ARG1", "ARG2", "ARG3", "ARG4"
+                      , "ARG5", "ARG6", "ARG7", "ARG8", "ARG9");
                     break;
                   default:
                     // Completions for item properties
                     var buffer = new List<ICompletionData>();
 
-                    buffer.Add(new BasicCompletionData("Relationships"));
+                    buffer.Add(new BasicCompletionData("Relationships") { Image = WpfImages.XmlTag16 } );
                     if (last.Action == "get")
                     {
-                      buffer.Add(new BasicCompletionData("and"));
-                      buffer.Add(new BasicCompletionData("not"));
-                      buffer.Add(new BasicCompletionData("or"));
+                      buffer.Add(new BasicCompletionData("and") { Image = WpfImages.Operator16 });
+                      buffer.Add(new BasicCompletionData("not") { Image = WpfImages.Operator16 });
+                      buffer.Add(new BasicCompletionData("or") { Image = WpfImages.Operator16 });
                     }
                     ItemType itemType;
                     if (!string.IsNullOrEmpty(last.Type)
@@ -456,19 +451,19 @@ namespace InnovatorAdmin.Editor
               }
               else if (state == XmlState.Tag && last.LocalName == "params" && soapAction == "GetAssignedTasks")
               {
-                items = new string[] { "inBasketViewMode", "workflowTasks", "projectTasks", "actionTasks", "userID" }.GetPromise<BasicCompletionData>();
+                items = Elements("inBasketViewMode", "workflowTasks", "projectTasks", "actionTasks", "userID");
               }
               else if (state == XmlState.Tag && last.LocalName == "Paths" && path.Count > 1 && path[path.Count - 2].Action == "EvaluateActivity")
               {
-                items = new string[] { "Path" }.GetPromise<BasicCompletionData>();
+                items = Elements("Path");
               }
               else if (state == XmlState.Tag && last.LocalName == "Tasks" && path.Count > 1 && path[path.Count - 2].Action == "EvaluateActivity")
               {
-                items = new string[] { "Task" }.GetPromise<BasicCompletionData>();
+                items = Elements("Task");
               }
               else if (state == XmlState.Tag && last.LocalName == "Variables" && path.Count > 1 && path[path.Count - 2].Action == "EvaluateActivity")
               {
-                items = new string[] { "Variable" }.GetPromise<BasicCompletionData>();
+                items = Elements("Variable");
               }
               else if (path.Count > 1)
               {
@@ -511,12 +506,39 @@ namespace InnovatorAdmin.Editor
       });
     }
 
+    private static IPromise<IEnumerable<ICompletionData>> Elements(params string[] values)
+    {
+      return Promises.Resolved(values.Select(v => (ICompletionData)new BasicCompletionData()
+      {
+        Text = v,
+        Image = WpfImages.XmlTag16
+      }));
+    }
+
+    private static IPromise<IEnumerable<ICompletionData>> Attributes(Func<string, bool> filter, params string[] values)
+    {
+      return Promises.Resolved(values.Where(filter).Select(v => (ICompletionData)new AttributeCompletionData()
+      {
+        Text = v,
+        Image = WpfImages.Attribute16
+      }));
+    }
+    private static IPromise<IEnumerable<ICompletionData>> AttributeValues(params string[] values)
+    {
+      return Promises.Resolved(values.Select(v => (ICompletionData)new AttributeValueCompletionData()
+      {
+        Text = v,
+        Image = WpfImages.EnumValue16
+      }));
+    }
+
     private IEnumerable<ICompletionData> ItemTypeCompletion<T>(IEnumerable<ItemType> itemTypes, bool insertId = false) where T : BasicCompletionData, new()
     {
       return itemTypes.Select(i =>
       {
         var result = new T();
         result.Text = i.Name;
+        result.Image = WpfImages.Class16;
         if (insertId) result.Action = () => i.Id;
         if (!string.IsNullOrWhiteSpace(i.Label)) result.Description = i.Label;
         return result;
@@ -525,6 +547,7 @@ namespace InnovatorAdmin.Editor
           .Select(i =>
           {
             var result = new T();
+            result.Image = WpfImages.Class16;
             result.Text = i.Label;
             result.Description = i.Name;
             result.Content = FormatText.MutedText(i.Label);
@@ -697,6 +720,7 @@ namespace InnovatorAdmin.Editor
     {
       _conn = conn;
       _metadata = ArasMetadataProvider.Cached(conn);
+      _isInitialized = true;
     }
 
     public string LastOpenTag(string xml)
@@ -801,20 +825,16 @@ namespace InnovatorAdmin.Editor
           .Select(s => "innovator.[" + s.KeyedName + "]"));
     }
 
-    public IPromise<IEnumerable<ListValue>> GetColumnNames(string tableName)
+    public IPromise<IEnumerable<IListValue>> GetColumnNames(string tableName)
     {
       ItemType itemType;
       if (tableName.StartsWith("innovator.", StringComparison.OrdinalIgnoreCase))
         tableName = tableName.Substring(10);
 
       if (_metadata.ItemTypeByName(tableName.Replace('_', ' '), out itemType))
-        return _metadata.GetProperties(itemType).Convert(p => p.Select(i => new ListValue()
-        {
-          Value = i.Name,
-          Label = i.Label
-        }));
+        return _metadata.GetProperties(itemType).Convert(p => p.OfType<IListValue>());
 
-      return Promises.Resolved(Enumerable.Empty<ListValue>());
+      return Promises.Resolved(Enumerable.Empty<IListValue>());
     }
 
 

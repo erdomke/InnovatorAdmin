@@ -42,6 +42,7 @@ namespace InnovatorAdmin.Editor
       var state = XmlState.Other;
       var line = 1;
       var lastTag = new KeyValuePair<int, int>(0, 0);
+      var attrValueQuote = '"';
 
       for (var i = 0; i < fragment.Length; i++)
       {
@@ -65,6 +66,8 @@ namespace InnovatorAdmin.Editor
                 if (fragment[i] == '=')
                 {
                   i++;
+                  if (i < fragment.Length)
+                    attrValueQuote = fragment[i];
                   state = XmlState.AttributeValue;
                 }
                 else if (fragment[i] == '>')
@@ -157,18 +160,11 @@ namespace InnovatorAdmin.Editor
         case XmlState.AttributeValue:
           if (fragment[fragment.Length - 1] == '=')
           {
-            fragment += '"';
+            fragment += "''>";
           }
           else
           {
-            if (fragment[fragment.LastIndexOf('=') + 1] == '\'')
-            {
-              fragment += "'>";
-            }
-            else
-            {
-              fragment += "\">";
-            }
+            fragment += attrValueQuote.ToString() + ">";
           }
           break;
         case XmlState.CData:

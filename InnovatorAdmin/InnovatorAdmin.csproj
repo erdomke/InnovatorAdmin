@@ -239,6 +239,7 @@
     <Compile Include="Editor\TextDocumentWriter.cs" />
     <Compile Include="Editor\VisualLineLinkText.cs" />
     <Compile Include="Editor\WpfImages.cs" />
+    <Compile Include="Editor\XmlEditorHelper.cs" />
     <Compile Include="GlobalProgress.cs" />
     <Compile Include="Ide\OutputType.cs" />
     <Compile Include="Ide\UiCommandManager.cs" />
@@ -329,11 +330,6 @@
     <Compile Include="Ide\EditorScript.cs" />
     <Compile Include="Editor\Sql\SqlEditorProxy.cs" />
     <Compile Include="Editor\Sql\SqlResultObject.cs" />
-    <Compile Include="Ide\TreeImages.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>TreeImages.resx</DependentUpon>
-    </Compile>
     <Compile Include="Editor\Aml\AttributeCompletionData.cs" />
     <Compile Include="Editor\Aml\AttributeValueCompletionData.cs" />
     <Compile Include="Editor\CompletionData\CompletionExtensions.cs" />
@@ -544,10 +540,6 @@
     <EmbeddedResource Include="Ide\ParameterWindow.resx">
       <DependentUpon>ParameterWindow.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Ide\TreeImages.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>TreeImages.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
     </EmbeddedResource>
@@ -708,6 +700,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\icons\tree\enum-value-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\icons\tree\attribute-16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\icons\tree\method-friend-16.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

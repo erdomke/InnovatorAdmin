@@ -122,6 +122,8 @@ namespace InnovatorAdmin.Controls
       this.UiThreadInvoke(() =>
       {
         _timer.Enabled = true;
+        if (e.Exception != null)
+          Utils.HandleError(e.Exception);
       });
     }
 

@@ -57,7 +57,7 @@
       this.pgHtml = new System.Windows.Forms.TabPage();
       this.browser = new System.Windows.Forms.WebBrowser();
       this.pgTableOutput = new System.Windows.Forms.TabPage();
-      this.dgvItems = new System.Windows.Forms.DataGridView();
+      this.dgvItems = new HandledDataGridView();
       this.conTable = new System.Windows.Forms.ContextMenuStrip(this.components);
       this.mniColumns = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
@@ -92,6 +92,15 @@
       this.insertToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.mniInsertNewGuid = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+      this.codeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniTidy = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniMinify = new System.Windows.Forms.ToolStripMenuItem();
+      this.commentUncommentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniToggleSingleLineComment = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniSingleLineComment = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniSingleLineUncomment = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniBlockComment = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniBlockUncomment = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
       this.mniUppercase = new System.Windows.Forms.ToolStripMenuItem();
       this.mniLowercase = new System.Windows.Forms.ToolStripMenuItem();
@@ -104,7 +113,6 @@
       this.mniMoveUpCurrentLine = new System.Windows.Forms.ToolStripMenuItem();
       this.mniMoveDownCurrentLine = new System.Windows.Forms.ToolStripMenuItem();
       this.xMLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-      this.mniTidyXml = new System.Windows.Forms.ToolStripMenuItem();
       this.mniXmlToEntity = new System.Windows.Forms.ToolStripMenuItem();
       this.mniEntityToXml = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripDropDownButton4 = new System.Windows.Forms.ToolStripDropDownButton();
@@ -794,6 +802,8 @@
             this.toolStripSeparator6,
             this.insertToolStripMenuItem,
             this.toolStripSeparator5,
+            this.codeToolStripMenuItem,
+            this.commentUncommentToolStripMenuItem,
             this.toolStripMenuItem1,
             this.lineOperationsToolStripMenuItem,
             this.xMLToolStripMenuItem});
@@ -807,53 +817,53 @@
       // 
       this.mniUndo.Name = "mniUndo";
       this.mniUndo.ShortcutKeyDisplayString = "Ctrl+Z";
-      this.mniUndo.Size = new System.Drawing.Size(175, 22);
+      this.mniUndo.Size = new System.Drawing.Size(200, 22);
       this.mniUndo.Text = "Undo";
       // 
       // mniRedo
       // 
       this.mniRedo.Name = "mniRedo";
       this.mniRedo.ShortcutKeyDisplayString = "Ctrl+Y";
-      this.mniRedo.Size = new System.Drawing.Size(175, 22);
+      this.mniRedo.Size = new System.Drawing.Size(200, 22);
       this.mniRedo.Text = "Redo";
       // 
       // toolStripSeparator4
       // 
       this.toolStripSeparator4.Name = "toolStripSeparator4";
-      this.toolStripSeparator4.Size = new System.Drawing.Size(172, 6);
+      this.toolStripSeparator4.Size = new System.Drawing.Size(197, 6);
       // 
       // mniCut
       // 
       this.mniCut.Name = "mniCut";
       this.mniCut.ShortcutKeyDisplayString = "Ctrl+X";
-      this.mniCut.Size = new System.Drawing.Size(175, 22);
+      this.mniCut.Size = new System.Drawing.Size(200, 22);
       this.mniCut.Text = "Cut";
       // 
       // mniCopy
       // 
       this.mniCopy.Name = "mniCopy";
       this.mniCopy.ShortcutKeyDisplayString = "Ctrl+C";
-      this.mniCopy.Size = new System.Drawing.Size(175, 22);
+      this.mniCopy.Size = new System.Drawing.Size(200, 22);
       this.mniCopy.Text = "Copy";
       // 
       // mniPaste
       // 
       this.mniPaste.Name = "mniPaste";
       this.mniPaste.ShortcutKeyDisplayString = "Ctrl+V";
-      this.mniPaste.Size = new System.Drawing.Size(175, 22);
+      this.mniPaste.Size = new System.Drawing.Size(200, 22);
       this.mniPaste.Text = "Paste";
       // 
       // toolStripSeparator6
       // 
       this.toolStripSeparator6.Name = "toolStripSeparator6";
-      this.toolStripSeparator6.Size = new System.Drawing.Size(172, 6);
+      this.toolStripSeparator6.Size = new System.Drawing.Size(197, 6);
       // 
       // insertToolStripMenuItem
       // 
       this.insertToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniInsertNewGuid});
       this.insertToolStripMenuItem.Name = "insertToolStripMenuItem";
-      this.insertToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+      this.insertToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
       this.insertToolStripMenuItem.Text = "Insert";
       // 
       // mniInsertNewGuid
@@ -865,7 +875,71 @@
       // toolStripSeparator5
       // 
       this.toolStripSeparator5.Name = "toolStripSeparator5";
-      this.toolStripSeparator5.Size = new System.Drawing.Size(172, 6);
+      this.toolStripSeparator5.Size = new System.Drawing.Size(197, 6);
+      // 
+      // codeToolStripMenuItem
+      // 
+      this.codeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mniTidy,
+            this.mniMinify});
+      this.codeToolStripMenuItem.Name = "codeToolStripMenuItem";
+      this.codeToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+      this.codeToolStripMenuItem.Text = "Code";
+      // 
+      // mniTidy
+      // 
+      this.mniTidy.Name = "mniTidy";
+      this.mniTidy.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
+      this.mniTidy.Size = new System.Drawing.Size(221, 22);
+      this.mniTidy.Text = "Pretty Format / Tidy";
+      // 
+      // mniMinify
+      // 
+      this.mniMinify.Name = "mniMinify";
+      this.mniMinify.Size = new System.Drawing.Size(221, 22);
+      this.mniMinify.Text = "Minify";
+      // 
+      // commentUncommentToolStripMenuItem
+      // 
+      this.commentUncommentToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mniToggleSingleLineComment,
+            this.mniSingleLineComment,
+            this.mniSingleLineUncomment,
+            this.mniBlockComment,
+            this.mniBlockUncomment});
+      this.commentUncommentToolStripMenuItem.Name = "commentUncommentToolStripMenuItem";
+      this.commentUncommentToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
+      this.commentUncommentToolStripMenuItem.Text = "Comment/Uncomment";
+      // 
+      // mniToggleSingleLineComment
+      // 
+      this.mniToggleSingleLineComment.Name = "mniToggleSingleLineComment";
+      this.mniToggleSingleLineComment.Size = new System.Drawing.Size(228, 22);
+      this.mniToggleSingleLineComment.Text = "Toggle Single Line Comment";
+      // 
+      // mniSingleLineComment
+      // 
+      this.mniSingleLineComment.Name = "mniSingleLineComment";
+      this.mniSingleLineComment.Size = new System.Drawing.Size(228, 22);
+      this.mniSingleLineComment.Text = "Single Line Comment";
+      // 
+      // mniSingleLineUncomment
+      // 
+      this.mniSingleLineUncomment.Name = "mniSingleLineUncomment";
+      this.mniSingleLineUncomment.Size = new System.Drawing.Size(228, 22);
+      this.mniSingleLineUncomment.Text = "Single Line Uncomment";
+      // 
+      // mniBlockComment
+      // 
+      this.mniBlockComment.Name = "mniBlockComment";
+      this.mniBlockComment.Size = new System.Drawing.Size(228, 22);
+      this.mniBlockComment.Text = "Block Comment";
+      // 
+      // mniBlockUncomment
+      // 
+      this.mniBlockUncomment.Name = "mniBlockUncomment";
+      this.mniBlockUncomment.Size = new System.Drawing.Size(228, 22);
+      this.mniBlockUncomment.Text = "Block Uncomment";
       // 
       // toolStripMenuItem1
       // 
@@ -878,7 +952,7 @@
             this.toolStripSeparator8,
             this.mniMd5Encode});
       this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-      this.toolStripMenuItem1.Size = new System.Drawing.Size(175, 22);
+      this.toolStripMenuItem1.Size = new System.Drawing.Size(200, 22);
       this.toolStripMenuItem1.Text = "Convert Characters";
       // 
       // mniUppercase
@@ -929,7 +1003,7 @@
             this.mniMoveUpCurrentLine,
             this.mniMoveDownCurrentLine});
       this.lineOperationsToolStripMenuItem.Name = "lineOperationsToolStripMenuItem";
-      this.lineOperationsToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+      this.lineOperationsToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
       this.lineOperationsToolStripMenuItem.Text = "Line Operations";
       // 
       // mniMoveUpCurrentLine
@@ -949,20 +1023,11 @@
       // xMLToolStripMenuItem
       // 
       this.xMLToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mniTidyXml,
             this.mniXmlToEntity,
             this.mniEntityToXml});
       this.xMLToolStripMenuItem.Name = "xMLToolStripMenuItem";
-      this.xMLToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+      this.xMLToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
       this.xMLToolStripMenuItem.Text = "XML";
-      // 
-      // mniTidyXml
-      // 
-      this.mniTidyXml.Name = "mniTidyXml";
-      this.mniTidyXml.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
-      this.mniTidyXml.Size = new System.Drawing.Size(326, 22);
-      this.mniTidyXml.Text = "Tidy Xml";
-      this.mniTidyXml.Click += new System.EventHandler(this.mniTidyXml_Click);
       // 
       // mniXmlToEntity
       // 
@@ -1188,7 +1253,7 @@
     private System.Windows.Forms.ToolStripButton btnEditConnections;
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
     private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
-    private System.Windows.Forms.ToolStripMenuItem mniTidyXml;
+    private System.Windows.Forms.ToolStripMenuItem mniTidy;
     private System.Windows.Forms.ToolStripLabel lblSoapAction;
     private System.Windows.Forms.ToolStripButton btnSoapAction;
     private System.Windows.Forms.ToolStripSplitButton btnSubmit;
@@ -1213,7 +1278,7 @@
     private System.Windows.Forms.TabPage pgTextOutput;
     private Editor.FullEditor outputEditor;
     private System.Windows.Forms.TabPage pgTableOutput;
-    private System.Windows.Forms.DataGridView dgvItems;
+    private HandledDataGridView dgvItems;
     private TreeListView treeItems;
     private BrightIdeasSoftware.OLVColumn colName;
     private BrightIdeasSoftware.OLVColumn colDescription;
@@ -1263,5 +1328,13 @@
     private System.Windows.Forms.ToolStripMenuItem mniGoTo;
     private System.Windows.Forms.Label lblVersion;
     private System.Windows.Forms.WebBrowser browser;
+    private System.Windows.Forms.ToolStripMenuItem codeToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem mniMinify;
+    private System.Windows.Forms.ToolStripMenuItem commentUncommentToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem mniToggleSingleLineComment;
+    private System.Windows.Forms.ToolStripMenuItem mniSingleLineComment;
+    private System.Windows.Forms.ToolStripMenuItem mniSingleLineUncomment;
+    private System.Windows.Forms.ToolStripMenuItem mniBlockComment;
+    private System.Windows.Forms.ToolStripMenuItem mniBlockUncomment;
   }
 }

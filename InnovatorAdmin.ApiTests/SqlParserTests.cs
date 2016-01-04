@@ -56,7 +56,7 @@ namespace InnovatorAdmin.Tests
                   , isnull(id, config_id) not_null_id
                   , isnull(id, config_id) /* not-named */
                   , isnull(id, config_id) named /* named */
-                  , isnull(id, config_id) named2 -- named asdfsdf 
+                  , isnull(id, config_id) named2 -- named asdfsdf
                   , isnull(id, config_id)
                   , 3
                   , created_by_id
@@ -128,6 +128,25 @@ namespace InnovatorAdmin.Tests
       var names = ctx.Tables.Single().Columns.ToArray();
       CollectionAssert.AreEqual(correct, names);
     }
+
+    [TestMethod()]
+    public void SelectColumnNamesSubSelectNoNameTest()
+    {
+      var sql = @"select *, 1 + 2 count
+                from (
+                  select *
+                  from (
+                    select *, 3 + 4 thing
+                    from another
+                  ) b
+                ) d
+                group by id, config_id, major_rev";
+      var parsed = new SqlTokenizer(sql).Parse();
+      var ctx = new SqlContext(parsed);
+      var names = ctx.Tables.Single().Columns.ToArray();
+      //CollectionAssert.AreEqual(correct, names);
+    }
+
     [TestMethod()]
     public void SelectContextTest()
     {

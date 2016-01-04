@@ -21,7 +21,7 @@ namespace InnovatorAdmin.Editor
   /// Provides the autocomplete (intellisense) data for an
   /// xml document that specifies a known schema.
   /// </summary>
-  public class XmlCompletionDataProvider : IEditorHelper
+  public class XmlCompletionDataProvider : XmlEditorHelper
   {
     //public static XmlCompletionDataProvider FromResource(string path)
     //{
@@ -56,7 +56,7 @@ namespace InnovatorAdmin.Editor
       this.defaultNamespacePrefix = string.Empty;
     }
 
-    public virtual void HandleTextEntered(EditorWinForm control, string insertText)
+    public override void HandleTextEntered(EditorWinForm control, string insertText)
     {
       var text = control.Editor.Text.Substring(0, control.Editor.CaretOffset);
       ICompletionData[] result = null;
@@ -135,7 +135,7 @@ namespace InnovatorAdmin.Editor
       }
     }
 
-    public string GetCurrentQuery(string text, int offset)
+    public override string GetCurrentQuery(string text, int offset)
     {
       return text;
     }
@@ -219,27 +219,6 @@ namespace InnovatorAdmin.Editor
       }
 
       return completionData;
-    }
-
-    public IEnumerable<string> GetParameterNames(string query)
-    {
-      return Enumerable.Empty<string>();
-    }
-
-    public IFoldingStrategy FoldingStrategy
-    {
-      get { return null; }
-    }
-
-    public ICSharpCode.AvalonEdit.Highlighting.IHighlightingDefinition GetHighlighting()
-    {
-      return null;
-    }
-
-
-    public Innovator.Client.IPromise<CompletionContext> ShowCompletions(EditorWinForm control)
-    {
-      throw new NotImplementedException();
     }
   }
 }

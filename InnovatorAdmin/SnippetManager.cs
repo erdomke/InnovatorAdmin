@@ -9,7 +9,13 @@ namespace InnovatorAdmin
 {
   public class SnippetManager
   {
-    private const string LastQueryKey = "___LastQuery";
+    private static string _lastQueryKey = "___LastQuery";
+
+    public static string LastQueryKey 
+    {
+      get { return _lastQueryKey; }
+      set { _lastQueryKey = value; }
+    }
     private Dictionary<string, Snippet> _cache = new Dictionary<string, Snippet>();
     private BlockingCollection<Action> _queue = new BlockingCollection<Action>(100);
     private Thread _thread;
@@ -36,10 +42,16 @@ namespace InnovatorAdmin
       _thread.Start();
     }
 
-    public Snippet LastQuery
+    public Snippet GetLastQueryByConnection(string connection)
     {
-      get { return this[LastQueryKey]; }
-      set { this[LastQueryKey] = value; }
+      var result = this[_lastQueryKey + "_" + (connection ?? "")];
+      if (result.IsEmpty())
+        result = this[_lastQueryKey];
+      return result;
+    }
+    public void SetLastQueryByConnection(string connection, Snippet value)
+    {
+      this[_lastQueryKey + "_" + connection] = value;
     }
 
     public Snippet this[string name]

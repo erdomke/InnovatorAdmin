@@ -11,6 +11,6 @@ namespace InnovatorAdmin.Editor
     IEnumerable<string> GetFunctionNames(bool tableValued);
     IEnumerable<string> GetSchemaNames();
     IEnumerable<string> GetTableNames();
-    IPromise<IEnumerable<ListValue>> GetColumnNames(string tableName);
+    IPromise<IEnumerable<IListValue>> GetColumnNames(string tableName);
   }
 }

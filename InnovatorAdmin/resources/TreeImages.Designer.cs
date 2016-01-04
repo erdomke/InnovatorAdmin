@@ -73,6 +73,16 @@ namespace InnovatorAdmin.resources {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap attribute_16 {
+            get {
+                object obj = ResourceManager.GetObject("attribute_16", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap class_16 {
             get {
                 object obj = ResourceManager.GetObject("class_16", resourceCulture);
@@ -116,6 +126,16 @@ namespace InnovatorAdmin.resources {
         internal static System.Drawing.Bitmap method_16 {
             get {
                 object obj = ResourceManager.GetObject("method_16", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap method_friend_16 {
+            get {
+                object obj = ResourceManager.GetObject("method_friend_16", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

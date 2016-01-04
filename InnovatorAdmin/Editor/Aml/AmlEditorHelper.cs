@@ -11,30 +11,19 @@ using System.Xml;
 
 namespace InnovatorAdmin.Editor
 {
-  public class AmlEditorHelper : CompletionHelper, IEditorHelper
+  public partial class AmlEditorHelper : AmlSimpleEditorHelper
   {
     private bool _isInitialized = false;
-    private AmlFoldingStrategy _foldingStrategy = new AmlFoldingStrategy();
-
-    public IFoldingStrategy FoldingStrategy
-    {
-      get { return _foldingStrategy; }
-    }
+    
     public string SoapAction { get; set; }
 
-    public AmlEditorHelper()
+    public AmlEditorHelper() : base()
     {
       this.SoapAction = "ApplyAML";
-      _foldingStrategy.ShowAttributesWhenFolded = true;
+      _sql = new SqlCompletionHelper(this);
     }
-
-    public override void InitializeConnection(IAsyncConnection conn)
-    {
-      _isInitialized = true;
-      base.InitializeConnection(conn);
-    }
-
-    public void HandleTextEntered(EditorWinForm control, string insertText)
+    
+    public override void HandleTextEntered(EditorWinForm control, string insertText)
     {
       if (_isInitialized)
       {
@@ -81,7 +70,7 @@ namespace InnovatorAdmin.Editor
       }
     }
 
-    public IPromise<CompletionContext> ShowCompletions(EditorWinForm control)
+    public override IPromise<CompletionContext> ShowCompletions(EditorWinForm control)
     {
       var length = control.Editor.Document.TextLength;
       var caret = control.Editor.CaretOffset;
@@ -139,12 +128,12 @@ namespace InnovatorAdmin.Editor
 
     }
 
-    public string GetCurrentQuery(string text, int offset)
+    public override string GetCurrentQuery(string text, int offset)
     {
       return this.GetQuery(text, offset);
     }
 
-    public IEnumerable<string> GetParameterNames(string query)
+    public override IEnumerable<string> GetParameterNames(string query)
     {
       var paramNames = new List<string>();
       var subs = new ParameterSubstitution()
@@ -156,25 +145,5 @@ namespace InnovatorAdmin.Editor
       return paramNames.Distinct().OrderBy(n => n);
     }
 
-    internal static IHighlightingDefinition _highlighter;
-
-    static AmlEditorHelper()
-    {
-      using (var stream = System.Reflection.Assembly.GetExecutingAssembly()
-        .GetManifestResourceStream("InnovatorAdmin.resources.Aml.xshd"))
-      {
-        using (var reader = new System.Xml.XmlTextReader(stream))
-        {
-          _highlighter =
-              ICSharpCode.AvalonEdit.Highlighting.Xshd.HighlightingLoader.Load(reader,
-              ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance);
-        }
-      }
-    }
-
-    public IHighlightingDefinition GetHighlighting()
-    {
-      return _highlighter;
-    }
   }
 }

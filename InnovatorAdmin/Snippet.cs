@@ -21,6 +21,11 @@ namespace InnovatorAdmin
       this.Text = fileContent.Substring(newLine).TrimStart(_newLineChars);
     }
 
+    public bool IsEmpty()
+    {
+      return string.IsNullOrWhiteSpace(this.Action) && string.IsNullOrWhiteSpace(this.Text);
+    }
+
     public override string ToString()
     {
       return this.Action + Environment.NewLine + this.Text;

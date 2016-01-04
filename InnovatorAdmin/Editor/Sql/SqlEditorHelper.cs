@@ -14,6 +14,10 @@ namespace InnovatorAdmin.Editor
   {
     private SqlCompletionHelper _sql;
 
+    public virtual string BlockCommentEnd { get { return "*/"; } }
+    public virtual string BlockCommentStart { get { return "/*"; } }
+    public virtual string LineComment { get { return "--"; } }
+
     public SqlEditorHelper(SqlConnection conn)
     {
       _sql = new SqlCompletionHelper(SqlMetadata.Cached(conn));
@@ -21,11 +25,19 @@ namespace InnovatorAdmin.Editor
 
     public IEnumerable<string> GetParameterNames(string query)
     {
+      var tokens = new SqlTokenizer(query).ToArray();
+      var parsed = SqlTokenizer.Parse(tokens);
+      var declares = new SqlDeclares(parsed);
+      var declared = new HashSet<string>(declares.Names ?? Enumerable.Empty<string>());
+
       return new SqlTokenizer(query)
         .OfType<SqlLiteral>()
-        .Where(t => t.Text[0] == '@' && !t.Text.StartsWith("@@"))
-        .Select(t => t.Text.Substring(1));
+        .Where(t => t.Text[0] == '@' && !t.Text.StartsWith("@@") && !declared.Contains(t.Text))
+        .Select(t => t.Text.Substring(1))
+        .Distinct();
     }
+
+
 
     public IFoldingStrategy FoldingStrategy
     {
@@ -139,6 +151,16 @@ namespace InnovatorAdmin.Editor
 
           return data;
         });
+    }
+
+    public void Format(System.IO.TextReader reader, System.IO.TextWriter writer)
+    {
+      // Do nothing, for now
+    }
+
+    public void Minify(System.IO.TextReader reader, System.IO.TextWriter writer)
+    {
+      // Do nothing, for now
     }
   }
 }

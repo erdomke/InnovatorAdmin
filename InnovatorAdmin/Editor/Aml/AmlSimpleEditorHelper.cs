@@ -1,44 +1,40 @@
-﻿using Innovator.Client;
+﻿using ICSharpCode.AvalonEdit.Highlighting;
+using Innovator.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace InnovatorAdmin.Editor
 {
-  public class AmlSimpleEditorHelper : IEditorHelper
+  public class AmlSimpleEditorHelper : XmlEditorHelper
   {
-    private AmlFoldingStrategy _foldingStrategy = new AmlFoldingStrategy();
-
-    public ICSharpCode.AvalonEdit.Highlighting.IHighlightingDefinition GetHighlighting()
+    public AmlSimpleEditorHelper() : base()
     {
-      return AmlEditorHelper._highlighter;
+      _foldingStrategy = new AmlFoldingStrategy() { ShowAttributesWhenFolded = true };
     }
 
-    public IEnumerable<string> GetParameterNames(string query)
+    internal static IHighlightingDefinition _highlighter;
+
+    static AmlSimpleEditorHelper()
     {
-      return Enumerable.Empty<string>();
+      using (var stream = System.Reflection.Assembly.GetExecutingAssembly()
+        .GetManifestResourceStream("InnovatorAdmin.resources.Aml.xshd"))
+      {
+        using (var reader = new System.Xml.XmlTextReader(stream))
+        {
+          _highlighter =
+              ICSharpCode.AvalonEdit.Highlighting.Xshd.HighlightingLoader.Load(reader,
+              ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance);
+        }
+      }
     }
 
-    public IFoldingStrategy FoldingStrategy
+    public override IHighlightingDefinition GetHighlighting()
     {
-      get { return _foldingStrategy; }
-    }
-
-    public void HandleTextEntered(EditorWinForm control, string insertText)
-    {
-      // Do nothing
-    }
-
-    public string GetCurrentQuery(string text, int offset)
-    {
-      return text;
-    }
-
-    public Innovator.Client.IPromise<CompletionContext> ShowCompletions(EditorWinForm control)
-    {
-      return Promises.Resolved(new CompletionContext());
+      return _highlighter;
     }
   }
 }

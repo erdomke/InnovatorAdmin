@@ -104,9 +104,9 @@ namespace InnovatorAdmin.Editor
         .Select(o => o.Schema + ".[" + o.Name + "]");
     }
 
-    public Innovator.Client.IPromise<IEnumerable<ListValue>> GetColumnNames(string tableName)
+    public Innovator.Client.IPromise<IEnumerable<IListValue>> GetColumnNames(string tableName)
     {
-      return GetColumns(tableName).Convert(l => l.Select(c => new ListValue { Value = c.Name }));
+      return GetColumns(tableName).Convert(l => l.Select(c => (IListValue)new ListValue { Value = c.Name }));
     }
     public Innovator.Client.IPromise<IEnumerable<SqlColumn>> GetColumns(string tableName, string schema = null)
     {

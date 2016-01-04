@@ -184,7 +184,6 @@ namespace InnovatorAdmin.Editor
     public void ReplaceSelectionSegments(Func<string, string> insert) { editor.ReplaceSelectionSegments(insert); }
     public void MoveLineDown() { editor.MoveLineDown(); }
     public void MoveLineUp() { editor.MoveLineUp(); }
-    public void TidyXml() { editor.TidyXml(); }
     public void TransformLowercase() { editor.TransformLowercase(); }
     public void TransformUppercase() { editor.TransformUppercase(); }
 

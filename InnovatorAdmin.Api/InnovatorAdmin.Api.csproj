@@ -106,6 +106,7 @@
     <Compile Include="RecoverableErrorEventArgs.cs" />
     <Compile Include="RecoveryOption.cs" />
     <Compile Include="Sql\SqlContext.cs" />
+    <Compile Include="Sql\SqlDeclares.cs" />
     <Compile Include="Sql\SqlGroup.cs" />
     <Compile Include="Sql\SqlGroupBase.cs" />
     <Compile Include="Sql\SqlLiteral.cs" />

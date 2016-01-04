@@ -11,26 +11,20 @@ using System.Windows.Media;
 
 namespace InnovatorAdmin.Editor
 {
-  public class RegexHelper : IEditorHelper
+  public class RegexHelper : PlainTextEditorHelper
   {
     private InsightWindow _currentInsight;
 
-    public ICSharpCode.AvalonEdit.Highlighting.IHighlightingDefinition GetHighlighting()
+    public override string BlockCommentEnd { get { return ")"; } }
+    public override string BlockCommentStart { get { return "(?#"; } }
+    public override string LineComment { get { return "#"; } }
+
+    public override ICSharpCode.AvalonEdit.Highlighting.IHighlightingDefinition GetHighlighting()
     {
       return _highlighter;
     }
 
-    public IEnumerable<string> GetParameterNames(string query)
-    {
-      return Enumerable.Empty<string>();
-    }
-
-    public IFoldingStrategy FoldingStrategy
-    {
-      get { return null; }
-    }
-
-    public void HandleTextEntered(EditorWinForm control, string insertText)
+    public override void HandleTextEntered(EditorWinForm control, string insertText)
     {
       switch (insertText)
       {
@@ -64,11 +58,6 @@ namespace InnovatorAdmin.Editor
       }
     }
 
-    public string GetCurrentQuery(string text, int offset)
-    {
-      return string.Empty;
-    }
-
     private static OverloadList _quantifiers = new OverloadList()
     {
       {"{n}", "Exactly n times"},
@@ -85,7 +74,8 @@ namespace InnovatorAdmin.Editor
       {"(?= subexpression)", "Zero-width positive lookahead assertion."},
       {"(?! subexpression)", "Zero-width negative lookahead assertion."},
       {"(?<= subexpression)", "Zero-width positive lookbehind assertion."},
-      {"(?> subexpression)", "Nonbacktracking (or \"greedy\") subexpression."}
+      {"(?> subexpression)", "Nonbacktracking (or \"greedy\") subexpression."},
+      {"(?# comment)", "Inline comment"}
     };
 
     private static OverloadList _charClass = new OverloadList()
@@ -117,7 +107,7 @@ namespace InnovatorAdmin.Editor
       new string[] { "B", "Match does not occur on a \\b boundary"}
     };
 
-    public Innovator.Client.IPromise<CompletionContext> ShowCompletions(EditorWinForm control)
+    public override Innovator.Client.IPromise<CompletionContext> ShowCompletions(EditorWinForm control)
     {
       var length = control.Editor.Document.TextLength;
       var caret = control.Editor.CaretOffset;

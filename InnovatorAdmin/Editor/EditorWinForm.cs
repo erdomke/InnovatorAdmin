@@ -338,12 +338,6 @@ namespace InnovatorAdmin.Editor
           MoveLineDown();
           e.Handled = true;
         }
-        // Ctrl+T
-        else if (key == System.Windows.Input.Key.T && IsControlDown(e.KeyboardDevice)) // Indent the code
-        {
-          TidyXml();
-          e.Handled = true;
-        }
         // Ctrl+Shift+U
         else if (key == System.Windows.Input.Key.U && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
         {
@@ -578,48 +572,6 @@ namespace InnovatorAdmin.Editor
       }
       // Do not set e.Handled=true.
       // We still want to insert the character that was typed.
-    }
-
-    /// <summary>
-    /// Tidy the xml of the editor by indenting
-    /// </summary>
-    /// <returns>Tidied Xml</returns>
-    public void TidyXml()
-    {
-      if (Editor.TextArea.Document.TextLength < 30000
-        || MessageBox.Show("Validating large requests may take several moments.  Continue?", "AML Studio", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-      {
-        var readerSettings = new XmlReaderSettings();
-        readerSettings.IgnoreWhitespace = true;
-        readerSettings.ConformanceLevel = ConformanceLevel.Fragment;
-
-        var settings = new XmlWriterSettings();
-        settings.OmitXmlDeclaration = true;
-        settings.Indent = true;
-        settings.IndentChars = "  ";
-        settings.CheckCharacters = true;
-        settings.CloseOutput = true;
-        settings.ConformanceLevel = ConformanceLevel.Fragment;
-
-        var newDoc = new TextDocument();
-
-        try
-        {
-          using (var reader = this.Document.CreateReader())
-          using (var xmlReader = XmlReader.Create(reader, readerSettings))
-          using (var writer = new TextDocumentWriter(newDoc))
-          using (var xmlWriter = XmlWriter.Create(writer, settings))
-          {
-            while (!xmlReader.EOF)
-            {
-              xmlWriter.WriteNode(xmlReader, true);
-            }
-            xmlWriter.Flush();
-            this.Document = newDoc;
-          }
-        }
-        catch (XmlException) { } // Eat it for now
-      }
     }
 
     protected override void Dispose(bool disposing)

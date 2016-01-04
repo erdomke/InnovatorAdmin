@@ -11,6 +11,7 @@ namespace InnovatorAdmin.Editor
 {
   public class SqlCompletionHelper
   {
+    private bool _tableNameColumnPrefix;
     private ISqlMetadataProvider _provider;
     private OverloadInsightWindow _overloadWin;
     private string _overloadName;
@@ -22,10 +23,12 @@ namespace InnovatorAdmin.Editor
       _provider = provider;
     }
 
-    public IPromise<CompletionContext> Completions(string prefix, string all, int caret, string termCharacter)
+    public IPromise<CompletionContext> Completions(string prefix, string all, int caret, string termCharacter
+      , bool tableNameColumnPrefix = false)
     {
       try
       {
+        _tableNameColumnPrefix = tableNameColumnPrefix;
         var lastIndex = string.IsNullOrEmpty(termCharacter) ? -1 : all.IndexOf(termCharacter, caret);
         var sql = prefix + (lastIndex < 0 ? all.Substring(caret) : all.Substring(caret, lastIndex - caret));
         if (sql.StartsWith("(") && sql.EndsWith(")"))
@@ -45,7 +48,13 @@ namespace InnovatorAdmin.Editor
 
           if (SqlTokenizer.KeywordPrecedesTable(literal))
           {
+            var context = new SqlContext(parGroup);
             return ContextFromData(Tables(null).Concat(Schemas())
+              .Concat(context.Definitions.Select(d => new SqlGeneralCompletionData() {
+                Text = d,
+                Description = "Locally defined table",
+                Image = WpfImages.Class16
+              }))
               .OrderBy(i => i.Text));
           }
           else if (literal.Text == "(")
@@ -120,20 +129,10 @@ namespace InnovatorAdmin.Editor
                   if (idx > 0 && name[idx - 1] is SqlLiteral
                     && context.TryByName(((SqlLiteral)name[idx - 1]).Text.ToLowerInvariant(), out info))
                   {
-                    if (info.Columns != null)
+                    return Columns(info, false).ToPromise().Convert(c => new CompletionContext()
                     {
-                      return ContextFromData(info.Columns
-                        .GetCompletions<SqlGeneralCompletionData>()
-                        .OrderBy(i => i.Text));
-                    }
-                    else
-                    {
-                      return _provider.GetColumnNames(info.Name.FullName)
-                        .Convert(p => new CompletionContext()
-                        {
-                          Items = new PropertyCompletionFactory().GetCompletions(p, info.Alias)
-                        });
-                    }
+                      Items = c
+                    });
                   }
                 }
               }
@@ -175,7 +174,7 @@ namespace InnovatorAdmin.Editor
                   break;
               }
 
-              // Table aliases and defined columns
+              // Table aliases and functions
               var context = new SqlContext(group);
               var others = context.Tables
                 .Where(t => !string.IsNullOrEmpty(t.Alias))
@@ -186,27 +185,14 @@ namespace InnovatorAdmin.Editor
                   Text = t,
                   Image = WpfImages.Class16
                 })
-                .Concat(context.Tables
-                  .Where(t => t.Columns != null)
-                  .SelectMany(t => string.IsNullOrEmpty(t.Alias)
-                    ? t.Columns.GetCompletions<SqlGeneralCompletionData>()
-                    : t.Columns.Select(c => new SqlGeneralCompletionData()
-                    {
-                      Text = c,
-                      Action = () => t.Alias + "." + c
-                    })))
                 .Concat(Functions(false, null));
 
               // Table columns
-              var types = context.Tables
-                .Where(t => t.Columns == null)
-                .Select(t => _provider.GetColumnNames(t.Name.FullName)).ToArray();
-              return Promises.All(types)
+              return Promises.All(context.Tables.Select(t => Columns(t).ToPromise()).ToArray())
                 .Convert(l => new CompletionContext()
                 {
-                  Items = l.OfType<IEnumerable<IListValue>>()
-                    .SelectMany(i => new PropertyCompletionFactory().GetCompletions(i))
-                    .Distinct()
+                  Items = l.OfType<IEnumerable<ICompletionData>>()
+                    .SelectMany(p => p)
                     .Concat(MatchCase(literal.Text, sqlOthers).Select(o => new SqlGeneralCompletionData()
                     {
                       Text = o,
@@ -214,7 +200,7 @@ namespace InnovatorAdmin.Editor
                     }))
                     .Concat(others)
                     .Concat(Schemas())
-                    .OrderBy(i => i.Text)
+                    .OrderBy(i => i.Text, StringComparer.OrdinalIgnoreCase)
                 });
             }
           }
@@ -226,6 +212,53 @@ namespace InnovatorAdmin.Editor
       {
         return Promises.Rejected<CompletionContext>(ex);
       }
+    }
+
+    private SqlGeneralCompletionData ColumnCompletion(string columnName, string alias)
+    {
+      var result = new SqlGeneralCompletionData();
+      if (!string.IsNullOrWhiteSpace(alias))
+        result.Action = () => alias + "." + columnName;
+      result.Image = WpfImages.Property16;
+      result.Text = columnName;
+      return result;
+    }
+
+    private async Task<IEnumerable<ICompletionData>> Columns(SqlTableInfo info, bool includeAlias = true)
+    {
+      var result = new List<ICompletionData>();
+
+      var alias = info.Alias;
+      if (this._tableNameColumnPrefix && info.Name != null)
+        alias = "[" + info.Name.Name + "]";
+      if (!includeAlias)
+        alias = null;
+
+
+      if (info.Columns == null && info.AdditionalColumns == null)
+      {
+        var allProps = await _provider.GetColumnNames(info.Name.FullName).ToTask();
+        result.AddRange(new PropertyCompletionFactory().GetCompletions(allProps, alias));
+      }
+      else
+      {
+        if (info.Columns != null)
+        {
+          result.AddRange(info.Columns
+            .Select(c => ColumnCompletion(c, alias)));
+        }
+
+        if (info.AdditionalColumns != null)
+        {
+          var properties = (await Promises.All(info.AdditionalColumns
+                                  .Select(i => _provider.GetColumnNames(i.Name.FullName)).ToArray())
+                                .ToTask()).OfType<IEnumerable<IListValue>>();
+          var allProps = properties.SelectMany(p => p);
+          result.AddRange(new PropertyCompletionFactory().GetCompletions(allProps, alias));
+        }
+      }
+
+      return result;
     }
 
     private IEnumerable<ICompletionData> Schemas()
