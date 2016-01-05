@@ -11,11 +11,12 @@ namespace InnovatorAdmin
     private string _script;
     private bool _scriptLoaded;
 
+    public bool AutoRun { get; set; }
     public string Name { get; set; }
     public string Action { get; set; }
-    public string Script 
+    public string Script
     {
-      get 
+      get
       {
         if (!_scriptLoaded)
         {
@@ -25,14 +26,19 @@ namespace InnovatorAdmin
             Utils.CallWithTimeout(5000, () => _script = this.ScriptGetter.Invoke());
           }
         }
-        return _script; 
+        return _script;
       }
-      set 
-      { 
+      set
+      {
         _script = value;
         _scriptLoaded = true;
       }
     }
     public Func<string> ScriptGetter { get; set; }
+
+    public EditorScript()
+    {
+      this.AutoRun = false;
+    }
   }
 }

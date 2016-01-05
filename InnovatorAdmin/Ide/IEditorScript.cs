@@ -6,5 +6,6 @@ namespace InnovatorAdmin
     string Action { get; }
     string Name { get; }
     string Script { get; }
+    bool AutoRun { get; }
   }
 }

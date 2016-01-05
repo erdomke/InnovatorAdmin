@@ -482,7 +482,11 @@ namespace InnovatorAdmin.Editor
                   else
                   {
                     ItemType itemType;
-                    if (!string.IsNullOrEmpty(lastItem.Type)
+                    if (lastItem.Action == "Run Report" && path.Last().LocalName.Equals("AML"))
+                    {
+                      items = Elements("Item");
+                    }
+                    else if (!string.IsNullOrEmpty(lastItem.Type)
                       && _metadata.ItemTypeByName(lastItem.Type, out itemType))
                     {
                       items = PropertyValueCompletion(itemType, state, path).ToPromise();

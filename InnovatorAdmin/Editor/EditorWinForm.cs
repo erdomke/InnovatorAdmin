@@ -350,6 +350,12 @@ namespace InnovatorAdmin.Editor
           TransformLowercase();
           e.Handled = true;
         }
+        // Ctrl+Space
+        else if (key == System.Windows.Input.Key.Space && IsControlDown(e.KeyboardDevice) && Helper != null)
+        {
+          Helper.ShowCompletions(this);
+          e.Handled = true;
+        }
 
         var winArgs = WinFormsKey(e);
         OnKeyDown(winArgs);

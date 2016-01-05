@@ -414,15 +414,31 @@ namespace InnovatorAdmin.Editor
         remote.Logout(true, true);
     }
 
+    private string[] _itemTypeReportNames;
+
     public IPromise<IEnumerable<IEditorTreeNode>> GetNodes()
     {
       return Promises.All(_conn.ApplyAsync(new Command("<Item/>").WithAction(CommandAction.GetMainTreeItems)
-          , true, false), ArasMetadataProvider.Cached(_conn).CompletePromise())
-        .Convert(r => ((IReadOnlyResult)r[0]).AssertItem()
+          , true, false),
+          _conn.ApplyAsync(@"<Item type='ItemType' action='get'>
+                              <name>ItemType</name>
+                              <Relationships>
+                                <Item type='Item Report' action='get'>
+    
+                                </Item>
+                              </Relationships>
+                            </Item>", true, false),
+          ArasMetadataProvider.Cached(_conn).CompletePromise())
+        .Convert(r =>
+        {
+          _itemTypeReportNames = ((IReadOnlyResult)r[1]).AssertItem().Relationships()
+            .Select(rep => rep.RelatedItem().Property("name").Value).ToArray();
+          return ((IReadOnlyResult)r[0]).AssertItem()
             .Property("root")
             .Elements().OfType<IReadOnlyItem>()
             .Select(ProcessTreeNode)
-            .Concat(Scripts()));
+            .Concat(Scripts());
+        });
     }
 
     private IEnumerable<IEditorTreeNode> Scripts()
@@ -507,6 +523,7 @@ namespace InnovatorAdmin.Editor
             ImageKey = "class-16",
             Description = "ItemType: " + item.Property("name").Value,
             HasChildren = true,
+            ScriptGetter = () => ItemTypeScripts(ArasMetadataProvider.Cached(_conn).TypeById(item.Property("itemtype_id").Value)),
             Children = ItemTypeChildren(item.Property("itemtype_id").Value)
             .Concat(item.Relationships().Select(r => ProcessTreeNode(r.RelatedItem())))
           };
@@ -566,15 +583,81 @@ namespace InnovatorAdmin.Editor
         Description = "ItemType: " + itemType.Name,
         HasChildren = true,
         Children = ItemTypeChildren(itemType.Id),
-        Scripts = new EditorScript[]
-        {
-          new EditorScript()
+        Scripts = ItemTypeScripts(itemType)
+      };
+    }
+    private IEnumerable<IEditorScript> ItemTypeScripts(ItemType itemType)
+    {
+      yield return new EditorScript()
+      {
+        Name = "List " + (itemType.Label ?? itemType.Name),
+        Action = "ApplyItem",
+        ScriptGetter = () => {
+          var it = _conn.Apply(@"<Item type='ItemType' action='get' select='default_page_size'>
+                                      <name>@0</name>
+                                      <Relationships>
+                                        <Item type='Property' action='get' select='default_search'>
+                                          <default_search condition='is not null'></default_search>
+                                        </Item>
+                                      </Relationships>
+                                    </Item>", itemType.Name).AssertItem();
+          var builder = new StringBuilder();
+          builder.AppendFormat("<Item type='{0}' action='get'", itemType.Name);
+          if (it.Property("default_page_size").HasValue())
+            builder.AppendFormat(" page='1' pagesize='{0}'", it.Property("default_page_size").Value);
+          builder.Append('>').AppendLine();
+          foreach (var prop in it.Relationships())
           {
-            Name = "SQL Select",
-            Action = "ApplySQL",
-            ScriptGetter = () => SqlSelect(itemType)
+            builder.Append("  <").Append(prop.Name).Append(">");
+            builder.Append(prop.Property("default_search").Value);
+            builder.Append("</").Append(prop.Name).Append(">").AppendLine();
           }
+          builder.Append("</Item>");
+          return builder.ToString();
         }
+      };
+      yield return new EditorScript()
+      {
+        Name = "New " + (itemType.Label ?? itemType.Name),
+        Action = "ApplyItem",
+        ScriptGetter = () => {
+          var builder = new StringBuilder();
+          builder.AppendFormat("<Item type='{0}' action='add'>", itemType.Name).AppendLine();
+          foreach (var prop in ArasMetadataProvider.Cached(_conn).GetProperties(itemType).Wait()
+                                .Where(p => p.DefaultValue != null))
+          {
+            builder.Append("  <").Append(prop.Name).Append(">");
+            builder.Append(_conn.AmlContext.LocalizationContext.Format(prop.DefaultValue));
+            builder.Append("</").Append(prop.Name).Append(">").AppendLine();
+          }
+          builder.Append("</Item>");
+          return builder.ToString();
+        }
+      };
+      yield return new EditorScript()
+      {
+        Name = "--------------------------"
+      };
+      foreach (var report in _itemTypeReportNames)
+      {
+        yield return new EditorScript()
+        {
+          Name = report,
+          Action = "ApplyItem",
+          Script = @"<Item type='Method' action='Run Report'>
+  <report_name>" + report + @"</report_name>
+  <AML>
+    <Item type='ItemType' typeId='450906E86E304F55A34B3C0D65C097EA' id='" + itemType.Id + @"' />
+  </AML>
+</Item>",
+          AutoRun = true
+        };
+      }
+      yield return new EditorScript()
+      {
+        Name = "ItemType: SQL Select",
+        Action = "ApplySQL",
+        ScriptGetter = () => SqlSelect(itemType)
       };
     }
 

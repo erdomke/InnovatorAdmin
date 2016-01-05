@@ -1474,11 +1474,20 @@ namespace InnovatorAdmin
           var con = new ContextMenuStrip();
           foreach (var script in scripts)
           {
-            con.Items.Add(new ToolStripMenuItem(script.Name, null, (s, ev) =>
+            if (script.Name.StartsWith("---") && string.IsNullOrWhiteSpace(script.Script))
             {
-              this.SoapAction = script.Action;
-              this.Script = script.Script;
-            }));
+              con.Items.Add(new ToolStripSeparator());
+            }
+            else
+            {
+              con.Items.Add(new ToolStripMenuItem(script.Name, null, (s, ev) =>
+              {
+                this.SoapAction = script.Action;
+                inputEditor.Document.Insert(0, script.Script + Environment.NewLine + Environment.NewLine);
+                if (script.AutoRun)
+                  Submit(script.Script);
+              }));
+            }
           }
           con.Show(treeItems.PointToScreen(e.Location));
         }
