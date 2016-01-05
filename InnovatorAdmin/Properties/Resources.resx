@@ -446,4 +446,80 @@ where SOURCE_ID = '{0}')&lt;/source_id&gt;
   <data name="function14" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\icons\function14.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="SoapSchema" xml:space="preserve">
+    <value>&lt;xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://schemas.xmlsoap.org/soap/envelope/" targetNamespace="http://schemas.xmlsoap.org/soap/envelope/"&gt;
+  &lt;!--  Envelope, header and body  --&gt;
+  &lt;xs:import namespace="{0}"/&gt;
+  &lt;xs:element name="Envelope" type="tns:Envelope"/&gt;
+  &lt;xs:complexType name="Envelope"&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element ref="tns:Header" minOccurs="0"/&gt;
+      &lt;xs:element ref="tns:Body" minOccurs="1"/&gt;
+      &lt;xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded" processContents="lax"/&gt;
+    &lt;/xs:sequence&gt;
+    &lt;xs:anyAttribute namespace="##other" processContents="lax"/&gt;
+  &lt;/xs:complexType&gt;
+  &lt;xs:element name="Header" type="tns:Header"/&gt;
+  &lt;xs:complexType name="Header"&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded" processContents="lax"/&gt;
+    &lt;/xs:sequence&gt;
+    &lt;xs:anyAttribute namespace="##other" processContents="lax"/&gt;
+  &lt;/xs:complexType&gt;
+  &lt;xs:element name="Body" type="tns:Body"/&gt;
+  &lt;xs:complexType name="Body"&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:any namespace="{0}" minOccurs="0" maxOccurs="1" processContents="lax"/&gt;
+    &lt;/xs:sequence&gt;
+    &lt;xs:anyAttribute namespace="##any" processContents="lax"&gt;
+      &lt;xs:annotation&gt;
+        &lt;xs:documentation&gt;
+Prose in the spec does not specify that attributes are allowed on the Body element
+        &lt;/xs:documentation&gt;
+      &lt;/xs:annotation&gt;
+    &lt;/xs:anyAttribute&gt;
+  &lt;/xs:complexType&gt;
+  &lt;!--
+ Global Attributes.  The following attributes are intended to be usable via qualified attribute names on any complex type referencing them.  
+--&gt;
+  &lt;xs:attribute name="mustUnderstand"&gt;
+    &lt;xs:simpleType&gt;
+      &lt;xs:restriction base="xs:boolean"&gt;
+        &lt;xs:pattern value="0|1"/&gt;
+      &lt;/xs:restriction&gt;
+    &lt;/xs:simpleType&gt;
+  &lt;/xs:attribute&gt;
+  &lt;xs:attribute name="actor" type="xs:anyURI"/&gt;
+  &lt;xs:simpleType name="encodingStyle"&gt;
+    &lt;xs:annotation&gt;
+      &lt;xs:documentation&gt;
+'encodingStyle' indicates any canonicalization conventions followed in the contents of the containing element. For example, the value 'http://schemas.xmlsoap.org/soap/encoding/' indicates the pattern described in SOAP specification
+      &lt;/xs:documentation&gt;
+    &lt;/xs:annotation&gt;
+    &lt;xs:list itemType="xs:anyURI"/&gt;
+  &lt;/xs:simpleType&gt;
+  &lt;xs:attribute name="encodingStyle" type="tns:encodingStyle"/&gt;
+  &lt;xs:attributeGroup name="encodingStyle"&gt;
+    &lt;xs:attribute ref="tns:encodingStyle"/&gt;
+  &lt;/xs:attributeGroup&gt;
+  &lt;xs:element name="Fault" type="tns:Fault"/&gt;
+  &lt;xs:complexType name="Fault" final="extension"&gt;
+    &lt;xs:annotation&gt;
+      &lt;xs:documentation&gt;Fault reporting structure&lt;/xs:documentation&gt;
+    &lt;/xs:annotation&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element name="faultcode" type="xs:QName"/&gt;
+      &lt;xs:element name="faultstring" type="xs:string"/&gt;
+      &lt;xs:element name="faultactor" type="xs:anyURI" minOccurs="0"/&gt;
+      &lt;xs:element name="detail" type="tns:detail" minOccurs="0"/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+  &lt;xs:complexType name="detail"&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:any namespace="##any" minOccurs="0" maxOccurs="unbounded" processContents="lax"/&gt;
+    &lt;/xs:sequence&gt;
+    &lt;xs:anyAttribute namespace="##any" processContents="lax"/&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;</value>
+  </data>
 </root>

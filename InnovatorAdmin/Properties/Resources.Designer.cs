@@ -294,6 +294,23 @@ namespace InnovatorAdmin.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;xs:schema xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:tns=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot; targetNamespace=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;&gt;
+        ///  &lt;!--  Envelope, header and body  --&gt;
+        ///  &lt;xs:import namespace=&quot;{0}&quot;/&gt;
+        ///  &lt;xs:element name=&quot;Envelope&quot; type=&quot;tns:Envelope&quot;/&gt;
+        ///  &lt;xs:complexType name=&quot;Envelope&quot;&gt;
+        ///    &lt;xs:sequence&gt;
+        ///      &lt;xs:element ref=&quot;tns:Header&quot; minOccurs=&quot;0&quot;/&gt;
+        ///      &lt;xs:element ref=&quot;tns:Body&quot; minOccurs=&quot;1&quot;/&gt;
+        ///      &lt;xs:any namespace=&quot;##other&quot; minOccurs=&quot;0&quot; maxOccurs=&quot; [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SoapSchema {
+            get {
+                return ResourceManager.GetString("SoapSchema", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap up16 {

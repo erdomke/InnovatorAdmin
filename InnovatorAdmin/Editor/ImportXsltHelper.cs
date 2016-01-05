@@ -42,9 +42,9 @@ namespace InnovatorAdmin.Editor
     private static string MethodToString(System.Reflection.MethodInfo method)
     {
       return (method.ReturnType == null ? "void" : method.ReturnType.Name)
-        + " " 
+        + " "
         + method.Name
-        + "(" 
+        + "("
         + method.GetParameters()
                 .GroupConcat(", ", p => (p.IsOut ? "out " : "") + p.ParameterType.Name + " " + p.Name + (p.IsOptional ? " = " + (p.DefaultValue ?? "null").ToString() : ""))
         + ")";

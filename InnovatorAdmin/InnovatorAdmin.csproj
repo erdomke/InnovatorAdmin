@@ -125,6 +125,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
+    <Reference Include="System.Web.Services" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -235,6 +236,7 @@
     <Compile Include="Editor\SearchStrategy\SearchResult.cs" />
     <Compile Include="Editor\SearchStrategy\StringHelper.cs" />
     <Compile Include="Editor\SearchStrategy\XPathSearchStrategy.cs" />
+    <Compile Include="Editor\Soap\SoapEditorProxy.cs" />
     <Compile Include="Editor\Sql\SqlMetadata.cs" />
     <Compile Include="Editor\TextDocumentWriter.cs" />
     <Compile Include="Editor\VisualLineLinkText.cs" />
