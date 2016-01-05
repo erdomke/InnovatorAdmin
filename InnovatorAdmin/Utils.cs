@@ -112,7 +112,7 @@ namespace InnovatorAdmin
 
     public static void UiThreadInvoke(this Control control, Action code)
     {
-      if (control.InvokeRequired && control.Parent != null)
+      if (control.InvokeRequired && (control.Parent != null || control is Form))
       {
         control.Invoke(code);
       }

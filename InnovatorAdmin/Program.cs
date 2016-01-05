@@ -28,16 +28,18 @@ namespace InnovatorAdmin
     [STAThread]
     static void Main(string[] args)
     {
-      Application.EnableVisualStyles();
-      Application.SetCompatibleTextRenderingDefault(false);
-
-      var amlStudioStart = args.FirstOrDefault(a =>
-        a.StartsWith("/amlstudio:", StringComparison.OrdinalIgnoreCase));
-
       try
       {
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+
+        var amlStudioStart = args.FirstOrDefault(a =>
+          a.StartsWith("/amlstudio:", StringComparison.OrdinalIgnoreCase));
+
         _serverPort = FreeTcpPort();
-        using (var host = new NancyHost(new Uri("http://localhost:" + _serverPort.ToString())))
+        var config = new HostConfiguration();
+        config.RewriteLocalhost = false;
+        using (var host = new NancyHost(config, new Uri("http://localhost:" + _serverPort.ToString())))
         {
           host.Start();
           if (string.IsNullOrEmpty(amlStudioStart))
@@ -53,9 +55,13 @@ namespace InnovatorAdmin
             if (conn != null) win.SetConnection(conn);
             Application.Run(new AppContext(win));
           }
+        }
       }
+      catch (Exception ex)
+      {
+        MessageBox.Show(ex.ToString(), "Innovator Admin: Crash");
+        File.WriteAllText(Path.Combine(Path.GetDirectoryName(AssemblyPath), "LastError.txt"), ex.ToString());
       }
-      catch (Exception) { }   // Eat the error for now
     }
 
     public static string AssemblyPath

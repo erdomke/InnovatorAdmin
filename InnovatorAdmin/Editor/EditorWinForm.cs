@@ -295,6 +295,12 @@ namespace InnovatorAdmin.Editor
       var doc = Editor.Document;
       var start = doc.GetOffset(Editor.TextArea.Selection.StartPosition.Location);
       var end = doc.GetOffset(Editor.TextArea.Selection.EndPosition.Location);
+      if (end < start)
+      {
+        var buffer = end;
+        end = start;
+        start = buffer;
+      }
       return doc.GetText(start, end - start);
     }
 

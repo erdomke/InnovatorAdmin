@@ -150,6 +150,9 @@
     <Compile Include="Controls\Compare.Designer.cs">
       <DependentUpon>Compare.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\FlatTabControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\InstallProgress.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -179,6 +182,7 @@
     <Compile Include="Controls\RecentlyModifiedSearch.Designer.cs">
       <DependentUpon>RecentlyModifiedSearch.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Win32.cs" />
     <Compile Include="Dialog\ColumnSelect.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -238,6 +242,7 @@
     <Compile Include="Editor\SearchStrategy\XPathSearchStrategy.cs" />
     <Compile Include="Editor\Soap\SoapEditorProxy.cs" />
     <Compile Include="Editor\Sql\SqlMetadata.cs" />
+    <Compile Include="Editor\Sql\SqlSubType.cs" />
     <Compile Include="Editor\TextDocumentWriter.cs" />
     <Compile Include="Editor\VisualLineLinkText.cs" />
     <Compile Include="Editor\WpfImages.cs" />
@@ -496,6 +501,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\ExportSelect.resx">
       <DependentUpon>ExportSelect.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\FlatTabControl.resx">
+      <DependentUpon>FlatTabControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\MergeInterface.resx">
       <DependentUpon>MergeInterface.cs</DependentUpon>

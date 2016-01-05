@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Clean;GenerateFiles;Build;UpdateIcons;GenerateNupkg;PackNuget">
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Clean;GenerateFiles;Build;GenerateNupkg;PackNuget">
   <PropertyGroup>
     <BuildVersion>$([System.DateTime]::Now.ToString(yyyy.MM.dd.HHmm))</BuildVersion>
     <ProjectName>InnovatorAdmin</ProjectName>

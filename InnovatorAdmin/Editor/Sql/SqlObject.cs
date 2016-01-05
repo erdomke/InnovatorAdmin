@@ -14,10 +14,10 @@ namespace InnovatorAdmin.Editor
     public string Name { get; set; }
     public string Type { get; set; }
     public string Definition { get; set; }
-    public bool IsTableValued { get; set; }
+    public SqlSubType SubType { get; set; }
     public IPromise<IEnumerable<SqlColumn>> Columns { get; set; }
 
-    public static SqlObject Create(string schema, string name, string type, int id, int parentId, bool tableValued)
+    public static SqlObject Create(string schema, string name, string type, int id, int parentId, SqlSubType subType)
     {
       return new SqlObject()
       {
@@ -26,7 +26,7 @@ namespace InnovatorAdmin.Editor
         Type = type,
         Id = id,
         ParentId = parentId,
-        IsTableValued = tableValued
+        SubType = subType
       };
     }
   }

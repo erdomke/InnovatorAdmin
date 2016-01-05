@@ -52,6 +52,7 @@ namespace InnovatorAdmin.Editor
             if (!r.IsEmptyElement)
               path.Add(new AmlNode()
               {
+                Offset = o,
                 LocalName = r.LocalName,
                 Type = GetType(r),
                 Action = r.GetAttribute("action"),
@@ -356,21 +357,90 @@ namespace InnovatorAdmin.Editor
               switch (attrName)
               {
                 case "condition":
-                  items = AttributeValues("between"
-                    , "eq"
-                    , "ge"
-                    , "gt"
-                    , "in"
-                    , "is not null"
-                    , "is null"
-                    , "is"
-                    , "le"
-                    , "like"
-                    , "lt"
-                    , "ne"
-                    , "not between"
-                    , "not in"
-                    , "not like");
+                  items = Promises.Resolved((IEnumerable<ICompletionData>)new ICompletionData[] {
+                    new AttributeValueCompletionData()
+                    {
+                      Text = "between",
+                      Image = WpfImages.EnumValue16
+                    },
+                    new AttributeValueCompletionData()
+                    {
+                      Text = "eq",
+                      Content = "eq (=, Equals)",
+                      Image = WpfImages.EnumValue16
+                    },
+                    new AttributeValueCompletionData()
+                    {
+                      Text = "ge",
+                      Content = "ge (>=, Greather than or equal to)",
+                      Image = WpfImages.EnumValue16
+                    },
+                    new AttributeValueCompletionData()
+                    {
+                      Text = "gt",
+                      Content = "gt (>, Greather than)",
+                      Image = WpfImages.EnumValue16
+                    },
+                    new AttributeValueCompletionData()
+                    {
+                      Text = "in",
+                      Image = WpfImages.EnumValue16
+                    },
+                    new AttributeValueCompletionData()
+                    {
+                      Text = "is not null",
+                      Image = WpfImages.EnumValue16
+                    },
+                    new AttributeValueCompletionData()
+                    {
+                      Text = "is null",
+                      Image = WpfImages.EnumValue16
+                    },
+                    new AttributeValueCompletionData()
+                    {
+                      Text = "is",
+                      Image = WpfImages.EnumValue16
+                    },
+                    new AttributeValueCompletionData()
+                    {
+                      Text = "le",
+                      Content = "le (<=, Less than or equal to)",
+                      Image = WpfImages.EnumValue16
+                    },
+                    new AttributeValueCompletionData()
+                    {
+                      Text = "like",
+                      Description = "Both * and % are wildcards",
+                      Image = WpfImages.EnumValue16
+                    },
+                    new AttributeValueCompletionData()
+                    {
+                      Text = "lt",
+                      Content = "lt (<, Less than)",
+                      Image = WpfImages.EnumValue16
+                    },
+                    new AttributeValueCompletionData()
+                    {
+                      Text = "ne",
+                      Content = "ne (<>, !=, Not Equals)",
+                      Image = WpfImages.EnumValue16
+                    },
+                    new AttributeValueCompletionData()
+                    {
+                      Text = "not between",
+                      Image = WpfImages.EnumValue16
+                    },
+                    new AttributeValueCompletionData()
+                    {
+                      Text = "not in",
+                      Image = WpfImages.EnumValue16
+                    },
+                    new AttributeValueCompletionData()
+                    {
+                      Text = "not like",
+                      Image = WpfImages.EnumValue16
+                    }
+                  });
                   break;
                 case "is_null":
                   items = AttributeValues("0", "1");
@@ -599,6 +669,10 @@ namespace InnovatorAdmin.Editor
           };
           completions = completions.Concat(Enumerable.Repeat(uploadComplete, 1));
         }
+        else
+        {
+          completions = completions.Concat(Enumerable.Repeat(new ItemPropertyCompletionData(_conn, path, p), 1));
+        }
 
         return completions;
       }
@@ -638,6 +712,114 @@ namespace InnovatorAdmin.Editor
       else
       {
         return Enumerable.Empty<ICompletionData>();
+      }
+    }
+
+    private class ItemPropertyCompletionData : ICompletionData
+    {
+      private IAsyncConnection _conn;
+      private IList<AmlNode> _path;
+      private Property _prop;
+
+      public ItemPropertyCompletionData(IAsyncConnection conn, IList<AmlNode> path, Property prop)
+      {
+        _conn = conn;
+        _path = path;
+        _prop = prop;
+      }
+
+      public void Complete(ICSharpCode.AvalonEdit.Editing.TextArea textArea, ICSharpCode.AvalonEdit.Document.ISegment completionSegment, EventArgs insertionRequestEventArgs)
+      {
+        var item = _path.LastOrDefault(n => n.LocalName == "Item");
+        if (item == null)
+          return;
+
+        var query = string.Format("<Item type='{0}' action='get'></Item>", _prop.Restrictions.First());
+        var items = EditorWindow.GetItems(_conn, query, query.Length - 7);
+        if (items.Any(i => _prop.Restrictions.Contains(i.Type)))
+        {
+          var allItems = items.Where(i => _prop.Restrictions.Contains(i.Type)).ToArray();
+          if (item.Action == "add" || item.Action == "create")
+          {
+            if (allItems.Length == 1)
+            {
+              PerformComplete(textArea, completionSegment, allItems);
+            }
+            else
+            {
+              var start = item.Offset;
+              var doc = textArea.Document;
+              while (start > 0 && (doc.GetCharAt(start - 1) == '\t' || doc.GetCharAt(start - 1) == ' '))
+                start--;
+              var begin = start;
+              var end = completionSegment.Offset;
+              while (doc.GetCharAt(end) != '>')
+                end--;
+              var prefix = doc.GetText(start, end - start);
+              start = completionSegment.EndOffset;
+              end = doc.IndexOf("</Item>", completionSegment.EndOffset, doc.TextLength - completionSegment.EndOffset, StringComparison.Ordinal);
+              end = end < 0 ? doc.TextLength : end + 7;
+              var suffix = doc.GetText(start, end - start);
+              var text = allItems
+                .Select(i => prefix + " type='" + i.Type + "' keyed_name='" + i.KeyedName + "'>" + i.Unique + suffix)
+                .GroupConcat(Environment.NewLine);
+              doc.Replace(begin, end - begin, text);
+            }
+          }
+          else if (item.Action == "merge" || item.Action == "edit" || item.Action == "update")
+          {
+            if (allItems.Length > 1)
+              throw new Exception("Can only set a property value to a single item");
+            PerformComplete(textArea, completionSegment, allItems);
+          }
+          else
+          {
+            PerformComplete(textArea, completionSegment, allItems);
+          }
+        }
+      }
+
+      private void PerformComplete(ICSharpCode.AvalonEdit.Editing.TextArea textArea, ICSharpCode.AvalonEdit.Document.ISegment completionSegment, ItemReference[] allItems)
+      {
+        var start = completionSegment.Offset;
+        var end = completionSegment.EndOffset;
+        var doc = textArea.Document;
+        while (doc.GetCharAt(start) != '>')
+          start--;
+
+        if (allItems.Length == 1)
+        {
+          doc.Replace(start, end - start, " type='" + allItems[0].Type + "' keyed_name='" + allItems[0].KeyedName + "'>" + allItems[0].Unique);
+        }
+        else
+        {
+          doc.Replace(start, end - start, " condition='in'>'" + allItems.GroupConcat("','", i => i.Unique) + "'");
+        }
+      }
+
+      public object Content
+      {
+        get { return FormatText.ColorText(this.Text, Brushes.Purple); }
+      }
+
+      public object Description
+      {
+        get { return null; }
+      }
+
+      public ImageSource Image
+      {
+        get { return null; }
+      }
+
+      public double Priority
+      {
+        get { return 0; }
+      }
+
+      public string Text
+      {
+        get { return "Search for item(s).."; }
       }
     }
 
@@ -807,6 +989,7 @@ namespace InnovatorAdmin.Editor
 
     private class AmlNode
     {
+      public int Offset { get; set; }
       public string LocalName { get; set; }
       public string Type { get; set; }
       public string Action { get; set; }

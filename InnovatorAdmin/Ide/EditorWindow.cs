@@ -99,6 +99,7 @@ namespace InnovatorAdmin
       treeItems.SmallImageList.Images.Add("class-16", resources.TreeImages.class_16);
       treeItems.SmallImageList.Images.Add("folder-16", resources.TreeImages.folder_16);
       treeItems.SmallImageList.Images.Add("folder-special-16", resources.TreeImages.folder_special_16);
+      treeItems.SmallImageList.Images.Add("method-16", resources.TreeImages.method_16);
       treeItems.SmallImageList.Images.Add("property-16", resources.TreeImages.property_16);
       treeItems.SmallImageList.Images.Add("xml-tag-16", resources.TreeImages.xml_tag_16);
 
@@ -211,7 +212,7 @@ namespace InnovatorAdmin
           return t;
         }));
     }
-    
+
     public void SetConnection(IAsyncConnection conn, string name = null)
     {
       if (conn == null) throw new ArgumentNullException("conn");
@@ -305,7 +306,28 @@ namespace InnovatorAdmin
         });
     }
 
+    public static IEnumerable<ItemReference> GetItems(IAsyncConnection conn, string query, int offset)
+    {
+      return GetItems(d =>
+      {
+        d.SetConnection(conn);
+        d.Script = query;
+        d.inputEditor.Editor.CaretOffset = offset;
+        //Task.Delay(500).ContinueWith(t =>
+        //{
+        //  d.UiThreadInvoke(() =>
+        //  {
+        //    d.inputEditor.Focus();
+
+        //  });
+        //});
+      });
+    }
     public static IEnumerable<ItemReference> GetItems(Connections.ConnectionData conn)
+    {
+      return GetItems(d => d.SetConnection(conn));
+    }
+    public static IEnumerable<ItemReference> GetItems(Action<EditorWindow> setConn)
     {
       using (var dialog = new EditorWindow())
       {
@@ -314,8 +336,8 @@ namespace InnovatorAdmin
         dialog.tbcOutputView.ItemSize = new Size(0, 1);
         dialog.tbcOutputView.SelectedTab = dialog.pgTableOutput;
         dialog.tbcOutputView.SizeMode = TabSizeMode.Fixed;
-        dialog.SetConnection(conn);
         dialog.PreferredMode = OutputType.Table;
+        setConn(dialog);
         if (dialog.ShowDialog() == DialogResult.OK
           && dialog._outputSet.Tables[0].Columns.Contains(Extensions.AmlTable_TypeName)
           && dialog._outputSet.Tables[0].Columns.Contains("id"))
@@ -351,8 +373,15 @@ namespace InnovatorAdmin
       try
       {
         base.OnLoad(e);
-        btnOk.Visible = this.Modal;
-        btnCancel.Visible = this.Modal;
+        if (!this.Modal)
+        {
+          tblMain.Controls.Remove(btnOk);
+          tblMain.Controls.Remove(btnCancel);
+          tblMain.ColumnStyles[tblMain.ColumnStyles.Count - 1].SizeType = SizeType.Absolute;
+          tblMain.ColumnStyles[tblMain.ColumnStyles.Count - 1].Width = 0;
+          tblMain.ColumnStyles[tblMain.ColumnStyles.Count - 2].SizeType = SizeType.Absolute;
+          tblMain.ColumnStyles[tblMain.ColumnStyles.Count - 2].Width = 0;
+        }
 
         //lblConnection.Visible = _proxy != null && _proxy.ConnData != null;
         lblConnection.Visible = true;
@@ -381,7 +410,7 @@ namespace InnovatorAdmin
           this.Size = bounds.Size;
         }
 
-        inputEditor.Focus();
+        inputEditor.Editor.TextArea.Focus();
       }
       catch (Exception ex)
       {
@@ -643,9 +672,9 @@ namespace InnovatorAdmin
       if (string.IsNullOrWhiteSpace(editor.Helper.LineComment))
         return;
 
-      ActOnSelectedLines(editor, start => { 
+      ActOnSelectedLines(editor, start => {
         var length = editor.Helper.LineComment.Length;
-        if (start + length < editor.Document.TextLength 
+        if (start + length < editor.Document.TextLength
           && editor.Document.GetText(start, length) == editor.Helper.LineComment)
         {
           if (start + length + 1 < editor.Document.TextLength
@@ -661,7 +690,7 @@ namespace InnovatorAdmin
       if (editor.Helper == null || editor.ReadOnly) return;
       if (string.IsNullOrWhiteSpace(editor.Helper.LineComment))
         return;
-      
+
       ActOnSelectedLines(editor, start =>
       {
         var length = editor.Helper.LineComment.Length;
@@ -702,7 +731,7 @@ namespace InnovatorAdmin
     private void BlockComment(Editor.FullEditor editor)
     {
       if (editor.Helper == null || editor.ReadOnly) return;
-      if (string.IsNullOrWhiteSpace(editor.Helper.BlockCommentStart) 
+      if (string.IsNullOrWhiteSpace(editor.Helper.BlockCommentStart)
         && !string.IsNullOrWhiteSpace(editor.Helper.LineComment))
       {
         LineComment(editor);
@@ -773,7 +802,7 @@ namespace InnovatorAdmin
           inComment = false;
           i += editor.Helper.BlockCommentEnd.Length - 1;
         }
-        else 
+        else
         {
           output.Append(text[i]);
         }
@@ -959,7 +988,7 @@ namespace InnovatorAdmin
         btnSubmit.Text = "► Run";
         return;
       }
-      if (_proxy.ConnData.Confirm)
+      if (_proxy.ConnData != null && _proxy.ConnData.Confirm)
       {
         if (MessageBox.Show("Do you want to run this query on " + _proxy.ConnData.ConnectionName +"?", "Confirm Execution", MessageBoxButtons.YesNo) == DialogResult.No)
         {
@@ -1009,14 +1038,17 @@ namespace InnovatorAdmin
         pgTableOutput.Text = "Table";
         dgvItems.DataSource = null;
 
-        SnippetManager.Instance.SetLastQueryByConnection(_proxy.ConnData.ConnectionName, new Snippet()
+        if (_proxy.ConnData != null)
         {
-          Action = this.SoapAction,
-          Text = inputEditor.Text
-        });
-        Properties.Settings.Default.LastConnection = _proxy.ConnData.ConnectionName;
-        Properties.Settings.Default.Save();
-        Properties.Settings.Default.Reload();
+          SnippetManager.Instance.SetLastQueryByConnection(_proxy.ConnData.ConnectionName, new Snippet()
+          {
+            Action = this.SoapAction,
+            Text = inputEditor.Text
+          });
+          Properties.Settings.Default.LastConnection = _proxy.ConnData.ConnectionName;
+          Properties.Settings.Default.Save();
+          Properties.Settings.Default.Reload();
+        }
 
         var st = Stopwatch.StartNew();
         _currentQuery = _proxy.Process(cmd, true)
@@ -1078,12 +1110,12 @@ namespace InnovatorAdmin
         lblItems.Text = string.Format("No items found in {0} ms.", milliseconds);
       }
 
-      if (result.PreferredMode == OutputType.Table && result.ItemCount > 0)
+      if (mode == OutputType.Table && result.ItemCount > 0)
       {
         tbcOutputView.SelectedTab = pgTableOutput;
         EnsureDataTable();
       }
-      else if (result.PreferredMode == OutputType.Html)
+      else if (mode == OutputType.Html)
       {
         browser.Navigate(GetReportUri().ToString());
         tbcOutputView.SelectedTab = pgHtml;
@@ -1690,6 +1722,12 @@ namespace InnovatorAdmin
 
     private class HandledDataGridView : DataGridView
     {
+      public HandledDataGridView() : base()
+      {
+        this.BorderStyle = System.Windows.Forms.BorderStyle.None;
+        this.BackgroundColor = Color.White;
+      }
+
       protected override void OnDataError(bool displayErrorDialogIfNoHandler, DataGridViewDataErrorEventArgs e)
       {
         Utils.HandleError(e.Exception);

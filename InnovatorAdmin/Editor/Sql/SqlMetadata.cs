@@ -30,17 +30,34 @@ namespace InnovatorAdmin.Editor
                             when type in ('P') then 'Procedure'
                             when type in ('V') then 'View'
                             else type end type
-                        , case when type in ('IF', 'TF') then 1 else 0 end table_valued
+                        , case when type in ('IF', 'TF') then 1 
+                              when type = 'PK' then 2 else 0 end sub_type
                         , object_id
                         , parent_object_id
-                      FROM sys.objects AS SO", conn)
+                      FROM sys.objects AS SO
+                      UNION ALL
+                      SELECT 
+                          SCHEMA_NAME(o.schema_id) + '.[' + o.name + ']' sch
+                        , ind.name
+                        , 'Index'
+                        , 0 table_valued
+                        , ind.index_id object_id
+                        , ind.object_id parent_object_id
+                      FROM sys.indexes ind
+                      inner join sys.[objects] o
+                      on o.object_id = ind.object_id
+                      WHERE 
+                       ind.is_primary_key = 0 
+                       AND ind.is_unique = 0 
+                       AND ind.is_unique_constraint = 0 
+                       AND o.is_ms_shipped = 0", conn)
         .GetListAsync<SqlObject>(async (r) => SqlObject.Create(
           await r.GetFieldStringAsync(0),
           await r.GetFieldStringAsync(1),
           await r.GetFieldStringAsync(2),
           await r.GetFieldIntAsync(4),
           await r.GetFieldIntAsync(5),
-          (await r.GetFieldIntAsync(3) == 1)
+          (SqlSubType)await r.GetFieldIntAsync(3)
         )).ContinueWith(l =>
         {
           if (l.IsFaulted)
@@ -91,7 +108,7 @@ namespace InnovatorAdmin.Editor
         .Where(o => string.Equals(o.Type, "table", StringComparison.OrdinalIgnoreCase)
           || string.Equals(o.Type, "view", StringComparison.OrdinalIgnoreCase)
           || (string.Equals(o.Type, "function", StringComparison.OrdinalIgnoreCase)
-            && o.IsTableValued))
+            && o.SubType == SqlSubType.TableValuedFunction))
         .Select(o => o.Schema + ".[" + o.Name + "]");
     }
 
@@ -100,7 +117,8 @@ namespace InnovatorAdmin.Editor
     {
       return _objects.Values
         .Where(o => string.Equals(o.Type, "function", StringComparison.OrdinalIgnoreCase)
-            && o.IsTableValued == tableValued)
+            && ((tableValued && o.SubType == SqlSubType.TableValuedFunction)
+              || (!tableValued && o.SubType != SqlSubType.TableValuedFunction)))
         .Select(o => o.Schema + ".[" + o.Name + "]");
     }
 
