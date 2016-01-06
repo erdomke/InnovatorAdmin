@@ -424,7 +424,7 @@ namespace InnovatorAdmin.Editor
                               <name>ItemType</name>
                               <Relationships>
                                 <Item type='Item Report' action='get'>
-    
+
                                 </Item>
                               </Relationships>
                             </Item>", true, false),
@@ -593,7 +593,7 @@ namespace InnovatorAdmin.Editor
         Name = "List " + (itemType.Label ?? itemType.Name),
         Action = "ApplyItem",
         ScriptGetter = () => {
-          var it = _conn.Apply(@"<Item type='ItemType' action='get' select='default_page_size'>
+                    var it = _conn.Apply(@"<Item type='ItemType' action='get' select='default_page_size'>
                                       <name>@0</name>
                                       <Relationships>
                                         <Item type='Property' action='get' select='default_search'>
@@ -608,9 +608,12 @@ namespace InnovatorAdmin.Editor
           builder.Append('>').AppendLine();
           foreach (var prop in it.Relationships())
           {
-            builder.Append("  <").Append(prop.Name).Append(">");
+            if (!string.IsNullOrEmpty(prop.Property("default_search").Value))
+            {
+            builder.Append("  <").Append(prop.KeyedName().Value).Append(">");
             builder.Append(prop.Property("default_search").Value);
-            builder.Append("</").Append(prop.Name).Append(">").AppendLine();
+            builder.Append("</").Append(prop.KeyedName().Value).Append(">").AppendLine();
+           }
           }
           builder.Append("</Item>");
           return builder.ToString();
