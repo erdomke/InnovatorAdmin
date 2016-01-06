@@ -597,7 +597,7 @@ namespace InnovatorAdmin.Editor
                                       <name>@0</name>
                                       <Relationships>
                                         <Item type='Property' action='get' select='default_search'>
-                                          <default_search condition='is not null'></default_search>
+
                                         </Item>
                                       </Relationships>
                                     </Item>", itemType.Name).AssertItem();
