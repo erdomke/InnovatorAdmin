@@ -424,7 +424,7 @@ namespace InnovatorAdmin.Editor
                               <name>ItemType</name>
                               <Relationships>
                                 <Item type='Item Report' action='get'>
-    
+
                                 </Item>
                               </Relationships>
                             </Item>", true, false),
