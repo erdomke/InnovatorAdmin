@@ -158,6 +158,9 @@
     <Compile Include="Controls\Compare.Designer.cs">
       <DependentUpon>Compare.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\DataGrid.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\DropShadow.cs">
       <SubType>Component</SubType>
     </Compile>

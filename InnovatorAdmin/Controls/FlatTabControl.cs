@@ -63,7 +63,8 @@ namespace InnovatorAdmin.Controls
         leftRightImages.Images.AddStrip(updownImage);
       }
 
-      this.DrawBorder = true;
+      this.DrawBorder = false;
+      this.myBackColor = System.Drawing.Color.White;
     }
 
     [DefaultValue(true)]

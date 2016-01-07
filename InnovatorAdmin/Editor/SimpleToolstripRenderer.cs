@@ -87,7 +87,7 @@ namespace InnovatorAdmin
       public override Color ImageMarginRevealedGradientBegin { get { return Color.White; } }
       public override Color ImageMarginRevealedGradientEnd { get { return Color.White; } }
       public override Color ImageMarginRevealedGradientMiddle { get { return Color.White; } }
-      public override Color MenuBorder { get { return borderColor; } }
+      public override Color MenuBorder { get { return Color.FromArgb(240, 240, 240); } }
       public override Color MenuItemBorder { get { return borderColor; } }
       public override Color MenuItemPressedGradientBegin { get { return pressedColor; } }
       public override Color MenuItemPressedGradientEnd { get { return pressedColor; } }

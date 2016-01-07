@@ -11,7 +11,7 @@ using System.Drawing;
 
 namespace InnovatorAdmin
 {
-  public partial class Main : Form, IWizard, IUpdateListener
+  public partial class Main : FormBase, IWizard, IUpdateListener
   {
     private IAsyncConnection _conn;
     private Stack<IWizardStep> _history = new Stack<IWizardStep>();
@@ -19,6 +19,7 @@ namespace InnovatorAdmin
     //private ImportProcessor _import;
     private InstallProcessor _install;
     private bool _updateCheckComplete = false;
+    private SimpleToolstripRenderer _renderer = new SimpleToolstripRenderer();
 
     public IAsyncConnection Connection
     {
@@ -32,12 +33,7 @@ namespace InnovatorAdmin
           _install = new InstallProcessor(_conn);
           if (this.ConnectionInfo.Count() == 1)
           {
-            lblLine.Height = 5;
-            lblLine.BackColor = this.ConnectionInfo.First().Color;
-          }
-          else
-          {
-            lblLine.Height = 1;
+            this.ConnectionColor = this.ConnectionInfo.First().Color;
           }
         }
       }
@@ -46,6 +42,32 @@ namespace InnovatorAdmin
     public ExportProcessor ExportProcessor { get { return _export; } }
     public InstallProcessor InstallProcessor { get { return _install; } }
     public InstallScript InstallScript { get; set; }
+
+    private Color ConnectionColor
+    {
+      get { return tblHeader.BackColor; }
+      set
+      {
+        _renderer.BaseColor = value;
+        tblHeader.BackColor = value;
+
+        picLogo.Image = _renderer.ColorTable.SeparatorDark.GetBrightness() < 0.5
+          ? Properties.Resources.logo_black
+          : Properties.Resources.logo_white;
+
+        pnlLeftTop.BackColor = value;
+        pnlTopLeft.BackColor = value;
+        pnlTop.BackColor = value;
+        pnlTopRight.BackColor = value;
+        pnlRightTop.BackColor = value;
+
+        this.ActiveTextColor = _renderer.ColorTable.SeparatorDark;
+        this.DownBackColor = _renderer.ColorTable.ButtonPressedGradientBegin;
+        this.DownTextColor = _renderer.ColorTable.SeparatorDark;
+        this.HoverBackColor = _renderer.ColorTable.ButtonSelectedGradientBegin;
+        this.HoverTextColor = _renderer.ColorTable.SeparatorDark;
+      }
+    }
 
     public string Message
     {
@@ -66,6 +88,27 @@ namespace InnovatorAdmin
     public Main()
     {
       InitializeComponent();
+
+      this.TitleLabel = lblTitle;
+      this.MaximizeLabel = lblMaximize;
+      this.MinimizeLabel = lblMinimize;
+      this.CloseLabel = lblClose;
+      this.LeftBorderPanel = pnlLeft;
+      this.TopLeftCornerPanel = pnlTopLeft;
+      this.TopLeftPanel = pnlLeftTop;
+      this.TopBorderPanel = pnlTop;
+      this.TopRightCornerPanel = pnlTopRight;
+      this.TopRightPanel = pnlRightTop;
+      this.RightBorderPanel = pnlRight;
+      this.BottomRightCornerPanel = pnlBottomRight;
+      this.BottomBorderPanel = pnlBottom;
+      this.BottomLeftCornerPanel = pnlBottomLeft;
+      this.InitializeTheme();
+
+      _renderer = new SimpleToolstripRenderer();
+      this.ConnectionColor = Color.LightGray;
+      picLogo.MouseDown += SystemLabel_MouseDown;
+      picLogo.MouseUp += SystemLabel_MouseUp;
 
       var assy = Assembly.GetExecutingAssembly().GetName().Version;
       this.lblVersion.Text = "v" + assy.ToString();
@@ -108,12 +151,11 @@ namespace InnovatorAdmin
       var ctrl = step as Control;
       if (ctrl == null) throw new ArgumentException("Each step must be a control.");
 
-      var curr = tblLayout.GetControlFromPosition(0, 3);
-      if (curr != null) tblLayout.Controls.Remove(curr);
+      var curr = tblMain.GetControlFromPosition(1, 3);
+      if (curr != null) tblMain.Controls.Remove(curr);
 
       ctrl.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
-      tblLayout.Controls.Add(ctrl, 0, 3);
-      tblLayout.SetColumnSpan(ctrl, 5);
+      tblMain.Controls.Add(ctrl, 1, 3);
       this.Message = "";
       this.NextLabel = "&Next";
       step.Configure(this);

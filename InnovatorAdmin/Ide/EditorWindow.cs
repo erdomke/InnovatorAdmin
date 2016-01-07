@@ -78,8 +78,8 @@ namespace InnovatorAdmin
     private Color ConnectionColor
     {
       get { return _renderer.BaseColor; }
-      set 
-      { 
+      set
+      {
         _renderer.BaseColor = value;
         tblHeader.BackColor = value;
 
@@ -92,7 +92,7 @@ namespace InnovatorAdmin
         pnlTop.BackColor = value;
         pnlTopRight.BackColor = value;
         pnlRightTop.BackColor = value;
-        
+
         this.ActiveTextColor = _renderer.ColorTable.SeparatorDark;
         this.DownBackColor = _renderer.ColorTable.ButtonPressedGradientBegin;
         this.DownTextColor = _renderer.ColorTable.SeparatorDark;
@@ -565,7 +565,7 @@ namespace InnovatorAdmin
           {
             var pg = new TabPage(tbl.TableName);
             pg.Name = GeneratedPage + i.ToString();
-            var grid = new HandledDataGridView();
+            var grid = new Controls.DataGrid();
             grid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             grid.ContextMenuStrip = this.conTable;
             grid.DataSource = tbl;
@@ -573,7 +573,6 @@ namespace InnovatorAdmin
             grid.Location = new System.Drawing.Point(0, 0);
             grid.Margin = new System.Windows.Forms.Padding(0);
             grid.TabIndex = 0;
-            grid.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgvItems_CellFormatting);
             pg.Controls.Add(grid);
             tbcOutputView.TabPages.Add(pg);
             FormatDataGrid(grid);
@@ -1534,21 +1533,6 @@ namespace InnovatorAdmin
       }
     }
 
-    private void dgvItems_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
-    {
-      try
-      {
-        if (e.Value == e.CellStyle.DataSourceNullValue)
-        {
-          e.CellStyle.BackColor = Color.AntiqueWhite;
-        }
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
 
     private void treeItems_CellRightClick(object sender, BrightIdeasSoftware.CellRightClickEventArgs e)
     {
@@ -1778,20 +1762,6 @@ namespace InnovatorAdmin
         }
       }
       catch (Exception) { }
-    }
-
-    private class HandledDataGridView : DataGridView
-    {
-      public HandledDataGridView() : base()
-      {
-        this.BorderStyle = System.Windows.Forms.BorderStyle.None;
-        this.BackgroundColor = Color.White;
-      }
-
-      protected override void OnDataError(bool displayErrorDialogIfNoHandler, DataGridViewDataErrorEventArgs e)
-      {
-        Utils.HandleError(e.Exception);
-      }
     }
   }
 }

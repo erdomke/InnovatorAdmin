@@ -925,6 +925,47 @@ namespace InnovatorAdmin.Editor
 </AML>"
       },
       new EditorScript() {
+        Name = "New ItemType",
+        Action = "ApplyItem",
+        Script = @"<Item type='ItemType' action='add' typeId='450906E86E304F55A34B3C0D65C097EA'>
+  <name>@0</name>
+  <allow_private_permission>1</allow_private_permission>
+  <enforce_discovery>1</enforce_discovery>
+  <implementation_type>table</implementation_type>
+  <is_relationship>0</is_relationship>
+  <is_versionable>0</is_versionable>
+  <manual_versioning>0</manual_versioning>
+  <revisions keyed_name='Default'>7FE395DD8B9F4E1090756A34B733D75E</revisions>
+  <show_parameters_tab>1</show_parameters_tab>
+  <Relationships>
+    <Item type='TOC Access' action='add' typeId='38C9CE2A4E06401DABF942E1D0224E87'>
+      <related_id>
+        <Item type='Identity' action='get'>
+          <name>World</name>
+        </Item>
+      </related_id>
+      <category>Administration</category>
+    </Item>
+    <Item type='Can Add' action='add' typeId='3A65F41FF1FC42518A702FDA164AF420'>
+      <can_add>1</can_add>
+      <related_id>
+        <Item type='Identity' action='get'>
+          <name>World</name>
+        </Item>
+      </related_id>
+    </Item>
+    <Item type='Allowed Permission' action='add' typeId='DB54505FA3E9419DA3C1E1AFB7A48C1C'>
+      <is_default>1</is_default>
+      <related_id>
+        <Item type='Permission' action='get'>
+          <name>Default Access</name>
+        </Item>
+      </related_id>
+    </Item>
+  </Relationships>
+</Item>"
+      },
+      new EditorScript() {
         Name = "Run a Report",
         Action = "ApplyItem",
         Script = @"<!--
