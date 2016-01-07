@@ -1,6 +1,8 @@
-﻿using System;
+﻿using ICSharpCode.AvalonEdit.Document;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
@@ -36,7 +38,7 @@ namespace InnovatorAdmin.Editor
     }
 
     //[DebuggerStepThrough()]
-    public static XmlState ProcessFragment(string fragment, Func<XmlReader, int, XmlState, bool> processor)
+    public static XmlState ProcessFragment(ITextSource fragment, Func<XmlReader, int, XmlState, bool> processor)
     {
       var lineOffsets = new List<int>() {0};
       var state = XmlState.Other;
@@ -44,12 +46,12 @@ namespace InnovatorAdmin.Editor
       var lastTag = new KeyValuePair<int, int>(0, 0);
       var attrValueQuote = '"';
 
-      for (var i = 0; i < fragment.Length; i++)
+      for (var i = 0; i < fragment.TextLength; i++)
       {
-        switch (fragment[i])
+        switch (fragment.GetCharAt(i))
         {
           case '\r':
-            if (i + 1 < fragment.Length && fragment[i + 1] == '\n') i++;
+            if (i + 1 < fragment.TextLength && fragment.GetCharAt(i + 1) == '\n') i++;
             line++;
             lineOffsets.Add(i + 1);
             if (state == XmlState.Tag) state = XmlState.Attribute;
@@ -63,68 +65,68 @@ namespace InnovatorAdmin.Editor
             switch (state)
             {
               case XmlState.Attribute:
-                if (fragment[i] == '=')
+                if (fragment.GetCharAt(i) == '=')
                 {
                   i++;
-                  if (i < fragment.Length)
-                    attrValueQuote = fragment[i];
+                  if (i < fragment.TextLength)
+                    attrValueQuote = fragment.GetCharAt(i);
                   state = XmlState.AttributeValue;
                 }
-                else if (fragment[i] == '>')
+                else if (fragment.GetCharAt(i) == '>')
                 {
                   state = XmlState.Other;
                 }
                 break;
               case XmlState.AttributeValue:
-                if (fragment[i] == '"' || fragment[i] == '\'')
+                if (fragment.GetCharAt(i) == '"' || fragment.GetCharAt(i) == '\'')
                 {
                   state = XmlState.Tag;
                 }
                 break;
               case XmlState.CData:
-                if (i + 2 < fragment.Length && fragment[i] == ']' && fragment[i + 1] == ']' && fragment[i + 2] == '>')
+                if (i + 2 < fragment.TextLength && fragment.GetCharAt(i) == ']' && fragment.GetCharAt(i + 1) == ']' && fragment.GetCharAt(i + 2) == '>')
                 {
                   i += 2;
                   state = XmlState.Other;
                 }
                 break;
               case XmlState.Comment:
-                if (i + 2 < fragment.Length && fragment[i] == '-' && fragment[i + 1] == '-' && fragment[i + 2] == '>')
+                if (i + 2 < fragment.TextLength && fragment.GetCharAt(i) == '-' && fragment.GetCharAt(i + 1) == '-' && fragment.GetCharAt(i + 2) == '>')
                 {
                   i += 2;
                   state = XmlState.Other;
                 }
                 break;
               case XmlState.Tag:
-                if (char.IsWhiteSpace(fragment[i]))
+                if (char.IsWhiteSpace(fragment.GetCharAt(i)))
                 {
                   state = XmlState.Attribute;
                 }
-                else if (fragment[i] == '>')
+                else if (fragment.GetCharAt(i) == '>')
                 {
                   state = XmlState.Other;
                 }
                 break;
               case XmlState.Other:
-                if (fragment[i] == '<')
+                if (fragment.GetCharAt(i) == '<')
                 {
-                  if (i + 3 < fragment.Length
-                    && fragment[i + 1] == '!'
-                    && fragment[i + 2] == '-'
-                    && fragment[i + 3] == '-')
+                  if (i + 3 < fragment.TextLength
+                    && fragment.GetCharAt(i + 1) == '!'
+                    && fragment.GetCharAt(i + 2) == '-'
+                    && fragment.GetCharAt(i + 3) == '-')
                   {
                     i += 3;
                     state = XmlState.Comment;
                   }
-                  if (i + 8 < fragment.Length
-                    && fragment[i + 1] == '!'
-                    && fragment[i + 2] == '['
-                    && fragment[i + 3] == 'C'
-                    && fragment[i + 4] == 'D'
-                    && fragment[i + 5] == 'A'
-                    && fragment[i + 6] == 'T'
-                    && fragment[i + 7] == 'A'
-                    && fragment[i + 8] == '[')
+                  if (i + 8 < fragment.TextLength
+                    && fragment.GetCharAt(i + 1) == '!'
+                    && fragment.GetCharAt(i + 2) == '['
+                    && fragment.GetCharAt(i + 3) == 'C'
+                    && fragment.GetCharAt(i + 4) == 'D'
+                    && fragment.GetCharAt(i + 5) == 'A'
+                    && fragment.GetCharAt(i + 6) == 'T'
+                    && fragment.GetCharAt(i + 7) == 'A'
+                    && fragment.GetCharAt(i + 8) == '[')
                   {
                     i += 8;
                     state = XmlState.CData;
@@ -143,45 +145,46 @@ namespace InnovatorAdmin.Editor
 
       const string __noName = "___NO_NAME___";
       const string __eof = "{`EOF`}";
+      var suffix = string.Empty;
 
       switch (state)
       {
         case XmlState.Attribute:
-          if (char.IsWhiteSpace(fragment[fragment.Length - 1]))
+          if (char.IsWhiteSpace(fragment.GetCharAt(fragment.TextLength - 1)))
           {
             state = XmlState.AttributeStart;
-            fragment += ">";
+            suffix += ">";
           }
           else
           {
-            fragment += "=\"\">";
+            suffix += "=\"\">";
           }
           break;
         case XmlState.AttributeValue:
-          if (fragment[fragment.Length - 1] == '=')
+          if (fragment.GetCharAt(fragment.TextLength - 1) == '=')
           {
-            fragment += "''>";
+            suffix += "''>";
           }
           else
           {
-            fragment += attrValueQuote.ToString() + ">";
+            suffix += attrValueQuote.ToString() + ">";
           }
           break;
         case XmlState.CData:
-          fragment += "]]>";
+          suffix += "]]>";
           break;
         case XmlState.Comment:
-          fragment += "-->";
+          suffix += "-->";
           break;
         case XmlState.Tag:
-          if (fragment[fragment.Length - 1] == '<') fragment += __noName;
-          fragment += ">";
+          if (fragment.GetCharAt(fragment.TextLength - 1) == '<') suffix += __noName;
+          suffix += ">";
           break;
       }
-      fragment += "<!--" + __eof + "-->";
+      suffix += "<!--" + __eof + "-->";
 
       var settings = new XmlReaderSettings() { ConformanceLevel = ConformanceLevel.Fragment };
-      var textReader = new System.IO.StringReader(fragment);
+      var textReader = new AugmentedReader(fragment.CreateReader(), suffix);
       var reader = XmlReader.Create(textReader, settings);
       var lineInfo = reader as IXmlLineInfo;
 
@@ -214,6 +217,73 @@ namespace InnovatorAdmin.Editor
       }
 
       return state;
+    }
+
+    private class AugmentedReader : TextReader
+    {
+      private string _suffix;
+      private int _i = 0;
+      private TextReader _reader;
+      private bool _readerAtEnd;
+
+      public AugmentedReader(TextReader reader, string suffix)
+      {
+        _reader = reader;
+        _suffix = suffix;
+      }
+
+      public override int Peek()
+      {
+        if (!_readerAtEnd)
+        {
+          var result = _reader.Peek();
+          if (result >= 0)
+            return result;
+        }
+
+        if (_i >= _suffix.Length)
+          return -1;
+        return _suffix[_i];
+      }
+      public override int Read()
+      {
+        if (!_readerAtEnd)
+        {
+          var result = _reader.Read();
+          if (result >= 0)
+            return result;
+          _readerAtEnd = true;
+        }
+
+        if (_i >= _suffix.Length)
+          return -1;
+        _i++;
+        return _suffix[_i - 1];
+      }
+      public override int Read(char[] buffer, int index, int count)
+      {
+        if (!_readerAtEnd)
+        {
+          var result = _reader.Read(buffer, index, count);
+          if (result > 0)
+            return result;
+          _readerAtEnd = true;
+        }
+
+        var toCopy = Math.Min(count, _suffix.Length - _i);
+        if (toCopy <= 0)
+          return 0;
+        _suffix.CopyTo(_i, buffer, index, toCopy);
+        _i += toCopy;
+        return toCopy;
+      }
+
+      protected override void Dispose(bool disposing)
+      {
+        base.Dispose(disposing);
+        if (disposing)
+          _reader.Dispose();
+      }
     }
   }
 }

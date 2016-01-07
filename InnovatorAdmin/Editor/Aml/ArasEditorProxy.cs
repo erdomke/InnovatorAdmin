@@ -597,7 +597,6 @@ namespace InnovatorAdmin.Editor
                                       <name>@0</name>
                                       <Relationships>
                                         <Item type='Property' action='get' select='default_search'>
-                                          <default_search condition='is not null'></default_search>
                                         </Item>
                                       </Relationships>
                                     </Item>", itemType.Name).AssertItem();
@@ -606,7 +605,7 @@ namespace InnovatorAdmin.Editor
           if (it.Property("default_page_size").HasValue())
             builder.AppendFormat(" page='1' pagesize='{0}'", it.Property("default_page_size").Value);
           builder.Append('>').AppendLine();
-          foreach (var prop in it.Relationships())
+          foreach (var prop in it.Relationships().Where(p => p.Property("default_search").HasValue()))
           {
             builder.Append("  <").Append(prop.Name).Append(">");
             builder.Append(prop.Property("default_search").Value);
@@ -1182,5 +1181,11 @@ order by 1
       }
     };
     #endregion
+
+
+    public IEditorHelper GetOutputHelper()
+    {
+      return _helper;
+    }
   }
 }

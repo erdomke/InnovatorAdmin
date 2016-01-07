@@ -108,17 +108,9 @@ namespace InnovatorAdmin.Editor
         _foldingStrategy.UpdateFoldings(_foldingManager, this.editor.Document);
     }
 
-    private void CollapseAll_Click(object sender, RoutedEventArgs e)
-    {
-      CollapseAll();
-    }
     private bool IsAmlFolding(FoldingSection f)
     {
       return f.Title.StartsWith("<Item") || f.Title.StartsWith("<Properties ") || f.Title.StartsWith("<Relationships");
-    }
-    private void ExpandAll_Click(object sender, RoutedEventArgs e)
-    {
-      ExpandAll();
     }
 
     private void CopyId_Click(object sender, RoutedEventArgs e)
@@ -146,7 +138,7 @@ namespace InnovatorAdmin.Editor
       }
       else
       {
-        amlQuery = this.Helper.GetCurrentQuery(doc.Text, caret.Offset);
+        amlQuery = this.Helper.GetCurrentQuery(doc, caret.Offset);
         var loc = doc.GetLocation(doc.IndexOf(amlQuery, 0, doc.TextLength, StringComparison.Ordinal));
         reader = new System.IO.StringReader(amlQuery);
         settings.LineNumberOffset = loc.Line;
@@ -212,20 +204,6 @@ namespace InnovatorAdmin.Editor
       }
 
       return null;
-    }
-
-    private void OpenWith_Click(object sender, RoutedEventArgs e)
-    {
-      try
-      {
-        var file = io.Path.Combine(io.Path.GetTempPath(), io.Path.GetRandomFileName() + ".xml");
-        io.File.WriteAllText(file, this.editor.Text);
-        ShellHelper.OpenAs(this.Host.FindForm().Handle, file);
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
     }
 
     public void Dispose()

@@ -200,7 +200,6 @@ namespace InnovatorAdmin
         var doc = TransformResults(ref result);
         NormalizeClassStructure(doc);
         FixFormFieldsPointingToSystemProperties(doc);
-        RemoveKeyedNameAttributes(doc.DocumentElement);
         ExpandSystemIdentities(doc);
         RemoveVersionableRelIds(doc);
         //TODO: Replace references to poly item lists
@@ -208,6 +207,7 @@ namespace InnovatorAdmin
         Export(script, doc, warnings, checkDependencies);
         CleanUpSystemProps(doc.DocumentElement.Elements(), items.ToDictionary(i => i), true);
         ConvertFloatProps(doc);
+        RemoveKeyedNameAttributes(doc.DocumentElement);
 
         if (string.IsNullOrWhiteSpace(script.Title))
         {

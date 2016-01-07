@@ -39,13 +39,7 @@
       this.txtName = new System.Windows.Forms.TextBox();
       this.lblName = new System.Windows.Forms.Label();
       this.toolTipManager = new System.Windows.Forms.ToolTip(this.components);
-      this.btnMoveDown = new InnovatorAdmin.Controls.FlatButton();
-      this.btnNew = new InnovatorAdmin.Controls.FlatButton();
-      this.btnMoveUp = new InnovatorAdmin.Controls.FlatButton();
-      this.btnCopy = new InnovatorAdmin.Controls.FlatButton();
-      this.btnDelete = new InnovatorAdmin.Controls.FlatButton();
       this.tlpControls = new System.Windows.Forms.TableLayoutPanel();
-      this.lstConnections = new InnovatorAdmin.MultiselectListBox();
       this.btnColor = new System.Windows.Forms.Button();
       this.lblMessage = new System.Windows.Forms.Label();
       this.cmbDatabase = new System.Windows.Forms.ComboBox();
@@ -54,9 +48,15 @@
       this.label2 = new System.Windows.Forms.Label();
       this.cmbAuth = new System.Windows.Forms.ComboBox();
       this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+      this.cb_confirm = new System.Windows.Forms.CheckBox();
+      this.lstConnections = new InnovatorAdmin.MultiselectListBox();
+      this.btnMoveDown = new InnovatorAdmin.Controls.FlatButton();
+      this.btnNew = new InnovatorAdmin.Controls.FlatButton();
+      this.btnMoveUp = new InnovatorAdmin.Controls.FlatButton();
+      this.btnCopy = new InnovatorAdmin.Controls.FlatButton();
+      this.btnDelete = new InnovatorAdmin.Controls.FlatButton();
       this.exploreButton = new InnovatorAdmin.Controls.FlatButton();
       this.btnTest = new InnovatorAdmin.Controls.FlatButton();
-      this.cb_confirm = new System.Windows.Forms.CheckBox();
       this.tlpControls.SuspendLayout();
       this.flowLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
@@ -65,7 +65,7 @@
       // 
       this.lblDatabase.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblDatabase.AutoSize = true;
-      this.lblDatabase.Location = new System.Drawing.Point(406, 117);
+      this.lblDatabase.Location = new System.Drawing.Point(406, 115);
       this.lblDatabase.Name = "lblDatabase";
       this.lblDatabase.Size = new System.Drawing.Size(56, 13);
       this.lblDatabase.TabIndex = 26;
@@ -82,7 +82,7 @@
       this.txtPassword.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtPassword.Name = "txtPassword";
       this.txtPassword.PasswordChar = '*';
-      this.txtPassword.Size = new System.Drawing.Size(132, 22);
+      this.txtPassword.Size = new System.Drawing.Size(132, 20);
       this.txtPassword.TabIndex = 7;
       this.txtPassword.WordWrap = false;
       // 
@@ -90,7 +90,7 @@
       // 
       this.lblPassword.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblPassword.AutoSize = true;
-      this.lblPassword.Location = new System.Drawing.Point(406, 89);
+      this.lblPassword.Location = new System.Drawing.Point(406, 88);
       this.lblPassword.Name = "lblPassword";
       this.lblPassword.Size = new System.Drawing.Size(56, 13);
       this.lblPassword.TabIndex = 24;
@@ -105,14 +105,14 @@
       this.txtUser.MaxLength = 32;
       this.txtUser.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtUser.Name = "txtUser";
-      this.txtUser.Size = new System.Drawing.Size(121, 22);
+      this.txtUser.Size = new System.Drawing.Size(121, 20);
       this.txtUser.TabIndex = 6;
       // 
       // lblUser
       // 
       this.lblUser.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblUser.AutoSize = true;
-      this.lblUser.Location = new System.Drawing.Point(198, 89);
+      this.lblUser.Location = new System.Drawing.Point(198, 88);
       this.lblUser.Name = "lblUser";
       this.lblUser.Size = new System.Drawing.Size(32, 13);
       this.lblUser.TabIndex = 22;
@@ -163,6 +163,176 @@
       this.lblName.TabIndex = 32;
       this.lblName.Text = "Name:";
       this.lblName.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+      // 
+      // tlpControls
+      // 
+      this.tlpControls.ColumnCount = 11;
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 10F));
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tlpControls.Controls.Add(this.lstConnections, 0, 0);
+      this.tlpControls.Controls.Add(this.btnMoveDown, 5, 6);
+      this.tlpControls.Controls.Add(this.txtName, 7, 0);
+      this.tlpControls.Controls.Add(this.btnNew, 0, 6);
+      this.tlpControls.Controls.Add(this.lblName, 6, 0);
+      this.tlpControls.Controls.Add(this.btnMoveUp, 4, 6);
+      this.tlpControls.Controls.Add(this.txtUrl, 7, 1);
+      this.tlpControls.Controls.Add(this.btnCopy, 1, 6);
+      this.tlpControls.Controls.Add(this.btnDelete, 2, 6);
+      this.tlpControls.Controls.Add(this.lblUrl, 6, 1);
+      this.tlpControls.Controls.Add(this.btnColor, 10, 0);
+      this.tlpControls.Controls.Add(this.lblUser, 6, 3);
+      this.tlpControls.Controls.Add(this.lblMessage, 6, 5);
+      this.tlpControls.Controls.Add(this.txtUser, 7, 3);
+      this.tlpControls.Controls.Add(this.lblPassword, 8, 3);
+      this.tlpControls.Controls.Add(this.txtPassword, 9, 3);
+      this.tlpControls.Controls.Add(this.cmbDatabase, 9, 4);
+      this.tlpControls.Controls.Add(this.lblDatabase, 8, 4);
+      this.tlpControls.Controls.Add(this.label1, 6, 4);
+      this.tlpControls.Controls.Add(this.cmbType, 7, 4);
+      this.tlpControls.Controls.Add(this.label2, 6, 2);
+      this.tlpControls.Controls.Add(this.cmbAuth, 7, 2);
+      this.tlpControls.Controls.Add(this.flowLayoutPanel1, 8, 5);
+      this.tlpControls.Controls.Add(this.cb_confirm, 9, 2);
+      this.tlpControls.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.tlpControls.Location = new System.Drawing.Point(0, 0);
+      this.tlpControls.Name = "tlpControls";
+      this.tlpControls.RowCount = 7;
+      this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+      this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tlpControls.Size = new System.Drawing.Size(603, 207);
+      this.tlpControls.TabIndex = 41;
+      // 
+      // btnColor
+      // 
+      this.btnColor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnColor.Location = new System.Drawing.Point(570, 3);
+      this.btnColor.Name = "btnColor";
+      this.btnColor.Size = new System.Drawing.Size(29, 23);
+      this.btnColor.TabIndex = 2;
+      this.btnColor.UseVisualStyleBackColor = true;
+      this.btnColor.Click += new System.EventHandler(this.btnColor_Click);
+      // 
+      // lblMessage
+      // 
+      this.lblMessage.AutoSize = true;
+      this.tlpControls.SetColumnSpan(this.lblMessage, 2);
+      this.lblMessage.Location = new System.Drawing.Point(201, 141);
+      this.lblMessage.Margin = new System.Windows.Forms.Padding(6);
+      this.lblMessage.Name = "lblMessage";
+      this.lblMessage.Size = new System.Drawing.Size(0, 13);
+      this.lblMessage.TabIndex = 41;
+      // 
+      // cmbDatabase
+      // 
+      this.cmbDatabase.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+      this.tlpControls.SetColumnSpan(this.cmbDatabase, 2);
+      this.cmbDatabase.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.cmbDatabase.FormattingEnabled = true;
+      this.cmbDatabase.Location = new System.Drawing.Point(468, 111);
+      this.cmbDatabase.Name = "cmbDatabase";
+      this.cmbDatabase.Size = new System.Drawing.Size(132, 21);
+      this.cmbDatabase.TabIndex = 9;
+      this.cmbDatabase.DropDown += new System.EventHandler(this.cmbDatabase_DropDown);
+      // 
+      // label1
+      // 
+      this.label1.Anchor = System.Windows.Forms.AnchorStyles.Left;
+      this.label1.AutoSize = true;
+      this.label1.Location = new System.Drawing.Point(198, 115);
+      this.label1.Name = "label1";
+      this.label1.Size = new System.Drawing.Size(34, 13);
+      this.label1.TabIndex = 43;
+      this.label1.Text = "Type:";
+      // 
+      // cmbType
+      // 
+      this.cmbType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+      this.cmbType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.cmbType.FormattingEnabled = true;
+      this.cmbType.Location = new System.Drawing.Point(279, 111);
+      this.cmbType.Name = "cmbType";
+      this.cmbType.Size = new System.Drawing.Size(121, 21);
+      this.cmbType.TabIndex = 8;
+      // 
+      // label2
+      // 
+      this.label2.Anchor = System.Windows.Forms.AnchorStyles.Left;
+      this.label2.AutoSize = true;
+      this.label2.Location = new System.Drawing.Point(198, 62);
+      this.label2.Name = "label2";
+      this.label2.Size = new System.Drawing.Size(75, 13);
+      this.label2.TabIndex = 44;
+      this.label2.Text = "Authentication";
+      // 
+      // cmbAuth
+      // 
+      this.cmbAuth.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+      this.cmbAuth.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.cmbAuth.FormattingEnabled = true;
+      this.cmbAuth.Location = new System.Drawing.Point(279, 58);
+      this.cmbAuth.Name = "cmbAuth";
+      this.cmbAuth.Size = new System.Drawing.Size(121, 21);
+      this.cmbAuth.TabIndex = 4;
+      this.cmbAuth.SelectedIndexChanged += new System.EventHandler(this.cmbAuth_SelectedIndexChanged);
+      // 
+      // flowLayoutPanel1
+      // 
+      this.flowLayoutPanel1.Anchor = System.Windows.Forms.AnchorStyles.Right;
+      this.flowLayoutPanel1.AutoSize = true;
+      this.tlpControls.SetColumnSpan(this.flowLayoutPanel1, 3);
+      this.flowLayoutPanel1.Controls.Add(this.exploreButton);
+      this.flowLayoutPanel1.Controls.Add(this.btnTest);
+      this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
+      this.flowLayoutPanel1.Location = new System.Drawing.Point(474, 135);
+      this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
+      this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+      this.flowLayoutPanel1.Size = new System.Drawing.Size(129, 37);
+      this.flowLayoutPanel1.TabIndex = 45;
+      // 
+      // cb_confirm
+      // 
+      this.cb_confirm.AutoSize = true;
+      this.cb_confirm.Location = new System.Drawing.Point(467, 57);
+      this.cb_confirm.Margin = new System.Windows.Forms.Padding(2);
+      this.cb_confirm.Name = "cb_confirm";
+      this.cb_confirm.Size = new System.Drawing.Size(61, 17);
+      this.cb_confirm.TabIndex = 5;
+      this.cb_confirm.Text = "Confirm";
+      this.cb_confirm.UseVisualStyleBackColor = true;
+      this.cb_confirm.CheckedChanged += new System.EventHandler(this.cb_confirm_CheckedChanged);
+      // 
+      // lstConnections
+      // 
+      this.lstConnections.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.tlpControls.SetColumnSpan(this.lstConnections, 6);
+      this.lstConnections.DataSource = null;
+      this.lstConnections.DisplayMember = "";
+      this.lstConnections.Location = new System.Drawing.Point(4, 4);
+      this.lstConnections.Margin = new System.Windows.Forms.Padding(4);
+      this.lstConnections.Multiselect = false;
+      this.lstConnections.Name = "lstConnections";
+      this.tlpControls.SetRowSpan(this.lstConnections, 6);
+      this.lstConnections.Size = new System.Drawing.Size(187, 165);
+      this.lstConnections.TabIndex = 0;
+      this.lstConnections.ValueMember = "";
+      this.lstConnections.SelectionChanged += new System.EventHandler(this.lstConnections_SelectionChanged);
+      this.lstConnections.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstConnections_MouseDoubleClick);
       // 
       // btnMoveDown
       // 
@@ -269,164 +439,6 @@
       this.btnDelete.UseVisualStyleBackColor = true;
       this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
       // 
-      // tlpControls
-      // 
-      this.tlpControls.ColumnCount = 11;
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 10F));
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this.tlpControls.Controls.Add(this.lstConnections, 0, 0);
-      this.tlpControls.Controls.Add(this.btnMoveDown, 5, 6);
-      this.tlpControls.Controls.Add(this.txtName, 7, 0);
-      this.tlpControls.Controls.Add(this.btnNew, 0, 6);
-      this.tlpControls.Controls.Add(this.lblName, 6, 0);
-      this.tlpControls.Controls.Add(this.btnMoveUp, 4, 6);
-      this.tlpControls.Controls.Add(this.txtUrl, 7, 1);
-      this.tlpControls.Controls.Add(this.btnCopy, 1, 6);
-      this.tlpControls.Controls.Add(this.btnDelete, 2, 6);
-      this.tlpControls.Controls.Add(this.lblUrl, 6, 1);
-      this.tlpControls.Controls.Add(this.btnColor, 10, 0);
-      this.tlpControls.Controls.Add(this.lblUser, 6, 3);
-      this.tlpControls.Controls.Add(this.lblMessage, 6, 5);
-      this.tlpControls.Controls.Add(this.txtUser, 7, 3);
-      this.tlpControls.Controls.Add(this.lblPassword, 8, 3);
-      this.tlpControls.Controls.Add(this.txtPassword, 9, 3);
-      this.tlpControls.Controls.Add(this.cmbDatabase, 9, 4);
-      this.tlpControls.Controls.Add(this.lblDatabase, 8, 4);
-      this.tlpControls.Controls.Add(this.label1, 6, 4);
-      this.tlpControls.Controls.Add(this.cmbType, 7, 4);
-      this.tlpControls.Controls.Add(this.label2, 6, 2);
-      this.tlpControls.Controls.Add(this.cmbAuth, 7, 2);
-      this.tlpControls.Controls.Add(this.flowLayoutPanel1, 8, 5);
-      this.tlpControls.Controls.Add(this.cb_confirm, 9, 2);
-      this.tlpControls.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.tlpControls.Location = new System.Drawing.Point(0, 0);
-      this.tlpControls.Name = "tlpControls";
-      this.tlpControls.RowCount = 7;
-      this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-      this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tlpControls.Size = new System.Drawing.Size(603, 207);
-      this.tlpControls.TabIndex = 41;
-      // 
-      // lstConnections
-      // 
-      this.lstConnections.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-      this.tlpControls.SetColumnSpan(this.lstConnections, 6);
-      this.lstConnections.DataSource = null;
-      this.lstConnections.DisplayMember = "";
-      this.lstConnections.Location = new System.Drawing.Point(4, 4);
-      this.lstConnections.Margin = new System.Windows.Forms.Padding(4);
-      this.lstConnections.Multiselect = false;
-      this.lstConnections.Name = "lstConnections";
-      this.tlpControls.SetRowSpan(this.lstConnections, 6);
-      this.lstConnections.Size = new System.Drawing.Size(187, 165);
-      this.lstConnections.TabIndex = 0;
-      this.lstConnections.ValueMember = "";
-      this.lstConnections.SelectionChanged += new System.EventHandler(this.lstConnections_SelectionChanged);
-      this.lstConnections.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstConnections_MouseDoubleClick);
-      // 
-      // btnColor
-      // 
-      this.btnColor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-      this.btnColor.Location = new System.Drawing.Point(570, 3);
-      this.btnColor.Name = "btnColor";
-      this.btnColor.Size = new System.Drawing.Size(29, 23);
-      this.btnColor.TabIndex = 2;
-      this.btnColor.UseVisualStyleBackColor = true;
-      this.btnColor.Click += new System.EventHandler(this.btnColor_Click);
-      // 
-      // lblMessage
-      // 
-      this.lblMessage.AutoSize = true;
-      this.tlpControls.SetColumnSpan(this.lblMessage, 2);
-      this.lblMessage.Location = new System.Drawing.Point(201, 143);
-      this.lblMessage.Margin = new System.Windows.Forms.Padding(6);
-      this.lblMessage.Name = "lblMessage";
-      this.lblMessage.Size = new System.Drawing.Size(0, 13);
-      this.lblMessage.TabIndex = 41;
-      // 
-      // cmbDatabase
-      // 
-      this.cmbDatabase.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-      this.tlpControls.SetColumnSpan(this.cmbDatabase, 2);
-      this.cmbDatabase.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-      this.cmbDatabase.FormattingEnabled = true;
-      this.cmbDatabase.Location = new System.Drawing.Point(468, 113);
-      this.cmbDatabase.Name = "cmbDatabase";
-      this.cmbDatabase.Size = new System.Drawing.Size(132, 21);
-      this.cmbDatabase.TabIndex = 9;
-      this.cmbDatabase.DropDown += new System.EventHandler(this.cmbDatabase_DropDown);
-      // 
-      // label1
-      // 
-      this.label1.Anchor = System.Windows.Forms.AnchorStyles.Left;
-      this.label1.AutoSize = true;
-      this.label1.Location = new System.Drawing.Point(198, 117);
-      this.label1.Name = "label1";
-      this.label1.Size = new System.Drawing.Size(34, 13);
-      this.label1.TabIndex = 43;
-      this.label1.Text = "Type:";
-      // 
-      // cmbType
-      // 
-      this.cmbType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-      this.cmbType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-      this.cmbType.FormattingEnabled = true;
-      this.cmbType.Location = new System.Drawing.Point(279, 113);
-      this.cmbType.Name = "cmbType";
-      this.cmbType.Size = new System.Drawing.Size(121, 21);
-      this.cmbType.TabIndex = 8;
-      // 
-      // label2
-      // 
-      this.label2.Anchor = System.Windows.Forms.AnchorStyles.Left;
-      this.label2.AutoSize = true;
-      this.label2.Location = new System.Drawing.Point(198, 62);
-      this.label2.Name = "label2";
-      this.label2.Size = new System.Drawing.Size(75, 13);
-      this.label2.TabIndex = 44;
-      this.label2.Text = "Authentication";
-      // 
-      // cmbAuth
-      // 
-      this.cmbAuth.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-      this.cmbAuth.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-      this.cmbAuth.FormattingEnabled = true;
-      this.cmbAuth.Location = new System.Drawing.Point(279, 58);
-      this.cmbAuth.Name = "cmbAuth";
-      this.cmbAuth.Size = new System.Drawing.Size(121, 21);
-      this.cmbAuth.TabIndex = 4;
-      this.cmbAuth.SelectedIndexChanged += new System.EventHandler(this.cmbAuth_SelectedIndexChanged);
-      // 
-      // flowLayoutPanel1
-      // 
-      this.flowLayoutPanel1.Anchor = System.Windows.Forms.AnchorStyles.Right;
-      this.flowLayoutPanel1.AutoSize = true;
-      this.tlpControls.SetColumnSpan(this.flowLayoutPanel1, 3);
-      this.flowLayoutPanel1.Controls.Add(this.exploreButton);
-      this.flowLayoutPanel1.Controls.Add(this.btnTest);
-      this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-      this.flowLayoutPanel1.Location = new System.Drawing.Point(474, 137);
-      this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
-      this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-      this.flowLayoutPanel1.Size = new System.Drawing.Size(129, 36);
-      this.flowLayoutPanel1.TabIndex = 45;
-      // 
       // exploreButton
       // 
       this.exploreButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -467,18 +479,6 @@
       this.btnTest.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnTest.UseVisualStyleBackColor = true;
       this.btnTest.Click += new System.EventHandler(this.btnTest_Click);
-      // 
-      // cb_confirm
-      // 
-      this.cb_confirm.AutoSize = true;
-      this.cb_confirm.Location = new System.Drawing.Point(467, 57);
-      this.cb_confirm.Margin = new System.Windows.Forms.Padding(2);
-      this.cb_confirm.Name = "cb_confirm";
-      this.cb_confirm.Size = new System.Drawing.Size(61, 17);
-      this.cb_confirm.TabIndex = 5;
-      this.cb_confirm.Text = "Confirm";
-      this.cb_confirm.UseVisualStyleBackColor = true;
-      this.cb_confirm.CheckedChanged += new System.EventHandler(this.cb_confirm_CheckedChanged);
       // 
       // ConnectionEditor
       // 

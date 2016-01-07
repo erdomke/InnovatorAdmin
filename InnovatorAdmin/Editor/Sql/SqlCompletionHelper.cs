@@ -1,4 +1,5 @@
 ﻿using ICSharpCode.AvalonEdit.CodeCompletion;
+using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using Innovator.Client;
 using System;
@@ -23,14 +24,14 @@ namespace InnovatorAdmin.Editor
       _provider = provider;
     }
 
-    public IPromise<CompletionContext> Completions(string prefix, string all, int caret, string termCharacter
+    public IPromise<CompletionContext> Completions(string prefix, ITextSource all, int caret, string termCharacter
       , bool tableNameColumnPrefix = false)
     {
       try
       {
         _tableNameColumnPrefix = tableNameColumnPrefix;
-        var lastIndex = string.IsNullOrEmpty(termCharacter) ? -1 : all.IndexOf(termCharacter, caret);
-        var sql = prefix + (lastIndex < 0 ? all.Substring(caret) : all.Substring(caret, lastIndex - caret));
+        var lastIndex = string.IsNullOrEmpty(termCharacter) ? -1 : all.IndexOf(termCharacter, caret, all.TextLength - caret, StringComparison.Ordinal);
+        var sql = prefix + (lastIndex < 0 ? all.GetText(caret, all.TextLength - caret) : all.GetText(caret, lastIndex - caret));
         if (sql.StartsWith("(") && sql.EndsWith(")"))
           sql = sql.Substring(1, sql.Length - 2);
         var parseTree = new SqlTokenizer(sql).Parse();

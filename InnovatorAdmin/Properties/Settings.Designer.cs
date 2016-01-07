@@ -85,7 +85,7 @@ namespace InnovatorAdmin.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool EditorWindowPanelCollapsed {
             get {
                 return ((bool)(this["EditorWindowPanelCollapsed"]));

@@ -13,6 +13,7 @@ namespace InnovatorAdmin.Editor
   public class SqlEditorProxy : IEditorProxy
   {
     private Editor.SqlEditorHelper _helper;
+    private Editor.PlainTextEditorHelper _outputHelper;
     private SqlConnection _conn;
     private StringBuilder _builder = new StringBuilder();
 
@@ -28,6 +29,7 @@ namespace InnovatorAdmin.Editor
       _conn = GetConnection(connData);
       this.ConnData = connData;
       _helper = new Editor.SqlEditorHelper(_conn);
+      _outputHelper = new Editor.PlainTextEditorHelper();
       _conn.InfoMessage += _conn_InfoMessage;
     }
 
@@ -288,6 +290,11 @@ WHERE ind.index_id = {0} and ind.object_id = {1};", c.Id, c.ParentId)
           Script = obj.Definition
         };
       }
+    }
+    
+    public IEditorHelper GetOutputHelper()
+    {
+      return _outputHelper;
     }
   }
 }

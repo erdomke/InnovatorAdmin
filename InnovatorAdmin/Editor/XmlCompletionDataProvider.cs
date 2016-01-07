@@ -135,9 +135,14 @@ namespace InnovatorAdmin.Editor
       }
     }
 
-    public override string GetCurrentQuery(string text, int offset)
+    public override string GetCurrentQuery(ITextSource text, int offset)
     {
-      return text;
+      return text.Text;
+    }
+
+    public IEnumerable<IEditorScript> GetScripts(ITextSource text, int offset)
+    {
+      return Enumerable.Empty<IEditorScript>();
     }
 
     /// <summary>

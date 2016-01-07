@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
@@ -25,6 +26,17 @@ namespace InnovatorAdmin.Editor
     private ExtendedEditor _extEditor;
     private List<IDisposable> _itemsToDispose = new List<IDisposable>();
     private bool _singleLine;
+    private ContextMenuStrip conMenu;
+    private IContainer components;
+    private ToolStripMenuItem mniCut;
+    private ToolStripMenuItem mniCopy;
+    private ToolStripMenuItem mniPaste;
+    private ToolStripMenuItem mniCollapseAll;
+    private ToolStripMenuItem mniExpandAll;
+    private ToolStripSeparator toolStripSeparator2;
+    private ToolStripSeparator toolStripSeparator1;
+    private ToolStripMenuItem mniOpenWith;
+    private ToolStripSeparator toolStripSeparator3;
     private Placeholder _placeholder;
 
     public event EventHandler<RunRequestedEventArgs> RunRequested;
@@ -117,6 +129,8 @@ namespace InnovatorAdmin.Editor
 
     public EditorWinForm()
     {
+      InitializeComponent();
+
       var host = new ElementHost();
       host.Size = new Size(200, 100);
       host.Location = new Point(100, 100);
@@ -132,6 +146,7 @@ namespace InnovatorAdmin.Editor
       editor.Options.EnableRectangularSelection = true;
       editor.Options.IndentationSize = 2;
       editor.ShowLineNumbers = true;
+      editor.TextArea.MouseRightButtonDown += TextArea_MouseRightButtonDown;
       editor.TextArea.PreviewKeyDown += TextArea_PreviewKeyDown;
       editor.TextArea.TextEntering += TextArea_TextEntering;
       editor.TextArea.TextEntered += TextArea_TextEntered;
@@ -148,6 +163,35 @@ namespace InnovatorAdmin.Editor
       editor.TextArea.IndentationStrategy = new ICSharpCode.AvalonEdit.Indentation.DefaultIndentationStrategy();
 
       this.Controls.Add(host);
+
+      BindToolStripItem(mniCut, System.Windows.Input.ApplicationCommands.Cut);
+      BindToolStripItem(mniCopy, System.Windows.Input.ApplicationCommands.Copy);
+      BindToolStripItem(mniPaste, System.Windows.Input.ApplicationCommands.Paste);
+    }
+
+    void TextArea_MouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+      var pos = e.GetPosition(Editor.TextArea);
+      var pt = new Point((int)pos.X, (int)pos.Y);
+      conMenu.Show(this.PointToScreen(pt));
+      while (conMenu.Items.Count > 9)
+        conMenu.Items.RemoveAt(conMenu.Items.Count - 1);
+
+      foreach (var script in Helper.GetScripts(Document, Editor.CaretOffset))
+      {
+        conMenu.Items.Add(new ToolStripMenuItem(script.Name, null, (s, ev) =>
+        {
+          var query = script.Script; // Trigger execution
+          if (!string.IsNullOrEmpty(script.Action) && !string.IsNullOrEmpty(query))
+          {
+            var ide = this.FindForm() as EditorWindow;
+            if (ide != null)
+              ide.Execute(script);
+          }
+        }));
+      }
+
+      OnMouseDown(new MouseEventArgs(System.Windows.Forms.MouseButtons.Right, e.ClickCount, pt.X, pt.Y, 0));
     }
 
     private class Placeholder : IBackgroundRenderer
@@ -289,7 +333,7 @@ namespace InnovatorAdmin.Editor
     {
       if (Editor.TextArea.Selection.IsEmpty)
       {
-        var query = Helper.GetCurrentQuery(Editor.Text, Editor.CaretOffset);
+        var query = Helper.GetCurrentQuery(Editor.Document, Editor.CaretOffset);
         return string.IsNullOrEmpty(query) ? Editor.Text : query;
       }
       var doc = Editor.Document;
@@ -672,6 +716,128 @@ namespace InnovatorAdmin.Editor
         {
           base.OnKeyDown(e);
         }
+      }
+    }
+
+    private void InitializeComponent()
+    {
+      this.components = new System.ComponentModel.Container();
+      this.conMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+      this.mniCut = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniCopy = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniPaste = new System.Windows.Forms.ToolStripMenuItem();
+      this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+      this.mniCollapseAll = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniExpandAll = new System.Windows.Forms.ToolStripMenuItem();
+      this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+      this.mniOpenWith = new System.Windows.Forms.ToolStripMenuItem();
+      this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+      this.conMenu.SuspendLayout();
+      this.SuspendLayout();
+      // 
+      // conMenu
+      // 
+      this.conMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mniCut,
+            this.mniCopy,
+            this.mniPaste,
+            this.toolStripSeparator2,
+            this.mniCollapseAll,
+            this.mniExpandAll,
+            this.toolStripSeparator1,
+            this.mniOpenWith,
+            this.toolStripSeparator3});
+      this.conMenu.Name = "contextMenuStrip1";
+      this.conMenu.Size = new System.Drawing.Size(145, 154);
+      // 
+      // mniCut
+      // 
+      this.mniCut.Name = "mniCut";
+      this.mniCut.ShortcutKeyDisplayString = "Ctrl+X";
+      this.mniCut.Size = new System.Drawing.Size(144, 22);
+      this.mniCut.Text = "Cut";
+      // 
+      // mniCopy
+      // 
+      this.mniCopy.Name = "mniCopy";
+      this.mniCopy.ShortcutKeyDisplayString = "Ctrl+C";
+      this.mniCopy.Size = new System.Drawing.Size(144, 22);
+      this.mniCopy.Text = "Copy";
+      // 
+      // mniPaste
+      // 
+      this.mniPaste.Name = "mniPaste";
+      this.mniPaste.ShortcutKeyDisplayString = "Ctrl+V";
+      this.mniPaste.Size = new System.Drawing.Size(144, 22);
+      this.mniPaste.Text = "Paste";
+      // 
+      // toolStripSeparator2
+      // 
+      this.toolStripSeparator2.Name = "toolStripSeparator2";
+      this.toolStripSeparator2.Size = new System.Drawing.Size(141, 6);
+      // 
+      // mniCollapseAll
+      // 
+      this.mniCollapseAll.Name = "mniCollapseAll";
+      this.mniCollapseAll.Size = new System.Drawing.Size(144, 22);
+      this.mniCollapseAll.Text = "Collapse All";
+      this.mniCollapseAll.Click += new System.EventHandler(this.mniCollapseAll_Click);
+      // 
+      // mniExpandAll
+      // 
+      this.mniExpandAll.Name = "mniExpandAll";
+      this.mniExpandAll.Size = new System.Drawing.Size(144, 22);
+      this.mniExpandAll.Text = "Expand All";
+      this.mniExpandAll.Click += new System.EventHandler(this.mniExpandAll_Click);
+      // 
+      // toolStripSeparator1
+      // 
+      this.toolStripSeparator1.Name = "toolStripSeparator1";
+      this.toolStripSeparator1.Size = new System.Drawing.Size(141, 6);
+      // 
+      // mniOpenWith
+      // 
+      this.mniOpenWith.Name = "mniOpenWith";
+      this.mniOpenWith.Size = new System.Drawing.Size(144, 22);
+      this.mniOpenWith.Text = "Open With...";
+      this.mniOpenWith.Click += new System.EventHandler(this.mniOpenWith_Click);
+      // 
+      // toolStripSeparator3
+      // 
+      this.toolStripSeparator3.Name = "toolStripSeparator3";
+      this.toolStripSeparator3.Size = new System.Drawing.Size(141, 6);
+      // 
+      // EditorWinForm
+      // 
+      this.Name = "EditorWinForm";
+      this.conMenu.ResumeLayout(false);
+      this.ResumeLayout(false);
+
+    }
+
+    private void mniCollapseAll_Click(object sender, EventArgs e)
+    {
+      try { _extEditor.CollapseAll(); }
+      catch (Exception ex) { Utils.HandleError(ex); }
+    }
+
+    private void mniExpandAll_Click(object sender, EventArgs e)
+    {
+      try { _extEditor.ExpandAll(); }
+      catch (Exception ex) { Utils.HandleError(ex); }
+    }
+
+    private void mniOpenWith_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        var file = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".xml");
+        File.WriteAllText(file, Editor.Text);
+        ShellHelper.OpenAs(this.FindForm().Handle, file);
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
       }
     }
   }

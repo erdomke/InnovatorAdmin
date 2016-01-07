@@ -8,7 +8,7 @@
              d:DesignHeight="300" d:DesignWidth="300">
 
   <avalonedit:TextEditor x:Name="editor" HorizontalAlignment="Stretch" Margin="0,0,0,0" VerticalAlignment="Stretch">
-    <avalonedit:TextEditor.ContextMenu>
+    <!--<avalonedit:TextEditor.ContextMenu>
       <ContextMenu>
         <MenuItem Command="Cut" />
         <MenuItem Command="Copy" />
@@ -22,7 +22,7 @@
         <Separator />
         <MenuItem Header="Open With..." Click="OpenWith_Click" />
       </ContextMenu>
-    </avalonedit:TextEditor.ContextMenu>
+    </avalonedit:TextEditor.ContextMenu>-->
   </avalonedit:TextEditor>
 
 </UserControl>

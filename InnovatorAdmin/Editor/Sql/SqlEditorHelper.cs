@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Innovator.Client;
 using System.Threading;
+using ICSharpCode.AvalonEdit.Document;
 
 namespace InnovatorAdmin.Editor
 {
@@ -58,8 +59,9 @@ namespace InnovatorAdmin.Editor
       }
     }
 
-    public string GetCurrentQuery(string text, int offset)
+    public string GetCurrentQuery(ITextSource source, int offset)
     {
+      var text = source.Text;
       var parseTree = new SqlTokenizer(text).Parse();
       if (!parseTree.Any())
         return text;
@@ -75,6 +77,10 @@ namespace InnovatorAdmin.Editor
       return text.Substring(start, end - start);
     }
 
+    public IEnumerable<IEditorScript> GetScripts(ITextSource text, int offset)
+    {
+      return Enumerable.Empty<IEditorScript>();
+    }
 
     private SqlLiteral LastLiteral(ISqlGroupNode group)
     {
@@ -126,7 +132,7 @@ namespace InnovatorAdmin.Editor
 
       var text = control.Editor.Text;
 
-      return _sql.Completions(text.Substring(0, caret), text, caret, null)
+      return _sql.Completions(text.Substring(0, caret), control.Document, caret, null)
         .UiPromise(control)
         .Convert(data =>
         {

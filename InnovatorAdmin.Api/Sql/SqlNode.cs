@@ -8,7 +8,7 @@ namespace InnovatorAdmin
 {
   public class SqlNode
   {
-    public int StartOffset { get; set; }
+    public virtual int StartOffset { get; set; }
     public SqlType Type { get; set; }
     public SqlNode Parent { get; set; }
 

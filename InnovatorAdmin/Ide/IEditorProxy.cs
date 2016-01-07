@@ -17,6 +17,7 @@ namespace InnovatorAdmin
     IEditorProxy Clone();
     IEnumerable<string> GetActions();
     IEditorHelper GetHelper();
+    IEditorHelper GetOutputHelper();
     ICommand NewCommand();
     IPromise<IResultObject> Process(ICommand request, bool async);
     IPromise<IEnumerable<IEditorTreeNode>> GetNodes();

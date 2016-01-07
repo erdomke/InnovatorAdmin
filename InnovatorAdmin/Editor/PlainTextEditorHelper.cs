@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ICSharpCode.AvalonEdit.Document;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,9 +29,9 @@ namespace InnovatorAdmin.Editor
       // Do nothing
     }
 
-    public virtual string GetCurrentQuery(string text, int offset)
+    public virtual string GetCurrentQuery(ITextSource text, int offset)
     {
-      return text;
+      return text.Text;
     }
 
     public virtual Innovator.Client.IPromise<CompletionContext> ShowCompletions(EditorWinForm control)
@@ -61,6 +62,11 @@ namespace InnovatorAdmin.Editor
     public virtual string BlockCommentEnd
     {
       get { return string.Empty; }
+    }
+
+    public IEnumerable<IEditorScript> GetScripts(ITextSource text, int offset)
+    {
+      return Enumerable.Empty<IEditorScript>();
     }
   }
 }

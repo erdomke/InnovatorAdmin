@@ -54,7 +54,7 @@ namespace InnovatorAdmin.Editor
               });
             break;
           case ">":
-            var endTag = this.LastOpenTag(control.Editor.Text.Substring(0, control.Editor.CaretOffset));
+            var endTag = this.LastOpenTag(control.Document.CreateSnapshot(0, control.Editor.CaretOffset));
             if (!string.IsNullOrEmpty(endTag))
             {
               var insert = "</" + endTag + ">";
@@ -100,7 +100,7 @@ namespace InnovatorAdmin.Editor
       }
       else
       {
-        return this.GetCompletions(control.Editor.Text, control.Editor.CaretOffset, this.SoapAction)
+        return this.GetCompletions(control.Document, control.Editor.CaretOffset, this.SoapAction)
           .UiPromise(control)
           .Convert(data => {
             if (length != control.Editor.Document.TextLength
@@ -127,12 +127,7 @@ namespace InnovatorAdmin.Editor
       }
 
     }
-
-    public override string GetCurrentQuery(string text, int offset)
-    {
-      return this.GetQuery(text, offset);
-    }
-
+    
     public override IEnumerable<string> GetParameterNames(string query)
     {
       var paramNames = new List<string>();

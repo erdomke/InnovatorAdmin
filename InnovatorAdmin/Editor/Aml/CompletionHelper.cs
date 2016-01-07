@@ -10,15 +10,15 @@ using System.Xml;
 using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Media;
+using ICSharpCode.AvalonEdit.Document;
 
 namespace InnovatorAdmin.Editor
 {
   public partial class AmlEditorHelper : ISqlMetadataProvider
   {
-    protected IAsyncConnection _conn;
     private ArasMetadataProvider _metadata;
     protected SqlCompletionHelper _sql;
-    
+
     private string GetType(XmlReader reader)
     {
       var type = reader.GetAttribute("type");
@@ -32,10 +32,10 @@ namespace InnovatorAdmin.Editor
       return null;
     }
 
-    public IPromise<CompletionContext> GetCompletions(string xml, int caret, string soapAction)
+    public IPromise<CompletionContext> GetCompletions(ITextSource xml, int caret, string soapAction)
     {
       //var overlap = 0;
-      if (string.IsNullOrEmpty(xml)) return Promises.Resolved<CompletionContext>(new CompletionContext());
+      if (xml.TextLength < 1) return Promises.Resolved<CompletionContext>(new CompletionContext());
 
       var path = new List<AmlNode>();
       var existingAttributes = new HashSet<string>();
@@ -44,7 +44,7 @@ namespace InnovatorAdmin.Editor
       string value = null;
       bool cdata = false;
 
-      var state = XmlUtils.ProcessFragment(xml.Substring(0, caret), (r, o, st) =>
+      var state = XmlUtils.ProcessFragment(xml.CreateSnapshot(0, caret), (r, o, st) =>
       {
         switch (r.NodeType)
         {
@@ -82,7 +82,7 @@ namespace InnovatorAdmin.Editor
         return true;
       });
 
-      if (caret > 0 && state == XmlState.Tag && (xml[caret - 1] == '"' || xml[caret - 1] == '\''))
+      if (caret > 0 && state == XmlState.Tag && (xml.GetCharAt(caret - 1) == '"' || xml.GetCharAt(caret - 1) == '\''))
         return Promises.Resolved<CompletionContext>(new CompletionContext() { IsXmlTag = true });
 
       IPromise<IEnumerable<ICompletionData>> items = null;
@@ -346,8 +346,8 @@ namespace InnovatorAdmin.Editor
                   if (!string.IsNullOrEmpty(path.Last().Type)
                     && _metadata.ItemTypeByName(path.Last().Type, out itemType))
                   {
-                    return _sql.Completions("select * from innovator.[" + itemType.Name.Replace(' ', '_') 
-                      + "] where " + value, xml, caret, xml[caret - value.Length - 1].ToString(), true);
+                    return _sql.Completions("select * from innovator.[" + itemType.Name.Replace(' ', '_')
+                      + "] where " + value, xml, caret, xml.GetCharAt(caret - value.Length - 1).ToString(), true);
                   }
                   break;
               }
@@ -851,14 +851,14 @@ namespace InnovatorAdmin.Editor
     }
 
 
-    public string GetQuery(string xml, int offset)
+    public override string GetCurrentQuery(ITextSource text, int offset)
     {
       var start = -1;
       var end = -1;
       var depth = 0;
       string result = null;
 
-      XmlUtils.ProcessFragment(xml, (r, o, st) =>
+      XmlUtils.ProcessFragment(text, (r, o, st) =>
       {
         switch (r.NodeType)
         {
@@ -871,10 +871,10 @@ namespace InnovatorAdmin.Editor
 
             if (r.IsEmptyElement)
             {
-              end = xml.IndexOf("/>", o) + 2;
+              end = text.IndexOf("/>", o, text.TextLength - o, StringComparison.Ordinal) + 2;
               if (depth == 0 && offset >= start && offset < end)
               {
-                result = xml.Substring(start, end - start);
+                result = text.GetText(start, end - start);
                 return false;
               }
             }
@@ -887,10 +887,10 @@ namespace InnovatorAdmin.Editor
             depth--;
             if (depth == 0)
             {
-              end = xml.IndexOf('>', o) + 1;
+              end = text.IndexOf('>', o, text.TextLength - o) + 1;
               if (offset >= start && offset < end)
               {
-                result = xml.Substring(start, end - start);
+                result = text.GetText(start, end - start);
                 return false;
               }
             }
@@ -909,7 +909,7 @@ namespace InnovatorAdmin.Editor
       _isInitialized = true;
     }
 
-    public string LastOpenTag(string xml)
+    public string LastOpenTag(ITextSource xml)
     {
       bool isOpenTag = false;
       var path = new List<AmlNode>();

@@ -231,12 +231,27 @@ namespace InnovatorAdmin
     public static bool CallWithTimeout(int timeout, Action method)
     {
       var wait = new System.Threading.ManualResetEvent(false);
+      Exception exception = null;
       method.BeginInvoke(iar =>
       {
-        ((Action)iar.AsyncState).EndInvoke(iar);
+        try
+        {
+          ((Action)iar.AsyncState).EndInvoke(iar);
+        }
+        catch (Exception ex)
+        {
+          exception = ex;
+        }
         wait.Set();
       }, method);
-      return wait.WaitOne(timeout);
+      
+      if (wait.WaitOne(timeout))
+      {
+        if (exception != null)
+          throw exception;
+        return true;
+      }
+      return false;
     }
   }
 }

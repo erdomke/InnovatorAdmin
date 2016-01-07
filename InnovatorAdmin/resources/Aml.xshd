@@ -1,13 +1,13 @@
 <SyntaxDefinition name="XML" extensions=".xml;.aml" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
-  <Color foreground="Green" name="Comment" exampleText="&lt;!-- comment --&gt;" />
-  <Color foreground="Blue" name="CData" exampleText="&lt;![CDATA[data]]&gt;" />
-  <Color foreground="Blue" name="DocType" exampleText="&lt;!DOCTYPE rootElement&gt;" />
-  <Color foreground="Blue" name="XmlDeclaration" exampleText='&lt;?xml version="1.0"?&gt;' />
-  <Color foreground="DarkMagenta" name="XmlTag" exampleText='&lt;tag attribute="value" /&gt;' />
-  <Color foreground="Red" name="AttributeName" exampleText='&lt;tag attribute="value" /&gt;' />
-  <Color foreground="Blue" name="AttributeValue" exampleText='&lt;tag attribute="value" /&gt;' />
-  <Color foreground="Teal" name="Entity" exampleText="index.aspx?a=1&amp;amp;b=2" />
-  <Color foreground="Olive" name="BrokenEntity" exampleText="index.aspx?a=1&amp;b=2" />
+  <Color name="Comment" foreground="Green" exampleText="&lt;!-- comment --&gt;" />
+  <Color name="CData" foreground="Blue" exampleText="&lt;![CDATA[data]]&gt;" />
+  <Color name="DocType" foreground="Blue" exampleText="&lt;!DOCTYPE rootElement&gt;" />
+  <Color name="XmlDeclaration" foreground="Blue" exampleText='&lt;?xml version="1.0"?&gt;' />
+  <Color name="XmlTag" foreground="DarkMagenta" exampleText='&lt;tag attribute="value" /&gt;' />
+  <Color name="AttributeName" foreground="Red" exampleText='&lt;tag attribute="value" /&gt;' />
+  <Color name="AttributeValue" foreground="Blue" exampleText='&lt;tag attribute="value" /&gt;' />
+  <Color name="Entity" foreground="Teal" exampleText="index.aspx?a=1&amp;amp;b=2" />
+  <Color name="BrokenEntity" foreground="Olive" exampleText="index.aspx?a=1&amp;b=2" />
 
   <!-- SQL Colors -->
   <Color name="Digits"     foreground="DarkBlue" exampleText="3.1415f"/>
@@ -34,6 +34,30 @@
   <Color name="CommentMarkerSetTodo"       foreground="Red"     fontWeight="bold" />
   <Color name="CommentMarkerSetHackUndone" foreground="#E0E000" fontWeight="bold" />
   
+  <Color name="Char" foreground="Magenta" exampleText="char linefeed = '\n';"/>
+	<Color name="Preprocessor" foreground="Green" exampleText="#region Title" />
+	<Color name="ValueTypeKeywords" fontWeight="bold" foreground="Red" exampleText="bool b = true;" />
+	<Color name="ReferenceTypeKeywords" foreground="Red" exampleText="object o;" />
+	<Color name="ThisOrBaseReference" fontWeight="bold" exampleText="this.Do(); base.Do();"/>
+	<Color name="NullOrValueKeywords" fontWeight="bold" exampleText="if (value == null)"/>
+	<Color name="GotoKeywords" foreground="Navy" exampleText="continue; return null;"/>
+	<Color name="ContextKeywords" foreground="Navy" exampleText="var a = from x in y select z;"/>
+	<Color name="ExceptionKeywords" fontWeight="bold" foreground="Teal" exampleText="try {} catch {} finally {}"/>
+	<Color name="CheckedKeyword" fontWeight="bold" foreground="DarkGray" exampleText="checked {}"/>
+	<Color name="UnsafeKeywords" foreground="Olive" exampleText="unsafe { fixed (..) {} }"/>
+	<Color name="OperatorKeywords" fontWeight="bold" foreground="Pink" exampleText="public static implicit operator..."/>
+	<Color name="ParameterModifiers" fontWeight="bold" foreground="DeepPink" exampleText="(ref int a, params int[] b)"/>
+	<Color name="Modifiers" foreground="Brown" exampleText="static readonly int a;"/>
+	<Color name="Visibility" fontWeight="bold" foreground="Blue" exampleText="public override void ToString();"/>
+	<Color name="NamespaceKeywords" fontWeight="bold" foreground="Green" exampleText="namespace A.B { using System; }"/>
+	<Color name="GetSetAddRemove" foreground="SaddleBrown" exampleText="int Prop { get; set; }"/>
+	<Color name="TrueFalse" fontWeight="bold" foreground="DarkCyan" exampleText="b = false; a = true;" />
+	<Color name="TypeKeywords" fontWeight="bold" foreground="DarkCyan" exampleText="if (x is int) { a = x as int; type = typeof(int); size = sizeof(int); c = new object(); }"/>
+  
+  <Color name="Operators" foreground="#FF8515EA" exampleText="If a OrElse b Then"/>
+  <Color name="Constants" foreground="Blue" exampleText="b = False" />
+  <Color name="FunctionKeywords" foreground="Blue" exampleText="CInt(a)" />
+	  
   <RuleSet>
     <Span ruleSet="SqlScriptSet" multiline="true">
       <Begin color="XmlTag">&lt;sql&gt;</Begin>
@@ -42,6 +66,10 @@
     <Span ruleSet="SqlScriptSet" multiline="true">
       <Begin color="XmlTag">&lt;sqlserver_body&gt;</Begin>
       <End color="XmlTag">&lt;/sqlserver_body&gt;</End>
+    </Span>
+    <Span ruleSet="NetCode" multiline="true">
+      <Begin color="XmlTag">&lt;method_code&gt;</Begin>
+      <End color="XmlTag">&lt;/method_code&gt;</End>
     </Span>
     <Span ruleSet="SqlScriptSet" multiline="true">
       <Begin color="XmlTag">&lt;[^&gt;]+\s+condition=['"]in['"][^&gt;]*&gt;</Begin>
@@ -99,6 +127,391 @@
     </Keywords>
   </RuleSet>
 
+  
+  <RuleSet name="EntitySet">
+    <Rule color="Entity">
+      &amp;
+      [\w\d\#]+
+      ;
+    </Rule>
+
+    <Rule color="BrokenEntity">
+      &amp;
+      [\w\d\#]*
+      #missing ;
+    </Rule>
+  
+    <Rule color="Variable">@([\w]+)</Rule>
+  </RuleSet>
+    
+  <RuleSet name="NetCode" ignoreCase="true">
+    <Span color="Preprocessor">
+			<Begin>\#</Begin>
+			<RuleSet name="PreprocessorSet">
+				<Span> <!-- preprocessor directives that allows comments -->
+					<Begin fontWeight="bold">
+						(define|undef|if|elif|else|endif|line)\b
+					</Begin>
+					<RuleSet>
+						<Span color="Comment" ruleSet="CommentMarkerSet">
+							<Begin>//</Begin>
+						</Span>
+					</RuleSet>
+				</Span>
+				<Span> <!-- preprocessor directives that don't allow comments -->
+					<Begin fontWeight="bold">
+						(region|endregion|error|warning|pragma)\b
+					</Begin>
+				</Span>
+			</RuleSet>
+		</Span>
+		
+		<Span color="Comment">
+			<Begin color="XmlDoc/DocComment">///(?!/)</Begin>
+			<RuleSet>
+				<Import ruleSet="XmlDoc/DocCommentSet"/>
+				<Import ruleSet="CommentMarkerSet"/>
+			</RuleSet>
+		</Span>
+		
+		<Span color="Comment" ruleSet="CommentMarkerSet">
+			<Begin>//</Begin>
+		</Span>
+		
+		<Span color="Comment" ruleSet="CommentMarkerSet" multiline="true">
+			<Begin>/\*</Begin>
+			<End>\*/</End>
+		</Span>
+    
+    <Span color="Comment">
+			<Begin>\bREM\b</Begin>
+		</Span>
+		
+		<Span color="String">
+			<Begin>"</Begin>
+			<End>"</End>
+			<RuleSet>
+				<!-- span for escape sequences -->
+				<Span begin="\\" end="."/>
+        <!-- Deal with VB strings -->
+        <Span begin='""' end=""/>
+			</RuleSet>
+		</Span>
+		
+		<Span color="Char">
+			<Begin>'</Begin>
+			<End>'|(?:&lt;/method_code&gt;)</End>
+			<RuleSet>
+				<!-- span for escape sequences -->
+				<Span begin="\\" end="."/>
+			</RuleSet>
+		</Span>
+		
+		<Span color="String" multiline="true">
+			<Begin>@"</Begin>
+			<End>"</End>
+			<RuleSet>
+				<!-- span for escape sequences -->
+				<Span begin='""' end=""/>
+			</RuleSet>
+		</Span>
+		
+		<!-- don't highlight "@int" as keyword -->
+		<Rule>
+			@[\w\d_]+
+		</Rule>
+		
+		<Keywords color="ThisOrBaseReference">
+			<Word>this</Word>
+			<Word>base</Word>
+		</Keywords>
+		
+		<Keywords color="TypeKeywords">
+			<Word>as</Word>
+			<Word>is</Word>
+			<Word>new</Word>
+			<Word>sizeof</Word>
+			<Word>typeof</Word>
+			<Word>stackalloc</Word>
+		</Keywords>
+		
+		<Keywords color="TrueFalse">
+			<Word>true</Word>
+			<Word>false</Word>
+		</Keywords>
+		
+		<Keywords color="Keyword">
+			<Word>else</Word>
+			<Word>if</Word>
+			<Word>switch</Word>
+			<Word>case</Word>
+			<Word>default</Word>
+			<Word>do</Word>
+			<Word>for</Word>
+			<Word>foreach</Word>
+			<Word>in</Word>
+			<Word>while</Word>
+			<Word>lock</Word>
+    
+      <Word>AddHandler</Word>
+			<Word>Alias</Word>
+			<Word>ByRef</Word>
+			<Word>ByVal</Word>
+			<Word>Call</Word>
+			<Word>Declare</Word>
+			<Word>Default</Word>
+			<Word>Dim</Word>
+			<Word>Each</Word>
+			<Word>ElseIf</Word>
+			<Word>End</Word>
+			<Word>EndIf</Word>
+			<Word>Erase</Word>
+			<Word>Error</Word>
+			<Word>Exit</Word>
+			<Word>Friend</Word>
+			<Word>Function</Word>
+			<Word>Get</Word>
+			<Word>Global</Word>
+			<Word>GoSub</Word>
+			<Word>GoTo</Word>
+			<Word>Handles</Word>
+			<Word>Implements</Word>
+			<Word>Imports</Word>
+			<Word>Inherits</Word>
+			<Word>Let</Word>
+			<Word>Lib</Word>
+			<Word>Loop</Word>
+			<Word>Module</Word>
+			<Word>MustInherit</Word>
+			<Word>MustOverride</Word>
+			<Word>Narrowing</Word>
+			<Word>Next</Word>
+			<Word>NotInheritable</Word>
+			<Word>NotOverridable</Word>
+			<Word>Of</Word>
+			<Word>On</Word>
+			<Word>Option</Word>
+			<Word>Optional</Word>
+			<Word>Overloads</Word>
+			<Word>Overridable</Word>
+			<Word>ParamArray</Word>
+			<Word>Partial</Word>
+			<Word>RaiseEvent</Word>
+			<Word>ReadOnly</Word>
+			<Word>ReDim</Word>
+			<Word>RemoveHandler</Word>
+			<Word>Resume</Word>
+			<Word>Set</Word>
+			<Word>Shadows</Word>
+			<Word>Shared</Word>
+			<Word>Step</Word>
+			<Word>Stop</Word>
+			<Word>Structure</Word>
+			<Word>Sub</Word>
+			<Word>SyncLock</Word>
+			<Word>Then</Word>
+			<Word>Throw</Word>
+			<Word>To</Word>
+			<Word>Wend</Word>
+			<Word>When</Word>
+			<Word>Widening</Word>
+			<Word>With</Word>
+			<Word>WithEvents</Word>
+			<Word>WriteOnly</Word>
+		</Keywords>
+		
+		<Keywords color="GotoKeywords">
+			<Word>break</Word>
+			<Word>continue</Word>
+			<Word>goto</Word>
+			<Word>return</Word>
+		</Keywords>
+		
+		<Keywords color="ContextKeywords">
+			<Word>yield</Word>
+			<Word>partial</Word>
+			<Word>global</Word>
+			<Word>where</Word>
+			<Word>select</Word>
+			<Word>group</Word>
+			<Word>by</Word>
+			<Word>into</Word>
+			<Word>from</Word>
+			<Word>ascending</Word>
+			<Word>descending</Word>
+			<Word>orderby</Word>
+			<Word>let</Word>
+			<Word>join</Word>
+			<Word>on</Word>
+			<Word>equals</Word>
+			<Word>var</Word>
+			<Word>dynamic</Word>
+			<Word>await</Word>
+		</Keywords>
+		
+		<Keywords color="ExceptionKeywords">
+			<Word>try</Word>
+			<Word>throw</Word>
+			<Word>catch</Word>
+			<Word>finally</Word>
+		</Keywords>
+		
+		<Keywords color="CheckedKeyword">
+			<Word>checked</Word>
+			<Word>unchecked</Word>
+		</Keywords>
+		
+		<Keywords color="UnsafeKeywords">
+			<Word>fixed</Word>
+			<Word>unsafe</Word>
+		</Keywords>
+		
+		<Keywords color="ValueTypeKeywords">
+			<Word>bool</Word>
+			<Word>byte</Word>
+			<Word>char</Word>
+			<Word>decimal</Word>
+			<Word>double</Word>
+			<Word>enum</Word>
+			<Word>float</Word>
+			<Word>int</Word>
+			<Word>long</Word>
+			<Word>sbyte</Word>
+			<Word>short</Word>
+			<Word>struct</Word>
+			<Word>uint</Word>
+			<Word>ushort</Word>
+			<Word>ulong</Word>
+      <Word>Boolean</Word>
+      <Word>Date</Word>
+      <Word>Variant</Word>
+		</Keywords>
+		
+		<Keywords color="ReferenceTypeKeywords">
+			<Word>class</Word>
+			<Word>interface</Word>
+			<Word>delegate</Word>
+			<Word>object</Word>
+			<Word>string</Word>
+			<Word>void</Word>
+		</Keywords>
+		
+		<Keywords color="OperatorKeywords">
+			<Word>explicit</Word>
+			<Word>implicit</Word>
+			<Word>operator</Word>
+		</Keywords>
+		
+		<Keywords color="ParameterModifiers">
+			<Word>params</Word>
+			<Word>ref</Word>
+			<Word>out</Word>
+		</Keywords>
+		
+		<Keywords color="Modifiers">
+			<Word>abstract</Word>
+			<Word>const</Word>
+			<Word>event</Word>
+			<Word>extern</Word>
+			<Word>override</Word>
+			<Word>readonly</Word>
+			<Word>sealed</Word>
+			<Word>static</Word>
+			<Word>virtual</Word>
+			<Word>volatile</Word>
+			<Word>async</Word>
+		</Keywords>
+		
+		<Keywords color="Visibility">
+			<Word>public</Word>
+			<Word>protected</Word>
+			<Word>private</Word>
+			<Word>internal</Word>
+		</Keywords>
+		
+		<Keywords color="NamespaceKeywords">
+			<Word>namespace</Word>
+			<Word>using</Word>
+		</Keywords>
+		
+		<Keywords color="GetSetAddRemove">
+			<Word>get</Word>
+			<Word>set</Word>
+			<Word>add</Word>
+			<Word>remove</Word>
+		</Keywords>
+		
+		<Keywords color="NullOrValueKeywords">
+			<Word>null</Word>
+			<Word>value</Word>
+		</Keywords>
+    
+    <Keywords color="Operators">
+			<Word>AddressOf</Word>
+			<Word>And</Word>
+			<Word>AndAlso</Word>
+			<Word>IsNot</Word>
+			<Word>Like</Word>
+			<Word>Mod</Word>
+			<Word>Not</Word>
+			<Word>Or</Word>
+			<Word>OrElse</Word>
+			<Word>Xor</Word>
+		</Keywords>
+		<Keywords color="Constants">
+			<Word>Me</Word>
+			<Word>MyBase</Word>
+			<Word>MyClass</Word>
+			<Word>Nothing</Word>
+		</Keywords>
+		<Keywords color="FunctionKeywords">
+			<Word>CBool</Word>
+			<Word>CByte</Word>
+			<Word>CChar</Word>
+			<Word>CDate</Word>
+			<Word>CDbl</Word>
+			<Word>CDec</Word>
+			<Word>CInt</Word>
+			<Word>CLng</Word>
+			<Word>CObj</Word>
+			<Word>CSByte</Word>
+			<Word>CShort</Word>
+			<Word>CSng</Word>
+			<Word>CStr</Word>
+			<Word>CType</Word>
+			<Word>CUInt</Word>
+			<Word>CULng</Word>
+			<Word>CUShort</Word>
+			<Word>DirectCast</Word>
+			<Word>GetType</Word>
+			<Word>GetXmlNamespace</Word>
+			<Word>IIf</Word>
+			<Word>TryCast</Word>
+			<Word>TypeOf</Word>
+		</Keywords>
+		
+		<!-- Mark previous rule-->
+		<Rule color="MethodCall">
+		\b
+		[\d\w_]+  # an identifier
+		(?=\s*\() # followed by (
+		</Rule>
+		
+		<!-- Digits -->
+		<Rule color="Digits">
+			\b0[xX][0-9a-fA-F]+  # hex number
+		|	
+			(	\b\d+(\.[0-9]+)?   #number with optional floating point
+			|	\.[0-9]+           #or just starting with floating point
+			)
+			([eE][+-]?[0-9]+)? # optional exponent
+		</Rule>
+		
+		<Rule color="Punctuation">
+			[?,.;()\[\]{}+\-/%*&lt;&gt;^+~!|&amp;]+
+		</Rule>
+  </RuleSet>
+    
   <RuleSet name="SqlScriptSet" ignoreCase="true">
     <Span color="String" multiline="true" >
       <Begin>'</Begin>
@@ -453,21 +866,5 @@
       ([eE][+-]?[0-9]+)? # optional exponent
     </Rule>
 
-  </RuleSet>
-  
-  <RuleSet name="EntitySet">
-    <Rule color="Entity">
-      &amp;
-      [\w\d\#]+
-      ;
-    </Rule>
-
-    <Rule color="BrokenEntity">
-      &amp;
-      [\w\d\#]*
-      #missing ;
-    </Rule>
-  
-    <Rule color="Variable">@([\w]+)</Rule>
   </RuleSet>
 </SyntaxDefinition>

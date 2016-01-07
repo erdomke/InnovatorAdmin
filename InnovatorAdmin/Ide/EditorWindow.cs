@@ -20,7 +20,7 @@ using System.Xml;
 
 namespace InnovatorAdmin
 {
-  public partial class EditorWindow : Form, IUpdateListener
+  public partial class EditorWindow : FormBase, IUpdateListener
   {
     private const string GeneratedPage = "__GeneratedPage_";
 
@@ -44,6 +44,7 @@ namespace InnovatorAdmin
     private string _uid;
     private bool _updateCheckComplete = false;
     private IHttpService _webService = new DefaultHttpService();
+    private SimpleToolstripRenderer _renderer;
 
     public bool AllowRun
     {
@@ -74,9 +75,62 @@ namespace InnovatorAdmin
     }
     public string Uid { get { return _uid; } }
 
+    private Color ConnectionColor
+    {
+      get { return _renderer.BaseColor; }
+      set 
+      { 
+        _renderer.BaseColor = value;
+        tblHeader.BackColor = value;
+
+        picLogo.Image = _renderer.ColorTable.SeparatorDark.GetBrightness() < 0.5
+          ? Properties.Resources.logo_black
+          : Properties.Resources.logo_white;
+
+        pnlLeftTop.BackColor = value;
+        pnlTopLeft.BackColor = value;
+        pnlTop.BackColor = value;
+        pnlTopRight.BackColor = value;
+        pnlRightTop.BackColor = value;
+        
+        this.ActiveTextColor = _renderer.ColorTable.SeparatorDark;
+        this.DownBackColor = _renderer.ColorTable.ButtonPressedGradientBegin;
+        this.DownTextColor = _renderer.ColorTable.SeparatorDark;
+        this.HoverBackColor = _renderer.ColorTable.ButtonSelectedGradientBegin;
+        this.HoverTextColor = _renderer.ColorTable.SeparatorDark;
+      }
+    }
+
     public EditorWindow()
     {
       InitializeComponent();
+
+      this.TitleLabel = lblTitle;
+      this.MaximizeLabel = lblMaximize;
+      this.MinimizeLabel = lblMinimize;
+      this.CloseLabel = lblClose;
+      this.LeftBorderPanel = pnlLeft;
+      this.TopLeftCornerPanel = pnlTopLeft;
+      this.TopLeftPanel = pnlLeftTop;
+      this.TopBorderPanel = pnlTop;
+      this.TopRightCornerPanel = pnlTopRight;
+      this.TopRightPanel = pnlRightTop;
+      this.RightBorderPanel = pnlRight;
+      this.BottomRightCornerPanel = pnlBottomRight;
+      this.BottomBorderPanel = pnlBottom;
+      this.BottomLeftCornerPanel = pnlBottomLeft;
+      this.InitializeTheme();
+
+      _renderer = new SimpleToolstripRenderer();
+      menuStrip.Renderer = _renderer;
+      lblConnection.Font = FontAwesome.Font;
+      lblConnection.Text = FontAwesome.Fa_cloud.ToString();
+      lblSoapAction.Font = FontAwesome.Font;
+      lblSoapAction.Text = FontAwesome.Fa_bolt.ToString();
+      this.ConnectionColor = Color.LightGray;
+      btnPanelToggle.BackColor = Color.White;
+      picLogo.MouseDown += SystemLabel_MouseDown;
+      picLogo.MouseUp += SystemLabel_MouseUp;
 
       this.KeyPreview = true;
       this.PreferredMode = OutputType.Any;
@@ -85,7 +139,7 @@ namespace InnovatorAdmin
       var assy = Assembly.GetExecutingAssembly().GetName().Version;
       this.lblVersion.Text = "v" + assy.ToString();
 
-      menuStrip.Renderer = new SimpleToolstripRenderer();
+      tbcOutputView.TabsVisible = false;
 
       btnSoapAction.Visible = false;
       lblSoapAction.Visible = false;
@@ -286,14 +340,14 @@ namespace InnovatorAdmin
       lblSoapAction.Visible = btnSoapAction.Visible;
 
       inputEditor.Helper = _proxy.GetHelper();
-      outputEditor.Helper = _proxy.GetHelper();
+      outputEditor.Helper = _proxy.GetOutputHelper();
       btnEditConnections.Text = string.Format("{0} ▼", _proxy.Name);
 
       if (proxy.ConnData != null)
       {
         lblConnection.Visible = true;
         btnEditConnections.Visible = lblConnection.Visible;
-        lblConnColor.BackColor = proxy.ConnData.Color;
+        this.ConnectionColor = proxy.ConnData.Color;
       }
       InitializeUi(_proxy as ArasEditorProxy);
       treeItems.Roots = null;
@@ -332,10 +386,8 @@ namespace InnovatorAdmin
       using (var dialog = new EditorWindow())
       {
         dialog.dgvItems.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        dialog.tbcOutputView.Appearance = TabAppearance.FlatButtons;
-        dialog.tbcOutputView.ItemSize = new Size(0, 1);
+        dialog.tbcOutputView.TabsVisible = false;
         dialog.tbcOutputView.SelectedTab = dialog.pgTableOutput;
-        dialog.tbcOutputView.SizeMode = TabSizeMode.Fixed;
         dialog.PreferredMode = OutputType.Table;
         setConn(dialog);
         if (dialog.ShowDialog() == DialogResult.OK
@@ -375,12 +427,14 @@ namespace InnovatorAdmin
         base.OnLoad(e);
         if (!this.Modal)
         {
+          var col1 = tblMain.GetColumn(btnOk);
+          var col2 = tblMain.GetColumn(btnCancel);
           tblMain.Controls.Remove(btnOk);
           tblMain.Controls.Remove(btnCancel);
-          tblMain.ColumnStyles[tblMain.ColumnStyles.Count - 1].SizeType = SizeType.Absolute;
-          tblMain.ColumnStyles[tblMain.ColumnStyles.Count - 1].Width = 0;
-          tblMain.ColumnStyles[tblMain.ColumnStyles.Count - 2].SizeType = SizeType.Absolute;
-          tblMain.ColumnStyles[tblMain.ColumnStyles.Count - 2].Width = 0;
+          tblMain.ColumnStyles[col1].SizeType = SizeType.Absolute;
+          tblMain.ColumnStyles[col1].Width = 0;
+          tblMain.ColumnStyles[col2].SizeType = SizeType.Absolute;
+          tblMain.ColumnStyles[col2].Width = 0;
         }
 
         //lblConnection.Visible = _proxy != null && _proxy.ConnData != null;
@@ -938,7 +992,7 @@ namespace InnovatorAdmin
     {
       try
       {
-        Submit(inputEditor.Helper.GetCurrentQuery(inputEditor.Text, inputEditor.Editor.CaretOffset)
+        Submit(inputEditor.Helper.GetCurrentQuery(inputEditor.Document, inputEditor.Editor.CaretOffset)
           ?? inputEditor.Text);
       }
       catch (Exception ex)
@@ -953,7 +1007,7 @@ namespace InnovatorAdmin
       try
       {
         var window = NewWindow();
-        var query = inputEditor.Helper.GetCurrentQuery(inputEditor.Text, inputEditor.Editor.CaretOffset)
+        var query = inputEditor.Helper.GetCurrentQuery(inputEditor.Document, inputEditor.Editor.CaretOffset)
           ?? inputEditor.Text;
         window.inputEditor.Text = query;
         window.SoapAction = this.SoapAction;
@@ -1099,6 +1153,7 @@ namespace InnovatorAdmin
       var mode = this.PreferredMode;
       if (mode == OutputType.Any)
         mode = result.PreferredMode;
+      tbcOutputView.TabsVisible = this.PreferredMode == OutputType.Any;
 
       _result = result;
       if (result.ItemCount > 0)
@@ -1514,10 +1569,7 @@ namespace InnovatorAdmin
             {
               con.Items.Add(new ToolStripMenuItem(script.Name, null, (s, ev) =>
               {
-                this.SoapAction = script.Action;
-                inputEditor.Document.Insert(0, script.Script + Environment.NewLine + Environment.NewLine);
-                if (script.AutoRun)
-                  Submit(script.Script);
+                Execute(script);
               }));
             }
           }
@@ -1528,6 +1580,14 @@ namespace InnovatorAdmin
       {
         Utils.HandleError(ex);
       }
+    }
+
+    public void Execute(IEditorScript script)
+    {
+      this.SoapAction = script.Action;
+      inputEditor.Document.Insert(0, script.Script + Environment.NewLine + Environment.NewLine);
+      if (script.AutoRun)
+        Submit(script.Script);
     }
 
     private void treeItems_CellToolTipShowing(object sender, BrightIdeasSoftware.ToolTipShowingEventArgs e)

@@ -15,6 +15,22 @@ namespace InnovatorAdmin
 
   public class SqlGroupBase<T> : SqlNode, ICollection<T>, ISqlGroupNode where T : SqlNode
   {
+    public override int StartOffset
+    {
+      get
+      {
+        if (base.StartOffset < 0 && _nodes.Any())
+          base.StartOffset = _nodes.Min(n => n.StartOffset);
+        return base.StartOffset;
+      }
+      set
+      {
+        if (value >= 0)
+          throw new InvalidOperationException();
+        base.StartOffset = value;
+      }
+    }
+
     private List<T> _nodes = new List<T>();
 
     public SqlGroupBase()
@@ -32,10 +48,6 @@ namespace InnovatorAdmin
     {
       _nodes.Add(item);
       item.Parent = this;
-      if (this.StartOffset < 0)
-        this.StartOffset = item.StartOffset;
-      else
-        this.StartOffset = Math.Min(this.StartOffset, item.StartOffset);
     }
 
     public SqlNode NodeByOffset(int offset)
@@ -51,6 +63,7 @@ namespace InnovatorAdmin
     public void Clear()
     {
       _nodes.Clear();
+      base.StartOffset = -1;
     }
 
     public bool Contains(T item)

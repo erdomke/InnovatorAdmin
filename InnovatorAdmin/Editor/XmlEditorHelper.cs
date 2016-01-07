@@ -37,9 +37,9 @@ namespace InnovatorAdmin.Editor
       // Do nothing
     }
 
-    public virtual string GetCurrentQuery(string text, int offset)
+    public virtual string GetCurrentQuery(ITextSource text, int offset)
     {
-      return text;
+      return text.Text;
     }
 
     public virtual Innovator.Client.IPromise<CompletionContext> ShowCompletions(EditorWinForm control)
@@ -100,6 +100,12 @@ namespace InnovatorAdmin.Editor
         var errors = foldings.Where(f => f.StartOffset < 0 || f.EndOffset > document.TextLength).ToArray();
         manager.UpdateFoldings(foldings, firstErrorOffset);
       }
+    }
+
+
+    public virtual IEnumerable<IEditorScript> GetScripts(ITextSource text, int offset)
+    {
+      return Enumerable.Empty<IEditorScript>();
     }
   }
 }

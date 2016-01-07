@@ -42,7 +42,7 @@ namespace InnovatorAdmin
             return null;
           throw new FormatException("The value must be empty if the type is Null");
         default:
-          return TextValue;
+          return TextValue ?? string.Empty;
       }
     }
 

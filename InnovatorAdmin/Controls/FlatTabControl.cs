@@ -31,6 +31,7 @@ namespace InnovatorAdmin.Controls
     private ImageList leftRightImages = null;
     private const int nMargin = 5;
     private Color mBackColor = SystemColors.Control;
+    private bool _tabsVisible;
 
     public FlatTabControl()
     {
@@ -67,6 +68,25 @@ namespace InnovatorAdmin.Controls
 
     [DefaultValue(true)]
     public bool DrawBorder { get; set; }
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public bool TabsVisible
+    {
+      get { return _tabsVisible; }
+      set
+      {
+        _tabsVisible = value;
+        if (_tabsVisible)
+        {
+          this.ItemSize = Size.Empty;
+          this.SizeMode = TabSizeMode.Normal;
+        }
+        else
+        {
+          this.ItemSize = new Size(0, 1);
+          this.SizeMode = TabSizeMode.Fixed;
+        }
+      }
+    }
 
     /// <summary>
     /// Clean up any resources being used.

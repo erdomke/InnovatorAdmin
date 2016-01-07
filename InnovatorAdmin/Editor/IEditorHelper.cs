@@ -1,4 +1,5 @@
-﻿using ICSharpCode.AvalonEdit.Highlighting;
+﻿using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Highlighting;
 using Innovator.Client;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,8 @@ namespace InnovatorAdmin.Editor
     IEnumerable<string> GetParameterNames(string query);
     IFoldingStrategy FoldingStrategy { get; }
     void HandleTextEntered(EditorWinForm control, string insertText);
-    string GetCurrentQuery(string text, int offset);
+    string GetCurrentQuery(ITextSource text, int offset);
     IPromise<CompletionContext> ShowCompletions(EditorWinForm control);
+    IEnumerable<IEditorScript> GetScripts(ITextSource text, int offset);
   }
 }
