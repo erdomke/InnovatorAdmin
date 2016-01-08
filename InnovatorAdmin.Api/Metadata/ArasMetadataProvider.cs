@@ -26,6 +26,8 @@ namespace InnovatorAdmin
       = new Dictionary<string,IEnumerable<ListValue>>();
     private Dictionary<string, IEnumerable<IListValue>> _serverReports
       = new Dictionary<string, IEnumerable<IListValue>>();
+    private Dictionary<string, IEnumerable<IListValue>> _serverActions
+      = new Dictionary<string, IEnumerable<IListValue>>();
 
     /// <summary>
     /// Enumerable of methods where core = 1
@@ -170,6 +172,32 @@ namespace InnovatorAdmin
         Value = r.Property("name").Value
       }).ToArray();
       _serverReports[typeName] = result;
+      return result;
+    }
+
+    public IEnumerable<IListValue> ServerItemActions(string typeName)
+    {
+      IEnumerable<IListValue> result;
+      if (_serverActions.TryGetValue(typeName, out result))
+        return result;
+
+      var items = _conn.Apply(@"<Item type='Action' action='get' select='label,method(name)'>
+                                  <id condition='in'>
+                                    (select related_id
+                                    from innovator.[Item_Action] ia
+                                    inner join innovator.[ItemType] it
+                                    on it.id = ia.source_id
+                                    where it.name = @0)
+                                  </id>
+                                  <location>server</location>
+                                  <type>item</type>
+                                </Item>", typeName).Items();
+      result = items.Select(r => new ListValue()
+      {
+        Label = r.Property("label").Value,
+        Value = r.Property("method").AsItem().Property("name").Value
+      }).ToArray();
+      _serverActions[typeName] = result;
       return result;
     }
 

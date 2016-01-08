@@ -171,27 +171,29 @@ namespace InnovatorAdmin.Editor
 
     void TextArea_MouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-      var pos = e.GetPosition(Editor.TextArea);
-      var pt = new Point((int)pos.X, (int)pos.Y);
-      conMenu.Show(this.PointToScreen(pt));
-      while (conMenu.Items.Count > 9)
-        conMenu.Items.RemoveAt(conMenu.Items.Count - 1);
-
-      foreach (var script in Helper.GetScripts(Document, Editor.CaretOffset))
+      try
       {
-        conMenu.Items.Add(new ToolStripMenuItem(script.Name, null, (s, ev) =>
-        {
-          var query = script.Script; // Trigger execution
-          if (!string.IsNullOrEmpty(script.Action) && !string.IsNullOrEmpty(query))
+        var pos = e.GetPosition(Editor.TextArea);
+        var pt = new Point((int)pos.X, (int)pos.Y);
+        conMenu.Show(this.PointToScreen(pt));
+        while (conMenu.Items.Count > 9)
+          conMenu.Items.RemoveAt(conMenu.Items.Count - 1);
+
+        EditorScript.BuildMenu(conMenu.Items
+          , Helper.GetScripts(Document, Editor.CaretOffset)
+          , (script) =>
           {
             var ide = this.FindForm() as EditorWindow;
             if (ide != null)
               ide.Execute(script);
-          }
-        }));
-      }
+          });
 
-      OnMouseDown(new MouseEventArgs(System.Windows.Forms.MouseButtons.Right, e.ClickCount, pt.X, pt.Y, 0));
+        OnMouseDown(new MouseEventArgs(System.Windows.Forms.MouseButtons.Right, e.ClickCount, pt.X, pt.Y, 0));
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
     }
 
     private class Placeholder : IBackgroundRenderer
@@ -285,25 +287,32 @@ namespace InnovatorAdmin.Editor
 
     void TextView_MouseHover(object sender, System.Windows.Input.MouseEventArgs e)
     {
-      var pos = _extEditor.Editor.GetPositionFromPoint(e.GetPosition(_extEditor.Editor));
-      if (pos.HasValue)
+      try
       {
-        var visLine = _extEditor.Editor.TextArea.TextView.GetVisualLine(pos.Value.Line);
-        if (visLine != null)
+        var pos = _extEditor.Editor.GetPositionFromPoint(e.GetPosition(_extEditor.Editor));
+        if (pos.HasValue)
         {
-          var link = visLine.Elements.OfType<VisualLineLinkText>()
-            .FirstOrDefault(l => l.VisualColumn <= pos.Value.VisualColumn
-              && pos.Value.VisualColumn < (l.VisualColumn + l.VisualLength));
-          if (link != null && _toolTip == null)
+          var visLine = _extEditor.Editor.TextArea.TextView.GetVisualLine(pos.Value.Line);
+          if (visLine != null)
           {
-            _toolTip = new System.Windows.Controls.ToolTip();
-            _toolTip.Closed += _toolTip_Closed;
-            _toolTip.PlacementTarget = _extEditor.Editor;
-            _toolTip.Content = "CTRL+click to follow link";
-            _toolTip.IsOpen = true;
-            e.Handled = true;
+            var link = visLine.Elements.OfType<VisualLineLinkText>()
+              .FirstOrDefault(l => l.VisualColumn <= pos.Value.VisualColumn
+                && pos.Value.VisualColumn < (l.VisualColumn + l.VisualLength));
+            if (link != null && _toolTip == null)
+            {
+              _toolTip = new System.Windows.Controls.ToolTip();
+              _toolTip.Closed += _toolTip_Closed;
+              _toolTip.PlacementTarget = _extEditor.Editor;
+              _toolTip.Content = "CTRL+click to follow link";
+              _toolTip.IsOpen = true;
+              e.Handled = true;
+            }
           }
         }
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
       }
     }
 
@@ -734,9 +743,9 @@ namespace InnovatorAdmin.Editor
       this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
       this.conMenu.SuspendLayout();
       this.SuspendLayout();
-      // 
+      //
       // conMenu
-      // 
+      //
       this.conMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniCut,
             this.mniCopy,
@@ -749,66 +758,66 @@ namespace InnovatorAdmin.Editor
             this.toolStripSeparator3});
       this.conMenu.Name = "contextMenuStrip1";
       this.conMenu.Size = new System.Drawing.Size(145, 154);
-      // 
+      //
       // mniCut
-      // 
+      //
       this.mniCut.Name = "mniCut";
       this.mniCut.ShortcutKeyDisplayString = "Ctrl+X";
       this.mniCut.Size = new System.Drawing.Size(144, 22);
       this.mniCut.Text = "Cut";
-      // 
+      //
       // mniCopy
-      // 
+      //
       this.mniCopy.Name = "mniCopy";
       this.mniCopy.ShortcutKeyDisplayString = "Ctrl+C";
       this.mniCopy.Size = new System.Drawing.Size(144, 22);
       this.mniCopy.Text = "Copy";
-      // 
+      //
       // mniPaste
-      // 
+      //
       this.mniPaste.Name = "mniPaste";
       this.mniPaste.ShortcutKeyDisplayString = "Ctrl+V";
       this.mniPaste.Size = new System.Drawing.Size(144, 22);
       this.mniPaste.Text = "Paste";
-      // 
+      //
       // toolStripSeparator2
-      // 
+      //
       this.toolStripSeparator2.Name = "toolStripSeparator2";
       this.toolStripSeparator2.Size = new System.Drawing.Size(141, 6);
-      // 
+      //
       // mniCollapseAll
-      // 
+      //
       this.mniCollapseAll.Name = "mniCollapseAll";
       this.mniCollapseAll.Size = new System.Drawing.Size(144, 22);
       this.mniCollapseAll.Text = "Collapse All";
       this.mniCollapseAll.Click += new System.EventHandler(this.mniCollapseAll_Click);
-      // 
+      //
       // mniExpandAll
-      // 
+      //
       this.mniExpandAll.Name = "mniExpandAll";
       this.mniExpandAll.Size = new System.Drawing.Size(144, 22);
       this.mniExpandAll.Text = "Expand All";
       this.mniExpandAll.Click += new System.EventHandler(this.mniExpandAll_Click);
-      // 
+      //
       // toolStripSeparator1
-      // 
+      //
       this.toolStripSeparator1.Name = "toolStripSeparator1";
       this.toolStripSeparator1.Size = new System.Drawing.Size(141, 6);
-      // 
+      //
       // mniOpenWith
-      // 
+      //
       this.mniOpenWith.Name = "mniOpenWith";
       this.mniOpenWith.Size = new System.Drawing.Size(144, 22);
       this.mniOpenWith.Text = "Open With...";
       this.mniOpenWith.Click += new System.EventHandler(this.mniOpenWith_Click);
-      // 
+      //
       // toolStripSeparator3
-      // 
+      //
       this.toolStripSeparator3.Name = "toolStripSeparator3";
       this.toolStripSeparator3.Size = new System.Drawing.Size(141, 6);
-      // 
+      //
       // EditorWinForm
-      // 
+      //
       this.Name = "EditorWinForm";
       this.conMenu.ResumeLayout(false);
       this.ResumeLayout(false);

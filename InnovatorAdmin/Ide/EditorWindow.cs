@@ -1027,7 +1027,7 @@ namespace InnovatorAdmin
       return window;
     }
 
-    private void Submit(string query)
+    private void Submit(string query, OutputType preferred = OutputType.Any)
     {
       if (_currentQuery != null)
       {
@@ -1113,7 +1113,7 @@ namespace InnovatorAdmin
               var milliseconds = st.ElapsedMilliseconds;
               _clock.Enabled = false;
 
-              SetResult(result, milliseconds);
+              SetResult(result, milliseconds, preferred);
             }
             catch (Exception ex)
             {
@@ -1143,13 +1143,15 @@ namespace InnovatorAdmin
       }
     }
 
-    private void SetResult(IResultObject result, long milliseconds)
+    private void SetResult(IResultObject result, long milliseconds, OutputType preferred = OutputType.Any)
     {
       _outputTextSet = false;
       dgvItems.DataSource = null;
       _outputSet = null;
 
       var mode = this.PreferredMode;
+      if (mode == OutputType.Any)
+        mode = preferred;
       if (mode == OutputType.Any)
         mode = result.PreferredMode;
       tbcOutputView.TabsVisible = this.PreferredMode == OutputType.Any;
@@ -1543,20 +1545,7 @@ namespace InnovatorAdmin
         if (node != null && scripts.Any())
         {
           var con = new ContextMenuStrip();
-          foreach (var script in scripts)
-          {
-            if (script.Name.StartsWith("---") && string.IsNullOrWhiteSpace(script.Script))
-            {
-              con.Items.Add(new ToolStripSeparator());
-            }
-            else
-            {
-              con.Items.Add(new ToolStripMenuItem(script.Name, null, (s, ev) =>
-              {
-                Execute(script);
-              }));
-            }
-          }
+          EditorScript.BuildMenu(con.Items, scripts, Execute);
           con.Show(treeItems.PointToScreen(e.Location));
         }
       }
@@ -1571,7 +1560,7 @@ namespace InnovatorAdmin
       this.SoapAction = script.Action;
       inputEditor.Document.Insert(0, script.Script + Environment.NewLine + Environment.NewLine);
       if (script.AutoRun)
-        Submit(script.Script);
+        Submit(script.Script, script.PreferredOutput);
     }
 
     private void treeItems_CellToolTipShowing(object sender, BrightIdeasSoftware.ToolTipShowingEventArgs e)
@@ -1671,7 +1660,8 @@ namespace InnovatorAdmin
       {
         using (var dialog = new ColumnSelect())
         {
-          dialog.DataSource = dgvItems;
+          var source = ((ContextMenuStrip)((ToolStripMenuItem)sender).GetCurrentParent()).SourceControl;
+          dialog.DataSource = (DataGridView)source;
           dialog.ShowDialog(this);
         }
       }
@@ -1762,6 +1752,40 @@ namespace InnovatorAdmin
         }
       }
       catch (Exception) { }
+    }
+
+    private void conTable_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+      try
+      {
+        if (_proxy == null)
+          return;
+
+        var grid = (DataGridView)((ContextMenuStrip)sender).SourceControl;
+        var rows = grid.SelectedRows.OfType<DataGridViewRow>();
+        if (!rows.Any())
+          rows = grid.SelectedCells.OfType<DataGridViewCell>().Select(c => c.OwningRow).Distinct();
+        if (!rows.Any())
+          rows = Enumerable.Repeat(grid.CurrentCell.OwningRow, 1);
+        var dataRows = rows.Select(r => ((DataRowView)r.DataBoundItem).Row).OfType<DataRow>().ToArray();
+        var scripts = _proxy.GetHelper().GetScripts(dataRows);
+
+        conTable.Items.Clear();
+        EditorScript.BuildMenu(conTable.Items, scripts, Execute);
+        if (scripts.Any())
+          conTable.Items.Add(new ToolStripSeparator());
+        conTable.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+          this.mniColumns,
+          this.mniSepTable1,
+          this.mniScriptEdits,
+          this.mniSepTable2,
+          this.mniAcceptChanges,
+          this.mniResetChanges});
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
     }
   }
 }

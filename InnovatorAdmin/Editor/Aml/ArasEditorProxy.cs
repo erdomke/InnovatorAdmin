@@ -586,6 +586,28 @@ namespace InnovatorAdmin.Editor
         Scripts = ItemTypeScripts(itemType)
       };
     }
+    public static EditorScript ItemTypeAddScript(IAsyncConnection conn, ItemType itemType)
+    {
+      return new EditorScript()
+      {
+        Name = "New " + (itemType.Label ?? itemType.Name),
+        Action = "ApplyItem",
+        ScriptGetter = () =>
+        {
+          var builder = new StringBuilder();
+          builder.AppendFormat("<Item type='{0}' action='add'>", itemType.Name).AppendLine();
+          foreach (var prop in ArasMetadataProvider.Cached(conn).GetProperties(itemType).Wait()
+                                .Where(p => p.DefaultValue != null))
+          {
+            builder.Append("  <").Append(prop.Name).Append(">");
+            builder.Append(conn.AmlContext.LocalizationContext.Format(prop.DefaultValue));
+            builder.Append("</").Append(prop.Name).Append(">").AppendLine();
+          }
+          builder.Append("</Item>");
+          return builder.ToString();
+        }
+      };
+    }
     private IEnumerable<IEditorScript> ItemTypeScripts(ItemType itemType)
     {
       yield return new EditorScript()
@@ -615,24 +637,7 @@ namespace InnovatorAdmin.Editor
           return builder.ToString();
         }
       };
-      yield return new EditorScript()
-      {
-        Name = "New " + (itemType.Label ?? itemType.Name),
-        Action = "ApplyItem",
-        ScriptGetter = () => {
-          var builder = new StringBuilder();
-          builder.AppendFormat("<Item type='{0}' action='add'>", itemType.Name).AppendLine();
-          foreach (var prop in ArasMetadataProvider.Cached(_conn).GetProperties(itemType).Wait()
-                                .Where(p => p.DefaultValue != null))
-          {
-            builder.Append("  <").Append(prop.Name).Append(">");
-            builder.Append(_conn.AmlContext.LocalizationContext.Format(prop.DefaultValue));
-            builder.Append("</").Append(prop.Name).Append(">").AppendLine();
-          }
-          builder.Append("</Item>");
-          return builder.ToString();
-        }
-      };
+      yield return ItemTypeAddScript(_conn, itemType);
       yield return new EditorScript()
       {
         Name = "--------------------------"

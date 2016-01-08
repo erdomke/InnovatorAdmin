@@ -168,5 +168,10 @@ namespace InnovatorAdmin.Editor
     {
       // Do nothing, for now
     }
+
+    public virtual IEnumerable<IEditorScript> GetScripts(IEnumerable<System.Data.DataRow> rows)
+    {
+      return Enumerable.Empty<IEditorScript>();
+    }
   }
 }

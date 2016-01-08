@@ -77,6 +77,8 @@ namespace InnovatorAdmin.Editor
           case XmlNodeType.Text:
             cdata = false;
             value = r.Value;
+            if (path.Last().LocalName == "source_id")
+              path[path.Count - 2].SourceId = r.Value;
             break;
         }
         return true;
@@ -559,7 +561,7 @@ namespace InnovatorAdmin.Editor
                     else if (!string.IsNullOrEmpty(lastItem.Type)
                       && _metadata.ItemTypeByName(lastItem.Type, out itemType))
                     {
-                      items = PropertyValueCompletion(itemType, state, path).ToPromise();
+                      items = PropertyValueCompletion(itemType, state, lastItem, path).ToPromise();
                     }
                   }
                 }
@@ -633,7 +635,7 @@ namespace InnovatorAdmin.Editor
           }));
     }
 
-    private async Task<IEnumerable<ICompletionData>> PropertyValueCompletion(ItemType itemType, XmlState state, IList<AmlNode> path)
+    private async Task<IEnumerable<ICompletionData>> PropertyValueCompletion(ItemType itemType, XmlState state, AmlNode lastItem, IList<AmlNode> path)
     {
       var p = await _metadata.GetProperty(itemType, path.Last().LocalName).ToTask();
 
@@ -674,6 +676,11 @@ namespace InnovatorAdmin.Editor
           completions = completions.Concat(Enumerable.Repeat(new ItemPropertyCompletionData(_conn, path, p), 1));
         }
 
+        if (p.Restrictions.Any(r => string.Equals(r, "ItemType", StringComparison.OrdinalIgnoreCase)))
+        {
+          completions = completions.Concat(ItemTypeCompletion<BasicCompletionData>(_metadata.ItemTypes, true));
+        }
+
         return completions;
       }
       else if (p.Type == PropertyType.boolean)
@@ -701,11 +708,22 @@ namespace InnovatorAdmin.Editor
         var paths = await _metadata.GetClassPaths(itemType).ToTask();
         return paths.GetCompletions<BasicCompletionData>();
       }
-      else if (p.Name == "name" && itemType.Name == "Method" && path[path.Count - 2].Action == "get")
+      else if (p.Name == "name" && itemType.Name == "Property" && lastItem.Action == "get" && !string.IsNullOrEmpty(lastItem.SourceId))
+      {
+        var parentType = _metadata.TypeById(lastItem.SourceId);
+        return await new PropertyCompletionFactory(_metadata, parentType).GetPromise().ToTask();
+      }
+      else if (p.Name == "class_path" && itemType.Name == "Property" && !string.IsNullOrEmpty(lastItem.SourceId))
+      {
+        var parentType = _metadata.TypeById(lastItem.SourceId);
+        var paths = await _metadata.GetClassPaths(parentType).ToTask();
+        return paths.GetCompletions<BasicCompletionData>();
+      }
+      else if (p.Name == "name" && itemType.Name == "Method" && lastItem.Action == "get")
       {
         return _metadata.MethodNames.GetCompletions<BasicCompletionData>();
       }
-      else if (p.Name == "name" && itemType.Name == "ItemType" && path[path.Count - 2].Action == "get")
+      else if (p.Name == "name" && itemType.Name == "ItemType" && lastItem.Action == "get")
       {
         return ItemTypeCompletion<BasicCompletionData>(_metadata.ItemTypes);
       }
@@ -994,6 +1012,7 @@ namespace InnovatorAdmin.Editor
       public string Type { get; set; }
       public string Action { get; set; }
       public string Condition { get; set; }
+      public string SourceId { get; set; }
     }
 
     public IEnumerable<string> GetSchemaNames()

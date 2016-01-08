@@ -310,7 +310,7 @@ namespace InnovatorAdmin
                     newColumn.AllowDBNull = true;
                     break;
                 }
-                newColumn.IsUiVisible(string.IsNullOrEmpty(mainType) && itemType.Name != mainType
+                newColumn.IsUiVisible(!string.IsNullOrEmpty(mainType) && itemType.Name != mainType
                   ? (pMeta.Visibility & PropertyVisibility.RelationshipGrid) > 0
                   : (pMeta.Visibility & PropertyVisibility.MainGrid) > 0);
                 newColumn.ColumnWidth(pMeta.ColumnWidth);
@@ -392,6 +392,24 @@ namespace InnovatorAdmin
             row.EndEdit();
             row.AcceptChanges();
             result.Rows.Add(row);
+          }
+
+
+          if (result.Rows.Count > 0
+            && result.Columns.OfType<DataColumn>().Where(c => c.ColumnName == "source_id" || c.ColumnName == "related_id").Count() == 2)
+          {
+            var firstRelated = result.Rows[0]["related_id"];
+            var firstSource = result.Rows[0]["source_id"];
+            if (result.Rows.Count > 1
+              && result.AsEnumerable().All(r => r["related_id"] == firstRelated)
+              && !result.AsEnumerable().All(r => r["source_id"] == firstSource))
+            {
+              result.Columns["source_id/keyed_name"].IsUiVisible(true);
+            }
+            else
+            {
+              result.Columns["related_id/keyed_name"].IsUiVisible(true);
+            }
           }
         }
         finally

@@ -122,15 +122,15 @@
       this.pgHtml = new System.Windows.Forms.TabPage();
       this.browser = new System.Windows.Forms.WebBrowser();
       this.pgTableOutput = new System.Windows.Forms.TabPage();
-      this.dgvItems = new Controls.DataGrid();
+      this.dgvItems = new InnovatorAdmin.Controls.DataGrid();
       this.conTable = new System.Windows.Forms.ContextMenuStrip(this.components);
       this.mniColumns = new System.Windows.Forms.ToolStripMenuItem();
-      this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
-      this.scriptEditsToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniSepTable1 = new System.Windows.Forms.ToolStripSeparator();
+      this.mniScriptEdits = new System.Windows.Forms.ToolStripMenuItem();
       this.mniTableEditsToClipboard = new System.Windows.Forms.ToolStripMenuItem();
       this.mniTableEditsToFile = new System.Windows.Forms.ToolStripMenuItem();
       this.mniTableEditsToQueryEditor = new System.Windows.Forms.ToolStripMenuItem();
-      this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+      this.mniSepTable2 = new System.Windows.Forms.ToolStripSeparator();
       this.mniAcceptChanges = new System.Windows.Forms.ToolStripMenuItem();
       this.mniResetChanges = new System.Windows.Forms.ToolStripMenuItem();
       this.btnOk = new InnovatorAdmin.Controls.FlatButton();
@@ -1189,13 +1189,14 @@
       //
       this.conTable.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniColumns,
-            this.toolStripSeparator9,
-            this.scriptEditsToToolStripMenuItem,
-            this.toolStripSeparator1,
+            this.mniSepTable1,
+            this.mniScriptEdits,
+            this.mniSepTable2,
             this.mniAcceptChanges,
             this.mniResetChanges});
       this.conTable.Name = "conTable";
-      this.conTable.Size = new System.Drawing.Size(161, 104);
+      this.conTable.Size = new System.Drawing.Size(161, 126);
+      this.conTable.Opening += new System.ComponentModel.CancelEventHandler(this.conTable_Opening);
       //
       // mniColumns
       //
@@ -1206,18 +1207,18 @@
       //
       // toolStripSeparator9
       //
-      this.toolStripSeparator9.Name = "toolStripSeparator9";
-      this.toolStripSeparator9.Size = new System.Drawing.Size(157, 6);
+      this.mniSepTable1.Name = "toolStripSeparator9";
+      this.mniSepTable1.Size = new System.Drawing.Size(157, 6);
       //
       // scriptEditsToToolStripMenuItem
       //
-      this.scriptEditsToToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+      this.mniScriptEdits.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniTableEditsToClipboard,
             this.mniTableEditsToFile,
             this.mniTableEditsToQueryEditor});
-      this.scriptEditsToToolStripMenuItem.Name = "scriptEditsToToolStripMenuItem";
-      this.scriptEditsToToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-      this.scriptEditsToToolStripMenuItem.Text = "Script Edits To";
+      this.mniScriptEdits.Name = "scriptEditsToToolStripMenuItem";
+      this.mniScriptEdits.Size = new System.Drawing.Size(160, 22);
+      this.mniScriptEdits.Text = "Script Edits To";
       //
       // mniTableEditsToClipboard
       //
@@ -1242,8 +1243,8 @@
       //
       // toolStripSeparator1
       //
-      this.toolStripSeparator1.Name = "toolStripSeparator1";
-      this.toolStripSeparator1.Size = new System.Drawing.Size(157, 6);
+      this.mniSepTable2.Name = "toolStripSeparator1";
+      this.mniSepTable2.Size = new System.Drawing.Size(157, 6);
       //
       // mniAcceptChanges
       //
@@ -1491,11 +1492,11 @@
     private Controls.FlatButton btnCancel;
     private System.Windows.Forms.Label lblItems;
     private System.Windows.Forms.ContextMenuStrip conTable;
-    private System.Windows.Forms.ToolStripMenuItem scriptEditsToToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem mniScriptEdits;
     private System.Windows.Forms.ToolStripMenuItem mniTableEditsToQueryEditor;
     private System.Windows.Forms.ToolStripMenuItem mniTableEditsToClipboard;
     private System.Windows.Forms.ToolStripMenuItem mniTableEditsToFile;
-    private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+    private System.Windows.Forms.ToolStripSeparator mniSepTable2;
     private System.Windows.Forms.ToolStripMenuItem mniAcceptChanges;
     private System.Windows.Forms.ToolStripMenuItem mniResetChanges;
     private System.Windows.Forms.ToolStrip menuStrip;
@@ -1567,7 +1568,7 @@
     private Controls.FlatButton btnInstall;
     private Controls.FlatButton btnCreate;
     private System.Windows.Forms.ToolStripMenuItem mniColumns;
-    private System.Windows.Forms.ToolStripSeparator toolStripSeparator9;
+    private System.Windows.Forms.ToolStripSeparator mniSepTable1;
     private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton4;
     private System.Windows.Forms.ToolStripMenuItem mniFind;
     private System.Windows.Forms.ToolStripMenuItem mniFindNext;
