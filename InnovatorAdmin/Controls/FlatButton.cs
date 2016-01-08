@@ -12,7 +12,9 @@ namespace InnovatorAdmin.Controls
   {
     Red,
     LightGray,
-    DarkGray
+    DarkGray,
+    Icon,
+    Dialog
   }
 
   public class FlatButton : Button
@@ -46,6 +48,8 @@ namespace InnovatorAdmin.Controls
       get { return _theme; }
       set
       {
+        this.Font = new Font(this.Font, FontStyle.Regular);
+        _theme = value;
         switch (value)
         {
           case FlatButtonTheme.Red:
@@ -55,6 +59,19 @@ namespace InnovatorAdmin.Controls
             break;
           case FlatButtonTheme.DarkGray:
             break;
+          case FlatButtonTheme.Icon:
+            this.BackColor = System.Drawing.Color.White;
+            this.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(221, 221, 221);
+            this.FlatAppearance.BorderSize = 0;
+            break;
+          case FlatButtonTheme.Dialog:
+            this.BackColor = System.Drawing.Color.White;
+            this.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(221, 221, 221);
+            this.ForeColor = System.Drawing.Color.FromArgb(33, 150, 243);
+            this.Font = new Font(this.Font, FontStyle.Bold);
+            this.FlatAppearance.BorderSize = 0;
+            this.Text = this.Text;
+            break;
           default:
             this.BackColor = System.Drawing.Color.FromArgb(221, 221, 221);
             this.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(196, 196, 196);
@@ -62,13 +79,15 @@ namespace InnovatorAdmin.Controls
             break;
         }
         this.FlatAppearance.MouseDownBackColor = this.FlatAppearance.MouseOverBackColor;
-        _theme = value;
       }
     }
     public override string Text
     {
       get { return base.Text; }
-      set { base.Text = value; SetSize(); }
+      set {
+        base.Text = _theme == FlatButtonTheme.Dialog ? value.ToUpper() : value;
+        SetSize();
+      }
     }
 
     public FlatButton()

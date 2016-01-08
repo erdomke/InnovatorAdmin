@@ -57,6 +57,7 @@
       this.btnDelete = new InnovatorAdmin.Controls.FlatButton();
       this.exploreButton = new InnovatorAdmin.Controls.FlatButton();
       this.btnTest = new InnovatorAdmin.Controls.FlatButton();
+      this.panel1 = new System.Windows.Forms.Panel();
       this.tlpControls.SuspendLayout();
       this.flowLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
@@ -65,7 +66,7 @@
       // 
       this.lblDatabase.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblDatabase.AutoSize = true;
-      this.lblDatabase.Location = new System.Drawing.Point(406, 115);
+      this.lblDatabase.Location = new System.Drawing.Point(409, 119);
       this.lblDatabase.Name = "lblDatabase";
       this.lblDatabase.Size = new System.Drawing.Size(56, 13);
       this.lblDatabase.TabIndex = 26;
@@ -77,12 +78,12 @@
       this.txtPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.tlpControls.SetColumnSpan(this.txtPassword, 2);
-      this.txtPassword.Location = new System.Drawing.Point(468, 85);
+      this.txtPassword.Location = new System.Drawing.Point(471, 87);
       this.txtPassword.MaxLength = 64;
       this.txtPassword.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtPassword.Name = "txtPassword";
       this.txtPassword.PasswordChar = '*';
-      this.txtPassword.Size = new System.Drawing.Size(132, 20);
+      this.txtPassword.Size = new System.Drawing.Size(129, 22);
       this.txtPassword.TabIndex = 7;
       this.txtPassword.WordWrap = false;
       // 
@@ -90,7 +91,7 @@
       // 
       this.lblPassword.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblPassword.AutoSize = true;
-      this.lblPassword.Location = new System.Drawing.Point(406, 88);
+      this.lblPassword.Location = new System.Drawing.Point(409, 91);
       this.lblPassword.Name = "lblPassword";
       this.lblPassword.Size = new System.Drawing.Size(56, 13);
       this.lblPassword.TabIndex = 24;
@@ -100,19 +101,19 @@
       // 
       this.txtUser.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.txtUser.Location = new System.Drawing.Point(279, 85);
+      this.txtUser.Location = new System.Drawing.Point(284, 87);
       this.txtUser.MaximumSize = new System.Drawing.Size(160, 4);
       this.txtUser.MaxLength = 32;
       this.txtUser.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtUser.Name = "txtUser";
-      this.txtUser.Size = new System.Drawing.Size(121, 20);
+      this.txtUser.Size = new System.Drawing.Size(119, 22);
       this.txtUser.TabIndex = 6;
       // 
       // lblUser
       // 
       this.lblUser.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblUser.AutoSize = true;
-      this.lblUser.Location = new System.Drawing.Point(198, 88);
+      this.lblUser.Location = new System.Drawing.Point(203, 91);
       this.lblUser.Name = "lblUser";
       this.lblUser.Size = new System.Drawing.Size(32, 13);
       this.lblUser.TabIndex = 22;
@@ -124,17 +125,17 @@
       this.txtUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.tlpControls.SetColumnSpan(this.txtUrl, 4);
-      this.txtUrl.Location = new System.Drawing.Point(279, 32);
+      this.txtUrl.Location = new System.Drawing.Point(284, 32);
       this.txtUrl.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtUrl.Name = "txtUrl";
-      this.txtUrl.Size = new System.Drawing.Size(321, 20);
+      this.txtUrl.Size = new System.Drawing.Size(316, 22);
       this.txtUrl.TabIndex = 3;
       // 
       // lblUrl
       // 
       this.lblUrl.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblUrl.AutoSize = true;
-      this.lblUrl.Location = new System.Drawing.Point(198, 35);
+      this.lblUrl.Location = new System.Drawing.Point(203, 36);
       this.lblUrl.Name = "lblUrl";
       this.lblUrl.Size = new System.Drawing.Size(32, 13);
       this.lblUrl.TabIndex = 20;
@@ -146,7 +147,7 @@
       this.txtName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.tlpControls.SetColumnSpan(this.txtName, 3);
-      this.txtName.Location = new System.Drawing.Point(279, 3);
+      this.txtName.Location = new System.Drawing.Point(284, 3);
       this.txtName.MaximumSize = new System.Drawing.Size(260, 4);
       this.txtName.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtName.Name = "txtName";
@@ -157,7 +158,7 @@
       // 
       this.lblName.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblName.AutoSize = true;
-      this.lblName.Location = new System.Drawing.Point(198, 8);
+      this.lblName.Location = new System.Drawing.Point(203, 8);
       this.lblName.Name = "lblName";
       this.lblName.Size = new System.Drawing.Size(38, 13);
       this.lblName.TabIndex = 32;
@@ -166,13 +167,15 @@
       // 
       // tlpControls
       // 
-      this.tlpControls.ColumnCount = 11;
+      this.tlpControls.BackColor = System.Drawing.Color.White;
+      this.tlpControls.ColumnCount = 12;
       this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 10F));
       this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 5F));
       this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
       this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
@@ -180,28 +183,29 @@
       this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tlpControls.Controls.Add(this.lstConnections, 0, 0);
       this.tlpControls.Controls.Add(this.btnMoveDown, 5, 6);
-      this.tlpControls.Controls.Add(this.txtName, 7, 0);
+      this.tlpControls.Controls.Add(this.txtName, 8, 0);
       this.tlpControls.Controls.Add(this.btnNew, 0, 6);
-      this.tlpControls.Controls.Add(this.lblName, 6, 0);
+      this.tlpControls.Controls.Add(this.lblName, 7, 0);
       this.tlpControls.Controls.Add(this.btnMoveUp, 4, 6);
-      this.tlpControls.Controls.Add(this.txtUrl, 7, 1);
+      this.tlpControls.Controls.Add(this.txtUrl, 8, 1);
       this.tlpControls.Controls.Add(this.btnCopy, 1, 6);
       this.tlpControls.Controls.Add(this.btnDelete, 2, 6);
-      this.tlpControls.Controls.Add(this.lblUrl, 6, 1);
-      this.tlpControls.Controls.Add(this.btnColor, 10, 0);
-      this.tlpControls.Controls.Add(this.lblUser, 6, 3);
-      this.tlpControls.Controls.Add(this.lblMessage, 6, 5);
-      this.tlpControls.Controls.Add(this.txtUser, 7, 3);
-      this.tlpControls.Controls.Add(this.lblPassword, 8, 3);
-      this.tlpControls.Controls.Add(this.txtPassword, 9, 3);
-      this.tlpControls.Controls.Add(this.cmbDatabase, 9, 4);
-      this.tlpControls.Controls.Add(this.lblDatabase, 8, 4);
-      this.tlpControls.Controls.Add(this.label1, 6, 4);
-      this.tlpControls.Controls.Add(this.cmbType, 7, 4);
-      this.tlpControls.Controls.Add(this.label2, 6, 2);
-      this.tlpControls.Controls.Add(this.cmbAuth, 7, 2);
-      this.tlpControls.Controls.Add(this.flowLayoutPanel1, 8, 5);
-      this.tlpControls.Controls.Add(this.cb_confirm, 9, 2);
+      this.tlpControls.Controls.Add(this.lblUrl, 7, 1);
+      this.tlpControls.Controls.Add(this.btnColor, 11, 0);
+      this.tlpControls.Controls.Add(this.lblUser, 7, 3);
+      this.tlpControls.Controls.Add(this.lblMessage, 7, 5);
+      this.tlpControls.Controls.Add(this.txtUser, 8, 3);
+      this.tlpControls.Controls.Add(this.lblPassword, 9, 3);
+      this.tlpControls.Controls.Add(this.txtPassword, 10, 3);
+      this.tlpControls.Controls.Add(this.cmbDatabase, 10, 4);
+      this.tlpControls.Controls.Add(this.lblDatabase, 9, 4);
+      this.tlpControls.Controls.Add(this.label1, 7, 4);
+      this.tlpControls.Controls.Add(this.cmbType, 8, 4);
+      this.tlpControls.Controls.Add(this.label2, 7, 2);
+      this.tlpControls.Controls.Add(this.cmbAuth, 8, 2);
+      this.tlpControls.Controls.Add(this.flowLayoutPanel1, 9, 5);
+      this.tlpControls.Controls.Add(this.cb_confirm, 10, 2);
+      this.tlpControls.Controls.Add(this.panel1, 6, 0);
       this.tlpControls.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tlpControls.Location = new System.Drawing.Point(0, 0);
       this.tlpControls.Name = "tlpControls";
@@ -219,7 +223,7 @@
       // btnColor
       // 
       this.btnColor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-      this.btnColor.Location = new System.Drawing.Point(570, 3);
+      this.btnColor.Location = new System.Drawing.Point(571, 3);
       this.btnColor.Name = "btnColor";
       this.btnColor.Size = new System.Drawing.Size(29, 23);
       this.btnColor.TabIndex = 2;
@@ -230,7 +234,7 @@
       // 
       this.lblMessage.AutoSize = true;
       this.tlpControls.SetColumnSpan(this.lblMessage, 2);
-      this.lblMessage.Location = new System.Drawing.Point(201, 141);
+      this.lblMessage.Location = new System.Drawing.Point(206, 145);
       this.lblMessage.Margin = new System.Windows.Forms.Padding(6);
       this.lblMessage.Name = "lblMessage";
       this.lblMessage.Size = new System.Drawing.Size(0, 13);
@@ -242,9 +246,9 @@
       this.tlpControls.SetColumnSpan(this.cmbDatabase, 2);
       this.cmbDatabase.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.cmbDatabase.FormattingEnabled = true;
-      this.cmbDatabase.Location = new System.Drawing.Point(468, 111);
+      this.cmbDatabase.Location = new System.Drawing.Point(471, 115);
       this.cmbDatabase.Name = "cmbDatabase";
-      this.cmbDatabase.Size = new System.Drawing.Size(132, 21);
+      this.cmbDatabase.Size = new System.Drawing.Size(129, 21);
       this.cmbDatabase.TabIndex = 9;
       this.cmbDatabase.DropDown += new System.EventHandler(this.cmbDatabase_DropDown);
       // 
@@ -252,7 +256,7 @@
       // 
       this.label1.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.label1.AutoSize = true;
-      this.label1.Location = new System.Drawing.Point(198, 115);
+      this.label1.Location = new System.Drawing.Point(203, 119);
       this.label1.Name = "label1";
       this.label1.Size = new System.Drawing.Size(34, 13);
       this.label1.TabIndex = 43;
@@ -263,16 +267,16 @@
       this.cmbType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
       this.cmbType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.cmbType.FormattingEnabled = true;
-      this.cmbType.Location = new System.Drawing.Point(279, 111);
+      this.cmbType.Location = new System.Drawing.Point(284, 115);
       this.cmbType.Name = "cmbType";
-      this.cmbType.Size = new System.Drawing.Size(121, 21);
+      this.cmbType.Size = new System.Drawing.Size(119, 21);
       this.cmbType.TabIndex = 8;
       // 
       // label2
       // 
       this.label2.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.label2.AutoSize = true;
-      this.label2.Location = new System.Drawing.Point(198, 62);
+      this.label2.Location = new System.Drawing.Point(203, 64);
       this.label2.Name = "label2";
       this.label2.Size = new System.Drawing.Size(75, 13);
       this.label2.TabIndex = 44;
@@ -283,9 +287,9 @@
       this.cmbAuth.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
       this.cmbAuth.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.cmbAuth.FormattingEnabled = true;
-      this.cmbAuth.Location = new System.Drawing.Point(279, 58);
+      this.cmbAuth.Location = new System.Drawing.Point(284, 60);
       this.cmbAuth.Name = "cmbAuth";
-      this.cmbAuth.Size = new System.Drawing.Size(121, 21);
+      this.cmbAuth.Size = new System.Drawing.Size(119, 21);
       this.cmbAuth.TabIndex = 4;
       this.cmbAuth.SelectedIndexChanged += new System.EventHandler(this.cmbAuth_SelectedIndexChanged);
       // 
@@ -297,16 +301,16 @@
       this.flowLayoutPanel1.Controls.Add(this.exploreButton);
       this.flowLayoutPanel1.Controls.Add(this.btnTest);
       this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-      this.flowLayoutPanel1.Location = new System.Drawing.Point(474, 135);
+      this.flowLayoutPanel1.Location = new System.Drawing.Point(474, 139);
       this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
       this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-      this.flowLayoutPanel1.Size = new System.Drawing.Size(129, 37);
+      this.flowLayoutPanel1.Size = new System.Drawing.Size(129, 34);
       this.flowLayoutPanel1.TabIndex = 45;
       // 
       // cb_confirm
       // 
       this.cb_confirm.AutoSize = true;
-      this.cb_confirm.Location = new System.Drawing.Point(467, 57);
+      this.cb_confirm.Location = new System.Drawing.Point(470, 59);
       this.cb_confirm.Margin = new System.Windows.Forms.Padding(2);
       this.cb_confirm.Name = "cb_confirm";
       this.cb_confirm.Size = new System.Drawing.Size(61, 17);
@@ -337,106 +341,111 @@
       // btnMoveDown
       // 
       this.btnMoveDown.AutoSize = true;
-      this.btnMoveDown.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.btnMoveDown.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
-      this.btnMoveDown.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnMoveDown.BackColor = System.Drawing.Color.White;
+      this.btnMoveDown.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnMoveDown.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnMoveDown.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnMoveDown.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnMoveDown.ForeColor = System.Drawing.Color.Black;
-      this.btnMoveDown.Image = global::InnovatorAdmin.Properties.Resources.down16;
-      this.btnMoveDown.Location = new System.Drawing.Point(164, 176);
+      this.btnMoveDown.Location = new System.Drawing.Point(163, 175);
+      this.btnMoveDown.Margin = new System.Windows.Forms.Padding(2);
       this.btnMoveDown.Name = "btnMoveDown";
       this.btnMoveDown.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnMoveDown.Padding = new System.Windows.Forms.Padding(2);
-      this.btnMoveDown.Size = new System.Drawing.Size(28, 28);
+      this.btnMoveDown.Padding = new System.Windows.Forms.Padding(1);
+      this.btnMoveDown.Size = new System.Drawing.Size(30, 30);
       this.btnMoveDown.TabIndex = 11;
       this.btnMoveDown.TabStop = false;
-      this.btnMoveDown.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnMoveDown.Theme = InnovatorAdmin.Controls.FlatButtonTheme.Icon;
       this.toolTipManager.SetToolTip(this.btnMoveDown, "Move Down");
-      this.btnMoveDown.UseVisualStyleBackColor = true;
+      this.btnMoveDown.UseVisualStyleBackColor = false;
       this.btnMoveDown.Click += new System.EventHandler(this.btnMoveDown_Click);
       // 
       // btnNew
       // 
       this.btnNew.AutoSize = true;
-      this.btnNew.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.btnNew.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
-      this.btnNew.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnNew.BackColor = System.Drawing.Color.White;
+      this.btnNew.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnNew.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnNew.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnNew.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnNew.ForeColor = System.Drawing.Color.Black;
-      this.btnNew.Image = global::InnovatorAdmin.Properties.Resources.add16;
-      this.btnNew.Location = new System.Drawing.Point(3, 176);
+      this.btnNew.Location = new System.Drawing.Point(2, 175);
+      this.btnNew.Margin = new System.Windows.Forms.Padding(2);
       this.btnNew.Name = "btnNew";
       this.btnNew.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnNew.Padding = new System.Windows.Forms.Padding(2);
-      this.btnNew.Size = new System.Drawing.Size(28, 28);
+      this.btnNew.Padding = new System.Windows.Forms.Padding(1);
+      this.btnNew.Size = new System.Drawing.Size(30, 30);
       this.btnNew.TabIndex = 7;
       this.btnNew.TabStop = false;
-      this.btnNew.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnNew.Theme = InnovatorAdmin.Controls.FlatButtonTheme.Icon;
       this.toolTipManager.SetToolTip(this.btnNew, "Add New");
-      this.btnNew.UseVisualStyleBackColor = true;
+      this.btnNew.UseVisualStyleBackColor = false;
       this.btnNew.Click += new System.EventHandler(this.btnNew_Click);
       // 
       // btnMoveUp
       // 
       this.btnMoveUp.AutoSize = true;
-      this.btnMoveUp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.btnMoveUp.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
-      this.btnMoveUp.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnMoveUp.BackColor = System.Drawing.Color.White;
+      this.btnMoveUp.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnMoveUp.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnMoveUp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnMoveUp.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnMoveUp.ForeColor = System.Drawing.Color.Black;
-      this.btnMoveUp.Image = global::InnovatorAdmin.Properties.Resources.up16;
-      this.btnMoveUp.Location = new System.Drawing.Point(130, 176);
+      this.btnMoveUp.Location = new System.Drawing.Point(129, 175);
+      this.btnMoveUp.Margin = new System.Windows.Forms.Padding(2);
       this.btnMoveUp.Name = "btnMoveUp";
       this.btnMoveUp.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnMoveUp.Padding = new System.Windows.Forms.Padding(2);
-      this.btnMoveUp.Size = new System.Drawing.Size(28, 28);
+      this.btnMoveUp.Padding = new System.Windows.Forms.Padding(1);
+      this.btnMoveUp.Size = new System.Drawing.Size(30, 30);
       this.btnMoveUp.TabIndex = 10;
       this.btnMoveUp.TabStop = false;
-      this.btnMoveUp.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnMoveUp.Theme = InnovatorAdmin.Controls.FlatButtonTheme.Icon;
       this.toolTipManager.SetToolTip(this.btnMoveUp, "Move Up");
-      this.btnMoveUp.UseVisualStyleBackColor = true;
+      this.btnMoveUp.UseVisualStyleBackColor = false;
       this.btnMoveUp.Click += new System.EventHandler(this.btnMoveUp_Click);
       // 
       // btnCopy
       // 
       this.btnCopy.AutoSize = true;
-      this.btnCopy.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.btnCopy.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
-      this.btnCopy.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnCopy.BackColor = System.Drawing.Color.White;
+      this.btnCopy.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnCopy.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnCopy.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnCopy.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnCopy.ForeColor = System.Drawing.Color.Black;
-      this.btnCopy.Image = global::InnovatorAdmin.Properties.Resources.copy16;
-      this.btnCopy.Location = new System.Drawing.Point(37, 176);
+      this.btnCopy.Location = new System.Drawing.Point(36, 175);
+      this.btnCopy.Margin = new System.Windows.Forms.Padding(2);
       this.btnCopy.Name = "btnCopy";
       this.btnCopy.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnCopy.Padding = new System.Windows.Forms.Padding(2);
-      this.btnCopy.Size = new System.Drawing.Size(28, 28);
+      this.btnCopy.Padding = new System.Windows.Forms.Padding(1);
+      this.btnCopy.Size = new System.Drawing.Size(30, 30);
       this.btnCopy.TabIndex = 8;
       this.btnCopy.TabStop = false;
-      this.btnCopy.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnCopy.Theme = InnovatorAdmin.Controls.FlatButtonTheme.Icon;
       this.toolTipManager.SetToolTip(this.btnCopy, "Duplicate");
-      this.btnCopy.UseVisualStyleBackColor = true;
+      this.btnCopy.UseVisualStyleBackColor = false;
       this.btnCopy.Click += new System.EventHandler(this.btnCopy_Click);
       // 
       // btnDelete
       // 
       this.btnDelete.AutoSize = true;
-      this.btnDelete.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.btnDelete.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
-      this.btnDelete.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnDelete.BackColor = System.Drawing.Color.White;
+      this.btnDelete.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnDelete.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnDelete.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnDelete.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnDelete.ForeColor = System.Drawing.Color.Black;
-      this.btnDelete.Image = global::InnovatorAdmin.Properties.Resources.remove16;
-      this.btnDelete.Location = new System.Drawing.Point(71, 176);
+      this.btnDelete.Location = new System.Drawing.Point(70, 175);
+      this.btnDelete.Margin = new System.Windows.Forms.Padding(2);
       this.btnDelete.Name = "btnDelete";
       this.btnDelete.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnDelete.Padding = new System.Windows.Forms.Padding(2);
-      this.btnDelete.Size = new System.Drawing.Size(28, 28);
+      this.btnDelete.Padding = new System.Windows.Forms.Padding(1);
+      this.btnDelete.Size = new System.Drawing.Size(30, 30);
       this.btnDelete.TabIndex = 9;
       this.btnDelete.TabStop = false;
-      this.btnDelete.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnDelete.Theme = InnovatorAdmin.Controls.FlatButtonTheme.Icon;
       this.toolTipManager.SetToolTip(this.btnDelete, "Delete");
-      this.btnDelete.UseVisualStyleBackColor = true;
+      this.btnDelete.UseVisualStyleBackColor = false;
       this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
       // 
       // exploreButton
@@ -448,6 +457,7 @@
       this.exploreButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.exploreButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.exploreButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.exploreButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.exploreButton.ForeColor = System.Drawing.Color.Black;
       this.exploreButton.Location = new System.Drawing.Point(70, 3);
       this.exploreButton.Name = "exploreButton";
@@ -468,6 +478,7 @@
       this.btnTest.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnTest.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnTest.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnTest.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnTest.ForeColor = System.Drawing.Color.Black;
       this.btnTest.Location = new System.Drawing.Point(3, 3);
       this.btnTest.Name = "btnTest";
@@ -479,6 +490,16 @@
       this.btnTest.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnTest.UseVisualStyleBackColor = true;
       this.btnTest.Click += new System.EventHandler(this.btnTest_Click);
+      // 
+      // panel1
+      // 
+      this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+      this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(235)))), ((int)(((byte)(235)))));
+      this.panel1.Location = new System.Drawing.Point(198, 3);
+      this.panel1.Name = "panel1";
+      this.tlpControls.SetRowSpan(this.panel1, 7);
+      this.panel1.Size = new System.Drawing.Size(1, 201);
+      this.panel1.TabIndex = 46;
       // 
       // ConnectionEditor
       // 
@@ -526,5 +547,6 @@
     private Controls.FlatButton exploreButton;
     private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
     private System.Windows.Forms.CheckBox cb_confirm;
+    private System.Windows.Forms.Panel panel1;
   }
 }

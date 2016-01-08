@@ -94,7 +94,9 @@ namespace InnovatorAdmin
       _checked = new CheckedListBox();
       _items = new ObjectCollection(this);
 
+      _list.BorderStyle = System.Windows.Forms.BorderStyle.None;
       _list.Dock = DockStyle.Fill;
+      _checked.BorderStyle = System.Windows.Forms.BorderStyle.None;
       _checked.Dock = DockStyle.Fill;
 
       //_checked.CheckOnClick = true;

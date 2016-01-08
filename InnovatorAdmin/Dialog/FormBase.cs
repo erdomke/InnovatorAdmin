@@ -330,11 +330,11 @@ namespace InnovatorAdmin
       control.BackColor = backColor;
     }
 
-    protected Label MaximizeLabel { get; set; }
-    protected Label MinimizeLabel { get; set; }
-    protected Label CloseLabel { get; set; }
-    protected Label TitleLabel { get; set; }
-    protected Label SystemLabel { get; set; }
+    protected Control MaximizeLabel { get; set; }
+    protected Control MinimizeLabel { get; set; }
+    protected Control CloseLabel { get; set; }
+    protected Control TitleLabel { get; set; }
+    protected Control SystemLabel { get; set; }
     protected Panel TopLeftPanel { get; set; }
     protected Panel TopRightPanel { get; set; }
     protected Panel TopLeftCornerPanel { get; set; }
@@ -383,34 +383,48 @@ namespace InnovatorAdmin
       if (TopRightPanel != null) TopRightPanel.Cursor = Cursors.SizeWE;
       BottomBorderPanel.Cursor = Cursors.SizeNS;
 
+      var marlett = new Font("Marlett", 8.5f);
+
       if (SystemLabel != null)
       {
         SystemLabel.MouseDown += SystemLabel_MouseDown;
         SystemLabel.MouseUp += SystemLabel_MouseUp;
+        SystemLabel.Font = marlett;
       }
 
-      TitleLabel.MouseDown += TitleLabel_MouseDown;
-      TitleLabel.MouseUp += (s, e) => { if (e.Button == MouseButtons.Right && TitleLabel.ClientRectangle.Contains(e.Location)) ShowSystemMenu(MouseButtons); };
-      TitleLabel.Text = Text;
+      if (TitleLabel != null)
+      {
+        TitleLabel.MouseDown += TitleLabel_MouseDown;
+        TitleLabel.MouseUp += (s, e) => { if (e.Button == MouseButtons.Right && TitleLabel.ClientRectangle.Contains(e.Location)) ShowSystemMenu(MouseButtons); };
+        TitleLabel.Text = Text;
+      }
 
-      var marlett = new Font("Marlett", 8.5f);
+      if (MinimizeLabel != null)
+      {
+        MinimizeLabel.Font = marlett;
+        MinimizeLabel.MouseClick += (s, e) => { if (e.Button == MouseButtons.Left) WindowState = FormWindowState.Minimized; };
+      }
 
-      MinimizeLabel.Font = marlett;
-      MaximizeLabel.Font = marlett;
-      CloseLabel.Font = marlett;
-      if (SystemLabel != null) SystemLabel.Font = marlett;
+      if (MaximizeLabel != null)
+      {
+        MaximizeLabel.Font = marlett;
+        MaximizeLabel.MouseClick += (s, e) => { if (e.Button == MouseButtons.Left) ToggleMaximize(); };
+      }
 
-      MinimizeLabel.MouseClick += (s, e) => { if (e.Button == MouseButtons.Left) WindowState = FormWindowState.Minimized; };
-      MaximizeLabel.MouseClick += (s, e) => { if (e.Button == MouseButtons.Left) ToggleMaximize(); };
+      if (CloseLabel != null)
+      {
+        CloseLabel.Font = marlett;
+        CloseLabel.MouseClick += (s, e) => Close(e);
+      }
+
       previousWindowState = MinMaxState;
-      CloseLabel.MouseClick += (s, e) => Close(e);
     }
 
     protected override void OnTextChanged(EventArgs e)
     {
       base.OnTextChanged(e);
       if (!_themeInitialize) return;
-      TitleLabel.Text = Text;
+      if (TitleLabel != null) TitleLabel.Text = Text;
     }
 
     protected void SystemLabel_MouseUp(object sender, MouseEventArgs e)
@@ -484,10 +498,10 @@ namespace InnovatorAdmin
     protected void SetTextColor(Color color)
     {
       if (SystemLabel != null) SystemLabel.ForeColor = color;
-      TitleLabel.ForeColor = color;
-      MinimizeLabel.ForeColor = color;
-      MaximizeLabel.ForeColor = color;
-      CloseLabel.ForeColor = color;
+      if (TitleLabel != null) TitleLabel.ForeColor = color;
+      if (MinimizeLabel != null) MinimizeLabel.ForeColor = color;
+      if (MaximizeLabel != null) MaximizeLabel.ForeColor = color;
+      if (CloseLabel != null) CloseLabel.ForeColor = color;
     }
 
     protected override void OnSizeChanged(EventArgs e)
@@ -496,7 +510,7 @@ namespace InnovatorAdmin
       if (!_themeInitialize) return;
 
       var maximized = MinMaxState == FormWindowState.Maximized;
-      MaximizeLabel.Text = maximized ? "2" : "1";
+      if (MaximizeLabel != null) MaximizeLabel.Text = maximized ? "2" : "1";
 
       //var panels = new[] { TopLeftCornerPanel, TopRightCornerPanel, BottomLeftCornerPanel, BottomRightCornerPanel,
       //          TopBorderPanel, LeftBorderPanel, RightBorderPanel, BottomBorderPanel, TopLeftPanel, TopRightPanel };

@@ -36,6 +36,18 @@ namespace InnovatorAdmin
     public ConnectionEditor()
     {
       InitializeComponent();
+
+      btnNew.Font = FontAwesome.Font;
+      btnNew.Text = FontAwesome.Fa_plus_circle.ToString();
+      btnDelete.Font = FontAwesome.Font;
+      btnDelete.Text = FontAwesome.Fa_minus_circle.ToString();
+      btnCopy.Font = FontAwesome.Font;
+      btnCopy.Text = FontAwesome.Fa_copy.ToString();
+      btnMoveDown.Font = FontAwesome.Font;
+      btnMoveDown.Text = FontAwesome.Fa_arrow_down.ToString();
+      btnMoveUp.Font = FontAwesome.Font;
+      btnMoveUp.Text = FontAwesome.Fa_arrow_up.ToString();
+
       this.MultiSelect = false;
       _bs.CurrentChanged += _bs_CurrentChanged;
       cmbType.DataSource = Enum.GetValues(typeof(ConnectionType));

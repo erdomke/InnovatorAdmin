@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace InnovatorAdmin.Controls
 {
-  public partial class FilterSelect<T> : Form
+  public partial class FilterSelect<T> : FormBase
   {
     private IEnumerable<T> _dataSource;
     private FullBindingList<T> _filterable;
@@ -43,6 +43,18 @@ namespace InnovatorAdmin.Controls
     public FilterSelect()
     {
       InitializeComponent();
+
+      this.TitleLabel = pnlTitle;
+      this.LeftBorderPanel = pnlLeft;
+      this.TopLeftCornerPanel = pnlTopLeft;
+      this.TopBorderPanel = pnlTop;
+      this.TopRightCornerPanel = pnlTopRight;
+      this.RightBorderPanel = pnlRight;
+      this.BottomRightCornerPanel = pnlBottomRight;
+      this.BottomBorderPanel = pnlBottom;
+      this.BottomLeftCornerPanel = pnlBottomLeft;
+      this.InitializeTheme();
+
       _props = TypeDescriptor.GetProperties(typeof(T));
       this.KeyPreview = true;
       this.Icon = (this.Owner ?? Application.OpenForms[0]).Icon;

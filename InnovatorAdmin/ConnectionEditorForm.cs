@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace InnovatorAdmin
 {
-  public partial class ConnectionEditorForm : Form
+  public partial class ConnectionEditorForm : FormBase
   {
     public bool Multiselect
     {
@@ -27,6 +27,18 @@ namespace InnovatorAdmin
     public ConnectionEditorForm()
     {
       InitializeComponent();
+
+      this.TitleLabel = lblTitle;
+      this.LeftBorderPanel = pnlLeft;
+      this.TopLeftCornerPanel = pnlTopLeft;
+      this.TopBorderPanel = pnlTop;
+      this.TopRightCornerPanel = pnlTopRight;
+      this.RightBorderPanel = pnlRight;
+      this.BottomRightCornerPanel = pnlBottomRight;
+      this.BottomBorderPanel = pnlBottom;
+      this.BottomLeftCornerPanel = pnlBottomLeft;
+      this.InitializeTheme();
+
       connectionEditor.LoadConnectionLibrary(ConnectionManager.Current.Library);
       connectionEditor.ConnectionSelected += connectionEditor_ConnectionSelected;
       this.TopMost = true;
