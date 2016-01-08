@@ -26,7 +26,7 @@ namespace InnovatorAdmin
 
     private Timer _clock = new Timer();
     private UiCommandManager _commands;
-    private IPromise _currentQuery;
+    private IPromise<IResultObject> _currentQuery;
     private bool _disposeProxy = true;
     private Editor.AmlLinkElementGenerator _linkGenerator;
     private bool _loadingConnection = false;
@@ -535,6 +535,7 @@ namespace InnovatorAdmin
         _outputSet = _result.GetDataSet();
         if (_outputSet.Tables.Count > 0)
         {
+          dgvItems.AutoGenerateColumns = false;
           dgvItems.DataSource = _outputSet.Tables[0];
           FormatDataGrid(dgvItems);
           pgTableOutput.Text = _outputSet.Tables[0].TableName;
@@ -545,6 +546,7 @@ namespace InnovatorAdmin
             var pg = new TabPage(tbl.TableName);
             pg.Name = GeneratedPage + i.ToString();
             var grid = new Controls.DataGrid();
+            grid.AutoGenerateColumns = false;
             grid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             grid.ContextMenuStrip = this.conTable;
             grid.DataSource = tbl;
@@ -579,13 +581,57 @@ namespace InnovatorAdmin
 
     private void FormatDataGrid(DataGridView grid)
     {
+      var tbl = (DataTable)grid.DataSource;
+      var arasProxy = _proxy as ArasEditorProxy;
+      ArasMetadataProvider metadata = null;
+      if (arasProxy != null)
+        metadata = ArasMetadataProvider.Cached(arasProxy.Connection);
+
+      grid.Columns.Clear();
+      foreach (var dataCol in tbl.Columns.OfType<DataColumn>())
+      {
+        DataGridViewColumn col;
+        if (dataCol.DataType == typeof(bool))
+        {
+          col = new DataGridViewCheckBoxColumn();
+        }
+        else if (dataCol.DataType == typeof(DateTime))
+        {
+          col = new Controls.DataGridViewCalendarColumn();
+        }
+        else
+        {
+          var prop = dataCol.PropMetadata();
+          if (prop != null && metadata != null
+            && string.Equals(prop.TypeName, "list", StringComparison.OrdinalIgnoreCase))
+          {
+            var combo = new DataGridViewListColumn();
+            combo.DisplayMember = "Label";
+            combo.ValueMember = "Value";
+            metadata.ListValues(prop.DataSource)
+              .Done(v => combo.DataSource = v.ToArray());
+            col = combo;
+          }
+          else
+          {
+            col = new DataGridViewTextBoxColumn();
+          }
+        }
+
+        col.DataPropertyName = dataCol.ColumnName;
+        col.ValueType = dataCol.DataType;
+        col.HeaderText = dataCol.Caption;
+        col.Visible = dataCol.IsUiVisible();
+        grid.Columns.Add(col);
+      }
+
       grid.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCellsExceptHeader);
       var minWidths = grid.Columns.OfType<DataGridViewColumn>().Select(c => c.Width).ToArray();
       grid.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
       var maxWidths = grid.Columns.OfType<DataGridViewColumn>().Select(c => c.Width).ToArray();
       var maxWidth = (int)(grid.Width * 0.8);
 
-      DataColumn boundColumn;
+      //DataColumn boundColumn;
       for (var i = 0; i < grid.Columns.Count; i++)
       {
         grid.Columns[i].Width = Math.Min(maxWidths[i] < 100 ? maxWidths[i] :
@@ -595,9 +641,9 @@ namespace InnovatorAdmin
           (IsNumericType(grid.Columns[i].ValueType)
             ? DataGridViewContentAlignment.TopRight
             : DataGridViewContentAlignment.TopLeft);
-        boundColumn = ((DataTable)grid.DataSource).Columns[grid.Columns[i].DataPropertyName];
-        grid.Columns[i].HeaderText = boundColumn.Caption;
-        grid.Columns[i].Visible = boundColumn.IsUiVisible();
+        //boundColumn = ((DataTable)grid.DataSource).Columns[grid.Columns[i].DataPropertyName];
+        //grid.Columns[i].HeaderText = boundColumn.Caption;
+        //grid.Columns[i].Visible = boundColumn.IsUiVisible();
       }
 
       if (!grid.Columns.OfType<DataGridViewColumn>().Any(c => c.Visible))
@@ -612,7 +658,7 @@ namespace InnovatorAdmin
         .Select(c => new
         {
           Column = c,
-          SortOrder = ((DataTable)grid.DataSource).Columns[c.DataPropertyName].SortOrder()
+          SortOrder = GetSortOrder(c)
         })
         .OrderBy(c => c.SortOrder)
         .ThenBy(c => c.Column.HeaderText)
@@ -628,6 +674,15 @@ namespace InnovatorAdmin
         && ((DataTable)grid.DataSource).Columns.Contains(Extensions.AmlTable_TypeName);
       grid.AllowUserToDeleteRows = grid.AllowUserToAddRows;
       grid.ReadOnly = !grid.AllowUserToAddRows;
+    }
+
+    private int GetSortOrder(DataGridViewColumn c)
+    {
+      var col = ((DataTable)c.DataGridView.DataSource).Columns[c.DataPropertyName];
+      var prop = col.PropMetadata();
+      if (prop == null)
+        return col.Ordinal;
+      return prop.SortOrder;
     }
 
     private string GetUid()
@@ -1006,7 +1061,7 @@ namespace InnovatorAdmin
       return window;
     }
 
-    private void Submit(string query, OutputType preferred = OutputType.Any)
+    private IPromise<IResultObject> Submit(string query, OutputType preferred = OutputType.Any)
     {
       if (_currentQuery != null)
       {
@@ -1018,13 +1073,14 @@ namespace InnovatorAdmin
         lblItems.Text = "";
         _clock.Enabled = false;
         btnSubmit.Text = "► Run";
-        return;
+        return null;
       }
+
       if (_proxy.ConnData != null && _proxy.ConnData.Confirm)
       {
         if (MessageBox.Show("Do you want to run this query on " + _proxy.ConnData.ConnectionName +"?", "Confirm Execution", MessageBoxButtons.YesNo) == DialogResult.No)
         {
-          return;
+          return null;
         }
       }
       try
@@ -1054,21 +1110,25 @@ namespace InnovatorAdmin
               case System.Windows.Forms.DialogResult.Ignore:
                 break;
               default:
-                return;
+                return null;
             }
           }
         }
 
-        _result = null;
-        _outputSet = null;
-        var pagesToRemove = tbcOutputView.TabPages.OfType<TabPage>()
-                .Where(p => p.Name.StartsWith(GeneratedPage)).ToArray();
-        foreach (var page in pagesToRemove)
+        // Only reset if we are getting a new result
+        if (preferred != OutputType.None)
         {
-          tbcOutputView.TabPages.Remove(page);
+          _result = null;
+          _outputSet = null;
+          var pagesToRemove = tbcOutputView.TabPages.OfType<TabPage>()
+                  .Where(p => p.Name.StartsWith(GeneratedPage)).ToArray();
+          foreach (var page in pagesToRemove)
+          {
+            tbcOutputView.TabPages.Remove(page);
+          }
+          pgTableOutput.Text = "Table";
+          dgvItems.DataSource = null;
         }
-        pgTableOutput.Text = "Table";
-        dgvItems.DataSource = null;
 
         if (_proxy.ConnData != null)
         {
@@ -1120,14 +1180,11 @@ namespace InnovatorAdmin
         _currentQuery = null;
         btnSubmit.Text = "► Run";
       }
+      return _currentQuery;
     }
 
     private void SetResult(IResultObject result, long milliseconds, OutputType preferred = OutputType.Any)
     {
-      _outputTextSet = false;
-      dgvItems.DataSource = null;
-      _outputSet = null;
-
       var mode = this.PreferredMode;
       if (mode == OutputType.Any)
         mode = preferred;
@@ -1135,7 +1192,6 @@ namespace InnovatorAdmin
         mode = result.PreferredMode;
       tbcOutputView.TabsVisible = this.PreferredMode == OutputType.Any;
 
-      _result = result;
       if (result.ItemCount > 0)
       {
         lblItems.Text = string.Format("{0} item(s) found in {1} ms.", result.ItemCount, milliseconds);
@@ -1145,24 +1201,31 @@ namespace InnovatorAdmin
         lblItems.Text = string.Format("No items found in {0} ms.", milliseconds);
       }
 
-      if (mode == OutputType.Table && result.ItemCount > 0)
+      if (mode != OutputType.None)
       {
-        tbcOutputView.SelectedTab = pgTableOutput;
-        EnsureDataTable();
-      }
-      else if (mode == OutputType.Html)
-      {
-        browser.Navigate(GetReportUri().ToString());
-        tbcOutputView.SelectedTab = pgHtml;
-      }
-      else
-      {
-        tbcOutputView.SelectedTab = pgTextOutput;
-        EnsureTextResult();
+        _outputTextSet = false;
+        dgvItems.DataSource = null;
+        _outputSet = null;
+        _result = result;
+        if (mode == OutputType.Table && result.ItemCount > 0)
+        {
+          tbcOutputView.SelectedTab = pgTableOutput;
+          EnsureDataTable();
+        }
+        else if (mode == OutputType.Html)
+        {
+          browser.Navigate(GetReportUri().ToString());
+          tbcOutputView.SelectedTab = pgHtml;
+        }
+        else
+        {
+          tbcOutputView.SelectedTab = pgTextOutput;
+          EnsureTextResult();
+        }
       }
 
       inputEditor.Editor.Focus();
-      this.Text = result.Title + " [AmlStudio]";
+      this.Text = string.IsNullOrEmpty(result.Title) ? "Innovator Admin" : result.Title + " [Innovator Admin]";
     }
     #endregion
 
@@ -1252,6 +1315,48 @@ namespace InnovatorAdmin
       try
       {
         _outputSet.RejectChanges();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void mniSave_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        var grid = tbcOutputView.SelectedTab.Controls.OfType<DataGridView>().Single();
+        this.Validate();
+        var aml = GetTableChangeAml((DataTable)grid.DataSource);
+        if (!string.IsNullOrEmpty(aml))
+        {
+          this.SoapAction = "ApplyAML";
+          var result = Submit(aml, OutputType.None);
+          if (result != null)
+            result.Done(r =>
+            {
+              try
+              {
+                using (var reader = r.GetTextSource().CreateReader())
+                using (var xml = XmlReader.Create(reader))
+                {
+                  while (xml.Read())
+                  {
+                    if (xml.NodeType == XmlNodeType.Element)
+                    {
+                      if (xml.LocalName == "Fault" && xml.Prefix == "SOAP-ENV")
+                        return;
+                      if (xml.LocalName == "Result" || xml.LocalName == "Item")
+                        break;
+                    }
+                  }
+                }
+              }
+              catch (XmlException) { }
+              ((DataTable)grid.DataSource).AcceptChanges();
+            });
+        }
       }
       catch (Exception ex)
       {
@@ -1349,7 +1454,9 @@ namespace InnovatorAdmin
               xml.WriteAttributeString("action", "add");
               foreach (var column in changes.Columns.OfType<DataColumn>())
               {
-                if (!row.IsNull(column) && !column.ColumnName.Contains('/'))
+                if (!column.ColumnName.Contains('/')
+                  && column.ColumnName != Extensions.AmlTable_TypeName
+                  && !row.IsNull(column))
                 {
                   xml.WriteElementString(column.ColumnName, context.Format(row[column]));
                 }
@@ -1363,6 +1470,7 @@ namespace InnovatorAdmin
               foreach (var column in changes.Columns.OfType<DataColumn>())
               {
                 if (!column.ColumnName.Contains('/')
+                  && column.ColumnName != Extensions.AmlTable_TypeName
                   && IsChanged(row, column, out newValue))
                 {
                   xml.WriteElementString(column.ColumnName, context.Format(newValue));
@@ -1564,8 +1672,7 @@ namespace InnovatorAdmin
         if (node != null && node.GetScripts().Any())
         {
           var script = node.GetScripts().First();
-          this.SoapAction = script.Action;
-          this.Script = script.Script;
+          Execute(script);
         }
       }
       catch (Exception ex)
@@ -1743,6 +1850,7 @@ namespace InnovatorAdmin
           conTable.Items.Add(new ToolStripSeparator());
         conTable.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
           this.mniColumns,
+          this.mniSave,
           this.mniScriptEdits,
           this.mniResetChanges});
       }

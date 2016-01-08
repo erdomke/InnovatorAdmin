@@ -3,6 +3,7 @@ using ICSharpCode.AvalonEdit.Highlighting;
 using Innovator.Client;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -131,7 +132,8 @@ namespace InnovatorAdmin.Editor
       public string Action { get; set; }
     }
 
-    public static IEnumerable<IEditorScript> GetScripts(IAsyncConnection conn, string type, string id, string relatedId = null)
+    public static IEnumerable<IEditorScript> GetScripts(IAsyncConnection conn, string type, string id
+      , string relatedId = null, DataRow row = null)
     {
       if (!string.IsNullOrEmpty(id))
       {
@@ -173,18 +175,29 @@ namespace InnovatorAdmin.Editor
         {
           yield return ArasEditorProxy.ItemTypeAddScript(conn, itemType);
         }
-        yield return new EditorScript()
+        if (row == null)
         {
-          Name = "Edit",
-          Action = "ApplyItem",
-          Script = string.Format("<Item type='{0}' id='{1}' action='edit'></Item>", type, id)
-        };
-        yield return new EditorScript()
+          yield return new EditorScript()
+          {
+            Name = "Edit",
+            Action = "ApplyItem",
+            Script = string.Format("<Item type='{0}' id='{1}' action='edit'></Item>", type, id)
+          };
+          yield return new EditorScript()
+          {
+            Name = "Delete",
+            Action = "ApplyItem",
+            Script = string.Format("<Item type='{0}' id='{1}' action='delete'></Item>", type, id)
+          };
+        }
+        else
         {
-          Name = "Delete",
-          Action = "ApplyItem",
-          Script = string.Format("<Item type='{0}' id='{1}' action='delete'></Item>", type, id)
-        };
+          yield return new EditorScriptExecute()
+          {
+            Name = "Delete",
+            Execute = () => row.Delete()
+          };
+        }
         yield return new EditorScript()
         {
           Name = "------"

@@ -11,6 +11,7 @@ namespace InnovatorAdmin
     Any,
     Text,
     Html,
-    Table
+    Table,
+    None
   }
 }

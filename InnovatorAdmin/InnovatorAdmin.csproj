@@ -161,6 +161,10 @@
     <Compile Include="Controls\DataGrid.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Controls\DataGridViewCalendarColumn.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\DataGridViewListColumn.cs" />
     <Compile Include="Controls\DropShadow.cs">
       <SubType>Component</SubType>
     </Compile>

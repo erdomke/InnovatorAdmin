@@ -29,11 +29,6 @@ namespace InnovatorAdmin
           table.Load(reader);
           dataSet.Tables.Add(table);
 
-          for (var i = 0; i < table.Columns.Count; i++)
-          {
-            table.Columns[i].SortOrder(i * 10);
-          }
-
           nextResult = !reader.IsClosed && reader.HasRows;
         }
 

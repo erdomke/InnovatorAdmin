@@ -143,6 +143,7 @@
       this.pnlLeftTop = new System.Windows.Forms.Panel();
       this.pnlRightTop = new System.Windows.Forms.Panel();
       this.pnlConnectionShadow = new InnovatorAdmin.DropShadow();
+      this.mniSave = new System.Windows.Forms.ToolStripMenuItem();
       this.tblMain.SuspendLayout();
       this.tblHeader.SuspendLayout();
       this.menuStrip.SuspendLayout();
@@ -1188,10 +1189,11 @@
       // 
       this.conTable.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniColumns,
+            this.mniSave,
             this.mniScriptEdits,
             this.mniResetChanges});
       this.conTable.Name = "conTable";
-      this.conTable.Size = new System.Drawing.Size(153, 92);
+      this.conTable.Size = new System.Drawing.Size(153, 114);
       this.conTable.Opening += new System.ComponentModel.CancelEventHandler(this.conTable_Opening);
       // 
       // mniColumns
@@ -1209,7 +1211,7 @@
             this.mniTableEditsToQueryEditor});
       this.mniScriptEdits.Name = "mniScriptEdits";
       this.mniScriptEdits.Size = new System.Drawing.Size(152, 22);
-      this.mniScriptEdits.Text = "Script Edits To";
+      this.mniScriptEdits.Text = "Save To";
       // 
       // mniTableEditsToClipboard
       // 
@@ -1418,6 +1420,13 @@
       this.pnlConnectionShadow.Size = new System.Drawing.Size(621, 4);
       this.pnlConnectionShadow.TabIndex = 17;
       // 
+      // mniSave
+      // 
+      this.mniSave.Name = "mniSave";
+      this.mniSave.Size = new System.Drawing.Size(152, 22);
+      this.mniSave.Text = "Save";
+      this.mniSave.Click += new System.EventHandler(this.mniSave_Click);
+      // 
       // EditorWindow
       // 
       this.AcceptButton = this.btnOk;
@@ -1583,5 +1592,6 @@
     private System.Windows.Forms.Panel pnlLeftTop;
     private System.Windows.Forms.Panel pnlRightTop;
     private DropShadow pnlConnectionShadow;
+    private System.Windows.Forms.ToolStripMenuItem mniSave;
   }
 }

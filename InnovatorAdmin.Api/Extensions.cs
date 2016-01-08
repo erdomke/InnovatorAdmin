@@ -139,26 +139,36 @@ namespace InnovatorAdmin
     {
       column.ExtendedProperties["visible"] = value;
     }
-    public static int ColumnWidth(this DataColumn column)
+    public static Property PropMetadata(this DataColumn column)
     {
-      if (column.ExtendedProperties.ContainsKey("column_width"))
-        return (int)column.ExtendedProperties["column_width"];
-      return 100;
+      if (column.ExtendedProperties.ContainsKey("property"))
+        return (Property)column.ExtendedProperties["property"];
+      return null;
     }
-    private static void ColumnWidth(this DataColumn column, int value)
+    private static void PropMetadata(this DataColumn column, Property value)
     {
-      column.ExtendedProperties["column_width"] = value;
+      column.ExtendedProperties["property"] = value;
     }
-    public static int SortOrder(this DataColumn column)
-    {
-      if (column.ExtendedProperties.ContainsKey("sort_order"))
-        return (int)column.ExtendedProperties["sort_order"];
-      return 999999;
-    }
-    public static void SortOrder(this DataColumn column, int value)
-    {
-      column.ExtendedProperties["sort_order"] = value;
-    }
+    //public static int ColumnWidth(this DataColumn column)
+    //{
+    //  if (column.ExtendedProperties.ContainsKey("column_width"))
+    //    return (int)column.ExtendedProperties["column_width"];
+    //  return 100;
+    //}
+    //private static void ColumnWidth(this DataColumn column, int value)
+    //{
+    //  column.ExtendedProperties["column_width"] = value;
+    //}
+    //public static int SortOrder(this DataColumn column)
+    //{
+    //  if (column.ExtendedProperties.ContainsKey("sort_order"))
+    //    return (int)column.ExtendedProperties["sort_order"];
+    //  return 999999;
+    //}
+    //public static void SortOrder(this DataColumn column, int value)
+    //{
+    //  column.ExtendedProperties["sort_order"] = value;
+    //}
 
     public static DataSet GetItemTable(IReadOnlyResult res, ArasMetadataProvider metadata)
     {
@@ -248,7 +258,10 @@ namespace InnovatorAdmin
             };
           }
 
-          foreach (var prop in kvp.Value)
+          var allProps = new HashSet<string>(kvp.Value);
+          allProps.UnionWith(metadata.GetProperties(itemType).Wait().Select(p => p.Name));
+
+          foreach (var prop in allProps)
           {
             if (prop != AmlTable_TypeName
               && prop != AmlTable_TypeId
@@ -313,8 +326,7 @@ namespace InnovatorAdmin
                 newColumn.IsUiVisible(!string.IsNullOrEmpty(mainType) && itemType.Name != mainType
                   ? (pMeta.Visibility & PropertyVisibility.RelationshipGrid) > 0
                   : (pMeta.Visibility & PropertyVisibility.MainGrid) > 0);
-                newColumn.ColumnWidth(pMeta.ColumnWidth);
-                newColumn.SortOrder(pMeta.SortOrder);
+                newColumn.PropMetadata(pMeta);
               }
               catch (KeyNotFoundException)
               {
@@ -326,6 +338,8 @@ namespace InnovatorAdmin
             {
               newColumn = new DataColumn(prop, typeof(string));
               newColumn.IsUiVisible(string.IsNullOrEmpty(kvp.Key) || metadata == null);
+              if (prop == AmlTable_TypeName && !string.IsNullOrEmpty(kvp.Key))
+                newColumn.DefaultValue = kvp.Key;
             }
             result.Columns.Add(newColumn);
           }

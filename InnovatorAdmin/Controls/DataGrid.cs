@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -62,7 +63,7 @@ namespace InnovatorAdmin.Controls
       {
         // do nothing
       }
-      else if (!string.IsNullOrEmpty(Clipboard.GetText())) 
+      else if (!string.IsNullOrEmpty(Clipboard.GetText()))
       {
 	      var lines = Clipboard.GetText().TrimEnd('\r', '\n').Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
 	      var clipRows = lines.Length;
@@ -77,35 +78,78 @@ namespace InnovatorAdmin.Controls
         var pasteErrorCount = 0;
         var pasteErrors = new StringBuilder();
 
-	      for (var row = 0; row <= this.RowCount - 1; row++) 
+	      for (var row = 0; row <= this.RowCount - 1; row++)
         {
           for (var colIdx = 0; colIdx < visColumns.Length; colIdx++)
           {
             if (selectMatrix[row][colIdx])
             {
-              for (var pasteRow = 0; pasteRow <= Math.Min(clipRows, this.RowCount - row) - 1; pasteRow++)
+              var maxRows = this.AllowUserToAddRows ? clipRows : Math.Min(clipRows, this.RowCount - row);
+              for (var pasteRow = 0; pasteRow < maxRows; pasteRow++)
               {
                 fields = lines[pasteRow].Split('\t');
-                for (var pasteCol = 0; pasteCol <= Math.Min(fields.Length, visColumns.Length - colIdx) - 1; pasteCol++)
+                if (this.Rows[row + pasteRow].IsNewRow)
                 {
-                  selectMatrix[row + pasteRow][colIdx + pasteCol] = false; // Prevent overwriting paste area
-                  cell = this[visColumns[colIdx + pasteCol], row + pasteRow];
-                  if (!cell.ReadOnly)
+                  for (var pRow = pasteRow; pRow < maxRows; pRow++)
                   {
-                    try
+                    fields = lines[pRow].Split('\t');
+                    var newRow = CreateRow();
+                    for (var pasteCol = 0; pasteCol < Math.Min(fields.Length, visColumns.Length - colIdx); pasteCol++)
                     {
-                      cell.Value = cell.ParseFormattedValue(fields[pasteCol], cell.Style, null, null);
-                    }
-                    catch (FormatException)
-                    {
-                      if (pasteErrorCount < 3)
+                      cell = this[visColumns[colIdx + pasteCol], row + pasteRow];
+                      if (!cell.ReadOnly)
                       {
-                        pasteErrors.AppendFormat("  '{0}' could not be pasted in {1} of type {2}"
-                          , fields[pasteCol]
-                          , cell.OwningColumn.HeaderText ?? cell.OwningColumn.Name
-                          , cell.OwningColumn.ValueType.Name).AppendLine();
+                        try
+                        {
+                          newRow[this.Columns[visColumns[colIdx + pasteCol]].DataPropertyName]
+                            = cell.ParseFormattedValue(fields[pasteCol], cell.Style, null, null);
+                        }
+                        catch (FormatException)
+                        {
+                          if (pasteErrorCount < 3)
+                          {
+                            pasteErrors.AppendFormat("  '{0}' could not be pasted in {1} of type {2}"
+                              , fields[pasteCol]
+                              , cell.OwningColumn.HeaderText ?? cell.OwningColumn.Name
+                              , cell.OwningColumn.ValueType.Name).AppendLine();
+                          }
+                          pasteErrorCount++;
+                        }
                       }
-                      pasteErrorCount++;
+                    }
+                    newRow.Add();
+                  }
+
+                  if (pasteRow == 0)
+                    this.Rows.RemoveAt(this.RowCount - 2);
+
+                  return;
+                }
+                else
+                {
+                  for (var pasteCol = 0; pasteCol < Math.Min(fields.Length, visColumns.Length - colIdx); pasteCol++)
+                  {
+                    if ((row + pasteRow) < selectMatrix.Count)
+                      selectMatrix[row + pasteRow][colIdx + pasteCol] = false; // Prevent overwriting paste area
+
+                    cell = this[visColumns[colIdx + pasteCol], row + pasteRow];
+                    if (!cell.ReadOnly)
+                    {
+                      try
+                      {
+                        cell.Value = cell.ParseFormattedValue(fields[pasteCol], cell.Style, null, null);
+                      }
+                      catch (FormatException)
+                      {
+                        if (pasteErrorCount < 3)
+                        {
+                          pasteErrors.AppendFormat("  '{0}' could not be pasted in {1} of type {2}"
+                            , fields[pasteCol]
+                            , cell.OwningColumn.HeaderText ?? cell.OwningColumn.Name
+                            , cell.OwningColumn.ValueType.Name).AppendLine();
+                        }
+                        pasteErrorCount++;
+                      }
                     }
                   }
                 }
@@ -120,6 +164,41 @@ namespace InnovatorAdmin.Controls
           Utils.HandleError(pasteError);
         }
 	    }
+    }
+
+    private interface INewRow
+    {
+      object this[string name] { get; set; }
+      void Add();
+    }
+
+    private class NewTableRow : INewRow
+    {
+      private DataRow _row;
+
+      public NewTableRow(DataTable table)
+      {
+        _row = table.NewRow();
+      }
+
+      public object this[string name]
+      {
+        get { return _row[name]; }
+        set { _row[name] = value; }
+      }
+
+      public void Add()
+      {
+        _row.Table.Rows.Add(_row);
+      }
+    }
+
+    private INewRow CreateRow()
+    {
+      var tbl = this.DataSource as DataTable;
+      if (tbl == null)
+        throw new NotSupportedException();
+      return new NewTableRow(tbl);
     }
   }
 }

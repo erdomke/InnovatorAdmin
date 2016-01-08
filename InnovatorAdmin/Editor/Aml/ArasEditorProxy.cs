@@ -626,6 +626,8 @@ namespace InnovatorAdmin.Editor
           builder.AppendFormat("<Item type='{0}' action='get'", itemType.Name);
           if (it.Property("default_page_size").HasValue())
             builder.AppendFormat(" page='1' pagesize='{0}'", it.Property("default_page_size").Value);
+          else
+            builder.Append(" maxRecords='250'");
           builder.Append('>').AppendLine();
           foreach (var prop in it.Relationships().Where(p => p.Property("default_search").HasValue()))
           {
@@ -635,7 +637,9 @@ namespace InnovatorAdmin.Editor
           }
           builder.Append("</Item>");
           return builder.ToString();
-        }
+        },
+        AutoRun = true,
+        PreferredOutput = OutputType.Table
       };
       yield return ItemTypeAddScript(_conn, itemType);
       yield return new EditorScript()
