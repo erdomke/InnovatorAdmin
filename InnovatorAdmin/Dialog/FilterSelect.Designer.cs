@@ -96,9 +96,9 @@
       this.tableLayoutPanel1.SetColumnSpan(this.listValues, 2);
       this.listValues.FormattingEnabled = true;
       this.listValues.ItemHeight = 15;
-      this.listValues.Location = new System.Drawing.Point(6, 77);
+      this.listValues.Location = new System.Drawing.Point(6, 74);
       this.listValues.Name = "listValues";
-      this.listValues.Size = new System.Drawing.Size(317, 165);
+      this.listValues.Size = new System.Drawing.Size(317, 180);
       this.listValues.TabIndex = 1;
       this.listValues.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listValues_KeyDown);
       this.listValues.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listValues_MouseDoubleClick);
@@ -109,7 +109,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.txtFilter.BorderStyle = System.Windows.Forms.BorderStyle.None;
       this.tableLayoutPanel1.SetColumnSpan(this.txtFilter, 2);
-      this.txtFilter.Location = new System.Drawing.Point(6, 48);
+      this.txtFilter.Location = new System.Drawing.Point(6, 45);
       this.txtFilter.Name = "txtFilter";
       this.txtFilter.Size = new System.Drawing.Size(317, 16);
       this.txtFilter.TabIndex = 0;
@@ -162,11 +162,11 @@
       // lblMessage
       // 
       this.lblMessage.AutoSize = true;
-      this.lblMessage.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.lblMessage.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.lblMessage.Location = new System.Drawing.Point(6, 22);
       this.lblMessage.Margin = new System.Windows.Forms.Padding(3);
       this.lblMessage.Name = "lblMessage";
-      this.lblMessage.Size = new System.Drawing.Size(0, 20);
+      this.lblMessage.Size = new System.Drawing.Size(0, 17);
       this.lblMessage.TabIndex = 4;
       // 
       // panel1
@@ -175,7 +175,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(150)))), ((int)(((byte)(243)))));
       this.tableLayoutPanel1.SetColumnSpan(this.panel1, 2);
-      this.panel1.Location = new System.Drawing.Point(3, 67);
+      this.panel1.Location = new System.Drawing.Point(3, 64);
       this.panel1.Margin = new System.Windows.Forms.Padding(0, 0, 0, 5);
       this.panel1.Name = "panel1";
       this.panel1.Size = new System.Drawing.Size(323, 2);

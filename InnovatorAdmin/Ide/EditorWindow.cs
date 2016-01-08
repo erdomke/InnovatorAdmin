@@ -44,7 +44,6 @@ namespace InnovatorAdmin
     private string _uid;
     private bool _updateCheckComplete = false;
     private IHttpService _webService = new DefaultHttpService();
-    private SimpleToolstripRenderer _renderer;
 
     public bool AllowRun
     {
@@ -77,27 +76,16 @@ namespace InnovatorAdmin
 
     private Color ConnectionColor
     {
-      get { return _renderer.BaseColor; }
+      get { return pnlConnectionShadow.ShadowColor; }
       set
       {
-        _renderer.BaseColor = value;
-        tblHeader.BackColor = value;
+        pnlConnectionShadow.ShadowColor = value;
+        pnlLeft.ShadowColor = value;
+        pnlRight.ShadowColor = value;
 
-        picLogo.Image = _renderer.ColorTable.SeparatorDark.GetBrightness() < 0.5
-          ? Properties.Resources.logo_black
-          : Properties.Resources.logo_white;
-
-        pnlLeftTop.BackColor = value;
-        pnlTopLeft.BackColor = value;
-        pnlTop.BackColor = value;
-        pnlTopRight.BackColor = value;
-        pnlRightTop.BackColor = value;
-
-        this.ActiveTextColor = _renderer.ColorTable.SeparatorDark;
-        this.DownBackColor = _renderer.ColorTable.ButtonPressedGradientBegin;
-        this.DownTextColor = _renderer.ColorTable.SeparatorDark;
-        this.HoverBackColor = _renderer.ColorTable.ButtonSelectedGradientBegin;
-        this.HoverTextColor = _renderer.ColorTable.SeparatorDark;
+        var logo = new Logo(value);
+        picLogo.Image = logo.Image;
+        this.Icon = logo.Icon;
       }
     }
 
@@ -121,13 +109,12 @@ namespace InnovatorAdmin
       this.BottomLeftCornerPanel = pnlBottomLeft;
       this.InitializeTheme();
 
-      _renderer = new SimpleToolstripRenderer();
-      menuStrip.Renderer = _renderer;
+      menuStrip.Renderer = new SimpleToolstripRenderer() { BaseColor = Color.White };
       lblConnection.Font = FontAwesome.Font;
       lblConnection.Text = FontAwesome.Fa_cloud.ToString();
       lblSoapAction.Font = FontAwesome.Font;
       lblSoapAction.Text = FontAwesome.Fa_bolt.ToString();
-      this.ConnectionColor = Color.LightGray;
+      picLogo.Image = Properties.Resources.logo_black;
       btnPanelToggle.BackColor = Color.White;
       picLogo.MouseDown += SystemLabel_MouseDown;
       picLogo.MouseUp += SystemLabel_MouseUp;
@@ -367,14 +354,6 @@ namespace InnovatorAdmin
         d.SetConnection(conn);
         d.Script = query;
         d.inputEditor.Editor.CaretOffset = offset;
-        //Task.Delay(500).ContinueWith(t =>
-        //{
-        //  d.UiThreadInvoke(() =>
-        //  {
-        //    d.inputEditor.Focus();
-
-        //  });
-        //});
       });
     }
     public static IEnumerable<ItemReference> GetItems(Connections.ConnectionData conn)
@@ -1268,18 +1247,6 @@ namespace InnovatorAdmin
 
     #region Table Handling
 
-    private void mniAcceptChanges_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        _outputSet.AcceptChanges();
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
     private void mniResetChanges_Click(object sender, EventArgs e)
     {
       try
@@ -1776,10 +1743,7 @@ namespace InnovatorAdmin
           conTable.Items.Add(new ToolStripSeparator());
         conTable.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
           this.mniColumns,
-          this.mniSepTable1,
           this.mniScriptEdits,
-          this.mniSepTable2,
-          this.mniAcceptChanges,
           this.mniResetChanges});
       }
       catch (Exception ex)

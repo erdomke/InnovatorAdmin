@@ -16,7 +16,8 @@ namespace InnovatorAdmin
     private static extern IntPtr AddFontMemResourceEx(IntPtr pbFont, uint cbFont,
         IntPtr pdv, [System.Runtime.InteropServices.In] ref uint pcFonts);
 
-    private static Font _materialDesignFont;
+    private static Font _font;
+    private static FontFamily _family;
 
     #region Characters
     public static char Fa_500px = '\xf26e';
@@ -715,9 +716,13 @@ namespace InnovatorAdmin
     public static char Fa_youtube_square = '\xf166';
     #endregion
 
+    public static FontFamily Family
+    {
+      get { return _family; }
+    }
     public static Font Font
     {
-      get { return _materialDesignFont; }
+      get { return _font; }
     }
 
     static FontAwesome()
@@ -734,7 +739,8 @@ namespace InnovatorAdmin
       AddFontMemResourceEx(fontPtr, (uint)fontData.Length, IntPtr.Zero, ref dummy);
       System.Runtime.InteropServices.Marshal.FreeCoTaskMem(fontPtr);
 
-      _materialDesignFont = new Font(fonts.Families[0], 16.0F);
+      _family = fonts.Families[0];
+      _font = new Font(_family, 16.0F);
     }
   }
 }

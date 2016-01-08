@@ -153,14 +153,37 @@ namespace InnovatorAdmin
       if (SelectionChanged != null) SelectionChanged.Invoke(this, e);
     }
 
+    private bool _authorizeCheck;
+
     void _checked_ItemCheck(object sender, ItemCheckEventArgs e)
     {
-      _itemChecked = true;
+      if (_authorizeCheck)
+        _itemChecked = true;
+      else
+        e.NewValue = e.CurrentValue; //check state change was only through authorized actions
     }
 
     void _checked_MouseDown(object sender, MouseEventArgs e)
     {
       _itemChecked = false;
+      //var loc = _checked.PointToClient(Cursor.Position);
+      var i = _checked.IndexFromPoint(e.Location);
+      var rec = _checked.GetItemRectangle(i);
+      rec.Width = 16; //checkbox itself has a default width of about 16 pixels
+
+      if (rec.Contains(e.Location))
+      {
+        try
+        {
+          _authorizeCheck = true;
+          var newValue = !_checked.GetItemChecked(i);
+          _checked.SetItemChecked(i, newValue); //check
+        }
+        finally
+        {
+          _authorizeCheck = false;
+        }
+      }
     }
 
     void _checked_MouseUp(object sender, MouseEventArgs e)

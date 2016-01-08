@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Innovator.Client;
 using System.Data.SqlClient;
+using System.Drawing;
 
 namespace InnovatorAdmin
 {
@@ -37,15 +38,16 @@ namespace InnovatorAdmin
     {
       InitializeComponent();
 
-      btnNew.Font = FontAwesome.Font;
+      var iconFont = new Font(FontAwesome.Family, 12.0F);
+      btnNew.Font = iconFont;
       btnNew.Text = FontAwesome.Fa_plus_circle.ToString();
-      btnDelete.Font = FontAwesome.Font;
+      btnDelete.Font = iconFont;
       btnDelete.Text = FontAwesome.Fa_minus_circle.ToString();
-      btnCopy.Font = FontAwesome.Font;
+      btnCopy.Font = iconFont;
       btnCopy.Text = FontAwesome.Fa_copy.ToString();
-      btnMoveDown.Font = FontAwesome.Font;
+      btnMoveDown.Font = iconFont;
       btnMoveDown.Text = FontAwesome.Fa_arrow_down.ToString();
-      btnMoveUp.Font = FontAwesome.Font;
+      btnMoveUp.Font = iconFont;
       btnMoveUp.Text = FontAwesome.Fa_arrow_up.ToString();
 
       this.MultiSelect = false;
@@ -272,7 +274,7 @@ namespace InnovatorAdmin
     {
       try
       {
-        if (ConnectionSelected != null)
+        if (ConnectionSelected != null && !lstConnections.Multiselect)
           ConnectionSelected.Invoke(this, e);
       }
       catch (Exception ex)

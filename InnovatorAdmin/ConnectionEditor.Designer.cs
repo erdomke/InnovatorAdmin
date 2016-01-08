@@ -49,6 +49,7 @@
       this.cmbAuth = new System.Windows.Forms.ComboBox();
       this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
       this.cb_confirm = new System.Windows.Forms.CheckBox();
+      this.panel1 = new System.Windows.Forms.Panel();
       this.lstConnections = new InnovatorAdmin.MultiselectListBox();
       this.btnMoveDown = new InnovatorAdmin.Controls.FlatButton();
       this.btnNew = new InnovatorAdmin.Controls.FlatButton();
@@ -57,7 +58,6 @@
       this.btnDelete = new InnovatorAdmin.Controls.FlatButton();
       this.exploreButton = new InnovatorAdmin.Controls.FlatButton();
       this.btnTest = new InnovatorAdmin.Controls.FlatButton();
-      this.panel1 = new System.Windows.Forms.Panel();
       this.tlpControls.SuspendLayout();
       this.flowLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
@@ -66,7 +66,7 @@
       // 
       this.lblDatabase.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblDatabase.AutoSize = true;
-      this.lblDatabase.Location = new System.Drawing.Point(409, 119);
+      this.lblDatabase.Location = new System.Drawing.Point(409, 115);
       this.lblDatabase.Name = "lblDatabase";
       this.lblDatabase.Size = new System.Drawing.Size(56, 13);
       this.lblDatabase.TabIndex = 26;
@@ -78,12 +78,12 @@
       this.txtPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.tlpControls.SetColumnSpan(this.txtPassword, 2);
-      this.txtPassword.Location = new System.Drawing.Point(471, 87);
+      this.txtPassword.Location = new System.Drawing.Point(471, 85);
       this.txtPassword.MaxLength = 64;
       this.txtPassword.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtPassword.Name = "txtPassword";
       this.txtPassword.PasswordChar = '*';
-      this.txtPassword.Size = new System.Drawing.Size(129, 22);
+      this.txtPassword.Size = new System.Drawing.Size(129, 20);
       this.txtPassword.TabIndex = 7;
       this.txtPassword.WordWrap = false;
       // 
@@ -91,7 +91,7 @@
       // 
       this.lblPassword.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblPassword.AutoSize = true;
-      this.lblPassword.Location = new System.Drawing.Point(409, 91);
+      this.lblPassword.Location = new System.Drawing.Point(409, 88);
       this.lblPassword.Name = "lblPassword";
       this.lblPassword.Size = new System.Drawing.Size(56, 13);
       this.lblPassword.TabIndex = 24;
@@ -101,19 +101,19 @@
       // 
       this.txtUser.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.txtUser.Location = new System.Drawing.Point(284, 87);
+      this.txtUser.Location = new System.Drawing.Point(284, 85);
       this.txtUser.MaximumSize = new System.Drawing.Size(160, 4);
       this.txtUser.MaxLength = 32;
       this.txtUser.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtUser.Name = "txtUser";
-      this.txtUser.Size = new System.Drawing.Size(119, 22);
+      this.txtUser.Size = new System.Drawing.Size(119, 20);
       this.txtUser.TabIndex = 6;
       // 
       // lblUser
       // 
       this.lblUser.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblUser.AutoSize = true;
-      this.lblUser.Location = new System.Drawing.Point(203, 91);
+      this.lblUser.Location = new System.Drawing.Point(203, 88);
       this.lblUser.Name = "lblUser";
       this.lblUser.Size = new System.Drawing.Size(32, 13);
       this.lblUser.TabIndex = 22;
@@ -128,14 +128,14 @@
       this.txtUrl.Location = new System.Drawing.Point(284, 32);
       this.txtUrl.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtUrl.Name = "txtUrl";
-      this.txtUrl.Size = new System.Drawing.Size(316, 22);
+      this.txtUrl.Size = new System.Drawing.Size(316, 20);
       this.txtUrl.TabIndex = 3;
       // 
       // lblUrl
       // 
       this.lblUrl.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblUrl.AutoSize = true;
-      this.lblUrl.Location = new System.Drawing.Point(203, 36);
+      this.lblUrl.Location = new System.Drawing.Point(203, 35);
       this.lblUrl.Name = "lblUrl";
       this.lblUrl.Size = new System.Drawing.Size(32, 13);
       this.lblUrl.TabIndex = 20;
@@ -234,7 +234,7 @@
       // 
       this.lblMessage.AutoSize = true;
       this.tlpControls.SetColumnSpan(this.lblMessage, 2);
-      this.lblMessage.Location = new System.Drawing.Point(206, 145);
+      this.lblMessage.Location = new System.Drawing.Point(206, 141);
       this.lblMessage.Margin = new System.Windows.Forms.Padding(6);
       this.lblMessage.Name = "lblMessage";
       this.lblMessage.Size = new System.Drawing.Size(0, 13);
@@ -246,7 +246,7 @@
       this.tlpControls.SetColumnSpan(this.cmbDatabase, 2);
       this.cmbDatabase.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.cmbDatabase.FormattingEnabled = true;
-      this.cmbDatabase.Location = new System.Drawing.Point(471, 115);
+      this.cmbDatabase.Location = new System.Drawing.Point(471, 111);
       this.cmbDatabase.Name = "cmbDatabase";
       this.cmbDatabase.Size = new System.Drawing.Size(129, 21);
       this.cmbDatabase.TabIndex = 9;
@@ -256,7 +256,7 @@
       // 
       this.label1.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.label1.AutoSize = true;
-      this.label1.Location = new System.Drawing.Point(203, 119);
+      this.label1.Location = new System.Drawing.Point(203, 115);
       this.label1.Name = "label1";
       this.label1.Size = new System.Drawing.Size(34, 13);
       this.label1.TabIndex = 43;
@@ -267,7 +267,7 @@
       this.cmbType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
       this.cmbType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.cmbType.FormattingEnabled = true;
-      this.cmbType.Location = new System.Drawing.Point(284, 115);
+      this.cmbType.Location = new System.Drawing.Point(284, 111);
       this.cmbType.Name = "cmbType";
       this.cmbType.Size = new System.Drawing.Size(119, 21);
       this.cmbType.TabIndex = 8;
@@ -276,7 +276,7 @@
       // 
       this.label2.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.label2.AutoSize = true;
-      this.label2.Location = new System.Drawing.Point(203, 64);
+      this.label2.Location = new System.Drawing.Point(203, 62);
       this.label2.Name = "label2";
       this.label2.Size = new System.Drawing.Size(75, 13);
       this.label2.TabIndex = 44;
@@ -287,7 +287,7 @@
       this.cmbAuth.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
       this.cmbAuth.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.cmbAuth.FormattingEnabled = true;
-      this.cmbAuth.Location = new System.Drawing.Point(284, 60);
+      this.cmbAuth.Location = new System.Drawing.Point(284, 58);
       this.cmbAuth.Name = "cmbAuth";
       this.cmbAuth.Size = new System.Drawing.Size(119, 21);
       this.cmbAuth.TabIndex = 4;
@@ -301,16 +301,16 @@
       this.flowLayoutPanel1.Controls.Add(this.exploreButton);
       this.flowLayoutPanel1.Controls.Add(this.btnTest);
       this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-      this.flowLayoutPanel1.Location = new System.Drawing.Point(474, 139);
+      this.flowLayoutPanel1.Location = new System.Drawing.Point(474, 135);
       this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
       this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-      this.flowLayoutPanel1.Size = new System.Drawing.Size(129, 34);
+      this.flowLayoutPanel1.Size = new System.Drawing.Size(129, 37);
       this.flowLayoutPanel1.TabIndex = 45;
       // 
       // cb_confirm
       // 
       this.cb_confirm.AutoSize = true;
-      this.cb_confirm.Location = new System.Drawing.Point(470, 59);
+      this.cb_confirm.Location = new System.Drawing.Point(470, 57);
       this.cb_confirm.Margin = new System.Windows.Forms.Padding(2);
       this.cb_confirm.Name = "cb_confirm";
       this.cb_confirm.Size = new System.Drawing.Size(61, 17);
@@ -318,6 +318,16 @@
       this.cb_confirm.Text = "Confirm";
       this.cb_confirm.UseVisualStyleBackColor = true;
       this.cb_confirm.CheckedChanged += new System.EventHandler(this.cb_confirm_CheckedChanged);
+      // 
+      // panel1
+      // 
+      this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+      this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(235)))), ((int)(((byte)(235)))));
+      this.panel1.Location = new System.Drawing.Point(198, 3);
+      this.panel1.Name = "panel1";
+      this.tlpControls.SetRowSpan(this.panel1, 7);
+      this.panel1.Size = new System.Drawing.Size(1, 201);
+      this.panel1.TabIndex = 46;
       // 
       // lstConnections
       // 
@@ -342,6 +352,7 @@
       // 
       this.btnMoveDown.AutoSize = true;
       this.btnMoveDown.BackColor = System.Drawing.Color.White;
+      this.btnMoveDown.FlatAppearance.BorderSize = 0;
       this.btnMoveDown.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnMoveDown.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnMoveDown.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -364,6 +375,7 @@
       // 
       this.btnNew.AutoSize = true;
       this.btnNew.BackColor = System.Drawing.Color.White;
+      this.btnNew.FlatAppearance.BorderSize = 0;
       this.btnNew.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnNew.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnNew.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -386,6 +398,7 @@
       // 
       this.btnMoveUp.AutoSize = true;
       this.btnMoveUp.BackColor = System.Drawing.Color.White;
+      this.btnMoveUp.FlatAppearance.BorderSize = 0;
       this.btnMoveUp.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnMoveUp.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnMoveUp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -408,6 +421,7 @@
       // 
       this.btnCopy.AutoSize = true;
       this.btnCopy.BackColor = System.Drawing.Color.White;
+      this.btnCopy.FlatAppearance.BorderSize = 0;
       this.btnCopy.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnCopy.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnCopy.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -430,6 +444,7 @@
       // 
       this.btnDelete.AutoSize = true;
       this.btnDelete.BackColor = System.Drawing.Color.White;
+      this.btnDelete.FlatAppearance.BorderSize = 0;
       this.btnDelete.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnDelete.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnDelete.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -484,22 +499,12 @@
       this.btnTest.Name = "btnTest";
       this.btnTest.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnTest.Padding = new System.Windows.Forms.Padding(2);
-      this.btnTest.Size = new System.Drawing.Size(61, 29);
+      this.btnTest.Size = new System.Drawing.Size(61, 31);
       this.btnTest.TabIndex = 0;
       this.btnTest.Text = "&Test";
       this.btnTest.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnTest.UseVisualStyleBackColor = true;
       this.btnTest.Click += new System.EventHandler(this.btnTest_Click);
-      // 
-      // panel1
-      // 
-      this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
-      this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(235)))), ((int)(((byte)(235)))));
-      this.panel1.Location = new System.Drawing.Point(198, 3);
-      this.panel1.Name = "panel1";
-      this.tlpControls.SetRowSpan(this.panel1, 7);
-      this.panel1.Size = new System.Drawing.Size(1, 201);
-      this.panel1.TabIndex = 46;
       // 
       // ConnectionEditor
       // 

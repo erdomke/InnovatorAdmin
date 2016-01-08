@@ -16,10 +16,8 @@ namespace InnovatorAdmin
     private IAsyncConnection _conn;
     private Stack<IWizardStep> _history = new Stack<IWizardStep>();
     private ExportProcessor _export;
-    //private ImportProcessor _import;
     private InstallProcessor _install;
     private bool _updateCheckComplete = false;
-    private SimpleToolstripRenderer _renderer = new SimpleToolstripRenderer();
 
     public IAsyncConnection Connection
     {
@@ -45,27 +43,16 @@ namespace InnovatorAdmin
 
     private Color ConnectionColor
     {
-      get { return tblHeader.BackColor; }
+      get { return pnlConnectionColor.ShadowColor; }
       set
       {
-        _renderer.BaseColor = value;
-        tblHeader.BackColor = value;
+        pnlConnectionColor.ShadowColor = value;
+        pnlLeft.ShadowColor = value;
+        pnlRight.ShadowColor = value;
 
-        picLogo.Image = _renderer.ColorTable.SeparatorDark.GetBrightness() < 0.5
-          ? Properties.Resources.logo_black
-          : Properties.Resources.logo_white;
-
-        pnlLeftTop.BackColor = value;
-        pnlTopLeft.BackColor = value;
-        pnlTop.BackColor = value;
-        pnlTopRight.BackColor = value;
-        pnlRightTop.BackColor = value;
-
-        this.ActiveTextColor = _renderer.ColorTable.SeparatorDark;
-        this.DownBackColor = _renderer.ColorTable.ButtonPressedGradientBegin;
-        this.DownTextColor = _renderer.ColorTable.SeparatorDark;
-        this.HoverBackColor = _renderer.ColorTable.ButtonSelectedGradientBegin;
-        this.HoverTextColor = _renderer.ColorTable.SeparatorDark;
+        var logo = new Logo(value);
+        picLogo.Image = logo.Image;
+        this.Icon = logo.Icon;
       }
     }
 
@@ -105,8 +92,7 @@ namespace InnovatorAdmin
       this.BottomLeftCornerPanel = pnlBottomLeft;
       this.InitializeTheme();
 
-      _renderer = new SimpleToolstripRenderer();
-      this.ConnectionColor = Color.LightGray;
+      picLogo.Image = Properties.Resources.logo_black_opaque;
       picLogo.MouseDown += SystemLabel_MouseDown;
       picLogo.MouseUp += SystemLabel_MouseUp;
 

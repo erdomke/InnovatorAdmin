@@ -49,7 +49,7 @@
       this.pnlLeft = new InnovatorAdmin.DropShadow();
       this.pnlLeftTop = new System.Windows.Forms.Panel();
       this.pnlRightTop = new System.Windows.Forms.Panel();
-      this.dropShadow1 = new InnovatorAdmin.DropShadow();
+      this.pnlConnectionColor = new InnovatorAdmin.DropShadow();
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
       this.lblVersion = new System.Windows.Forms.Label();
       this.pnlBottom = new System.Windows.Forms.Panel();
@@ -67,6 +67,7 @@
       this.btnNext.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(119)))), ((int)(((byte)(3)))), ((int)(((byte)(32)))));
       this.btnNext.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(119)))), ((int)(((byte)(3)))), ((int)(((byte)(32)))));
       this.btnNext.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnNext.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnNext.ForeColor = System.Drawing.Color.White;
       this.btnNext.Location = new System.Drawing.Point(396, 3);
       this.btnNext.Name = "btnNext";
@@ -87,6 +88,7 @@
       this.btnPrevious.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnPrevious.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnPrevious.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnPrevious.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnPrevious.ForeColor = System.Drawing.Color.Black;
       this.btnPrevious.Location = new System.Drawing.Point(320, 3);
       this.btnPrevious.Name = "btnPrevious";
@@ -107,6 +109,7 @@
       this.btnClose.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnClose.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnClose.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnClose.ForeColor = System.Drawing.Color.Black;
       this.btnClose.Location = new System.Drawing.Point(472, 3);
       this.btnClose.Name = "btnClose";
@@ -139,14 +142,14 @@
       this.tblMain.Controls.Add(this.pnlLeft, 0, 2);
       this.tblMain.Controls.Add(this.pnlLeftTop, 0, 1);
       this.tblMain.Controls.Add(this.pnlRightTop, 2, 1);
-      this.tblMain.Controls.Add(this.dropShadow1, 1, 2);
+      this.tblMain.Controls.Add(this.pnlConnectionColor, 1, 2);
       this.tblMain.Controls.Add(this.tableLayoutPanel1, 1, 4);
       this.tblMain.Controls.Add(this.pnlBottom, 1, 5);
       this.tblMain.Location = new System.Drawing.Point(1, 1);
       this.tblMain.Name = "tblMain";
       this.tblMain.RowCount = 6;
       this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 3F));
-      this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 57F));
       this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
       this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -158,7 +161,7 @@
       // 
       this.tblHeader.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.tblHeader.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(183)))), ((int)(((byte)(28)))), ((int)(((byte)(28)))));
+      this.tblHeader.BackColor = System.Drawing.Color.White;
       this.tblHeader.ColumnCount = 5;
       this.tblHeader.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tblHeader.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -178,7 +181,7 @@
       this.tblHeader.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tblHeader.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tblHeader.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-      this.tblHeader.Size = new System.Drawing.Size(545, 68);
+      this.tblHeader.Size = new System.Drawing.Size(545, 57);
       this.tblHeader.TabIndex = 1;
       // 
       // lblClose
@@ -199,7 +202,7 @@
       this.lblTitle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.lblTitle.BackColor = System.Drawing.Color.Transparent;
-      this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.lblTitle.ForeColor = System.Drawing.SystemColors.ControlText;
       this.lblTitle.Location = new System.Drawing.Point(80, 0);
       this.lblTitle.Margin = new System.Windows.Forms.Padding(0, 0, 0, 6);
@@ -320,12 +323,13 @@
       this.pnlRight.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.pnlRight.Location = new System.Drawing.Point(548, 71);
+      this.pnlRight.Location = new System.Drawing.Point(548, 60);
       this.pnlRight.Margin = new System.Windows.Forms.Padding(0);
       this.pnlRight.Name = "pnlRight";
       this.tblMain.SetRowSpan(this.pnlRight, 3);
+      this.pnlRight.ShadowColor = System.Drawing.Color.Empty;
       this.pnlRight.ShadowExtent = 5;
-      this.pnlRight.Size = new System.Drawing.Size(3, 272);
+      this.pnlRight.Size = new System.Drawing.Size(3, 283);
       this.pnlRight.TabIndex = 14;
       // 
       // pnlLeft
@@ -333,12 +337,13 @@
       this.pnlLeft.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.pnlLeft.Location = new System.Drawing.Point(0, 71);
+      this.pnlLeft.Location = new System.Drawing.Point(0, 60);
       this.pnlLeft.Margin = new System.Windows.Forms.Padding(0);
       this.pnlLeft.Name = "pnlLeft";
       this.tblMain.SetRowSpan(this.pnlLeft, 3);
+      this.pnlLeft.ShadowColor = System.Drawing.Color.Empty;
       this.pnlLeft.ShadowExtent = 5;
-      this.pnlLeft.Size = new System.Drawing.Size(3, 272);
+      this.pnlLeft.Size = new System.Drawing.Size(3, 283);
       this.pnlLeft.TabIndex = 13;
       // 
       // pnlLeftTop
@@ -349,7 +354,7 @@
       this.pnlLeftTop.Location = new System.Drawing.Point(0, 3);
       this.pnlLeftTop.Margin = new System.Windows.Forms.Padding(0);
       this.pnlLeftTop.Name = "pnlLeftTop";
-      this.pnlLeftTop.Size = new System.Drawing.Size(3, 68);
+      this.pnlLeftTop.Size = new System.Drawing.Size(3, 57);
       this.pnlLeftTop.TabIndex = 15;
       // 
       // pnlRightTop
@@ -360,19 +365,20 @@
       this.pnlRightTop.Location = new System.Drawing.Point(548, 3);
       this.pnlRightTop.Margin = new System.Windows.Forms.Padding(0);
       this.pnlRightTop.Name = "pnlRightTop";
-      this.pnlRightTop.Size = new System.Drawing.Size(3, 68);
+      this.pnlRightTop.Size = new System.Drawing.Size(3, 57);
       this.pnlRightTop.TabIndex = 16;
       // 
-      // dropShadow1
+      // pnlConnectionColor
       // 
-      this.dropShadow1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+      this.pnlConnectionColor.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.dropShadow1.Location = new System.Drawing.Point(3, 71);
-      this.dropShadow1.Margin = new System.Windows.Forms.Padding(0);
-      this.dropShadow1.Name = "dropShadow1";
-      this.dropShadow1.ShadowExtent = 0;
-      this.dropShadow1.Size = new System.Drawing.Size(545, 5);
-      this.dropShadow1.TabIndex = 17;
+      this.pnlConnectionColor.Location = new System.Drawing.Point(3, 60);
+      this.pnlConnectionColor.Margin = new System.Windows.Forms.Padding(0);
+      this.pnlConnectionColor.Name = "pnlConnectionColor";
+      this.pnlConnectionColor.ShadowColor = System.Drawing.Color.Empty;
+      this.pnlConnectionColor.ShadowExtent = 0;
+      this.pnlConnectionColor.Size = new System.Drawing.Size(545, 5);
+      this.pnlConnectionColor.TabIndex = 17;
       // 
       // tableLayoutPanel1
       // 
@@ -401,9 +407,8 @@
       this.lblVersion.AutoSize = true;
       this.lblVersion.Location = new System.Drawing.Point(3, 11);
       this.lblVersion.Name = "lblVersion";
-      this.lblVersion.Size = new System.Drawing.Size(35, 13);
+      this.lblVersion.Size = new System.Drawing.Size(0, 13);
       this.lblVersion.TabIndex = 18;
-      this.lblVersion.Text = "label1";
       // 
       // pnlBottom
       // 
@@ -423,6 +428,7 @@
       this.BackColor = System.Drawing.Color.DarkGray;
       this.ClientSize = new System.Drawing.Size(553, 348);
       this.Controls.Add(this.tblMain);
+      this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.Location = new System.Drawing.Point(0, 0);
       this.Name = "Main";
@@ -461,7 +467,7 @@
     private DropShadow pnlLeft;
     private System.Windows.Forms.Panel pnlLeftTop;
     private System.Windows.Forms.Panel pnlRightTop;
-    private DropShadow dropShadow1;
+    private DropShadow pnlConnectionColor;
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     private System.Windows.Forms.Label lblVersion;
     private System.Windows.Forms.Panel pnlBottom;

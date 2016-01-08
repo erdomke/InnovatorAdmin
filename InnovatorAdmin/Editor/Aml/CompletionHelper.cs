@@ -56,7 +56,8 @@ namespace InnovatorAdmin.Editor
                 LocalName = r.LocalName,
                 Type = GetType(r),
                 Action = r.GetAttribute("action"),
-                Condition = r.GetAttribute("condition")
+                Condition = r.GetAttribute("condition"),
+                Id = r.GetAttribute("id")
               });
 
             existingAttributes.Clear();
@@ -727,6 +728,14 @@ namespace InnovatorAdmin.Editor
       {
         return ItemTypeCompletion<BasicCompletionData>(_metadata.ItemTypes);
       }
+      else if (p.Name == "state" && lastItem.Action == "promoteItem" 
+        && !string.IsNullOrEmpty(lastItem.Type) && !string.IsNullOrEmpty(lastItem.Id))
+      {
+        var stateResult = await _conn.ApplyAsync(@"<Item type='@0' action='getItemNextStates' id='@1'></Item>"
+          , true, false, lastItem.Type, lastItem.Id).ToTask();
+        var states = stateResult.Items().Select(i => i.Property("to_state").AsItem().Property("name").Value).ToArray();
+        return states.GetCompletions<BasicCompletionData>();
+      }
       else
       {
         return Enumerable.Empty<ICompletionData>();
@@ -1010,6 +1019,7 @@ namespace InnovatorAdmin.Editor
       public int Offset { get; set; }
       public string LocalName { get; set; }
       public string Type { get; set; }
+      public string Id { get; set; }
       public string Action { get; set; }
       public string Condition { get; set; }
       public string SourceId { get; set; }

@@ -271,6 +271,7 @@
     <Compile Include="GlobalProgress.cs" />
     <Compile Include="Ide\EditorScriptExecute.cs" />
     <Compile Include="Ide\FontAwesome.cs" />
+    <Compile Include="Ide\Logo.cs" />
     <Compile Include="Ide\OutputType.cs" />
     <Compile Include="Ide\UiCommandManager.cs" />
     <Compile Include="Ide\EditorTreeNode.cs" />
@@ -749,6 +750,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\icons\logo-black.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\icons\logo-black-opaque.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
