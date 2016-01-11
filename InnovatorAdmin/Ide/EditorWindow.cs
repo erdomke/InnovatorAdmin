@@ -266,8 +266,7 @@ namespace InnovatorAdmin
 
     public void SetConnection(ConnectionData conn)
     {
-      if (!_loadingConnection && !string.IsNullOrEmpty(conn.Url)
-        && !string.IsNullOrEmpty(conn.Database))
+      if (!_loadingConnection && !string.IsNullOrEmpty(conn.Url))
       {
         _loadingConnection = true;
         btnSoapAction.Visible = false;
@@ -287,7 +286,6 @@ namespace InnovatorAdmin
             .UiPromise(this)
             .Done(proxy =>
             {
-              btnSubmit.Visible = true;
               SetProxy(proxy);
               _disposeProxy = true;
             })
@@ -315,6 +313,7 @@ namespace InnovatorAdmin
       if (proxy == null)
         return;
 
+      btnSubmit.Visible = true;
       if (_proxy.GetActions().Any())
       {
         _proxy.Action = _soapAction;
@@ -1057,6 +1056,7 @@ namespace InnovatorAdmin
     {
       var window = new EditorWindow();
       window.SetProxy(_proxy.Clone());
+      window.SoapAction = this.SoapAction;
       window._disposeProxy = false;
       return window;
     }

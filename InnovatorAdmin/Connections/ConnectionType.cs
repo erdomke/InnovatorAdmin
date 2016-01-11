@@ -9,6 +9,7 @@ namespace InnovatorAdmin.Connections
   public enum ConnectionType
   {
     Innovator,
-    SqlServer
+    SqlServer,
+    Soap
   }
 }

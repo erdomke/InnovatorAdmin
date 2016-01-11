@@ -13,7 +13,7 @@ namespace InnovatorAdmin
   public static class Extensions
   {
     public const string AmlTable_TypeName = "__type";
-    public const string AmlTable_TypeId = "__itemtype";
+    public const string AmlTable_TypeId = "itemtype";
 
     /// <summary>
     /// Determines if a string is an Aras-styled GUID
@@ -259,7 +259,8 @@ namespace InnovatorAdmin
           }
 
           var allProps = new HashSet<string>(kvp.Value);
-          allProps.UnionWith(metadata.GetProperties(itemType).Wait().Select(p => p.Name));
+          if (itemType != null)
+            allProps.UnionWith(metadata.GetProperties(itemType).Wait().Select(p => p.Name));
 
           foreach (var prop in allProps)
           {

@@ -285,7 +285,7 @@ namespace InnovatorAdmin.Editor
             {
               Text = f.Name,
               Description = f.Description,
-              Image = WpfImages.Method16
+              Image = WpfImages.MethodFriend16
             }));
         return results;
       }

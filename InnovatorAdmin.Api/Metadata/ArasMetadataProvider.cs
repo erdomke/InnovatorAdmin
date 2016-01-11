@@ -149,6 +149,22 @@ namespace InnovatorAdmin
         });
     }
 
+    public IPromise<IEnumerable<string>> ItemTypeStates(ItemType itemtype)
+    {
+      if (itemtype.States != null)
+        return Promises.Resolved(itemtype.States);
+
+      return _conn.ApplyAsync(@"<Item type='Life Cycle State' action='get' select='name'>
+          <source_id condition='in'>(select related_id from innovator.[ItemType_Life_Cycle] where source_id = @0)</source_id>
+        </Item>", true, false, itemtype.Id)
+        .Convert(r =>
+        {
+          var states = r.Items().Select(i => i.Property("name").Value).ToArray();
+          itemtype.States = states;
+          return (IEnumerable<string>)states;
+        });
+    }
+
     public IEnumerable<IListValue> ServerReports(string typeName)
     {
       IEnumerable<IListValue> result;

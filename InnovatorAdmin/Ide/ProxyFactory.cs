@@ -36,6 +36,8 @@ namespace InnovatorAdmin
               {
                 ConnData = conn
               });
+          case ConnectionType.Soap:
+            return Promises.Resolved<IEditorProxy>(new Editor.SoapEditorProxy(conn));
           case ConnectionType.SqlServer:
             return Promises.Resolved<IEditorProxy>(new Editor.SqlEditorProxy(conn));
         }

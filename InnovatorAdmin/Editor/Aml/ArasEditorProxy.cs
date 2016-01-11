@@ -15,7 +15,7 @@ namespace InnovatorAdmin.Editor
   public class ArasEditorProxy : IEditorProxy
   {
     #region "Default Actions"
-    private static readonly string[] _defaultActions = new string[] {
+    private static readonly string[] _baseActions = new string[] {
             "ActivateActivity",
             "AddItem",
             "ApplyAML",
@@ -24,10 +24,8 @@ namespace InnovatorAdmin.Editor
             "ApplySQL",
             "ApplyUpdate",
             "BuildProcessReport",
-            "CacheDiag",
             "CancelWorkflow",
             "ChangeUserPassword",
-            "CheckImportedItemType",
             "ClearCache",
             "ClearHistory",
             "CloneForm",
@@ -71,7 +69,6 @@ namespace InnovatorAdmin.Editor
             "GetUsersList",
             "GetUserWorkingDirectory",
             "InstantiateWorkflow",
-            "LoadCache",
             "LoadProcessInstance",
             "LoadVersionFile",
             "LockItem",
@@ -92,8 +89,6 @@ namespace InnovatorAdmin.Editor
             "ResetAllItemsAccess",
             "ResetItemAccess",
             "ResetLifeCycle",
-            "ResetServerCache",
-            "SaveCache",
             "ServerErrorTest",
             "SetDefaultLifeCycle",
             "SetNullBooleanTo0",
@@ -109,9 +104,11 @@ namespace InnovatorAdmin.Editor
             "UpdateItem",
             "ValidateUser",
             "ValidateVote",
-            "ValidateWorkflowMap"};
+            "ValidateWorkflowMap"
+            };
     #endregion
 
+    private string[] _actions;
     private IAsyncConnection _conn;
     private Connections.ConnectionData _connData;
     private string _name;
@@ -142,11 +139,44 @@ namespace InnovatorAdmin.Editor
       _helper = new Editor.AmlEditorHelper();
       _helper.InitializeConnection(_conn);
       _name = name;
+      var arasConn = _conn as Innovator.Client.Connection.IArasConnection;
+      _actions = GetActions(arasConn == null ? -1 : arasConn.Version).OrderBy(a => a).ToArray();
+    }
+
+    private IEnumerable<string> GetActions(int version)
+    {
+      foreach (var action in _baseActions)
+      {
+        yield return action;
+      }
+      if (version < 10)
+      {
+        yield return "CacheDiag";
+        yield return "CheckImportedItemType";
+      }
+      if (version < 11)
+      {
+        yield return "LoadCache";
+        yield return "ResetServerCache";
+        yield return "SaveCache";
+      }
+      if (version <= 0 || version >= 10)
+      {
+        yield return "CreateFileExchangeTxn";
+        yield return "ProcessFileTransferResult";
+        yield return "StartFileExchangeTxn";
+      }
+      if (version <= 0 || version >= 11)
+      {
+        yield return "GetCheckUpdateInfo";
+        yield return "VaultApplyAml";
+        yield return "VaultApplyItem";
+      }
     }
 
     public virtual IEnumerable<string> GetActions()
     {
-      return _defaultActions;
+      return _actions;
     }
 
     public virtual Innovator.Client.IPromise<IResultObject> Process(ICommand request, bool async)

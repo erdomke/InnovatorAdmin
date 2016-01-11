@@ -75,7 +75,7 @@ namespace InnovatorAdmin
           items.Add(new ToolStripMenuItem(script.Name, null, (s, ev) =>
           {
             var query = script.Script; // Trigger execution
-            if (!string.IsNullOrEmpty(script.Action) && !string.IsNullOrEmpty(query))
+            if (!string.IsNullOrEmpty(query))
             {
               callback(script);
             }

@@ -265,7 +265,14 @@
     <Compile Include="Editor\SearchStrategy\SearchResult.cs" />
     <Compile Include="Editor\SearchStrategy\StringHelper.cs" />
     <Compile Include="Editor\SearchStrategy\XPathSearchStrategy.cs" />
+    <Compile Include="Editor\Soap\Facets.cs" />
+    <Compile Include="Editor\Soap\Generator.cs" />
+    <Compile Include="Editor\Soap\InstanceAttribute.cs" />
+    <Compile Include="Editor\Soap\InstanceElement.cs" />
+    <Compile Include="Editor\Soap\InstanceGroup.cs" />
+    <Compile Include="Editor\Soap\InstanceObject.cs" />
     <Compile Include="Editor\Soap\SoapEditorProxy.cs" />
+    <Compile Include="Editor\Soap\XmlSampleGenerator.cs" />
     <Compile Include="Editor\Sql\SqlMetadata.cs" />
     <Compile Include="Editor\Sql\SqlSubType.cs" />
     <Compile Include="Editor\TextDocumentWriter.cs" />
