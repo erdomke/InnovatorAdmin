@@ -6,6 +6,7 @@
     <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/octicons.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -23,38 +24,62 @@
         </header>
 
         <section id="downloads" class="clearfix">
-          <a href="https://github.com/erdomke/InnovatorAdmin/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
-          <a href="https://github.com/erdomke/InnovatorAdmin/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
-          <a href="https://github.com/erdomke/InnovatorAdmin" id="view-on-github" class="button"><span>View on GitHub</span></a>
+          <a href="https://github.com/erdomke/InnovatorAdmin/releases/latest" class="button"><span><i class="octicon octicon-cloud-download"></i> Download</span></a>
+          <a href="https://github.com/erdomke/InnovatorAdmin" class="button"><span><i class="octicon octicon-mark-github"></i> View on GitHub</span></a>
         </section>
 
         <hr>
 
         <section id="main_content">
           <h1>
-<a id="a-better-admin-tool" class="anchor" href="#a-better-admin-tool" aria-hidden="true"><span class="octicon octicon-link"></span></a>A Better Admin Tool</h1>
+<a id="a-better-admin-tool" class="anchor" href="#a-better-admin-tool" aria-hidden="true"></a>A better admin tool</h1>
 
 <p>Innovator Admin is a Windows tool for querying and administrating databases.  It is the ideal tool for administrating <a href="www.aras.com">Aras Innovator PLM systems</a> featuring an advanced AML query editor (with full intellisense) along with streamlined tools for exporting solutions from one database and importing them into another (e.g. during DEV to PROD migrations).  It is also quickly becoming a great tool for querying SQL Server databases (with intellisense for SQL queries) among other data sources.</p>
 
-<h1>
-<a id="download" class="anchor" href="#download" aria-hidden="true"><span class="octicon octicon-link"></span></a>Download</h1>
-
-<p>If you don't want to build the project from the source code, you can download a <a href="https://github.com/erdomke/InnovatorAdmin/releases/latest">recent release</a> from GitHub.</p>
+<img src="https://raw.githubusercontent.com/erdomke/InnovatorAdmin/master/doc/aml-studio.png" alt="Innovator Admin screenshot" />
 
 <h1>
-<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h1>
+<a id="download" class="anchor" href="#features" aria-hidden="true"></a>What makes it better?</h1>
 
-<p>If you run the setup.exe installer file, the program should install and update automatically.</p>
+<h2><a href="https://github.com/erdomke/InnovatorAdmin/blob/master/doc/aml-studio.md">...for querying</a></h2>
+<ul>
+  <li>Full Intellisense for AML and SQL provides helpful suggestions as you type</li>
+  <li>Run just the query under your cursor with <code>Run Current</code> (or <code>Ctrl+Enter</code>)</li>
+  <li>Parameter bindings: include <code>@paramName</code> parameters in your queries and give them values when the query runs</li>
+  <li><small>[Innovator only]</small> Editable grid which allows you to make changes and save them back to the database</li>
+  <li>Excel-style block copy and paste in the grids</li>
+  <li><small>[Innovator only]</small> Smart AML code folding shows you just what you need to see</li>
+  <li><small>[Innovator only]</small> Renders HTML reports</li>
+  <li>Continually being optimized for running large queries</li>
+</ul>
+
+<h2><a href="https://github.com/erdomke/InnovatorAdmin/blob/master/doc/innovator-installer.md">...for administering</a> <small>[Innovator only]</small></h2>
+
+<ul>
+  <li>Imports and exports are streamlined into a single tool</li>
+  <li>Anything can be exported regardless of the package used in the database</li>
+  <li>Full dependency analysis performed on exports prevents you from forgetting anything</li>
+  <li>Install into multiple databases simultaneously</li>
+  <li>Useful progress indicators keep you informed of how your exports and imports are doing</li>
+  <li>A helpful error dialog allows you to recover from install errors as they happen</li>
+</ul>
 
 <h1>
-<a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributing</h1>
+<a id="download" class="anchor" href="#download" aria-hidden="true"></a>I want it</h1>
+
+<p>If you don't want to build the project from the source code, you can download the <a href="https://github.com/erdomke/InnovatorAdmin/releases/latest">latest release</a> from GitHub. If you download and run the setup.exe installer file, the program should install and update automatically.</p>
+
+<h1><a id="download" class="anchor" href="#help" aria-hidden="true"></a>Help me!</h1>
+<p>While there is some documentation built into the tool (e.g. the AML Cookbook folder of the Table of Contents when connected to an Innovator instance), additional documentation regarding the tool and Innovator can be found on the <a href="https://github.com/erdomke/InnovatorAdmin/wiki">wiki</a>.</p>
+
+<h1>
+<a id="contributing" class="anchor" href="#contributing" aria-hidden="true"></a>Let me help</h1>
 
 <p>All contributions are welcome.  The range from shout-outs on social media to <a href="https://github.com/erdomke/InnovatorAdmin/issues">bug fix</a> submissions and <a href="https://github.com/erdomke/InnovatorAdmin/issues">feature requests</a> to even feature additions submitted via a pull request.</p>
         </section>
 
         <footer>
-          Innovator Admin is maintained by <a href="https://github.com/erdomke">erdomke</a><br>
-          This page was generated by <a href="https://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+          Innovator Admin is maintained by <a href="https://github.com/erdomke">erdomke</a>
         </footer>
 
         
