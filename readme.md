@@ -1,45 +1,56 @@
-# Innovator Admin
+# A better admin tool
 
-Innovator Admin is a tool for managing Aras Innovator installations.  This 
-tool consists of several different components including:
+Innovator Admin is a Windows tool for querying and administrating databases. 
+It is the ideal tool for administrating Aras Innovator PLM systems featuring 
+an advanced AML query editor (with full intellisense) along with streamlined 
+tools for exporting solutions from one database and importing them into 
+another (e.g. during DEV to PROD migrations). It is also quickly becoming a 
+great tool for querying SQL Server databases (with intellisense for SQL 
+queries) among other data sources.
 
-- [Innovator Installer](doc/innovator-installer.md)
-- [AML Studio](doc/aml-studio.md)
+![AML Studio](doc/aml-studio.png)
 
-# Recent Changes
+![AML Studio](doc/aml-studio-sql.png)
 
-**2015-11-30**
-- Updates to AML Studio to streamline the interface and add more functionality
+# What makes it better?
 
-# Current Status
+## ...[for querying](doc/aml-studio.md)
 
-Please treat this tool as **alpha** level software.  While some of the 
-core functionality has been tested and should work, other peripheral 
-features have been blocked out and/or coded but not tested.  In 
-particular, exports to/install from the previous manifest file and folder 
-structure have not been tested.
+- Full Intellisense for AML and SQL provides helpful suggestions as you type
+- Run just the query under your cursor with Run Current (or Ctrl+Enter)
+- Parameter bindings: include @paramName parameters in your queries and give them values when the query runs
+- (Innovator only) Editable grid which allows you to make changes and save them back to the database
+- Excel-style block copy and paste in the grids
+- (Innovator only) Smart AML code folding shows you just what you need to see
+- (Innovator only) Renders HTML reports
+- Continually being optimized for running large queries
 
-# Download
- 
-If you don't want to build the project from the source code, you can
-download a [recent release](https://github.com/erdomke/InnovatorAdmin/releases/latest)
-from GitHub.
+## ...[for administering (Innovator only)](doc/innovator-installer.md)
 
-# Installation
+- Imports and exports are streamlined into a single tool
+- Anything can be exported regardless of the package used in the database
+- Full dependency analysis performed on exports prevents you from forgetting anything
+- Install into multiple databases simultaneously
+- Useful progress indicators keep you informed of how your exports and imports are doing
+- A helpful error dialog allows you to recover from install errors as they happen
 
-If you run the `setup.exe` installer file, the program should update
-automatically.
+# I want it
 
-# Bugs / Features
+If you don't want to build the project from the source code, you can 
+download the [latest release](https://github.com/erdomke/InnovatorAdmin/releases/latest) 
+from GitHub. If you download and run the setup.exe installer file, 
+the program should install and update automatically.
 
-- To review or submit a bug or feature request, see the [Issues](issues)
+# Help me!
 
-# Contributing
+While there is some documentation built into the tool (e.g. the AML Cookbook 
+folder of the Table of Contents when connected to an Innovator instance), 
+additional documentation regarding the tool and Innovator can be found on the 
+[wiki](https://github.com/erdomke/InnovatorAdmin/wiki).
 
-Feel free to fork the repo and submit pull requests with any changes you
-would like to see made
+# Let me help
 
-# More Information
-
-For more information, visit the official repository at 
-[https://github.com/erdomke/innovatoradmin](https://github.com/erdomke/innovatoradmin)
+All contributions are welcome. The range from shout-outs on social media to 
+[bug fix](https://github.com/erdomke/InnovatorAdmin/issues) submissions and 
+[feature requests](https://github.com/erdomke/InnovatorAdmin/issues) to 
+even feature additions submitted via a pull request.

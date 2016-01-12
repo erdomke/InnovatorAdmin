@@ -8,8 +8,6 @@ to improve the experience in the following key areas:
 The new tool features a wizard interface to make it easier for 
 non-developers to be able to quickly install packages.
 
-![Wizard interface](screenshot-pg01.png)
-
 ## Connection Manager
 
 A connection manager saves all your commonly used connections locally so

@@ -12,8 +12,7 @@ This version of AML Studio includes a number of improvments.  They include:
   
   ![Collapsed AML](aml-studio-tree.png)
 
-
-- (*Might have bugs*) Table display of AML that is editable and can be converted back to AML statements
+- Table display of AML that is editable and can be converted back to AML statements
   
   ![Editing a table](aml-studio-table-edit.png)
 
@@ -23,10 +22,23 @@ This version of AML Studio includes a number of improvments.  They include:
 
   ![Parameter substitutions](aml-studio-param.png)
 
-- (*Might have bugs*) Support for find/replace including a normal mode, extended mode (supports \r, \n, 
+- Support for find/replace including a normal mode, extended mode (supports \r, \n, 
   etc.), Regex mode, and XPath mode.
 
   ![Find/replace](aml-studio-find-replace.png)
 
-
+- Many useful commands (e.g. viewing items, invoking actions, running reports, etc.) 
+  can be invoked directly from the output editor's context menu
+  
+  ![Context menu](aml-studio-context-menu.png)
+  
+- Go directly to items referenced in AML by Ctrl+clicking on the links.
+  
+  ![Links](aml-studio-links.png)
+  
+- Reference useful queries in the AML Cookbook folder of the Table of Contents
+  
+  ![Cookbook](aml-studio-cookbook.png)
+  
+- The query currently under the cursor can be executed with `Ctrl+Enter`
 - Auto-completion uses single quotes for easier inclusion in C# multi-line strings
