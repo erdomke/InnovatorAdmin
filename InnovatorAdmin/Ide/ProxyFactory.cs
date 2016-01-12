@@ -6,6 +6,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Innovator.Client;
 using System.Data.SqlClient;
+using System.Web.Services.Description;
+using System.IO;
+using System.Xml;
+using System.Xml.Schema;
 
 namespace InnovatorAdmin
 {
@@ -37,12 +41,39 @@ namespace InnovatorAdmin
                 ConnData = conn
               });
           case ConnectionType.Soap:
-            return Promises.Resolved<IEditorProxy>(new Editor.SoapEditorProxy(conn));
+            var service = new Innovator.Client.Connection.DefaultHttpService();
+            return service.Execute("GET", conn.Url, null, null, true, null)
+              .Convert(r =>
+              {
+                ServiceDescription descrip;
+                using (var reader = new StreamReader(r.AsStream))
+                using (var xml = XmlReader.Create(reader))
+                {
+                  descrip = ServiceDescription.Read(xml);
+                }
+
+                var schemaSet = new XmlSchemaSet();
+                var soap = new StringReader(string.Format(Properties.Resources.SoapSchema, descrip.TargetNamespace));
+                schemaSet.Add(XmlSchema.Read(soap, new ValidationEventHandler(Validation)));
+                foreach (var schema in descrip.Types.Schemas.OfType<XmlSchema>())
+                {
+                  schemaSet.Add(schema);
+                }
+                schemaSet.Compile();
+
+                return (IEditorProxy)new Editor.SoapEditorProxy(conn, descrip, schemaSet);
+              });
           case ConnectionType.SqlServer:
             return Promises.Resolved<IEditorProxy>(new Editor.SqlEditorProxy(conn));
         }
         return Promises.Rejected<IEditorProxy>(new NotSupportedException("Unsupported connection type"));
       }
+    }
+
+
+    private static void Validation(object sender, ValidationEventArgs e)
+    {
+      // Do nothing
     }
   }
 }

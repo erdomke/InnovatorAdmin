@@ -49,6 +49,22 @@ namespace InnovatorAdmin.Editor
     XmlSchemaCompletionData defaultSchemaCompletionData;
     string defaultNamespacePrefix = String.Empty;
 
+    public XmlCompletionDataProvider(XmlSchemaSet schemaSet, string defaultNamespace, string prefix = null)
+    {
+      var def = schemaSet.Schemas(defaultNamespace).OfType<XmlSchema>().First();
+
+      this.schemaCompletionDataItems = new XmlSchemaCompletionDataCollection();
+      foreach (var schema in schemaSet.Schemas().OfType<XmlSchema>().Where(s => s != def))
+      {
+        this.schemaCompletionDataItems.Add(new XmlSchemaCompletionData(schema));
+      }
+      this.defaultSchemaCompletionData = new XmlSchemaCompletionData(def)
+      {
+        RelatedSchemas = this.schemaCompletionDataItems
+      };
+      this.defaultNamespacePrefix = prefix ?? string.Empty;
+    }
+
     public XmlCompletionDataProvider(XmlSchema schema)
     {
       this.schemaCompletionDataItems = new XmlSchemaCompletionDataCollection();
@@ -83,7 +99,7 @@ namespace InnovatorAdmin.Editor
           }
           else if (defaultSchemaCompletionData != null)
           {
-            result = defaultSchemaCompletionData.GetElementCompletionData(defaultNamespacePrefix);
+            result = defaultSchemaCompletionData.GetElementCompletionData(defaultNamespacePrefix).ToArray();
           }
           break;
 

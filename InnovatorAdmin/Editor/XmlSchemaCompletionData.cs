@@ -7,10 +7,12 @@
 
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
 using System.Xml.Schema;
+using System.Linq;
 
 namespace InnovatorAdmin.Editor
 {
@@ -18,7 +20,7 @@ namespace InnovatorAdmin.Editor
   /// Holds the completion (intellisense) data for an xml schema.
   /// </summary>
   /// <remarks>
-  /// The XmlSchema class throws an exception if we attempt to load 
+  /// The XmlSchema class throws an exception if we attempt to load
   /// the xhtml1-strict.xsd schema.  It does not like the fact that
   /// this schema redefines the xml namespace, even though this is
   /// allowed by the w3.org specification.
@@ -29,6 +31,8 @@ namespace InnovatorAdmin.Editor
     XmlSchema schema;
     string fileName = String.Empty;
     bool readOnly = false;
+
+    public XmlSchemaCompletionDataCollection RelatedSchemas { get; set; }
 
     /// <summary>
     /// Stores attributes that have been prohibited whilst the code
@@ -41,7 +45,7 @@ namespace InnovatorAdmin.Editor
     }
 
     /// <summary>
-    /// Creates completion data from the schema passed in 
+    /// Creates completion data from the schema passed in
     /// via the reader object.
     /// </summary>
     public XmlSchemaCompletionData(TextReader reader)
@@ -58,7 +62,7 @@ namespace InnovatorAdmin.Editor
     }
 
     /// <summary>
-    /// Creates completion data from the schema passed in 
+    /// Creates completion data from the schema passed in
     /// via the reader object.
     /// </summary>
     public XmlSchemaCompletionData(XmlTextReader reader)
@@ -98,7 +102,7 @@ namespace InnovatorAdmin.Editor
     }
 
     /// <summary>
-    /// Read only schemas are those that are installed with 
+    /// Read only schemas are those that are installed with
     /// SharpDevelop.
     /// </summary>
     public bool ReadOnly
@@ -158,34 +162,50 @@ namespace InnovatorAdmin.Editor
       return uri;
     }
 
-    /// <summary>
-    /// Gets the possible root elements for an xml document using this schema.
-    /// </summary>
-    public ICompletionData[] GetElementCompletionData()
-    {
-      return GetElementCompletionData(String.Empty);
-    }
+    ///// <summary>
+    ///// Gets the possible root elements for an xml document using this schema.
+    ///// </summary>
+    //public ICompletionData[] GetElementCompletionData()
+    //{
+    //  return GetElementCompletionData(String.Empty);
+    //}
 
     /// <summary>
     /// Gets the possible root elements for an xml document using this schema.
     /// </summary>
-    public ICompletionData[] GetElementCompletionData(string namespacePrefix)
+    public IEnumerable<ICompletionData> GetElementCompletionData(string namespacePrefix)
     {
       XmlCompletionDataCollection data = new XmlCompletionDataCollection();
 
+      //<soapenv:Stuff xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
       foreach (XmlSchemaElement element in schema.Elements.Values)
       {
         if (element.Name != null)
         {
-          AddElement(data, element.Name, namespacePrefix, element.Annotation);
+          if (string.IsNullOrEmpty(namespacePrefix))
+          {
+            yield return new XmlCompletionData()
+            {
+              Text = element.Name,
+              Image = WpfImages.XmlTag16
+            };
+          }
+          else
+          {
+            yield return new XmlCompletionData()
+            {
+              Text = element.Name,
+              Content = element.Name,
+              Image = WpfImages.XmlTag16,
+              Action = () => namespacePrefix + ":" + element.Name + " xmlns:soapenv=\"" + schema.TargetNamespace + "\""
+            };
+          }
         }
         else
         {
           // Do not add reference element.
         }
       }
-
-      return data.ToArray();
     }
 
     /// <summary>
@@ -286,7 +306,7 @@ namespace InnovatorAdmin.Editor
     /// Finds an element in the schema.
     /// </summary>
     /// <remarks>
-    /// Only looks at the elements that are defined in the 
+    /// Only looks at the elements that are defined in the
     /// root of the schema so it will not find any elements
     /// that are defined inside any complex types.
     /// </remarks>
@@ -392,7 +412,7 @@ namespace InnovatorAdmin.Editor
     /// Takes the name and creates a qualified name using the namespace of this
     /// schema.
     /// </summary>
-    /// <remarks>If the name is of the form myprefix:mytype then the correct 
+    /// <remarks>If the name is of the form myprefix:mytype then the correct
     /// namespace is determined from the prefix. If the name is not of this
     /// form then no prefix is added.</remarks>
     public QualifiedName CreateQualifiedName(string name)
@@ -478,7 +498,7 @@ namespace InnovatorAdmin.Editor
     /// Finds an element in the schema.
     /// </summary>
     /// <remarks>
-    /// Only looks at the elements that are defined in the 
+    /// Only looks at the elements that are defined in the
     /// root of the schema so it will not find any elements
     /// that are defined inside any complex types.
     /// </remarks>
@@ -556,6 +576,7 @@ namespace InnovatorAdmin.Editor
         XmlSchemaSequence childSequence = schemaObject as XmlSchemaSequence;
         XmlSchemaChoice childChoice = schemaObject as XmlSchemaChoice;
         XmlSchemaGroupRef groupRef = schemaObject as XmlSchemaGroupRef;
+        XmlSchemaAny anyRef = schemaObject as XmlSchemaAny;
 
         if (childElement != null)
         {
@@ -596,6 +617,21 @@ namespace InnovatorAdmin.Editor
         else if (groupRef != null)
         {
           AddElements(data, GetChildElementCompletionData(groupRef, prefix));
+        }
+        else if (anyRef != null)
+        {
+          if (string.IsNullOrEmpty(anyRef.Namespace) || anyRef.Namespace == schema.TargetNamespace)
+          {
+            data.AddRange(GetElementCompletionData(prefix).OfType<XmlCompletionData>().ToArray());
+          }
+          else if (RelatedSchemas != null)
+          {
+            var completion = RelatedSchemas[anyRef.Namespace];
+            if (completion != null)
+            {
+              data.AddRange(completion.GetElementCompletionData(null).OfType<XmlCompletionData>().ToArray());
+            }
+          }
         }
       }
 
@@ -709,7 +745,7 @@ namespace InnovatorAdmin.Editor
     }
 
     /// <summary>
-    /// Adds an element completion data to the collection if it does not 
+    /// Adds an element completion data to the collection if it does not
     /// already exist.
     /// </summary>
     void AddElement(XmlCompletionDataCollection data, string name, string prefix, string documentation)
@@ -726,7 +762,7 @@ namespace InnovatorAdmin.Editor
     }
 
     /// <summary>
-    /// Adds an element completion data to the collection if it does not 
+    /// Adds an element completion data to the collection if it does not
     /// already exist.
     /// </summary>
     void AddElement(XmlCompletionDataCollection data, string name, string prefix, XmlSchemaAnnotation annotation)
@@ -920,7 +956,7 @@ namespace InnovatorAdmin.Editor
 
     /// <summary>
     /// Checks that the attribute is prohibited or has been flagged
-    /// as prohibited previously. 
+    /// as prohibited previously.
     /// </summary>
     bool IsProhibitedAttribute(XmlSchemaAttribute attribute)
     {

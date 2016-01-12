@@ -14,69 +14,37 @@ namespace InnovatorAdmin.Editor
 {
   public class SoapEditorProxy : IEditorProxy
   {
-    private IEditorHelper _helper = new XmlEditorHelper();
+    private IEditorHelper _helper;
     private Connections.ConnectionData _connData;
-    private IPromise<ServiceInfo> _service;
+    private ServiceDescription _descrip;
+    private XmlSchemaSet _schemas;
 
-    public SoapEditorProxy(Connections.ConnectionData connData)
+
+    public SoapEditorProxy(Connections.ConnectionData connData, ServiceDescription description, XmlSchemaSet schemas)
     {
       _connData = connData;
-      _service = GetService();
+      _descrip = description;
+      _schemas = schemas;
+      _helper = new XmlCompletionDataProvider(schemas, "http://schemas.xmlsoap.org/soap/envelope/", "soapenv");
     }
 
-    private IPromise<ServiceInfo> GetService()
-    {
-      var service = new Innovator.Client.Connection.DefaultHttpService();
-      return service.Execute("GET", _connData.Url, null, null, true, null)
-        .Convert(r =>
-        {
-          ServiceDescription descrip;
-          using (var reader = new StreamReader(r.AsStream))
-          using (var xml = XmlReader.Create(reader))
-          {
-            descrip = ServiceDescription.Read(xml);
-          }
+    //public static void ParseWsdl(string url)
+    //{
+    //  //http://www.border.gov.au/_vti_bin/Lists.asmx?wsdl
+    //  var reader = XmlReader.Create(url);
+    //  var wsdl = ServiceDescription.Read(reader);
+    //  var schemaSet = new XmlSchemaSet();
 
-          var schemaSet = new XmlSchemaSet();
-          var soap = new StringReader(string.Format(Properties.Resources.SoapSchema, descrip.TargetNamespace));
-          schemaSet.Add(XmlSchema.Read(soap, new ValidationEventHandler(Validation)));
-          foreach (var schema in descrip.Types.Schemas.OfType<XmlSchema>())
-          {
-            schemaSet.Add(schema);
-          }
-          schemaSet.Compile();
+    //  var soap = new StringReader(string.Format(Properties.Resources.SoapSchema, wsdl.TargetNamespace));
+    //  schemaSet.Add(XmlSchema.Read(soap, new ValidationEventHandler(Validation)));
+    //  foreach (var schema in wsdl.Types.Schemas.OfType<XmlSchema>())
+    //  {
+    //    schemaSet.Add(schema);
+    //  }
+    //  schemaSet.Compile();
+    //  var thing = 2 + 2;
+    //}
 
-          return new ServiceInfo()
-          {
-            Description = descrip,
-            Schemas = schemaSet
-          };
-        });
-    }
-
-    public static void ParseWsdl(string url)
-    {
-      //http://www.border.gov.au/_vti_bin/Lists.asmx?wsdl
-      var reader = XmlReader.Create(url);
-      var wsdl = ServiceDescription.Read(reader);
-      var schemaSet = new XmlSchemaSet();
-
-      var soap = new StringReader(string.Format(Properties.Resources.SoapSchema, wsdl.TargetNamespace));
-      schemaSet.Add(XmlSchema.Read(soap, new ValidationEventHandler(Validation)));
-      foreach (var schema in wsdl.Types.Schemas.OfType<XmlSchema>())
-      {
-        schemaSet.Add(schema);
-      }
-      schemaSet.Compile();
-      var thing = 2 + 2;
-    }
-
-
-
-    private static void Validation(object sender, ValidationEventArgs e)
-    {
-      // Do nothing
-    }
 
     public string Action { get; set; }
 
@@ -179,8 +147,8 @@ namespace InnovatorAdmin.Editor
 
     public Innovator.Client.IPromise<IEnumerable<IEditorTreeNode>> GetNodes()
     {
-      return _service.Convert(svc =>
-        svc.Description.Services.OfType<Service>().Select(s => (IEditorTreeNode)new EditorTreeNode() {
+      return Promises.Resolved(
+        _descrip.Services.OfType<Service>().Select(s => (IEditorTreeNode)new EditorTreeNode() {
           Name = s.Name,
           ImageKey = "folder-16",
           HasChildren = true,
@@ -188,20 +156,20 @@ namespace InnovatorAdmin.Editor
             Name = p.Name,
             ImageKey = "folder-16",
             HasChildren = true,
-            Children = svc.Description.Bindings[p.Binding.Name].Operations.OfType<OperationBinding>()
+            Children = _descrip.Bindings[p.Binding.Name].Operations.OfType<OperationBinding>()
               .OrderBy(o => o.Name, StringComparer.OrdinalIgnoreCase)
               .Select(o =>
               (IEditorTreeNode)new EditorTreeNode() {
                 Name = o.Name,
                 ImageKey = "xml-tag-16",
                 HasChildren = false,
-                Scripts = GetScripts(o, svc)
+                Scripts = GetScripts(o)
               })
           })
         }));
     }
 
-    private IEnumerable<IEditorScript> GetScripts(OperationBinding opBinding, ServiceInfo info)
+    private IEnumerable<IEditorScript> GetScripts(OperationBinding opBinding)
     {
       var binding = opBinding.Binding;
       var service = binding.ServiceDescription;
@@ -222,7 +190,7 @@ namespace InnovatorAdmin.Editor
       using (var writer = new StringWriter())
       using (var xml = XmlTextWriter.Create(writer, settings))
       {
-        var generator = new Microsoft.Xml.XMLGen.XmlSampleGenerator(info.Schemas, elem);
+        var generator = new Microsoft.Xml.XMLGen.XmlSampleGenerator(_schemas, elem);
 
         xml.WriteStartElement("soapenv", "Envelope", "http://schemas.xmlsoap.org/soap/envelope/");
         xml.WriteAttributeString("xmlns", "soap", null, elem.Namespace);
@@ -248,12 +216,6 @@ namespace InnovatorAdmin.Editor
     public void Dispose()
     {
       // do nothing
-    }
-
-    private class ServiceInfo
-    {
-      public ServiceDescription Description { get; set; }
-      public XmlSchemaSet Schemas { get; set; }
     }
   }
 }

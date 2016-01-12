@@ -233,16 +233,18 @@ namespace InnovatorAdmin.Editor
     {
       try
       {
-        if (e.Key == System.Windows.Input.Key.Enter && this.SingleLine && !IsControlDown(e.KeyboardDevice) && !IsAltDown(e.KeyboardDevice) && !IsShiftDown(e.KeyboardDevice))
+        if (e.Key == System.Windows.Input.Key.Enter && this.SingleLine
+          && e.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.None)
         {
           OnRunRequested(new RunRequestedEventArgs(this.Text));
           e.Handled = true;
         }
-        else if (e.Key == System.Windows.Input.Key.Tab && this.SingleLine && !IsControlDown(e.KeyboardDevice) && !IsAltDown(e.KeyboardDevice))
+        else if (e.Key == System.Windows.Input.Key.Tab && this.SingleLine &&
+          (e.KeyboardDevice.Modifiers & ~(System.Windows.Input.ModifierKeys.Shift)) == System.Windows.Input.ModifierKeys.None)
         {
           e.Handled = true;
           var frm = this.FindForm();
-          frm.SelectNextControl(this, !IsShiftDown(e.KeyboardDevice), true, true, true);
+          frm.SelectNextControl(this, e.KeyboardDevice.Modifiers != System.Windows.Input.ModifierKeys.Shift, true, true, true);
         }
       }
       catch (Exception ex)
@@ -369,48 +371,53 @@ namespace InnovatorAdmin.Editor
         var key = (e.Key == System.Windows.Input.Key.System ? e.SystemKey : e.Key);
 
         // F5 or F9
-        if (key == System.Windows.Input.Key.F9 || key == System.Windows.Input.Key.F5)
+        if ((key == System.Windows.Input.Key.F9 || key == System.Windows.Input.Key.F5)
+          && e.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.None)
         {
           OnRunRequested(new RunRequestedEventArgs(Editor.Text));
           e.Handled = true;
         }
         // Ctrl+Enter or Ctrl+Shift+E
-        else if ((key == System.Windows.Input.Key.Enter && IsControlDown(e.KeyboardDevice))
-          || (key == System.Windows.Input.Key.E && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice)))
+        else if ((key == System.Windows.Input.Key.Enter && e.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control)
+          || (key == System.Windows.Input.Key.E
+            && e.KeyboardDevice.Modifiers == (System.Windows.Input.ModifierKeys.Control | System.Windows.Input.ModifierKeys.Shift)))
         {
           OnRunRequested(new RunRequestedEventArgs(GetCurrentQuery()));
           e.Handled = true;
         }
         // Ctrl+Shift+Up
         else if (!SingleLine
-          && ((key == System.Windows.Input.Key.Up && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
-            || (key == System.Windows.Input.Key.Up && IsAltDown(e.KeyboardDevice))))
+          && ((key == System.Windows.Input.Key.Up
+              && e.KeyboardDevice.Modifiers == (System.Windows.Input.ModifierKeys.Control | System.Windows.Input.ModifierKeys.Shift))
+            || (key == System.Windows.Input.Key.Up && e.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Alt)))
         {
           MoveLineUp();
           e.Handled = true;
         }
         // Ctrl+Shift+Down
         else if (!SingleLine
-          && ((key == System.Windows.Input.Key.Down && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
-            || (key == System.Windows.Input.Key.Down && IsAltDown(e.KeyboardDevice))))
+          && ((key == System.Windows.Input.Key.Down
+              && e.KeyboardDevice.Modifiers == (System.Windows.Input.ModifierKeys.Control | System.Windows.Input.ModifierKeys.Shift))
+            || (key == System.Windows.Input.Key.Down && e.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Alt)))
         {
           MoveLineDown();
           e.Handled = true;
         }
         // Ctrl+Shift+U
-        else if (key == System.Windows.Input.Key.U && IsControlDown(e.KeyboardDevice) && IsShiftDown(e.KeyboardDevice))
+        else if (key == System.Windows.Input.Key.U
+          && e.KeyboardDevice.Modifiers == (System.Windows.Input.ModifierKeys.Control | System.Windows.Input.ModifierKeys.Shift))
         {
           TransformUppercase();
           e.Handled = true;
         }
         // Ctrl+U
-        else if (key == System.Windows.Input.Key.U && IsControlDown(e.KeyboardDevice))
+        else if (key == System.Windows.Input.Key.U && e.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control)
         {
           TransformLowercase();
           e.Handled = true;
         }
         // Ctrl+Space
-        else if (key == System.Windows.Input.Key.Space && IsControlDown(e.KeyboardDevice) && Helper != null)
+        else if (key == System.Windows.Input.Key.Space && e.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control && Helper != null)
         {
           Helper.ShowCompletions(this);
           e.Handled = true;
@@ -555,18 +562,18 @@ namespace InnovatorAdmin.Editor
       ReplaceSelectionSegments(t => t.ToLowerInvariant());
     }
 
-    private bool IsAltDown(System.Windows.Input.KeyboardDevice keyboard)
-    {
-      return keyboard.IsKeyDown(System.Windows.Input.Key.LeftAlt) || keyboard.IsKeyDown(System.Windows.Input.Key.RightAlt);
-    }
-    private bool IsControlDown(System.Windows.Input.KeyboardDevice keyboard)
-    {
-      return keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl) || keyboard.IsKeyDown(System.Windows.Input.Key.RightCtrl);
-    }
-    private bool IsShiftDown(System.Windows.Input.KeyboardDevice keyboard)
-    {
-      return keyboard.IsKeyDown(System.Windows.Input.Key.LeftShift) || keyboard.IsKeyDown(System.Windows.Input.Key.RightShift);
-    }
+    //private bool IsAltDown(System.Windows.Input.KeyboardDevice keyboard)
+    //{
+    //  return keyboard.IsKeyDown(System.Windows.Input.Key.LeftAlt) || keyboard.IsKeyDown(System.Windows.Input.Key.RightAlt);
+    //}
+    //private bool IsControlDown(System.Windows.Input.KeyboardDevice keyboard)
+    //{
+    //  return keyboard.IsKeyDown(System.Windows.Input.Key.LeftCtrl) || keyboard.IsKeyDown(System.Windows.Input.Key.RightCtrl);
+    //}
+    //private bool IsShiftDown(System.Windows.Input.KeyboardDevice keyboard)
+    //{
+    //  return keyboard.IsKeyDown(System.Windows.Input.Key.LeftShift) || keyboard.IsKeyDown(System.Windows.Input.Key.RightShift);
+    //}
 
     CompletionWindow completionWindow;
 

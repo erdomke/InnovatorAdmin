@@ -24,8 +24,8 @@ namespace InnovatorAdmin.Editor
   /// </summary>
   /// <remarks>
   /// All of the routines return <see cref="XmlElementPath"/> objects
-  /// since we are interested in the complete path or tree to the 
-  /// currently active element. 
+  /// since we are interested in the complete path or tree to the
+  /// currently active element.
   /// </remarks>
   public class XmlParser
   {
@@ -82,7 +82,7 @@ namespace InnovatorAdmin.Editor
     }
 
     /// <summary>
-    /// Gets path of the xml element start tag that the specified 
+    /// Gets path of the xml element start tag that the specified
     /// <paramref name="index"/> is currently inside.
     /// </summary>
     /// <remarks>If the index outside the start tag then an empty path
@@ -110,16 +110,16 @@ namespace InnovatorAdmin.Editor
           elementNamespace.Prefix = elementName.Prefix;
         }
         path.Elements.Add(new QualifiedName(elementName.Name, elementNamespace.Namespace, elementNamespace.Prefix));
-        path.Compact(elementNamespace.Namespace); 
+        path.Compact(elementNamespace.Namespace);
       }
 
       return path;
     }
 
     /// <summary>
-    /// Gets path of the xml element start tag that the specified 
+    /// Gets path of the xml element start tag that the specified
     /// <paramref name="index"/> is currently located. This is different to the
-    /// GetActiveElementStartPath method since the index can be inside the element 
+    /// GetActiveElementStartPath method since the index can be inside the element
     /// name.
     /// </summary>
     /// <remarks>If the index outside the start tag then an empty path
@@ -163,7 +163,7 @@ namespace InnovatorAdmin.Editor
       }
       catch (XmlException) { /* Do nothing. */ }
       catch (WebException) { /* Do nothing. */ }
-      
+
       return null;
     }
 
@@ -297,7 +297,7 @@ namespace InnovatorAdmin.Editor
     }
 
     /// <summary>
-    /// Checks whether the attribute at the end of the string is a 
+    /// Checks whether the attribute at the end of the string is a
     /// namespace declaration.
     /// </summary>
     public static bool IsNamespaceDeclaration(string xml, int index)
@@ -362,7 +362,7 @@ namespace InnovatorAdmin.Editor
     }
 
     /// <summary>
-    /// Gets the name of the attribute inside but before the specified 
+    /// Gets the name of the attribute inside but before the specified
     /// index.
     /// </summary>
     public static string GetAttributeName(string xml, int index)
@@ -609,7 +609,7 @@ namespace InnovatorAdmin.Editor
     }
 
     /// <summary>
-    /// Gets the text of the xml element start tag that the index is 
+    /// Gets the text of the xml element start tag that the index is
     /// currently inside.
     /// </summary>
     /// <returns>
@@ -699,7 +699,7 @@ namespace InnovatorAdmin.Editor
     /// <summary>
     /// Gets the element name from the element start tag string.
     /// </summary>
-    /// <param name="xml">This string must start at the 
+    /// <param name="xml">This string must start at the
     /// element we are interested in.</param>
     static QualifiedName GetElementName(string xml)
     {
@@ -737,7 +737,7 @@ namespace InnovatorAdmin.Editor
     /// Gets the element namespace from the element start tag
     /// string.
     /// </summary>
-    /// <param name="xml">This string must start at the 
+    /// <param name="xml">This string must start at the
     /// element we are interested in.</param>
     static NamespaceURI GetElementNamespace(string xml)
     {

@@ -11,15 +11,13 @@ using ICSharpCode.AvalonEdit.CodeCompletion;
 namespace InnovatorAdmin.Editor
 {
   /// <summary>
-  /// Holds the text for  namespace, child element or attribute 
+  /// Holds the text for  namespace, child element or attribute
   /// autocomplete (intellisense).
   /// </summary>
-  public class XmlCompletionData : ICompletionData
+  public class XmlCompletionData : BasicCompletionData
   {
-    string text;
     string defaultValue;
     DataType dataType = DataType.XmlElement;
-    string description = String.Empty;
     bool forceDefault = false;
 
     /// <summary>
@@ -32,6 +30,8 @@ namespace InnovatorAdmin.Editor
       NamespaceUri = 3,
       XmlAttributeValue = 4
     }
+
+    public XmlCompletionData() { }
 
     public XmlCompletionData(string text)
       : this(text, String.Empty, DataType.XmlElement)
@@ -50,22 +50,22 @@ namespace InnovatorAdmin.Editor
 
     public XmlCompletionData(string text, string description, DataType dataType)
     {
-      this.text = text;
-      this.description = description;
+      this.Text = text;
+      this.Description = description;
       this.dataType = dataType;
     }
 
     public XmlCompletionData(string text, string description, DataType dataType, string defaultValue)
     {
-      this.text = text;
-      this.description = description;
+      this.Text = text;
+      this.Description = description;
       this.dataType = dataType;
       this.defaultValue = defaultValue;
     }
     public XmlCompletionData(string text, string description, DataType dataType, string defaultValue, bool forceDefault)
     {
-      this.text = text;
-      this.description = description;
+      this.Text = text;
+      this.Description = description;
       this.dataType = dataType;
       this.defaultValue = defaultValue;
       this.forceDefault = forceDefault;
@@ -76,30 +76,6 @@ namespace InnovatorAdmin.Editor
       get
       {
         return 0;
-      }
-    }
-
-    public string Text
-    {
-      get
-      {
-        return text;
-      }
-      set
-      {
-        text = value;
-      }
-    }
-
-    /// <summary>
-    /// Returns the xml item's documentation as retrieved from
-    /// the xs:annotation/xs:documentation element.
-    /// </summary>
-    public string Description
-    {
-      get
-      {
-        return description;
       }
     }
 
@@ -168,28 +144,7 @@ namespace InnovatorAdmin.Editor
       {
         return -1;
       }
-      return text.CompareTo(((XmlCompletionData)obj).text);
-    }
-
-    
-    public void Complete(ICSharpCode.AvalonEdit.Editing.TextArea textArea, ICSharpCode.AvalonEdit.Document.ISegment completionSegment, EventArgs insertionRequestEventArgs)
-    {
-      textArea.Document.Replace(completionSegment, this.Text);
-    }
-
-    public object Content
-    {
-      get { return this.text; }
-    }
-
-    object ICompletionData.Description
-    {
-      get { return this.description; }
-    }
-
-    public System.Windows.Media.ImageSource Image
-    {
-      get { return null; }
+      return this.Text.CompareTo(((XmlCompletionData)obj).Text);
     }
   }
 }

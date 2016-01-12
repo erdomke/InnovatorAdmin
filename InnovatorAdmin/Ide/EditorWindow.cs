@@ -166,14 +166,14 @@ namespace InnovatorAdmin
       _commands = new UiCommandManager(this);
       inputEditor.KeyDown += _commands.OnKeyDown;
       outputEditor.KeyDown += _commands.OnKeyDown;
-      _commands.Add<Control>(btnEditConnections, e => e.KeyCode == Keys.O && e.Control, ChangeConnection);
-      _commands.Add<Control>(btnSoapAction, e => e.KeyCode == Keys.M && e.Control, ChangeSoapAction);
-      _commands.Add<Control>(mniNewWindow, e => e.KeyCode == Keys.N && e.Control, c => NewWindow().Show());
+      _commands.Add<Control>(btnEditConnections, e => e.KeyCode == Keys.O && e.Modifiers == Keys.Control, ChangeConnection);
+      _commands.Add<Control>(btnSoapAction, e => e.KeyCode == Keys.M && e.Modifiers == Keys.Control, ChangeSoapAction);
+      _commands.Add<Control>(mniNewWindow, e => e.KeyCode == Keys.N && e.Modifiers == Keys.Control, c => NewWindow().Show());
       _commands.Add<Editor.FullEditor>(mniFind, null, c => c.Find());
       _commands.Add<Editor.FullEditor>(mniFindNext, null, c => c.FindNext());
       _commands.Add<Editor.FullEditor>(mniFindPrevious, null, c => c.FindPrevious());
       _commands.Add<Editor.FullEditor>(mniReplace, null, c => c.Replace());
-      _commands.Add<Editor.FullEditor>(mniGoTo, e => e.KeyCode == Keys.G && e.Control, c =>
+      _commands.Add<Editor.FullEditor>(mniGoTo, e => e.KeyCode == Keys.G && e.Modifiers == Keys.Control, c =>
       {
         using (var dialog = new InputBox())
         {
@@ -194,7 +194,7 @@ namespace InnovatorAdmin
           }
         }
       });
-      _commands.Add<Editor.FullEditor>(mniTidy, e => e.KeyCode == Keys.T && e.Control, c => TransformSelection(c, c.Helper.Format));
+      _commands.Add<Editor.FullEditor>(mniTidy, e => e.KeyCode == Keys.T && e.Modifiers == Keys.Control, c => TransformSelection(c, c.Helper.Format));
       _commands.Add<Editor.FullEditor>(mniMinify, null, c => TransformSelection(c, c.Helper.Minify));
       _commands.Add<Editor.FullEditor>(mniMd5Encode, null, c => c.ReplaceSelectionSegments(t => ConnectionDataExtensions.CalcMD5(t)));
       _commands.Add<Editor.FullEditor>(mniDoubleToSingleQuotes, null, c => c.ReplaceSelectionSegments(t => t.Replace('"', '\'')));
@@ -203,10 +203,10 @@ namespace InnovatorAdmin
       _commands.Add<Editor.FullEditor>(mniLowercase, null, c => c.TransformLowercase());
       _commands.Add<Editor.FullEditor>(mniMoveUpCurrentLine, null, c => c.MoveLineUp());
       _commands.Add<Editor.FullEditor>(mniMoveDownCurrentLine, null, c => c.MoveLineDown());
-      _commands.Add<Editor.FullEditor>(mniToggleSingleLineComment, e => e.Control && e.KeyCode == Keys.Q && !e.Shift, LineToggleComment);
-      _commands.Add<Editor.FullEditor>(mniSingleLineComment, e => e.Control && e.KeyCode == Keys.K && !e.Shift, LineComment);
-      _commands.Add<Editor.FullEditor>(mniSingleLineUncomment, e => e.Control && e.KeyCode == Keys.K && e.Shift, LineUncomment);
-      _commands.Add<Editor.FullEditor>(mniBlockComment, e => e.Control && e.KeyCode == Keys.Q && e.Shift, BlockComment);
+      _commands.Add<Editor.FullEditor>(mniToggleSingleLineComment, e => e.Modifiers == Keys.Control && e.KeyCode == Keys.Q, LineToggleComment);
+      _commands.Add<Editor.FullEditor>(mniSingleLineComment, e => e.Modifiers == Keys.Control && e.KeyCode == Keys.K, LineComment);
+      _commands.Add<Editor.FullEditor>(mniSingleLineUncomment, e => e.Modifiers == (Keys.Control | Keys.Shift) && e.KeyCode == Keys.K, LineUncomment);
+      _commands.Add<Editor.FullEditor>(mniBlockComment, e => e.Modifiers == (Keys.Control | Keys.Shift) && e.KeyCode == Keys.Q, BlockComment);
       _commands.Add<Editor.FullEditor>(mniBlockUncomment, null, BlockUncomment);
       _commands.Add<Editor.FullEditor>(mniInsertNewGuid, null, c => c.ReplaceSelectionSegments(t => Guid.NewGuid().ToString("N").ToUpperInvariant()));
       _commands.Add<Editor.FullEditor>(mniXmlToEntity, null, c => c.ReplaceSelectionSegments(t => {
