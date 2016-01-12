@@ -216,10 +216,10 @@ namespace InnovatorAdmin
       _commands.Add<Editor.FullEditor>(mniLowercase, null, c => c.TransformLowercase());
       _commands.Add<Editor.FullEditor>(mniMoveUpCurrentLine, null, c => c.MoveLineUp());
       _commands.Add<Editor.FullEditor>(mniMoveDownCurrentLine, null, c => c.MoveLineDown());
-      _commands.Add<Editor.FullEditor>(mniToggleSingleLineComment, e => e.Control && e.KeyCode == Keys.Q && !e.Shift, LineToggleComment);
+      _commands.Add<Editor.FullEditor>(mniToggleSingleLineComment, e => e.Control && e.KeyCode == Keys.Q && !e.Shift && !e.Alt, LineToggleComment);
       _commands.Add<Editor.FullEditor>(mniSingleLineComment, e => e.Control && e.KeyCode == Keys.K && !e.Shift, LineComment);
       _commands.Add<Editor.FullEditor>(mniSingleLineUncomment, e => e.Control && e.KeyCode == Keys.K && e.Shift, LineUncomment);
-      _commands.Add<Editor.FullEditor>(mniBlockComment, e => e.Control && e.KeyCode == Keys.Q && e.Shift, BlockComment);
+      _commands.Add<Editor.FullEditor>(mniBlockComment, e => e.Control && e.KeyCode == Keys.Q && e.Shift && !e.Alt, BlockComment);
       _commands.Add<Editor.FullEditor>(mniBlockUncomment, null, BlockUncomment);
       _commands.Add<Editor.FullEditor>(mniInsertNewGuid, null, c => c.ReplaceSelectionSegments(t => Guid.NewGuid().ToString("N").ToUpperInvariant()));
       _commands.Add<Editor.FullEditor>(mniXmlToEntity, null, c => c.ReplaceSelectionSegments(t => {
