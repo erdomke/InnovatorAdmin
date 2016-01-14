@@ -52,19 +52,13 @@ namespace InnovatorAdmin
                   descrip = ServiceDescription.Read(xml);
                 }
 
-                var schemaSet = new XmlSchemaSet();
-                var soap = new StringReader(string.Format(Properties.Resources.SoapSchema, descrip.TargetNamespace));
-                schemaSet.Add(XmlSchema.Read(soap, new ValidationEventHandler(Validation)));
-                foreach (var schema in descrip.Types.Schemas.OfType<XmlSchema>())
-                {
-                  schemaSet.Add(schema);
-                }
-                schemaSet.Compile();
-
-                return (IEditorProxy)new Editor.SoapEditorProxy(conn, descrip, schemaSet);
+                return (IEditorProxy)new Editor.SoapEditorProxy(conn, descrip
+                  , Editor.XmlSchemas.SchemasFromDescrip(descrip));
               });
           case ConnectionType.SqlServer:
             return Promises.Resolved<IEditorProxy>(new Editor.SqlEditorProxy(conn));
+          case ConnectionType.Sharepoint:
+            return new Editor.SharepointEditorProxy(conn).Initialize().ToPromise();
         }
         return Promises.Rejected<IEditorProxy>(new NotSupportedException("Unsupported connection type"));
       }

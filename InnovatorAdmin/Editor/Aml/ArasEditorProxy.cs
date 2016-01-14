@@ -9,11 +9,16 @@ using System.Data;
 using System.ComponentModel;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Utils;
+using InnovatorAdmin.Testing;
+using Innovator.Client;
+using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Editor
 {
   public class ArasEditorProxy : IEditorProxy
   {
+    public const string UnitTestAction = "> Run Unit Tests";
+
     #region "Default Actions"
     private static readonly string[] _baseActions = new string[] {
             "ActivateActivity",
@@ -172,11 +177,24 @@ namespace InnovatorAdmin.Editor
         yield return "VaultApplyAml";
         yield return "VaultApplyItem";
       }
+      yield return UnitTestAction;
     }
 
     public virtual IEnumerable<string> GetActions()
     {
       return _actions;
+    }
+
+    private async Task<IResultObject> ProcessTestSuite(string commands)
+    {
+      TestSuite suite;
+      using (var reader = new StringReader(commands))
+      {
+        suite = TestSerializer.ReadTestSuite(reader);
+      }
+      var context = new TestContext(_conn);
+      await suite.Run(context);
+      return new ResultObject(suite, _conn);
     }
 
     public virtual Innovator.Client.IPromise<IResultObject> Process(ICommand request, bool async)
@@ -188,6 +206,9 @@ namespace InnovatorAdmin.Editor
       var cmd = innCmd.Internal;
 
       // Check for file uploads and process if need be
+      if (cmd.ActionString == UnitTestAction)
+        return ProcessTestSuite(cmd.Aml).ToPromise();
+
       var elem = System.Xml.Linq.XElement.Parse(cmd.Aml);
       var files = elem.DescendantsAndSelf("Item")
         .Where(e => e.Attributes("type").Any(a => a.Value == "File")
@@ -211,7 +232,8 @@ namespace InnovatorAdmin.Editor
         cmd.Aml = "<AML>" + cmd.Aml + "</AML>";
       }
       return ProcessCommand(cmd, async)
-        .Convert(s => {
+        .Convert(s =>
+        {
           var result = new ResultObject(s, _conn);
           if (cmd.Action == CommandAction.ApplySQL)
             result.PreferredMode = OutputType.Table;
@@ -254,6 +276,19 @@ namespace InnovatorAdmin.Editor
         get { return _count; }
       }
 
+      public ResultObject(TestSuite suite, IAsyncConnection conn)
+      {
+        var rope = new Rope<char>();
+        using (var writer = new Editor.RopeWriter(rope))
+        {
+          suite.Write(writer);
+        }
+        _amlLength = rope.Length;
+        _count = suite.Tests.Count;
+        _conn = conn;
+        _text = new RopeTextSource(rope);
+        _dataSet = new DataSet();
+      }
       public ResultObject(Stream aml, IAsyncConnection conn)
       {
         System.Diagnostics.Debug.Print("{0:hh:MM:ss} Document loaded", DateTime.Now);

@@ -78,8 +78,17 @@ namespace InnovatorAdmin.Editor
     public void CollapseAll()
     {
       UpdateFoldings();
-      if (_foldingManager.AllFoldings.Any(IsAmlFolding))
+      if (_foldingManager.AllFoldings.FirstOrDefault(f => f.Title == "<TestSuite>") != null)
       {
+        // Unit test results
+        foreach (var fm in _foldingManager.AllFoldings)
+        {
+          fm.IsFolded = !(fm.Title == "<TestSuite>" || fm.Title == "<Results>");
+        }
+      }
+      else if (_foldingManager.AllFoldings.Any(IsAmlFolding))
+      {
+        // AML folding
         foreach (var fm in _foldingManager.AllFoldings)
         {
           fm.IsFolded = IsAmlFolding(fm);

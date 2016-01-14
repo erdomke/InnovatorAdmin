@@ -1,0 +1,111 @@
+<TestSuite>
+  <Results>
+    <Run name='Get Part 1' result='Pass' elapsedMs='276' start='2016-01-13T14:18:18' />
+    <Run name='Add MCO Org' result='Fail' elapsedMs='86' start='2016-01-13T14:18:18' errorLine='2' message='Elements do not match the expected value' />
+  </Results>
+  <Out>
+    <Param name='permission_id'>95475AE006E7415794BDC93808DC04D2</Param>
+  </Out>
+  <Tests>
+    <Test name='Get Part 1'>
+      <Item type='Part' action='get'>
+        <item_number>350-0232-004</item_number>
+      </Item>
+      <AssertMatch match='//Item[1]'>
+        <Expected>
+          <Item type='Part' typeId='4F1AC04A2B484F3ABA4E20DB63808A88' id='A5E65BFA4BAF4E6E97AD818B9DE07F46'>
+            <classification>Metal/Channel Mount/Raw</classification>
+            <coated>0</coated>
+            <config_id keyed_name='350-0232-004' type='Part'>EEA13852286E4575952B3E546CDAA597</config_id>
+            <cost>1.4490</cost>
+            <cost_basis>Actual</cost_basis>
+            <created_by_id keyed_name='_EBS Sync' type='User'>8227040ABF0A46A8AF06C18ABD3967B3</created_by_id>
+            <current_state name='Implemented' keyed_name='Implemented' type='Life Cycle State'>1FA687F2F75F4BCCAF978684B3E6B482</current_state>
+            <ebs_category_01 keyed_name='OSP' type='External Value'>B343E10C111D4972A562A82060496D73</ebs_category_01>
+            <ebs_category_02 keyed_name='METAL' type='External Value'>3260609AE41349A2B06080AE909C261E</ebs_category_02>
+            <ebs_category_03 keyed_name='MOUNT' type='External Value'>5A8A022150174FA991245F0C13CAED32</ebs_category_03>
+            <ebs_category_04 keyed_name='PAINT/POWDER COAT' type='External Value'>7D29FAE0D16749DC8DA9BE10642584BA</ebs_category_04>
+            <ebs_create_attempts>0</ebs_create_attempts>
+            <ebs_eco_number>CEW837</ebs_eco_number>
+            <ebs_orgs>(2), 7, 15b</ebs_orgs>
+            <eco keyed_name='CEW837' type='Express ECO'>832A0797BC93414AA2333136014A13F6</eco>
+            <effective_date>2012-01-25T09:39:03</effective_date>
+            <esd_control_item>0</esd_control_item>
+            <generation>7</generation>
+            <has_change_pending>0</has_change_pending>
+            <heater_sealant>0</heater_sealant>
+            <hydrophillic>0</hydrophillic>
+            <id keyed_name='350-0232-004' type='Part'>A5E65BFA4BAF4E6E97AD818B9DE07F46</id>
+            <iec_windshield_button keyed_name='350-0347-000' type='Part'>D2D1F54AFB514F4A8A0FB2EA984E7F07</iec_windshield_button>
+            <in_ebs>1</in_ebs>
+            <is_active_rev>1</is_active_rev>
+            <is_current>1</is_current>
+            <is_design_restricted>0</is_design_restricted>
+            <is_engineering_rev>0</is_engineering_rev>
+            <is_in_service>0</is_in_service>
+            <is_released>1</is_released>
+            <keyed_name>350-0232-004</keyed_name>
+            <major_rev>BAH</major_rev>
+            <make_buy>OSP</make_buy>
+            <minor_rev>1</minor_rev>
+            <modified_by_id keyed_name='_EBS Sync' type='User'>8227040ABF0A46A8AF06C18ABD3967B3</modified_by_id>
+            <name>MOUNT, AUDI C6 - SOUL BLACK</name>
+            <new_version>1</new_version>
+            <not_for_production>0</not_for_production>
+            <not_lockable>0</not_lockable>
+            <oec_lighted>0</oec_lighted>
+            <owned_by_id keyed_name='Lorie Morris' type='Identity'>08434395BF7A4E718EDBD2DF213C6010</owned_by_id>
+            <painted>0</painted>
+            <pb_free>0</pb_free>
+            <permission_id keyed_name='Released Part' type='Permission'>95475AE006E7415794BDC93808DC04D2</permission_id>
+            <phoenix_element>0</phoenix_element>
+            <plm_only>0</plm_only>
+            <primary_mfg_group>SA</primary_mfg_group>
+            <privacy_glass>0</privacy_glass>
+            <product_item_type>Component</product_item_type>
+            <product_line>IEC</product_line>
+            <release_date>2011-09-01T03:09:49</release_date>
+            <rke_function>0</rke_function>
+            <secondary_optics>0</secondary_optics>
+            <shield_painted>0</shield_painted>
+            <smartbeam>0</smartbeam>
+            <sourcing_status>Buy: Approved</sourcing_status>
+            <sourcing_status_icon>../images/customer/images/SourcingList_Approved22.png</sourcing_status_icon>
+            <state>Implemented</state>
+            <state_image>../images/customer/images/Part_Implemented16.png</state_image>
+            <team_id keyed_name='Part: General' type='Team'>EC30D51403344F689242E451481286D8</team_id>
+            <tsca_listed>0</tsca_listed>
+            <unit>EA</unit>
+            <z_nav>0</z_nav>
+            <item_number>350-0232-004</item_number>
+            <itemtype>4F1AC04A2B484F3ABA4E20DB63808A88</itemtype>
+          </Item>
+        </Expected>
+      </AssertMatch>
+      <Param name='permission_id' select='//Item[1]/permission_id/text()' />
+    </Test>
+    <Test name='Add MCO Org'>
+      <Item type='Permission' action='get' id='@permission_id' />
+      <AssertMatch match='//Item[1]'>
+        <Expected>
+          <Item type='Permission' typeId='C6A89FDE1294451497801DF78341B473' id='95475AE006E7415794BDC93808DC04D2'>
+            <config_id keyed_name='Released Part' type='Permission'>95475AE006E7415794BDC93808DC04D2</config_id>
+            <created_by_id keyed_name='_Super User' type='User'>AD30A6D8D3B642F5A2AFED1A4B02BEFA</created_by_id>
+            <generation>1</generation>
+            <id keyed_name='Released Part' type='Permission'>95475AE006E7415794BDC93808DC04D2</id>
+            <is_current>1</is_current>
+            <is_private>0</is_private>
+            <is_released>0</is_released>
+            <keyed_name>Released Part</keyed_name>
+            <major_rev>A</major_rev>
+            <modified_by_id keyed_name='Eric Domke' type='User'>2D246C5838644C1C8FD34F8D2796E327</modified_by_id>
+            <new_version>0</new_version>
+            <not_lockable>0</not_lockable>
+            <permission_id keyed_name='Permission' type='Permission'>BBBFCF1164514B7B92C8BCA944498142</permission_id>
+            <name>Released Part</name>
+          </Item>
+        </Expected>
+      </AssertMatch>
+    </Test>
+  </Tests>
+</TestSuite>

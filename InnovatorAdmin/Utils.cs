@@ -5,6 +5,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
@@ -13,6 +14,26 @@ namespace InnovatorAdmin
 {
   public static class Utils
   {
+    public static void CopyTo(this TextReader reader, TextWriter writer)
+    {
+      var buffer = new char[4096];
+      var cnt = reader.Read(buffer, 0, buffer.Length);
+      while (cnt > 0)
+      {
+        writer.Write(buffer, 0, cnt);
+        cnt = reader.Read(buffer, 0, buffer.Length);
+      }
+    }
+    public static async Task CopyToAsync(this TextReader reader, TextWriter writer)
+    {
+      var buffer = new char[4096];
+      var cnt = await reader.ReadAsync(buffer, 0, buffer.Length);
+      while (cnt > 0)
+      {
+        await writer.WriteAsync(buffer, 0, cnt);
+        cnt = await reader.ReadAsync(buffer, 0, buffer.Length);
+      }
+    }
     public static Control FindFocusedControl(this IContainerControl container)
     {
       Control control = null;
@@ -244,7 +265,7 @@ namespace InnovatorAdmin
         }
         wait.Set();
       }, method);
-      
+
       if (wait.WaitOne(timeout))
       {
         if (exception != null)

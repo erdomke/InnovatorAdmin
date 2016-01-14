@@ -49,18 +49,26 @@ namespace InnovatorAdmin.Editor
     XmlSchemaCompletionData defaultSchemaCompletionData;
     string defaultNamespacePrefix = String.Empty;
 
-    public XmlCompletionDataProvider(XmlSchemaSet schemaSet, string defaultNamespace, string prefix = null)
+    public XmlCompletionDataProvider(XmlSchemaSet schemaSet, string defaultNamespace
+      , string prefix = null
+      , Func<string> namespaceWriter = null
+      , Func<XmlSchemaElement, bool> filter = null)
     {
       var def = schemaSet.Schemas(defaultNamespace).OfType<XmlSchema>().First();
 
       this.schemaCompletionDataItems = new XmlSchemaCompletionDataCollection();
       foreach (var schema in schemaSet.Schemas().OfType<XmlSchema>().Where(s => s != def))
       {
-        this.schemaCompletionDataItems.Add(new XmlSchemaCompletionData(schema));
+        this.schemaCompletionDataItems.Add(new XmlSchemaCompletionData(schema)
+        {
+          ElementFilter = filter
+        });
       }
       this.defaultSchemaCompletionData = new XmlSchemaCompletionData(def)
       {
-        RelatedSchemas = this.schemaCompletionDataItems
+        RelatedSchemas = this.schemaCompletionDataItems,
+        NamespaceWriter = namespaceWriter,
+        ElementFilter = filter
       };
       this.defaultNamespacePrefix = prefix ?? string.Empty;
     }

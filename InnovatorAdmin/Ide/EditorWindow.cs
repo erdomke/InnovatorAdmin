@@ -166,9 +166,40 @@ namespace InnovatorAdmin
       _commands = new UiCommandManager(this);
       inputEditor.KeyDown += _commands.OnKeyDown;
       outputEditor.KeyDown += _commands.OnKeyDown;
-      _commands.Add<Control>(btnEditConnections, e => e.KeyCode == Keys.O && e.Modifiers == Keys.Control, ChangeConnection);
+      _commands.Add<Control>(btnEditConnections, e => e.KeyCode == Keys.Q && e.Modifiers == Keys.Control, ChangeConnection);
       _commands.Add<Control>(btnSoapAction, e => e.KeyCode == Keys.M && e.Modifiers == Keys.Control, ChangeSoapAction);
       _commands.Add<Control>(mniNewWindow, e => e.KeyCode == Keys.N && e.Modifiers == Keys.Control, c => NewWindow().Show());
+      _commands.Add<Editor.FullEditor>(mniOpen, e => e.KeyCode == Keys.O && e.Modifiers == Keys.Control, c =>
+      {
+        using (var dialog = new OpenFileDialog())
+        {
+          if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+          {
+            lblProgress.Text = "Opening file...";
+            c.OpenFile(dialog.FileName).ContinueWith(t => {
+              if (t.IsCanceled)
+                lblProgress.Text = "";
+              else if (t.IsFaulted)
+                lblProgress.Text = t.Exception.Message;
+              else
+                lblProgress.Text = "File opened";
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+          }
+        }
+      });
+      _commands.Add<Editor.FullEditor>(mniSave, e => e.KeyCode == Keys.S && e.Modifiers == Keys.Control, c =>
+      {
+        lblProgress.Text = "Saving file...";
+        c.Save().ContinueWith(t =>
+        {
+          if (t.IsFaulted)
+            lblProgress.Text = t.Exception.Message;
+          else if (t.IsCanceled || !t.Result)
+            lblProgress.Text = "";
+          else
+            lblProgress.Text = "File saved";
+        }, TaskScheduler.FromCurrentSynchronizationContext());
+      });
       _commands.Add<Editor.FullEditor>(mniFind, null, c => c.Find());
       _commands.Add<Editor.FullEditor>(mniFindNext, null, c => c.FindNext());
       _commands.Add<Editor.FullEditor>(mniFindPrevious, null, c => c.FindPrevious());
@@ -291,7 +322,7 @@ namespace InnovatorAdmin
             })
             .Fail(ex =>
             {
-              lblItems.Text = ex.Message;
+              lblProgress.Text = ex.Message;
               btnEditConnections.Text = "Not Connected ▼";
               lblConnection.Visible = true;
               btnEditConnections.Visible = lblConnection.Visible;
@@ -504,7 +535,7 @@ namespace InnovatorAdmin
 
     void _clock_Tick(object sender, EventArgs e)
     {
-      lblItems.Text = string.Format(@"Processing... {0:hh\:mm\:ss}", DateTime.UtcNow - _start);
+      lblProgress.Text = string.Format(@"Processing... {0:hh\:mm\:ss}", DateTime.UtcNow - _start);
     }
     private void ConfigureRequest(IHttpRequest req)
     {
@@ -1067,10 +1098,9 @@ namespace InnovatorAdmin
       {
         _currentQuery.Cancel();
         _clock.Enabled = false;
-        lblItems.Text = "Canceled";
+        lblProgress.Text = "Canceled";
         _currentQuery = null;
         outputEditor.Text = "";
-        lblItems.Text = "";
         _clock.Enabled = false;
         btnSubmit.Text = "► Run";
         return null;
@@ -1086,7 +1116,7 @@ namespace InnovatorAdmin
       try
       {
         outputEditor.Text = "Processing...";
-        lblItems.Text = "Processing...";
+        lblProgress.Text = "Processing...";
         _start = DateTime.UtcNow;
         _clock.Enabled = true;
         _outputTextSet = false;
@@ -1095,7 +1125,7 @@ namespace InnovatorAdmin
         var cmd = _proxy.NewCommand().WithQuery(query).WithAction(this.SoapAction);
         var queryParams = _proxy.GetHelper().GetParameterNames(query)
           .Select(p => GetCreateParameter(p)).ToList();
-        if (queryParams.Any())
+        if (queryParams.Any() && this.SoapAction != ArasEditorProxy.UnitTestAction)
         {
           using (var dialog = new ParameterWindow(queryParams))
           {
@@ -1162,7 +1192,7 @@ namespace InnovatorAdmin
           {
             outputEditor.Text = ex.Message;
             tbcOutputView.SelectedTab = pgTextOutput;
-            lblItems.Text = "Error";
+            lblProgress.Text = "Error";
           })
           .Always(() =>
           {
@@ -1176,7 +1206,7 @@ namespace InnovatorAdmin
         outputEditor.Text = err.Message;
         tbcOutputView.SelectedTab = pgTextOutput;
         _clock.Enabled = false;
-        lblItems.Text = "Error";
+        lblProgress.Text = "Error";
         _currentQuery = null;
         btnSubmit.Text = "► Run";
       }
@@ -1194,11 +1224,11 @@ namespace InnovatorAdmin
 
       if (result.ItemCount > 0)
       {
-        lblItems.Text = string.Format("{0} item(s) found in {1} ms.", result.ItemCount, milliseconds);
+        lblProgress.Text = string.Format("{0} item(s) found in {1} ms.", result.ItemCount, milliseconds);
       }
       else
       {
-        lblItems.Text = string.Format("No items found in {0} ms.", milliseconds);
+        lblProgress.Text = string.Format("No items found in {0} ms.", milliseconds);
       }
 
       if (mode != OutputType.None)
@@ -1850,7 +1880,7 @@ namespace InnovatorAdmin
           conTable.Items.Add(new ToolStripSeparator());
         conTable.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
           this.mniColumns,
-          this.mniSave,
+          this.mniSaveTableEdits,
           this.mniScriptEdits,
           this.mniResetChanges});
       }

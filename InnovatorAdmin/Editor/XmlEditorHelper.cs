@@ -39,7 +39,58 @@ namespace InnovatorAdmin.Editor
 
     public virtual string GetCurrentQuery(ITextSource text, int offset)
     {
-      return text.Text;
+      return text.GetText(GetCurrentQuerySegment(text, offset));
+    }
+
+    protected ISegment GetCurrentQuerySegment(ITextSource text, int offset)
+    {
+      var start = -1;
+      var end = -1;
+      var depth = 0;
+      var result = new TextSegment() { StartOffset = 0, Length = text.TextLength };
+
+      XmlUtils.ProcessFragment(text, (r, o, st) =>
+      {
+        switch (r.NodeType)
+        {
+          case XmlNodeType.Element:
+
+            if (depth == 0)
+            {
+              start = o;
+            }
+
+            if (r.IsEmptyElement)
+            {
+              end = text.IndexOf("/>", o, text.TextLength - o, StringComparison.Ordinal) + 2;
+              if (depth == 0 && offset >= start && offset < end)
+              {
+                result = new TextSegment() { StartOffset = start, EndOffset = end };
+                return false;
+              }
+            }
+            else
+            {
+              depth++;
+            }
+            break;
+          case XmlNodeType.EndElement:
+            depth--;
+            if (depth == 0)
+            {
+              end = text.IndexOf('>', o, text.TextLength - o) + 1;
+              if (offset >= start && offset < end)
+              {
+                result = new TextSegment() { StartOffset = start, EndOffset = end };
+                return false;
+              }
+            }
+            break;
+        }
+        return true;
+      });
+
+      return result;
     }
 
     public virtual Innovator.Client.IPromise<CompletionContext> ShowCompletions(EditorWinForm control)

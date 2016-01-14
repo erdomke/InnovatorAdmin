@@ -14,7 +14,7 @@ namespace InnovatorAdmin.Editor
   public partial class AmlEditorHelper : AmlSimpleEditorHelper
   {
     private bool _isInitialized = false;
-    
+
     public string SoapAction { get; set; }
 
     public AmlEditorHelper() : base()
@@ -22,7 +22,7 @@ namespace InnovatorAdmin.Editor
       this.SoapAction = "ApplyAML";
       _sql = new SqlCompletionHelper(this);
     }
-    
+
     public override void HandleTextEntered(EditorWinForm control, string insertText)
     {
       if (_isInitialized)
@@ -127,7 +127,7 @@ namespace InnovatorAdmin.Editor
       }
 
     }
-    
+
     public override IEnumerable<string> GetParameterNames(string query)
     {
       var paramNames = new List<string>();
@@ -139,6 +139,8 @@ namespace InnovatorAdmin.Editor
 
       return paramNames.Distinct().OrderBy(n => n);
     }
+
+
 
   }
 }

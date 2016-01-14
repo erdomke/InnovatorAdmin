@@ -60,6 +60,7 @@
     </Compile>
     <Compile Include="SqlParserTests.cs" />
     <Compile Include="StringEnumerableReaderTests.cs" />
+    <Compile Include="Testing\TestSerializerTests.cs" />
     <Compile Include="UtilsTests.cs" />
   </ItemGroup>
   <ItemGroup>

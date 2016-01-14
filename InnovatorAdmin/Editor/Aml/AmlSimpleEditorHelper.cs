@@ -4,10 +4,12 @@ using Innovator.Client;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace InnovatorAdmin.Editor
 {
@@ -46,10 +48,24 @@ namespace InnovatorAdmin.Editor
       var item = GetCurrentItem(text, offset);
       if (item != null)
       {
-        return GetScripts(_conn, item.Type, item.Id);
+        return GetScripts(_conn, item.Type, item.Id).Concat(Enumerable.Repeat(new EditorScriptExecute() {
+          Name = "Transform: Criteria to Where Clause",
+          Execute = () =>
+          {
+            var doc = text as IDocument;
+            if (doc != null)
+            {
+              var segment = GetCurrentQuerySegment(text, offset);
+              var elem = XElement.Load(text.CreateReader(segment.Offset, segment.Length));
+              AmlTransforms.CriteriaToWhereClause(elem);
+              doc.Replace(segment.Offset, segment.Length, elem.ToString());
+            }
+          }
+        }, 1));
       }
       return Enumerable.Empty<IEditorScript>();
     }
+
 
     public override IEnumerable<IEditorScript> GetScripts(IEnumerable<System.Data.DataRow> rows)
     {

@@ -27,12 +27,15 @@ namespace InnovatorAdmin.Editor
   /// </remarks>
   public class XmlSchemaCompletionData
   {
+    private IDictionary<string, string> _namespaces;
     string namespaceUri = String.Empty;
     XmlSchema schema;
     string fileName = String.Empty;
     bool readOnly = false;
 
     public XmlSchemaCompletionDataCollection RelatedSchemas { get; set; }
+    public Func<string> NamespaceWriter { get; set; }
+    public Func<XmlSchemaElement, bool> ElementFilter { get; set; }
 
     /// <summary>
     /// Stores attributes that have been prohibited whilst the code
@@ -177,34 +180,29 @@ namespace InnovatorAdmin.Editor
     {
       XmlCompletionDataCollection data = new XmlCompletionDataCollection();
 
-      //<soapenv:Stuff xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-      foreach (XmlSchemaElement element in schema.Elements.Values)
+      var isDefined = false;
+      var filter = ElementFilter ?? (e => e.Name != null);
+      if (string.IsNullOrEmpty(namespacePrefix) && _namespaces != null)
       {
-        if (element.Name != null)
+        namespacePrefix = _namespaces.FirstOrDefault(k => k.Value == schema.TargetNamespace).Key;
+        isDefined = !string.IsNullOrEmpty(namespacePrefix);
+      }
+
+      //<soapenv:Stuff xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+      foreach (var element in schema.Elements.Values.OfType<XmlSchemaElement>().Where(filter))
+      {
+        var insertText = (string.IsNullOrEmpty(namespacePrefix) ? "" : namespacePrefix + ":") + element.Name;
+        if (!isDefined)
+          insertText += " xmlns:" + namespacePrefix + "=\"" + schema.TargetNamespace + "\"";
+        if (NamespaceWriter != null)
+          insertText += " " + NamespaceWriter();
+
+        yield return new XmlCompletionData()
         {
-          if (string.IsNullOrEmpty(namespacePrefix))
-          {
-            yield return new XmlCompletionData()
-            {
-              Text = element.Name,
-              Image = WpfImages.XmlTag16
-            };
-          }
-          else
-          {
-            yield return new XmlCompletionData()
-            {
-              Text = element.Name,
-              Content = element.Name,
-              Image = WpfImages.XmlTag16,
-              Action = () => namespacePrefix + ":" + element.Name + " xmlns:soapenv=\"" + schema.TargetNamespace + "\""
-            };
-          }
-        }
-        else
-        {
-          // Do not add reference element.
-        }
+          Text = element.Name,
+          Image = WpfImages.XmlTag16,
+          Action = () => insertText
+        };
       }
     }
 
@@ -235,6 +233,7 @@ namespace InnovatorAdmin.Editor
     /// </summary>
     public ICompletionData[] GetChildElementCompletionData(XmlElementPath path)
     {
+      _namespaces = path.Namespaces;
       XmlCompletionDataCollection data = new XmlCompletionDataCollection();
 
       // Locate matching element.
@@ -254,6 +253,7 @@ namespace InnovatorAdmin.Editor
     /// </summary>
     public ICompletionData[] GetAttributeValueCompletionData(XmlElementPath path, string name)
     {
+      _namespaces = path.Namespaces;
       XmlCompletionDataCollection data = new XmlCompletionDataCollection();
 
       // Locate matching element.
@@ -277,6 +277,7 @@ namespace InnovatorAdmin.Editor
     /// <returns><see langword="null"/> if no element can be found.</returns>
     public virtual XmlSchemaElement FindElement(XmlElementPath path)
     {
+      _namespaces = path.Namespaces;
       XmlSchemaElement element = null;
       for (int i = 0; i < path.Elements.Count; ++i)
       {
@@ -629,6 +630,7 @@ namespace InnovatorAdmin.Editor
             var completion = RelatedSchemas[anyRef.Namespace];
             if (completion != null)
             {
+              completion._namespaces = _namespaces;
               data.AddRange(completion.GetElementCompletionData(null).OfType<XmlCompletionData>().ToArray());
             }
           }

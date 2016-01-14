@@ -43,6 +43,7 @@ namespace InnovatorAdmin.Editor
       string attrName = null;
       string value = null;
       bool cdata = false;
+      var paramNames = new HashSet<string>();
 
       var state = XmlUtils.ProcessFragment(xml.CreateSnapshot(0, caret), (r, o, st) =>
       {
@@ -70,6 +71,17 @@ namespace InnovatorAdmin.Editor
             if (st == XmlState.Attribute || st == XmlState.AttributeValue)
               attrName = r.LocalName;
             value = r.Value;
+            if (path.Last().LocalName == "Param")
+            {
+              if (r.LocalName == "name")
+              {
+                paramNames.Add(r.Value);
+              }
+            }
+            else if (r.Value.StartsWith("@") && r.LocalName != "match")
+            {
+              paramNames.Add(r.Value.TrimStart('@').TrimEnd('!'));
+            }
             break;
           case XmlNodeType.CDATA:
             cdata = true;
@@ -87,11 +99,18 @@ namespace InnovatorAdmin.Editor
                 lastItem.Values[path.Last().LocalName] = r.Value;
               }
             }
+            if (r.Value.StartsWith("@"))
+            {
+              paramNames.Add(r.Value.TrimStart('@').TrimEnd('!'));
+            }
             break;
         }
         return true;
       });
 
+      // Bail within comments to avoid conflicting with typing
+      if (state == XmlState.Comment)
+        return Promises.Resolved<CompletionContext>(new CompletionContext());
       if (caret > 0 && state == XmlState.Tag && (xml.GetCharAt(caret - 1) == '"' || xml.GetCharAt(caret - 1) == '\''))
         return Promises.Resolved<CompletionContext>(new CompletionContext() { IsXmlTag = true });
 
@@ -111,6 +130,9 @@ namespace InnovatorAdmin.Editor
             break;
           case "GetAssignedTasks":
             items = Elements("params");
+            break;
+          case ArasEditorProxy.UnitTestAction:
+            items = Elements("TestSuite");
             break;
           default:
             items = Elements("Item");
@@ -144,6 +166,18 @@ namespace InnovatorAdmin.Editor
                 break;
               case "Authentication":
                 items = Attributes(notExisting, "mode");
+                break;
+              case "Param":
+                items = Attributes(notExisting, "name", "select");
+                break;
+              case "Remove":
+                items = Attributes(notExisting, "match");
+                break;
+              case "AssertMatch":
+                items = Attributes(notExisting, "match", "removeSysProps");
+                break;
+              case "Test":
+                items = Attributes(notExisting, "name");
                 break;
               case "Item":
                 switch (soapAction)
@@ -282,7 +316,20 @@ namespace InnovatorAdmin.Editor
                 case "isCriteria":
                 case "related_expand":
                 case "serverEvents":
-                  items = AttributeValues("0", "1");
+                case "removeSysProps":
+                  items = Promises.Resolved<IEnumerable<ICompletionData>>(new ICompletionData[] {
+                    new AttributeValueCompletionData() {
+                      Text = "0",
+                      Image = WpfImages.EnumValue16,
+                      Content = "0 (False)"
+                    },
+                    new AttributeValueCompletionData()
+                    {
+                      Text = "1",
+                      Image = WpfImages.EnumValue16,
+                      Content = "1 (True)"
+                    }
+                  });
                   break;
                 case "id":
                   var newGuid = new AttributeValueCompletionData()
@@ -483,11 +530,35 @@ namespace InnovatorAdmin.Editor
 
             if (path.Count == 1 && path.First().LocalName == "AML" && state == XmlState.Tag)
             {
-              items = CompletionExtensions.GetPromise<BasicCompletionData>("Item");
+              items = Elements("Item");
             }
             else if (path.Count == 1 && path.First().LocalName.Equals("sql", StringComparison.OrdinalIgnoreCase) && soapAction == "ApplySQL")
             {
               return _sql.Completions(value, xml, caret, cdata ? "]]>" : "<");
+            }
+            else if (path.Last().LocalName == "TestSuite")
+            {
+              items = Elements("Tests", "Init", "Cleanup");
+            }
+            else if (path.Last().LocalName == "Tests")
+            {
+              items = Elements("Test");
+            }
+            else if (path.Last().LocalName == "Test")
+            {
+              items = Elements("AssertMatch", "Param", "Item", "sql");
+            }
+            else if (path.Last().LocalName == "Init" || path.Last().LocalName == "Cleanup")
+            {
+              items = Elements("Param", "Item", "sql");
+            }
+            else if (path.Last().LocalName == "AssertMatch")
+            {
+              items = Elements("Expected", "Remove");
+            }
+            else if (path.Last().LocalName == "Expected" || path.Last().LocalName == "Param")
+            {
+              items = Elements("Item");
             }
             else
             {
@@ -1058,58 +1129,6 @@ namespace InnovatorAdmin.Editor
       {
         callback(itemType);
       }
-    }
-
-
-    public override string GetCurrentQuery(ITextSource text, int offset)
-    {
-      var start = -1;
-      var end = -1;
-      var depth = 0;
-      string result = null;
-
-      XmlUtils.ProcessFragment(text, (r, o, st) =>
-      {
-        switch (r.NodeType)
-        {
-          case XmlNodeType.Element:
-
-            if (depth == 0)
-            {
-              start = o;
-            }
-
-            if (r.IsEmptyElement)
-            {
-              end = text.IndexOf("/>", o, text.TextLength - o, StringComparison.Ordinal) + 2;
-              if (depth == 0 && offset >= start && offset < end)
-              {
-                result = text.GetText(start, end - start);
-                return false;
-              }
-            }
-            else
-            {
-              depth++;
-            }
-            break;
-          case XmlNodeType.EndElement:
-            depth--;
-            if (depth == 0)
-            {
-              end = text.IndexOf('>', o, text.TextLength - o) + 1;
-              if (offset >= start && offset < end)
-              {
-                result = text.GetText(start, end - start);
-                return false;
-              }
-            }
-            break;
-        }
-        return true;
-      });
-
-      return result;
     }
 
     public virtual void InitializeConnection(IAsyncConnection conn)

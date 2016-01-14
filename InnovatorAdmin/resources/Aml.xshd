@@ -1,9 +1,15 @@
 <SyntaxDefinition name="XML" extensions=".xml;.aml" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+  <!--<Run name='Get Part 1' result='Pass' elapsedMs='422' start='2016-01-12T19:25:27' />-->
+
+  <Color name="TestRun_Pass" foreground="Green" exampleText="&lt;!-- comment --&gt;" />
+  <Color name="TestRun_Fail" foreground="Red" fontWeight="bold" exampleText="&lt;!-- comment --&gt;" />
+  <Color name="TestRun_NotRun" foreground="Blue" exampleText="&lt;!-- comment --&gt;" />
+  
   <Color name="Comment" foreground="Green" exampleText="&lt;!-- comment --&gt;" />
   <Color name="CData" foreground="Blue" exampleText="&lt;![CDATA[data]]&gt;" />
   <Color name="DocType" foreground="Blue" exampleText="&lt;!DOCTYPE rootElement&gt;" />
   <Color name="XmlDeclaration" foreground="Blue" exampleText='&lt;?xml version="1.0"?&gt;' />
-  <Color name="XmlTag" foreground="DarkMagenta" exampleText='&lt;tag attribute="value" /&gt;' />
+  <Color name="XmlTag" foreground="Purple" exampleText='&lt;tag attribute="value" /&gt;' />
   <Color name="AttributeName" foreground="Red" exampleText='&lt;tag attribute="value" /&gt;' />
   <Color name="AttributeValue" foreground="Blue" exampleText='&lt;tag attribute="value" /&gt;' />
   <Color name="Entity" foreground="Teal" exampleText="index.aspx?a=1&amp;amp;b=2" />
@@ -59,6 +65,19 @@
   <Color name="FunctionKeywords" foreground="Blue" exampleText="CInt(a)" />
 	  
   <RuleSet>
+    <Span color="TestRun_Pass" multiline="false">
+      <Begin>&lt;Run .*? result='Pass'</Begin>
+      <End>/&gt;</End>
+    </Span>
+    <Span color="TestRun_Fail" multiline="false">
+      <Begin>&lt;Run .*? result='Fail'</Begin>
+      <End>/&gt;</End>
+    </Span>
+    <Span color="TestRun_NotRun" multiline="false">
+      <Begin>&lt;Run .*? result='NotRun'</Begin>
+      <End>/&gt;</End>
+    </Span>
+
     <Span ruleSet="SqlScriptSet" multiline="true">
       <Begin color="XmlTag">&lt;sql&gt;</Begin>
       <End color="XmlTag">&lt;/sql&gt;</End>

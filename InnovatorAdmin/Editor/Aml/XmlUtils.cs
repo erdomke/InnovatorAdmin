@@ -118,7 +118,7 @@ namespace InnovatorAdmin.Editor
                     i += 3;
                     state = XmlState.Comment;
                   }
-                  if (i + 8 < fragment.TextLength
+                  else if (i + 8 < fragment.TextLength
                     && fragment.GetCharAt(i + 1) == '!'
                     && fragment.GetCharAt(i + 2) == '['
                     && fragment.GetCharAt(i + 3) == 'C'

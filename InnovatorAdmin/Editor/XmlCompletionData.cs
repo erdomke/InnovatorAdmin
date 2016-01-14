@@ -71,20 +71,33 @@ namespace InnovatorAdmin.Editor
       this.forceDefault = forceDefault;
     }
 
-    public int ImageIndex
-    {
-      get
-      {
-        return 0;
-      }
-    }
-
     public string DefaultValue
     {
       get
       {
         return defaultValue;
       }
+    }
+
+    public override System.Windows.Media.ImageSource Image
+    {
+      get
+      {
+        if (base.Image == null)
+        {
+          switch (this.dataType)
+          {
+            case DataType.XmlElement:
+              return WpfImages.XmlTag16;
+            case DataType.XmlAttribute:
+              return WpfImages.Attribute16;
+            default:
+              return WpfImages.EnumValue16;
+          }
+        }
+        return base.Image;
+      }
+      set { base.Image = value; }
     }
 
     public double Priority

@@ -3,13 +3,16 @@ using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Rendering;
 using ICSharpCode.AvalonEdit.Search;
+using ICSharpCode.AvalonEdit.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace InnovatorAdmin.Editor
@@ -142,6 +145,48 @@ namespace InnovatorAdmin.Editor
       txtReplace.KeyDown += textbox_KeyDown;
 
       FindReplaceMode = FindReplaceState.None;
+    }
+
+
+    public async Task OpenFile(string path)
+    {
+      Document.FileName = path;
+      using (var stream = File.OpenRead(path))
+      {
+        await OpenFile(stream);
+      }
+    }
+
+    public async Task OpenFile(Stream stream)
+    {
+      var rope = new Rope<char>();
+      using (var reader = new StreamReader(stream))
+      using (var writer = new Editor.RopeWriter(rope))
+      {
+        await reader.CopyToAsync(writer);
+      }
+      Document.Replace(0, Document.TextLength, new RopeTextSource(rope));
+    }
+
+    public async Task<bool> Save()
+    {
+      if (string.IsNullOrWhiteSpace(Document.FileName))
+      {
+        using (var dialog = new SaveFileDialog())
+        {
+          if (dialog.ShowDialog() != DialogResult.OK)
+            return false;
+          Document.FileName = dialog.FileName;
+        }
+      }
+
+      using (var stream = File.OpenWrite(Document.FileName))
+      using (var writer = new StreamWriter(stream))
+      using (var reader = Document.CreateReader())
+      {
+        await reader.CopyToAsync(writer);
+      }
+      return true;
     }
 
     public void Find()

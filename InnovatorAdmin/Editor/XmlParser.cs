@@ -98,13 +98,12 @@ namespace InnovatorAdmin.Editor
         QualifiedName elementName = GetElementName(elementText);
         NamespaceURI elementNamespace = GetElementNamespace(elementText);
 
-        IDictionary<string, string> namespaces;
-        path = GetParentElementPathCore(xml.Substring(0, index), out namespaces);
+        path = GetParentElementPathCore(xml.Substring(0, index));
         string namespaceUri;
         if (elementNamespace.Namespace.Length == 0
           && !string.IsNullOrEmpty(elementName.Prefix)
-          && namespaces != null
-          && namespaces.TryGetValue(elementName.Prefix, out namespaceUri))
+          && path.Namespaces != null
+          && path.Namespaces.TryGetValue(elementName.Prefix, out namespaceUri))
         {
           elementNamespace.Namespace = namespaceUri;
           elementNamespace.Prefix = elementName.Prefix;
@@ -169,16 +168,14 @@ namespace InnovatorAdmin.Editor
 
     public static XmlElementPath GetParentElementPath(string xml)
     {
-      IDictionary<string, string> namespaces;
-      var path = GetParentElementPathCore(xml, out namespaces);
+      var path = GetParentElementPathCore(xml);
       path.Compact();
       return path;
     }
 
     public static IEnumerable<XmlElementPath> GetParentElementPaths(string xml)
     {
-      IDictionary<string, string> namespaces;
-      var path = GetParentElementPathCore(xml, out namespaces);
+      var path = GetParentElementPathCore(xml);
       string lastNamespace = "";
       var groups = new GroupedList<string, QualifiedName>();
       foreach (QualifiedName qname in path.Elements)
@@ -196,7 +193,10 @@ namespace InnovatorAdmin.Editor
         return x.Key.CompareTo(y.Key);
       });
 
-      return orderedList.Select(g => new XmlElementPath(g.ToArray()));
+      return orderedList.Select(g => new XmlElementPath(g.ToArray())
+      {
+        Namespaces = path.Namespaces
+      });
     }
 
     /// <summary>
@@ -256,10 +256,9 @@ namespace InnovatorAdmin.Editor
     /// Gets the parent element path based on the index position.
     /// </summary>
     [DebuggerStepThrough()]
-    public static XmlElementPath GetParentElementPathCore(string xml, out IDictionary<string, string> namespaces)
+    public static XmlElementPath GetParentElementPathCore(string xml)
     {
       XmlElementPath path = new XmlElementPath();
-      namespaces = null;
 
       try
       {
@@ -275,7 +274,7 @@ namespace InnovatorAdmin.Editor
               {
                 QualifiedName elementName = new QualifiedName(xmlReader.LocalName, xmlReader.NamespaceURI, xmlReader.Prefix);
                 path.Elements.Add(elementName);
-                namespaces = xmlReader.GetNamespacesInScope(XmlNamespaceScope.All);
+                path.Namespaces = xmlReader.GetNamespacesInScope(XmlNamespaceScope.All);
               }
               break;
             case XmlNodeType.EndElement:

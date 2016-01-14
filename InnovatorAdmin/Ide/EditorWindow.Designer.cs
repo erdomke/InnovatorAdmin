@@ -100,7 +100,7 @@
       this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
       this.lblSelection = new System.Windows.Forms.Label();
       this.lblVersion = new System.Windows.Forms.Label();
-      this.lblItems = new System.Windows.Forms.Label();
+      this.lblProgress = new System.Windows.Forms.Label();
       this.splitMain = new InnovatorAdmin.Controls.SplitContainerTheme();
       this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
       this.treeItems = new InnovatorAdmin.TreeListView();
@@ -125,6 +125,7 @@
       this.dgvItems = new InnovatorAdmin.Controls.DataGrid();
       this.conTable = new System.Windows.Forms.ContextMenuStrip(this.components);
       this.mniColumns = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniSaveTableEdits = new System.Windows.Forms.ToolStripMenuItem();
       this.mniScriptEdits = new System.Windows.Forms.ToolStripMenuItem();
       this.mniTableEditsToClipboard = new System.Windows.Forms.ToolStripMenuItem();
       this.mniTableEditsToFile = new System.Windows.Forms.ToolStripMenuItem();
@@ -143,6 +144,7 @@
       this.pnlLeftTop = new System.Windows.Forms.Panel();
       this.pnlRightTop = new System.Windows.Forms.Panel();
       this.pnlConnectionShadow = new InnovatorAdmin.DropShadow();
+      this.mniOpen = new System.Windows.Forms.ToolStripMenuItem();
       this.mniSave = new System.Windows.Forms.ToolStripMenuItem();
       this.tblMain.SuspendLayout();
       this.tblHeader.SuspendLayout();
@@ -338,6 +340,8 @@
       this.toolStripDropDownButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
       this.toolStripDropDownButton2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniNewWindow,
+            this.mniOpen,
+            this.mniSave,
             this.toolStripSeparator3,
             this.mniClose});
       this.toolStripDropDownButton2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton2.Image")));
@@ -811,7 +815,7 @@
       this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
       this.tableLayoutPanel5.Controls.Add(this.lblSelection, 2, 0);
       this.tableLayoutPanel5.Controls.Add(this.lblVersion, 1, 0);
-      this.tableLayoutPanel5.Controls.Add(this.lblItems, 0, 0);
+      this.tableLayoutPanel5.Controls.Add(this.lblProgress, 0, 0);
       this.tableLayoutPanel5.Location = new System.Drawing.Point(3, 405);
       this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(0);
       this.tableLayoutPanel5.Name = "tableLayoutPanel5";
@@ -840,13 +844,13 @@
       // 
       // lblItems
       // 
-      this.lblItems.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-      this.lblItems.AutoEllipsis = true;
-      this.lblItems.Location = new System.Drawing.Point(3, 6);
-      this.lblItems.Margin = new System.Windows.Forms.Padding(3);
-      this.lblItems.Name = "lblItems";
-      this.lblItems.Size = new System.Drawing.Size(147, 13);
-      this.lblItems.TabIndex = 3;
+      this.lblProgress.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+      this.lblProgress.AutoEllipsis = true;
+      this.lblProgress.Location = new System.Drawing.Point(3, 6);
+      this.lblProgress.Margin = new System.Windows.Forms.Padding(3);
+      this.lblProgress.Name = "lblItems";
+      this.lblProgress.Size = new System.Drawing.Size(147, 13);
+      this.lblProgress.TabIndex = 3;
       // 
       // splitMain
       // 
@@ -1189,19 +1193,26 @@
       // 
       this.conTable.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniColumns,
-            this.mniSave,
+            this.mniSaveTableEdits,
             this.mniScriptEdits,
             this.mniResetChanges});
       this.conTable.Name = "conTable";
-      this.conTable.Size = new System.Drawing.Size(153, 114);
+      this.conTable.Size = new System.Drawing.Size(152, 92);
       this.conTable.Opening += new System.ComponentModel.CancelEventHandler(this.conTable_Opening);
       // 
       // mniColumns
       // 
       this.mniColumns.Name = "mniColumns";
-      this.mniColumns.Size = new System.Drawing.Size(152, 22);
+      this.mniColumns.Size = new System.Drawing.Size(151, 22);
       this.mniColumns.Text = "Columns...";
       this.mniColumns.Click += new System.EventHandler(this.mniColumns_Click);
+      // 
+      // mniSaveTableEdits
+      // 
+      this.mniSaveTableEdits.Name = "mniSaveTableEdits";
+      this.mniSaveTableEdits.Size = new System.Drawing.Size(151, 22);
+      this.mniSaveTableEdits.Text = "Save";
+      this.mniSaveTableEdits.Click += new System.EventHandler(this.mniSave_Click);
       // 
       // mniScriptEdits
       // 
@@ -1210,34 +1221,34 @@
             this.mniTableEditsToFile,
             this.mniTableEditsToQueryEditor});
       this.mniScriptEdits.Name = "mniScriptEdits";
-      this.mniScriptEdits.Size = new System.Drawing.Size(152, 22);
+      this.mniScriptEdits.Size = new System.Drawing.Size(151, 22);
       this.mniScriptEdits.Text = "Save To";
       // 
       // mniTableEditsToClipboard
       // 
       this.mniTableEditsToClipboard.Name = "mniTableEditsToClipboard";
-      this.mniTableEditsToClipboard.Size = new System.Drawing.Size(152, 22);
+      this.mniTableEditsToClipboard.Size = new System.Drawing.Size(140, 22);
       this.mniTableEditsToClipboard.Text = "Clipboard";
       this.mniTableEditsToClipboard.Click += new System.EventHandler(this.mniTableEditsToClipboard_Click);
       // 
       // mniTableEditsToFile
       // 
       this.mniTableEditsToFile.Name = "mniTableEditsToFile";
-      this.mniTableEditsToFile.Size = new System.Drawing.Size(152, 22);
+      this.mniTableEditsToFile.Size = new System.Drawing.Size(140, 22);
       this.mniTableEditsToFile.Text = "File...";
       this.mniTableEditsToFile.Click += new System.EventHandler(this.mniTableEditsToFile_Click);
       // 
       // mniTableEditsToQueryEditor
       // 
       this.mniTableEditsToQueryEditor.Name = "mniTableEditsToQueryEditor";
-      this.mniTableEditsToQueryEditor.Size = new System.Drawing.Size(152, 22);
+      this.mniTableEditsToQueryEditor.Size = new System.Drawing.Size(140, 22);
       this.mniTableEditsToQueryEditor.Text = "Query Editor";
       this.mniTableEditsToQueryEditor.Click += new System.EventHandler(this.mniTableEditsToQueryEditor_Click);
       // 
       // mniResetChanges
       // 
       this.mniResetChanges.Name = "mniResetChanges";
-      this.mniResetChanges.Size = new System.Drawing.Size(152, 22);
+      this.mniResetChanges.Size = new System.Drawing.Size(151, 22);
       this.mniResetChanges.Text = "Reset Changes";
       this.mniResetChanges.Click += new System.EventHandler(this.mniResetChanges_Click);
       // 
@@ -1420,12 +1431,19 @@
       this.pnlConnectionShadow.Size = new System.Drawing.Size(621, 4);
       this.pnlConnectionShadow.TabIndex = 17;
       // 
+      // mniOpen
+      // 
+      this.mniOpen.Name = "mniOpen";
+      this.mniOpen.ShortcutKeyDisplayString = "Ctrl+O";
+      this.mniOpen.Size = new System.Drawing.Size(188, 22);
+      this.mniOpen.Text = "Open";
+      // 
       // mniSave
       // 
       this.mniSave.Name = "mniSave";
-      this.mniSave.Size = new System.Drawing.Size(152, 22);
+      this.mniSave.ShortcutKeyDisplayString = "Ctrl+S";
+      this.mniSave.Size = new System.Drawing.Size(188, 22);
       this.mniSave.Text = "Save";
-      this.mniSave.Click += new System.EventHandler(this.mniSave_Click);
       // 
       // EditorWindow
       // 
@@ -1483,7 +1501,7 @@
     private Controls.SplitContainerTheme splitMain;
     private Controls.FlatButton btnOk;
     private Controls.FlatButton btnCancel;
-    private System.Windows.Forms.Label lblItems;
+    private System.Windows.Forms.Label lblProgress;
     private System.Windows.Forms.ContextMenuStrip conTable;
     private System.Windows.Forms.ToolStripMenuItem mniScriptEdits;
     private System.Windows.Forms.ToolStripMenuItem mniTableEditsToQueryEditor;
@@ -1592,6 +1610,8 @@
     private System.Windows.Forms.Panel pnlLeftTop;
     private System.Windows.Forms.Panel pnlRightTop;
     private DropShadow pnlConnectionShadow;
+    private System.Windows.Forms.ToolStripMenuItem mniSaveTableEdits;
+    private System.Windows.Forms.ToolStripMenuItem mniOpen;
     private System.Windows.Forms.ToolStripMenuItem mniSave;
   }
 }

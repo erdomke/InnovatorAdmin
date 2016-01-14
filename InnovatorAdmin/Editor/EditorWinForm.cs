@@ -3,6 +3,7 @@ using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Rendering;
+using ICSharpCode.AvalonEdit.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,6 +11,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
 using System.Windows.Media;
@@ -333,7 +335,6 @@ namespace InnovatorAdmin.Editor
     {
       _extEditor.CollapseAll();
     }
-
 
     protected virtual void OnRunRequested(RunRequestedEventArgs e)
     {
