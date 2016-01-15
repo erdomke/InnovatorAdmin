@@ -101,6 +101,7 @@ namespace InnovatorAdmin.Editor
       else
       {
         return this.GetCompletions(control.Document, control.Editor.CaretOffset, this.SoapAction)
+          .ToPromise()
           .UiPromise(control)
           .Convert(data => {
             if (length != control.Editor.Document.TextLength

@@ -117,44 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="assembly_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>icons\tree\assembly-16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="attribute_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>icons\tree\attribute-16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="class_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>icons\tree\class-16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="enum_value_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>icons\tree\enum-value-16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="field_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>icons\tree\field-16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="folder_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>icons\tree\folder-16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="folder_special_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>icons\tree\folder-special-16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="method_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>icons\tree\method-16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="method_friend_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>icons\tree\method-friend-16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="namespace_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>icons\tree\namespace-16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="operator_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>icons\tree\operator-16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="property_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>icons\tree\property-16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="xml_tag_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>icons\tree\xml-tag-16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
 </root>

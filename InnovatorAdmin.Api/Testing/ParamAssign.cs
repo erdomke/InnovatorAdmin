@@ -11,7 +11,9 @@ namespace InnovatorAdmin.Testing
 {
   public class ParamAssign : ICommand
   {
+    public string ActualValue { get; set; }
     public string Comment { get; set; }
+    public bool IsXml { get; set; }
     public string Name { get; set; }
     public string Select { get; set; }
     public string Value { get; set; }
@@ -23,7 +25,8 @@ namespace InnovatorAdmin.Testing
         if (context.LastResult == null)
           throw new InvalidOperationException("Cannot assert a match when no query has been run");
 
-        context.Parameters[this.Name] = XPathResult.Evaluate(context.LastResult, this.Select).ToString();
+        this.ActualValue = XPathResult.Evaluate(context.LastResult, this.Select).ToString();
+        context.Parameters[this.Name] = this.ActualValue;
       }
       else if (string.IsNullOrEmpty(this.Value))
       {

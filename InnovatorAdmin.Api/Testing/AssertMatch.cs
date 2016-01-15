@@ -13,9 +13,15 @@ namespace InnovatorAdmin.Testing
   public class AssertMatch : ITestCommand
   {
     private List<string> _removes = new List<string>();
+    private static HashSet<string> _systemProps = new HashSet<string>(new string[]
+    {
+      "created_on", "created_by_id", "modified_on", "modified_by_id", "id", "config_id", "keyed_name"
+    });
 
+    public string Actual { get; set; }
     public string Comment { get; set; }
     public string Expected { get; set; }
+    public bool IsXml { get; set; }
     public string Match { get; set; }
     public bool RemoveSystemProperties { get; set; }
     public IList<string> Removes { get { return _removes; } }
@@ -32,23 +38,30 @@ namespace InnovatorAdmin.Testing
       if (string.IsNullOrWhiteSpace(this.Match))
         throw new ArgumentException("No match pattern is specified");
 
+      this.Actual = context.LastResult.ToString();
       var res = XPathResult.Evaluate(context.LastResult, this.Match);
       var elemRes = res as ElementsXpathResult;
       if (elemRes != null)
       {
-        var elem = elemRes.Elements;
+        elemRes.Elements = elemRes.Elements.Select(e => new XElement(e)).ToArray();
+        var elems = elemRes.Elements;
 
         // Remove properties from the actual as needed
         if (RemoveSystemProperties)
         {
-          foreach (var sysProp in elem.Descendants("created_on").Concat(elem.Descendants("modified_on")).ToArray())
+          foreach (var sysProp in elems.Descendants().Where(e => _systemProps.Contains(e.Name.LocalName)).ToArray())
           {
             sysProp.Remove();
+          }
+          foreach (var item in elems.DescendantsAndSelf().Where(e => e.Name.LocalName == "Item"))
+          {
+            var idAttr = item.Attribute("id");
+            if (idAttr != null) idAttr.Remove();
           }
         }
         foreach (var remove in _removes)
         {
-          foreach (var e in elem)
+          foreach (var e in elems)
           {
             foreach (var toRemove in e.XPathSelectElements(remove).ToArray())
             {

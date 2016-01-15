@@ -60,7 +60,7 @@ namespace InnovatorAdmin.Editor
                   {
                     Id = reader.Value,
                     Type = type,
-                    Offset = lineInfo.LinePosition + start
+                    Offset = lineInfo.LinePosition + start - 1
                   };
                 break;
             }

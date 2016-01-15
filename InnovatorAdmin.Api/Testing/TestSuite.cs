@@ -26,60 +26,71 @@ namespace InnovatorAdmin.Testing
       _results.Clear();
       _output.Clear();
 
-      var start = DateTime.Now;
-      var i = 0;
-      try
+      using (context.StartSubProgress())
       {
-        for (i = 0; i < _init.Count; i++)
+        var start = DateTime.Now;
+        var i = 0;
+        var pos = 0;
+        var totalCount = _init.Count + _tests.Count + _cleanup.Count;
+        try
         {
-          await _init[i].Run(context);
+          for (i = 0; i < _init.Count; i++)
+          {
+            context.ReportProgress(pos, totalCount, "Running initialization...");
+            await _init[i].Run(context);
+            pos += 1;
+          }
         }
-      }
-      catch (Exception ex)
-      {
-        _results.Add(new TestRun()
+        catch (Exception ex)
         {
-          Name = "* Init",
-          Result = TestResult.Fail,
-          Start = start,
-          ErrorLine = i + 1,
-          Message = ex.Message
-        });
-        return;
-      }
-
-      foreach (var test in _tests)
-      {
-        _results.Add(await test.Run(context));
-      }
-
-      try
-      {
-        for (i = 0; i < _cleanup.Count; i++)
-        {
-          await _cleanup[i].Run(context);
+          _results.Add(new TestRun()
+          {
+            Name = "* Init",
+            Result = TestResult.Fail,
+            Start = start,
+            ErrorLine = i + 1,
+            Message = ex.Message
+          });
+          return;
         }
-      }
-      catch (Exception ex)
-      {
-        _results.Add(new TestRun()
-        {
-          Name = "* Cleanup",
-          Result = TestResult.Fail,
-          Start = start,
-          ErrorLine = i + 1,
-          Message = ex.Message
-        });
-        return;
-      }
 
-      foreach (var kvp in context.Parameters)
-      {
-        _output.Add(new ParamAssign()
+        for (i = 0; i < _tests.Count; i++)
         {
-          Name = kvp.Key,
-          Value = kvp.Value
-        });
+          context.ReportProgress(pos, totalCount, "Running test " + (i + 1) + "...");
+          _results.Add(await _tests[i].Run(context));
+          pos += 1;
+        }
+
+        try
+        {
+          for (i = 0; i < _cleanup.Count; i++)
+          {
+            context.ReportProgress(pos, totalCount, "Running cleanup...");
+            await _cleanup[i].Run(context);
+            pos += 1;
+          }
+        }
+        catch (Exception ex)
+        {
+          _results.Add(new TestRun()
+          {
+            Name = "* Cleanup",
+            Result = TestResult.Fail,
+            Start = start,
+            ErrorLine = i + 1,
+            Message = ex.Message
+          });
+          return;
+        }
+
+        foreach (var kvp in context.Parameters)
+        {
+          _output.Add(new ParamAssign()
+          {
+            Name = kvp.Key,
+            Value = kvp.Value
+          });
+        }
       }
     }
   }

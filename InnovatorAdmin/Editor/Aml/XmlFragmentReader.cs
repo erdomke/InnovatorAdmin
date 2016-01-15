@@ -18,8 +18,12 @@ namespace InnovatorAdmin.Editor
     private int _i;
     private XmlReader _xml;
     private List<int> _lineOffsets = new List<int>() { 0 };
+    private XmlState _endState;
 
-
+    public XmlState EndState
+    {
+      get { return _endState; }
+    }
     public int Offset
     {
       get
@@ -42,7 +46,7 @@ namespace InnovatorAdmin.Editor
       var state = XmlState.Other;
       var line = 1;
 
-      var ch = _reader.Read();
+      var ch = ReadText();
       _i = 0;
       while (ch > 0)
       {
@@ -178,6 +182,7 @@ namespace InnovatorAdmin.Editor
       var textReader = new System.IO.StringReader(_builder.ToString());
       _builder.Length = 0;
       _xml = XmlReader.Create(textReader, settings);
+      _endState = state;
     }
 
     private int LastIndexOf(char value)
@@ -315,7 +320,9 @@ namespace InnovatorAdmin.Editor
 
     public override bool Read()
     {
-      return _xml.Read() && !(_xml.NodeType == XmlNodeType.Comment && _xml.Value == __eof);
+      return _xml.Read()
+        && !(_xml.NodeType == XmlNodeType.Comment && _xml.Value == __eof)
+        && !(_xml.NodeType == XmlNodeType.Element && _xml.LocalName == __noName);
     }
 
     public override bool ReadAttributeValue()

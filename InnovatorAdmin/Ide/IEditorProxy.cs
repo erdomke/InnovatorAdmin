@@ -19,7 +19,7 @@ namespace InnovatorAdmin
     IEditorHelper GetHelper();
     IEditorHelper GetOutputHelper();
     ICommand NewCommand();
-    IPromise<IResultObject> Process(ICommand request, bool async);
+    IPromise<IResultObject> Process(ICommand request, bool async, Action<int, string> progressCallback);
     IPromise<IEnumerable<IEditorTreeNode>> GetNodes();
   }
 }

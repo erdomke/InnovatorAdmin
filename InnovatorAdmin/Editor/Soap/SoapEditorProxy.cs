@@ -109,7 +109,7 @@ namespace InnovatorAdmin.Editor
       return new SoapCommand();
     }
 
-    public Innovator.Client.IPromise<IResultObject> Process(ICommand request, bool async)
+    public Innovator.Client.IPromise<IResultObject> Process(ICommand request, bool async, Action<int, string> progressCallback)
     {
       var soapCmd = request as SoapCommand;
       if (soapCmd == null)
@@ -291,7 +291,7 @@ namespace InnovatorAdmin.Editor
       return (IEditorTreeNode)new EditorTreeNode()
       {
         Name = p.Name,
-        ImageKey = "folder-16",
+        Image = Icons.Folder16,
         HasChildren = true,
         Children = descrip.Bindings[p.Binding.Name].Operations.OfType<OperationBinding>()
           .OrderBy(o => o.Name, StringComparer.OrdinalIgnoreCase)
@@ -299,7 +299,7 @@ namespace InnovatorAdmin.Editor
           (IEditorTreeNode)new EditorTreeNode()
           {
             Name = o.Name,
-            ImageKey = "xml-tag-16",
+            Image = Icons.XmlTag16,
             HasChildren = false,
             Scripts = GetScripts(o, schemas)
           })

@@ -88,11 +88,11 @@ namespace InnovatorAdmin.Editor
           switch (this.dataType)
           {
             case DataType.XmlElement:
-              return WpfImages.XmlTag16;
+              return Icons.XmlTag16.Wpf;
             case DataType.XmlAttribute:
-              return WpfImages.Attribute16;
+              return Icons.Field16.Wpf;
             default:
-              return WpfImages.EnumValue16;
+              return Icons.EnumValue16.Wpf;
           }
         }
         return base.Image;

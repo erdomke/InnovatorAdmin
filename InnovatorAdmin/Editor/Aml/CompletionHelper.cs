@@ -32,10 +32,10 @@ namespace InnovatorAdmin.Editor
       return null;
     }
 
-    public IPromise<CompletionContext> GetCompletions(ITextSource xml, int caret, string soapAction)
+    public async Task<CompletionContext> GetCompletions(ITextSource xml, int caret, string soapAction)
     {
       //var overlap = 0;
-      if (xml.TextLength < 1) return Promises.Resolved<CompletionContext>(new CompletionContext());
+      if (xml.TextLength < 1) return new CompletionContext();
 
       var path = new List<AmlNode>();
       var existingAttributes = new HashSet<string>();
@@ -45,77 +45,91 @@ namespace InnovatorAdmin.Editor
       bool cdata = false;
       var paramNames = new HashSet<string>();
 
-      var state = XmlUtils.ProcessFragment(xml.CreateSnapshot(0, caret), (r, o, st) =>
-      {
-        switch (r.NodeType)
-        {
-          case XmlNodeType.Element:
-            if (!r.IsEmptyElement)
-              path.Add(new AmlNode()
-              {
-                Offset = o,
-                LocalName = r.LocalName,
-                Type = GetType(r),
-                Action = r.GetAttribute("action"),
-                Condition = r.GetAttribute("condition"),
-                Id = r.GetAttribute("id")
-              });
+      var reader = new XmlFragmentReader(xml.CreateReader(0, caret));
 
-            existingAttributes.Clear();
-            break;
-          case XmlNodeType.EndElement:
-            path.RemoveAt(path.Count - 1);
-            break;
-          case XmlNodeType.Attribute:
-            existingAttributes.Add(r.LocalName);
-            if (st == XmlState.Attribute || st == XmlState.AttributeValue)
-              attrName = r.LocalName;
-            value = r.Value;
-            if (path.Last().LocalName == "Param")
-            {
-              if (r.LocalName == "name")
+      try
+      {
+        while (reader.Read())
+        {
+          switch (reader.NodeType)
+          {
+            case XmlNodeType.Element:
+              var elemName = reader.LocalName;
+              if (!reader.IsEmptyElement)
+                path.Add(new AmlNode()
+                {
+                  Offset = reader.Offset,
+                  LocalName = reader.LocalName,
+                  Type = GetType(reader),
+                  Action = reader.GetAttribute("action"),
+                  Condition = reader.GetAttribute("condition"),
+                  Id = reader.GetAttribute("id")
+                });
+
+              attrName = null;
+              value = null;
+              existingAttributes.Clear();
+              for (var i = 0; i < reader.AttributeCount; i++ )
               {
-                paramNames.Add(r.Value);
+                reader.MoveToAttribute(i);
+                existingAttributes.Add(reader.LocalName);
+                if (reader.EndState == XmlState.Attribute || reader.EndState == XmlState.AttributeValue)
+                  attrName = reader.LocalName;
+                value = reader.Value;
+                if (elemName == "Param")
+                {
+                  if (reader.LocalName == "name")
+                  {
+                    paramNames.Add("@" + reader.Value.TrimStart('@'));
+                  }
+                }
+                else if (reader.Value.StartsWith("@") && reader.LocalName != "match")
+                {
+                  paramNames.Add(reader.Value.TrimEnd('!'));
+                }
               }
-            }
-            else if (r.Value.StartsWith("@") && r.LocalName != "match")
-            {
-              paramNames.Add(r.Value.TrimStart('@').TrimEnd('!'));
-            }
-            break;
-          case XmlNodeType.CDATA:
-            cdata = true;
-            value = r.Value;
-            break;
-          case XmlNodeType.Text:
-            cdata = false;
-            value = r.Value;
-            if (!string.IsNullOrWhiteSpace(r.Value) && r.Value.Length <= 128 && path.Count > 1
-              && path.Last().LocalName != "Item")
-            {
-              var lastItem = path.LastOrDefault(n => n.LocalName == "Item");
-              if (lastItem != null)
+              break;
+            case XmlNodeType.EndElement:
+              path.RemoveAt(path.Count - 1);
+              attrName = null;
+              value = null;
+              existingAttributes.Clear();
+              break;
+            case XmlNodeType.CDATA:
+              cdata = true;
+              value = reader.Value;
+              break;
+            case XmlNodeType.Text:
+              cdata = false;
+              value = reader.Value;
+              if (!string.IsNullOrWhiteSpace(reader.Value) && reader.Value.Length <= 128 && path.Count > 1
+                && path.Last().LocalName != "Item")
               {
-                lastItem.Values[path.Last().LocalName] = r.Value;
+                var lastItem = path.LastOrDefault(n => n.LocalName == "Item");
+                if (lastItem != null)
+                {
+                  lastItem.Values[path.Last().LocalName] = reader.Value;
+                }
               }
-            }
-            if (r.Value.StartsWith("@"))
-            {
-              paramNames.Add(r.Value.TrimStart('@').TrimEnd('!'));
-            }
-            break;
+              if (reader.Value.StartsWith("@"))
+              {
+                paramNames.Add(reader.Value.TrimEnd('!'));
+              }
+              break;
+          }
         }
-        return true;
-      });
+      }
+      catch (XmlException) { }
 
       // Bail within comments to avoid conflicting with typing
+      var state = reader.EndState;
       if (state == XmlState.Comment)
-        return Promises.Resolved<CompletionContext>(new CompletionContext());
+        return new CompletionContext();
       if (caret > 0 && state == XmlState.Tag && (xml.GetCharAt(caret - 1) == '"' || xml.GetCharAt(caret - 1) == '\''))
-        return Promises.Resolved<CompletionContext>(new CompletionContext() { IsXmlTag = true });
+        return new CompletionContext() { IsXmlTag = true };
 
-      IPromise<IEnumerable<ICompletionData>> items = null;
-      IEnumerable<ICompletionData> appendItems = Enumerable.Empty<ICompletionData>();
+      IEnumerable<ICompletionData> items = null;
+      var appendItems = Enumerable.Empty<ICompletionData>();
       var filter = string.Empty;
 
       if (path.Count < 1)
@@ -300,13 +314,13 @@ namespace InnovatorAdmin.Editor
                   if (version < 0 || version >= 11)
                     methods = methods.Concat(Enumerable.Repeat("GetInheritedServerEvents", 1));
 
-                  items = Promises.Resolved(_metadata.MethodNames.Select(m => (ICompletionData)new AttributeValueCompletionData() {
+                  items = _metadata.MethodNames.Select(m => (ICompletionData)new AttributeValueCompletionData() {
                     Text = m,
-                    Image = WpfImages.Method16
+                    Image = Icons.Method16.Wpf
                   }).Concat(methods.Select(m => (ICompletionData)new AttributeValueCompletionData() {
                     Text = m,
-                    Image = WpfImages.MethodFriend16
-                  })));
+                    Image = Icons.MethodFriend16.Wpf
+                  }));
                   break;
                 case "access_type":
                   items = AttributeValues("can_add", "can_delete", "can_get", "can_update");
@@ -316,20 +330,19 @@ namespace InnovatorAdmin.Editor
                 case "isCriteria":
                 case "related_expand":
                 case "serverEvents":
-                case "removeSysProps":
-                  items = Promises.Resolved<IEnumerable<ICompletionData>>(new ICompletionData[] {
+                  items = new ICompletionData[] {
                     new AttributeValueCompletionData() {
                       Text = "0",
-                      Image = WpfImages.EnumValue16,
+                      Image = Icons.EnumValue16.Wpf,
                       Content = "0 (False)"
                     },
                     new AttributeValueCompletionData()
                     {
                       Text = "1",
-                      Image = WpfImages.EnumValue16,
+                      Image = Icons.EnumValue16.Wpf,
                       Content = "1 (True)"
                     }
-                  });
+                  };
                   break;
                 case "id":
                   var newGuid = new AttributeValueCompletionData()
@@ -338,7 +351,7 @@ namespace InnovatorAdmin.Editor
                     Content = FormatText.ColorText("(New Guid)", Brushes.Purple),
                     Action = () => Guid.NewGuid().ToString("N").ToUpperInvariant()
                   };
-                  items = Promises.Resolved(Enumerable.Repeat<ICompletionData>(newGuid, 1));
+                  items = Enumerable.Repeat<ICompletionData>(newGuid, 1);
                   break;
                 case "queryType":
                   items = AttributeValues("Effective", "Latest", "Released");
@@ -350,7 +363,7 @@ namespace InnovatorAdmin.Editor
                     var lastComma = value.LastIndexOf(",");
                     if (lastComma >= 0) value = value.Substring(lastComma + 1).Trim();
 
-                    items = new OrderByPropertyFactory(_metadata, itemType).GetPromise();
+                    items = await new OrderByPropertyFactory(_metadata, itemType).GetPromise().ToTask();
                   }
                   break;
                 case "select":
@@ -361,20 +374,18 @@ namespace InnovatorAdmin.Editor
                     var selectPath = SelectPath(value, out partial);
                     value = partial;
 
-                    var itPromise = new Promise<ItemType>();
-                    RecurseProperties(itemType, selectPath, it => itPromise.Resolve(it));
+                    var it = await RecurseProperties(itemType, selectPath);
 
-                    items = itPromise
-                      .Continue(it => new SelectPropertyFactory(_metadata, it).GetPromise());
+                    items = await new SelectPropertyFactory(_metadata, it).GetPromise().ToTask();
                   }
                   break;
                 case "type":
                   if (string.IsNullOrEmpty(value) && !string.IsNullOrEmpty(path.Last().Type))
                   {
-                    items = Promises.Resolved(Enumerable.Repeat<ICompletionData>(new AttributeValueCompletionData()
+                    items = Enumerable.Repeat<ICompletionData>(new AttributeValueCompletionData()
                     {
                       Text = path.Last().Type
-                    }, 1));
+                    }, 1);
                   }
                   else if (path.Count > 2
                     && path[path.Count - 3].LocalName == "Item"
@@ -383,22 +394,22 @@ namespace InnovatorAdmin.Editor
                     if (!string.IsNullOrEmpty(path[path.Count - 3].Type)
                       && _metadata.ItemTypeByName(path[path.Count - 3].Type, out itemType))
                     {
-                      items = Promises.Resolved(ItemTypeCompletion<AttributeValueCompletionData>(itemType.Relationships));
+                      items = ItemTypeCompletion<AttributeValueCompletionData>(itemType.Relationships);
                     }
                   }
                   else
                   {
-                    items = Promises.Resolved(ItemTypeCompletion<AttributeValueCompletionData>(_metadata.ItemTypes));
+                    items = ItemTypeCompletion<AttributeValueCompletionData>(_metadata.ItemTypes);
                   }
                   break;
                 case "typeId":
                   if (!string.IsNullOrEmpty(path.Last().Type)
                     && _metadata.ItemTypeByName(path.Last().Type, out itemType))
                   {
-                    items = Promises.Resolved(Enumerable.Repeat<ICompletionData>(new AttributeValueCompletionData()
+                    items = Enumerable.Repeat<ICompletionData>(new AttributeValueCompletionData()
                     {
                       Text = itemType.Id
-                    }, 1));
+                    }, 1);
                   }
                   else if (path.Count > 2
                     && path[path.Count - 3].LocalName == "Item"
@@ -407,113 +418,116 @@ namespace InnovatorAdmin.Editor
                     if (!string.IsNullOrEmpty(path[path.Count - 3].Type)
                       && _metadata.ItemTypeByName(path[path.Count - 3].Type, out itemType))
                     {
-                      items = Promises.Resolved(ItemTypeCompletion<AttributeValueCompletionData>(itemType.Relationships, true));
+                      items = ItemTypeCompletion<AttributeValueCompletionData>(itemType.Relationships, true);
                     }
                   }
                   else
                   {
-                    items = Promises.Resolved(ItemTypeCompletion<AttributeValueCompletionData>(_metadata.ItemTypes, true));
+                    items = ItemTypeCompletion<AttributeValueCompletionData>(_metadata.ItemTypes, true);
                   }
                   break;
                 case "where":
                   if (!string.IsNullOrEmpty(path.Last().Type)
                     && _metadata.ItemTypeByName(path.Last().Type, out itemType))
                   {
-                    return _sql.Completions("select * from innovator.[" + itemType.Name.Replace(' ', '_')
-                      + "] where " + value, xml, caret, xml.GetCharAt(caret - value.Length - 1).ToString(), true);
+                    return await _sql.Completions("select * from innovator.[" + itemType.Name.Replace(' ', '_')
+                      + "] where " + value, xml, caret, xml.GetCharAt(caret - value.Length - 1).ToString(), true).ToTask();
                   }
                   break;
               }
+
+              if (items != null && paramNames.Any())
+                items = items.Concat(Parameters(paramNames.ToArray()));
             }
             else
             {
               switch (attrName)
               {
                 case "condition":
-                  items = Promises.Resolved((IEnumerable<ICompletionData>)new ICompletionData[] {
+                  items = new ICompletionData[] {
                     new AttributeValueCompletionData()
                     {
                       Text = "between",
-                      Image = WpfImages.EnumValue16
+                      Image = Icons.EnumValue16.Wpf
                     },
                     new AttributeValueCompletionData()
                     {
                       Text = "eq",
                       Content = "eq (=, Equals)",
-                      Image = WpfImages.EnumValue16
+                      Image = Icons.EnumValue16.Wpf
                     },
                     new AttributeValueCompletionData()
                     {
                       Text = "ge",
                       Content = "ge (>=, Greather than or equal to)",
-                      Image = WpfImages.EnumValue16
+                      Image = Icons.EnumValue16.Wpf
                     },
                     new AttributeValueCompletionData()
                     {
                       Text = "gt",
                       Content = "gt (>, Greather than)",
-                      Image = WpfImages.EnumValue16
+                      Image = Icons.EnumValue16.Wpf
                     },
                     new AttributeValueCompletionData()
                     {
                       Text = "in",
-                      Image = WpfImages.EnumValue16
+                      Image = Icons.EnumValue16.Wpf
                     },
                     new AttributeValueCompletionData()
                     {
                       Text = "is not null",
-                      Image = WpfImages.EnumValue16
+                      Image = Icons.EnumValue16.Wpf
                     },
                     new AttributeValueCompletionData()
                     {
                       Text = "is null",
-                      Image = WpfImages.EnumValue16
+                      Image = Icons.EnumValue16.Wpf
                     },
                     new AttributeValueCompletionData()
                     {
                       Text = "is",
-                      Image = WpfImages.EnumValue16
+                      Image = Icons.EnumValue16.Wpf
                     },
                     new AttributeValueCompletionData()
                     {
                       Text = "le",
                       Content = "le (<=, Less than or equal to)",
-                      Image = WpfImages.EnumValue16
+                      Image = Icons.EnumValue16.Wpf
                     },
                     new AttributeValueCompletionData()
                     {
                       Text = "like",
                       Description = "Both * and % are wildcards",
-                      Image = WpfImages.EnumValue16
+                      Image = Icons.EnumValue16.Wpf
                     },
                     new AttributeValueCompletionData()
                     {
                       Text = "lt",
                       Content = "lt (<, Less than)",
-                      Image = WpfImages.EnumValue16
+                      Image = Icons.EnumValue16.Wpf
                     },
                     new AttributeValueCompletionData()
                     {
                       Text = "ne",
                       Content = "ne (<>, !=, Not Equals)",
-                      Image = WpfImages.EnumValue16
+                      Image = Icons.EnumValue16.Wpf
                     },
                     new AttributeValueCompletionData()
                     {
                       Text = "not between",
-                      Image = WpfImages.EnumValue16
+                      Image = Icons.EnumValue16.Wpf
                     },
                     new AttributeValueCompletionData()
                     {
                       Text = "not in",
-                      Image = WpfImages.EnumValue16
+                      Image = Icons.EnumValue16.Wpf
                     },
                     new AttributeValueCompletionData()
                     {
                       Text = "not like",
-                      Image = WpfImages.EnumValue16
+                      Image = Icons.EnumValue16.Wpf
                     }
-                  });
+                  };
                   break;
                 case "is_null":
                   items = AttributeValues("0", "1");
@@ -534,7 +548,7 @@ namespace InnovatorAdmin.Editor
             }
             else if (path.Count == 1 && path.First().LocalName.Equals("sql", StringComparison.OrdinalIgnoreCase) && soapAction == "ApplySQL")
             {
-              return _sql.Completions(value, xml, caret, cdata ? "]]>" : "<");
+              return await _sql.Completions(value, xml, caret, cdata ? "]]>" : "<").ToTask();
             }
             else if (path.Last().LocalName == "TestSuite")
             {
@@ -565,55 +579,58 @@ namespace InnovatorAdmin.Editor
               var j = path.Count - 1;
               while (path[j].LocalName == "and" || path[j].LocalName == "not" || path[j].LocalName == "or") j--;
               var last = path[j];
-              if (state == XmlState.Tag && last.LocalName == "Item")
+              if (last.LocalName == "Item")
               {
-                switch (last.Action)
+                if (state == XmlState.Tag)
                 {
-                  case "AddHistory":
-                    items = Elements("action", "filename", "form_name");
-                    break;
-                  case "GetItemsForStructureBrowser":
-                    items = Elements("Item");
-                    break;
-                  case "EvaluateActivity":
-                    items = Elements("Activity", "ActivityAssignment", "Paths", "DelegateTo"
-                      , "Tasks", "Variables", "Authentication", "Comments", "Complete");
-                    break;
-                  case "instantiateWorkflow":
-                    items = Elements("WorkflowMap");
-                    break;
-                  case "promoteItem":
-                    items = Elements("state", "comments");
-                    break;
-                  case "Run Report":
-                    items = Elements("report_name", "AML");
-                    break;
-                  case "SQL Process":
-                    items = Elements("name", "PROCESS", "ARG1", "ARG2", "ARG3", "ARG4"
-                      , "ARG5", "ARG6", "ARG7", "ARG8", "ARG9");
-                    break;
-                  default:
-                    // Completions for item properties
-                    var buffer = new List<ICompletionData>();
+                  switch (last.Action)
+                  {
+                    case "AddHistory":
+                      items = Elements("action", "filename", "form_name");
+                      break;
+                    case "GetItemsForStructureBrowser":
+                      items = Elements("Item");
+                      break;
+                    case "EvaluateActivity":
+                      items = Elements("Activity", "ActivityAssignment", "Paths", "DelegateTo"
+                        , "Tasks", "Variables", "Authentication", "Comments", "Complete");
+                      break;
+                    case "instantiateWorkflow":
+                      items = Elements("WorkflowMap");
+                      break;
+                    case "promoteItem":
+                      items = Elements("state", "comments");
+                      break;
+                    case "Run Report":
+                      items = Elements("report_name", "AML");
+                      break;
+                    case "SQL Process":
+                      items = Elements("name", "PROCESS", "ARG1", "ARG2", "ARG3", "ARG4"
+                        , "ARG5", "ARG6", "ARG7", "ARG8", "ARG9");
+                      break;
+                    default:
+                      // Completions for item properties
+                      var buffer = new List<ICompletionData>();
 
-                    buffer.Add(new BasicCompletionData("Relationships") { Image = WpfImages.XmlTag16 } );
-                    if (last.Action == "get")
-                    {
-                      buffer.Add(new BasicCompletionData("and") { Image = WpfImages.Operator16 });
-                      buffer.Add(new BasicCompletionData("not") { Image = WpfImages.Operator16 });
-                      buffer.Add(new BasicCompletionData("or") { Image = WpfImages.Operator16 });
-                    }
-                    ItemType itemType;
-                    if (!string.IsNullOrEmpty(last.Type)
-                      && _metadata.ItemTypeByName(last.Type, out itemType))
-                    {
-                      items = new PropertyCompletionFactory(_metadata, itemType).GetPromise(buffer);
-                    }
-                    else
-                    {
-                      items = Promises.Resolved<IEnumerable<ICompletionData>>(buffer);
-                    }
-                    break;
+                      buffer.Add(new BasicCompletionData("Relationships") { Image = Icons.XmlTag16.Wpf });
+                      if (last.Action == "get")
+                      {
+                        buffer.Add(new BasicCompletionData("and") { Image = Icons.Operator16.Wpf });
+                        buffer.Add(new BasicCompletionData("not") { Image = Icons.Operator16.Wpf });
+                        buffer.Add(new BasicCompletionData("or") { Image = Icons.Operator16.Wpf });
+                      }
+                      ItemType itemType;
+                      if (!string.IsNullOrEmpty(last.Type)
+                        && _metadata.ItemTypeByName(last.Type, out itemType))
+                      {
+                        items = await new PropertyCompletionFactory(_metadata, itemType).GetPromise(buffer).ToTask();
+                      }
+                      else
+                      {
+                        items = buffer;
+                      }
+                      break;
+                  }
                 }
               }
               else if (state == XmlState.Tag && last.LocalName == "params" && soapAction == "GetAssignedTasks")
@@ -639,12 +656,12 @@ namespace InnovatorAdmin.Editor
                 {
                   if (path.Last().LocalName == "Relationships")
                   {
-                    items = CompletionExtensions.GetPromise<BasicCompletionData>("Item");
+                    items = Elements("Item");
                   }
                   else if (path.Last().Condition == "in"
                     || path.Last().LocalName.Equals("sql", StringComparison.OrdinalIgnoreCase))
                   {
-                    return _sql.Completions(value, xml, caret, cdata ? "]]>" : "<");
+                    return await _sql.Completions(value, xml, caret, cdata ? "]]>" : "<").ToTask();
                   }
                   else
                   {
@@ -656,7 +673,9 @@ namespace InnovatorAdmin.Editor
                     else if (!string.IsNullOrEmpty(lastItem.Type)
                       && _metadata.ItemTypeByName(lastItem.Type, out itemType))
                     {
-                      items = PropertyValueCompletion(itemType, state, lastItem, path).ToPromise();
+                      items = await PropertyValueCompletion(itemType, state, lastItem, path).ToPromise().ToTask();
+                      if (items != null && paramNames.Any())
+                        items = items.Concat(Parameters(paramNames.ToArray()));
                     }
                   }
                 }
@@ -669,38 +688,47 @@ namespace InnovatorAdmin.Editor
       }
 
       if (items == null)
-        return Promises.Resolved(new CompletionContext());
+        return new CompletionContext();
 
-      return items.Convert(i => new CompletionContext() {
-        Items = FilterAndSort(i.Concat(appendItems), filter),
+      return new CompletionContext() {
+        Items = FilterAndSort(items.Concat(appendItems), filter),
         Overlap = (filter ?? "").Length
+      };
+    }
+
+    private static IEnumerable<ICompletionData> Parameters(params string[] values)
+    {
+      return values.Select(v => (ICompletionData)new BasicCompletionData()
+      {
+        Text = v,
+        Image = Icons.Attribute16.Wpf
       });
     }
 
-    private static IPromise<IEnumerable<ICompletionData>> Elements(params string[] values)
+    private static IEnumerable<ICompletionData> Elements(params string[] values)
     {
-      return Promises.Resolved(values.Select(v => (ICompletionData)new BasicCompletionData()
+      return values.Select(v => (ICompletionData)new BasicCompletionData()
       {
         Text = v,
-        Image = WpfImages.XmlTag16
-      }));
+        Image = Icons.XmlTag16.Wpf
+      });
     }
 
-    private static IPromise<IEnumerable<ICompletionData>> Attributes(Func<string, bool> filter, params string[] values)
+    private static IEnumerable<ICompletionData> Attributes(Func<string, bool> filter, params string[] values)
     {
-      return Promises.Resolved(values.Where(filter).Select(v => (ICompletionData)new AttributeCompletionData()
+      return values.Where(filter).Select(v => (ICompletionData)new AttributeCompletionData()
       {
         Text = v,
-        Image = WpfImages.Attribute16
-      }));
+        Image = Icons.Field16.Wpf
+      });
     }
-    private static IPromise<IEnumerable<ICompletionData>> AttributeValues(params string[] values)
+    private static IEnumerable<ICompletionData> AttributeValues(params string[] values)
     {
-      return Promises.Resolved(values.Select(v => (ICompletionData)new AttributeValueCompletionData()
+      return values.Select(v => (ICompletionData)new AttributeValueCompletionData()
       {
         Text = v,
-        Image = WpfImages.EnumValue16
-      }));
+        Image = Icons.EnumValue16.Wpf
+      });
     }
 
     private IEnumerable<ICompletionData> ItemTypeCompletion<T>(IEnumerable<ItemType> itemTypes, bool insertId = false) where T : BasicCompletionData, new()
@@ -709,7 +737,7 @@ namespace InnovatorAdmin.Editor
       {
         var result = new T();
         result.Text = i.Name;
-        result.Image = WpfImages.Class16;
+        result.Image = Icons.Class16.Wpf;
         if (insertId) result.Action = () => i.Id;
         if (!string.IsNullOrWhiteSpace(i.Label)) result.Description = i.Label;
         return result;
@@ -718,7 +746,7 @@ namespace InnovatorAdmin.Editor
           .Select(i =>
           {
             var result = new T();
-            result.Image = WpfImages.Class16;
+            result.Image = Icons.Class16.Wpf;
             result.Text = i.Label;
             result.Description = i.Name;
             result.Content = FormatText.MutedText(i.Label);
@@ -797,6 +825,7 @@ namespace InnovatorAdmin.Editor
             return Enumerable.Repeat(new BasicCompletionData()
             {
               Text = assn[0].Id() + "<!-- " + assn[0].RelatedId().KeyedName().Value + " -->",
+              Image = Icons.EnumValue16.Wpf,
               Content = assn[0].RelatedId().KeyedName().Value
             }, 1);
           return Enumerable.Empty<ICompletionData>();
@@ -822,6 +851,7 @@ namespace InnovatorAdmin.Editor
             paths.Add(new BasicCompletionData()
             {
               Text = "<Path id='" + defaultPath.Id() + "'>Delegate</Path>",
+              Image = Icons.XmlTag16.Wpf,
               Content = "Delegate"
             });
           }
@@ -830,12 +860,14 @@ namespace InnovatorAdmin.Editor
             paths.Add(new BasicCompletionData()
             {
               Text = "<Path id='" + defaultPath.Id() + "'>Refuse</Path>",
+              Image = Icons.XmlTag16.Wpf,
               Content = "Refuse"
             });
           }
           paths.AddRange(act[0].Relationships("Workflow Process Path").Select(p => new BasicCompletionData()
           {
             Text = "<Path id='" + p.Id() + "'>" + p.Property("label").AsString(p.Property("name").Value) + "</Path>",
+            Image = Icons.XmlTag16.Wpf,
             Content = p.Property("label").AsString(p.Property("name").Value)
           }));
           return paths;
@@ -856,8 +888,10 @@ namespace InnovatorAdmin.Editor
         if (p.Type == PropertyType.item && p.Restrictions.Any())
         {
           var completions = p.Restrictions
-            .Select(type => (state != XmlState.Tag ? "<" : "") + "Item type='" + type + "'")
-            .GetCompletions<BasicCompletionData>();
+            .Select(type => (ICompletionData)new BasicCompletionData() {
+              Text = (state != XmlState.Tag ? "<" : "") + "Item type='" + type + "'",
+              Image = Icons.XmlTag16.Wpf
+            });
 
           if (p.Restrictions.Any(r => string.Equals(r, "File", StringComparison.OrdinalIgnoreCase)))
           {
@@ -900,12 +934,13 @@ namespace InnovatorAdmin.Editor
         else if (p.Type == PropertyType.date)
         {
           return new ICompletionData[] {
-          new BasicCompletionData() {
-            Text = DateTime.Now.ToString("s"),
-            Content = DateTime.Now.ToString("s") + " (Now)"
-          }
-          // Add a completion dialog option to open a calendar control
-        };
+            new BasicCompletionData() {
+              Text = DateTime.Now.ToString("s"),
+              Image = Icons.EnumValue16.Wpf,
+              Content = DateTime.Now.ToString("s") + " (Now)"
+            }
+            // Add a completion dialog option to open a calendar control
+          };
         }
         else if (p.Type == PropertyType.boolean)
         {
@@ -917,12 +952,15 @@ namespace InnovatorAdmin.Editor
 
           var hash = new HashSet<string>(values.Select(v => v.Value), StringComparer.CurrentCultureIgnoreCase);
           return values
-            .Select(v => v.Value)
-            .GetCompletions<BasicCompletionData>()
+            .Select(v => new BasicCompletionData() {
+              Text = v.Value,
+              Image = Icons.EnumValue16.Wpf
+            })
             .Concat(values.Where(v => !string.IsNullOrWhiteSpace(v.Label) && !hash.Contains(v.Label))
                     .Select(v => new BasicCompletionData()
                     {
                       Text = v.Label + " (" + v.Value + ")",
+                      Image = Icons.EnumValue16.Wpf,
                       Description = v.Value,
                       Content = FormatText.MutedText(v.Label + " (" + v.Value + ")"),
                       Action = () => v.Value
@@ -1104,30 +1142,33 @@ namespace InnovatorAdmin.Editor
       }
     }
 
-    private void RecurseProperties(ItemType itemType, IEnumerable<string> remainingPath, Action<ItemType> callback)
+    private async Task<ItemType> RecurseProperties(ItemType itemType, IEnumerable<string> remainingPath)
     {
       if (remainingPath.Any())
       {
-        _metadata.GetProperty(itemType, remainingPath.First())
-        .Done(currProp =>
+        try
         {
+          var currProp = await _metadata.GetProperty(itemType, remainingPath.First()).ToTask();
           ItemType it;
           if (currProp.Type == PropertyType.item
             && currProp.Restrictions.Any()
             && _metadata.ItemTypeByName(currProp.Restrictions.First(), out it))
           {
-            RecurseProperties(it, remainingPath.Skip(1), callback);
+            return await RecurseProperties(it, remainingPath.Skip(1));
           }
           else
           {
-            callback(itemType);
+            return itemType;
           }
-        })
-        .Fail(ex => callback(itemType));
+        }
+        catch (Exception ex)
+        {
+          return itemType;
+        }
       }
       else
       {
-        callback(itemType);
+        return itemType;
       }
     }
 

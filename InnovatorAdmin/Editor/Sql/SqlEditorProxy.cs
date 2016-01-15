@@ -58,7 +58,7 @@ namespace InnovatorAdmin.Editor
       return new WrappedSqlCommand();
     }
 
-    public Innovator.Client.IPromise<IResultObject> Process(ICommand request, bool async)
+    public Innovator.Client.IPromise<IResultObject> Process(ICommand request, bool async, Action<int, string> progressCallback)
     {
       var intCmd = request as WrappedSqlCommand;
       if (intCmd == null)
@@ -154,7 +154,7 @@ namespace InnovatorAdmin.Editor
       yield return new EditorTreeNode()
       {
         Name = "Programmability",
-        ImageKey = "folder-16",
+        Image = Icons.Folder16,
         HasChildren = true,
         Children = new IEditorTreeNode[] {
           FolderNode("Stored Procedures", objects.Where(o =>
@@ -172,7 +172,7 @@ namespace InnovatorAdmin.Editor
       return new EditorTreeNode()
       {
         Name = name,
-        ImageKey = "folder-16",
+        Image = Icons.Folder16,
         HasChildren = true,
         Children = children
           .Where(o => o.Schema != "INFORMATION_SCHEMA" && o.Schema != "sys")
@@ -190,53 +190,53 @@ namespace InnovatorAdmin.Editor
         return new EditorTreeNode()
         {
           Name = obj.Schema + "." + obj.Name,
-          ImageKey = "class-16",
+          Image = Icons.Class16,
           HasChildren = true,
           Children = new IEditorTreeNode[] {
             new EditorTreeNode() {
               Name = "Columns",
-              ImageKey = "folder-16",
+              Image = Icons.Folder16,
               HasChildren = true,
               ChildGetter = () => metadata.GetColumns(obj.Name, obj.Schema).Wait()
                 .Select(c => new EditorTreeNode()
                 {
                   Name = c.Name,
                   Description = c.Type,
-                  ImageKey = "property-16"
+                  Image = Icons.Property16,
                 }).OrderBy(n => n.Name)
             },
             new EditorTreeNode() {
               Name = "Keys",
-              ImageKey = "folder-16",
+              Image = Icons.Folder16,
               HasChildren = metadata.Objects.Wait().Any(o => o.ParentId == obj.Id && o.Type == "Key"),
               ChildGetter = () => metadata.Objects.Wait().Where(o => o.ParentId == obj.Id && o.Type == "Key")
                 .Select(c => new EditorTreeNode()
                 {
                   Name = c.Name,
-                  ImageKey = "method-16"
+                  Image = Icons.Method16,
                 }).OrderBy(n => n.Name)
             },
             new EditorTreeNode() {
               Name = "Constraints",
-              ImageKey = "folder-16",
+              Image = Icons.Folder16,
               HasChildren = metadata.Objects.Wait().Any(o => o.ParentId == obj.Id && o.Type == "Constraint"),
               ChildGetter = () => metadata.Objects.Wait().Where(o => o.ParentId == obj.Id && o.Type == "Constraint")
                 .Select(c => new EditorTreeNode()
                 {
                   Name = c.Name,
-                  ImageKey = "method-16"
+                  Image = Icons.Method16,
                 }).OrderBy(n => n.Name)
             }
             ,
             new EditorTreeNode() {
               Name = "Indexes",
-              ImageKey = "folder-16",
+              Image = Icons.Folder16,
               HasChildren = metadata.Objects.Wait().Any(o => o.ParentId == obj.Id && (o.Type == "Index" || o.SubType == SqlSubType.PrimaryKey)),
               ChildGetter = () => metadata.Objects.Wait().Where(o => o.ParentId == obj.Id && (o.Type == "Index" || o.SubType == SqlSubType.PrimaryKey))
                 .Select(c => new EditorTreeNode()
                 {
                   Name = c.Name,
-                  ImageKey = "method-16",
+                  Image = Icons.Method16,
                   Scripts = new IEditorScript[] {
                     new EditorScript() {
                       Name = "Stats",
@@ -275,7 +275,7 @@ WHERE ind.index_id = {0} and ind.object_id = {1};", c.Id, c.ParentId)
         return new EditorTreeNode()
         {
           Name = obj.Schema + "." + obj.Name,
-          ImageKey = "xml-tag-16",
+          Image = Icons.XmlTag16,
           HasChildren = false,
           Scripts = GetScripts(obj)
         };

@@ -146,23 +146,30 @@ namespace InnovatorAdmin.Testing
             Text = reader.ReadOuterXml()
           };
         case "Param":
-          return new ParamAssign()
+          bool isXml;
+          var result = new ParamAssign()
           {
             Comment = comment,
             Name = reader.GetAttribute("name"),
             Select = reader.GetAttribute("select"),
-            Value = ProcessXmlValue(reader.ReadInnerXml())
+            Value = ProcessXmlValue(reader.ReadInnerXml(), out isXml)
           };
+          result.IsXml = isXml;
+          return result;
       }
       return null;
     }
 
-    private static string ProcessXmlValue(string value)
+    private static string ProcessXmlValue(string value, out bool isXml)
     {
+      isXml = false;
       if (string.IsNullOrWhiteSpace(value))
         return value;
       if (value.TrimStart()[0] == '<')
+      {
+        isXml = true;
         return value;
+      }
 
       using (var reader = new StringReader("<a>" + value + "</a>"))
       using (var xml = XmlReader.Create(reader))
@@ -204,7 +211,9 @@ namespace InnovatorAdmin.Testing
                     subReader.Read();
                     break;
                   case "Expected":
-                    result.Expected = ProcessXmlValue(reader.ReadInnerXml());
+                    bool isXml;
+                    result.Expected = ProcessXmlValue(reader.ReadInnerXml(), out isXml);
+                    result.IsXml = isXml;
                     break;
                   default:
                     subReader.Read();
@@ -238,10 +247,19 @@ namespace InnovatorAdmin.Testing
         writer.WriteAttributeString("match", remove);
         writer.WriteEndElement();
       }
-      if (!string.IsNullOrWhiteSpace(match.Expected))
+      if (string.IsNullOrWhiteSpace(match.Expected))
+      {
+        if (!string.IsNullOrEmpty(match.Actual))
+        {
+          writer.WriteStartElement("Actual");
+          WriteFormatted(match.Actual, match.IsXml, writer);
+          writer.WriteEndElement();
+        }
+      }
+      else
       {
         writer.WriteStartElement("Expected");
-        WriteFormatted(match.Expected, writer);
+        WriteFormatted(match.Expected, match.IsXml, writer);
         writer.WriteEndElement();
       }
       writer.WriteEndElement();
@@ -255,14 +273,21 @@ namespace InnovatorAdmin.Testing
         writer.WriteAttributeString("name", param.Name);
       if (!string.IsNullOrWhiteSpace(param.Select))
         writer.WriteAttributeString("select", param.Select);
-      WriteFormatted(param.Value, writer);
+      if (string.IsNullOrEmpty(param.Value))
+      {
+        if (!string.IsNullOrEmpty(param.ActualValue)) writer.WriteComment(param.ActualValue);
+      }
+      else
+      {
+        WriteFormatted(param.Value, param.IsXml, writer);
+      }
       writer.WriteEndElement();
     }
     public static void Write(this Query query, XmlWriter writer)
     {
       if (!string.IsNullOrWhiteSpace(query.Comment))
         writer.WriteComment(query.Comment);
-      WriteFormatted(query.Text, writer);
+      WriteFormatted(query.Text, true, writer);
     }
     public static void Write(this Test test, XmlWriter writer)
     {
@@ -346,15 +371,14 @@ namespace InnovatorAdmin.Testing
       }
       writer.WriteEndElement();
     }
-    private static void WriteFormatted(string value, XmlWriter writer)
+    private static void WriteFormatted(string value, bool isXml, XmlWriter writer)
     {
       if (!string.IsNullOrWhiteSpace(value))
       {
-        if (value.TrimStart()[0] == '<')
+        if (isXml)
         {
           char[] writeNodeBuffer = null;
-          using (var strReader = new StringReader(value))
-          using (var reader = new XmlTextReader(strReader))
+          using (var reader = new XmlTextReader(value, XmlNodeType.Element, null))
           {
             reader.WhitespaceHandling = WhitespaceHandling.Significant;
 

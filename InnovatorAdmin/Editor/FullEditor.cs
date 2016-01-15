@@ -168,9 +168,9 @@ namespace InnovatorAdmin.Editor
       Document.Replace(0, Document.TextLength, new RopeTextSource(rope));
     }
 
-    public async Task<bool> Save()
+    public async Task<bool> Save(bool forceFilePrompt)
     {
-      if (string.IsNullOrWhiteSpace(Document.FileName))
+      if (forceFilePrompt || string.IsNullOrWhiteSpace(Document.FileName))
       {
         using (var dialog = new SaveFileDialog())
         {
@@ -180,7 +180,7 @@ namespace InnovatorAdmin.Editor
         }
       }
 
-      using (var stream = File.OpenWrite(Document.FileName))
+      using (var stream = new FileStream(Document.FileName, FileMode.Create, FileAccess.Write))
       using (var writer = new StreamWriter(stream))
       using (var reader = Document.CreateReader())
       {

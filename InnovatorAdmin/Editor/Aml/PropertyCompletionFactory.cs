@@ -50,7 +50,7 @@ namespace InnovatorAdmin.Editor
     {
       data.Text = prop.Value;
       data.Description = prop.Label;
-      data.Image = WpfImages.Property16;
+      data.Image = Icons.Property16.Wpf;
 
       if (_insertion != null)
       {
@@ -65,7 +65,7 @@ namespace InnovatorAdmin.Editor
       data.Text = label;
       data.Description = prop.Value;
       data.Content = FormatText.MutedText(label);
-      data.Image = WpfImages.Property16;
+      data.Image = Icons.Property16.Wpf;
 
       var insertValue = prop.Value;
       if (_insertion != null)

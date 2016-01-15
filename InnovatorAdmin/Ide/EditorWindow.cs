@@ -44,6 +44,7 @@ namespace InnovatorAdmin
     private string _uid;
     private bool _updateCheckComplete = false;
     private IHttpService _webService = new DefaultHttpService();
+    private ConnectionType _oldConnType = ConnectionType.Innovator;
 
     public bool AllowRun
     {
@@ -135,14 +136,12 @@ namespace InnovatorAdmin
 
       treeItems.CanExpandGetter = m => ((IEditorTreeNode)m).HasChildren;
       treeItems.ChildrenGetter = m => ((IEditorTreeNode)m).GetChildren();
-      colName.ImageGetter = m => ((IEditorTreeNode)m).ImageKey;
+      colName.ImageGetter = m => ((IEditorTreeNode)m).Image.Key;
 
-      treeItems.SmallImageList.Images.Add("class-16", resources.TreeImages.class_16);
-      treeItems.SmallImageList.Images.Add("folder-16", resources.TreeImages.folder_16);
-      treeItems.SmallImageList.Images.Add("folder-special-16", resources.TreeImages.folder_special_16);
-      treeItems.SmallImageList.Images.Add("method-16", resources.TreeImages.method_16);
-      treeItems.SmallImageList.Images.Add("property-16", resources.TreeImages.property_16);
-      treeItems.SmallImageList.Images.Add("xml-tag-16", resources.TreeImages.xml_tag_16);
+      foreach (var icon in Icons.All)
+      {
+        treeItems.SmallImageList.Images.Add(icon.Key, icon.Gdi);
+      }
 
       _clock.Interval = 250;
       _clock.Tick += _clock_Tick;
@@ -187,19 +186,8 @@ namespace InnovatorAdmin
           }
         }
       });
-      _commands.Add<Editor.FullEditor>(mniSave, e => e.KeyCode == Keys.S && e.Modifiers == Keys.Control, c =>
-      {
-        lblProgress.Text = "Saving file...";
-        c.Save().ContinueWith(t =>
-        {
-          if (t.IsFaulted)
-            lblProgress.Text = t.Exception.Message;
-          else if (t.IsCanceled || !t.Result)
-            lblProgress.Text = "";
-          else
-            lblProgress.Text = "File saved";
-        }, TaskScheduler.FromCurrentSynchronizationContext());
-      });
+      _commands.Add<Editor.FullEditor>(mniSave, e => e.KeyCode == Keys.S && e.Modifiers == Keys.Control, c => Save(c, false));
+      _commands.Add<Editor.FullEditor>(mniSaveAs, e => e.KeyCode == Keys.S && e.Modifiers == (Keys.Control | Keys.Shift), c => Save(c, true));
       _commands.Add<Editor.FullEditor>(mniFind, null, c => c.Find());
       _commands.Add<Editor.FullEditor>(mniFindNext, null, c => c.FindNext());
       _commands.Add<Editor.FullEditor>(mniFindPrevious, null, c => c.FindPrevious());
@@ -285,6 +273,44 @@ namespace InnovatorAdmin
         }));
     }
 
+    protected override void OnSizeChanged(EventArgs e)
+    {
+      base.OnSizeChanged(e);
+
+      var resizeMargin = this.WindowState == FormWindowState.Maximized ? 0 : 3;
+      tblMain.ColumnStyles[0].Width = resizeMargin;
+      tblMain.ColumnStyles[tblMain.ColumnStyles.Count - 1].Width = resizeMargin;
+      tblMain.RowStyles[0].Height = resizeMargin;
+      tblMain.RowStyles[tblMain.RowStyles.Count - 1].Height = resizeMargin;
+    }
+
+    private void Save(FullEditor editor, bool forceFilePrompt)
+    {
+      lblProgress.Text = "Saving file...";
+      editor.Save(forceFilePrompt).ContinueWith(t =>
+      {
+        if (t.IsFaulted)
+          lblProgress.Text = t.Exception.Message;
+        else if (t.IsCanceled || !t.Result)
+          lblProgress.Text = "";
+        else
+        {
+          lblProgress.Text = "File saved";
+          if (_proxy != null && _proxy.ConnData != null)
+          {
+            SnippetManager.Instance.SetLastQueryByConnection(_proxy.ConnData.ConnectionName, new Snippet()
+            {
+              Action = this.SoapAction,
+              Text = editor.Text
+            });
+            Properties.Settings.Default.LastConnection = _proxy.ConnData.ConnectionName;
+            Properties.Settings.Default.Save();
+            Properties.Settings.Default.Reload();
+          }
+        }
+      }, TaskScheduler.FromCurrentSynchronizationContext());
+    }
+
     public void SetConnection(IAsyncConnection conn, string name = null)
     {
       if (conn == null) throw new ArgumentNullException("conn");
@@ -293,6 +319,7 @@ namespace InnovatorAdmin
       mniTimeZone.Visible = true;
       SetProxy(new ArasEditorProxy(conn, name ?? conn.Database));
       _disposeProxy = false;
+      _oldConnType = ConnectionType.Innovator;
     }
 
     public void SetConnection(ConnectionData conn)
@@ -305,10 +332,14 @@ namespace InnovatorAdmin
         exploreButton.Visible = false;
         btnSubmit.Visible = false;
 
-        var lastQuery = SnippetManager.Instance.GetLastQueryByConnection(conn.ConnectionName);
-        inputEditor.Text = lastQuery.Text;
-        this.SoapAction = lastQuery.Action;
-        inputEditor.CleanUndoStack();
+        if (inputEditor.Document.TextLength <= 0 || conn.Type != _oldConnType)
+        {
+          var lastQuery = SnippetManager.Instance.GetLastQueryByConnection(conn.ConnectionName);
+          inputEditor.Text = lastQuery.Text;
+          this.SoapAction = lastQuery.Action;
+          inputEditor.CleanUndoStack();
+        }
+        _oldConnType = conn.Type;
 
         try
         {
@@ -434,6 +465,7 @@ namespace InnovatorAdmin
       try
       {
         base.OnLoad(e);
+
         if (!this.Modal)
         {
           var col1 = tblMain.GetColumn(btnOk);
@@ -535,7 +567,7 @@ namespace InnovatorAdmin
 
     void _clock_Tick(object sender, EventArgs e)
     {
-      lblProgress.Text = string.Format(@"Processing... {0:hh\:mm\:ss}", DateTime.UtcNow - _start);
+      lblClock.Text = string.Format(@"[{0:hh\:mm\:ss}]", DateTime.UtcNow - _start);
     }
     private void ConfigureRequest(IHttpRequest req)
     {
@@ -1101,6 +1133,7 @@ namespace InnovatorAdmin
         lblProgress.Text = "Canceled";
         _currentQuery = null;
         outputEditor.Text = "";
+        lblClock.Text = "";
         _clock.Enabled = false;
         btnSubmit.Text = "► Run";
         return null;
@@ -1115,13 +1148,6 @@ namespace InnovatorAdmin
       }
       try
       {
-        outputEditor.Text = "Processing...";
-        lblProgress.Text = "Processing...";
-        _start = DateTime.UtcNow;
-        _clock.Enabled = true;
-        _outputTextSet = false;
-        btnSubmit.Text = "Cancel";
-
         var cmd = _proxy.NewCommand().WithQuery(query).WithAction(this.SoapAction);
         var queryParams = _proxy.GetHelper().GetParameterNames(query)
           .Select(p => GetCreateParameter(p)).ToList();
@@ -1144,6 +1170,14 @@ namespace InnovatorAdmin
             }
           }
         }
+
+        outputEditor.Text = "Processing...";
+        lblProgress.Text = "Processing...";
+        _start = DateTime.UtcNow;
+        lblClock.Text = "";
+        _clock.Enabled = true;
+        _outputTextSet = false;
+        btnSubmit.Text = "Cancel";
 
         // Only reset if we are getting a new result
         if (preferred != OutputType.None)
@@ -1173,7 +1207,8 @@ namespace InnovatorAdmin
         }
 
         var st = Stopwatch.StartNew();
-        _currentQuery = _proxy.Process(cmd, true)
+        _currentQuery = _proxy
+          .Process(cmd, true, (p, m) => this.UiThreadInvoke(() => lblProgress.Text = m))
           .UiPromise(this)
           .Done(result =>
           {
@@ -1196,6 +1231,7 @@ namespace InnovatorAdmin
           })
           .Always(() =>
           {
+            lblClock.Text = "";
             _clock.Enabled = false;
             _currentQuery = null;
             btnSubmit.Text = "► Run";
@@ -1206,6 +1242,7 @@ namespace InnovatorAdmin
         outputEditor.Text = err.Message;
         tbcOutputView.SelectedTab = pgTextOutput;
         _clock.Enabled = false;
+        lblClock.Text = "";
         lblProgress.Text = "Error";
         _currentQuery = null;
         btnSubmit.Text = "► Run";

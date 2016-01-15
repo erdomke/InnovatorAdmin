@@ -24,23 +24,27 @@ namespace InnovatorAdmin.Testing
       {
         TestRun result = null;
 
-        for (i = 0; i < _commands.Count; i++)
+        using (context.StartSubProgress())
         {
-          try
+          for (i = 0; i < _commands.Count; i++)
           {
-            await _commands[i].Run(context);
-          }
-          catch (AssertionFailedException ex)
-          {
-            if (result == null)
-              result = new TestRun()
-              {
-                Name = this.Name,
-                Result = TestResult.Fail,
-                Start = start,
-                ErrorLine = i + 1,
-                Message = ex.Message
-              };
+            context.ReportProgress(i, _commands.Count, "Running test '" + this.Name + "'...");
+            try
+            {
+              await _commands[i].Run(context);
+            }
+            catch (AssertionFailedException ex)
+            {
+              if (result == null)
+                result = new TestRun()
+                {
+                  Name = this.Name,
+                  Result = TestResult.Fail,
+                  Start = start,
+                  ErrorLine = i + 1,
+                  Message = ex.Message
+                };
+            }
           }
         }
 

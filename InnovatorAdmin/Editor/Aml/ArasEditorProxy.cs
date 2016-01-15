@@ -185,7 +185,7 @@ namespace InnovatorAdmin.Editor
       return _actions;
     }
 
-    private async Task<IResultObject> ProcessTestSuite(string commands)
+    private async Task<IResultObject> ProcessTestSuite(string commands, Action<int, string> progressCallback)
     {
       TestSuite suite;
       using (var reader = new StringReader(commands))
@@ -193,11 +193,12 @@ namespace InnovatorAdmin.Editor
         suite = TestSerializer.ReadTestSuite(reader);
       }
       var context = new TestContext(_conn);
+      context.ProgressCallback = progressCallback;
       await suite.Run(context);
       return new ResultObject(suite, _conn);
     }
 
-    public virtual Innovator.Client.IPromise<IResultObject> Process(ICommand request, bool async)
+    public virtual Innovator.Client.IPromise<IResultObject> Process(ICommand request, bool async, Action<int, string> progressCallback)
     {
       var innCmd = request as InnovatorCommand;
       if (innCmd == null)
@@ -207,7 +208,7 @@ namespace InnovatorAdmin.Editor
 
       // Check for file uploads and process if need be
       if (cmd.ActionString == UnitTestAction)
-        return ProcessTestSuite(cmd.Aml).ToPromise();
+        return ProcessTestSuite(cmd.Aml, progressCallback).ToPromise();
 
       var elem = System.Xml.Linq.XElement.Parse(cmd.Aml);
       var files = elem.DescendantsAndSelf("Item")
@@ -515,26 +516,26 @@ namespace InnovatorAdmin.Editor
       yield return new EditorTreeNode()
       {
         Name = "AML Cookbook",
-        ImageKey = "folder-special-16",
+        Image = Icons.FolderSpecial16,
         Description = "Useful AML Scripts",
         HasChildren = true,
         Children = Enumerable.Repeat(new EditorTreeNode()
         {
           Name = "Exports",
-          ImageKey = "folder-special-16",
+          Image = Icons.FolderSpecial16,
           Description = "Metadata Export Scripts",
           HasChildren = true,
           Children = _exports.Select(s => new EditorTreeNode()
           {
             Name = s.Name,
-            ImageKey = "xml-tag-16",
+            Image = Icons.XmlTag16,
             HasChildren = false,
             Scripts = Enumerable.Repeat(s, 1)
           })
         }, 1).Concat(_scripts.Select(s => new EditorTreeNode()
         {
           Name = s.Name,
-          ImageKey = "xml-tag-16",
+          Image = Icons.XmlTag16,
           HasChildren = false,
           Scripts = Enumerable.Repeat(s, 1)
         }))
@@ -542,7 +543,7 @@ namespace InnovatorAdmin.Editor
       yield return new EditorTreeNode()
       {
         Name = "Item Types",
-        ImageKey = "folder-special-16",
+        Image = Icons.FolderSpecial16,
         HasChildren = true,
         Children = ArasMetadataProvider.Cached(_conn).ItemTypes
           .Where(i => !i.IsRelationship)
@@ -552,7 +553,7 @@ namespace InnovatorAdmin.Editor
       yield return new EditorTreeNode()
       {
         Name = "Relationship Types",
-        ImageKey = "folder-special-16",
+        Image = Icons.FolderSpecial16,
         HasChildren = true,
         Children = ArasMetadataProvider.Cached(_conn).ItemTypes
           .Where(i => i.IsRelationship)
@@ -570,7 +571,7 @@ namespace InnovatorAdmin.Editor
           {
             Name = item.Property("label").Value,
             Description = "Saved Search",
-            ImageKey = "xml-tag-16",
+            Image = Icons.XmlTag16,
             HasChildren = item.Relationships("Tree Node Child").Any(),
             Children = item.Relationships().Select(r => ProcessTreeNode(r.RelatedItem())),
             ScriptGetter = () => Enumerable.Repeat(
@@ -585,7 +586,7 @@ namespace InnovatorAdmin.Editor
           return new EditorTreeNode()
           {
             Name = item.Property("label").Value,
-            ImageKey = "class-16",
+            Image = Icons.Class16,
             Description = "ItemType: " + item.Property("name").Value,
             HasChildren = true,
             ScriptGetter = () => ItemTypeScripts(ArasMetadataProvider.Cached(_conn).TypeById(item.Property("itemtype_id").Value)),
@@ -596,7 +597,7 @@ namespace InnovatorAdmin.Editor
           return new EditorTreeNode()
           {
             Name = item.Property("label").Value,
-            ImageKey = "folder-16",
+            Image = Icons.Folder16,
             HasChildren = item.Relationships("Tree Node Child").Any(),
             Children = item.Relationships().Select(r => ProcessTreeNode(r.RelatedItem()))
           };
@@ -609,14 +610,14 @@ namespace InnovatorAdmin.Editor
         new EditorTreeNode()
         {
           Name = "Properties",
-          ImageKey = "folder-16",
+          Image = Icons.Folder16,
           HasChildren = true,
           ChildGetter = () => ArasMetadataProvider.Cached(_conn)
             .GetPropertiesByTypeId(typeId).Wait()
             .Select(p => new EditorTreeNode()
             {
               Name = p.Label ?? p.Name,
-              ImageKey = "property-16",
+              Image = Icons.Property16,
               Description = GetPropertyDescription(p)
             })
             .OrderBy(n => n.Name)
@@ -628,7 +629,7 @@ namespace InnovatorAdmin.Editor
         result.Add(new EditorTreeNode()
         {
           Name = "Relationships",
-          ImageKey = "folder-16",
+          Image = Icons.Folder16,
           HasChildren = true,
           ChildGetter = () => ArasMetadataProvider.Cached(_conn)
             .TypeById(typeId).Relationships
@@ -644,7 +645,7 @@ namespace InnovatorAdmin.Editor
       return new EditorTreeNode()
       {
         Name = itemType.Label ?? itemType.Name,
-        ImageKey = "class-16",
+        Image = Icons.Class16,
         Description = "ItemType: " + itemType.Name,
         HasChildren = true,
         Children = ItemTypeChildren(itemType.Id),

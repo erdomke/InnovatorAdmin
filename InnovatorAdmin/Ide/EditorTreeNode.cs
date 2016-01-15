@@ -1,4 +1,5 @@
 ﻿using Innovator.Client;
+using InnovatorAdmin.Editor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace InnovatorAdmin
     private IEnumerable<IEditorTreeNode> _children;
     private IEnumerable<IEditorScript> _scripts;
 
-    public string ImageKey { get; set; }
+    public IconInfo Image { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
     public bool HasChildren { get; set; }

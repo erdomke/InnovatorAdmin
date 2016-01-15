@@ -200,7 +200,7 @@ namespace InnovatorAdmin.Editor
         yield return new XmlCompletionData()
         {
           Text = element.Name,
-          Image = WpfImages.XmlTag16,
+          Image = Icons.XmlTag16.Wpf,
           Action = () => insertText
         };
       }

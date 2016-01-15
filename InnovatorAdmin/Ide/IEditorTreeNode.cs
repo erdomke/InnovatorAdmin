@@ -9,7 +9,7 @@ namespace InnovatorAdmin
 {
   public interface IEditorTreeNode
   {
-    string ImageKey { get; }
+    InnovatorAdmin.Editor.IconInfo Image { get; }
     string Name { get; }
     string Description { get; }
     bool HasChildren { get; }

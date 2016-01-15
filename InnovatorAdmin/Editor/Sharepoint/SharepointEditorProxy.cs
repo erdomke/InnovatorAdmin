@@ -104,7 +104,7 @@ namespace InnovatorAdmin.Editor
       throw new NotImplementedException();
     }
 
-    public Innovator.Client.IPromise<IResultObject> Process(ICommand request, bool async)
+    public Innovator.Client.IPromise<IResultObject> Process(ICommand request, bool async, Action<int, string> progressCallback)
     {
       throw new NotImplementedException();
     }
@@ -116,7 +116,7 @@ namespace InnovatorAdmin.Editor
           new EditorTreeNode()
           {
             Name = "Site Content",
-            ImageKey = "folder-16",
+            Image = Icons.Folder16,
             HasChildren = true,
             Children = n
           },
@@ -141,7 +141,7 @@ namespace InnovatorAdmin.Editor
         {
           Name = elem.Element(ns + "Title").Value,
           Description = elem.Element(ns + "BaseType").Value,
-          ImageKey = "class-16",
+          Image = Icons.Class16,
           HasChildren = true,
           ChildGetter = () => GetListProperties(elem.Element(ns + "InternalName").Value)
             .OrderBy(n => n.Name)
@@ -165,7 +165,7 @@ namespace InnovatorAdmin.Editor
         {
           Name = field.AttributeValue("DisplayName") ?? field.AttributeValue("StaticName"),
           Description = "Field " + field.AttributeValue("StaticName") + ": " + typeText,
-          ImageKey = "property-16"
+          Image = Icons.Property16
         };
       }
     }

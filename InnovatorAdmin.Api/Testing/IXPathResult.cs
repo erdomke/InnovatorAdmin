@@ -47,7 +47,17 @@ namespace InnovatorAdmin.Testing
           return new StringXpathResult(enumerable.OfType<XAttribute>().GroupConcat("", t => t.Value));
 
         if (enumerable.OfType<XElement>().Any())
-          return new ElementsXpathResult() { Elements = enumerable.OfType<XElement>().ToArray() };
+        {
+          var elems = enumerable.OfType<XElement>().ToArray();
+          if (elems.Length == 1 && elems[0].Nodes().Count() == 1 && elems[0].Nodes().First() is XText)
+          {
+            return new StringXpathResult(((XText)elems[0].Nodes().First()).Value);
+          }
+          else
+          {
+            return new ElementsXpathResult() { Elements = enumerable.OfType<XElement>().ToArray() };
+          }
+        }
 
         throw new NotSupportedException();
       }

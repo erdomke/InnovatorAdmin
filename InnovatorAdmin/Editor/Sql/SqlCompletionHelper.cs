@@ -54,7 +54,7 @@ namespace InnovatorAdmin.Editor
               .Concat(context.Definitions.Select(d => new SqlGeneralCompletionData() {
                 Text = d,
                 Description = "Locally defined table",
-                Image = WpfImages.Class16
+                Image = Icons.Class16.Wpf
               }))
               .OrderBy(i => i.Text));
           }
@@ -97,7 +97,7 @@ namespace InnovatorAdmin.Editor
                     {
                       Text = n[0] + (n[1] == n[0] ? "" : " (" + n[1] + ")"),
                       Description = n[1],
-                      Image = WpfImages.EnumValue16,
+                      Image = Icons.EnumValue16.Wpf,
                       Action = () => n[0]
                     })
                     .OrderBy(i => i.Text));
@@ -184,7 +184,7 @@ namespace InnovatorAdmin.Editor
                 .Select(t => new SqlGeneralCompletionData()
                 {
                   Text = t,
-                  Image = WpfImages.Class16
+                  Image = Icons.Class16.Wpf
                 })
                 .Concat(Functions(false, null));
 
@@ -197,7 +197,7 @@ namespace InnovatorAdmin.Editor
                     .Concat(MatchCase(literal.Text, sqlOthers).Select(o => new SqlGeneralCompletionData()
                     {
                       Text = o,
-                      Image = WpfImages.Operator16
+                      Image = Icons.Operator16.Wpf
                     }))
                     .Concat(others)
                     .Concat(Schemas())
@@ -220,7 +220,7 @@ namespace InnovatorAdmin.Editor
       var result = new SqlGeneralCompletionData();
       if (!string.IsNullOrWhiteSpace(alias))
         result.Action = () => alias + "." + columnName;
-      result.Image = WpfImages.Property16;
+      result.Image = Icons.Property16.Wpf;
       result.Text = columnName;
       return result;
     }
@@ -267,7 +267,7 @@ namespace InnovatorAdmin.Editor
       return _provider.GetSchemaNames().Select(s => new SqlGeneralCompletionData()
       {
         Text = s,
-        Image = WpfImages.Assembly16
+        Image = Icons.Assembly16.Wpf
       });
     }
     private IEnumerable<ICompletionData> Functions(bool tableValued, string schema)
@@ -277,7 +277,7 @@ namespace InnovatorAdmin.Editor
         var results = _provider.GetFunctionNames(tableValued)
           .Select(t => new SqlGeneralCompletionData() {
             Text = GetNameLabel(t),
-            Image = WpfImages.Method16,
+            Image = Icons.Method16.Wpf,
             Action = () => t
           });
         if (!tableValued)
@@ -285,7 +285,7 @@ namespace InnovatorAdmin.Editor
             {
               Text = f.Name,
               Description = f.Description,
-              Image = WpfImages.MethodFriend16
+              Image = Icons.MethodFriend16.Wpf
             }));
         return results;
       }
@@ -295,7 +295,7 @@ namespace InnovatorAdmin.Editor
         .Select(t => new SqlGeneralCompletionData()
         {
           Text = GetNameLabel(t),
-          Image = WpfImages.Method16,
+          Image = Icons.Method16.Wpf,
           Action = () => t.Substring(schema.Length + 1)
         });
     }
@@ -316,7 +316,7 @@ namespace InnovatorAdmin.Editor
           .Select(t => new SqlGeneralCompletionData()
           {
             Text = GetNameLabel(t),
-            Image = WpfImages.Class16,
+            Image = Icons.Class16.Wpf,
             Action = () => t
           });
       }
@@ -326,7 +326,7 @@ namespace InnovatorAdmin.Editor
         .Select(t => new SqlGeneralCompletionData()
         {
           Text = GetNameLabel(t),
-          Image = WpfImages.Class16,
+          Image = Icons.Class16.Wpf,
           Action = () => t.Substring(schema.Length + 1)
         });
     }

@@ -523,7 +523,21 @@ namespace InnovatorAdmin
 
     private FormWindowState ToggleMaximize()
     {
-      return WindowState = WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
+      var newState = WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
+      //if (newState == FormWindowState.Maximized)
+      //{
+      //  var x = NativeMethods.GetSystemMetrics(NativeConstants.SM_CXSIZEFRAME);
+      //  var y = NativeMethods.GetSystemMetrics(NativeConstants.SM_CYSIZEFRAME);
+      //  var p = NativeMethods.GetSystemMetrics(NativeConstants.SM_CXPADDEDBORDER);
+      //  var w = x + p;
+      //  var h = y + p;
+      //  MaximumSize = Size.Subtract(Screen.FromControl(this).WorkingArea.Size, new Size(1,1));
+      //}
+      //else
+      //{
+      //  MaximumSize = new Size(0, 0);
+      //}
+      return WindowState = newState;
     }
 
     private DateTime titleClickTime = DateTime.MinValue;
