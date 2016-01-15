@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using System.Text;
 
 namespace InnovatorAdmin
 {
@@ -89,6 +90,8 @@ namespace InnovatorAdmin
         this.Icon = logo.Icon;
       }
     }
+    public FullEditor InputEditor { get { return inputEditor; } }
+    public FullEditor OutputEditor { get { return outputEditor; } }
 
     public EditorWindow()
     {
@@ -161,6 +164,8 @@ namespace InnovatorAdmin
       inputEditor.BindToolStripItem(mniUndo, System.Windows.Input.ApplicationCommands.Undo);
       inputEditor.BindToolStripItem(mniRedo, System.Windows.Input.ApplicationCommands.Redo);
 
+      UpdateTitle(null);
+
       // Wire up the commands
       _commands = new UiCommandManager(this);
       inputEditor.KeyDown += _commands.OnKeyDown;
@@ -182,6 +187,7 @@ namespace InnovatorAdmin
                 lblProgress.Text = t.Exception.Message;
               else
                 lblProgress.Text = "File opened";
+              UpdateTitle(null);
             }, TaskScheduler.FromCurrentSynchronizationContext());
           }
         }
@@ -216,6 +222,8 @@ namespace InnovatorAdmin
       _commands.Add<Editor.FullEditor>(mniTidy, e => e.KeyCode == Keys.T && e.Modifiers == Keys.Control, c => TransformSelection(c, c.Helper.Format));
       _commands.Add<Editor.FullEditor>(mniMinify, null, c => TransformSelection(c, c.Helper.Minify));
       _commands.Add<Editor.FullEditor>(mniMd5Encode, null, c => c.ReplaceSelectionSegments(t => ConnectionDataExtensions.CalcMD5(t)));
+      _commands.Add<Editor.FullEditor>(mniBase64Encode, null, c => c.ReplaceSelectionSegments(t => Convert.ToBase64String(Encoding.UTF8.GetBytes(t))));
+      _commands.Add<Editor.FullEditor>(mniBase64Decode, null, c => c.ReplaceSelectionSegments(t => Encoding.UTF8.GetString(Convert.FromBase64String(t))));
       _commands.Add<Editor.FullEditor>(mniDoubleToSingleQuotes, null, c => c.ReplaceSelectionSegments(t => t.Replace('"', '\'')));
       _commands.Add<Editor.FullEditor>(mniSingleToDoubleQuotes, null, c => c.ReplaceSelectionSegments(t => t.Replace('\'', '"')));
       _commands.Add<Editor.FullEditor>(mniUppercase, null, c => c.TransformUppercase());
@@ -271,6 +279,14 @@ namespace InnovatorAdmin
           }
           return t;
         }));
+      _commands.Add<Control>(mniPreferences, null, c =>
+      {
+        using (var dialog = new Dialog.SettingsDialog())
+        {
+          dialog.Message = "Configure Innovator Admin";
+          dialog.ShowDialog();
+        }
+      });
     }
 
     protected override void OnSizeChanged(EventArgs e)
@@ -308,6 +324,7 @@ namespace InnovatorAdmin
             Properties.Settings.Default.Reload();
           }
         }
+        UpdateTitle(null);
       }, TaskScheduler.FromCurrentSynchronizationContext());
     }
 
@@ -371,7 +388,7 @@ namespace InnovatorAdmin
       DisposeProxy();
 
       _proxy = proxy;
-
+      UpdateTitle(null);
       if (proxy == null)
         return;
 
@@ -1292,9 +1309,44 @@ namespace InnovatorAdmin
       }
 
       inputEditor.Editor.Focus();
-      this.Text = string.IsNullOrEmpty(result.Title) ? "Innovator Admin" : result.Title + " [Innovator Admin]";
+
+      UpdateTitle(result.Title);
     }
     #endregion
+
+    private void UpdateTitle(string resultTitle)
+    {
+      var name = string.Empty;
+      if (string.IsNullOrWhiteSpace(inputEditor.Document.FileName))
+      {
+        name += resultTitle ?? "";
+      }
+      else
+      {
+        name += Path.GetFileName(inputEditor.Document.FileName);
+      }
+
+      if (_proxy != null && _proxy.ConnData != null && !string.IsNullOrWhiteSpace(_proxy.ConnData.ConnectionName))
+      {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+          name = _proxy.ConnData.ConnectionName;
+        }
+        else 
+        {
+          name += " (" + _proxy.ConnData.ConnectionName + ")";
+        }
+      }
+
+      if (string.IsNullOrWhiteSpace(name))
+      {
+        this.Text = "Innovator Admin";
+      }
+      else
+      {
+        this.Text = name + " [Innovator Admin]";
+      }
+    }
 
     private QueryParameter GetCreateParameter(string name)
     {

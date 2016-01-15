@@ -39,6 +39,7 @@ namespace InnovatorAdmin.Editor
     private ToolStripSeparator toolStripSeparator1;
     private ToolStripMenuItem mniOpenWith;
     private ToolStripSeparator toolStripSeparator3;
+    private ToolStripMenuItem mniCompareTo;
     private Placeholder _placeholder;
 
     public event EventHandler<RunRequestedEventArgs> RunRequested;
@@ -610,7 +611,12 @@ namespace InnovatorAdmin.Editor
 
     void TextArea_TextEntered(object sender, System.Windows.Input.TextCompositionEventArgs e)
     {
-      if (this.Helper != null) this.Helper.HandleTextEntered(this, e.Text);
+      try
+      {
+        if (this.Helper != null) this.Helper.HandleTextEntered(this, e.Text);
+      }
+      // hide this exception as a problem in completions should cause the use issues
+      catch (Exception) { }
     }
 
 
@@ -749,6 +755,7 @@ namespace InnovatorAdmin.Editor
       this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
       this.mniOpenWith = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+      this.mniCompareTo = new System.Windows.Forms.ToolStripMenuItem();
       this.conMenu.SuspendLayout();
       this.SuspendLayout();
       //
@@ -762,67 +769,75 @@ namespace InnovatorAdmin.Editor
             this.mniCollapseAll,
             this.mniExpandAll,
             this.toolStripSeparator1,
+            this.mniCompareTo,
             this.mniOpenWith,
             this.toolStripSeparator3});
       this.conMenu.Name = "contextMenuStrip1";
-      this.conMenu.Size = new System.Drawing.Size(145, 154);
+      this.conMenu.Size = new System.Drawing.Size(153, 198);
       //
       // mniCut
       //
       this.mniCut.Name = "mniCut";
       this.mniCut.ShortcutKeyDisplayString = "Ctrl+X";
-      this.mniCut.Size = new System.Drawing.Size(144, 22);
+      this.mniCut.Size = new System.Drawing.Size(152, 22);
       this.mniCut.Text = "Cut";
       //
       // mniCopy
       //
       this.mniCopy.Name = "mniCopy";
       this.mniCopy.ShortcutKeyDisplayString = "Ctrl+C";
-      this.mniCopy.Size = new System.Drawing.Size(144, 22);
+      this.mniCopy.Size = new System.Drawing.Size(152, 22);
       this.mniCopy.Text = "Copy";
       //
       // mniPaste
       //
       this.mniPaste.Name = "mniPaste";
       this.mniPaste.ShortcutKeyDisplayString = "Ctrl+V";
-      this.mniPaste.Size = new System.Drawing.Size(144, 22);
+      this.mniPaste.Size = new System.Drawing.Size(152, 22);
       this.mniPaste.Text = "Paste";
       //
       // toolStripSeparator2
       //
       this.toolStripSeparator2.Name = "toolStripSeparator2";
-      this.toolStripSeparator2.Size = new System.Drawing.Size(141, 6);
+      this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
       //
       // mniCollapseAll
       //
       this.mniCollapseAll.Name = "mniCollapseAll";
-      this.mniCollapseAll.Size = new System.Drawing.Size(144, 22);
+      this.mniCollapseAll.Size = new System.Drawing.Size(152, 22);
       this.mniCollapseAll.Text = "Collapse All";
       this.mniCollapseAll.Click += new System.EventHandler(this.mniCollapseAll_Click);
       //
       // mniExpandAll
       //
       this.mniExpandAll.Name = "mniExpandAll";
-      this.mniExpandAll.Size = new System.Drawing.Size(144, 22);
+      this.mniExpandAll.Size = new System.Drawing.Size(152, 22);
       this.mniExpandAll.Text = "Expand All";
       this.mniExpandAll.Click += new System.EventHandler(this.mniExpandAll_Click);
       //
       // toolStripSeparator1
       //
       this.toolStripSeparator1.Name = "toolStripSeparator1";
-      this.toolStripSeparator1.Size = new System.Drawing.Size(141, 6);
+      this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
       //
       // mniOpenWith
       //
       this.mniOpenWith.Name = "mniOpenWith";
-      this.mniOpenWith.Size = new System.Drawing.Size(144, 22);
+      this.mniOpenWith.Size = new System.Drawing.Size(152, 22);
       this.mniOpenWith.Text = "Open With...";
       this.mniOpenWith.Click += new System.EventHandler(this.mniOpenWith_Click);
       //
       // toolStripSeparator3
       //
       this.toolStripSeparator3.Name = "toolStripSeparator3";
-      this.toolStripSeparator3.Size = new System.Drawing.Size(141, 6);
+      this.toolStripSeparator3.Size = new System.Drawing.Size(149, 6);
+      //
+      // mniCompareTo
+      //
+      this.mniCompareTo.Name = "mniCompareTo";
+      this.mniCompareTo.Size = new System.Drawing.Size(152, 22);
+      this.mniCompareTo.Text = "Compare To...";
+      this.mniCompareTo.DropDownOpening += new System.EventHandler(this.mniCompareTo_DropDownOpening);
       //
       // EditorWinForm
       //
@@ -851,6 +866,51 @@ namespace InnovatorAdmin.Editor
         var file = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".xml");
         File.WriteAllText(file, Editor.Text);
         ShellHelper.OpenAs(this.FindForm().Handle, file);
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void mniCompareTo_DropDownOpening(object sender, EventArgs e)
+    {
+      try
+      {
+        mniCompareTo.DropDownItems.Clear();
+        if (!this.SingleLine)
+        {
+          var newItems = new List<ToolStripMenuItem>();
+          var currEditor = this.ParentsAndSelf().OfType<FullEditor>().FirstOrDefault();
+          var currForm = this.FindForm();
+          var isInput = currEditor != null && currEditor.Name.StartsWith("input", StringComparison.OrdinalIgnoreCase);
+          var currName = isInput ? "Input" : "Output";
+
+          foreach (var editor in Application.OpenForms.OfType<EditorWindow>()
+            .SelectMany(f => new FullEditor[] { f.InputEditor, f.OutputEditor })
+            .Where(c => c != currEditor))
+          {
+            var compareForm = editor.FindForm();
+            var isCompareInput = editor.Name.StartsWith("input", StringComparison.OrdinalIgnoreCase);
+            var isSameForm = compareForm == currForm;
+            var name = isCompareInput ? "Input" : "Output";
+            if (!isSameForm)
+              name += ": " + compareForm.Text.Replace(" [Innovator Admin]", "");
+            newItems.Add(new ToolStripMenuItem(name, null, (s, ea) =>
+            {
+              if (!isInput && isCompareInput)
+                Settings.Current.PerformDiff(name, editor.Document, currName, this.Document);
+              else
+                Settings.Current.PerformDiff(currName, this.Document, name, editor.Document);
+            })
+            {
+              Tag = isSameForm ? 1 : 2
+            });
+          }
+
+          newItems.OrderBy(i => (int)i.Tag).ThenBy(i => i.Name);
+          mniCompareTo.DropDownItems.AddRange(newItems.ToArray());
+        }
       }
       catch (Exception ex)
       {

@@ -26,13 +26,15 @@ namespace InnovatorAdmin.Dialog
       //};
       //var list = new List<ParamTest>() { param };
 
-      var obj = new QueryParamGroup();
-      obj.Items.Add(new QueryParameter() { Name = "ItemNumber", TextValue = "905-1954-001" });
-      obj.Items.Add(new QueryParameter() { Name = "Name", TextValue = "Finished Good" });
-      obj.Items.Add(new QueryParameter() { Name = "IsDbParam", TextValue = "1", Type = QueryParameter.DataType.Boolean });
-      obj.Items.Add(new QueryParameter() { Name = "DateValue", TextValue = "2016-01-14" });
+      //var obj = new QueryParamGroup();
+      //obj.Items.Add(new QueryParameter() { Name = "ItemNumber", TextValue = "905-1954-001" });
+      //obj.Items.Add(new QueryParameter() { Name = "Name", TextValue = "Finished Good" });
+      //obj.Items.Add(new QueryParameter() { Name = "IsDbParam", TextValue = "1", Type = QueryParameter.DataType.Boolean });
+      //obj.Items.Add(new QueryParameter() { Name = "DateValue", TextValue = "2016-01-14" });
 
-      var list = new List<QueryParamGroup>() { obj };
+      //var list = new List<QueryParamGroup>() { obj };
+
+      var list = new List<Settings>() { new Settings() };
 
       _source.DataSource = list;
       paramGrid.SetDataSource(_source);

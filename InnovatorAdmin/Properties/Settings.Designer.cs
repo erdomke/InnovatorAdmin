@@ -94,5 +94,29 @@ namespace InnovatorAdmin.Properties {
                 this["EditorWindowPanelCollapsed"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DiffToolCommand {
+            get {
+                return ((string)(this["DiffToolCommand"]));
+            }
+            set {
+                this["DiffToolCommand"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string MergeToolCommand {
+            get {
+                return ((string)(this["MergeToolCommand"]));
+            }
+            set {
+                this["MergeToolCommand"] = value;
+            }
+        }
     }
 }

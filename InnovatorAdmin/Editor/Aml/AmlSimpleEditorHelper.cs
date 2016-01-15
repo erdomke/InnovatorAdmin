@@ -16,6 +16,7 @@ namespace InnovatorAdmin.Editor
   public class AmlSimpleEditorHelper : XmlEditorHelper
   {
     protected IAsyncConnection _conn;
+    protected InnovatorAdmin.Connections.ConnectionData _connData;
 
     public AmlSimpleEditorHelper() : base()
     {
@@ -48,7 +49,7 @@ namespace InnovatorAdmin.Editor
       var item = GetCurrentItem(text, offset);
       if (item != null)
       {
-        return GetScripts(_conn, item.Type, item.Id).Concat(Enumerable.Repeat(new EditorScriptExecute() {
+        return GetScripts(_conn, item.Type, item.Id, connData: _connData).Concat(Enumerable.Repeat(new EditorScriptExecute() {
           Name = "Transform: Criteria to Where Clause",
           Execute = () =>
           {
@@ -81,7 +82,7 @@ namespace InnovatorAdmin.Editor
           if (row.Table.Columns.Contains("related_id") && !row.IsNull("related_id"))
             relatedId = (string)row["related_id"];
 
-          return GetScripts(_conn, (string)row[Extensions.AmlTable_TypeName], (string)row["id"], relatedId);
+          return GetScripts(_conn, (string)row[Extensions.AmlTable_TypeName], (string)row["id"], relatedId, connData: _connData);
         }
       }
 
@@ -149,7 +150,9 @@ namespace InnovatorAdmin.Editor
     }
 
     public static IEnumerable<IEditorScript> GetScripts(IAsyncConnection conn, string type, string id
-      , string relatedId = null, DataRow row = null)
+      , string relatedId = null
+      , DataRow row = null
+      , Connections.ConnectionData connData = null)
     {
       if (!string.IsNullOrEmpty(id))
       {
@@ -218,6 +221,15 @@ namespace InnovatorAdmin.Editor
         {
           Name = "------"
         };
+        yield return new EditorScriptExecute()
+        {
+          Name = "Export",
+          Execute = () =>
+          {
+            var refs = new[] { new ItemReference(type, id) };
+            StartExport(connData, conn, refs);
+          }
+        };
         if (metadata != null)
         {
           var actions = new EditorScript()
@@ -285,6 +297,31 @@ namespace InnovatorAdmin.Editor
           }
         };
       }
+    }
+
+    private static void StartExport(Connections.ConnectionData connData, IAsyncConnection conn
+      , IEnumerable<ItemReference> selectedRefs)
+    {
+      if (conn == null)
+        return;
+
+      var main = new Main();
+      var wizard = (IWizard)main;
+      wizard.ConnectionInfo = new[] { connData };
+      wizard.Connection = conn;
+
+      var prog = new InnovatorAdmin.Controls.ProgressStep<ExportProcessor>(wizard.ExportProcessor);
+      prog.MethodInvoke = e =>
+      {
+        wizard.InstallScript = new InstallScript();
+        wizard.InstallScript.ExportUri = new Uri(wizard.ConnectionInfo.First().Url);
+        wizard.InstallScript.ExportDb = wizard.ConnectionInfo.First().Database;
+        wizard.InstallScript.Lines = Enumerable.Empty<InstallItem>();
+        e.Export(wizard.InstallScript, selectedRefs, true);
+      };
+      prog.GoNextAction = () => wizard.GoToStep(new Controls.ExportResolve());
+      main.Show();
+      wizard.GoToStep(prog);
     }
   }
 }

@@ -14,8 +14,13 @@ namespace InnovatorAdmin.Editor
     protected ItemType _itemType;
     private Func<string, string> _insertion;
 
-    public PropertyCompletionFactory() { }
-    public PropertyCompletionFactory(ArasMetadataProvider metadata, ItemType itemType)
+    public Func<Property, bool> Filter { get; set; }
+
+    public PropertyCompletionFactory()
+    {
+      this.Filter = p => true;
+    }
+    public PropertyCompletionFactory(ArasMetadataProvider metadata, ItemType itemType) : base()
     {
       _metadata = metadata;
       _itemType = itemType;
@@ -33,7 +38,7 @@ namespace InnovatorAdmin.Editor
     {
       buffer = buffer ?? Enumerable.Empty<ICompletionData>();
       return _metadata.GetProperties(_itemType)
-        .Convert(p => GetCompletions(p).Concat(buffer));
+        .Convert(p => GetCompletions(p.Where(Filter)).Concat(buffer));
     }
 
     protected virtual IEnumerable<ICompletionData> GetCompletions(IEnumerable<IListValue> normal, IEnumerable<IListValue> byLabel)

@@ -18,6 +18,23 @@ namespace InnovatorAdmin.Editor
   {
     private ArasMetadataProvider _metadata;
     protected SqlCompletionHelper _sql;
+    private static HashSet<string> _systemControlledProperties = new HashSet<string>(new string[]
+    {
+      "config_id",
+      "created_by_id",
+      "created_on",
+      "current_state",
+      "state",
+      "generation",
+      "is_current",
+      "is_released",
+      "keyed_name",
+      "modified_by_id",
+      "modified_on",
+      "new_version",
+      "not_lockable",
+      "state"
+    });
 
     private string GetType(XmlReader reader)
     {
@@ -168,6 +185,10 @@ namespace InnovatorAdmin.Editor
               case "AML":
               case "sql":
               case "SQL":
+              case "TestSuite":
+              case "Tests":
+              case "Init":
+              case "Cleanup":
                 break;
               case "Path":
                 items = Attributes(notExisting, "id");
@@ -192,6 +213,17 @@ namespace InnovatorAdmin.Editor
                 break;
               case "Test":
                 items = Attributes(notExisting, "name");
+                break;
+              case "actual_data":
+                var lastItem = path.LastOrDefault(p => p.LocalName == "Item");
+                if (lastItem != null && lastItem.Type == "File")
+                {
+                  items = Attributes(notExisting, "encoding");
+                }
+                else
+                {
+                  items = Attributes(notExisting, "condition", "is_null");
+                }
                 break;
               case "Item":
                 switch (soapAction)
@@ -443,6 +475,9 @@ namespace InnovatorAdmin.Editor
             {
               switch (attrName)
               {
+                case "encoding":
+                  items = AttributeValues("none", "base64");
+                  break;
                 case "condition":
                   items = new ICompletionData[] {
                     new AttributeValueCompletionData()
@@ -623,7 +658,35 @@ namespace InnovatorAdmin.Editor
                       if (!string.IsNullOrEmpty(last.Type)
                         && _metadata.ItemTypeByName(last.Type, out itemType))
                       {
-                        items = await new PropertyCompletionFactory(_metadata, itemType).GetPromise(buffer).ToTask();
+                        switch (last.Action)
+                        {
+                          case "add":
+                          case "create":
+                          case "edit":
+                          case "update":
+                          case "merge":
+                            items = await new PropertyCompletionFactory(_metadata, itemType)
+                            {
+                              Filter = p => !_systemControlledProperties.Contains(p.Name)
+                            }.GetPromise(buffer).ToTask();
+                            break;
+                          default:
+                            items = await new PropertyCompletionFactory(_metadata, itemType).GetPromise(buffer).ToTask();
+                            break;
+                        }
+                        if (itemType.Name == "File")
+                        {
+                          items = items.Concat(new[] {
+                            new BasicCompletionData() {
+                              Text = "actual_filename",
+                              Image = Icons.Property16.Wpf
+                            },
+                            new BasicCompletionData() {
+                              Text = "actual_data",
+                              Image = Icons.Property16.Wpf
+                            }
+                          });
+                        }
                       }
                       else
                       {
@@ -1172,9 +1235,10 @@ namespace InnovatorAdmin.Editor
       }
     }
 
-    public virtual void InitializeConnection(IAsyncConnection conn)
+    public virtual void InitializeConnection(IAsyncConnection conn, InnovatorAdmin.Connections.ConnectionData connData)
     {
       _conn = conn;
+      _connData = connData;
       _metadata = ArasMetadataProvider.Cached(conn);
       _isInitialized = true;
     }
@@ -1339,23 +1403,6 @@ namespace InnovatorAdmin.Editor
             data.Action = () => i.Value + " DESC";
             return data;
           }));
-      }
-    }
-
-    private class WherePropertyFactory : PropertyCompletionFactory
-    {
-      public WherePropertyFactory(ArasMetadataProvider metadata, ItemType itemType) :
-        base(metadata, itemType) { }
-
-      protected override BasicCompletionData CreateCompletion()
-      {
-        return new AttributeValueCompletionData() { MultiValue = true };
-      }
-      protected override BasicCompletionData ConfigureNormalProperty(BasicCompletionData data, IListValue prop)
-      {
-        var res = base.ConfigureNormalProperty(data, prop);
-        res.Action = () => "[" + _itemType.Name.Replace(' ', '_') + "].[" + prop.Value + "]";
-        return res;
       }
     }
 

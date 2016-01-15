@@ -114,19 +114,23 @@ namespace InnovatorAdmin.Editor
       readerSettings.IgnoreWhitespace = true;
       readerSettings.ConformanceLevel = ConformanceLevel.Fragment;
 
-      var settings = new XmlWriterSettings();
-      settings.OmitXmlDeclaration = true;
-      settings.Indent = indent;
-      if (indent) settings.IndentChars = "  ";
-      settings.CheckCharacters = true;
-      settings.CloseOutput = true;
-      settings.ConformanceLevel = ConformanceLevel.Fragment;
+      //var settings = new XmlWriterSettings();
+      //settings.OmitXmlDeclaration = true;
+      //settings.Indent = indent;
+      //if (indent) settings.IndentChars = "  ";
+      //settings.CheckCharacters = true;
+      //settings.CloseOutput = true;
+      //settings.ConformanceLevel = ConformanceLevel.Fragment;
 
       try
       {
         using (var xmlReader = XmlReader.Create(reader, readerSettings))
-        using (var xmlWriter = XmlWriter.Create(writer, settings))
+        using (var xmlWriter = new XmlTextWriter(writer))
         {
+          xmlWriter.Indentation = 2;
+          xmlWriter.IndentChar = ' ';
+          xmlWriter.Formatting = Formatting.Indented;
+          xmlWriter.QuoteChar = '\'';
           while (!xmlReader.EOF)
           {
             xmlWriter.WriteNode(xmlReader, true);

@@ -36,10 +36,7 @@ namespace InnovatorAdmin
         {
           case ConnectionType.Innovator:
             return conn.ArasLogin(true)
-              .Convert(c => (IEditorProxy)new Editor.ArasEditorProxy(c, conn.ConnectionName)
-              {
-                ConnData = conn
-              });
+              .Convert(c => (IEditorProxy)new Editor.ArasEditorProxy(c, conn));
           case ConnectionType.Soap:
             var service = new Innovator.Client.Connection.DefaultHttpService();
             return service.Execute("GET", conn.Url, null, null, true, null)

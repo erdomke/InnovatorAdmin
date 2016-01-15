@@ -15,6 +15,8 @@ namespace InnovatorAdmin.Controls
     private List<int> _initialValues = new List<int>();
     private bool _isLoaded = false;
 
+    public IPropertyFilter Filter { get; set; }
+
     public ParameterGrid()
     {
       InitializeComponent();
@@ -40,8 +42,12 @@ namespace InnovatorAdmin.Controls
       tblMain.RowCount = 0;
 
       var dataTypeArray = Enum.GetValues(typeof(QueryParameter.DataType)).OfType<QueryParameter.DataType>().ToArray();
+      var props = source.GetItemProperties(null).OfType<PropertyDescriptor>()
+        .Where(p => Filter == null || Filter.Contains(p))
+        .OrderBy(p => p.DisplayName ?? p.Name)
+        .ToArray();
 
-      foreach (var prop in source.GetItemProperties(null).OfType<PropertyDescriptor>())
+      foreach (var prop in props)
       {
         tblMain.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         tblMain.RowCount += 1;
@@ -104,9 +110,19 @@ namespace InnovatorAdmin.Controls
 
     private void AddControl(BindingSource source, PropertyDescriptor prop, Type type, int row)
     {
+      var paramControl = prop.Attributes.OfType<ParamControlAttribute>().FirstOrDefault();
+
       type = type ?? prop.PropertyType;
       Control ctrl;
-      if (type == typeof(bool))
+      if (paramControl != null && typeof(Control).IsAssignableFrom(paramControl.ControlType))
+      {
+        ctrl = (Control)Activator.CreateInstance(paramControl.ControlType);
+        var optCtrl = ctrl as IOptionsControl;
+        if (optCtrl != null)
+          optCtrl.SetOptions(paramControl.Options);
+        ctrl.DataBindings.Add("Text", source, prop.Name);
+      }
+      else if (type == typeof(bool))
       {
         ctrl = new CheckBox();
         ctrl.DataBindings.Add("Checked", source, prop.Name);

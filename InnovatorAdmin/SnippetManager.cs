@@ -11,7 +11,7 @@ namespace InnovatorAdmin
   {
     private static string _lastQueryKey = "___LastQuery";
 
-    public static string LastQueryKey 
+    public static string LastQueryKey
     {
       get { return _lastQueryKey; }
       set { _lastQueryKey = value; }
@@ -97,7 +97,7 @@ namespace InnovatorAdmin
         .Where(n => n != LastQueryKey);
     }
 
-    private string CleanFileName(string name)
+    public static string CleanFileName(string name)
     {
       var invalidChars = System.IO.Path.GetInvalidFileNameChars();
       var nameArray = name.ToCharArray(0, Math.Min(name.Length, 96));

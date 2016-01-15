@@ -127,7 +127,6 @@ namespace InnovatorAdmin.Editor
     public Connections.ConnectionData ConnData
     {
       get { return _connData; }
-      set { _connData = value; }
     }
     public IAsyncConnection Connection
     {
@@ -138,12 +137,26 @@ namespace InnovatorAdmin.Editor
       get { return _name; }
     }
 
+
     public ArasEditorProxy(IAsyncConnection conn, string name)
     {
       _conn = conn;
-      _helper = new Editor.AmlEditorHelper();
-      _helper.InitializeConnection(_conn);
+      Initialize();
+      _helper.InitializeConnection(_conn, null);
       _name = name;
+    }
+    public ArasEditorProxy(IAsyncConnection conn, Connections.ConnectionData connData)
+    {
+      _conn = conn;
+      Initialize();
+      _connData = connData;
+      _helper.InitializeConnection(_conn, _connData);
+      _name = connData.ConnectionName;
+    }
+
+    private void Initialize()
+    {
+      _helper = new Editor.AmlEditorHelper();
       var arasConn = _conn as Innovator.Client.Connection.IArasConnection;
       _actions = GetActions(arasConn == null ? -1 : arasConn.Version).OrderBy(a => a).ToArray();
     }
@@ -249,7 +262,7 @@ namespace InnovatorAdmin.Editor
 
     public virtual IEditorProxy Clone()
     {
-      return new ArasEditorProxy(_conn, _name) { ConnData = _connData };
+      return new ArasEditorProxy(_conn, _connData);
     }
 
     public ICommand NewCommand()
@@ -293,6 +306,7 @@ namespace InnovatorAdmin.Editor
       public ResultObject(Stream aml, IAsyncConnection conn)
       {
         System.Diagnostics.Debug.Print("{0:hh:MM:ss} Document loaded", DateTime.Now);
+        _conn = conn;
         var rope = new Rope<char>();
         using (var reader = new StreamReader(aml))
         using (var writer = new Editor.RopeWriter(rope))
@@ -300,7 +314,6 @@ namespace InnovatorAdmin.Editor
           IndentXml(reader, writer, out _count);
         }
         _amlLength = rope.Length;
-        _conn = conn;
         _text = new RopeTextSource(rope);
         System.Diagnostics.Debug.Print("{0:hh:MM:ss} Document rendered", DateTime.Now);
       }
@@ -337,6 +350,8 @@ namespace InnovatorAdmin.Editor
         settings.IndentChars = "  ";
         settings.CheckCharacters = true;
 
+        var types = new HashSet<string>();
+
         using (var reader = XmlReader.Create(xmlContent))
         using (var xmlWriter = XmlWriter.Create(writer, settings))
         {
@@ -346,13 +361,20 @@ namespace InnovatorAdmin.Editor
             switch (reader.NodeType)
             {
               case XmlNodeType.Element:
-                if (reader.LocalName == "Item") levels[level]++;
                 xmlWriter.WriteStartElement(reader.Prefix, reader.LocalName, reader.NamespaceURI);
                 xmlWriter.WriteAttributes(reader, false);
-                if (reader.LocalName == "id" && _title == null)
+
+                if (reader.LocalName == "Item")
+                {
+                  levels[level]++;
+                  var currType = reader.GetAttribute("type");
+                  if (!string.IsNullOrWhiteSpace(currType)) types.Add(currType);
+                }
+                else if (reader.LocalName == "id" && _title == null)
                 {
                   _title = reader.GetAttribute("type") + " " + reader.GetAttribute("keyed_name");
                 }
+
                 if (reader.IsEmptyElement)
                 {
                   xmlWriter.WriteEndElement();
@@ -419,7 +441,18 @@ namespace InnovatorAdmin.Editor
           writer.Flush();
         }
 
-        if (itemCount > 1) _title = "";
+        if (itemCount > 1)
+        {
+          ItemType itemType;
+          if (types.Count == 1 && ArasMetadataProvider.Cached(_conn).ItemTypeByName(types.First(), out itemType))
+          {
+            _title = _count + " " + itemType.Label ?? itemType.Name + " Item(s)";
+          }
+          else
+          {
+            _title = _count + " Item(s)";
+          }
+        }
       }
 
 
