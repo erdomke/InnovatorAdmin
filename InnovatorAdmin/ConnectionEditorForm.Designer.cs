@@ -76,7 +76,7 @@
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 3F));
-      this.tableLayoutPanel1.Size = new System.Drawing.Size(696, 341);
+      this.tableLayoutPanel1.Size = new System.Drawing.Size(711, 387);
       this.tableLayoutPanel1.TabIndex = 0;
       // 
       // btnClose
@@ -91,7 +91,7 @@
       this.btnClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnClose.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
       this.btnClose.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(150)))), ((int)(((byte)(243)))));
-      this.btnClose.Location = new System.Drawing.Point(603, 302);
+      this.btnClose.Location = new System.Drawing.Point(618, 348);
       this.btnClose.MinimumSize = new System.Drawing.Size(87, 0);
       this.btnClose.Name = "btnClose";
       this.btnClose.Orientation = System.Windows.Forms.Orientation.Horizontal;
@@ -111,7 +111,7 @@
       this.connectionEditor.MinimumSize = new System.Drawing.Size(496, 196);
       this.connectionEditor.MultiSelect = false;
       this.connectionEditor.Name = "connectionEditor";
-      this.connectionEditor.Size = new System.Drawing.Size(690, 270);
+      this.connectionEditor.Size = new System.Drawing.Size(705, 316);
       this.connectionEditor.TabIndex = 0;
       // 
       // btnOk
@@ -125,7 +125,7 @@
       this.btnOk.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnOk.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
       this.btnOk.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(150)))), ((int)(((byte)(243)))));
-      this.btnOk.Location = new System.Drawing.Point(492, 302);
+      this.btnOk.Location = new System.Drawing.Point(507, 348);
       this.btnOk.MinimumSize = new System.Drawing.Size(87, 0);
       this.btnOk.Name = "btnOk";
       this.btnOk.Orientation = System.Windows.Forms.Orientation.Horizontal;
@@ -149,9 +149,9 @@
       this.lblTitle.Margin = new System.Windows.Forms.Padding(0);
       this.lblTitle.Name = "lblTitle";
       this.lblTitle.Padding = new System.Windows.Forms.Padding(6, 6, 0, 0);
-      this.lblTitle.Size = new System.Drawing.Size(690, 26);
+      this.lblTitle.Size = new System.Drawing.Size(705, 26);
       this.lblTitle.TabIndex = 3;
-      this.lblTitle.Text = "Connection Editor";
+      this.lblTitle.Text = "Connect to a service.";
       this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
       // 
       // pnlTopLeft
@@ -174,7 +174,7 @@
       this.pnlTop.Location = new System.Drawing.Point(3, 0);
       this.pnlTop.Margin = new System.Windows.Forms.Padding(0);
       this.pnlTop.Name = "pnlTop";
-      this.pnlTop.Size = new System.Drawing.Size(690, 3);
+      this.pnlTop.Size = new System.Drawing.Size(705, 3);
       this.pnlTop.TabIndex = 5;
       // 
       // pnlLeft
@@ -186,7 +186,7 @@
       this.pnlLeft.Margin = new System.Windows.Forms.Padding(0);
       this.pnlLeft.Name = "pnlLeft";
       this.tableLayoutPanel1.SetRowSpan(this.pnlLeft, 3);
-      this.pnlLeft.Size = new System.Drawing.Size(3, 335);
+      this.pnlLeft.Size = new System.Drawing.Size(3, 381);
       this.pnlLeft.TabIndex = 6;
       // 
       // pnlTopRight
@@ -194,7 +194,7 @@
       this.pnlTopRight.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.pnlTopRight.Location = new System.Drawing.Point(693, 0);
+      this.pnlTopRight.Location = new System.Drawing.Point(708, 0);
       this.pnlTopRight.Margin = new System.Windows.Forms.Padding(0);
       this.pnlTopRight.Name = "pnlTopRight";
       this.pnlTopRight.Size = new System.Drawing.Size(3, 3);
@@ -205,11 +205,11 @@
       this.pnlRight.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.pnlRight.Location = new System.Drawing.Point(693, 3);
+      this.pnlRight.Location = new System.Drawing.Point(708, 3);
       this.pnlRight.Margin = new System.Windows.Forms.Padding(0);
       this.pnlRight.Name = "pnlRight";
       this.tableLayoutPanel1.SetRowSpan(this.pnlRight, 3);
-      this.pnlRight.Size = new System.Drawing.Size(3, 335);
+      this.pnlRight.Size = new System.Drawing.Size(3, 381);
       this.pnlRight.TabIndex = 8;
       // 
       // pnlBottomLeft
@@ -217,7 +217,7 @@
       this.pnlBottomLeft.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.pnlBottomLeft.Location = new System.Drawing.Point(0, 338);
+      this.pnlBottomLeft.Location = new System.Drawing.Point(0, 384);
       this.pnlBottomLeft.Margin = new System.Windows.Forms.Padding(0);
       this.pnlBottomLeft.Name = "pnlBottomLeft";
       this.pnlBottomLeft.Size = new System.Drawing.Size(3, 3);
@@ -229,10 +229,10 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.tableLayoutPanel1.SetColumnSpan(this.pnlBottom, 2);
-      this.pnlBottom.Location = new System.Drawing.Point(3, 338);
+      this.pnlBottom.Location = new System.Drawing.Point(3, 384);
       this.pnlBottom.Margin = new System.Windows.Forms.Padding(0);
       this.pnlBottom.Name = "pnlBottom";
-      this.pnlBottom.Size = new System.Drawing.Size(690, 3);
+      this.pnlBottom.Size = new System.Drawing.Size(705, 3);
       this.pnlBottom.TabIndex = 10;
       // 
       // pnlBottomRight
@@ -240,7 +240,7 @@
       this.pnlBottomRight.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.pnlBottomRight.Location = new System.Drawing.Point(693, 338);
+      this.pnlBottomRight.Location = new System.Drawing.Point(708, 384);
       this.pnlBottomRight.Margin = new System.Windows.Forms.Padding(0);
       this.pnlBottomRight.Name = "pnlBottomRight";
       this.pnlBottomRight.Size = new System.Drawing.Size(3, 3);
@@ -253,14 +253,15 @@
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.BackColor = System.Drawing.Color.DarkGray;
       this.CancelButton = this.btnClose;
-      this.ClientSize = new System.Drawing.Size(698, 343);
+      this.ClientSize = new System.Drawing.Size(713, 389);
       this.Controls.Add(this.tableLayoutPanel1);
       this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+      this.Location = new System.Drawing.Point(0, 0);
       this.Name = "ConnectionEditorForm";
       this.ShowIcon = false;
       this.ShowInTaskbar = false;
-      this.Text = "Connection Editor";
+      this.Text = "Connect to a service.";
       this.tableLayoutPanel1.ResumeLayout(false);
       this.tableLayoutPanel1.PerformLayout();
       this.ResumeLayout(false);

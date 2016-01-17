@@ -17,6 +17,10 @@ namespace InnovatorAdmin
     {
       _items = new List<QueryParameter>();
     }
+    public QueryParamGroup(IEnumerable<QueryParameter> values)
+    {
+      _items = new List<QueryParameter>(values);
+    }
 
     public AttributeCollection GetAttributes()
     {

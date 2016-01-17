@@ -75,6 +75,9 @@
       this.mniSingleToDoubleQuotes = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
       this.mniMd5Encode = new System.Windows.Forms.ToolStripMenuItem();
+      this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+      this.mniBase64Encode = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniBase64Decode = new System.Windows.Forms.ToolStripMenuItem();
       this.lineOperationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.mniMoveUpCurrentLine = new System.Windows.Forms.ToolStripMenuItem();
       this.mniMoveDownCurrentLine = new System.Windows.Forms.ToolStripMenuItem();
@@ -88,10 +91,6 @@
       this.mniReplace = new System.Windows.Forms.ToolStripMenuItem();
       this.mniGoTo = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripDropDownButton3 = new System.Windows.Forms.ToolStripDropDownButton();
-      this.preferencesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-      this.mniLocale = new System.Windows.Forms.ToolStripMenuItem();
-      this.mniTimeZone = new System.Windows.Forms.ToolStripMenuItem();
-      this.mniTimeout = new System.Windows.Forms.ToolStripMenuItem();
       this.mniPreferences = new System.Windows.Forms.ToolStripMenuItem();
       this.exploreButton = new System.Windows.Forms.ToolStripButton();
       this.btnSubmit = new System.Windows.Forms.ToolStripSplitButton();
@@ -149,9 +148,6 @@
       this.pnlLeftTop = new System.Windows.Forms.Panel();
       this.pnlRightTop = new System.Windows.Forms.Panel();
       this.pnlConnectionShadow = new InnovatorAdmin.DropShadow();
-      this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-      this.mniBase64Encode = new System.Windows.Forms.ToolStripMenuItem();
-      this.mniBase64Decode = new System.Windows.Forms.ToolStripMenuItem();
       this.tblMain.SuspendLayout();
       this.tblHeader.SuspendLayout();
       this.menuStrip.SuspendLayout();
@@ -610,6 +606,23 @@
       this.mniMd5Encode.Size = new System.Drawing.Size(211, 22);
       this.mniMd5Encode.Text = "MD5 Encode";
       // 
+      // toolStripSeparator1
+      // 
+      this.toolStripSeparator1.Name = "toolStripSeparator1";
+      this.toolStripSeparator1.Size = new System.Drawing.Size(208, 6);
+      // 
+      // mniBase64Encode
+      // 
+      this.mniBase64Encode.Name = "mniBase64Encode";
+      this.mniBase64Encode.Size = new System.Drawing.Size(211, 22);
+      this.mniBase64Encode.Text = "Base64 Encode";
+      // 
+      // mniBase64Decode
+      // 
+      this.mniBase64Decode.Name = "mniBase64Decode";
+      this.mniBase64Decode.Size = new System.Drawing.Size(211, 22);
+      this.mniBase64Decode.Text = "Base64 Decode";
+      // 
       // lineOperationsToolStripMenuItem
       // 
       this.lineOperationsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -709,7 +722,6 @@
       // 
       this.toolStripDropDownButton3.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
       this.toolStripDropDownButton3.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.preferencesToolStripMenuItem,
             this.mniPreferences});
       this.toolStripDropDownButton3.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton3.Image")));
       this.toolStripDropDownButton3.ImageTransparentColor = System.Drawing.Color.Magenta;
@@ -718,43 +730,10 @@
       this.toolStripDropDownButton3.Size = new System.Drawing.Size(40, 22);
       this.toolStripDropDownButton3.Text = "&Tools";
       // 
-      // preferencesToolStripMenuItem
-      // 
-      this.preferencesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mniLocale,
-            this.mniTimeZone,
-            this.mniTimeout});
-      this.preferencesToolStripMenuItem.Name = "preferencesToolStripMenuItem";
-      this.preferencesToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
-      this.preferencesToolStripMenuItem.Text = "Connection Options";
-      // 
-      // mniLocale
-      // 
-      this.mniLocale.Name = "mniLocale";
-      this.mniLocale.ShortcutKeyDisplayString = "";
-      this.mniLocale.Size = new System.Drawing.Size(140, 22);
-      this.mniLocale.Text = "Locale...";
-      this.mniLocale.Click += new System.EventHandler(this.mniLocale_Click);
-      // 
-      // mniTimeZone
-      // 
-      this.mniTimeZone.Name = "mniTimeZone";
-      this.mniTimeZone.ShortcutKeyDisplayString = "";
-      this.mniTimeZone.Size = new System.Drawing.Size(140, 22);
-      this.mniTimeZone.Text = "Time Zone...";
-      this.mniTimeZone.Click += new System.EventHandler(this.mniTimeZone_Click);
-      // 
-      // mniTimeout
-      // 
-      this.mniTimeout.Name = "mniTimeout";
-      this.mniTimeout.Size = new System.Drawing.Size(140, 22);
-      this.mniTimeout.Text = "Timeout...";
-      this.mniTimeout.Click += new System.EventHandler(this.mniTimeout_Click);
-      // 
       // mniPreferences
       // 
       this.mniPreferences.Name = "mniPreferences";
-      this.mniPreferences.Size = new System.Drawing.Size(181, 22);
+      this.mniPreferences.Size = new System.Drawing.Size(152, 22);
       this.mniPreferences.Text = "Preferences...";
       // 
       // exploreButton
@@ -1480,23 +1459,6 @@
       this.pnlConnectionShadow.Size = new System.Drawing.Size(621, 4);
       this.pnlConnectionShadow.TabIndex = 17;
       // 
-      // toolStripSeparator1
-      // 
-      this.toolStripSeparator1.Name = "toolStripSeparator1";
-      this.toolStripSeparator1.Size = new System.Drawing.Size(208, 6);
-      // 
-      // mniBase64Encode
-      // 
-      this.mniBase64Encode.Name = "mniBase64Encode";
-      this.mniBase64Encode.Size = new System.Drawing.Size(211, 22);
-      this.mniBase64Encode.Text = "Base64 Encode";
-      // 
-      // mniBase64Decode
-      // 
-      this.mniBase64Decode.Name = "mniBase64Decode";
-      this.mniBase64Decode.Size = new System.Drawing.Size(211, 22);
-      this.mniBase64Decode.Text = "Base64 Decode";
-      // 
       // EditorWindow
       // 
       this.AcceptButton = this.btnOk;
@@ -1577,10 +1539,6 @@
     private System.Windows.Forms.ToolStripMenuItem mniNewWindow;
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
     private System.Windows.Forms.ToolStripMenuItem mniClose;
-    private System.Windows.Forms.ToolStripMenuItem preferencesToolStripMenuItem;
-    private System.Windows.Forms.ToolStripMenuItem mniLocale;
-    private System.Windows.Forms.ToolStripMenuItem mniTimeZone;
-    private System.Windows.Forms.ToolStripMenuItem mniTimeout;
     private System.Windows.Forms.ToolStripButton exploreButton;
     private Controls.SplitContainerTheme splitEditors;
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;

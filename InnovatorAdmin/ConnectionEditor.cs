@@ -50,10 +50,22 @@ namespace InnovatorAdmin
       btnMoveUp.Font = iconFont;
       btnMoveUp.Text = FontAwesome.Fa_arrow_up.ToString();
 
+      lblUrl.Font = FontAwesome.Font;
+      lblUrl.Text = FontAwesome.Fa_globe.ToString();
+      lblUser.Font = FontAwesome.Font;
+      lblUser.Text = FontAwesome.Fa_user.ToString();
+      lblPassword.Font = FontAwesome.Font;
+      lblPassword.Text = FontAwesome.Fa_key.ToString();
+      lblName.Font = FontAwesome.Font;
+      lblName.Text = FontAwesome.Fa_bookmark.ToString();
+      lblDatabase.Font = FontAwesome.Font;
+      lblDatabase.Text = FontAwesome.Fa_database.ToString();
+      lblType.Font = FontAwesome.Font;
+      lblType.Text = FontAwesome.Fa_tag.ToString();
+
       this.MultiSelect = false;
       _bs.CurrentChanged += _bs_CurrentChanged;
       cmbType.DataSource = Enum.GetValues(typeof(ConnectionType));
-      cmbAuth.DataSource = Enum.GetValues(typeof(Authentication));
     }
 
     public void InitializeFocus()
@@ -67,15 +79,19 @@ namespace InnovatorAdmin
       try
       {
         var connData = _bs.Current as ConnectionData;
-        if (connData != null
-          && connData.Url != _lastDatabaseUrl
-          && !string.IsNullOrEmpty(connData.Database))
+        if (connData != null)
         {
-          _lastDatabaseUrl = null;
-          cmbDatabase.Items.Clear();
-          cmbDatabase.Items.Add(connData.Database);
-          cmbDatabase.SelectedIndex = 0;
+          if (connData.Url != _lastDatabaseUrl
+          && !string.IsNullOrEmpty(connData.Database))
+          {
+            _lastDatabaseUrl = null;
+            cmbDatabase.Items.Clear();
+            cmbDatabase.Items.Add(connData.Database);
+            cmbDatabase.SelectedIndex = 0;
+          }
+          SetAuthentication(connData.Authentication);
         }
+
         btnColor.BackColor = connData.Color;
       }
       catch (Exception ex)
@@ -105,8 +121,6 @@ namespace InnovatorAdmin
         txtUrl.DataBindings.Add("Text", _bs, "Url");
         txtUser.DataBindings.Add("Text", _bs, "UserName");
         cmbType.DataBindings.Add("SelectedItem", _bs, "Type");
-        cmbAuth.DataBindings.Add("SelectedItem", _bs, "Authentication");
-        cb_confirm.DataBindings.Add("Checked", _bs, "Confirm");
 
         if (lstConnections.Items.Count > 0 && !this.MultiSelect)
           lstConnections.SetItemSelected(0, true);
@@ -117,11 +131,11 @@ namespace InnovatorAdmin
     {
       try
       {
-        lblMessage.Text="Testing...";
+        btnTest.Text = "Testing...";
         ((ConnectionData)_bs.Current).ArasLogin(true)
           .UiPromise(this)
-          .Done(c => lblMessage.Text = "Success")
-          .Fail(ex => lblMessage.Text = ex.Message);
+          .Done(c => btnTest.Text = "Success. Test Again.")
+          .Fail(ex => btnTest.Text = ex.Message);
       }
       catch (Exception ex)
       {
@@ -131,7 +145,7 @@ namespace InnovatorAdmin
 
     private void ClearMessage()
     {
-      lblMessage.Text="";
+      btnTest.Text = "Test";
     }
 
     private void btnNew_Click(object sender, EventArgs e)
@@ -304,27 +318,31 @@ namespace InnovatorAdmin
       }
     }
 
-    private void cmbAuth_SelectedIndexChanged(object sender, EventArgs e)
-    {
-      try
-      {
-        txtUser.Enabled = ((Authentication)cmbAuth.SelectedItem) == Authentication.Explicit;
-        txtPassword.Enabled = txtUser.Enabled;
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
     private void exploreButton_Click(object sender, EventArgs e)
     {
       try
       {
-        lblMessage.Text = "Opening Browser...";
+        exploreButton.Text = "Opening Browser...";
         Application.DoEvents();
         ((ConnectionData)_bs.Current).Explore();
-        lblMessage.Text = "";
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+      finally
+      {
+        exploreButton.Text = "Explore";
+      }
+    }
+
+    private bool _programChangingCheck;
+
+    private void chkPassword_CheckedChanged(object sender, EventArgs e)
+    {
+      try
+      {
+        SetAuthentication(Authentication.Explicit);
       }
       catch (Exception ex)
       {
@@ -332,10 +350,78 @@ namespace InnovatorAdmin
       }
     }
 
-    private void cb_confirm_CheckedChanged(object sender, EventArgs e)
+    private void chkWindows_CheckedChanged(object sender, EventArgs e)
     {
-      var connData = _bs.Current as ConnectionData;
-      connData.Confirm = cb_confirm.Checked;
+      try
+      {
+        SetAuthentication(Authentication.Windows);
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
     }
+
+    private void chkAnonymous_CheckedChanged(object sender, EventArgs e)
+    {
+      try
+      {
+        SetAuthentication(Authentication.Anonymous);
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void SetAuthentication(Authentication value)
+    {
+      if (_programChangingCheck) return;
+
+      try
+      {
+        _programChangingCheck = true;
+        ((ConnectionData)_bs.Current).Authentication = value;
+        chkAnonymous.Checked = false;
+        chkPassword.Checked = false;
+        chkWindows.Checked = false;
+        switch (value)
+        {
+          case Authentication.Anonymous:
+            chkAnonymous.Checked = true;
+            break;
+          case Authentication.Windows:
+            chkWindows.Checked = true;
+            break;
+          default:
+            chkPassword.Checked = true;
+            break;
+        }
+        txtUser.Enabled = (value == Authentication.Explicit);
+        txtPassword.Enabled = txtUser.Enabled;
+      }
+      finally
+      {
+        _programChangingCheck = false;
+      }
+    }
+
+    private void btnAdvanced_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        using (var dialog = new Dialog.ConnectionAdvancedDialog())
+        {
+          dialog.ConnData = (Connections.ConnectionData)_bs.Current;
+          dialog.ShowDialog();
+        }
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+
   }
 }

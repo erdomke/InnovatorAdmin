@@ -153,6 +153,7 @@
     <Compile Include="Color\YUV.cs" />
     <Compile Include="Connections\Authentication.cs" />
     <Compile Include="Connections\ConnectionDataExtensions.cs" />
+    <Compile Include="Connections\ConnectionParameter.cs" />
     <Compile Include="Connections\ConnectionType.cs" />
     <Compile Include="Controls\Compare.cs">
       <SubType>UserControl</SubType>
@@ -202,6 +203,9 @@
     <Compile Include="Controls\ParameterGrid.Designer.cs">
       <DependentUpon>ParameterGrid.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\PlaceholderTextbox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\RecentlyModifiedSearch.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -226,6 +230,18 @@
     <Compile Include="Dialog\FileDialogControlBase.designer.cs">
       <DependentUpon>FileDialogControlBase.cs</DependentUpon>
     </Compile>
+    <Compile Include="Dialog\ParameterDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialog\ParameterDialog.Designer.cs">
+      <DependentUpon>ParameterDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialog\ConnectionAdvancedDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialog\ConnectionAdvancedDialog.Designer.cs">
+      <DependentUpon>ConnectionAdvancedDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="PropertyFilter.cs" />
     <Compile Include="Dialog\SettingsDialog.cs">
       <SubType>Form</SubType>
@@ -249,12 +265,6 @@
       <DependentUpon>LightBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Dialog\Native.cs" />
-    <Compile Include="Dialog\ParameterPrompt.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialog\ParameterPrompt.Designer.cs">
-      <DependentUpon>ParameterPrompt.cs</DependentUpon>
-    </Compile>
     <Compile Include="Dialog\ProgressDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -316,7 +326,7 @@
     <Compile Include="Ide\Logo.cs" />
     <Compile Include="Ide\OutputType.cs" />
     <Compile Include="Ide\QueryParamDescriptor.cs" />
-    <Compile Include="Ide\QueryParamObject.cs" />
+    <Compile Include="Ide\QueryParamGroup.cs" />
     <Compile Include="Ide\UiCommandManager.cs" />
     <Compile Include="Ide\EditorTreeNode.cs" />
     <Compile Include="Ide\EditorWindow.cs">
@@ -484,12 +494,6 @@
       <DependentUpon>MultiselectListBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Ide\QueryParameter.cs" />
-    <Compile Include="Ide\ParameterWindow.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Ide\ParameterWindow.Designer.cs">
-      <DependentUpon>ParameterWindow.cs</DependentUpon>
-    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -583,6 +587,12 @@
     <EmbeddedResource Include="Dialog\ColumnSelect.resx">
       <DependentUpon>ColumnSelect.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Dialog\ParameterDialog.resx">
+      <DependentUpon>ParameterDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialog\ConnectionAdvancedDialog.resx">
+      <DependentUpon>ConnectionAdvancedDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Dialog\SettingsDialog.resx">
       <DependentUpon>SettingsDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -610,9 +620,6 @@
     <EmbeddedResource Include="Dialog\ImportSelectDialog.resx">
       <DependentUpon>ImportSelectDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialog\ParameterPrompt.resx">
-      <DependentUpon>ParameterPrompt.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Dialog\ProgressDialog.resx">
       <DependentUpon>ProgressDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -630,9 +637,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Ide\InputBox.resx">
       <DependentUpon>InputBox.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Ide\ParameterWindow.resx">
-      <DependentUpon>ParameterWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>

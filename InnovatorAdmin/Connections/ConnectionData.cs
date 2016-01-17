@@ -13,6 +13,9 @@ namespace InnovatorAdmin.Connections
 {
   public class ConnectionData : ICloneable, IXmlSerializable
   {
+    private const int DefaultTimeout = 100000;
+    private BindingList<ConnectionParameter> _params = new BindingList<ConnectionParameter>();
+
     [DisplayName("Type")]
     public ConnectionType Type { get; set; }
     [DisplayName("Authentication")]
@@ -31,16 +34,21 @@ namespace InnovatorAdmin.Connections
     public Color Color { get; set; }
     [DisplayName("Confirm")]
     public Boolean Confirm { get; set; }
+    [DisplayName("Timeout")]
+    public int Timeout { get; set; }
 
+    [Browsable(false)]
+    public IList<ConnectionParameter> Params { get { return _params; } }
 
     public ConnectionData()
     {
       this.Type = ConnectionType.Innovator;
+      this.Timeout = DefaultTimeout;
     }
 
     public ConnectionData Clone()
     {
-      return new ConnectionData()
+      var result = new ConnectionData()
       {
         ConnectionName = this.ConnectionName,
         Database = this.Database,
@@ -50,8 +58,15 @@ namespace InnovatorAdmin.Connections
         Color = this.Color,
         Type = this.Type,
         Authentication = this.Authentication,
-        Confirm = this.Confirm
+        Confirm = this.Confirm,
+        Timeout = this.Timeout
       };
+
+      foreach (var param in _params)
+      {
+        result._params.Add(param);
+      }
+      return result;
     }
 
     object ICloneable.Clone()
@@ -115,6 +130,37 @@ namespace InnovatorAdmin.Connections
             if (Boolean.TryParse(reader.ReadElementString(reader.LocalName), out newConfirm))
               this.Confirm = newConfirm;
             break;
+          case "Timeout":
+            int timeout;
+            this.Timeout = int.TryParse(reader.ReadElementString(reader.LocalName), out timeout)
+              ? timeout : DefaultTimeout;
+            break;
+          case "Params":
+            if (reader.IsEmptyElement)
+            {
+              reader.Read();
+            }
+            else
+            {
+              reader.Read();
+              while (reader.NodeType != System.Xml.XmlNodeType.EndElement || reader.LocalName != "Params")
+              {
+                if (reader.NodeType == System.Xml.XmlNodeType.Element && reader.LocalName == "Param")
+                {
+                  _params.Add(new ConnectionParameter()
+                  {
+                    Name = reader.GetAttribute("name"),
+                    Value = reader.ReadElementString(reader.LocalName)
+                  });
+                }
+                else
+                {
+                  reader.Read();
+                }
+              }
+              reader.Read();
+            }
+            break;
           default:
             reader.ReadOuterXml();
             reader.MoveToContent();
@@ -141,6 +187,16 @@ namespace InnovatorAdmin.Connections
       writer.WriteElementString("Type", this.Type.ToString());
       writer.WriteElementString("Authentication", this.Authentication.ToString());
       writer.WriteElementString("Confirm", this.Confirm.ToString());
+      writer.WriteElementString("Timeout", this.Timeout.ToString());
+      writer.WriteStartElement("Params");
+      foreach (var param in _params)
+      {
+        writer.WriteStartElement("Param");
+        writer.WriteAttributeString("name", param.Name);
+        writer.WriteValue(param.Value);
+        writer.WriteEndElement();
+      }
+      writer.WriteEndElement();
       writer.Flush();
     }
 

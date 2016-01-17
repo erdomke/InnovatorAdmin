@@ -31,7 +31,6 @@ namespace InnovatorAdmin
     private bool _disposeProxy = true;
     private Editor.AmlLinkElementGenerator _linkGenerator;
     private bool _loadingConnection = false;
-    private string _locale;
     private DataSet _outputSet;
     private bool _outputTextSet = false;
     private bool _panelCollapsed;
@@ -40,8 +39,6 @@ namespace InnovatorAdmin
     private IResultObject _result;
     private string _soapAction;
     private DateTime _start = DateTime.UtcNow;
-    private int _timeout = Innovator.Client.Connection.DefaultHttpService.DefaultTimeout;
-    private string _timeZone;
     private string _uid;
     private bool _updateCheckComplete = false;
     private IHttpService _webService = new DefaultHttpService();
@@ -332,8 +329,6 @@ namespace InnovatorAdmin
     {
       if (conn == null) throw new ArgumentNullException("conn");
       exploreButton.Visible = true;
-      mniLocale.Visible = true;
-      mniTimeZone.Visible = true;
       SetProxy(new ArasEditorProxy(conn, name ?? conn.Database));
       _disposeProxy = false;
       _oldConnType = ConnectionType.Innovator;
@@ -588,9 +583,14 @@ namespace InnovatorAdmin
     }
     private void ConfigureRequest(IHttpRequest req)
     {
-      req.SetHeader("LOCALE", _locale);
-      req.SetHeader("TIMEZONE_NAME", _timeZone);
-      req.Timeout = _timeout;
+      if (_proxy != null && _proxy.ConnData != null)
+      {
+        foreach (var param in _proxy.ConnData.Params)
+        {
+          req.SetHeader(param.Name, param.Value);
+        }
+        req.Timeout = _proxy.ConnData.Timeout;
+      }
     }
 
     private void DisposeProxy()
@@ -777,23 +777,11 @@ namespace InnovatorAdmin
       }
 
       exploreButton.Visible = true;
-      mniLocale.Visible = true;
-      mniTimeZone.Visible = true;
 
       if (!outputEditor.ElementGenerators.Contains(_linkGenerator))
         outputEditor.ElementGenerators.Add(_linkGenerator);
 
-      var local = proxy.Connection.AmlContext.LocalizationContext;
       var remote = proxy.Connection as IRemoteConnection;
-      _locale = local.Locale;
-      _timeZone = local.TimeZone;
-      mniLocale.ShortcutKeyDisplayString = "(" + _locale + ")";
-      mniTimeZone.ShortcutKeyDisplayString = "(" + _timeZone + ")";
-      mniTimeout.ShortcutKeyDisplayString = "(" + (_timeout / 1000) + "s)";
-
-      mniLocale.Enabled = remote != null;
-      mniTimeZone.Enabled = mniLocale.Enabled;
-      mniTimeout.Visible = mniLocale.Enabled;
 
       if (remote != null)
       {
@@ -1170,7 +1158,7 @@ namespace InnovatorAdmin
           .Select(p => GetCreateParameter(p)).ToList();
         if (queryParams.Any() && this.SoapAction != ArasEditorProxy.UnitTestAction)
         {
-          using (var dialog = new ParameterWindow(queryParams))
+          using (var dialog = new Dialog.ParameterDialog(queryParams))
           {
             switch (dialog.ShowDialog(this))
             {
@@ -1332,7 +1320,7 @@ namespace InnovatorAdmin
         {
           name = _proxy.ConnData.ConnectionName;
         }
-        else 
+        else
         {
           name += " (" + _proxy.ConnData.ConnectionName + ")";
         }
@@ -1638,81 +1626,51 @@ namespace InnovatorAdmin
       }
     }
 
-    private void mniTimeZone_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        using (var dialog = new FilterSelect<string>())
-        {
-          dialog.DataSource = TimeZoneInfo.GetSystemTimeZones().Select(t => t.Id).ToList();
-          dialog.Message = "Select a time zone";
-          if (dialog.ShowDialog(this) ==
-            DialogResult.OK && dialog.SelectedItem != null)
-          {
-            _timeZone = dialog.SelectedItem;
-            mniTimeZone.ShortcutKeyDisplayString = _timeZone;
-          }
-        }
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
+    //private void mniTimeZone_Click(object sender, EventArgs e)
+    //{
+    //  try
+    //  {
+    //    using (var dialog = new FilterSelect<string>())
+    //    {
+    //      dialog.DataSource = TimeZoneInfo.GetSystemTimeZones().Select(t => t.Id).ToList();
+    //      dialog.Message = "Select a time zone";
+    //      if (dialog.ShowDialog(this) ==
+    //        DialogResult.OK && dialog.SelectedItem != null)
+    //      {
+    //        _timeZone = dialog.SelectedItem;
+    //        mniTimeZone.ShortcutKeyDisplayString = _timeZone;
+    //      }
+    //    }
+    //  }
+    //  catch (Exception ex)
+    //  {
+    //    Utils.HandleError(ex);
+    //  }
+    //}
 
-    private void mniLocale_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        using (var dialog = new FilterSelect<string>())
-        {
-          dialog.DataSource = CultureInfo.GetCultures(CultureTypes.SpecificCultures)
-            .Select(c => c.Name).ToList();
-          dialog.Message = "Select a locale";
-          if (dialog.ShowDialog(this) ==
-            DialogResult.OK && dialog.SelectedItem != null)
-          {
-            _locale = dialog.SelectedItem;
-            mniLocale.ShortcutKeyDisplayString = _locale;
-          }
-        }
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
+    //private void mniLocale_Click(object sender, EventArgs e)
+    //{
+    //  try
+    //  {
+    //    using (var dialog = new FilterSelect<string>())
+    //    {
+    //      dialog.DataSource = CultureInfo.GetCultures(CultureTypes.SpecificCultures)
+    //        .Select(c => c.Name).ToList();
+    //      dialog.Message = "Select a locale";
+    //      if (dialog.ShowDialog(this) ==
+    //        DialogResult.OK && dialog.SelectedItem != null)
+    //      {
+    //        _locale = dialog.SelectedItem;
+    //        mniLocale.ShortcutKeyDisplayString = _locale;
+    //      }
+    //    }
+    //  }
+    //  catch (Exception ex)
+    //  {
+    //    Utils.HandleError(ex);
+    //  }
+    //}
 
-    private void mniTimeout_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        using (var dialog = new InputBox())
-        {
-          dialog.Caption = "Select Timeout";
-          dialog.Message = "Specify the desired timeout (in seconds)";
-          dialog.Value = (_timeout < 0 ? -1 : _timeout / 1000).ToString();
-          int newTimeout;
-          if (dialog.ShowDialog(this) == DialogResult.OK && int.TryParse(dialog.Value, out newTimeout))
-          {
-            if (newTimeout < 0)
-            {
-              _timeout = -1;
-              mniTimeout.ShortcutKeyDisplayString = "(none)";
-            }
-            else
-            {
-              _timeout = newTimeout * 1000;
-              mniTimeout.ShortcutKeyDisplayString = "(" + newTimeout.ToString() + "s)";
-            }
-          }
-        }
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
     private void exploreButton_Click(object sender, EventArgs e)
     {
       try
