@@ -21,6 +21,9 @@ namespace InnovatorAdmin.Testing
       if (xPath == "x:NewId()")
         return new StringXpathResult(Guid.NewGuid().ToString("N").ToUpperInvariant());
 
+      if (elem == null)
+        throw new InvalidOperationException("Cannot match an XPath when data is available");
+
       var output = elem.XPathEvaluate(xPath);
       if (output is bool)
       {

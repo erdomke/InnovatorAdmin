@@ -22,9 +22,6 @@ namespace InnovatorAdmin.Testing
     {
       if (!string.IsNullOrWhiteSpace(this.Select))
       {
-        if (context.LastResult == null)
-          throw new InvalidOperationException("Cannot assert a match when no query has been run");
-
         this.ActualValue = XPathResult.Evaluate(context.LastResult, this.Select).ToString();
         context.Parameters[this.Name] = this.ActualValue;
       }
