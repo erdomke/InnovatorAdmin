@@ -588,8 +588,8 @@ namespace InnovatorAdmin
       }
     }
 
-    private static Dictionary<IAsyncConnection, ArasMetadataProvider> _cache
-      = new Dictionary<IAsyncConnection, ArasMetadataProvider>();
+    private static Dictionary<string, ArasMetadataProvider> _cache
+      = new Dictionary<string, ArasMetadataProvider>();
 
     /// <summary>
     /// Return a cached metadata object for a given connection
@@ -597,10 +597,14 @@ namespace InnovatorAdmin
     public static ArasMetadataProvider Cached(IAsyncConnection conn)
     {
       ArasMetadataProvider result;
-      if (!_cache.TryGetValue(conn, out result))
+      var key = conn.Database + "|" + conn.UserId;
+      var remote = conn as IRemoteConnection;
+      if (remote != null)
+        key += "|" + remote.Url;
+      if (!_cache.TryGetValue(key, out result))
       {
         result = new ArasMetadataProvider(conn);
-        _cache[conn] = result;
+        _cache[key] = result;
       }
       return result;
     }
