@@ -137,6 +137,7 @@ namespace InnovatorAdmin
     }
     private static void IsUiVisible(this DataColumn column, bool value)
     {
+      if (column == null) return;
       column.ExtendedProperties["visible"] = value;
     }
     public static Property PropMetadata(this DataColumn column)
