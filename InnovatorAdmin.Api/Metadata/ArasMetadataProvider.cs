@@ -566,7 +566,11 @@ namespace InnovatorAdmin
           newProp.ForeignTypeName = foreign.SourceId().KeyedName().Value;
         }
         newProp.DataSource = prop.Property("data_source").Value;
-        if (newProp.Type == PropertyType.item && prop.Property("data_source").Attribute("name").HasValue())
+        if (newProp.Type == PropertyType.item && newProp.Name == "data_source" && type.Name == "Property")
+        {
+          newProp.Restrictions.AddRange(new string [] { "ItemType", "List", "Property" } );
+        }
+        else if (newProp.Type == PropertyType.item && prop.Property("data_source").Attribute("name").HasValue())
         {
           newProp.Restrictions.Add(prop.Property("data_source").Attribute("name").Value);
         }

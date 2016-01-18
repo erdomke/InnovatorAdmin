@@ -4,6 +4,7 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -45,9 +46,16 @@ namespace InnovatorAdmin
           break;
       }
 
+      var prefs = new ConnectionPreferences() { UserAgent = "InnovatorAdmin v" + Assembly.GetExecutingAssembly().GetName().Version.ToString() };
+      var localePref = credentials.Params.FirstOrDefault(p => p.Name == "LOCALE");
+      var tzPref = credentials.Params.FirstOrDefault(p => p.Name == "TIMEZONE_NAME");
+      if (localePref != null)
+        prefs.Locale = localePref.Value;
+      if (tzPref != null)
+        prefs.TimeZone = tzPref.Value;
+
       return Factory.GetConnection(credentials.Url
-        , new ConnectionPreferences() { UserAgent = "InnovatorAdmin" }
-        , async)
+        , prefs, async)
       .Continue(c =>
       {
         return c.Login(cred, async)

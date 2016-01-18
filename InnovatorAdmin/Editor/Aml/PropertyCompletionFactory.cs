@@ -20,7 +20,7 @@ namespace InnovatorAdmin.Editor
     {
       this.Filter = p => true;
     }
-    public PropertyCompletionFactory(ArasMetadataProvider metadata, ItemType itemType) : base()
+    public PropertyCompletionFactory(ArasMetadataProvider metadata, ItemType itemType) : this()
     {
       _metadata = metadata;
       _itemType = itemType;

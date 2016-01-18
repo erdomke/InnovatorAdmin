@@ -17,6 +17,7 @@ namespace InnovatorAdmin.Editor
   public partial class AmlEditorHelper : ISqlMetadataProvider
   {
     private ArasMetadataProvider _metadata;
+    private XmlCompletionDataProvider _xsltProvider;
     protected SqlCompletionHelper _sql;
     private static HashSet<string> _systemControlledProperties = new HashSet<string>(new string[]
     {
@@ -35,6 +36,29 @@ namespace InnovatorAdmin.Editor
       "not_lockable",
       "state"
     });
+
+    private XmlCompletionDataProvider XsltProvider
+    {
+      get
+      {
+        if (_xsltProvider == null)
+        {
+          var schema = new System.Xml.Schema.XmlSchema();
+          using (var stream = typeof(XmlCompletionDataProvider).Assembly.GetManifestResourceStream("InnovatorAdmin.Editor.xslt.xsd"))
+          {
+            using (var reader = XmlReader.Create(stream))
+            {
+              var handler = new System.Xml.Schema.ValidationEventHandler((s, e) => { });
+              schema = System.Xml.Schema.XmlSchema.Read(reader, handler);
+              schema.Compile(handler);
+            }
+          }
+
+          _xsltProvider = new XmlCompletionDataProvider(schema);
+        }
+        return _xsltProvider;
+      }
+    }
 
     private string GetType(XmlReader reader)
     {
@@ -385,6 +409,9 @@ namespace InnovatorAdmin.Editor
                   };
                   items = Enumerable.Repeat<ICompletionData>(newGuid, 1);
                   break;
+                case "queryDate":
+                  items = GetDateCompletions();
+                  break;
                 case "queryType":
                   items = AttributeValues("Effective", "Latest", "Released");
                   break;
@@ -608,6 +635,20 @@ namespace InnovatorAdmin.Editor
             else if (path.Last().LocalName == "Expected" || path.Last().LocalName == "Param")
             {
               items = Elements("Item");
+            }
+            else if (state == XmlState.CData && value.TrimStart().StartsWith("<"))
+            {
+              var lastItem = path.LastOrDefault(p => p.LocalName == "Item");
+              if (path.Last().LocalName == "xsl_stylesheet" && lastItem != null && lastItem.Type == "Report")
+              {
+                items = XsltProvider.HandleTextEntered(new StringTextSource(value), value.Length, value.Last().ToString());
+              }
+              else if (lastItem != null && ((path.Last().LocalName == "criteria" && lastItem.Type == "SavedSearch")
+                || (path.Last().LocalName == "query_string" && lastItem.Type == "EMail Message")
+                || (path.Last().LocalName == "report_query" && lastItem.Type == "Report")))
+              {
+                items = (await GetCompletions(new StringTextSource(value), value.Length, "ApplyItem")).Items;
+              }
             }
             else
             {
@@ -996,14 +1037,7 @@ namespace InnovatorAdmin.Editor
         }
         else if (p.Type == PropertyType.date)
         {
-          return new ICompletionData[] {
-            new BasicCompletionData() {
-              Text = DateTime.Now.ToString("s"),
-              Image = Icons.EnumValue16.Wpf,
-              Content = DateTime.Now.ToString("s") + " (Now)"
-            }
-            // Add a completion dialog option to open a calendar control
-          };
+          return GetDateCompletions();
         }
         else if (p.Type == PropertyType.boolean)
         {
@@ -1054,7 +1088,8 @@ namespace InnovatorAdmin.Editor
               o++;
             }
           }
-          return Enumerable.Repeat(new string(output, 0, o), 1).GetCompletions<BasicCompletionData>();
+          if (output[o - 1] == '_') o--;
+          return Enumerable.Repeat(new string(output, 0, Math.Min(o, 32)), 1).GetCompletions<BasicCompletionData>();
         }
         else if (p.Name == "name" && itemType.Name == "Property" && lastItem.Action == "get"
           && lastItem.Values.TryGetValue("source_id", out itemValue))
@@ -1095,6 +1130,18 @@ namespace InnovatorAdmin.Editor
           return Enumerable.Empty<ICompletionData>();
         }
       }
+    }
+
+    private IEnumerable<ICompletionData> GetDateCompletions()
+    {
+      return new ICompletionData[] {
+        new BasicCompletionData() {
+          Text = DateTime.Now.ToString("s"),
+          Image = Icons.EnumValue16.Wpf,
+          Content = DateTime.Now.ToString("s") + " (Now)"
+        }
+        // Add a completion dialog option to open a calendar control
+      };
     }
 
     private class ItemPropertyCompletionData : ICompletionData

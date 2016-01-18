@@ -80,9 +80,10 @@ namespace InnovatorAdmin.Editor
       this.defaultNamespacePrefix = string.Empty;
     }
 
-    public override void HandleTextEntered(EditorWinForm control, string insertText)
+    public virtual IEnumerable<ICompletionData> HandleTextEntered(ITextSource source, int caret, string insertText = null)
     {
-      var text = control.Editor.Text.Substring(0, control.Editor.CaretOffset);
+      insertText = insertText ?? source.GetText(caret - 1, 1);
+      var text = source.GetText(0, caret);
       ICompletionData[] result = null;
       IEnumerable<XmlElementPath> parentPaths;
       switch (insertText)
@@ -122,17 +123,6 @@ namespace InnovatorAdmin.Editor
             }
           }
           break;
-        case ">":
-          var elementName = XmlParser.GetOpenElement(text);
-          if (!string.IsNullOrEmpty(elementName))
-          {
-            var insert = "</" + elementName + ">";
-            if (!control.Editor.Text.Substring(control.Editor.CaretOffset).Trim().StartsWith(insert))
-            {
-              control.Editor.Document.Insert(control.Editor.CaretOffset, insert, AnchorMovementType.BeforeInsertion);
-            }
-          }
-          break;
         default:
 
           // Attribute value intellisense.
@@ -153,9 +143,36 @@ namespace InnovatorAdmin.Editor
       }
 
       if (result != null)
+        return result.OrderBy(x => x.Text);
+
+      return Enumerable.Empty<ICompletionData>();
+    }
+
+    public override void HandleTextEntered(EditorWinForm control, string insertText)
+    {
+      switch (insertText)
       {
-        Array.Sort(result, (x, y) => x.Text.CompareTo(y.Text));
-        control.ShowCompletionWindow(result, 0);
+        case ">":
+          var doc = control.Editor.Document;
+          var caret = control.Editor.CaretOffset;
+          var text = doc.GetText(0, caret);
+          var elementName = XmlParser.GetOpenElement(text);
+          if (!string.IsNullOrEmpty(elementName))
+          {
+            var insert = "</" + elementName + ">";
+            if (!doc.GetText(caret, doc.TextLength - caret).Trim().StartsWith(insert))
+            {
+              doc.Insert(caret, insert, AnchorMovementType.BeforeInsertion);
+            }
+          }
+          break;
+        default:
+          var result = HandleTextEntered(control.Editor.Document, control.Editor.CaretOffset, insertText);
+          if (result.Any())
+          {
+            control.ShowCompletionWindow(result, 0);
+          }
+          break;
       }
     }
 
