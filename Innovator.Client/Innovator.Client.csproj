@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{D909EF15-81AA-4119-AB5A-1636CA8C08FC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Innovator.Client</RootNamespace>
+    <AssemblyName>Innovator.Client</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;NET4</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;NET4</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Aml\DateMagnitude.cs" />
+    <Compile Include="Aml\DynamicDateTimeRange.cs" />
+    <Compile Include="Aml\IAttribute.cs" />
+    <Compile Include="Aml\IElement.cs" />
+    <Compile Include="Aml\IErrorBuilder.cs" />
+    <Compile Include="Aml\IItem.cs" />
+    <Compile Include="Aml\IProperty.cs" />
+    <Compile Include="Aml\IResult.cs" />
+    <Compile Include="Aml\ItemExtensions.cs" />
+    <Compile Include="Aml\JsonFormatter.cs" />
+    <Compile Include="Aml\LockStatusType.cs" />
+    <Compile Include="Aml\Model\Activity.cs" />
+    <Compile Include="Aml\Model\ItemWrapper.cs" />
+    <Compile Include="Aml\Model\LifeCycleState.cs" />
+    <Compile Include="Aml\Model\LifeCycleTransition.cs" />
+    <Compile Include="Aml\Model\WorkflowProcess.cs" />
+    <Compile Include="Aml\ParameterSubstitution.cs" />
+    <Compile Include="Aml\CommandAction.cs" />
+    <Compile Include="Aml\SqlBatchWriter.cs" />
+    <Compile Include="Aml\SqlFormatter.cs" />
+    <Compile Include="Aml\StaticDateTimeRange.cs" />
+    <Compile Include="Aml\SubSelect.cs" />
+    <Compile Include="Aml\ValidationException.cs" />
+    <Compile Include="Aml\ValidationReportException.cs" />
+    <Compile Include="Aml\XmlFormatter.cs" />
+    <Compile Include="AssemblyInfo.Version.cs" />
+    <Compile Include="ConnectionPreferences.cs" />
+    <Compile Include="Connection\ArasVaultConnection.cs" />
+    <Compile Include="Connection\CacheVaultStrategy.cs" />
+    <Compile Include="Connection\Db\DbAdapter.cs" />
+    <Compile Include="Connection\Db\DbCommand.cs" />
+    <Compile Include="Connection\Db\DbConnection.cs" />
+    <Compile Include="Connection\Db\DbParameter.cs" />
+    <Compile Include="Connection\Db\DbParams.cs" />
+    <Compile Include="Connection\Db\DbReader.cs" />
+    <Compile Include="Connection\DefaultHttpService.cs" />
+    <Compile Include="Connection\DefaultVaultStrategy.cs" />
+    <Compile Include="Connection\Endpoints.cs" />
+    <Compile Include="Connection\IArasConnection.cs" />
+    <Compile Include="Connection\IHttpService.cs" />
+    <Compile Include="Connection\IVaultStrategy.cs" />
+    <Compile Include="Connection\MultiPartFormWriter.cs" />
+    <Compile Include="IAsyncConnection.cs" />
+    <Compile Include="IAsyncScript.cs" />
+    <Compile Include="IO\SmartCompressionStream.cs" />
+    <Compile Include="MemoryCache.cs" />
+    <Compile Include="Connection\QueryString.cs" />
+    <Compile Include="Credentials\AnonymousCredentials.cs" />
+    <Compile Include="Credentials\ExplicitCredentials.cs" />
+    <Compile Include="Credentials\WindowsCredentials.cs" />
+    <Compile Include="ICredentials.cs" />
+    <Compile Include="ITokenStore.cs" />
+    <Compile Include="IO\AsyncStreamWriter.cs" />
+    <Compile Include="Connection\AuthenticationScheme.cs" />
+    <Compile Include="Connection\ConnectionExtensions.cs" />
+    <Compile Include="Connection\SessionPolicy.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="IO\HttpTimeoutException.cs" />
+    <Compile Include="IO\IHttpRequest.cs" />
+    <Compile Include="IO\IStreamWriter.cs" />
+    <Compile Include="IO\SyncStreamWriter.cs" />
+    <Compile Include="IO\NameValueDictionary.cs" />
+    <Compile Include="IO\HttpException.cs" />
+    <Compile Include="Promise\ICancelable.cs" />
+    <Compile Include="Promise\PromiseResult.cs" />
+    <Compile Include="IServerContext.cs" />
+    <Compile Include="Connection\InitializeSessionToken.cs" />
+    <Compile Include="Connection\Vault.cs" />
+    <Compile Include="Factory.cs" />
+    <Compile Include="IO\IHttpResponse.cs" />
+    <Compile Include="Connection\ProxyServerConnection.cs" />
+    <Compile Include="Credentials\TokenCredentials.cs" />
+    <Compile Include="Aml\MutableXml\Attribute.cs" />
+    <Compile Include="Aml\Condition.cs" />
+    <Compile Include="Aml\Core.cs" />
+    <Compile Include="Aml\MutableXml\Element.cs" />
+    <Compile Include="Aml\ElementFactory.cs" />
+    <Compile Include="Aml\MutableXml\GenericElement.cs" />
+    <Compile Include="Aml\MutableXml\Item.cs" />
+    <Compile Include="Aml\MutableXml\Logical.cs" />
+    <Compile Include="Aml\NoItemsFoundException.cs" />
+    <Compile Include="Aml\MutableXml\Property.cs" />
+    <Compile Include="Aml\QueryType.cs" />
+    <Compile Include="Aml\MutableXml\Relationships.cs" />
+    <Compile Include="Aml\MutableXml\Result.cs" />
+    <Compile Include="Aml\ServerContext.cs" />
+    <Compile Include="Aml\ServerException.cs" />
+    <Compile Include="Aml\XmlUtils.cs" />
+    <Compile Include="Aml\XPathCache.cs" />
+    <Compile Include="IO\CompressionType.cs" />
+    <Compile Include="Connection\ArasHttpConnection.cs" />
+    <Compile Include="Promise\Promises.cs" />
+    <Compile Include="IRemoteConnection.cs" />
+    <Compile Include="Promise\IPromise.cs" />
+    <Compile Include="IConnection.cs" />
+    <Compile Include="Promise\Promise.cs" />
+    <Compile Include="Command.cs" />
+    <Compile Include="CommandFile.cs" />
+    <Compile Include="Security\AsymmetricEncryptor.cs" />
+    <Compile Include="Server\Extensions.cs" />
+    <Compile Include="Server\IServerCache.cs" />
+    <Compile Include="Server\IServerConnection.cs" />
+    <Compile Include="Server\IServerPermissions.cs" />
+    <Compile Include="Server\ServerMethod\DelegateContext.cs" />
+    <Compile Include="Server\ServerMethod\Methods.cs" />
+    <Compile Include="Server\ServerMethod\MultiItemContext.cs" />
+    <Compile Include="Server\ServerMethod\PromotionContext.cs" />
+    <Compile Include="Server\ServerMethod\SingleItemContext.cs" />
+    <Compile Include="Server\ServerMethod\ValidationContext.cs" />
+    <Compile Include="Server\ServerMethod\VersionContext.cs" />
+    <Compile Include="Server\ServerMethod\VoteContext.cs" />
+    <Compile Include="Server\ServerMethod\WorkflowContext.cs" />
+    <Compile Include="Server\ServerMethod\WorkflowEvent.cs" />
+    <Compile Include="UnixDate.cs" />
+    <Compile Include="UploadCommand.cs" />
+    <Compile Include="IO\WebPromise.cs" />
+    <Compile Include="IO\WebRequest.cs" />
+    <Compile Include="IO\WebResponse.cs" />
+    <Compile Include="Security\SecureToken.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

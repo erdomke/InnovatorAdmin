@@ -62,10 +62,6 @@
       <HintPath>..\packages\squirrel.windows.1.2.1\lib\Net45\ICSharpCode.SharpZipLib.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Innovator.Client, Version=2015.12.7.1658, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\Innovator.Client.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.WindowsAPICodePack, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -679,6 +675,10 @@
     <ProjectReference Include="..\HgSharp.Core\HgSharp.Core.csproj">
       <Project>{7a342412-e7f3-42a2-a902-349d45c5eafa}</Project>
       <Name>HgSharp.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Innovator.Client\Innovator.Client.csproj">
+      <Project>{d909ef15-81aa-4119-ab5a-1636ca8c08fc}</Project>
+      <Name>Innovator.Client</Name>
     </ProjectReference>
     <ProjectReference Include="..\InnovatorAdmin.Api\InnovatorAdmin.Api.csproj">
       <Project>{7C397623-C59E-4DB2-8879-8A3385DABCD9}</Project>

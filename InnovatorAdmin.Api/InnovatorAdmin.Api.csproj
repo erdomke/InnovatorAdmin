@@ -42,10 +42,6 @@
       <Private>True</Private>
       <HintPath>..\packages\DocumentFormat.OpenXml.2.5\lib\DocumentFormat.OpenXml.dll</HintPath>
     </Reference>
-    <Reference Include="Innovator.Client, Version=2015.12.7.1658, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\Innovator.Client.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Mvp.Xml">
       <HintPath>..\packages\Mvp.Xml.2.3.0\lib\net20\Mvp.Xml.dll</HintPath>
@@ -149,6 +145,10 @@
     <ProjectReference Include="..\ADiff.Api\ADiff.Api.csproj">
       <Project>{8d33a5d4-206d-4e3e-9609-968417bdeb23}</Project>
       <Name>ADiff.Api</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Innovator.Client\Innovator.Client.csproj">
+      <Project>{d909ef15-81aa-4119-ab5a-1636ca8c08fc}</Project>
+      <Name>Innovator.Client</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
