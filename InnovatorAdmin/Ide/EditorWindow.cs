@@ -1918,7 +1918,10 @@ namespace InnovatorAdmin
           rows = grid.SelectedCells.OfType<DataGridViewCell>().Select(c => c.OwningRow).Distinct();
         if (!rows.Any())
           rows = Enumerable.Repeat(grid.CurrentCell.OwningRow, 1);
-        var dataRows = rows.Select(r => ((DataRowView)r.DataBoundItem).Row).OfType<DataRow>().ToArray();
+        var dataRows = rows.Where(r => r.DataBoundItem is DataRowView)
+          .Select(r => ((DataRowView)r.DataBoundItem).Row)
+          .OfType<DataRow>()
+          .ToArray();
         var scripts = _proxy.GetHelper().GetScripts(dataRows);
 
         conTable.Items.Clear();
