@@ -21,6 +21,7 @@ namespace InnovatorAdmin
       ResolvedCycle
     }
 
+    private int _arasVersion;
     private IAsyncConnection _conn;
     private DependencyAnalyzer _dependAnalyzer;
     private ArasMetadataProvider _metadata;
@@ -38,6 +39,10 @@ namespace InnovatorAdmin
       _metadata = ArasMetadataProvider.Cached(conn);
       _metadata.Reset();
       _dependAnalyzer = new DependencyAnalyzer(_metadata);
+      _arasVersion = 9;
+      var arasConn = conn as Innovator.Client.Connection.IArasConnection;
+      if (arasConn != null)
+        _arasVersion = arasConn.Version;
     }
 
     /// <summary>
@@ -1378,8 +1383,133 @@ namespace InnovatorAdmin
       switch (type)
       {
         case "ItemType":
-          queryElem.SetAttribute("levels", "2");
-          queryElem.SetAttribute("config_path", "Property|RelationshipType|View|Server Event|Item Action|ItemType Life Cycle|Allowed Workflow|TOC Access|TOC View|Client Event|Can Add|Allowed Permission|Item Report|Morphae");
+          //queryElem.SetAttribute("levels", "2");
+          //queryElem.SetAttribute("config_path", "Property|RelationshipType|View|Server Event|Item Action|ItemType Life Cycle|Allowed Workflow|TOC Access|TOC View|Client Event|Can Add|Allowed Permission|Item Report|Morphae");
+          if (_arasVersion < 11)
+          {
+            queryElem.InnerXml = @"<Relationships>
+	<Item type='Property' action='get'>
+		<Relationships>
+			<Item type='Grid Event' action='get' />
+		</Relationships>
+	</Item>
+	<Item type='RelationshipType' action='get' />
+	<Item type='View' action='get'>
+		<related_id>
+			<Item type='Form' action='get'>
+				<Relationships>
+					<Item type='Body' action='get' />
+				</Relationships>
+			</Item>
+		</related_id>
+	</Item>
+	<Item type='Server Event' action='get' />
+	<Item type='Item Action' action='get' />
+	<Item type='ItemType Life Cycle' action='get' />
+	<Item type='Allowed Workflow' action='get' />
+	<Item type='TOC Access' action='get'>
+		<related_id>
+			<Item type='Identity' action='get'>
+				<Relationships>
+					<Item type='Member' action='get' />
+				</Relationships>
+			</Item>
+		</related_id>
+	</Item>
+	<Item type='TOC View' action='get' />
+	<Item type='Client Event' action='get' />
+	<Item type='Can Add' action='get'>
+		<related_id>
+			<Item type='Identity' action='get'>
+				<Relationships>
+					<Item type='Member' action='get' />
+				</Relationships>
+			</Item>
+		</related_id>
+	</Item>
+	<Item type='Allowed Permission' action='get'>
+		<related_id>
+			<Item type='Permission' action='get'>
+				<Relationships>
+					<Item type='Access' action='get' />
+				</Relationships>
+			</Item>
+		</related_id>
+	</Item>
+	<Item type='Item Report' action='get' />
+	<Item type='Morphae' action='get' />
+</Relationships>";
+          }
+          else
+          {
+            queryElem.InnerXml = @"<Relationships>
+	<Item type='DiscussionTemplate' action='get'>
+		<Relationships>
+			<Item type='FeedTemplate' action='get'>
+				<Relationships>
+					<Item type='FileSelectorTemplate' action='get' />
+				</Relationships>
+			</Item>
+			<Item type='DiscussionTemplateView' action='get' >
+				<related_id>
+					<Item type='SSVCPresentationConfiguration' action='get'/>
+				</related_id>
+			</Item>
+		</Relationships>
+	</Item>
+	<Item type='ITPresentationConfiguration' action='get' related_expand='0'/>
+	<Item type='Property' action='get'>
+		<Relationships>
+			<Item type='Grid Event' action='get' />
+		</Relationships>
+	</Item>
+	<Item type='RelationshipType' action='get' />
+	<Item type='View' action='get'>
+		<related_id>
+			<Item type='Form' action='get'>
+				<Relationships>
+					<Item type='Body' action='get' />
+				</Relationships>
+			</Item>
+		</related_id>
+	</Item>
+	<Item type='Server Event' action='get' />
+	<Item type='Item Action' action='get' />
+	<Item type='ItemType Life Cycle' action='get' />
+	<Item type='Allowed Workflow' action='get' />
+	<Item type='TOC Access' action='get'>
+		<related_id>
+			<Item type='Identity' action='get'>
+				<Relationships>
+					<Item type='Member' action='get' />
+				</Relationships>
+			</Item>
+		</related_id>
+	</Item>
+	<Item type='TOC View' action='get' />
+	<Item type='Client Event' action='get' />
+	<Item type='Can Add' action='get'>
+		<related_id>
+			<Item type='Identity' action='get'>
+				<Relationships>
+					<Item type='Member' action='get' />
+				</Relationships>
+			</Item>
+		</related_id>
+	</Item>
+	<Item type='Allowed Permission' action='get'>
+		<related_id>
+			<Item type='Permission' action='get'>
+				<Relationships>
+					<Item type='Access' action='get' />
+				</Relationships>
+			</Item>
+		</related_id>
+	</Item>
+	<Item type='Item Report' action='get' />
+	<Item type='Morphae' action='get' />
+</Relationships>";
+          }
           levels = 1;
           break;
         case "Item Report":
@@ -1427,6 +1557,60 @@ namespace InnovatorAdmin
         case "Workflow Map":
           queryElem.SetAttribute("levels", "3");
           levels = 3;
+          break;
+        case "cmf_ContentType":
+          queryElem.InnerXml = @"<Relationships>
+	<Item type='cmf_ContentTypeView' action='get'>
+	</Item>
+	<Item type='cmf_ElementType' action='get'>
+		<Relationships>
+			<Item type='cmf_ElementAllowedPermission' action='get'>
+			</Item>
+			<Item type='cmf_ElementBinding' action='get'>
+				<Relationships>
+					<Item type='cmf_PropertyBinding' action='get'>
+					</Item>
+				</Relationships>
+			</Item>
+			<Item type='cmf_PropertyType' action='get'>
+				<Relationships>
+					<Item type='cmf_ComputedProperty' action='get'>
+					</Item>
+					<Item type='cmf_PropertyAllowedPermission' action='get'>
+					</Item>
+				</Relationships>
+			</Item>
+		</Relationships>
+	</Item>
+	<Item type='cmf_ContentTypeExportRel' action='get'>
+	</Item>
+	<Item type='cmf_DocumentLifeCycleState' action='get'>
+	</Item>
+</Relationships>";
+          levels = 0;
+          break;
+        case "cmf_TabularView":
+          queryElem.InnerXml = @"<Relationships>
+	<Item type='cmf_TabularViewColumn' action='get'>
+		<Relationships>
+			<Item type='cmf_AdditionalPropertyType' action='get'>
+			</Item>
+		</Relationships>
+	</Item>
+	<Item type='cmf_TabularViewHeaderRows' action='get'>
+		<related_id>
+			<Item type='cmf_TabularViewHeaderRow' action='get'>
+				<Relationships>
+					<Item type='cmf_TabularViewColumnGroups' action='get'>
+					</Item>
+				</Relationships>
+			</Item>
+		</related_id>
+	</Item>
+	<Item type='cmf_TabularViewTree' action='get'>
+	</Item>
+</Relationships>";
+          levels = 0;
           break;
         default:
           levels = (levels < 0 ? 1 : levels);
