@@ -69,6 +69,7 @@ namespace InnovatorAdmin.Controls
 
         var ctrl = (ListEditingControl)DataGridView.EditingControl;
         ctrl.Text = this.Value == null ? null : this.Value.ToString();
+        ctrl.DataSource = null;
         ctrl.DisplayMember = ((DataGridViewListColumn)this.OwningColumn).DisplayMember;
         ctrl.ValueMember = ((DataGridViewListColumn)this.OwningColumn).ValueMember;
         ctrl.DataSource = ((DataGridViewListColumn)this.OwningColumn).DataSource;

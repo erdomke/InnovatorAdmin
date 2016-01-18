@@ -78,12 +78,16 @@ namespace InnovatorAdmin.Dialog
           switch ((string)gridHeaders.Rows[e.RowIndex].Cells["colName"].Value)
           {
             case "LOCALE":
+              colValue.DisplayMember = "DisplayName";
+              colValue.ValueMember = "Name";
               colValue.DataSource = CultureInfo.GetCultures(CultureTypes.SpecificCultures)
-                .Select(c => c.Name).OrderBy(v => v).ToList();
+                .OrderBy(v => v.DisplayName).ToList();
               break;
             case "TIMEZONE_NAME":
-              colValue.DataSource = TimeZoneInfo.GetSystemTimeZones().Select(t => t.Id)
-                .OrderBy(v => v).ToList();
+              colValue.DisplayMember = "DisplayName";
+              colValue.ValueMember = "Id";
+              colValue.DataSource = TimeZoneInfo.GetSystemTimeZones()
+                .OrderBy(v => v.BaseUtcOffset.TotalHours).ThenBy(v => v.DisplayName).ToList();
               break;
             default:
               colValue.DataSource = new string[] {};
