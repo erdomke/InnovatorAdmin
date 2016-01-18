@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Clean;GenerateFiles;Build;PackNuget">
+  <PropertyGroup>
+    <BuildVersion>$([System.DateTime]::Now.ToString(yyyy.MM.dd.HHmm))</BuildVersion>
+    <ProjectName>Innovator.Client</ProjectName>
+    <NuSpecContent><![CDATA[<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>$(ProjectName)</id>
+    <version>$(BuildVersion)</version>
+    <authors>eric.domke</authors>
+    <owners>Gentex Corporation</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Client dll for simplifying access to an Aras Innovator installation or a corresponding proxy</description>
+  </metadata>
+</package>]]></NuSpecContent>
+    
+    <NuSpecPath>..\publish\$(ProjectName)\$(ProjectName).nuspec</NuSpecPath>
+    <OutDir35>..\publish\$(ProjectName)\lib\net35</OutDir35>
+    <OutDir40>..\publish\$(ProjectName)\lib\net40</OutDir40>
+    <ObjDir35>obj\net35</ObjDir35>
+    <ObjDir40>obj\net40</ObjDir40>
+    <AssemInfo><![CDATA[using System.Reflection%3B
+
+[assembly: AssemblyVersion("$(BuildVersion)")]
+[assembly: AssemblyFileVersion("$(BuildVersion)")]]]></AssemInfo>
+  </PropertyGroup>
+  
+  <Target Name="Clean">
+    <ItemGroup>
+      <FilesToDelete Include="$(OutDir35)\*.*;$(OutDir40)\*.*;$(ObjDir35)\*.*;$(ObjDir40)\*.*;*.nupkg"/>
+    </ItemGroup>   
+    <Delete Files="@(FilesToDelete)" />
+  </Target>
+  <Target Name="GenerateFiles">
+    <!--<WriteLinesToFile File="AssemblyInfo.Version.cs" Lines="$(AssemInfo)" Overwrite="true" />-->
+    <WriteLinesToFile File="$(NuSpecPath)" Lines="$(NuSpecContent)" Overwrite="true" />
+  </Target>
+  <Target Name="Build">
+    <ItemGroup>
+      <ProjectToBuild3 Include="Innovator.Client.csproj">
+        <Properties>OutputPath=$(OutDir35);IntermediateOutputPath=$(ObjDir35)\;TargetFrameworkVersion=v3.5;Configuration=Release</Properties>
+        <SGenToolPath>C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\sgen.exe</SGenToolPath>
+      </ProjectToBuild3>
+      <ProjectToBuild4 Include="Innovator.Client.csproj">
+        <Properties>OutputPath=$(OutDir40);IntermediateOutputPath=$(ObjDir40)\;TargetFrameworkVersion=v4.0;Configuration=Release;DefineConstants=NET4</Properties>
+        <SGenToolPath>C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\sgen.exe</SGenToolPath>
+      </ProjectToBuild4>
+    </ItemGroup>
+    <MSBuild Projects="@(ProjectToBuild3)" />
+    <MSBuild Projects="@(ProjectToBuild4)" />
+  </Target>
+  <Target Name="PackNuget">
+    <Exec Command="..\.nuget\NuGet.exe Update -self" />
+    <Exec Command="..\.nuget\NuGet.exe SetApiKey D618A457-93E2-4D16-B322-8AA4466EB952 -source http://gpm.gentex.com/nuget/NuGet" />
+    <Exec Command="..\.nuget\NuGet.exe Pack $(NuSpecPath)" />
+  </Target>
+  
+</Project>
