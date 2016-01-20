@@ -10,14 +10,19 @@ namespace Innovator.Client
 {
   public static class Extensions
   {
+    public static bool IsNullOrEmpty(this SecureToken token)
+    {
+      return token == null || token.Length < 1;
+    }
+
     public static string Checksum(this FileInfo fileInfo)
     {
       if (!File.Exists(fileInfo.FullName))
         throw new ArgumentException("The spcecified file doesn't exist.", "fileName");
-      
+
       if (Directory.Exists(fileInfo.FullName))
         throw new ArgumentException("The specified path is a directory and not a file.", "fileName");
-      
+
       using (var fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
       {
         using (var bufferedStream = new BufferedStream(fileStream, 32768))
@@ -143,7 +148,7 @@ namespace Innovator.Client
       }
     }
 
-    
+
 
   }
 }
