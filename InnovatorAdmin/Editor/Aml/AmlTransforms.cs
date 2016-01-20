@@ -31,7 +31,7 @@ namespace InnovatorAdmin.Editor
     private static void ProcessCriteria(XElement parent, CriteriaBuilder builder)
     {
       CriteriaBuilder newBuilder;
-      foreach (var elem in parent.Elements())
+      foreach (var elem in parent.Elements().ToArray())
       {
         switch (elem.Name.LocalName)
         {
