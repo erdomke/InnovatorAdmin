@@ -136,6 +136,20 @@ namespace InnovatorAdmin.Testing
     {
       switch (reader.LocalName)
       {
+        case "Login":
+          return new Login()
+          {
+            Comment = comment,
+            Database = reader.GetAttribute("database"),
+            Password = reader.GetAttribute("password"),
+            Url = reader.GetAttribute("url"),
+            UserName = reader.GetAttribute("username")
+          };
+        case "Logout":
+          return new Logout()
+          {
+            Comment = comment
+          };
         case "sql":
         case "SQL":
         case "Item":
@@ -262,6 +276,14 @@ namespace InnovatorAdmin.Testing
         WriteFormatted(match.Expected, match.IsXml, writer);
         writer.WriteEndElement();
       }
+      writer.WriteEndElement();
+    }
+    public static void Write(this Login login, XmlWriter writer)
+    {
+      if (!string.IsNullOrWhiteSpace(login.Comment))
+        writer.WriteComment(login.Comment);
+      writer.WriteStartElement("Login");
+
       writer.WriteEndElement();
     }
     public static void Write(this ParamAssign param, XmlWriter writer)

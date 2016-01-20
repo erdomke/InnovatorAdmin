@@ -37,6 +37,13 @@ namespace InnovatorAdmin
       get { return _methods.Where(m => m.IsCore); }
     }
     /// <summary>
+    /// Enumerable of methods where core = 1
+    /// </summary>
+    public IEnumerable<ItemReference> AllMethods
+    {
+      get { return _methods; }
+    }
+    /// <summary>
     /// Enumerable of all item types
     /// </summary>
     public IEnumerable<ItemType> ItemTypes

@@ -11,17 +11,26 @@ namespace InnovatorAdmin.Testing
   public class TestContext
   {
     private Dictionary<string, string> _parameters = new Dictionary<string, string>();
-    private IAsyncConnection _conn;
+    private Stack<IAsyncConnection> _conns = new Stack<IAsyncConnection>();
     private List<ProgressState> _progressStack = new List<ProgressState>();
 
-    public IAsyncConnection Connection { get { return _conn; } }
+    public IAsyncConnection Connection { get { return _conns.Any() ? _conns.Peek() : null; } }
     public XElement LastResult { get; set; }
     public IDictionary<string, string> Parameters { get { return _parameters; } }
     public Action<int, string> ProgressCallback { get; set; }
 
     public TestContext(IAsyncConnection conn)
     {
-      _conn = conn;
+      _conns.Push(conn);
+    }
+
+    public void PushConnection(IAsyncConnection conn)
+    {
+      _conns.Push(conn);
+    }
+    public IAsyncConnection PopConnection()
+    {
+      return _conns.Pop();
     }
 
     public IDisposable StartSubProgress()
