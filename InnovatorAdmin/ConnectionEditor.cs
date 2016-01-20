@@ -422,6 +422,18 @@ namespace InnovatorAdmin
       }
     }
 
+    private void txtName_Validated(object sender, EventArgs e)
+    {
+      try
+      {
+        _bs.ResetBindings(false);
+      } 
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
 
   }
 }

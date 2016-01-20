@@ -35,31 +35,31 @@
       this.lblUrl = new System.Windows.Forms.Label();
       this.lblName = new System.Windows.Forms.Label();
       this.toolTipManager = new System.Windows.Forms.ToolTip(this.components);
-      this.tlpControls = new System.Windows.Forms.TableLayoutPanel();
-      this.panel1 = new System.Windows.Forms.Panel();
-      this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-      this.cmbDatabase = new System.Windows.Forms.ComboBox();
-      this.cmbType = new System.Windows.Forms.ComboBox();
-      this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
-      this.chkPassword = new System.Windows.Forms.CheckBox();
-      this.chkWindows = new System.Windows.Forms.CheckBox();
-      this.chkAnonymous = new System.Windows.Forms.CheckBox();
-      this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-      this.lblType = new System.Windows.Forms.Label();
-      this.btnColor = new System.Windows.Forms.Button();
-      this.lstConnections = new InnovatorAdmin.MultiselectListBox();
       this.btnMoveDown = new InnovatorAdmin.Controls.FlatButton();
       this.btnNew = new InnovatorAdmin.Controls.FlatButton();
       this.btnMoveUp = new InnovatorAdmin.Controls.FlatButton();
       this.btnCopy = new InnovatorAdmin.Controls.FlatButton();
       this.btnDelete = new InnovatorAdmin.Controls.FlatButton();
+      this.tlpControls = new System.Windows.Forms.TableLayoutPanel();
+      this.lstConnections = new InnovatorAdmin.MultiselectListBox();
+      this.panel1 = new System.Windows.Forms.Panel();
+      this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+      this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
+      this.chkPassword = new System.Windows.Forms.CheckBox();
+      this.chkWindows = new System.Windows.Forms.CheckBox();
+      this.chkAnonymous = new System.Windows.Forms.CheckBox();
       this.txtUrl = new InnovatorAdmin.Controls.PlaceholderTextBox();
       this.txtName = new InnovatorAdmin.Controls.PlaceholderTextBox();
       this.txtUser = new InnovatorAdmin.Controls.PlaceholderTextBox();
+      this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
       this.exploreButton = new InnovatorAdmin.Controls.FlatButton();
+      this.btnAdvanced = new InnovatorAdmin.Controls.FlatButton();
       this.btnTest = new InnovatorAdmin.Controls.FlatButton();
       this.txtPassword = new InnovatorAdmin.Controls.PlaceholderTextBox();
-      this.btnAdvanced = new InnovatorAdmin.Controls.FlatButton();
+      this.lblType = new System.Windows.Forms.Label();
+      this.cmbType = new System.Windows.Forms.ComboBox();
+      this.cmbDatabase = new System.Windows.Forms.ComboBox();
+      this.btnColor = new System.Windows.Forms.Button();
       this.tlpControls.SuspendLayout();
       this.tableLayoutPanel1.SuspendLayout();
       this.flowLayoutPanel2.SuspendLayout();
@@ -124,229 +124,6 @@
       this.lblName.TabIndex = 32;
       this.lblName.Text = "Name:";
       this.lblName.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-      // 
-      // tlpControls
-      // 
-      this.tlpControls.BackColor = System.Drawing.Color.White;
-      this.tlpControls.ColumnCount = 8;
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 10F));
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 90F));
-      this.tlpControls.Controls.Add(this.lstConnections, 0, 0);
-      this.tlpControls.Controls.Add(this.btnMoveDown, 5, 1);
-      this.tlpControls.Controls.Add(this.btnNew, 0, 1);
-      this.tlpControls.Controls.Add(this.btnMoveUp, 4, 1);
-      this.tlpControls.Controls.Add(this.btnCopy, 1, 1);
-      this.tlpControls.Controls.Add(this.btnDelete, 2, 1);
-      this.tlpControls.Controls.Add(this.panel1, 6, 0);
-      this.tlpControls.Controls.Add(this.tableLayoutPanel1, 7, 0);
-      this.tlpControls.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.tlpControls.Location = new System.Drawing.Point(0, 0);
-      this.tlpControls.Name = "tlpControls";
-      this.tlpControls.RowCount = 2;
-      this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-      this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tlpControls.Size = new System.Drawing.Size(652, 282);
-      this.tlpControls.TabIndex = 41;
-      // 
-      // panel1
-      // 
-      this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
-      this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(235)))), ((int)(((byte)(235)))));
-      this.panel1.Location = new System.Drawing.Point(225, 3);
-      this.panel1.Name = "panel1";
-      this.tlpControls.SetRowSpan(this.panel1, 2);
-      this.panel1.Size = new System.Drawing.Size(1, 276);
-      this.panel1.TabIndex = 46;
-      // 
-      // tableLayoutPanel1
-      // 
-      this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-      this.tableLayoutPanel1.ColumnCount = 3;
-      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel2, 1, 2);
-      this.tableLayoutPanel1.Controls.Add(this.txtUrl, 1, 0);
-      this.tableLayoutPanel1.Controls.Add(this.txtName, 1, 7);
-      this.tableLayoutPanel1.Controls.Add(this.lblName, 0, 7);
-      this.tableLayoutPanel1.Controls.Add(this.lblUrl, 0, 0);
-      this.tableLayoutPanel1.Controls.Add(this.lblUser, 0, 3);
-      this.tableLayoutPanel1.Controls.Add(this.txtUser, 1, 3);
-      this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel1, 1, 8);
-      this.tableLayoutPanel1.Controls.Add(this.lblPassword, 0, 4);
-      this.tableLayoutPanel1.Controls.Add(this.txtPassword, 1, 4);
-      this.tableLayoutPanel1.Controls.Add(this.lblType, 0, 1);
-      this.tableLayoutPanel1.Controls.Add(this.cmbType, 1, 1);
-      this.tableLayoutPanel1.Controls.Add(this.lblDatabase, 0, 5);
-      this.tableLayoutPanel1.Controls.Add(this.cmbDatabase, 1, 5);
-      this.tableLayoutPanel1.Controls.Add(this.btnColor, 2, 7);
-      this.tableLayoutPanel1.Location = new System.Drawing.Point(236, 0);
-      this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
-      this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-      this.tableLayoutPanel1.RowCount = 9;
-      this.tlpControls.SetRowSpan(this.tableLayoutPanel1, 2);
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-      this.tableLayoutPanel1.Size = new System.Drawing.Size(416, 282);
-      this.tableLayoutPanel1.TabIndex = 47;
-      // 
-      // cmbDatabase
-      // 
-      this.cmbDatabase.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-      this.tableLayoutPanel1.SetColumnSpan(this.cmbDatabase, 2);
-      this.cmbDatabase.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-      this.cmbDatabase.FormattingEnabled = true;
-      this.cmbDatabase.Location = new System.Drawing.Point(65, 141);
-      this.cmbDatabase.Name = "cmbDatabase";
-      this.cmbDatabase.Size = new System.Drawing.Size(348, 21);
-      this.cmbDatabase.TabIndex = 9;
-      this.cmbDatabase.DropDown += new System.EventHandler(this.cmbDatabase_DropDown);
-      // 
-      // cmbType
-      // 
-      this.cmbType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-      this.tableLayoutPanel1.SetColumnSpan(this.cmbType, 2);
-      this.cmbType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-      this.cmbType.FormattingEnabled = true;
-      this.cmbType.Location = new System.Drawing.Point(65, 29);
-      this.cmbType.Name = "cmbType";
-      this.cmbType.Size = new System.Drawing.Size(348, 21);
-      this.cmbType.TabIndex = 8;
-      // 
-      // flowLayoutPanel2
-      // 
-      this.flowLayoutPanel2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-      this.flowLayoutPanel2.AutoSize = true;
-      this.tableLayoutPanel1.SetColumnSpan(this.flowLayoutPanel2, 2);
-      this.flowLayoutPanel2.Controls.Add(this.chkPassword);
-      this.flowLayoutPanel2.Controls.Add(this.chkWindows);
-      this.flowLayoutPanel2.Controls.Add(this.chkAnonymous);
-      this.flowLayoutPanel2.Location = new System.Drawing.Point(62, 53);
-      this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
-      this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-      this.flowLayoutPanel2.Size = new System.Drawing.Size(354, 29);
-      this.flowLayoutPanel2.TabIndex = 0;
-      // 
-      // chkPassword
-      // 
-      this.chkPassword.Appearance = System.Windows.Forms.Appearance.Button;
-      this.chkPassword.AutoSize = true;
-      this.chkPassword.Checked = true;
-      this.chkPassword.CheckState = System.Windows.Forms.CheckState.Checked;
-      this.chkPassword.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.chkPassword.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.chkPassword.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
-      this.chkPassword.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-      this.chkPassword.Location = new System.Drawing.Point(3, 3);
-      this.chkPassword.Name = "chkPassword";
-      this.chkPassword.Size = new System.Drawing.Size(114, 23);
-      this.chkPassword.TabIndex = 0;
-      this.chkPassword.Text = "Login with Password";
-      this.chkPassword.UseVisualStyleBackColor = true;
-      this.chkPassword.CheckedChanged += new System.EventHandler(this.chkPassword_CheckedChanged);
-      // 
-      // chkWindows
-      // 
-      this.chkWindows.Appearance = System.Windows.Forms.Appearance.Button;
-      this.chkWindows.AutoSize = true;
-      this.chkWindows.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.chkWindows.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.chkWindows.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
-      this.chkWindows.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-      this.chkWindows.Location = new System.Drawing.Point(123, 3);
-      this.chkWindows.Name = "chkWindows";
-      this.chkWindows.Size = new System.Drawing.Size(112, 23);
-      this.chkWindows.TabIndex = 1;
-      this.chkWindows.Text = "Login with Windows";
-      this.chkWindows.UseVisualStyleBackColor = true;
-      this.chkWindows.CheckedChanged += new System.EventHandler(this.chkWindows_CheckedChanged);
-      // 
-      // chkAnonymous
-      // 
-      this.chkAnonymous.Appearance = System.Windows.Forms.Appearance.Button;
-      this.chkAnonymous.AutoSize = true;
-      this.chkAnonymous.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.chkAnonymous.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.chkAnonymous.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
-      this.chkAnonymous.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-      this.chkAnonymous.Location = new System.Drawing.Point(241, 3);
-      this.chkAnonymous.Name = "chkAnonymous";
-      this.chkAnonymous.Size = new System.Drawing.Size(108, 23);
-      this.chkAnonymous.TabIndex = 2;
-      this.chkAnonymous.Text = "Login Anonymously";
-      this.chkAnonymous.UseVisualStyleBackColor = true;
-      this.chkAnonymous.CheckedChanged += new System.EventHandler(this.chkAnonymous_CheckedChanged);
-      // 
-      // flowLayoutPanel1
-      // 
-      this.flowLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-      this.flowLayoutPanel1.AutoSize = true;
-      this.tableLayoutPanel1.SetColumnSpan(this.flowLayoutPanel1, 2);
-      this.flowLayoutPanel1.Controls.Add(this.exploreButton);
-      this.flowLayoutPanel1.Controls.Add(this.btnAdvanced);
-      this.flowLayoutPanel1.Controls.Add(this.btnTest);
-      this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-      this.flowLayoutPanel1.Location = new System.Drawing.Point(206, 214);
-      this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
-      this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-      this.flowLayoutPanel1.Size = new System.Drawing.Size(210, 37);
-      this.flowLayoutPanel1.TabIndex = 45;
-      // 
-      // lblType
-      // 
-      this.lblType.Anchor = System.Windows.Forms.AnchorStyles.Right;
-      this.lblType.AutoSize = true;
-      this.lblType.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.lblType.Location = new System.Drawing.Point(25, 33);
-      this.lblType.Name = "lblType";
-      this.lblType.Size = new System.Drawing.Size(34, 13);
-      this.lblType.TabIndex = 43;
-      this.lblType.Text = "Type:";
-      // 
-      // btnColor
-      // 
-      this.btnColor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-      this.btnColor.Location = new System.Drawing.Point(386, 188);
-      this.btnColor.Name = "btnColor";
-      this.btnColor.Size = new System.Drawing.Size(27, 23);
-      this.btnColor.TabIndex = 2;
-      this.btnColor.UseVisualStyleBackColor = true;
-      this.btnColor.Click += new System.EventHandler(this.btnColor_Click);
-      // 
-      // lstConnections
-      // 
-      this.lstConnections.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-      this.tlpControls.SetColumnSpan(this.lstConnections, 6);
-      this.lstConnections.DataSource = null;
-      this.lstConnections.DisplayMember = "";
-      this.lstConnections.Location = new System.Drawing.Point(4, 4);
-      this.lstConnections.Margin = new System.Windows.Forms.Padding(4);
-      this.lstConnections.Multiselect = false;
-      this.lstConnections.Name = "lstConnections";
-      this.lstConnections.Size = new System.Drawing.Size(208, 240);
-      this.lstConnections.TabIndex = 0;
-      this.lstConnections.ValueMember = "";
-      this.lstConnections.SelectionChanged += new System.EventHandler(this.lstConnections_SelectionChanged);
-      this.lstConnections.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstConnections_MouseDoubleClick);
       // 
       // btnMoveDown
       // 
@@ -463,6 +240,170 @@
       this.btnDelete.UseVisualStyleBackColor = false;
       this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
       // 
+      // tlpControls
+      // 
+      this.tlpControls.BackColor = System.Drawing.Color.White;
+      this.tlpControls.ColumnCount = 8;
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 10F));
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 90F));
+      this.tlpControls.Controls.Add(this.lstConnections, 0, 0);
+      this.tlpControls.Controls.Add(this.btnMoveDown, 5, 1);
+      this.tlpControls.Controls.Add(this.btnNew, 0, 1);
+      this.tlpControls.Controls.Add(this.btnMoveUp, 4, 1);
+      this.tlpControls.Controls.Add(this.btnCopy, 1, 1);
+      this.tlpControls.Controls.Add(this.btnDelete, 2, 1);
+      this.tlpControls.Controls.Add(this.panel1, 6, 0);
+      this.tlpControls.Controls.Add(this.tableLayoutPanel1, 7, 0);
+      this.tlpControls.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.tlpControls.Location = new System.Drawing.Point(0, 0);
+      this.tlpControls.Name = "tlpControls";
+      this.tlpControls.RowCount = 2;
+      this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+      this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tlpControls.Size = new System.Drawing.Size(652, 282);
+      this.tlpControls.TabIndex = 41;
+      // 
+      // lstConnections
+      // 
+      this.lstConnections.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.tlpControls.SetColumnSpan(this.lstConnections, 6);
+      this.lstConnections.DataSource = null;
+      this.lstConnections.DisplayMember = "";
+      this.lstConnections.Location = new System.Drawing.Point(4, 4);
+      this.lstConnections.Margin = new System.Windows.Forms.Padding(4);
+      this.lstConnections.Multiselect = false;
+      this.lstConnections.Name = "lstConnections";
+      this.lstConnections.Size = new System.Drawing.Size(208, 240);
+      this.lstConnections.TabIndex = 0;
+      this.lstConnections.ValueMember = "";
+      this.lstConnections.SelectionChanged += new System.EventHandler(this.lstConnections_SelectionChanged);
+      this.lstConnections.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstConnections_MouseDoubleClick);
+      // 
+      // panel1
+      // 
+      this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+      this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(235)))), ((int)(((byte)(235)))));
+      this.panel1.Location = new System.Drawing.Point(225, 3);
+      this.panel1.Name = "panel1";
+      this.tlpControls.SetRowSpan(this.panel1, 2);
+      this.panel1.Size = new System.Drawing.Size(1, 276);
+      this.panel1.TabIndex = 46;
+      // 
+      // tableLayoutPanel1
+      // 
+      this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.tableLayoutPanel1.ColumnCount = 3;
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel2, 1, 2);
+      this.tableLayoutPanel1.Controls.Add(this.txtUrl, 1, 0);
+      this.tableLayoutPanel1.Controls.Add(this.txtName, 1, 7);
+      this.tableLayoutPanel1.Controls.Add(this.lblName, 0, 7);
+      this.tableLayoutPanel1.Controls.Add(this.lblUrl, 0, 0);
+      this.tableLayoutPanel1.Controls.Add(this.lblUser, 0, 3);
+      this.tableLayoutPanel1.Controls.Add(this.txtUser, 1, 3);
+      this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel1, 1, 8);
+      this.tableLayoutPanel1.Controls.Add(this.lblPassword, 0, 4);
+      this.tableLayoutPanel1.Controls.Add(this.txtPassword, 1, 4);
+      this.tableLayoutPanel1.Controls.Add(this.lblType, 0, 1);
+      this.tableLayoutPanel1.Controls.Add(this.cmbType, 1, 1);
+      this.tableLayoutPanel1.Controls.Add(this.lblDatabase, 0, 5);
+      this.tableLayoutPanel1.Controls.Add(this.cmbDatabase, 1, 5);
+      this.tableLayoutPanel1.Controls.Add(this.btnColor, 2, 7);
+      this.tableLayoutPanel1.Location = new System.Drawing.Point(236, 0);
+      this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
+      this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+      this.tableLayoutPanel1.RowCount = 9;
+      this.tlpControls.SetRowSpan(this.tableLayoutPanel1, 2);
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+      this.tableLayoutPanel1.Size = new System.Drawing.Size(416, 282);
+      this.tableLayoutPanel1.TabIndex = 47;
+      // 
+      // flowLayoutPanel2
+      // 
+      this.flowLayoutPanel2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.flowLayoutPanel2.AutoSize = true;
+      this.tableLayoutPanel1.SetColumnSpan(this.flowLayoutPanel2, 2);
+      this.flowLayoutPanel2.Controls.Add(this.chkPassword);
+      this.flowLayoutPanel2.Controls.Add(this.chkWindows);
+      this.flowLayoutPanel2.Controls.Add(this.chkAnonymous);
+      this.flowLayoutPanel2.Location = new System.Drawing.Point(62, 53);
+      this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
+      this.flowLayoutPanel2.Name = "flowLayoutPanel2";
+      this.flowLayoutPanel2.Size = new System.Drawing.Size(354, 29);
+      this.flowLayoutPanel2.TabIndex = 0;
+      // 
+      // chkPassword
+      // 
+      this.chkPassword.Appearance = System.Windows.Forms.Appearance.Button;
+      this.chkPassword.AutoSize = true;
+      this.chkPassword.Checked = true;
+      this.chkPassword.CheckState = System.Windows.Forms.CheckState.Checked;
+      this.chkPassword.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.chkPassword.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.chkPassword.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.chkPassword.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.chkPassword.Location = new System.Drawing.Point(3, 3);
+      this.chkPassword.Name = "chkPassword";
+      this.chkPassword.Size = new System.Drawing.Size(114, 23);
+      this.chkPassword.TabIndex = 0;
+      this.chkPassword.Text = "Login with Password";
+      this.chkPassword.UseVisualStyleBackColor = true;
+      this.chkPassword.CheckedChanged += new System.EventHandler(this.chkPassword_CheckedChanged);
+      // 
+      // chkWindows
+      // 
+      this.chkWindows.Appearance = System.Windows.Forms.Appearance.Button;
+      this.chkWindows.AutoSize = true;
+      this.chkWindows.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.chkWindows.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.chkWindows.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.chkWindows.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.chkWindows.Location = new System.Drawing.Point(123, 3);
+      this.chkWindows.Name = "chkWindows";
+      this.chkWindows.Size = new System.Drawing.Size(112, 23);
+      this.chkWindows.TabIndex = 1;
+      this.chkWindows.Text = "Login with Windows";
+      this.chkWindows.UseVisualStyleBackColor = true;
+      this.chkWindows.CheckedChanged += new System.EventHandler(this.chkWindows_CheckedChanged);
+      // 
+      // chkAnonymous
+      // 
+      this.chkAnonymous.Appearance = System.Windows.Forms.Appearance.Button;
+      this.chkAnonymous.AutoSize = true;
+      this.chkAnonymous.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.chkAnonymous.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.chkAnonymous.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.chkAnonymous.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.chkAnonymous.Location = new System.Drawing.Point(241, 3);
+      this.chkAnonymous.Name = "chkAnonymous";
+      this.chkAnonymous.Size = new System.Drawing.Size(108, 23);
+      this.chkAnonymous.TabIndex = 2;
+      this.chkAnonymous.Text = "Login Anonymously";
+      this.chkAnonymous.UseVisualStyleBackColor = true;
+      this.chkAnonymous.CheckedChanged += new System.EventHandler(this.chkAnonymous_CheckedChanged);
+      // 
       // txtUrl
       // 
       this.txtUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -473,7 +414,7 @@
       this.txtUrl.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtUrl.Name = "txtUrl";
       this.txtUrl.PlaceholderText = "Address / URL";
-      this.txtUrl.Size = new System.Drawing.Size(348, 22);
+      this.txtUrl.Size = new System.Drawing.Size(348, 20);
       this.txtUrl.TabIndex = 3;
       // 
       // txtName
@@ -487,6 +428,7 @@
       this.txtName.PlaceholderText = "Connection Name";
       this.txtName.Size = new System.Drawing.Size(315, 22);
       this.txtName.TabIndex = 1;
+      this.txtName.Validated += new System.EventHandler(this.txtName_Validated);
       // 
       // txtUser
       // 
@@ -501,6 +443,21 @@
       this.txtUser.PlaceholderText = "User name";
       this.txtUser.Size = new System.Drawing.Size(348, 22);
       this.txtUser.TabIndex = 6;
+      // 
+      // flowLayoutPanel1
+      // 
+      this.flowLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+      this.flowLayoutPanel1.AutoSize = true;
+      this.tableLayoutPanel1.SetColumnSpan(this.flowLayoutPanel1, 2);
+      this.flowLayoutPanel1.Controls.Add(this.exploreButton);
+      this.flowLayoutPanel1.Controls.Add(this.btnAdvanced);
+      this.flowLayoutPanel1.Controls.Add(this.btnTest);
+      this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
+      this.flowLayoutPanel1.Location = new System.Drawing.Point(206, 214);
+      this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
+      this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+      this.flowLayoutPanel1.Size = new System.Drawing.Size(210, 37);
+      this.flowLayoutPanel1.TabIndex = 45;
       // 
       // exploreButton
       // 
@@ -523,6 +480,27 @@
       this.exploreButton.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.exploreButton.UseVisualStyleBackColor = false;
       this.exploreButton.Click += new System.EventHandler(this.exploreButton_Click);
+      // 
+      // btnAdvanced
+      // 
+      this.btnAdvanced.AutoSize = true;
+      this.btnAdvanced.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnAdvanced.FlatAppearance.BorderSize = 0;
+      this.btnAdvanced.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnAdvanced.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnAdvanced.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnAdvanced.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+      this.btnAdvanced.ForeColor = System.Drawing.Color.Black;
+      this.btnAdvanced.Location = new System.Drawing.Point(70, 3);
+      this.btnAdvanced.Name = "btnAdvanced";
+      this.btnAdvanced.Orientation = System.Windows.Forms.Orientation.Horizontal;
+      this.btnAdvanced.Padding = new System.Windows.Forms.Padding(2);
+      this.btnAdvanced.Size = new System.Drawing.Size(75, 31);
+      this.btnAdvanced.TabIndex = 2;
+      this.btnAdvanced.Text = "&Advanced";
+      this.btnAdvanced.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnAdvanced.UseVisualStyleBackColor = false;
+      this.btnAdvanced.Click += new System.EventHandler(this.btnAdvanced_Click);
       // 
       // btnTest
       // 
@@ -563,26 +541,49 @@
       this.txtPassword.TabIndex = 7;
       this.txtPassword.WordWrap = false;
       // 
-      // btnAdvanced
+      // lblType
       // 
-      this.btnAdvanced.AutoSize = true;
-      this.btnAdvanced.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.btnAdvanced.FlatAppearance.BorderSize = 0;
-      this.btnAdvanced.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
-      this.btnAdvanced.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
-      this.btnAdvanced.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-      this.btnAdvanced.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-      this.btnAdvanced.ForeColor = System.Drawing.Color.Black;
-      this.btnAdvanced.Location = new System.Drawing.Point(70, 3);
-      this.btnAdvanced.Name = "btnAdvanced";
-      this.btnAdvanced.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnAdvanced.Padding = new System.Windows.Forms.Padding(2);
-      this.btnAdvanced.Size = new System.Drawing.Size(75, 31);
-      this.btnAdvanced.TabIndex = 2;
-      this.btnAdvanced.Text = "&Advanced";
-      this.btnAdvanced.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
-      this.btnAdvanced.UseVisualStyleBackColor = false;
-      this.btnAdvanced.Click += new System.EventHandler(this.btnAdvanced_Click);
+      this.lblType.Anchor = System.Windows.Forms.AnchorStyles.Right;
+      this.lblType.AutoSize = true;
+      this.lblType.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.lblType.Location = new System.Drawing.Point(25, 33);
+      this.lblType.Name = "lblType";
+      this.lblType.Size = new System.Drawing.Size(34, 13);
+      this.lblType.TabIndex = 43;
+      this.lblType.Text = "Type:";
+      // 
+      // cmbType
+      // 
+      this.cmbType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+      this.tableLayoutPanel1.SetColumnSpan(this.cmbType, 2);
+      this.cmbType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.cmbType.FormattingEnabled = true;
+      this.cmbType.Location = new System.Drawing.Point(65, 29);
+      this.cmbType.Name = "cmbType";
+      this.cmbType.Size = new System.Drawing.Size(348, 21);
+      this.cmbType.TabIndex = 8;
+      // 
+      // cmbDatabase
+      // 
+      this.cmbDatabase.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+      this.tableLayoutPanel1.SetColumnSpan(this.cmbDatabase, 2);
+      this.cmbDatabase.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.cmbDatabase.FormattingEnabled = true;
+      this.cmbDatabase.Location = new System.Drawing.Point(65, 141);
+      this.cmbDatabase.Name = "cmbDatabase";
+      this.cmbDatabase.Size = new System.Drawing.Size(348, 21);
+      this.cmbDatabase.TabIndex = 9;
+      this.cmbDatabase.DropDown += new System.EventHandler(this.cmbDatabase_DropDown);
+      // 
+      // btnColor
+      // 
+      this.btnColor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnColor.Location = new System.Drawing.Point(386, 188);
+      this.btnColor.Name = "btnColor";
+      this.btnColor.Size = new System.Drawing.Size(27, 23);
+      this.btnColor.TabIndex = 2;
+      this.btnColor.UseVisualStyleBackColor = true;
+      this.btnColor.Click += new System.EventHandler(this.btnColor_Click);
       // 
       // ConnectionEditor
       // 
