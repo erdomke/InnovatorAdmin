@@ -408,6 +408,40 @@ namespace InnovatorAdmin.Editor
                     Action = () => Guid.NewGuid().ToString("N").ToUpperInvariant()
                   };
                   items = Enumerable.Repeat<ICompletionData>(newGuid, 1);
+                  var last = path.Last();
+                  if (last.Action != "add")
+                  {
+                    switch (last.Type)
+                    {
+                      case "ItemType":
+                        items = items.Concat(ItemTypeCompletion<AttributeValueCompletionData>(_metadata.ItemTypes, true));
+                        break;
+                      case "Method":
+                        items = items.Concat(_metadata.AllMethods.Select(r => new AttributeValueCompletionData()
+                        {
+                          Text = r.KeyedName,
+                          Action = () => r.Unique,
+                          Image = Icons.EnumValue16.Wpf
+                        }));
+                        break;
+                      case "Sql":
+                        items = items.Concat(_metadata.Sqls().Select(r => new AttributeValueCompletionData()
+                        {
+                          Text = r.KeyedName,
+                          Action = () => r.Unique,
+                          Image = Icons.EnumValue16.Wpf
+                        }));
+                        break;
+                      case "Identity":
+                        items = items.Concat(_metadata.SystemIdentities.Select(r => new AttributeValueCompletionData()
+                        {
+                          Text = r.KeyedName,
+                          Action = () => r.Unique,
+                          Image = Icons.EnumValue16.Wpf
+                        }));
+                        break;
+                    }
+                  }
                   break;
                 case "queryDate":
                   items = GetDateCompletions();
