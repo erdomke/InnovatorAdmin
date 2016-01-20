@@ -46,7 +46,7 @@ namespace InnovatorAdmin.Controls
 
       if (!connEditor.SelectedConnections.Any())
       {
-        MessageBox.Show(resources.Messages.NoConnectionSelected);
+        Dialog.MessageDialog.Show(resources.Messages.NoConnectionSelected);
       }
       else
       {
@@ -59,7 +59,7 @@ namespace InnovatorAdmin.Controls
         }
         catch (Exception ex)
         {
-          MessageBox.Show(ex.Message);
+          Utils.HandleError(ex);
         }
       }
     }

@@ -61,7 +61,7 @@ namespace InnovatorAdmin.Controls
       }
       else
       {
-        MessageBox.Show(resources.Messages.SelectItemsExport);
+        Dialog.MessageDialog.Show(resources.Messages.SelectItemsExport);
       }
     }
 

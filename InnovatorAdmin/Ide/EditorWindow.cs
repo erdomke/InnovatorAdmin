@@ -373,7 +373,7 @@ namespace InnovatorAdmin
         }
         catch (Exception ex)
         {
-          MessageBox.Show(ex.Message);
+          Utils.HandleError(ex);
         }
       }
     }
@@ -1146,7 +1146,8 @@ namespace InnovatorAdmin
 
       if (_proxy.ConnData != null && _proxy.ConnData.Confirm)
       {
-        if (MessageBox.Show("Do you want to run this query on " + _proxy.ConnData.ConnectionName +"?", "Confirm Execution", MessageBoxButtons.YesNo) == DialogResult.No)
+        if (Dialog.MessageDialog.Show("Do you want to run this query on " + _proxy.ConnData.ConnectionName + "?", "Confirm Execution"
+          , "&Run Query", "&Cancel") != DialogResult.OK)
         {
           return null;
         }
@@ -1693,12 +1694,15 @@ namespace InnovatorAdmin
       try
       {
         var node = e.Model as IEditorTreeNode;
-        var scripts = node.GetScripts();
-        if (node != null && scripts.Any())
+        if (node != null)
         {
-          var con = new ContextMenuStrip();
-          EditorScript.BuildMenu(con.Items, scripts, Execute);
-          con.Show(treeItems.PointToScreen(e.Location));
+          var scripts = node.GetScripts();
+          if (scripts.Any())
+          {
+            var con = new ContextMenuStrip();
+            EditorScript.BuildMenu(con.Items, scripts, Execute);
+            con.Show(treeItems.PointToScreen(e.Location));
+          }
         }
       }
       catch (Exception ex)

@@ -37,7 +37,7 @@ namespace InnovatorAdmin.Scripts
 
       if (connData.Type != ConnectionType.Innovator)
       {
-        MessageBox.Show("Only Innovator connections are supported");
+        Dialog.MessageDialog.Show("Only Innovator connections are supported");
         return;
       }
 

@@ -182,14 +182,15 @@ namespace InnovatorAdmin.Editor
         while (conMenu.Items.Count > 9)
           conMenu.Items.RemoveAt(conMenu.Items.Count - 1);
 
-        EditorScript.BuildMenu(conMenu.Items
-          , Helper.GetScripts(Document, Editor.CaretOffset)
-          , (script) =>
-          {
-            var ide = this.FindForm() as EditorWindow;
-            if (ide != null)
-              ide.Execute(script);
-          });
+        if (Helper != null)
+          EditorScript.BuildMenu(conMenu.Items
+            , Helper.GetScripts(Document, Editor.CaretOffset)
+            , (script) =>
+            {
+              var ide = this.FindForm() as EditorWindow;
+              if (ide != null)
+                ide.Execute(script);
+            });
 
         OnMouseDown(new MouseEventArgs(System.Windows.Forms.MouseButtons.Right, e.ClickCount, pt.X, pt.Y, 0));
       }

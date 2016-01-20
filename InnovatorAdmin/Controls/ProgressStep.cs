@@ -73,7 +73,7 @@ namespace InnovatorAdmin.Controls
         }
         else
         {
-          MessageBox.Show(e.Exception.Message);
+          Utils.HandleError(e.Exception);
         }
       });
     }

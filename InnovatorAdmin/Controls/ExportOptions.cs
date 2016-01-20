@@ -37,7 +37,7 @@ namespace InnovatorAdmin.Controls
     {
       if (string.IsNullOrEmpty(txtName.Text))
       {
-        MessageBox.Show("A name must be specified for the package.");
+        Dialog.MessageDialog.Show("A name must be specified for the package.", "Package Validation");
         return false;
       }
       _wizard.InstallScript.Title = txtName.Text;

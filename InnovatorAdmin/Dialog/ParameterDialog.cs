@@ -88,7 +88,7 @@ namespace InnovatorAdmin.Dialog
 
           if (builder.Length > 0)
           {
-            MessageBox.Show(builder.ToString());
+            Dialog.MessageDialog.Show(builder.ToString());
           }
           else
           {
