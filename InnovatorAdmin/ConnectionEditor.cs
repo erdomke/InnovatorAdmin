@@ -302,13 +302,12 @@ namespace InnovatorAdmin
       try
       {
         var connData = _bs.Current as ConnectionData;
-        using (var dialog = new ColorDialog())
+        using (var dialog = new Dialog.ColorDialog())
         {
-          dialog.Color = connData.Color;
           if (dialog.ShowDialog(this) == DialogResult.OK)
           {
-            connData.Color = dialog.Color;
-            btnColor.BackColor = dialog.Color;
+            connData.Color = dialog.SelectedColor;
+            btnColor.BackColor = dialog.SelectedColor;
           }
         }
       }
@@ -427,7 +426,7 @@ namespace InnovatorAdmin
       try
       {
         _bs.ResetBindings(false);
-      } 
+      }
       catch (Exception ex)
       {
         Utils.HandleError(ex);
