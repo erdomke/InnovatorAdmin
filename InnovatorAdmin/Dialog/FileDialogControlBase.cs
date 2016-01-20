@@ -4,19 +4,19 @@
 //  Email:  gustavo_franco@hotmail.com
 //  All rights reserved.
 
-//  Redistribution and use in source and binary forms, with or without modification, 
+//  Redistribution and use in source and binary forms, with or without modification,
 //  are permitted provided that the following conditions are met:
 
-//  Redistributions of source code must retain the above copyright notice, 
-//  this list of conditions and the following disclaimer. 
-//  Redistributions in binary form must reproduce the above copyright notice, 
-//  this list of conditions and the following disclaimer in the documentation 
-//  and/or other materials provided with the distribution. 
+//  Redistributions of source code must retain the above copyright notice,
+//  this list of conditions and the following disclaimer.
+//  Redistributions in binary form must reproduce the above copyright notice,
+//  this list of conditions and the following disclaimer in the documentation
+//  and/or other materials provided with the distribution.
 
 //  THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
 //  KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
 //  IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR
-//  PURPOSE. IT CAN BE DISTRIBUTED FREE OF CHARGE AS LONG AS THIS HEADER 
+//  PURPOSE. IT CAN BE DISTRIBUTED FREE OF CHARGE AS LONG AS THIS HEADER
 //  REMAINS UNCHANGED.
 
 using System;
@@ -47,7 +47,7 @@ namespace InnovatorAdmin.Dialog
     #endregion
 
     #region Events
-    //for weird reasons the designer wants the events public not protected    
+    //for weird reasons the designer wants the events public not protected
     [Category("File Dialog Extension")]
     public event PathChangedEventHandler EventFileNameChanged;
     [Category("File Dialog Extension")]
@@ -195,9 +195,9 @@ namespace InnovatorAdmin.Dialog
     public virtual string FileName
     {
       get { return DesignMode ? _FileName : MSDialog.FileName; }
-      set 
-      { 
-        _FileName = value; 
+      set
+      {
+        _FileName = value;
         if (!this.DesignMode && MSDialog != null)
         {
           NativeMethods.SetWindowText(new HandleRef(this, _hFileName), value);
@@ -306,7 +306,7 @@ namespace InnovatorAdmin.Dialog
     [DisplayName("Dereference Links")]
     public bool Multiselect
     {
-      get 
+      get
       {
         var openFile = DesignMode ? null : MSDialog as OpenFileDialog;
         return openFile == null ? _multiselect : openFile.Multiselect;
@@ -337,7 +337,7 @@ namespace InnovatorAdmin.Dialog
           EnableOkButton = _EnableOkBtn;//that's design time value
           NativeMethods.SetWindowText(new HandleRef(_dlgWrapper, _dlgWrapper.Handle), _Caption);
           //will work only for open dialog, save dialog will be overriden internally by windows
-          NativeMethods.SetWindowText(new HandleRef(this, _hOKButton), _OKCaption);//SetDlgItemText fails too 
+          NativeMethods.SetWindowText(new HandleRef(this, _hOKButton), _OKCaption);//SetDlgItemText fails too
           //bool res = NativeMethods.SetDlgItemText(NativeMethods.GetParent(Handle), (int)ControlsId.ButtonOk, FileDlgOkCaption);
         }
       }
@@ -347,7 +347,7 @@ namespace InnovatorAdmin.Dialog
     {
       try
       {
-        //handle of the "defView" --> container of the listView  
+        //handle of the "defView" --> container of the listView
         IntPtr hWndWin = NativeMethods.FindWindowEx(_dlgWrapper.Handle, IntPtr.Zero, "SHELLDLL_DefView", "");
 
         if (hWndWin != IntPtr.Zero)
@@ -559,7 +559,7 @@ namespace InnovatorAdmin.Dialog
       }
       catch (Exception ex)
       {
-        MessageBox.Show("unable to get the modal dialog handle", ex.Message);
+        Utils.HandleError(ex);
       }
       return returnDialogResult;
     }
@@ -592,7 +592,7 @@ namespace InnovatorAdmin.Dialog
       }
       catch (Exception ex)
       {
-        MessageBox.Show("unable to get the modal dialog handle", ex.Message);
+        Utils.HandleError(ex);
       }
       return returnDialogResult;
     }

@@ -25,8 +25,8 @@ namespace InnovatorAdmin.Dialog
     }
     public override string FileName
     {
-      get { return (base.FileName ?? "").EndsWith(FolderPlaceHolder) 
-        ? base.FileName.Substring(0, base.FileName.Length - FolderPlaceHolder.Length) 
+      get { return (base.FileName ?? "").EndsWith(FolderPlaceHolder)
+        ? base.FileName.Substring(0, base.FileName.Length - FolderPlaceHolder.Length)
         : base.FileName; }
       set
       {
@@ -40,7 +40,7 @@ namespace InnovatorAdmin.Dialog
         var path = base.FileNames == null ? null : base.FileNames.FirstOrDefault(n => n.EndsWith(FolderPlaceHolder));
         if (path == null)
         {
-          return base.FileNames; 
+          return base.FileNames;
         }
         else
         {
@@ -60,7 +60,7 @@ namespace InnovatorAdmin.Dialog
     {
       if (_checkFileExists && Path.GetFileNameWithoutExtension(base.FileName) != FolderPlaceHolder && !File.Exists(base.FileName))
       {
-        MessageBox.Show(String.Format("The file '{1}' does not exist.{0}Please select a file that exists.", Environment.NewLine, base.FileName));
+        Dialog.MessageDialog.Show(String.Format("The file '{1}' does not exist.{0}Please select a file that exists.", Environment.NewLine, base.FileName));
         e.Cancel = true;
         return;
       }
@@ -72,9 +72,9 @@ namespace InnovatorAdmin.Dialog
       this.btnSelectFolder = new System.Windows.Forms.Button();
       this.btnUseAutoSave = new System.Windows.Forms.Button();
       this.SuspendLayout();
-      // 
+      //
       // btnSelectFolder
-      // 
+      //
       this.btnSelectFolder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.btnSelectFolder.AutoSize = true;
       this.btnSelectFolder.Location = new System.Drawing.Point(460, 3);
@@ -85,9 +85,9 @@ namespace InnovatorAdmin.Dialog
       this.btnSelectFolder.Text = "&Select Folder";
       this.btnSelectFolder.UseVisualStyleBackColor = true;
       this.btnSelectFolder.Click += new System.EventHandler(this.btnSelectFolder_Click);
-      // 
+      //
       // btnUseAutoSave
-      // 
+      //
       this.btnUseAutoSave.AutoSize = true;
       this.btnUseAutoSave.Location = new System.Drawing.Point(3, 3);
       this.btnUseAutoSave.MinimumSize = new System.Drawing.Size(90, 0);
@@ -97,9 +97,9 @@ namespace InnovatorAdmin.Dialog
       this.btnUseAutoSave.Text = "&Load Last Auto-Saved Import";
       this.btnUseAutoSave.UseVisualStyleBackColor = true;
       this.btnUseAutoSave.Click += new System.EventHandler(this.btnUseAutoSave_Click);
-      // 
+      //
       // ImportSelectDialog
-      // 
+      //
       this.AddExtension = false;
       this.Caption = "Select files / folder";
       this.CheckFileExists = false;

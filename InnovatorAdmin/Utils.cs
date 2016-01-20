@@ -115,7 +115,7 @@ namespace InnovatorAdmin
       }
       catch (Exception ex)
       {
-        MessageBox.Show(ex.Message);
+        Dialog.MessageDialog.Show(ex.Message);
         formattedString = string.Empty;
         return ex;
       }
@@ -139,7 +139,15 @@ namespace InnovatorAdmin
 
     public static void HandleError(Exception ex)
     {
-      MessageBox.Show(ex.ToString());
+      using (var dialog = new Dialog.MessageDialog())
+      {
+        dialog.Message = ex.Message;
+        dialog.Details = ex.ToString();
+        dialog.OkText = "&Keep Going";
+        dialog.Caption = "Oops, that error wasn't expected";
+        dialog.CaptionColor = System.Drawing.Color.Red;
+        dialog.ShowDialog();
+      }
     }
 
     //public static IEnumerable<Item> AsEnum(this Item item)

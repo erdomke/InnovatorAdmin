@@ -215,9 +215,9 @@ namespace InnovatorAdmin.Controls
         var proc = Process.Start(@"c:\Program Files\Perforce\p4merge.exe", args);
         proc.WaitForExit();
         var newChecksum = Md5HashFile(paths.Merged);
-        if (newChecksum != checksum 
-          || MessageBox.Show("The merge file appears not to have changed.  Do you still want to mark it resolved anyway?", 
-          "Merge Resolution", MessageBoxButtons.YesNo) == DialogResult.Yes)
+        if (newChecksum != checksum
+          || Dialog.MessageDialog.Show("The merge file appears not to have changed.  Do you still want to mark it resolved anyway?",
+          "Merge Resolution", "Mark &Resolved", "&Ignore") == DialogResult.OK)
           item.ResolutionStatus = MergeStatus.ResolvedConflict;
 
         CleanupTempFiles(paths.Base, paths.Local, paths.Merged, paths.Remote);

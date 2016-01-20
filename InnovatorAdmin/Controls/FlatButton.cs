@@ -193,11 +193,19 @@ namespace InnovatorAdmin.Controls
       else
         base.AutoSize = false;
 
-      if (_autoSize && _orientation == Orientation.Vertical)
+      if (_autoSize)
       {
         var content = TextRenderer.MeasureText(this.Text, this.Font);
-        var vert = new Size(content.Height, content.Width);
-        this.Size = Size.Add(vert, this.Padding.Size);
+        if (_orientation == Orientation.Vertical)
+        {
+          var vert = new Size(content.Height, content.Width);
+          this.Size = Size.Add(vert, this.Padding.Size);
+        }
+        else
+        {
+          var newSize = Size.Add(Size.Add(content, this.Padding.Size), new Size(10, 6));
+          this.Size = new Size(Math.Max(newSize.Width, this.Width), Math.Max(newSize.Height, this.Height));
+        }
       }
     }
   }
