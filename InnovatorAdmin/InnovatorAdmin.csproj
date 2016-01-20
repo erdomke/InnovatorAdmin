@@ -226,6 +226,12 @@
     <Compile Include="Dialog\FileDialogControlBase.designer.cs">
       <DependentUpon>FileDialogControlBase.cs</DependentUpon>
     </Compile>
+    <Compile Include="Dialog\ColorDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialog\ColorDialog.Designer.cs">
+      <DependentUpon>ColorDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Dialog\ParameterDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -582,6 +588,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Dialog\ColumnSelect.resx">
       <DependentUpon>ColumnSelect.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialog\ColorDialog.resx">
+      <DependentUpon>ColorDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialog\ParameterDialog.resx">
       <DependentUpon>ParameterDialog.cs</DependentUpon>
