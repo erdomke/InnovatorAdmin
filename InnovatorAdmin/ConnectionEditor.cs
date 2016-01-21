@@ -132,10 +132,38 @@ namespace InnovatorAdmin
       try
       {
         btnTest.Text = "Testing...";
-        ((ConnectionData)_bs.Current).ArasLogin(true)
-          .UiPromise(this)
-          .Done(c => btnTest.Text = "Success. Test Again.")
-          .Fail(ex => btnTest.Text = ex.Message);
+
+
+        var connData = (ConnectionData)_bs.Current;
+        switch (connData.Type)
+        {
+          case ConnectionType.Innovator:
+            ((ConnectionData)_bs.Current).ArasLogin(true)
+              .UiPromise(this)
+              .Done(c => btnTest.Text = "Success. Test Again.")
+              .Fail(ex => btnTest.Text = ex.Message);
+            break;
+          case ConnectionType.SqlServer:
+            try
+            {
+              using (var conn = Editor.SqlEditorProxy.GetConnection(connData, "master"))
+              {
+                conn.Open();
+              }
+              btnTest.Text = "Success. Test Again.";
+            }
+            catch (Exception ex)
+            {
+              btnTest.Text = ex.Message;
+            }
+            break;
+          default:
+            ProxyFactory.FromConn(connData)
+              .UiPromise(this)
+              .Done(c => btnTest.Text = "Success. Test Again.")
+              .Fail(ex => btnTest.Text = ex.Message);
+            break;
+        }
       }
       catch (Exception ex)
       {
