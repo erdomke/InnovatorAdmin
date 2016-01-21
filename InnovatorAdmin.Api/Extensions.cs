@@ -171,11 +171,54 @@ namespace InnovatorAdmin
     //  column.ExtendedProperties["sort_order"] = value;
     //}
 
-    public static DataSet GetItemTable(IReadOnlyResult res, ArasMetadataProvider metadata)
+    public static HashSet<string> SelectColumns(string select)
+    {
+      var result = new HashSet<string>();
+      if (string.IsNullOrEmpty(select))
+        return result;
+      var parenDepth = 0;
+      var hasParen = false;
+      var start = 0;
+      for (var i = 0; i < select.Length; i++)
+      {
+        switch (select[i])
+        {
+          case ',':
+            if (!hasParen && parenDepth == 0)
+            {
+              result.Add(select.Substring(start, i - start).Trim());
+              start = i + 1;
+            }
+            hasParen = parenDepth > 0;
+            if (!hasParen)
+              start = i + 1;
+            break;
+          case '(':
+            if (start >= 0 && parenDepth == 0)
+            {
+              result.Add(select.Substring(start, i - start).Trim());
+            }
+            parenDepth += 1;
+            hasParen = true;
+            break;
+          case ')':
+            parenDepth -= 1;
+            break;
+        }
+      }
+      if (!hasParen && parenDepth == 0)
+      {
+        result.Add(select.Substring(0, select.Length - start).Trim());
+      }
+      return result;
+    }
+
+    public static DataSet GetItemTable(IReadOnlyResult res, ArasMetadataProvider metadata, string select)
     {
       var ds = new DataSet();
       string mainType = null;
       string mainId = null;
+      var selectedCols = SelectColumns(select);
 
       List<IReadOnlyItem> items;
       try
@@ -198,6 +241,8 @@ namespace InnovatorAdmin
 
       var types = new TypeProperties();
       string type;
+      bool idAdded;
+      bool keyedNameAdded;
 
       foreach (var i in items)
       {
@@ -207,18 +252,22 @@ namespace InnovatorAdmin
 
         if (!string.IsNullOrEmpty(type)) types.Add(type, AmlTable_TypeName);
         if (i.TypeId().Exists || i.Property("itemtype").Exists) types.Add(type, AmlTable_TypeId);
-        if (i.KeyedName().Exists || i.Property("id").KeyedName().Exists) types.Add(type, "keyed_name");
-        if (!string.IsNullOrEmpty(i.Id())) types.Add(type, "id");
 
+        idAdded = false;
+        keyedNameAdded = false;
         foreach (var elem in i.Elements().OfType<IReadOnlyProperty>())
         {
-          if (elem.Name != "id" && elem.Name != "config_id")
+          if (elem.Name != "config_id")
           {
             if (elem.Type().Exists) types.Add(type, elem.Name + "/type");
             if (elem.KeyedName().Exists) types.Add(type, elem.Name + "/keyed_name");
           }
           types.Add(type, elem.Name);
+          idAdded = idAdded || elem.Name == "id";
+          keyedNameAdded = keyedNameAdded || elem.Name == "keyed_name";
         }
+        if (!string.IsNullOrEmpty(i.Id()) && !idAdded) types.Add(type, "id");
+        if (i.Property("id").KeyedName().Exists && !keyedNameAdded) types.Add(type, "keyed_name");
       }
 
 
@@ -314,7 +363,7 @@ namespace InnovatorAdmin
                 if (kvp.Key != mainType && !string.IsNullOrEmpty(mainId) && pMeta.Name == "source_id")
                   newColumn.DefaultValue = mainId;
                 newColumn.ReadOnly = pMeta.ReadOnly;
-                newColumn.AllowDBNull = !pMeta.IsRequired;
+                newColumn.AllowDBNull = selectedCols.Any() || !pMeta.IsRequired;
                 // Ignore constraints on the following columns
                 switch (pMeta.Name)
                 {
@@ -325,9 +374,16 @@ namespace InnovatorAdmin
                     newColumn.AllowDBNull = true;
                     break;
                 }
-                newColumn.IsUiVisible(!string.IsNullOrEmpty(mainType) && itemType.Name != mainType
-                  ? (pMeta.Visibility & PropertyVisibility.RelationshipGrid) > 0
-                  : (pMeta.Visibility & PropertyVisibility.MainGrid) > 0);
+                if (selectedCols.Any())
+                {
+                  newColumn.IsUiVisible(selectedCols.Contains(propName));
+                }
+                else
+                {
+                  newColumn.IsUiVisible(!string.IsNullOrEmpty(mainType) && itemType.Name != mainType
+                    ? (pMeta.Visibility & PropertyVisibility.RelationshipGrid) > 0
+                    : (pMeta.Visibility & PropertyVisibility.MainGrid) > 0);
+                }
                 newColumn.PropMetadata(pMeta);
               }
               catch (KeyNotFoundException)
