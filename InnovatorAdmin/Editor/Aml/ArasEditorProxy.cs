@@ -240,6 +240,12 @@ namespace InnovatorAdmin.Editor
         }
         cmd = upload;
       }
+      var firstItem = elem.DescendantsAndSelf("Item").FirstOrDefault();
+      string select = null;
+      if (firstItem != null && firstItem.Parent.Elements("Item").Count() == 1)
+      {
+        select = firstItem.AttributeValue("select");
+      }
 
       if (cmd.Action == CommandAction.ApplyAML && cmd.Aml.IndexOf("<AML>") < 0)
       {
@@ -248,7 +254,7 @@ namespace InnovatorAdmin.Editor
       return ProcessCommand(cmd, async)
         .Convert(s =>
         {
-          var result = new ResultObject(s, _conn);
+          var result = new ResultObject(s, _conn, select);
           if (cmd.Action == CommandAction.ApplySQL)
             result.PreferredMode = OutputType.Table;
           return (IResultObject)result;
@@ -284,6 +290,7 @@ namespace InnovatorAdmin.Editor
       private IAsyncConnection _conn;
       private OutputType _preferredMode = OutputType.Text;
       private string _html;
+      private string _select;
 
       public int ItemCount
       {
@@ -303,7 +310,7 @@ namespace InnovatorAdmin.Editor
         _text = new RopeTextSource(rope);
         _dataSet = new DataSet();
       }
-      public ResultObject(Stream aml, IAsyncConnection conn)
+      public ResultObject(Stream aml, IAsyncConnection conn, string select)
       {
         System.Diagnostics.Debug.Print("{0:hh:MM:ss} Document loaded", DateTime.Now);
         _conn = conn;
@@ -315,6 +322,7 @@ namespace InnovatorAdmin.Editor
         }
         _amlLength = rope.Length;
         _text = new RopeTextSource(rope);
+        _select = select;
         System.Diagnostics.Debug.Print("{0:hh:MM:ss} Document rendered", DateTime.Now);
       }
 
@@ -330,7 +338,7 @@ namespace InnovatorAdmin.Editor
           var doc = new XmlDocument();
           doc.Load(_text.CreateReader());
           _dataSet = Extensions.GetItemTable(_conn.AmlContext.FromXml(doc.DocumentElement)
-            , ArasMetadataProvider.Cached(_conn));
+            , ArasMetadataProvider.Cached(_conn), _select);
         }
         return _dataSet;
       }
