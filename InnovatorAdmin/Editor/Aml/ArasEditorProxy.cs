@@ -242,7 +242,7 @@ namespace InnovatorAdmin.Editor
       }
       var firstItem = elem.DescendantsAndSelf("Item").FirstOrDefault();
       string select = null;
-      if (firstItem != null && firstItem.Parent.Elements("Item").Count() == 1)
+      if (firstItem != null && (firstItem.Parent == null || firstItem.Parent.Elements("Item").Count() == 1))
       {
         select = firstItem.AttributeValue("select");
       }
