@@ -57,6 +57,16 @@ namespace InnovatorAdmin.Controls
       Utils.HandleError(e.Exception);
     }
 
+    public IEnumerable<DataGridViewRow> GetSelectedRows()
+    {
+      var rows = this.SelectedRows.OfType<DataGridViewRow>();
+      if (!rows.Any())
+        rows = this.SelectedCells.OfType<DataGridViewCell>().Select(c => c.OwningRow).Distinct();
+      if (!rows.Any())
+        rows = Enumerable.Repeat(this.CurrentCell.OwningRow, 1);
+      return rows;
+    }
+
     public void Paste()
     {
       if (this.IsCurrentCellInEditMode)

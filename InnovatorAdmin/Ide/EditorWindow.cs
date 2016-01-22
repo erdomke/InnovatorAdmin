@@ -677,6 +677,7 @@ namespace InnovatorAdmin
         else if (dataCol.DataType == typeof(DateTime))
         {
           col = new Controls.DataGridViewCalendarColumn();
+          
         }
         else
         {
@@ -1813,7 +1814,7 @@ namespace InnovatorAdmin
     {
       try
       {
-        using (var dialog = new ColumnSelect())
+        using (var dialog = new Dialog.ColumnSelect())
         {
           var source = ((ContextMenuStrip)((ToolStripMenuItem)sender).GetCurrentParent()).SourceControl;
           dialog.DataSource = (DataGridView)source;
