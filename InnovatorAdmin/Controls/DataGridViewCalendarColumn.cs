@@ -40,7 +40,7 @@ namespace InnovatorAdmin.Controls
       : base()
     {
       // Use the short date format.
-      this.Style.Format = "d";
+      this.Style.Format = "g";
     }
 
     public override void InitializeEditingControl(int rowIndex, object

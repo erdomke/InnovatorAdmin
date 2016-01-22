@@ -212,12 +212,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\Win32.cs" />
-    <Compile Include="Dialog\ColumnSelect.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialog\ColumnSelect.Designer.cs">
-      <DependentUpon>ColumnSelect.cs</DependentUpon>
-    </Compile>
     <Compile Include="Dialog\Enums.cs" />
     <Compile Include="Dialog\Extensions.cs" />
     <Compile Include="Dialog\FileDialogControlBase.cs">
@@ -237,6 +231,12 @@
     </Compile>
     <Compile Include="Dialog\MessageDialog.Designer.cs">
       <DependentUpon>MessageDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialog\ColumnSelect.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialog\ColumnSelect.Designer.cs">
+      <DependentUpon>ColumnSelect.cs</DependentUpon>
     </Compile>
     <Compile Include="Dialog\ParameterDialog.cs">
       <SubType>Form</SubType>
@@ -592,14 +592,14 @@
     <EmbeddedResource Include="Controls\ParameterGrid.resx">
       <DependentUpon>ParameterGrid.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialog\ColumnSelect.resx">
-      <DependentUpon>ColumnSelect.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Dialog\ColorDialog.resx">
       <DependentUpon>ColorDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialog\MessageDialog.resx">
       <DependentUpon>MessageDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialog\ColumnSelect.resx">
+      <DependentUpon>ColumnSelect.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialog\ParameterDialog.resx">
       <DependentUpon>ParameterDialog.cs</DependentUpon>
