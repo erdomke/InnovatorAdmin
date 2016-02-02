@@ -67,8 +67,15 @@ namespace Innovator.Client
       return result;
     }
 
-    public static IReadOnlyResult ApplySql(this IConnection conn, Command sql)
+    public static IReadOnlyResult ApplySql(this IConnection conn, Command sql, params object[] parameters)
     {
+      if (parameters != null)
+      {
+        for (var i = 0; i < parameters.Length; i++)
+        {
+          sql.WithParam(i.ToString(), parameters[i]);
+        }
+      }
       if (!sql.Aml.TrimStart().StartsWith("<"))
       {
         sql.Aml = "<sql>" + sql.Aml + "</sql>";

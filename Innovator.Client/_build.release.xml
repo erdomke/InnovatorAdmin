@@ -9,7 +9,6 @@
     <id>$(ProjectName)</id>
     <version>$(BuildVersion)</version>
     <authors>eric.domke</authors>
-    <owners>Gentex Corporation</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Client dll for simplifying access to an Aras Innovator installation or a corresponding proxy</description>
   </metadata>
@@ -52,7 +51,6 @@
   </Target>
   <Target Name="PackNuget">
     <Exec Command="..\.nuget\NuGet.exe Update -self" />
-    <Exec Command="..\.nuget\NuGet.exe SetApiKey D618A457-93E2-4D16-B322-8AA4466EB952 -source http://gpm.gentex.com/nuget/NuGet" />
     <Exec Command="..\.nuget\NuGet.exe Pack $(NuSpecPath)" />
   </Target>
   

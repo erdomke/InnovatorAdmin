@@ -16,9 +16,9 @@ namespace Innovator.Client
       }
     }
 
-    internal Item(ElementFactory factory, params object[] content) 
+    internal Item(ElementFactory factory, params object[] content)
       : base(factory, "Item", content) { }
-    internal Item(ElementFactory factory, XmlElement node) 
+    internal Item(ElementFactory factory, XmlElement node)
       : base(factory, node) { }
 
     public override IElement Add(object content)
@@ -28,7 +28,7 @@ namespace Innovator.Client
       {
         var relationships = _node.ChildNodes.OfType<XmlElement>()
                                   .SingleOrDefault(e => e.LocalName == "Relationships");
-        if (relationships == null) 
+        if (relationships == null)
           relationships = (XmlElement)_node.AppendChild(_node.OwnerDocument.CreateElement("Relationships"));
         relationships.AppendChild(_node.GetLocalNode(item._node));
         return this;
@@ -39,7 +39,7 @@ namespace Innovator.Client
     {
       return new Result(_factory, _node);
     }
-    
+
     public IItem Clone()
     {
       return (IItem)((ICloneable)this).Clone();
@@ -118,9 +118,9 @@ namespace Innovator.Client
       }
       else if (this.Exists && obj.Exists)
       {
-        if (!string.IsNullOrEmpty(this._node.GetAttribute("type")) 
+        if (!string.IsNullOrEmpty(this._node.GetAttribute("type"))
           && !string.IsNullOrEmpty(this._node.GetAttribute("id"))
-          && !string.IsNullOrEmpty(obj._node.GetAttribute("type")) 
+          && !string.IsNullOrEmpty(obj._node.GetAttribute("type"))
           && !string.IsNullOrEmpty(obj._node.GetAttribute("id")))
         {
           return this._node.GetAttribute("type").Equals(obj._node.GetAttribute("type"))
@@ -139,9 +139,9 @@ namespace Innovator.Client
     public override int GetHashCode()
     {
       if (!this.Exists) return 0;
-      return (!string.IsNullOrEmpty(this._node.GetAttribute("type")) 
-              && !string.IsNullOrEmpty(this._node.GetAttribute("id")) ? 
-        this._node.GetAttribute("type").GetHashCode() ^ this._node.GetAttribute("id").GetHashCode() : 
+      return (!string.IsNullOrEmpty(this._node.GetAttribute("type"))
+              && !string.IsNullOrEmpty(this._node.GetAttribute("id")) ?
+        this._node.GetAttribute("type").GetHashCode() ^ this._node.GetAttribute("id").GetHashCode() :
         this._node.OuterXml.GetHashCode());
     }
 
@@ -149,21 +149,16 @@ namespace Innovator.Client
     {
       if (!this.Exists) return null;
       return _node.ChildNodes.OfType<XmlElement>()
-                  .SingleOrDefault(e => e.LocalName == "Relationships" 
+                  .SingleOrDefault(e => e.LocalName == "Relationships"
                     && e.ChildNodes.OfType<XmlElement>().Any());
     }
-    
+
     public static implicit operator string(Item value)
     {
       return value._node.OuterXml;
     }
 
     internal static readonly Item NullItem = new Item(null, (XmlElement)null);
-
-    object ICloneable.Clone()
-    {
-      throw new NotImplementedException();
-    }
 
     IReadOnlyProperty IReadOnlyItem.Property(string name)
     {
