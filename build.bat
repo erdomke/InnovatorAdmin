@@ -1,1 +1,1 @@
-"c:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" InnovatorAdmin\_build.release.xml
+"c:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" Innovator.Client\_build.release.xml
