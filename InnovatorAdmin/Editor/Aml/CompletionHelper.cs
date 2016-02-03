@@ -424,7 +424,7 @@ namespace InnovatorAdmin.Editor
                           Image = Icons.EnumValue16.Wpf
                         }));
                         break;
-                      case "Sql":
+                      case "SQL":
                         items = items.Concat(_metadata.Sqls().Select(r => new AttributeValueCompletionData()
                         {
                           Text = r.KeyedName,
@@ -1066,6 +1066,41 @@ namespace InnovatorAdmin.Editor
           {
             completions = completions.Concat(ItemTypeCompletion<BasicCompletionData>(_metadata.ItemTypes, true));
           }
+          if (p.Restrictions.Any(r => string.Equals(r, "Method", StringComparison.OrdinalIgnoreCase)))
+          {
+            completions = completions.Concat(_metadata.AllMethods.Select(m => new BasicCompletionData()
+            {
+              Text = m.KeyedName,
+              Action = () => m.Unique,
+              Image = Icons.Method16.Wpf
+            }));
+          }
+          if (p.Restrictions.Any(r => string.Equals(r, "SQL", StringComparison.OrdinalIgnoreCase)))
+          {
+            completions = completions.Concat(_metadata.Sqls().Select(m => new BasicCompletionData()
+            {
+              Text = m.KeyedName,
+              Action = () => m.Unique,
+              Image = Icons.EnumValue16.Wpf
+            }));
+          }
+          if (p.Restrictions.Any(r => string.Equals(r, "Identity", StringComparison.OrdinalIgnoreCase)))
+          {
+            completions = completions.Concat(_metadata.SystemIdentities.Select(m => new BasicCompletionData()
+            {
+              Text = m.KeyedName,
+              Action = () => m.Unique,
+              Image = Icons.EnumValue16.Wpf
+            }));
+          }
+          if (p.Restrictions.Any(r => string.Equals(r, "User", StringComparison.OrdinalIgnoreCase)))
+          {
+            completions = completions.Concat(new ICompletionData[] { new BasicCompletionData() {
+              Action = () => _conn.UserId,
+              Text = "Me",
+              Image = Icons.EnumValue16.Wpf
+            } });
+          }
 
           return completions;
         }
@@ -1125,7 +1160,7 @@ namespace InnovatorAdmin.Editor
           if (output[o - 1] == '_') o--;
           return Enumerable.Repeat(new string(output, 0, Math.Min(o, 32)), 1).GetCompletions<BasicCompletionData>();
         }
-        else if (p.Name == "name" && itemType.Name == "Property" && lastItem.Action == "get"
+        else if ((p.Name == "name" || p.Name == "keyed_name") && itemType.Name == "Property" && lastItem.Action == "get"
           && lastItem.Values.TryGetValue("source_id", out itemValue))
         {
           var parentType = _metadata.TypeById(itemValue);
@@ -1138,13 +1173,21 @@ namespace InnovatorAdmin.Editor
           var paths = await _metadata.GetClassPaths(parentType).ToTask();
           return paths.GetCompletions<BasicCompletionData>();
         }
-        else if (p.Name == "name" && itemType.Name == "Method" && lastItem.Action == "get")
+        else if ((p.Name == "name" || p.Name == "keyed_name") && itemType.Name == "Method" && lastItem.Action == "get")
         {
           return _metadata.MethodNames.GetCompletions<BasicCompletionData>();
         }
-        else if (p.Name == "name" && itemType.Name == "ItemType" && lastItem.Action == "get")
+        else if ((p.Name == "name" || p.Name == "keyed_name") && itemType.Name == "ItemType" && lastItem.Action == "get")
         {
           return ItemTypeCompletion<BasicCompletionData>(_metadata.ItemTypes);
+        }
+        else if ((p.Name == "name" || p.Name == "keyed_name") && itemType.Name == "SQL" && lastItem.Action == "get")
+        {
+          return _metadata.Sqls().Select(s => new BasicCompletionData()
+          {
+            Text = s.KeyedName,
+            Image = Icons.EnumValue16.Wpf
+          });
         }
         else if (p.Name == "state" && lastItem.Action == "promoteItem"
           && !string.IsNullOrEmpty(lastItem.Type) && !string.IsNullOrEmpty(lastItem.Id))

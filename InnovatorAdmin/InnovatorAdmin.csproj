@@ -160,9 +160,7 @@
     <Compile Include="Controls\DataGrid.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\DataGridViewCalendarColumn.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="Controls\DataGridViewCalendarColumn.cs" />
     <Compile Include="Controls\DataGridViewListColumn.cs" />
     <Compile Include="Controls\DropShadow.cs">
       <SubType>Component</SubType>
@@ -250,6 +248,9 @@
     <Compile Include="Dialog\ConnectionAdvancedDialog.Designer.cs">
       <DependentUpon>ConnectionAdvancedDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Editor\CompletionData\CompletionList.cs" />
+    <Compile Include="Editor\CompletionData\CompletionListBox.cs" />
+    <Compile Include="Editor\CompletionData\CompletionWindow.cs" />
     <Compile Include="PropertyFilter.cs" />
     <Compile Include="Dialog\SettingsDialog.cs">
       <SubType>Form</SubType>
@@ -784,8 +785,14 @@
     <None Include="resources\icons\function14.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Editor\CompletionData\CompletionList.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Editor\EditorWpf.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="themes\generic.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
