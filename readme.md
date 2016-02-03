@@ -34,6 +34,8 @@ queries) among other data sources.
 - Useful progress indicators keep you informed of how your exports and imports are doing
 - A helpful error dialog allows you to recover from install errors as they happen
 
+### It leverages the new [Innovator.Client](doc/innovator-client.md) dll!
+
 # I want it
 
 If you don't want to build the project from the source code, you can 
