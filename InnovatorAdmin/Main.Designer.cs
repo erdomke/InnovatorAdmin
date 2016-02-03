@@ -69,11 +69,11 @@
       this.btnNext.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnNext.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnNext.ForeColor = System.Drawing.Color.White;
-      this.btnNext.Location = new System.Drawing.Point(396, 3);
+      this.btnNext.Location = new System.Drawing.Point(427, 3);
       this.btnNext.Name = "btnNext";
       this.btnNext.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnNext.Padding = new System.Windows.Forms.Padding(2);
-      this.btnNext.Size = new System.Drawing.Size(70, 29);
+      this.btnNext.Size = new System.Drawing.Size(71, 36);
       this.btnNext.TabIndex = 0;
       this.btnNext.Text = "&Next";
       this.btnNext.Theme = InnovatorAdmin.Controls.FlatButtonTheme.Red;
@@ -90,11 +90,11 @@
       this.btnPrevious.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnPrevious.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnPrevious.ForeColor = System.Drawing.Color.Black;
-      this.btnPrevious.Location = new System.Drawing.Point(320, 3);
+      this.btnPrevious.Location = new System.Drawing.Point(310, 3);
       this.btnPrevious.Name = "btnPrevious";
       this.btnPrevious.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnPrevious.Padding = new System.Windows.Forms.Padding(2);
-      this.btnPrevious.Size = new System.Drawing.Size(70, 29);
+      this.btnPrevious.Size = new System.Drawing.Size(111, 36);
       this.btnPrevious.TabIndex = 1;
       this.btnPrevious.Text = "&Previous";
       this.btnPrevious.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
@@ -111,11 +111,11 @@
       this.btnClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnClose.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnClose.ForeColor = System.Drawing.Color.Black;
-      this.btnClose.Location = new System.Drawing.Point(472, 3);
+      this.btnClose.Location = new System.Drawing.Point(504, 3);
       this.btnClose.Name = "btnClose";
       this.btnClose.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnClose.Padding = new System.Windows.Forms.Padding(2);
-      this.btnClose.Size = new System.Drawing.Size(70, 29);
+      this.btnClose.Size = new System.Drawing.Size(82, 36);
       this.btnClose.TabIndex = 2;
       this.btnClose.Text = "&Close";
       this.btnClose.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
@@ -149,18 +149,19 @@
       this.tblMain.Name = "tblMain";
       this.tblMain.RowCount = 6;
       this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 3F));
-      this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 57F));
+      this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
       this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 3F));
-      this.tblMain.Size = new System.Drawing.Size(551, 346);
+      this.tblMain.Size = new System.Drawing.Size(595, 382);
       this.tblMain.TabIndex = 2;
       // 
       // tblHeader
       // 
       this.tblHeader.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+      this.tblHeader.AutoSize = true;
       this.tblHeader.BackColor = System.Drawing.Color.White;
       this.tblHeader.ColumnCount = 5;
       this.tblHeader.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
@@ -181,7 +182,7 @@
       this.tblHeader.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tblHeader.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tblHeader.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-      this.tblHeader.Size = new System.Drawing.Size(545, 57);
+      this.tblHeader.Size = new System.Drawing.Size(589, 74);
       this.tblHeader.TabIndex = 1;
       // 
       // lblClose
@@ -189,7 +190,7 @@
       this.lblClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.lblClose.BackColor = System.Drawing.Color.Transparent;
       this.lblClose.Font = new System.Drawing.Font("Marlett", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lblClose.Location = new System.Drawing.Point(521, 0);
+      this.lblClose.Location = new System.Drawing.Point(565, 0);
       this.lblClose.Margin = new System.Windows.Forms.Padding(0);
       this.lblClose.Name = "lblClose";
       this.lblClose.Size = new System.Drawing.Size(24, 32);
@@ -207,7 +208,7 @@
       this.lblTitle.Location = new System.Drawing.Point(80, 0);
       this.lblTitle.Margin = new System.Windows.Forms.Padding(0, 0, 0, 6);
       this.lblTitle.Name = "lblTitle";
-      this.lblTitle.Size = new System.Drawing.Size(393, 32);
+      this.lblTitle.Size = new System.Drawing.Size(437, 32);
       this.lblTitle.TabIndex = 11;
       this.lblTitle.Text = "Title";
       this.lblTitle.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
@@ -217,7 +218,7 @@
       this.lblMaximize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.lblMaximize.BackColor = System.Drawing.Color.Transparent;
       this.lblMaximize.Font = new System.Drawing.Font("Marlett", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lblMaximize.Location = new System.Drawing.Point(497, 0);
+      this.lblMaximize.Location = new System.Drawing.Point(541, 0);
       this.lblMaximize.Margin = new System.Windows.Forms.Padding(0);
       this.lblMaximize.Name = "lblMaximize";
       this.lblMaximize.Size = new System.Drawing.Size(24, 32);
@@ -230,7 +231,7 @@
       this.lblMinimize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.lblMinimize.BackColor = System.Drawing.Color.Transparent;
       this.lblMinimize.Font = new System.Drawing.Font("Marlett", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lblMinimize.Location = new System.Drawing.Point(473, 0);
+      this.lblMinimize.Location = new System.Drawing.Point(517, 0);
       this.lblMinimize.Margin = new System.Windows.Forms.Padding(0);
       this.lblMinimize.Name = "lblMinimize";
       this.lblMinimize.Size = new System.Drawing.Size(24, 32);
@@ -255,7 +256,7 @@
       this.lblMessage.Location = new System.Drawing.Point(83, 41);
       this.lblMessage.Margin = new System.Windows.Forms.Padding(3);
       this.lblMessage.Name = "lblMessage";
-      this.lblMessage.Size = new System.Drawing.Size(0, 13);
+      this.lblMessage.Size = new System.Drawing.Size(0, 30);
       this.lblMessage.TabIndex = 16;
       // 
       // pnlTopLeft
@@ -279,7 +280,7 @@
       this.pnlTop.Location = new System.Drawing.Point(3, 0);
       this.pnlTop.Margin = new System.Windows.Forms.Padding(0);
       this.pnlTop.Name = "pnlTop";
-      this.pnlTop.Size = new System.Drawing.Size(545, 3);
+      this.pnlTop.Size = new System.Drawing.Size(589, 3);
       this.pnlTop.TabIndex = 7;
       // 
       // pnlTopRight
@@ -288,7 +289,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.pnlTopRight.BackColor = System.Drawing.Color.WhiteSmoke;
-      this.pnlTopRight.Location = new System.Drawing.Point(548, 0);
+      this.pnlTopRight.Location = new System.Drawing.Point(592, 0);
       this.pnlTopRight.Margin = new System.Windows.Forms.Padding(0);
       this.pnlTopRight.Name = "pnlTopRight";
       this.pnlTopRight.Size = new System.Drawing.Size(3, 3);
@@ -300,7 +301,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.pnlBottomLeft.BackColor = System.Drawing.Color.WhiteSmoke;
-      this.pnlBottomLeft.Location = new System.Drawing.Point(0, 343);
+      this.pnlBottomLeft.Location = new System.Drawing.Point(0, 379);
       this.pnlBottomLeft.Margin = new System.Windows.Forms.Padding(0);
       this.pnlBottomLeft.Name = "pnlBottomLeft";
       this.pnlBottomLeft.Size = new System.Drawing.Size(3, 3);
@@ -312,7 +313,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.pnlBottomRight.BackColor = System.Drawing.Color.WhiteSmoke;
-      this.pnlBottomRight.Location = new System.Drawing.Point(548, 343);
+      this.pnlBottomRight.Location = new System.Drawing.Point(592, 379);
       this.pnlBottomRight.Margin = new System.Windows.Forms.Padding(0);
       this.pnlBottomRight.Name = "pnlBottomRight";
       this.pnlBottomRight.Size = new System.Drawing.Size(3, 3);
@@ -323,13 +324,13 @@
       this.pnlRight.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.pnlRight.Location = new System.Drawing.Point(548, 60);
+      this.pnlRight.Location = new System.Drawing.Point(592, 77);
       this.pnlRight.Margin = new System.Windows.Forms.Padding(0);
       this.pnlRight.Name = "pnlRight";
       this.tblMain.SetRowSpan(this.pnlRight, 3);
       this.pnlRight.ShadowColor = System.Drawing.Color.Empty;
       this.pnlRight.ShadowExtent = 5;
-      this.pnlRight.Size = new System.Drawing.Size(3, 283);
+      this.pnlRight.Size = new System.Drawing.Size(3, 302);
       this.pnlRight.TabIndex = 14;
       // 
       // pnlLeft
@@ -337,13 +338,13 @@
       this.pnlLeft.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.pnlLeft.Location = new System.Drawing.Point(0, 60);
+      this.pnlLeft.Location = new System.Drawing.Point(0, 77);
       this.pnlLeft.Margin = new System.Windows.Forms.Padding(0);
       this.pnlLeft.Name = "pnlLeft";
       this.tblMain.SetRowSpan(this.pnlLeft, 3);
       this.pnlLeft.ShadowColor = System.Drawing.Color.Empty;
       this.pnlLeft.ShadowExtent = 5;
-      this.pnlLeft.Size = new System.Drawing.Size(3, 283);
+      this.pnlLeft.Size = new System.Drawing.Size(3, 302);
       this.pnlLeft.TabIndex = 13;
       // 
       // pnlLeftTop
@@ -354,7 +355,7 @@
       this.pnlLeftTop.Location = new System.Drawing.Point(0, 3);
       this.pnlLeftTop.Margin = new System.Windows.Forms.Padding(0);
       this.pnlLeftTop.Name = "pnlLeftTop";
-      this.pnlLeftTop.Size = new System.Drawing.Size(3, 57);
+      this.pnlLeftTop.Size = new System.Drawing.Size(3, 74);
       this.pnlLeftTop.TabIndex = 15;
       // 
       // pnlRightTop
@@ -362,22 +363,22 @@
       this.pnlRightTop.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.pnlRightTop.Location = new System.Drawing.Point(548, 3);
+      this.pnlRightTop.Location = new System.Drawing.Point(592, 3);
       this.pnlRightTop.Margin = new System.Windows.Forms.Padding(0);
       this.pnlRightTop.Name = "pnlRightTop";
-      this.pnlRightTop.Size = new System.Drawing.Size(3, 57);
+      this.pnlRightTop.Size = new System.Drawing.Size(3, 74);
       this.pnlRightTop.TabIndex = 16;
       // 
       // pnlConnectionColor
       // 
       this.pnlConnectionColor.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.pnlConnectionColor.Location = new System.Drawing.Point(3, 60);
+      this.pnlConnectionColor.Location = new System.Drawing.Point(3, 77);
       this.pnlConnectionColor.Margin = new System.Windows.Forms.Padding(0);
       this.pnlConnectionColor.Name = "pnlConnectionColor";
       this.pnlConnectionColor.ShadowColor = System.Drawing.Color.Empty;
       this.pnlConnectionColor.ShadowExtent = 0;
-      this.pnlConnectionColor.Size = new System.Drawing.Size(545, 5);
+      this.pnlConnectionColor.Size = new System.Drawing.Size(589, 5);
       this.pnlConnectionColor.TabIndex = 17;
       // 
       // tableLayoutPanel1
@@ -393,21 +394,21 @@
       this.tableLayoutPanel1.Controls.Add(this.btnPrevious, 1, 0);
       this.tableLayoutPanel1.Controls.Add(this.btnClose, 3, 0);
       this.tableLayoutPanel1.Controls.Add(this.lblVersion, 0, 0);
-      this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 308);
+      this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 337);
       this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
       this.tableLayoutPanel1.Name = "tableLayoutPanel1";
       this.tableLayoutPanel1.RowCount = 1;
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-      this.tableLayoutPanel1.Size = new System.Drawing.Size(545, 35);
+      this.tableLayoutPanel1.Size = new System.Drawing.Size(589, 42);
       this.tableLayoutPanel1.TabIndex = 19;
       // 
       // lblVersion
       // 
       this.lblVersion.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblVersion.AutoSize = true;
-      this.lblVersion.Location = new System.Drawing.Point(3, 11);
+      this.lblVersion.Location = new System.Drawing.Point(3, 6);
       this.lblVersion.Name = "lblVersion";
-      this.lblVersion.Size = new System.Drawing.Size(0, 13);
+      this.lblVersion.Size = new System.Drawing.Size(0, 30);
       this.lblVersion.TabIndex = 18;
       // 
       // pnlBottom
@@ -415,18 +416,18 @@
       this.pnlBottom.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.pnlBottom.Location = new System.Drawing.Point(3, 343);
+      this.pnlBottom.Location = new System.Drawing.Point(3, 379);
       this.pnlBottom.Margin = new System.Windows.Forms.Padding(0);
       this.pnlBottom.Name = "pnlBottom";
-      this.pnlBottom.Size = new System.Drawing.Size(545, 3);
+      this.pnlBottom.Size = new System.Drawing.Size(589, 3);
       this.pnlBottom.TabIndex = 20;
       // 
       // Main
       // 
-      this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+      this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 30F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.BackColor = System.Drawing.Color.DarkGray;
-      this.ClientSize = new System.Drawing.Size(553, 348);
+      this.ClientSize = new System.Drawing.Size(597, 384);
       this.Controls.Add(this.tblMain);
       this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
