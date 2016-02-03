@@ -578,7 +578,7 @@ namespace InnovatorAdmin.Editor
     //  return keyboard.IsKeyDown(System.Windows.Input.Key.LeftShift) || keyboard.IsKeyDown(System.Windows.Input.Key.RightShift);
     //}
 
-    CompletionWindow completionWindow;
+    ICSharpCode.AvalonEdit.CodeCompletion.CompletionWindow completionWindow;
 
     public void ShowCompletionWindow(IEnumerable<ICompletionData> completionItems, int overlap)
     {
@@ -711,7 +711,7 @@ namespace InnovatorAdmin.Editor
       }
     }
 
-    private class CompletionWindowEx : CompletionWindow
+    private class CompletionWindowEx : ICSharpCode.AvalonEdit.CodeCompletion.CompletionWindow
     {
       private bool _allowEnter = false;
 

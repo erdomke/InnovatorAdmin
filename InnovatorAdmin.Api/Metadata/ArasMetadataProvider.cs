@@ -142,10 +142,10 @@ namespace InnovatorAdmin
       if (_listValues.TryGetValue(id, out result))
         return Promises.Resolved(result);
 
-      return _conn.ApplyAsync("<Item type='Value' action='get' select='label,value'><source_id>@0</source_id></Item>"
+      return _conn.ApplyAsync("<Item type='List' action='get' id='@0' select='id'><Relationships><Item type='Value' action='get' select='label,value' /><Item type='Filter Value' action='get' select='label,value' /></Relationships></Item>"
         , true, false, id)
         .Convert(r => {
-          var values = (IEnumerable<ListValue>)r.Items()
+          var values = (IEnumerable<ListValue>)r.AssertItem().Relationships()
             .Select(i => new ListValue()
             {
               Label = i.Property("label").Value,
@@ -608,7 +608,7 @@ namespace InnovatorAdmin
       var remote = conn as IRemoteConnection;
       if (remote != null)
         key += "|" + remote.Url;
-      if (!_cache.TryGetValue(key, out result))
+      if (!_cache.TryGetValue(key, out result) || string.IsNullOrEmpty(result._conn.UserId))
       {
         result = new ArasMetadataProvider(conn);
         _cache[key] = result;

@@ -677,7 +677,7 @@ namespace InnovatorAdmin
         else if (dataCol.DataType == typeof(DateTime))
         {
           col = new Controls.DataGridViewCalendarColumn();
-          
+
         }
         else
         {
@@ -1580,7 +1580,7 @@ namespace InnovatorAdmin
               {
                 if (!column.ColumnName.Contains('/')
                   && column.ColumnName != Extensions.AmlTable_TypeName
-                  && IsChanged(row, column, out newValue))
+                  && (IsChanged(row, column, out newValue) || column.ColumnName == "related_id" || column.ColumnName == "source_id"))
                 {
                   xml.WriteElementString(column.ColumnName, context.Format(newValue));
                 }
