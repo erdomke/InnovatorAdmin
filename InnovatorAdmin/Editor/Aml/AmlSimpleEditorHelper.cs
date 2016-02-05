@@ -161,7 +161,8 @@ namespace InnovatorAdmin.Editor
         if (conn != null)
         {
           metadata = ArasMetadataProvider.Cached(conn);
-          itemType = metadata.ItemTypeByName(type);
+          if (!metadata.ItemTypeByName(type, out itemType))
+            metadata = null;
         }
 
         if (metadata != null)

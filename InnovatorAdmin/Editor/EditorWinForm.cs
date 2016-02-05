@@ -578,7 +578,7 @@ namespace InnovatorAdmin.Editor
     //  return keyboard.IsKeyDown(System.Windows.Input.Key.LeftShift) || keyboard.IsKeyDown(System.Windows.Input.Key.RightShift);
     //}
 
-    ICSharpCode.AvalonEdit.CodeCompletion.CompletionWindow completionWindow;
+    CompletionWindowEx completionWindow;
 
     public void ShowCompletionWindow(IEnumerable<ICompletionData> completionItems, int overlap)
     {
@@ -595,6 +595,7 @@ namespace InnovatorAdmin.Editor
           data.Add(item);
         }
         completionWindow.Show();
+        completionWindow.AutoGrow();
         completionWindow.CompletionList.IsFiltering = false;
         completionWindow.CompletionList.SelectItem(completionItems.First().Text);
         completionWindow.CompletionList.IsFiltering = true;
@@ -714,6 +715,7 @@ namespace InnovatorAdmin.Editor
     private class CompletionWindowEx : ICSharpCode.AvalonEdit.CodeCompletion.CompletionWindow
     {
       private bool _allowEnter = false;
+      private double _minWidth = 0;
 
       public CompletionWindowEx(TextArea textArea) : base(textArea) { }
 
@@ -740,6 +742,15 @@ namespace InnovatorAdmin.Editor
         {
           base.OnKeyDown(e);
         }
+        AutoGrow();
+      }
+
+      public void AutoGrow()
+      {
+        var addition = this.CompletionList.ScrollViewer.ExtentWidth - this.CompletionList.ScrollViewer.ViewportWidth;
+        var client = this.TextArea.PointFromScreen(new System.Windows.Point(this.Left, this.Top));
+        addition = Math.Max(0, Math.Min(addition, this.TextArea.ActualWidth - this.Width - client.X));
+        this.Width += addition;
       }
     }
 
