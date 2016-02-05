@@ -38,11 +38,11 @@
   <Target Name="Build">
     <ItemGroup>
       <ProjectToBuild3 Include="Innovator.Client.csproj">
-        <Properties>OutputPath=$(OutDir35);IntermediateOutputPath=$(ObjDir35)\;TargetFrameworkVersion=v3.5;Configuration=Release</Properties>
+        <Properties>OutputPath=$(OutDir35);IntermediateOutputPath=$(ObjDir35)\;TargetFrameworkVersion=v3.5;Configuration=Release 3.5</Properties>
         <SGenToolPath>C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\sgen.exe</SGenToolPath>
       </ProjectToBuild3>
       <ProjectToBuild4 Include="Innovator.Client.csproj">
-        <Properties>OutputPath=$(OutDir40);IntermediateOutputPath=$(ObjDir40)\;TargetFrameworkVersion=v4.0;Configuration=Release;DefineConstants=NET4</Properties>
+        <Properties>OutputPath=$(OutDir40);IntermediateOutputPath=$(ObjDir40)\;TargetFrameworkVersion=v4.0;Configuration=Release</Properties>
         <SGenToolPath>C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\sgen.exe</SGenToolPath>
       </ProjectToBuild4>
     </ItemGroup>

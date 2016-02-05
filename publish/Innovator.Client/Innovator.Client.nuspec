@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Innovator.Client</id>
-    <version>2016.02.02.1619</version>
+    <version>2016.02.05.0858</version>
     <authors>eric.domke</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Client dll for simplifying access to an Aras Innovator installation or a corresponding proxy</description>

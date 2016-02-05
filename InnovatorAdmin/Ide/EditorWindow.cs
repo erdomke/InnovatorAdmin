@@ -504,7 +504,7 @@ namespace InnovatorAdmin
         }
 
         var bounds = Properties.Settings.Default.EditorWindow_Bounds;
-        if (bounds.Width < 100 || bounds.Height < 100)
+        if (bounds.Width < 200 || bounds.Height < 200)
         {
           // Do nothing
         }
@@ -1243,6 +1243,10 @@ namespace InnovatorAdmin
             _currentQuery = null;
             btnSubmit.Text = "► Run";
           });
+
+        // Handle the synchronous option
+        if (!_clock.Enabled)
+          _currentQuery = null;
       }
       catch (Exception err)
       {
