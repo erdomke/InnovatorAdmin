@@ -6,6 +6,7 @@ using System.Text;
 
 namespace Innovator.Client
 {
+  [Serializable]
   public class HttpTimeoutException : Exception
   {
     public HttpTimeoutException() : base("HTTP request timed out") { }
