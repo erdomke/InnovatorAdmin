@@ -487,7 +487,11 @@ namespace InnovatorAdmin
         }
         finally
         {
-          result.EndLoadData();
+          try
+          {
+            result.EndLoadData();
+          }
+          catch (ConstraintException) { }
           result.AcceptChanges();
         }
 

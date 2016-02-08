@@ -433,7 +433,6 @@ namespace InnovatorAdmin.Editor
               case XmlNodeType.DocumentType:
                 xmlWriter.WriteDocType(reader.Name, reader.GetAttribute("PUBLIC"), reader.GetAttribute("SYSTEM"), reader.Value);
                 break;
-              case XmlNodeType.Whitespace:
               case XmlNodeType.SignificantWhitespace:
                 xmlWriter.WriteWhitespace(reader.Value);
                 break;
@@ -659,6 +658,9 @@ namespace InnovatorAdmin.Editor
             {
               Name = p.Label ?? p.Name,
               Image = Icons.Property16,
+              HasChildren = p.Type == PropertyType.item && p.Restrictions.Any()
+                && p.Name != "id" && p.Name != "config_id",
+              ChildGetter = () => ItemTypeChildren(ArasMetadataProvider.Cached(_conn).ItemTypeByName(p.Restrictions.First()).Id),
               Description = GetPropertyDescription(p)
             })
             .OrderBy(n => n.Name)
