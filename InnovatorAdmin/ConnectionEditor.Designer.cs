@@ -71,10 +71,9 @@
       this.lblDatabase.Anchor = System.Windows.Forms.AnchorStyles.Right;
       this.lblDatabase.AutoSize = true;
       this.lblDatabase.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.lblDatabase.Location = new System.Drawing.Point(8, 198);
-      this.lblDatabase.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+      this.lblDatabase.Location = new System.Drawing.Point(3, 141);
       this.lblDatabase.Name = "lblDatabase";
-      this.lblDatabase.Size = new System.Drawing.Size(110, 25);
+      this.lblDatabase.Size = new System.Drawing.Size(56, 13);
       this.lblDatabase.TabIndex = 26;
       this.lblDatabase.Text = "Database:";
       this.lblDatabase.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -84,10 +83,9 @@
       this.lblPassword.Anchor = System.Windows.Forms.AnchorStyles.Right;
       this.lblPassword.AutoSize = true;
       this.lblPassword.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.lblPassword.Location = new System.Drawing.Point(6, 159);
-      this.lblPassword.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+      this.lblPassword.Location = new System.Drawing.Point(3, 114);
       this.lblPassword.Name = "lblPassword";
-      this.lblPassword.Size = new System.Drawing.Size(112, 25);
+      this.lblPassword.Size = new System.Drawing.Size(56, 13);
       this.lblPassword.TabIndex = 24;
       this.lblPassword.Text = "Password:";
       // 
@@ -96,10 +94,9 @@
       this.lblUser.Anchor = System.Windows.Forms.AnchorStyles.Right;
       this.lblUser.AutoSize = true;
       this.lblUser.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.lblUser.Location = new System.Drawing.Point(55, 127);
-      this.lblUser.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+      this.lblUser.Location = new System.Drawing.Point(27, 88);
       this.lblUser.Name = "lblUser";
-      this.lblUser.Size = new System.Drawing.Size(63, 25);
+      this.lblUser.Size = new System.Drawing.Size(32, 13);
       this.lblUser.TabIndex = 22;
       this.lblUser.Text = "User:";
       this.lblUser.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -109,10 +106,9 @@
       this.lblUrl.Anchor = System.Windows.Forms.AnchorStyles.Right;
       this.lblUrl.AutoSize = true;
       this.lblUrl.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.lblUrl.Location = new System.Drawing.Point(58, 3);
-      this.lblUrl.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+      this.lblUrl.Location = new System.Drawing.Point(27, 6);
       this.lblUrl.Name = "lblUrl";
-      this.lblUrl.Size = new System.Drawing.Size(60, 25);
+      this.lblUrl.Size = new System.Drawing.Size(32, 13);
       this.lblUrl.TabIndex = 20;
       this.lblUrl.Text = "URL:";
       this.lblUrl.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -122,10 +118,9 @@
       this.lblName.Anchor = System.Windows.Forms.AnchorStyles.Right;
       this.lblName.AutoSize = true;
       this.lblName.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.lblName.Location = new System.Drawing.Point(44, 286);
-      this.lblName.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+      this.lblName.Location = new System.Drawing.Point(21, 189);
       this.lblName.Name = "lblName";
-      this.lblName.Size = new System.Drawing.Size(74, 25);
+      this.lblName.Size = new System.Drawing.Size(38, 13);
       this.lblName.TabIndex = 32;
       this.lblName.Text = "Name:";
       this.lblName.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -140,7 +135,7 @@
       this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 10F));
       this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+      this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
       this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 90F));
       this.tlpControls.Controls.Add(this.lstConnections, 0, 0);
       this.tlpControls.Controls.Add(this.btnMoveDown, 5, 1);
@@ -152,23 +147,21 @@
       this.tlpControls.Controls.Add(this.tableLayoutPanel1, 7, 0);
       this.tlpControls.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tlpControls.Location = new System.Drawing.Point(0, 0);
-      this.tlpControls.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
       this.tlpControls.Name = "tlpControls";
       this.tlpControls.RowCount = 2;
       this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
       this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tlpControls.Size = new System.Drawing.Size(1304, 542);
+      this.tlpControls.Size = new System.Drawing.Size(652, 282);
       this.tlpControls.TabIndex = 41;
       // 
       // panel1
       // 
       this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
       this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(235)))), ((int)(((byte)(235)))));
-      this.panel1.Location = new System.Drawing.Point(451, 6);
-      this.panel1.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+      this.panel1.Location = new System.Drawing.Point(225, 3);
       this.panel1.Name = "panel1";
       this.tlpControls.SetRowSpan(this.panel1, 2);
-      this.panel1.Size = new System.Drawing.Size(2, 530);
+      this.panel1.Size = new System.Drawing.Size(1, 276);
       this.panel1.TabIndex = 46;
       // 
       // tableLayoutPanel1
@@ -195,7 +188,7 @@
       this.tableLayoutPanel1.Controls.Add(this.lblDatabase, 0, 5);
       this.tableLayoutPanel1.Controls.Add(this.cmbDatabase, 1, 5);
       this.tableLayoutPanel1.Controls.Add(this.btnColor, 2, 7);
-      this.tableLayoutPanel1.Location = new System.Drawing.Point(472, 0);
+      this.tableLayoutPanel1.Location = new System.Drawing.Point(236, 0);
       this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
       this.tableLayoutPanel1.Name = "tableLayoutPanel1";
       this.tableLayoutPanel1.RowCount = 9;
@@ -206,11 +199,11 @@
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 38F));
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 38F));
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 38F));
-      this.tableLayoutPanel1.Size = new System.Drawing.Size(832, 542);
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+      this.tableLayoutPanel1.Size = new System.Drawing.Size(416, 282);
       this.tableLayoutPanel1.TabIndex = 47;
       // 
       // flowLayoutPanel2
@@ -222,10 +215,10 @@
       this.flowLayoutPanel2.Controls.Add(this.chkPassword);
       this.flowLayoutPanel2.Controls.Add(this.chkWindows);
       this.flowLayoutPanel2.Controls.Add(this.chkAnonymous);
-      this.flowLayoutPanel2.Location = new System.Drawing.Point(124, 77);
+      this.flowLayoutPanel2.Location = new System.Drawing.Point(62, 53);
       this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
       this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-      this.flowLayoutPanel2.Size = new System.Drawing.Size(708, 47);
+      this.flowLayoutPanel2.Size = new System.Drawing.Size(354, 29);
       this.flowLayoutPanel2.TabIndex = 0;
       // 
       // chkPassword
@@ -238,10 +231,9 @@
       this.chkPassword.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.chkPassword.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.chkPassword.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-      this.chkPassword.Location = new System.Drawing.Point(6, 6);
-      this.chkPassword.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+      this.chkPassword.Location = new System.Drawing.Point(3, 3);
       this.chkPassword.Name = "chkPassword";
-      this.chkPassword.Size = new System.Drawing.Size(219, 35);
+      this.chkPassword.Size = new System.Drawing.Size(114, 23);
       this.chkPassword.TabIndex = 0;
       this.chkPassword.Text = "Login with Password";
       this.chkPassword.UseVisualStyleBackColor = true;
@@ -255,10 +247,9 @@
       this.chkWindows.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.chkWindows.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.chkWindows.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-      this.chkWindows.Location = new System.Drawing.Point(237, 6);
-      this.chkWindows.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+      this.chkWindows.Location = new System.Drawing.Point(123, 3);
       this.chkWindows.Name = "chkWindows";
-      this.chkWindows.Size = new System.Drawing.Size(212, 35);
+      this.chkWindows.Size = new System.Drawing.Size(112, 23);
       this.chkWindows.TabIndex = 1;
       this.chkWindows.Text = "Login with Windows";
       this.chkWindows.UseVisualStyleBackColor = true;
@@ -272,10 +263,9 @@
       this.chkAnonymous.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.chkAnonymous.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.chkAnonymous.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-      this.chkAnonymous.Location = new System.Drawing.Point(461, 6);
-      this.chkAnonymous.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+      this.chkAnonymous.Location = new System.Drawing.Point(241, 3);
       this.chkAnonymous.Name = "chkAnonymous";
-      this.chkAnonymous.Size = new System.Drawing.Size(210, 35);
+      this.chkAnonymous.Size = new System.Drawing.Size(108, 23);
       this.chkAnonymous.TabIndex = 2;
       this.chkAnonymous.Text = "Login Anonymously";
       this.chkAnonymous.UseVisualStyleBackColor = true;
@@ -290,10 +280,10 @@
       this.flowLayoutPanel1.Controls.Add(this.btnAdvanced);
       this.flowLayoutPanel1.Controls.Add(this.btnTest);
       this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-      this.flowLayoutPanel1.Location = new System.Drawing.Point(412, 327);
+      this.flowLayoutPanel1.Location = new System.Drawing.Point(206, 210);
       this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
       this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-      this.flowLayoutPanel1.Size = new System.Drawing.Size(420, 72);
+      this.flowLayoutPanel1.Size = new System.Drawing.Size(210, 37);
       this.flowLayoutPanel1.TabIndex = 45;
       // 
       // lblType
@@ -301,10 +291,9 @@
       this.lblType.Anchor = System.Windows.Forms.AnchorStyles.Right;
       this.lblType.AutoSize = true;
       this.lblType.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
-      this.lblType.Location = new System.Drawing.Point(52, 42);
-      this.lblType.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+      this.lblType.Location = new System.Drawing.Point(25, 33);
       this.lblType.Name = "lblType";
-      this.lblType.Size = new System.Drawing.Size(66, 25);
+      this.lblType.Size = new System.Drawing.Size(34, 13);
       this.lblType.TabIndex = 43;
       this.lblType.Text = "Type:";
       // 
@@ -314,10 +303,9 @@
       this.tableLayoutPanel1.SetColumnSpan(this.cmbType, 2);
       this.cmbType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.cmbType.FormattingEnabled = true;
-      this.cmbType.Location = new System.Drawing.Point(130, 38);
-      this.cmbType.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+      this.cmbType.Location = new System.Drawing.Point(65, 29);
       this.cmbType.Name = "cmbType";
-      this.cmbType.Size = new System.Drawing.Size(696, 33);
+      this.cmbType.Size = new System.Drawing.Size(348, 21);
       this.cmbType.TabIndex = 8;
       // 
       // cmbDatabase
@@ -326,20 +314,18 @@
       this.tableLayoutPanel1.SetColumnSpan(this.cmbDatabase, 2);
       this.cmbDatabase.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.cmbDatabase.FormattingEnabled = true;
-      this.cmbDatabase.Location = new System.Drawing.Point(130, 194);
-      this.cmbDatabase.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+      this.cmbDatabase.Location = new System.Drawing.Point(65, 137);
       this.cmbDatabase.Name = "cmbDatabase";
-      this.cmbDatabase.Size = new System.Drawing.Size(696, 33);
+      this.cmbDatabase.Size = new System.Drawing.Size(348, 21);
       this.cmbDatabase.TabIndex = 9;
       this.cmbDatabase.DropDown += new System.EventHandler(this.cmbDatabase_DropDown);
       // 
       // btnColor
       // 
       this.btnColor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-      this.btnColor.Location = new System.Drawing.Point(772, 277);
-      this.btnColor.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+      this.btnColor.Location = new System.Drawing.Point(386, 184);
       this.btnColor.Name = "btnColor";
-      this.btnColor.Size = new System.Drawing.Size(54, 44);
+      this.btnColor.Size = new System.Drawing.Size(27, 23);
       this.btnColor.TabIndex = 2;
       this.btnColor.UseVisualStyleBackColor = true;
       this.btnColor.Click += new System.EventHandler(this.btnColor_Click);
@@ -352,11 +338,11 @@
       this.tlpControls.SetColumnSpan(this.lstConnections, 6);
       this.lstConnections.DataSource = null;
       this.lstConnections.DisplayMember = "";
-      this.lstConnections.Location = new System.Drawing.Point(8, 8);
-      this.lstConnections.Margin = new System.Windows.Forms.Padding(8);
+      this.lstConnections.Location = new System.Drawing.Point(4, 4);
+      this.lstConnections.Margin = new System.Windows.Forms.Padding(4);
       this.lstConnections.Multiselect = false;
       this.lstConnections.Name = "lstConnections";
-      this.lstConnections.Size = new System.Drawing.Size(416, 460);
+      this.lstConnections.Size = new System.Drawing.Size(208, 240);
       this.lstConnections.TabIndex = 0;
       this.lstConnections.ValueMember = "";
       this.lstConnections.SelectionChanged += new System.EventHandler(this.lstConnections_SelectionChanged);
@@ -372,12 +358,12 @@
       this.btnMoveDown.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnMoveDown.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnMoveDown.ForeColor = System.Drawing.Color.Black;
-      this.btnMoveDown.Location = new System.Drawing.Point(368, 480);
-      this.btnMoveDown.Margin = new System.Windows.Forms.Padding(4);
+      this.btnMoveDown.Location = new System.Drawing.Point(184, 250);
+      this.btnMoveDown.Margin = new System.Windows.Forms.Padding(2);
       this.btnMoveDown.Name = "btnMoveDown";
       this.btnMoveDown.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnMoveDown.Padding = new System.Windows.Forms.Padding(2);
-      this.btnMoveDown.Size = new System.Drawing.Size(60, 58);
+      this.btnMoveDown.Padding = new System.Windows.Forms.Padding(1);
+      this.btnMoveDown.Size = new System.Drawing.Size(30, 30);
       this.btnMoveDown.TabIndex = 11;
       this.btnMoveDown.TabStop = false;
       this.btnMoveDown.Theme = InnovatorAdmin.Controls.FlatButtonTheme.Icon;
@@ -395,12 +381,12 @@
       this.btnNew.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnNew.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnNew.ForeColor = System.Drawing.Color.Black;
-      this.btnNew.Location = new System.Drawing.Point(4, 480);
-      this.btnNew.Margin = new System.Windows.Forms.Padding(4);
+      this.btnNew.Location = new System.Drawing.Point(2, 250);
+      this.btnNew.Margin = new System.Windows.Forms.Padding(2);
       this.btnNew.Name = "btnNew";
       this.btnNew.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnNew.Padding = new System.Windows.Forms.Padding(2);
-      this.btnNew.Size = new System.Drawing.Size(60, 58);
+      this.btnNew.Padding = new System.Windows.Forms.Padding(1);
+      this.btnNew.Size = new System.Drawing.Size(30, 30);
       this.btnNew.TabIndex = 7;
       this.btnNew.TabStop = false;
       this.btnNew.Theme = InnovatorAdmin.Controls.FlatButtonTheme.Icon;
@@ -418,12 +404,12 @@
       this.btnMoveUp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnMoveUp.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnMoveUp.ForeColor = System.Drawing.Color.Black;
-      this.btnMoveUp.Location = new System.Drawing.Point(300, 480);
-      this.btnMoveUp.Margin = new System.Windows.Forms.Padding(4);
+      this.btnMoveUp.Location = new System.Drawing.Point(150, 250);
+      this.btnMoveUp.Margin = new System.Windows.Forms.Padding(2);
       this.btnMoveUp.Name = "btnMoveUp";
       this.btnMoveUp.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnMoveUp.Padding = new System.Windows.Forms.Padding(2);
-      this.btnMoveUp.Size = new System.Drawing.Size(60, 58);
+      this.btnMoveUp.Padding = new System.Windows.Forms.Padding(1);
+      this.btnMoveUp.Size = new System.Drawing.Size(30, 30);
       this.btnMoveUp.TabIndex = 10;
       this.btnMoveUp.TabStop = false;
       this.btnMoveUp.Theme = InnovatorAdmin.Controls.FlatButtonTheme.Icon;
@@ -441,12 +427,12 @@
       this.btnCopy.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnCopy.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnCopy.ForeColor = System.Drawing.Color.Black;
-      this.btnCopy.Location = new System.Drawing.Point(72, 480);
-      this.btnCopy.Margin = new System.Windows.Forms.Padding(4);
+      this.btnCopy.Location = new System.Drawing.Point(36, 250);
+      this.btnCopy.Margin = new System.Windows.Forms.Padding(2);
       this.btnCopy.Name = "btnCopy";
       this.btnCopy.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnCopy.Padding = new System.Windows.Forms.Padding(2);
-      this.btnCopy.Size = new System.Drawing.Size(60, 58);
+      this.btnCopy.Padding = new System.Windows.Forms.Padding(1);
+      this.btnCopy.Size = new System.Drawing.Size(30, 30);
       this.btnCopy.TabIndex = 8;
       this.btnCopy.TabStop = false;
       this.btnCopy.Theme = InnovatorAdmin.Controls.FlatButtonTheme.Icon;
@@ -464,12 +450,12 @@
       this.btnDelete.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnDelete.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnDelete.ForeColor = System.Drawing.Color.Black;
-      this.btnDelete.Location = new System.Drawing.Point(140, 480);
-      this.btnDelete.Margin = new System.Windows.Forms.Padding(4);
+      this.btnDelete.Location = new System.Drawing.Point(70, 250);
+      this.btnDelete.Margin = new System.Windows.Forms.Padding(2);
       this.btnDelete.Name = "btnDelete";
       this.btnDelete.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnDelete.Padding = new System.Windows.Forms.Padding(2);
-      this.btnDelete.Size = new System.Drawing.Size(60, 58);
+      this.btnDelete.Padding = new System.Windows.Forms.Padding(1);
+      this.btnDelete.Size = new System.Drawing.Size(30, 30);
       this.btnDelete.TabIndex = 9;
       this.btnDelete.TabStop = false;
       this.btnDelete.Theme = InnovatorAdmin.Controls.FlatButtonTheme.Icon;
@@ -483,12 +469,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.tableLayoutPanel1.SetColumnSpan(this.txtUrl, 2);
       this.txtUrl.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.txtUrl.Location = new System.Drawing.Point(130, 6);
-      this.txtUrl.Margin = new System.Windows.Forms.Padding(6);
+      this.txtUrl.Location = new System.Drawing.Point(65, 3);
       this.txtUrl.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtUrl.Name = "txtUrl";
       this.txtUrl.PlaceholderText = "Address / URL";
-      this.txtUrl.Size = new System.Drawing.Size(696, 20);
+      this.txtUrl.Size = new System.Drawing.Size(348, 20);
       this.txtUrl.TabIndex = 3;
       // 
       // txtName
@@ -496,12 +481,11 @@
       this.txtName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.txtName.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.txtName.Location = new System.Drawing.Point(130, 277);
-      this.txtName.Margin = new System.Windows.Forms.Padding(6);
+      this.txtName.Location = new System.Drawing.Point(65, 184);
       this.txtName.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtName.Name = "txtName";
       this.txtName.PlaceholderText = "Connection Name";
-      this.txtName.Size = new System.Drawing.Size(630, 22);
+      this.txtName.Size = new System.Drawing.Size(315, 22);
       this.txtName.TabIndex = 1;
       this.txtName.Validated += new System.EventHandler(this.txtName_Validated);
       // 
@@ -511,13 +495,12 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.tableLayoutPanel1.SetColumnSpan(this.txtUser, 2);
       this.txtUser.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.txtUser.Location = new System.Drawing.Point(130, 130);
-      this.txtUser.Margin = new System.Windows.Forms.Padding(6);
+      this.txtUser.Location = new System.Drawing.Point(65, 85);
       this.txtUser.MaxLength = 32;
       this.txtUser.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtUser.Name = "txtUser";
       this.txtUser.PlaceholderText = "User name";
-      this.txtUser.Size = new System.Drawing.Size(696, 22);
+      this.txtUser.Size = new System.Drawing.Size(348, 22);
       this.txtUser.TabIndex = 6;
       // 
       // exploreButton
@@ -531,12 +514,11 @@
       this.exploreButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.exploreButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.exploreButton.ForeColor = System.Drawing.Color.Black;
-      this.exploreButton.Location = new System.Drawing.Point(302, 6);
-      this.exploreButton.Margin = new System.Windows.Forms.Padding(6);
+      this.exploreButton.Location = new System.Drawing.Point(151, 3);
       this.exploreButton.Name = "exploreButton";
       this.exploreButton.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.exploreButton.Padding = new System.Windows.Forms.Padding(4);
-      this.exploreButton.Size = new System.Drawing.Size(112, 60);
+      this.exploreButton.Padding = new System.Windows.Forms.Padding(2);
+      this.exploreButton.Size = new System.Drawing.Size(56, 31);
       this.exploreButton.TabIndex = 1;
       this.exploreButton.Text = "E&xplore";
       this.exploreButton.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
@@ -553,12 +535,11 @@
       this.btnAdvanced.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnAdvanced.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnAdvanced.ForeColor = System.Drawing.Color.Black;
-      this.btnAdvanced.Location = new System.Drawing.Point(140, 6);
-      this.btnAdvanced.Margin = new System.Windows.Forms.Padding(6);
+      this.btnAdvanced.Location = new System.Drawing.Point(70, 3);
       this.btnAdvanced.Name = "btnAdvanced";
       this.btnAdvanced.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnAdvanced.Padding = new System.Windows.Forms.Padding(4);
-      this.btnAdvanced.Size = new System.Drawing.Size(150, 60);
+      this.btnAdvanced.Padding = new System.Windows.Forms.Padding(2);
+      this.btnAdvanced.Size = new System.Drawing.Size(75, 31);
       this.btnAdvanced.TabIndex = 2;
       this.btnAdvanced.Text = "&Advanced";
       this.btnAdvanced.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
@@ -575,14 +556,13 @@
       this.btnTest.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnTest.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnTest.ForeColor = System.Drawing.Color.Black;
-      this.btnTest.Location = new System.Drawing.Point(6, 6);
-      this.btnTest.Margin = new System.Windows.Forms.Padding(6);
-      this.btnTest.MaximumSize = new System.Drawing.Size(600, 0);
-      this.btnTest.MinimumSize = new System.Drawing.Size(0, 60);
+      this.btnTest.Location = new System.Drawing.Point(3, 3);
+      this.btnTest.MaximumSize = new System.Drawing.Size(300, 0);
+      this.btnTest.MinimumSize = new System.Drawing.Size(0, 31);
       this.btnTest.Name = "btnTest";
       this.btnTest.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnTest.Padding = new System.Windows.Forms.Padding(4);
-      this.btnTest.Size = new System.Drawing.Size(122, 60);
+      this.btnTest.Padding = new System.Windows.Forms.Padding(2);
+      this.btnTest.Size = new System.Drawing.Size(61, 31);
       this.btnTest.TabIndex = 0;
       this.btnTest.Text = "&Test";
       this.btnTest.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
@@ -595,26 +575,24 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.tableLayoutPanel1.SetColumnSpan(this.txtPassword, 2);
       this.txtPassword.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.txtPassword.Location = new System.Drawing.Point(130, 162);
-      this.txtPassword.Margin = new System.Windows.Forms.Padding(6);
+      this.txtPassword.Location = new System.Drawing.Point(65, 111);
       this.txtPassword.MaxLength = 64;
       this.txtPassword.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtPassword.Name = "txtPassword";
       this.txtPassword.PasswordChar = '*';
       this.txtPassword.PlaceholderText = "Password";
-      this.txtPassword.Size = new System.Drawing.Size(696, 22);
+      this.txtPassword.Size = new System.Drawing.Size(348, 22);
       this.txtPassword.TabIndex = 7;
       this.txtPassword.WordWrap = false;
       // 
       // ConnectionEditor
       // 
-      this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
+      this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.Controls.Add(this.tlpControls);
-      this.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
-      this.MinimumSize = new System.Drawing.Size(850, 327);
+      this.MinimumSize = new System.Drawing.Size(425, 170);
       this.Name = "ConnectionEditor";
-      this.Size = new System.Drawing.Size(1304, 542);
+      this.Size = new System.Drawing.Size(652, 282);
       this.tlpControls.ResumeLayout(false);
       this.tlpControls.PerformLayout();
       this.tableLayoutPanel1.ResumeLayout(false);

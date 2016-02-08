@@ -607,6 +607,13 @@ namespace InnovatorAdmin
         if (_disposeProxy) _proxy.Dispose();
       }
     }
+
+    private class TableError
+    {
+      public string Message { get; set; }
+      public string Table { get; set; }
+    }
+
     private void EnsureDataTable()
     {
       if (_outputSet == null && _result != null && tbcOutputView.SelectedTab == pgTableOutput)
@@ -614,6 +621,31 @@ namespace InnovatorAdmin
         _outputSet = _result.GetDataSet();
         if (_outputSet.Tables.Count > 0)
         {
+          var errors = _outputSet.Tables.OfType<DataTable>()
+            .SelectMany(t => t.GetErrors().Select(r => new TableError()
+            {
+              Message = r.RowError,
+              Table = t.TableName
+            }))
+            .GroupBy(e => e.Message)
+            .Select(g => g.Key
+              + " in tables: "
+              + g.GroupBy(t => t.Table)
+                .Select(t => t.Key + " (" + t.Count() + " row(s))")
+                .GroupConcat(", "));
+
+          if (errors.Any())
+          {
+            using (var dialog = new Dialog.MessageDialog())
+            {
+              dialog.Message = errors.GroupConcat(Environment.NewLine);
+              dialog.OkText = "&Keep Going";
+              dialog.Caption = "Validation Error";
+              dialog.CaptionColor = System.Drawing.Color.Red;
+              dialog.ShowDialog();
+            }
+          }
+
           dgvItems.AutoGenerateColumns = false;
           dgvItems.DataSource = _outputSet.Tables[0];
           FormatDataGrid(dgvItems);
