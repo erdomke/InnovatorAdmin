@@ -7,6 +7,7 @@ using System.Text;
 
 namespace Innovator.Client
 {
+  [Serializable]
   public class HttpException : Exception
   {
     private IHttpResponse _resp;
@@ -24,7 +25,7 @@ namespace Innovator.Client
     {
       _resp = new WebResponse(req, (HttpWebResponse)ex.Response);
     }
-    internal HttpException(IHttpResponse resp) : base(resp.StatusCode.ToString()) 
+    internal HttpException(IHttpResponse resp) : base(resp.StatusCode.ToString())
     {
       _resp = resp;
     }

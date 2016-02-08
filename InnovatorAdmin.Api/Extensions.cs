@@ -171,46 +171,47 @@ namespace InnovatorAdmin
     //  column.ExtendedProperties["sort_order"] = value;
     //}
 
-    public static HashSet<string> SelectColumns(string select)
+    public static IEnumerable<AmlSelectColumn> SelectColumns(string select)
     {
-      var result = new HashSet<string>();
+      var result = new AmlSelectColumn();
       if (string.IsNullOrEmpty(select))
-        return result;
-      var parenDepth = 0;
-      var hasParen = false;
+        return result.Children;
+
+      var path = new Stack<AmlSelectColumn>();
+      path.Push(result);
       var start = 0;
       for (var i = 0; i < select.Length; i++)
       {
         switch (select[i])
         {
           case ',':
-            if (!hasParen && parenDepth == 0)
-            {
-              result.Add(select.Substring(start, i - start).Trim());
-              start = i + 1;
-            }
-            hasParen = parenDepth > 0;
-            if (!hasParen)
-              start = i + 1;
+            if (i - start > 0)
+              path.Peek().Add(new AmlSelectColumn() { Name = select.Substring(start, i - start).Trim() });
+            start = i + 1;
             break;
           case '(':
-            if (start >= 0 && parenDepth == 0)
+            if (i - start > 0)
             {
-              result.Add(select.Substring(start, i - start).Trim());
+              var curr = new AmlSelectColumn() { Name = select.Substring(start, i - start).Trim() };
+              path.Peek().Add(curr);
+              path.Push(curr);
             }
-            parenDepth += 1;
-            hasParen = true;
+            start = i + 1;
             break;
           case ')':
-            parenDepth -= 1;
+            if (i - start > 0)
+              path.Peek().Add(new AmlSelectColumn() { Name = select.Substring(start, i - start).Trim() });
+            path.Pop();
+            start = i + 1;
             break;
         }
       }
-      if (!hasParen && parenDepth == 0)
+
+      if (start < select.Length)
       {
-        result.Add(select.Substring(0, select.Length - start).Trim());
+        result.Add(new AmlSelectColumn() { Name = select.Substring(0, select.Length - start).Trim() });
       }
-      return result;
+      return result.Children;
     }
 
     public static DataSet GetItemTable(IReadOnlyResult res, ArasMetadataProvider metadata, string select)
@@ -376,7 +377,7 @@ namespace InnovatorAdmin
                 }
                 if (selectedCols.Any())
                 {
-                  newColumn.IsUiVisible(selectedCols.Contains(propName));
+                  newColumn.IsUiVisible(selectedCols.Any(c => string.Equals(c.Name, propName)));
                 }
                 else
                 {

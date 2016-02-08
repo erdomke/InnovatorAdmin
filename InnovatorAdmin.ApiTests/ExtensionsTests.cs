@@ -15,7 +15,7 @@ namespace InnovatorAdmin.Tests
     {
       var cols = Extensions.SelectColumns("first, second (thing, another2(id, config_id)), no_paren, third (stuff), another (id)");
       var expected = new string[] { "first", "second", "no_paren", "third", "another" };
-      CollectionAssert.AreEqual(expected, cols.ToArray());
+      CollectionAssert.AreEqual(expected, cols.Select(c => c.Name).ToArray());
     }
   }
 }
