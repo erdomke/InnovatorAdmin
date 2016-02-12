@@ -467,6 +467,12 @@ namespace InnovatorAdmin.Editor
           result.WithParam(param.Key, param.Value);
         }
       }
+      var firstItem = elem.DescendantsAndSelf("Item").FirstOrDefault();
+      string select = null;
+      if (firstItem != null && (firstItem.Parent == null || firstItem.Parent.Elements("Item").Count() == 1))
+      {
+        select = firstItem.AttributeValue("select");
+      }
 
       if (result.Action == CommandAction.ApplyAML && result.Aml.IndexOf("<AML>") < 0)
       {

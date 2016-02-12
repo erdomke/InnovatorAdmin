@@ -43,7 +43,6 @@ namespace Innovator.Client
         return new PooledPromise(poolSize, promises);
       return new AggregatePromise(promises.Select(p => p.Invoke()).ToArray());
     }
-
     /// <summary>
     /// Attach a callback that runs when the promise is canceled
     /// </summary>

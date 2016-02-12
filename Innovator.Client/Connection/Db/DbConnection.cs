@@ -270,5 +270,4 @@ namespace Innovator.Client.Connection
       return _item.Property(name, lang);
     }
   }
-
 }
