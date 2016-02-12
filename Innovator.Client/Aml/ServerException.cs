@@ -117,6 +117,10 @@ namespace Innovator.Client
     {
       return _faultNode.Parents().Last().OuterXml;
     }
+    public void AsAmlString(XmlWriter writer)
+    {
+      _faultNode.Parents().Last().WriteTo(writer);
+    }
     public IReadOnlyResult AsResult()
     {
       return new Result(_factory, _faultNode);

@@ -6,12 +6,12 @@ using Innovator.Client;
 using System.Xml;
 using System.IO;
 using System.Data;
-using System.ComponentModel;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Utils;
 using InnovatorAdmin.Testing;
-using Innovator.Client;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using System.Threading;
 
 namespace InnovatorAdmin.Editor
 {
@@ -211,7 +211,7 @@ namespace InnovatorAdmin.Editor
       return new ResultObject(suite, _conn);
     }
 
-    public virtual Innovator.Client.IPromise<IResultObject> Process(ICommand request, bool async, Action<int, string> progressCallback)
+    public virtual IPromise<IResultObject> Process(ICommand request, bool async, Action<int, string> progressCallback)
     {
       var innCmd = request as InnovatorCommand;
       if (innCmd == null)
@@ -219,11 +219,226 @@ namespace InnovatorAdmin.Editor
 
       var cmd = innCmd.Internal;
 
-      // Check for file uploads and process if need be
+      // Process Unit Tests separately
       if (cmd.ActionString == UnitTestAction)
         return ProcessTestSuite(cmd.Aml, progressCallback).ToPromise();
 
-      var elem = System.Xml.Linq.XElement.Parse(cmd.Aml);
+      var elem = XElement.Parse(cmd.Aml);
+      var firstItem = elem.DescendantsAndSelf("Item").FirstOrDefault();
+      string select = null;
+      if (firstItem != null && (firstItem.Parent == null || firstItem.Parent.Elements("Item").Count() == 1))
+      {
+        select = firstItem.AttributeValue("select");
+      }
+
+      XElement[] queries;
+      if (async && innCmd.ConcurrentCount > 0 && innCmd.StatementCount > 0)
+      {
+        var query = elem;
+        while (!IsQueryTag(query) && query.Elements().Any())
+          query = query.Elements().First();
+        if (IsQueryTag(query))
+        {
+          if (query.Parent == null)
+          {
+            queries = new XElement[] { query };
+          }
+          else
+          {
+            var allQueries = query.Parent.Elements().Where(IsQueryTag).ToArray();
+            // Switch to ApplyAML where necessary
+            if (cmd.Action == CommandAction.ApplyItem && innCmd.StatementCount > 1)
+              cmd.Action = CommandAction.ApplyAML;
+            if (allQueries.Length <= innCmd.StatementCount)
+              queries = new XElement[] { elem };
+            else
+              queries = allQueries.Batch(innCmd.StatementCount).Select(ConcatQueries).ToArray();
+          }
+        }
+        else
+        {
+          queries = new XElement[] { elem };
+        }
+      }
+      else
+      {
+        queries = new XElement[] { elem };
+      }
+
+      Func<Stream, IResultObject> getResult = s =>
+      {
+        var result = new ResultObject(s, _conn, select);
+        if (cmd.Action == CommandAction.ApplySQL)
+          result.PreferredMode = OutputType.Table;
+        return (IResultObject)result;
+      };
+
+      if (queries.Length == 1)
+      {
+        return ProcessCommand(GetCommand(queries[0], cmd, innCmd.Parameters, true), async)
+          .Convert(getResult);
+      }
+      else
+      {
+        return new DataPromise(queries, innCmd.ConcurrentCount, _conn
+          , (q, ct) => ProcessCommand(GetCommand(q, cmd, innCmd.Parameters, false), async).ToTask(ct)
+          , getResult)
+          .Progress(progressCallback);
+      }
+    }
+
+    private class DataPromise : Promise<IResultObject>
+    {
+      private Stream _resultStream = new MemoryStream();
+      private XmlWriter _writer;
+      private int _totalCount;
+      private int _completeCount = 0;
+      private int _errorCount = 0;
+      private int _started = 0;
+      private object _lock = new object();
+      private CancellationTokenSource _cts = new CancellationTokenSource();
+      private Func<Stream, IResultObject> _getResult;
+
+      public DataPromise(IList<XElement> queries, int concurrentCount, IConnection conn
+        , Func<XElement, CancellationToken, Task<Stream>> processQuery
+        , Func<Stream, IResultObject> getResult)
+      {
+        var settings = new XmlWriterSettings()
+        {
+          OmitXmlDeclaration = true,
+          Indent = true,
+          IndentChars = "  "
+        };
+        _writer = XmlWriter.Create(_resultStream, settings);
+        _writer.WriteStartElement("AsyncResult");
+        _totalCount = queries.Count;
+        _getResult = getResult;
+
+        base.CancelTarget(this);
+
+        ProcessPooled(queries, concurrentCount, processQuery, conn)
+          .ContinueWith(t =>
+          {
+            if (t.IsFaulted)
+            {
+              Exception ex = t.Exception;
+              if (ex != null && ex.InnerException != null)
+                ex = ex.InnerException;
+              base.Reject(ex);
+            }
+            else if (!t.IsCanceled && !_cts.IsCancellationRequested)
+            {
+              lock(_lock)
+              {
+                _writer.WriteEndElement();
+                _writer.Flush();
+                _resultStream.Position = 0;
+              }
+              base.Resolve(getResult(_resultStream));
+            }
+          });
+      }
+
+      public override void Cancel()
+      {
+        if (!_cts.IsCancellationRequested)
+        {
+          _cts.Cancel();
+          lock (_lock)
+          {
+            _writer.WriteStartElement("Canceled");
+            _writer.WriteAttributeString("at", DateTime.Now.ToString("s"));
+            _writer.WriteAttributeString("batchesStarted", _started.ToString() + " of " + _totalCount.ToString());
+            _writer.WriteAttributeString("batchesFinished", _completeCount.ToString());
+            _writer.WriteEndElement();
+            _writer.WriteEndElement();
+            _writer.Flush();
+            _resultStream.Position = 0;
+            base.Resolve(_getResult(_resultStream));
+          }
+        }
+      }
+
+      private void RecordResult(IReadOnlyResult result, XElement query)
+      {
+        if (!_cts.IsCancellationRequested)
+        {
+          lock (_lock)
+          {
+            _completeCount++;
+            if (result.Exception == null)
+            {
+              if (result.Items().Any())
+              {
+                foreach (var item in result.Items())
+                {
+                  item.ToAml(_writer);
+                }
+              }
+              else
+              {
+                _writer.WriteElementString("Result", result.Value);
+              }
+            }
+            else
+            {
+              _writer.WriteStartElement("Error");
+              result.Exception.AsAmlString(_writer);
+              _writer.WriteStartElement("Query");
+              query.WriteTo(_writer);
+              _writer.WriteEndElement();
+              _writer.WriteEndElement();
+              _errorCount++;
+            }
+            Notify(_completeCount * 100 / _totalCount, _errorCount + " error(s), " + (_completeCount - _errorCount) + " success(es)");
+          }
+        }
+      }
+
+      private async Task ProcessPooled(IList<XElement> queries, int concurrentCount, Func<XElement, CancellationToken, Task<Stream>> getResult, IConnection conn)
+      {
+        // now let's send HTTP requests to each of these URLs in parallel
+        var allTasks = new List<Task>();
+        var throttler = new SemaphoreSlim(initialCount: concurrentCount);
+        var factory = conn.AmlContext;
+
+        foreach (var query in queries)
+        {
+          // do an async wait until we can schedule again
+          await throttler.WaitAsync();
+
+          // using Task.Run(...) to run the lambda in its own parallel
+          // flow on the threadpool
+          allTasks.Add(Task.Run(async () =>
+          {
+            try
+            {
+              Interlocked.Increment(ref _started);
+              var stream = await getResult(query, _cts.Token);
+              RecordResult(factory.FromXml(stream, null, conn), query);
+            }
+            finally
+            {
+              throttler.Release();
+            }
+          }, _cts.Token));
+
+          if (_cts.IsCancellationRequested)
+             return;
+        }
+
+        // won't get here until all urls have been put into tasks
+        await Task.WhenAll(allTasks);
+
+        // won't get here until all tasks have completed in some way
+        // (either success or exception)
+      }
+    }
+
+    private Command GetCommand(XElement elem, Command orig, Dictionary<string, object> parameters, bool allowReuse)
+    {
+      // Check for file uploads and process if need be
+      Command result;
       var files = elem.DescendantsAndSelf("Item")
         .Where(e => e.Attributes("type").Any(a => a.Value == "File")
                   && e.Elements("actual_filename").Any(p => !string.IsNullOrEmpty(p.Value))
@@ -232,33 +447,60 @@ namespace InnovatorAdmin.Editor
       if (files.Any())
       {
         var upload = _conn.CreateUploadCommand();
-        upload.AddFileQuery(cmd.Aml);
-        upload.WithAction(cmd.ActionString);
-        foreach (var param in innCmd.Parameters)
+        upload.AddFileQuery(orig.Aml);
+        upload.WithAction(orig.ActionString);
+        foreach (var param in parameters)
         {
           upload.WithParam(param.Key, param.Value);
         }
-        cmd = upload;
+        result = upload;
       }
-      var firstItem = elem.DescendantsAndSelf("Item").FirstOrDefault();
-      string select = null;
-      if (firstItem != null && (firstItem.Parent == null || firstItem.Parent.Elements("Item").Count() == 1))
+      else if (allowReuse)
       {
-        select = firstItem.AttributeValue("select");
+        result = orig;
+      }
+      else
+      {
+        result = new Command(elem.ToString()).WithAction(orig.ActionString);
+        foreach (var param in parameters)
+        {
+          result.WithParam(param.Key, param.Value);
+        }
       }
 
-      if (cmd.Action == CommandAction.ApplyAML && cmd.Aml.IndexOf("<AML>") < 0)
+      if (result.Action == CommandAction.ApplyAML && result.Aml.IndexOf("<AML>") < 0)
       {
-        cmd.Aml = "<AML>" + cmd.Aml + "</AML>";
+        result.Aml = "<AML>" + result.Aml + "</AML>";
       }
-      return ProcessCommand(cmd, async)
-        .Convert(s =>
+      return result;
+    }
+
+    private bool IsQueryTag(XElement elem)
+    {
+      return elem.Name.LocalName == "Item" || elem.Name.LocalName == "sql" || elem.Name.LocalName == "SQL";
+    }
+    private XElement ConcatQueries(IEnumerable<XElement> elements)
+    {
+      if (elements == null || !elements.Any())
+        throw new NotSupportedException();
+      if (elements.First().Name.LocalName == "Item")
+      {
+        var result = new XElement("AML");
+        foreach (var elem in elements)
         {
-          var result = new ResultObject(s, _conn, select);
-          if (cmd.Action == CommandAction.ApplySQL)
-            result.PreferredMode = OutputType.Table;
-          return (IResultObject)result;
-        });
+          result.Add(elem);
+        }
+        return result;
+      }
+      else
+      {
+        var builder = new StringBuilder();
+        foreach (var elem in elements)
+        {
+          builder.AppendLine(elem.Value);
+        }
+        return new XElement("sql", builder.ToString());
+      }
     }
 
     protected virtual IPromise<Stream> ProcessCommand(Command cmd, bool async)
@@ -499,6 +741,7 @@ namespace InnovatorAdmin.Editor
         _internal.WithAction(action);
         return this;
       }
+
       public ICommand WithParam(string name, object value)
       {
         _internal.WithParam(name, value);
@@ -511,6 +754,21 @@ namespace InnovatorAdmin.Editor
         return this;
       }
 
+      private int _concurrentCount;
+      public int ConcurrentCount { get { return _concurrentCount; } }
+      public ICommand WithConcurrentCount(int concurrentCount)
+      {
+        _concurrentCount = concurrentCount;
+        return this;
+      }
+
+      private int _statementCount;
+      public int StatementCount { get { return _statementCount; } }
+      public ICommand WithStatementCount(int statementCount)
+      {
+        _statementCount = statementCount;
+        return this;
+      }
     }
 
     public void Dispose()

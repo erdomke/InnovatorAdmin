@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml;
 
 namespace Innovator.Client
 {
@@ -9,7 +10,7 @@ namespace Innovator.Client
     IEnumerable<IReadOnlyAttribute> Attributes();
     IEnumerable<IReadOnlyElement> Elements();
     IServerContext Context { get; }
-    /// <summary>Returns <c>true</c> if this element actually exists in the underlying AML, 
+    /// <summary>Returns <c>true</c> if this element actually exists in the underlying AML,
     /// otherwise, returns <c>false</c> to indicate that the element is just a null placeholder
     /// put in place to reduce unnecessary null reference checks</summary>
     bool Exists { get; }
@@ -21,6 +22,7 @@ namespace Innovator.Client
     string Value { get; }
 
     string ToAml();
+    void ToAml(XmlWriter writer);
   }
   public interface IElement : IReadOnlyElement
   {

@@ -95,10 +95,10 @@
       this.listValues.BorderStyle = System.Windows.Forms.BorderStyle.None;
       this.tableLayoutPanel1.SetColumnSpan(this.listValues, 2);
       this.listValues.FormattingEnabled = true;
-      this.listValues.ItemHeight = 15;
-      this.listValues.Location = new System.Drawing.Point(6, 74);
+      this.listValues.ItemHeight = 32;
+      this.listValues.Location = new System.Drawing.Point(6, 109);
       this.listValues.Name = "listValues";
-      this.listValues.Size = new System.Drawing.Size(317, 180);
+      this.listValues.Size = new System.Drawing.Size(317, 128);
       this.listValues.TabIndex = 1;
       this.listValues.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listValues_KeyDown);
       this.listValues.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listValues_MouseDoubleClick);
@@ -109,9 +109,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.txtFilter.BorderStyle = System.Windows.Forms.BorderStyle.None;
       this.tableLayoutPanel1.SetColumnSpan(this.txtFilter, 2);
-      this.txtFilter.Location = new System.Drawing.Point(6, 45);
+      this.txtFilter.Location = new System.Drawing.Point(6, 64);
       this.txtFilter.Name = "txtFilter";
-      this.txtFilter.Size = new System.Drawing.Size(317, 16);
+      this.txtFilter.Size = new System.Drawing.Size(317, 32);
       this.txtFilter.TabIndex = 0;
       this.txtFilter.TextChanged += new System.EventHandler(this.txtFilter_TextChanged);
       this.txtFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtFilter_KeyDown);
@@ -128,11 +128,11 @@
       this.btnOK.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnOK.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
       this.btnOK.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(150)))), ((int)(((byte)(243)))));
-      this.btnOK.Location = new System.Drawing.Point(168, 261);
+      this.btnOK.Location = new System.Drawing.Point(78, 258);
       this.btnOK.Name = "btnOK";
       this.btnOK.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnOK.Padding = new System.Windows.Forms.Padding(2);
-      this.btnOK.Size = new System.Drawing.Size(76, 33);
+      this.btnOK.Size = new System.Drawing.Size(117, 36);
       this.btnOK.TabIndex = 2;
       this.btnOK.Text = "&SELECT";
       this.btnOK.Theme = InnovatorAdmin.Controls.FlatButtonTheme.Dialog;
@@ -149,11 +149,11 @@
       this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnCancel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
       this.btnCancel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(150)))), ((int)(((byte)(243)))));
-      this.btnCancel.Location = new System.Drawing.Point(250, 261);
+      this.btnCancel.Location = new System.Drawing.Point(201, 258);
       this.btnCancel.Name = "btnCancel";
       this.btnCancel.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnCancel.Padding = new System.Windows.Forms.Padding(2);
-      this.btnCancel.Size = new System.Drawing.Size(73, 33);
+      this.btnCancel.Size = new System.Drawing.Size(122, 36);
       this.btnCancel.TabIndex = 3;
       this.btnCancel.Text = "&CANCEL";
       this.btnCancel.Theme = InnovatorAdmin.Controls.FlatButtonTheme.Dialog;
@@ -166,7 +166,7 @@
       this.lblMessage.Location = new System.Drawing.Point(6, 22);
       this.lblMessage.Margin = new System.Windows.Forms.Padding(3);
       this.lblMessage.Name = "lblMessage";
-      this.lblMessage.Size = new System.Drawing.Size(0, 17);
+      this.lblMessage.Size = new System.Drawing.Size(0, 36);
       this.lblMessage.TabIndex = 4;
       // 
       // panel1
@@ -175,7 +175,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(150)))), ((int)(((byte)(243)))));
       this.tableLayoutPanel1.SetColumnSpan(this.panel1, 2);
-      this.panel1.Location = new System.Drawing.Point(3, 64);
+      this.panel1.Location = new System.Drawing.Point(3, 99);
       this.panel1.Margin = new System.Windows.Forms.Padding(0, 0, 0, 5);
       this.panel1.Name = "panel1";
       this.panel1.Size = new System.Drawing.Size(323, 2);
@@ -288,7 +288,7 @@
       // FilterSelect
       // 
       this.AcceptButton = this.btnOK;
-      this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+      this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 32F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.BackColor = System.Drawing.Color.DarkGray;
       this.CancelButton = this.btnCancel;

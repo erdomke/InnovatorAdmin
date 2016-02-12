@@ -266,5 +266,10 @@ namespace Innovator.Client
       if (_node == null) return null;
       return _node.OuterXml;
     }
+
+    public void ToAml(XmlWriter writer)
+    {
+      _node.WriteTo(writer);
+    }
   }
 }

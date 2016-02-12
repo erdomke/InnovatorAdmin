@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Innovator.Client.Connection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Reflection;
+
 namespace Innovator.Client.Connection.Tests
 {
   [TestClass()]
@@ -22,17 +24,17 @@ namespace Innovator.Client.Connection.Tests
         req.SetHeader("OData-MaxVersion", "4.0");
         req.SetContent(w =>
         {
-          w.Write(@"{  
+          w.Write(@"{
     ""UserName"":""lewisblack"",
     ""FirstName"":""Lewis"",
     ""LastName"":""Black"",
-    ""Emails"":[  
+    ""Emails"":[
         ""lewisblack@example.com""
     ],
-    ""AddressInfo"":[  
-        {  
+    ""AddressInfo"":[
+        {
             ""Address"":""187 Suffolk Ln."",
-            ""City"":{  
+            ""City"":{
                 ""CountryRegion"":""United States"",
                 ""Name"":""Boise"",
                 ""Region"":""ID""

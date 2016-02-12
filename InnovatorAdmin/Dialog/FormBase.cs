@@ -61,6 +61,7 @@ namespace InnovatorAdmin
       NativeMethods.SendMessage(Handle, (int)WindowMessages.WM_SYSMENU, 0, MakeLong((short)pos.X, (short)pos.Y));
     }
 
+    const int WM_DPICHANGED = 0x02E0;
     protected override void WndProc(ref Message m)
     {
       if (DesignMode)
@@ -101,6 +102,29 @@ namespace InnovatorAdmin
             WmWindowPosChanged(ref m);
             break;
           }
+        //This message is sent when the form is dragged to a different monitor i.e. when
+        //the bigger part of its are is on the new monitor. Note that handling the message immediately
+        //might change the size of the form so that it no longer overlaps the new monitor in its bigger part
+        //which in turn will send again the WM_DPICHANGED message and this might cause misbehavior.
+        //Therefore we delay the scaling if the form is being moved and we use the CanPerformScaling method to
+        //check if it is safe to perform the scaling.
+        case WM_DPICHANGED:
+          oldDpi = currentDpi;
+          currentDpi = LOWORD((int)m.WParam);
+
+          if (oldDpi != currentDpi)
+          {
+            if (this.isMoving)
+            {
+              shouldScale = true;
+            }
+            else
+            {
+              OnDpiChanged(currentDpi / 96.0f, oldDpi / 96.0f);
+            }
+          }
+
+          break;
         case 174: // ignore magic message number
           {
             break;
@@ -111,6 +135,11 @@ namespace InnovatorAdmin
             break;
           }
       }
+    }
+
+    public static short LOWORD(int number)
+    {
+      return (short)number;
     }
 
     private void SetWindowRegion(IntPtr hwnd, int left, int top, int right, int bottom)
@@ -557,6 +586,73 @@ namespace InnovatorAdmin
           DecorationMouseDown(HitTestValues.HTCAPTION);
         }
       }
+    }
+    #endregion
+
+    #region DPI
+    protected void InitializeDpi()
+    {
+      using (var g = this.CreateGraphics())
+      {
+        oldDpi = (int)g.DpiX;
+        currentDpi = (int)g.DpiX;
+      }
+      if (oldDpi > designTimeDpi)
+        OnDpiChanged(currentDpi / designTimeDpi, oldDpi / designTimeDpi);
+    }
+    protected float DpiScale
+    {
+      get { return currentDpi / designTimeDpi; }
+    }
+
+    private bool isMoving = false;
+    private bool shouldScale = false;
+    int oldDpi;
+    int currentDpi;
+    const float designTimeDpi = 96.0f;
+
+    protected override void OnResizeBegin(EventArgs e)
+    {
+      base.OnResizeBegin(e);
+      this.isMoving = true;
+    }
+
+    protected override void OnResizeEnd(EventArgs e)
+    {
+      base.OnResizeEnd(e);
+      this.isMoving = false;
+      if (shouldScale)
+      {
+        shouldScale = false;
+        OnDpiChanged(currentDpi / designTimeDpi, oldDpi / designTimeDpi);
+      }
+    }
+
+    protected override void OnMove(EventArgs e)
+    {
+      base.OnMove(e);
+      if (this.shouldScale && CanPerformScaling())
+      {
+        this.shouldScale = false;
+        OnDpiChanged(currentDpi / designTimeDpi, oldDpi / designTimeDpi);
+      }
+    }
+
+
+    private bool CanPerformScaling()
+    {
+      Screen screen = Screen.FromControl(this);
+      if (screen.Bounds.Contains(this.Bounds))
+      {
+        return true;
+      }
+
+      return false;
+    }
+
+    protected virtual void OnDpiChanged(float scale, float oldScale)
+    {
+
     }
     #endregion
   }

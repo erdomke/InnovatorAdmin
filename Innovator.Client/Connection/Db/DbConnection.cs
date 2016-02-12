@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using Innovator.Client;
+using System.Xml;
 
 namespace Innovator.Client.Connection
 {
@@ -38,7 +39,7 @@ namespace Innovator.Client.Connection
     {
       return new DbCommand(this);
     }
-    
+
     void IDbConnection.Close()
     {
       // Do nothing
@@ -58,7 +59,7 @@ namespace Innovator.Client.Connection
     {
       get { return DefaultHttpService.DefaultTimeout; }
     }
-    
+
     IDbTransaction IDbConnection.BeginTransaction(IsolationLevel il)
     {
       throw new NotSupportedException();
@@ -254,6 +255,11 @@ namespace Innovator.Client.Connection
       return _item.ToAml();
     }
 
+    public void ToAml(XmlWriter writer)
+    {
+      _item.ToAml(writer);
+    }
+
     object ICloneable.Clone()
     {
       return _item.Clone();
@@ -264,5 +270,5 @@ namespace Innovator.Client.Connection
       return _item.Property(name, lang);
     }
   }
-  
+
 }

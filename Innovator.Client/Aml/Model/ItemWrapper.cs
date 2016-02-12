@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml;
 
 namespace Innovator.Client
 {
@@ -92,6 +93,11 @@ namespace Innovator.Client
     public string ToAml()
     {
       return _item.ToAml();
+    }
+
+    public void ToAml(XmlWriter writer)
+    {
+      _item.ToAml(writer);
     }
 
     object ICloneable.Clone()

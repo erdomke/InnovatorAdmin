@@ -78,9 +78,12 @@ namespace InnovatorAdmin.Dialog
       this.BottomLeftCornerPanel = pnlBottomLeft;
       this.InitializeTheme();
 
+      InitializeDpi();
+
       this.KeyPreview = true;
       this.Icon = (this.Owner ?? Application.OpenForms[0]).Icon;
       grid.AutoGenerateColumns = false;
+      grid.RowTemplate.Height = (int)(DpiScale * 22);
 
       btnMoveUp.Font = FontAwesome.Font;
       btnMoveUp.Text = FontAwesome.Fa_arrow_up.ToString();

@@ -8,6 +8,8 @@ namespace InnovatorAdmin
 {
   public interface ICommand
   {
+    ICommand WithStatementCount(int statementCount);
+    ICommand WithConcurrentCount(int concurrentCount);
     ICommand WithQuery(string query);
     ICommand WithAction(string action);
     ICommand WithParam(string name, object value);

@@ -107,6 +107,10 @@ namespace InnovatorAdmin
         base.OnLoad(e);
 
         var bounds = Properties.Settings.Default.Main_Bounds;
+        var scale = DpiScale / Properties.Settings.Default.LastDpiScale;
+        if (Math.Round(scale, 5) != 1)
+          bounds = new Rectangle(bounds.X, bounds.Y, (int)(bounds.Width * scale), (int)(bounds.Height * scale));
+
         if (bounds.Width < 100 || bounds.Height < 100)
         {
           // Do nothing

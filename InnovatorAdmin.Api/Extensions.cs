@@ -171,55 +171,12 @@ namespace InnovatorAdmin
     //  column.ExtendedProperties["sort_order"] = value;
     //}
 
-    public static IEnumerable<AmlSelectColumn> SelectColumns(string select)
-    {
-      var result = new AmlSelectColumn();
-      if (string.IsNullOrEmpty(select))
-        return result.Children;
-
-      var path = new Stack<AmlSelectColumn>();
-      path.Push(result);
-      var start = 0;
-      for (var i = 0; i < select.Length; i++)
-      {
-        switch (select[i])
-        {
-          case ',':
-            if (i - start > 0)
-              path.Peek().Add(new AmlSelectColumn() { Name = select.Substring(start, i - start).Trim() });
-            start = i + 1;
-            break;
-          case '(':
-            if (i - start > 0)
-            {
-              var curr = new AmlSelectColumn() { Name = select.Substring(start, i - start).Trim() };
-              path.Peek().Add(curr);
-              path.Push(curr);
-            }
-            start = i + 1;
-            break;
-          case ')':
-            if (i - start > 0)
-              path.Peek().Add(new AmlSelectColumn() { Name = select.Substring(start, i - start).Trim() });
-            path.Pop();
-            start = i + 1;
-            break;
-        }
-      }
-
-      if (start < select.Length)
-      {
-        result.Add(new AmlSelectColumn() { Name = select.Substring(0, select.Length - start).Trim() });
-      }
-      return result.Children;
-    }
-
     public static DataSet GetItemTable(IReadOnlyResult res, ArasMetadataProvider metadata, string select)
     {
       var ds = new DataSet();
       string mainType = null;
       string mainId = null;
-      var selectedCols = SelectColumns(select);
+      var selectedCols = SubSelect.FromString(select);
 
       List<IReadOnlyItem> items;
       try

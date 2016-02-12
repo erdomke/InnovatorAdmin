@@ -63,12 +63,12 @@ namespace Innovator.Client
       return Promises.Rejected<Stream>(
         new ArgumentException(string.Format("Property '{0}' does not reference a file to download", prop.Name), "prop"));
     }
-    
+
     public static bool ClassStartsWith(this IReadOnlyItem item, params string[] roots)
     {
       if (roots == null) return false;
       var path = item.Classification().Value;
-      
+
       foreach (var root in roots)
       {
         if (string.IsNullOrEmpty(root)) return true;
@@ -162,7 +162,7 @@ namespace Innovator.Client
       ).Apply(conn).AssertItem();
       item.LockedById().Remove();
     }
-    
+
     //public static IReadOnlyItem LazyFetch(this IReadOnlyItem item, IConnection conn, params SubSelect[] properties)
     //{
     //  if (!properties.Any()) return item;
@@ -209,7 +209,7 @@ namespace Innovator.Client
         _path = path ?? "";
         _listener = listener;
       }
-      
+
       public override IReadOnlyProperty Property(string name)
       {
         return new PropertyWatcher(base.Property(name), _path + "/" + name, _listener);
@@ -348,6 +348,11 @@ namespace Innovator.Client
       public string ToAml()
       {
         return _prop.ToAml();
+      }
+
+      public void ToAml(XmlWriter writer)
+      {
+        _prop.ToAml(writer);
       }
 
       public object Clone()

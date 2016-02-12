@@ -189,6 +189,9 @@ namespace InnovatorAdmin.Editor
           case ArasEditorProxy.UnitTestAction:
             items = Elements("TestSuite");
             break;
+          case "RebuildKeyedName":
+            items = Elements("ItemTypes");
+            break;
           default:
             items = Elements("Item");
             break;
@@ -649,6 +652,10 @@ namespace InnovatorAdmin.Editor
             else if (path.Last().LocalName == "TestSuite")
             {
               items = Elements("Tests", "Init", "Cleanup");
+            }
+            else if (soapAction == "RebuildKeyedName" && path.Last().LocalName == "ItemTypes")
+            {
+              items = ItemTypeCompletion<BasicCompletionData>(_metadata.ItemTypes);
             }
             else if (path.Last().LocalName == "Tests")
             {
@@ -1139,8 +1146,7 @@ namespace InnovatorAdmin.Editor
         }
         else if (p.Name == "name" && itemType.Name == "Property"
           && lastItem.Values.TryGetValue("label", out itemValue)
-          && (lastItem.Action == "add" || lastItem.Action == "create"
-            || lastItem.Action == "edit" || lastItem.Action == "merge"))
+          && IsUpdateAction(lastItem.Action))
         {
           var output = new char[itemValue.Length];
           var o = 0;
@@ -1159,6 +1165,13 @@ namespace InnovatorAdmin.Editor
           }
           if (output[o - 1] == '_') o--;
           return Enumerable.Repeat(new string(output, 0, Math.Min(o, 32)), 1).GetCompletions<BasicCompletionData>();
+        }
+        else if ((itemType.Name == "Value" || itemType.Name == "Filter Value")
+          && ((p.Name == "value" && lastItem.Values.TryGetValue("label", out itemValue))
+            || (p.Name == "label" && lastItem.Values.TryGetValue("value", out itemValue)))
+          && IsUpdateAction(lastItem.Action))
+        {
+          return new string[] { itemValue }.GetCompletions<BasicCompletionData>();
         }
         else if ((p.Name == "name" || p.Name == "keyed_name") && itemType.Name == "Property" && lastItem.Action == "get"
           && lastItem.Values.TryGetValue("source_id", out itemValue))
@@ -1207,6 +1220,12 @@ namespace InnovatorAdmin.Editor
           return Enumerable.Empty<ICompletionData>();
         }
       }
+    }
+
+    private bool IsUpdateAction(string action)
+    {
+      return action == "add" || action == "create"
+          || action == "edit" || action == "merge";
     }
 
     private IEnumerable<ICompletionData> GetDateCompletions()

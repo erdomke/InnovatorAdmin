@@ -117,6 +117,7 @@
     <Compile Include="IO\NameValueDictionary.cs" />
     <Compile Include="IO\HttpException.cs" />
     <Compile Include="Promise\ICancelable.cs" />
+    <Compile Include="Promise\PooledPromise.cs" />
     <Compile Include="Promise\PromiseResult.cs" />
     <Compile Include="IServerContext.cs" />
     <Compile Include="Connection\InitializeSessionToken.cs" />

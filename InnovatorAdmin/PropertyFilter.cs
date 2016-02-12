@@ -19,8 +19,16 @@ namespace InnovatorAdmin
 
     public void Add(Expression<Func<T, object>> propertyGetter)
     {
+      var body = propertyGetter.Body;
+      // Convert
+      if (body.NodeType == ExpressionType.Convert
+        || body.NodeType == ExpressionType.ConvertChecked)
+      {
+        body = ((UnaryExpression)propertyGetter.Body).Operand;
+      }
+
       // PropertyExpression
-      var propExpr = propertyGetter.Body as MemberExpression;
+      var propExpr = body as MemberExpression;
       if (propExpr == null)
         throw new ArgumentException("Expression should be a property access (e.g. i => i.PropertyName )");
       _names.Add(propExpr.Member.Name);

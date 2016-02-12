@@ -129,6 +129,22 @@ namespace InnovatorAdmin.Editor
         _cmd.Parameters.AddWithValue(name, value);
         return this;
       }
+
+      private int _concurrentCount;
+      public int ConcurrentCount { get { return _concurrentCount; } }
+      public ICommand WithConcurrentCount(int concurrentCount)
+      {
+        _concurrentCount = concurrentCount;
+        return this;
+      }
+
+      private int _statementCount;
+      public int StatementCount { get { return _statementCount; } }
+      public ICommand WithStatementCount(int statementCount)
+      {
+        _statementCount = statementCount;
+        return this;
+      }
     }
 
     public void Dispose()

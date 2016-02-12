@@ -22,7 +22,13 @@ namespace InnovatorAdmin
     {
       GenerateBatFile();
       this.MainForm.Shown += MainForm_Shown;
+      AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
       Splat.Locator.CurrentMutable.RegisterConstant(new Logger(), typeof(Splat.ILogger));
+    }
+
+    private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+      Utils.HandleError(e.ExceptionObject as Exception);
     }
 
     private class Logger : Splat.ILogger

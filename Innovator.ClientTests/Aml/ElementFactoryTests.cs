@@ -11,6 +11,14 @@ namespace Innovator.Client.Aml.Tests
   public class ElementFactoryTests
   {
     [TestMethod()]
+    public void SelectColumnsTest()
+    {
+      var cols = SubSelect.FromString("first, second (thing, another2(id, config_id)), no_paren, third (stuff), another (id)");
+      var expected = new string[] { "first", "second", "no_paren", "third", "another" };
+      CollectionAssert.AreEqual(expected, cols.Select(c => c.Name).ToArray());
+    }
+
+    [TestMethod()]
     public void FormatAmlTest()
     {
       Assert.AreEqual("<Item><name>first &amp; second &gt; third</name><is_current>1</is_current><date>2015-01-01T00:00:00</date></Item>",
@@ -33,7 +41,7 @@ namespace Innovator.Client.Aml.Tests
     [TestMethod()]
     public void FormatAmlTest_EmptyXmlElement()
     {
-      Assert.AreEqual(@"<Item type=""PCO Task"" action=""add""><source_id>1234</source_id><related_id><Item type=""Task"" action=""add""><date_due_target>2020-01-14T16:38:12</date_due_target><indent>0</indent><is_complete is_null=""1"" /><name>Update the documentation</name><date_start_target>2020-01-13T16:38:12</date_start_target><owned_by_id>F13AF7BC3D7A4084AF67AB7BF938C409</owned_by_id></Item></related_id></Item>", 
+      Assert.AreEqual(@"<Item type=""PCO Task"" action=""add""><source_id>1234</source_id><related_id><Item type=""Task"" action=""add""><date_due_target>2020-01-14T16:38:12</date_due_target><indent>0</indent><is_complete is_null=""1"" /><name>Update the documentation</name><date_start_target>2020-01-13T16:38:12</date_start_target><owned_by_id>F13AF7BC3D7A4084AF67AB7BF938C409</owned_by_id></Item></related_id></Item>",
         new Command(@"<Item type='PCO Task' action='add'><source_id>@0</source_id><related_id><Item type='Task' action='add'><date_due_target>2020-01-14T16:38:12</date_due_target><indent>0</indent><is_complete is_null='1' /><name>Update the documentation</name><date_start_target>2020-01-13T16:38:12</date_start_target><owned_by_id>F13AF7BC3D7A4084AF67AB7BF938C409</owned_by_id></Item></related_id></Item>"
           , "1234").ToNormalizedAml(ElementFactory.Local.LocalizationContext));
     }

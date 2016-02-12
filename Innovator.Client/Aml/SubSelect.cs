@@ -69,7 +69,7 @@ namespace Innovator.Client
       }
       match.EnsurePath(path.Skip(1));
     }
-    
+
     public IEnumerator<SubSelect> GetEnumerator()
     {
       if (_children == null) return Enumerable.Empty<SubSelect>().GetEnumerator();
@@ -93,9 +93,9 @@ namespace Innovator.Client
       return this.GetEnumerator();
     }
 
-    public static implicit operator SubSelect(string name)
+    public static implicit operator SubSelect(string select)
     {
-      return new SubSelect(name);
+      return FromString(select);
     }
 
     public override string ToString()
@@ -127,6 +127,49 @@ namespace Innovator.Client
     public static string ToString(IEnumerable<SubSelect> items)
     {
       return Write(new StringBuilder(), items).ToString();
+    }
+
+    public static SubSelect FromString(string select)
+    {
+      var result = new SubSelect();
+      if (string.IsNullOrEmpty(select))
+        return result;
+
+      var path = new Stack<SubSelect>();
+      path.Push(result);
+      var start = 0;
+      for (var i = 0; i < select.Length; i++)
+      {
+        switch (select[i])
+        {
+          case ',':
+            if (i - start > 0)
+              path.Peek().Add(new SubSelect(select.Substring(start, i - start).Trim()));
+            start = i + 1;
+            break;
+          case '(':
+            if (i - start > 0)
+            {
+              var curr = new SubSelect(select.Substring(start, i - start).Trim());
+              path.Peek().Add(curr);
+              path.Push(curr);
+            }
+            start = i + 1;
+            break;
+          case ')':
+            if (i - start > 0)
+              path.Peek().Add(new SubSelect(select.Substring(start, i - start).Trim()));
+            path.Pop();
+            start = i + 1;
+            break;
+        }
+      }
+
+      if (start < select.Length)
+      {
+        result.Add(new SubSelect(select.Substring(0, select.Length - start).Trim()));
+      }
+      return result;
     }
 
     private static StringBuilder Write(StringBuilder builder, IEnumerable<SubSelect> items)

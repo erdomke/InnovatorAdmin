@@ -90,10 +90,10 @@ namespace InnovatorAdmin
     public FullEditor InputEditor { get { return inputEditor; } }
     public FullEditor OutputEditor { get { return outputEditor; } }
 
-    public EditorWindow()
+    public EditorWindow() : base()
     {
       InitializeComponent();
-
+      
       this.TitleLabel = lblTitle;
       this.MaximizeLabel = lblMaximize;
       this.MinimizeLabel = lblMinimize;
@@ -109,6 +109,8 @@ namespace InnovatorAdmin
       this.BottomBorderPanel = pnlBottom;
       this.BottomLeftCornerPanel = pnlBottomLeft;
       this.InitializeTheme();
+
+      InitializeDpi();
 
       menuStrip.Renderer = new SimpleToolstripRenderer() { BaseColor = Color.White };
       lblConnection.Font = FontAwesome.Font;
@@ -693,6 +695,7 @@ namespace InnovatorAdmin
     private void FormatDataGrid(DataGridView grid)
     {
       var tbl = (DataTable)grid.DataSource;
+      grid.RowTemplate.Height = (int)(DpiScale * 22);
       var arasProxy = _proxy as ArasEditorProxy;
       ArasMetadataProvider metadata = null;
       if (arasProxy != null)
@@ -1162,18 +1165,18 @@ namespace InnovatorAdmin
       return window;
     }
 
-    private IPromise<IResultObject> Submit(string query, OutputType preferred = OutputType.Any)
+    private IPromise<IResultObject> Submit(string query, OutputType preferred = OutputType.Any, int batchSize = 0, int concurrentCount = 0)
     {
       if (_currentQuery != null)
       {
-        _currentQuery.Cancel();
-        _clock.Enabled = false;
-        lblProgress.Text = "Canceled";
-        _currentQuery = null;
         outputEditor.Text = "";
+        _currentQuery.Cancel();
+        _currentQuery = null;
         lblClock.Text = "";
+        progQuery.Visible = false;
         _clock.Enabled = false;
         btnSubmit.Text = "► Run";
+        lblProgress.Text = "Canceled";
         return null;
       }
 
@@ -1187,7 +1190,11 @@ namespace InnovatorAdmin
       }
       try
       {
-        var cmd = _proxy.NewCommand().WithQuery(query).WithAction(this.SoapAction);
+        var cmd = _proxy.NewCommand()
+          .WithQuery(query)
+          .WithAction(this.SoapAction)
+          .WithStatementCount(batchSize)
+          .WithConcurrentCount(concurrentCount);
         var queryParams = _proxy.GetHelper().GetParameterNames(query)
           .Select(p => GetCreateParameter(p)).ToList();
         if (queryParams.Any() && this.SoapAction != ArasEditorProxy.UnitTestAction)
@@ -1214,6 +1221,7 @@ namespace InnovatorAdmin
         lblProgress.Text = "Processing...";
         _start = DateTime.UtcNow;
         lblClock.Text = "";
+        progQuery.Visible = true;
         _clock.Enabled = true;
         _outputTextSet = false;
         btnSubmit.Text = "Cancel";
@@ -1247,7 +1255,11 @@ namespace InnovatorAdmin
 
         var st = Stopwatch.StartNew();
         _currentQuery = _proxy
-          .Process(cmd, true, (p, m) => this.UiThreadInvoke(() => lblProgress.Text = m))
+          .Process(cmd, true, (p, m) => this.UiThreadInvoke(() =>
+          {
+            lblProgress.Text = m;
+            progQuery.Value = p;
+          }))
           .UiPromise(this)
           .Done(result =>
           {
@@ -1273,6 +1285,7 @@ namespace InnovatorAdmin
             lblClock.Text = "";
             _clock.Enabled = false;
             _currentQuery = null;
+            progQuery.Visible = false;
             btnSubmit.Text = "► Run";
           });
 
@@ -1285,6 +1298,7 @@ namespace InnovatorAdmin
         outputEditor.Text = err.Message;
         tbcOutputView.SelectedTab = pgTextOutput;
         _clock.Enabled = false;
+        progQuery.Visible = false;
         lblClock.Text = "";
         lblProgress.Text = "Error";
         _currentQuery = null;
@@ -1979,6 +1993,39 @@ namespace InnovatorAdmin
       {
         Utils.HandleError(ex);
       }
+    }
+
+    private void mniRunBatch_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        using (var dialog = new Dialog.SettingsDialog())
+        {
+          dialog.Filter.Add(s => s.BatchSize);
+          dialog.Filter.Add(s => s.ThreadCount);
+          dialog.Settings = Settings.Current;
+          dialog.Message = "Please verify the batch size and thread count settings";
+          if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+            return;
+        }
+        Submit(inputEditor.Helper.GetCurrentQuery(inputEditor.Document, inputEditor.Editor.CaretOffset)
+          ?? inputEditor.Text, OutputType.Any, Settings.Current.BatchSize, Settings.Current.ThreadCount);
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    protected override void OnDpiChanged(float scale, float oldScale)
+    {
+      var size = (int)(3 * scale);
+      tblMain.ColumnStyles[0].Width = size;
+      tblMain.ColumnStyles[tblMain.ColumnStyles.Count - 1].Width = size;
+      tblMain.RowStyles[0].Height = size;
+      tblMain.RowStyles[tblMain.RowStyles.Count - 1].Height = size;
+      btnInstall.MinimumSize = new Size((int)(120 * scale), (int)(40 * scale));
+      btnCreate.MinimumSize = btnInstall.MinimumSize;
     }
   }
 }

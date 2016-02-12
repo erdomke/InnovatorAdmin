@@ -39,6 +39,8 @@ namespace InnovatorAdmin
       this.BottomLeftCornerPanel = pnlBottomLeft;
       this.InitializeTheme();
 
+      InitializeDpi();
+
       connectionEditor.LoadConnectionLibrary(ConnectionManager.Current.Library);
       connectionEditor.ConnectionSelected += connectionEditor_ConnectionSelected;
       this.TopMost = true;
@@ -79,7 +81,7 @@ namespace InnovatorAdmin
       var screenDim = SystemInformation.VirtualScreen;
       var newX = Math.Min(Math.Max(bounds.X, 0), screenDim.Width - this.DesktopBounds.Width);
       var newY = Math.Min(Math.Max(bounds.Y - 30, 0), screenDim.Height - this.DesktopBounds.Height);
-      this.DesktopLocation = new Point(newX, newY);
+      this.DesktopBounds = new Rectangle(newX, newY, (int)(DpiScale * this.Width), (int)(DpiScale * this.Height));
       return this.ShowDialog(owner);
     }
   }

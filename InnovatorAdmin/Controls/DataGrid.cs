@@ -67,6 +67,11 @@ namespace InnovatorAdmin.Controls
       return rows;
     }
 
+    public override DataObject GetClipboardContent()
+    {
+      return base.GetClipboardContent();
+    }
+
     public void Paste()
     {
       if (this.IsCurrentCellInEditMode)
@@ -75,20 +80,20 @@ namespace InnovatorAdmin.Controls
       }
       else if (!string.IsNullOrEmpty(Clipboard.GetText()))
       {
-	      var lines = Clipboard.GetText().TrimEnd('\r', '\n').Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
-	      var clipRows = lines.Length;
-	      string[] fields = null;
+        var lines = Clipboard.GetText().TrimEnd('\r', '\n').Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+        var clipRows = lines.Length;
+        string[] fields = null;
         DataGridViewCell cell;
         var visColumns = Enumerable.Range(0, this.ColumnCount)
           .Where(c => this.Columns[c].Visible)
           .OrderBy(c => this.Columns[c].DisplayIndex).ToArray();
-	      var selectMatrix = (from r in Enumerable.Range(0, this.RowCount)
+        var selectMatrix = (from r in Enumerable.Range(0, this.RowCount)
                             select (from c in visColumns
                                     select this[c, r].Selected).ToList()).ToList();
         var pasteErrorCount = 0;
         var pasteErrors = new StringBuilder();
 
-	      for (var row = 0; row <= this.RowCount - 1; row++)
+        for (var row = 0; row <= this.RowCount - 1; row++)
         {
           for (var colIdx = 0; colIdx < visColumns.Length; colIdx++)
           {
@@ -166,14 +171,14 @@ namespace InnovatorAdmin.Controls
               }
             }
           }
-	      }
+        }
 
         if (pasteErrorCount > 0)
         {
           var pasteError = new Exception(string.Format("Could not paste {0} values. For example:\r\n{1}", pasteErrorCount, pasteErrors.ToString()));
           Utils.HandleError(pasteError);
         }
-	    }
+      }
     }
 
     private interface INewRow

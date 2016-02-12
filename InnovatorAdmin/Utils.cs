@@ -14,6 +14,32 @@ namespace InnovatorAdmin
 {
   public static class Utils
   {
+
+    public static IEnumerable<IEnumerable<TSource>> Batch<TSource>(
+                  this IEnumerable<TSource> source, int size)
+    {
+      TSource[] bucket = null;
+      var count = 0;
+
+      foreach (var item in source)
+      {
+        if (bucket == null)
+          bucket = new TSource[size];
+
+        bucket[count++] = item;
+        if (count != size)
+          continue;
+
+        yield return bucket;
+
+        bucket = null;
+        count = 0;
+      }
+
+      if (bucket != null && count > 0)
+        yield return bucket.Take(count);
+    }
+
     public static string Replace(this string source, string oldValue, string newValue, StringComparison comparisonType)
     {
       if (source.Length == 0 || oldValue.Length == 0)
@@ -139,6 +165,7 @@ namespace InnovatorAdmin
 
     public static void HandleError(Exception ex)
     {
+      if (ex == null) return;
       using (var dialog = new Dialog.MessageDialog())
       {
         dialog.Message = ex.Message;

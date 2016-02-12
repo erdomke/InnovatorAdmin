@@ -70,7 +70,6 @@
     <Compile Include="CommandTests.cs" />
     <Compile Include="Connection\AuthenticationSchemeTests.cs" />
     <Compile Include="Connection\DefaultHttpServiceTests.cs" />
-    <Compile Include="FactoryTests.cs" />
     <Compile Include="ItemTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -12,6 +12,10 @@ namespace InnovatorAdmin
 {
   public class Settings
   {
+    [DisplayName("Batch Execution: Batch Size")]
+    public int BatchSize { get; set; }
+    [DisplayName("Batch Execution: Thread Count")]
+    public int ThreadCount { get; set; }
     [DisplayName("Diff Tool"), ParamControl(typeof(Editor.FilePathControl), "Base|Compare")]
     public string DiffToolCommand { get; set; }
     [DisplayName("Merge Tool"), ParamControl(typeof(Editor.FilePathControl), "Base|Local|Remote")]
@@ -85,6 +89,8 @@ namespace InnovatorAdmin
     {
       Properties.Settings.Default.DiffToolCommand = this.DiffToolCommand;
       Properties.Settings.Default.MergeToolCommand = this.MergeToolCommand;
+      Properties.Settings.Default.BatchCount = this.BatchSize;
+      Properties.Settings.Default.ThreadCount = this.ThreadCount;
       Properties.Settings.Default.Save();
     }
 
@@ -94,6 +100,8 @@ namespace InnovatorAdmin
       {
         return new Settings()
         {
+          BatchSize = Properties.Settings.Default.BatchCount,
+          ThreadCount = Properties.Settings.Default.ThreadCount,
           DiffToolCommand = Properties.Settings.Default.DiffToolCommand,
           MergeToolCommand = Properties.Settings.Default.MergeToolCommand
         };
