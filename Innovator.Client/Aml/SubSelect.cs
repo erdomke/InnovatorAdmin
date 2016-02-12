@@ -64,7 +64,7 @@ namespace Innovator.Client
       var match = _children.FirstOrDefault(c => c.Name == name);
       if (match == null)
       {
-        match = (SubSelect)name;
+        match = new SubSelect(name);
         _children.Add(match);
       }
       match.EnsurePath(path.Skip(1));

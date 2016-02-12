@@ -19,6 +19,22 @@ namespace Innovator.Client.Aml.Tests
     }
 
     [TestMethod()]
+    public void SubSelect_EnsurePath()
+    {
+      var subSelect = new SubSelect();
+      subSelect.EnsurePath("first");
+      subSelect.EnsurePath("second", "thing");
+      subSelect.EnsurePath("second", "another2", "id");
+      subSelect.EnsurePath("second", "another2", "config_id");
+      subSelect.EnsurePath("no_paren");
+      subSelect.EnsurePath("third");
+      subSelect.EnsurePath("third", "stuff");
+      subSelect.EnsurePath("another", "id");
+      var actual = subSelect.ToString();
+      Assert.AreEqual("first,second(thing,another2(id,config_id)),no_paren,third(stuff),another(id)", actual);
+    }
+
+    [TestMethod()]
     public void FormatAmlTest()
     {
       Assert.AreEqual("<Item><name>first &amp; second &gt; third</name><is_current>1</is_current><date>2015-01-01T00:00:00</date></Item>",
