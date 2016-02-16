@@ -147,6 +147,11 @@ namespace InnovatorAdmin.Editor
       FindReplaceMode = FindReplaceState.None;
     }
 
+    public void NewFile()
+    {
+      Document.FileName = string.Empty;
+      Document.Text = string.Empty;
+    }
 
     public async Task OpenFile(string path)
     {

@@ -541,6 +541,7 @@
       <DependentUpon>ScriptWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Settings.cs" />
+    <Compile Include="Settings1.cs" />
     <Compile Include="SingleInstance.cs" />
     <Compile Include="Snippet.cs" />
     <Compile Include="SnippetManager.cs" />
@@ -711,6 +712,14 @@
     <ProjectReference Include="..\InnovatorAdmin.Api\InnovatorAdmin.Api.csproj">
       <Project>{7C397623-C59E-4DB2-8879-8A3385DABCD9}</Project>
       <Name>InnovatorAdmin.Api</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Pipes.OfficeXml\Pipes.OfficeXml.csproj">
+      <Project>{7909c327-9068-4bce-8e53-168fdb23bdd8}</Project>
+      <Name>Pipes.OfficeXml</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Pipes\Pipes.csproj">
+      <Project>{42c8ffe2-a1fe-4358-8de2-7dbeb287a1e8}</Project>
+      <Name>Pipes</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

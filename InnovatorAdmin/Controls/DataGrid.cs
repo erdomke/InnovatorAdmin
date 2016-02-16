@@ -4,8 +4,8 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Pipes;
 
 namespace InnovatorAdmin.Controls
 {
@@ -80,7 +80,13 @@ namespace InnovatorAdmin.Controls
       }
       else if (!string.IsNullOrEmpty(Clipboard.GetText()))
       {
-        var lines = Clipboard.GetText().TrimEnd('\r', '\n').Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+        var reader = new Pipes.IO.StringTextSource(Clipboard.GetText().TrimEnd('\r', '\n'))
+          .Pipe(new Pipes.Data.DelimitedTextLineReader());
+        reader.AddDelim('\t');
+        reader.FieldEnclosingChar = '"';
+        reader.EnclosingCharEscape = '"';
+
+        var lines = reader.ToArray();
         var clipRows = lines.Length;
         string[] fields = null;
         DataGridViewCell cell;
@@ -102,12 +108,12 @@ namespace InnovatorAdmin.Controls
               var maxRows = this.AllowUserToAddRows ? clipRows : Math.Min(clipRows, this.RowCount - row);
               for (var pasteRow = 0; pasteRow < maxRows; pasteRow++)
               {
-                fields = lines[pasteRow].Split('\t');
+                fields = lines[pasteRow].ToArray();
                 if (this.Rows[row + pasteRow].IsNewRow)
                 {
                   for (var pRow = pasteRow; pRow < maxRows; pRow++)
                   {
-                    fields = lines[pRow].Split('\t');
+                    fields = lines[pRow].ToArray();
                     var newRow = CreateRow();
                     for (var pasteCol = 0; pasteCol < Math.Min(fields.Length, visColumns.Length - colIdx); pasteCol++)
                     {

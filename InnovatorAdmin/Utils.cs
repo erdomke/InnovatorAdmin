@@ -328,5 +328,34 @@ namespace InnovatorAdmin
       }
       return false;
     }
+
+    public static string PathEllipse(string path)
+    {
+      return Ellipsis(path, 400, new System.Drawing.Font("Arial", 9), TextFormatFlags.PathEllipsis);
+    }
+    public static string Ellipsis(string path, int width, float fontSize, TextFormatFlags FormatFlags)
+    {
+      return Ellipsis(path, width, new System.Drawing.Font("Arial", fontSize), FormatFlags);
+    }
+    public static string Ellipsis(string path, int width, System.Drawing.Font Font, TextFormatFlags formatFlags)
+    {
+      var result = string.Copy(path);
+      TextRenderer.MeasureText(result, Font, new System.Drawing.Size(width, 0), formatFlags | TextFormatFlags.ModifyString);
+
+      for (int index = 0; index <= result.Length - 1; index++)
+      {
+        if (result[index] == '\0')
+        {
+          return result.Substring(0, index);
+        }
+      }
+
+      return result;
+    }
+    public static string URLEllipse(string path)
+    {
+      return Ellipsis(path.Replace('/', '\\'), 300, new System.Drawing.Font("Arial", 9), TextFormatFlags.PathEllipsis).Replace('\\', '/');
+    }
+
   }
 }

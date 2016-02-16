@@ -92,17 +92,6 @@ namespace InnovatorAdmin
       _doc = SpreadsheetDocument.Open(source, false);
     }
 
-    //public static object[] Test()
-    //{
-    //  using (var reader = new ExcelTableReader())
-    //  {
-    //    reader.FirstRowColumnNames = true;
-    //    reader.SetSheet("CT+ A SQ Yesterday Report");
-    //    reader.Initialize(new FileStream(@"C:\Users\edomke\Desktop\CT+ A SQ Yesterday Report (03-04-2015) xlsx iec jan 2015_Fixed.xlsx", FileMode.Open, FileAccess.Read));
-    //    return reader.First();
-    //  }
-    //}
-
     public IEnumerator<object[]> GetEnumerator()
     {
       _columns = null;

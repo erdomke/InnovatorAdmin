@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Testing
 {
-  public class Test
+  public class Test : ITestVisitable
   {
     private List<ITestCommand> _commands = new List<ITestCommand>();
-
+    /// <summary>
+    /// Comment preceding the command in the script
+    /// </summary>
     public string Comment { get; set; }
     public IList<ITestCommand> Commands { get { return _commands; } }
     public string Name { get; set; }
@@ -76,6 +78,11 @@ namespace InnovatorAdmin.Testing
       {
         context.LastResult = null;
       }
+    }
+
+    public void Visit(ITestVisitor visitor)
+    {
+      visitor.Visit(this);
     }
   }
 }

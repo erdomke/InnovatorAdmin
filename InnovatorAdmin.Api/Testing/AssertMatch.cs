@@ -19,6 +19,9 @@ namespace InnovatorAdmin.Testing
     });
 
     public string Actual { get; set; }
+    /// <summary>
+    /// Comment preceding the command in the script
+    /// </summary>
     public string Comment { get; set; }
     public string Expected { get; set; }
     public bool IsXml { get; set; }
@@ -31,6 +34,9 @@ namespace InnovatorAdmin.Testing
       this.RemoveSystemProperties = true;
     }
 
+    /// <summary>
+    /// Code for executing the command
+    /// </summary>
     public async Task Run(TestContext context)
     {
       if (context.LastResult == null)
@@ -39,24 +45,40 @@ namespace InnovatorAdmin.Testing
         throw new ArgumentException("No match pattern is specified");
 
       this.Actual = context.LastResult.ToString();
-      var res = XPathResult.Evaluate(context.LastResult, this.Match);
+      var res = XPathResult.Evaluate(context.LastResult, this.Match, context.Connection);
       var elemRes = res as ElementsXpathResult;
       if (elemRes != null)
       {
+        this.IsXml = true;
         elemRes.Elements = elemRes.Elements.Select(e => new XElement(e)).ToArray();
         var elems = elemRes.Elements;
 
         // Remove properties from the actual as needed
         if (RemoveSystemProperties)
         {
+          // Remove system properties defined above
           foreach (var sysProp in elems.Descendants().Where(e => _systemProps.Contains(e.Name.LocalName)).ToArray())
           {
             sysProp.Remove();
           }
+          // Remote item ID attributes
           foreach (var item in elems.DescendantsAndSelf().Where(e => e.Name.LocalName == "Item"))
           {
             var idAttr = item.Attribute("id");
             if (idAttr != null) idAttr.Remove();
+          }
+          // Remove source_id properties that aren't necessary
+          foreach (var sourceId in elems.Descendants().Where(e => e.Name.LocalName == "source_id" && e.Parent != null
+            && e.Parent.Name.LocalName == "Item" && e.Parent.Parent != null && e.Parent.Parent.Name.LocalName == "Relationships").ToArray())
+          {
+            sourceId.Remove();
+          }
+          // Remove redundant itemtype properties to save space
+          foreach (var itemtype in elems.Descendants().Where(e => e.Name.LocalName == "itemtype" && e.Parent != null
+            && e.Parent.Name.LocalName == "Item" && e.Parent.Attribute("typeId") != null
+            && string.Equals(e.Value, e.Parent.Attribute("typeId").Value)).ToArray())
+          {
+            itemtype.Remove();
           }
         }
         foreach (var remove in _removes)
@@ -91,5 +113,12 @@ namespace InnovatorAdmin.Testing
       return "Aras Fault: " + fault.Value;
     }
 
+    /// <summary>
+    /// Visit this object for the purposes of rendering it to an output
+    /// </summary>
+    public void Visit(ITestVisitor visitor)
+    {
+      visitor.Visit(this);
+    }
   }
 }

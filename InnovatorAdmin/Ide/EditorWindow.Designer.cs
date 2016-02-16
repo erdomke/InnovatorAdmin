@@ -40,11 +40,13 @@
       this.lblSoapAction = new System.Windows.Forms.ToolStripLabel();
       this.btnSoapAction = new System.Windows.Forms.ToolStripButton();
       this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-      this.toolStripDropDownButton2 = new System.Windows.Forms.ToolStripDropDownButton();
+      this.mniFile = new System.Windows.Forms.ToolStripDropDownButton();
+      this.mniNewDocument = new System.Windows.Forms.ToolStripMenuItem();
       this.mniNewWindow = new System.Windows.Forms.ToolStripMenuItem();
       this.mniOpen = new System.Windows.Forms.ToolStripMenuItem();
       this.mniSave = new System.Windows.Forms.ToolStripMenuItem();
       this.mniSaveAs = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniRecentDocsStart = new System.Windows.Forms.ToolStripSeparator();
       this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
       this.mniClose = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
@@ -106,6 +108,7 @@
       this.lblVersion = new System.Windows.Forms.Label();
       this.lblProgress = new System.Windows.Forms.Label();
       this.lblClock = new System.Windows.Forms.Label();
+      this.progQuery = new System.Windows.Forms.ProgressBar();
       this.splitMain = new InnovatorAdmin.Controls.SplitContainerTheme();
       this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
       this.treeItems = new InnovatorAdmin.TreeListView();
@@ -149,7 +152,6 @@
       this.pnlLeftTop = new System.Windows.Forms.Panel();
       this.pnlRightTop = new System.Windows.Forms.Panel();
       this.pnlConnectionShadow = new InnovatorAdmin.DropShadow();
-      this.progQuery = new System.Windows.Forms.ProgressBar();
       this.tblMain.SuspendLayout();
       this.tblHeader.SuspendLayout();
       this.menuStrip.SuspendLayout();
@@ -177,11 +179,11 @@
       ((System.ComponentModel.ISupportInitialize)(this.dgvItems)).BeginInit();
       this.conTable.SuspendLayout();
       this.SuspendLayout();
-      //
+      // 
       // tblMain
-      //
-      this.tblMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.tblMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.tblMain.BackColor = System.Drawing.Color.White;
       this.tblMain.ColumnCount = 5;
@@ -217,9 +219,9 @@
       this.tblMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 3F));
       this.tblMain.Size = new System.Drawing.Size(1002, 687);
       this.tblMain.TabIndex = 0;
-      //
+      // 
       // tblHeader
-      //
+      // 
       this.tblHeader.AutoSize = true;
       this.tblHeader.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
       this.tblHeader.BackColor = System.Drawing.Color.White;
@@ -245,9 +247,9 @@
       this.tblHeader.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tblHeader.Size = new System.Drawing.Size(996, 48);
       this.tblHeader.TabIndex = 1;
-      //
+      // 
       // lblClose
-      //
+      // 
       this.lblClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.lblClose.AutoSize = true;
       this.lblClose.BackColor = System.Drawing.Color.Transparent;
@@ -260,10 +262,10 @@
       this.lblClose.TabIndex = 14;
       this.lblClose.Text = "r";
       this.lblClose.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-      //
+      // 
       // lblTitle
-      //
-      this.lblTitle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.lblTitle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.lblTitle.AutoSize = true;
       this.lblTitle.BackColor = System.Drawing.Color.Transparent;
@@ -276,9 +278,9 @@
       this.lblTitle.TabIndex = 11;
       this.lblTitle.Text = "Title";
       this.lblTitle.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
-      //
+      // 
       // menuStrip
-      //
+      // 
       this.menuStrip.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
       this.menuStrip.BackColor = System.Drawing.Color.Transparent;
       this.tblHeader.SetColumnSpan(this.menuStrip, 4);
@@ -291,7 +293,7 @@
             this.lblSoapAction,
             this.btnSoapAction,
             this.toolStripSeparator2,
-            this.toolStripDropDownButton2,
+            this.mniFile,
             this.toolStripDropDownButton1,
             this.toolStripDropDownButton4,
             this.toolStripDropDownButton3,
@@ -302,106 +304,120 @@
       this.menuStrip.Size = new System.Drawing.Size(927, 25);
       this.menuStrip.TabIndex = 1;
       this.menuStrip.Text = "toolStrip1";
-      //
+      // 
       // lblConnection
-      //
+      // 
       this.lblConnection.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.lblConnection.ForeColor = System.Drawing.Color.Black;
       this.lblConnection.Name = "lblConnection";
       this.lblConnection.Size = new System.Drawing.Size(15, 22);
       this.lblConnection.Text = "C";
-      //
+      // 
       // btnEditConnections
-      //
+      // 
       this.btnEditConnections.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
       this.btnEditConnections.ImageTransparentColor = System.Drawing.Color.Magenta;
       this.btnEditConnections.Name = "btnEditConnections";
       this.btnEditConnections.Size = new System.Drawing.Size(105, 22);
       this.btnEditConnections.Text = "Not Connected ▼";
       this.btnEditConnections.ToolTipText = "Change Connection (Ctrl+O)";
-      //
+      // 
       // lblSoapAction
-      //
+      // 
       this.lblSoapAction.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.lblSoapAction.ForeColor = System.Drawing.Color.Black;
       this.lblSoapAction.Name = "lblSoapAction";
       this.lblSoapAction.Size = new System.Drawing.Size(15, 22);
       this.lblSoapAction.Text = "A";
-      //
+      // 
       // btnSoapAction
-      //
+      // 
       this.btnSoapAction.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
       this.btnSoapAction.ImageTransparentColor = System.Drawing.Color.Magenta;
       this.btnSoapAction.Name = "btnSoapAction";
       this.btnSoapAction.Size = new System.Drawing.Size(46, 22);
       this.btnSoapAction.Text = "Action";
       this.btnSoapAction.ToolTipText = "Change Action (Ctrl+M)";
-      //
+      // 
       // toolStripSeparator2
-      //
+      // 
       this.toolStripSeparator2.AutoSize = false;
       this.toolStripSeparator2.Name = "toolStripSeparator2";
       this.toolStripSeparator2.Size = new System.Drawing.Size(25, 25);
-      //
-      // toolStripDropDownButton2
-      //
-      this.toolStripDropDownButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-      this.toolStripDropDownButton2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+      // 
+      // mniFile
+      // 
+      this.mniFile.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+      this.mniFile.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mniNewDocument,
             this.mniNewWindow,
             this.mniOpen,
             this.mniSave,
             this.mniSaveAs,
+            this.mniRecentDocsStart,
             this.toolStripSeparator3,
             this.mniClose});
-      this.toolStripDropDownButton2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton2.Image")));
-      this.toolStripDropDownButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
-      this.toolStripDropDownButton2.Name = "toolStripDropDownButton2";
-      this.toolStripDropDownButton2.ShowDropDownArrow = false;
-      this.toolStripDropDownButton2.Size = new System.Drawing.Size(29, 22);
-      this.toolStripDropDownButton2.Text = "&File";
-      //
+      this.mniFile.Image = ((System.Drawing.Image)(resources.GetObject("mniFile.Image")));
+      this.mniFile.ImageTransparentColor = System.Drawing.Color.Magenta;
+      this.mniFile.Name = "mniFile";
+      this.mniFile.ShowDropDownArrow = false;
+      this.mniFile.Size = new System.Drawing.Size(29, 22);
+      this.mniFile.Text = "&File";
+      // 
+      // mniNewDocument
+      // 
+      this.mniNewDocument.Name = "mniNewDocument";
+      this.mniNewDocument.ShortcutKeyDisplayString = "Ctrl+N";
+      this.mniNewDocument.Size = new System.Drawing.Size(220, 22);
+      this.mniNewDocument.Text = "New Document";
+      // 
       // mniNewWindow
-      //
+      // 
       this.mniNewWindow.Name = "mniNewWindow";
-      this.mniNewWindow.ShortcutKeyDisplayString = "Ctrl+N";
-      this.mniNewWindow.Size = new System.Drawing.Size(195, 22);
+      this.mniNewWindow.ShortcutKeyDisplayString = "Ctrl+Shift+N";
+      this.mniNewWindow.Size = new System.Drawing.Size(220, 22);
       this.mniNewWindow.Text = "New Window";
-      //
+      // 
       // mniOpen
-      //
+      // 
       this.mniOpen.Name = "mniOpen";
       this.mniOpen.ShortcutKeyDisplayString = "Ctrl+O";
-      this.mniOpen.Size = new System.Drawing.Size(195, 22);
+      this.mniOpen.Size = new System.Drawing.Size(220, 22);
       this.mniOpen.Text = "Open...";
-      //
+      // 
       // mniSave
-      //
+      // 
       this.mniSave.Name = "mniSave";
       this.mniSave.ShortcutKeyDisplayString = "Ctrl+S";
-      this.mniSave.Size = new System.Drawing.Size(195, 22);
+      this.mniSave.Size = new System.Drawing.Size(220, 22);
       this.mniSave.Text = "Save";
-      //
+      // 
       // mniSaveAs
-      //
+      // 
       this.mniSaveAs.Name = "mniSaveAs";
       this.mniSaveAs.ShortcutKeyDisplayString = "Ctrl+Shift+S";
-      this.mniSaveAs.Size = new System.Drawing.Size(195, 22);
+      this.mniSaveAs.Size = new System.Drawing.Size(220, 22);
       this.mniSaveAs.Text = "Save As...";
-      //
+      // 
+      // mniRecentDocsStart
+      // 
+      this.mniRecentDocsStart.Name = "mniRecentDocsStart";
+      this.mniRecentDocsStart.Size = new System.Drawing.Size(217, 6);
+      // 
       // toolStripSeparator3
-      //
+      // 
       this.toolStripSeparator3.Name = "toolStripSeparator3";
-      this.toolStripSeparator3.Size = new System.Drawing.Size(192, 6);
-      //
+      this.toolStripSeparator3.Size = new System.Drawing.Size(217, 6);
+      // 
       // mniClose
-      //
+      // 
       this.mniClose.Name = "mniClose";
-      this.mniClose.Size = new System.Drawing.Size(195, 22);
+      this.mniClose.Size = new System.Drawing.Size(220, 22);
       this.mniClose.Text = "Close";
       this.mniClose.Click += new System.EventHandler(this.mniClose_Click);
-      //
+      // 
       // toolStripDropDownButton1
-      //
+      // 
       this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
       this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniUndo,
@@ -424,95 +440,95 @@
       this.toolStripDropDownButton1.ShowDropDownArrow = false;
       this.toolStripDropDownButton1.Size = new System.Drawing.Size(31, 22);
       this.toolStripDropDownButton1.Text = "&Edit";
-      //
+      // 
       // mniUndo
-      //
+      // 
       this.mniUndo.Name = "mniUndo";
       this.mniUndo.ShortcutKeyDisplayString = "Ctrl+Z";
       this.mniUndo.Size = new System.Drawing.Size(200, 22);
       this.mniUndo.Text = "Undo";
-      //
+      // 
       // mniRedo
-      //
+      // 
       this.mniRedo.Name = "mniRedo";
       this.mniRedo.ShortcutKeyDisplayString = "Ctrl+Y";
       this.mniRedo.Size = new System.Drawing.Size(200, 22);
       this.mniRedo.Text = "Redo";
-      //
+      // 
       // toolStripSeparator4
-      //
+      // 
       this.toolStripSeparator4.Name = "toolStripSeparator4";
       this.toolStripSeparator4.Size = new System.Drawing.Size(197, 6);
-      //
+      // 
       // mniCut
-      //
+      // 
       this.mniCut.Name = "mniCut";
       this.mniCut.ShortcutKeyDisplayString = "Ctrl+X";
       this.mniCut.Size = new System.Drawing.Size(200, 22);
       this.mniCut.Text = "Cut";
-      //
+      // 
       // mniCopy
-      //
+      // 
       this.mniCopy.Name = "mniCopy";
       this.mniCopy.ShortcutKeyDisplayString = "Ctrl+C";
       this.mniCopy.Size = new System.Drawing.Size(200, 22);
       this.mniCopy.Text = "Copy";
-      //
+      // 
       // mniPaste
-      //
+      // 
       this.mniPaste.Name = "mniPaste";
       this.mniPaste.ShortcutKeyDisplayString = "Ctrl+V";
       this.mniPaste.Size = new System.Drawing.Size(200, 22);
       this.mniPaste.Text = "Paste";
-      //
+      // 
       // toolStripSeparator6
-      //
+      // 
       this.toolStripSeparator6.Name = "toolStripSeparator6";
       this.toolStripSeparator6.Size = new System.Drawing.Size(197, 6);
-      //
+      // 
       // insertToolStripMenuItem
-      //
+      // 
       this.insertToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniInsertNewGuid});
       this.insertToolStripMenuItem.Name = "insertToolStripMenuItem";
       this.insertToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
       this.insertToolStripMenuItem.Text = "Insert";
-      //
+      // 
       // mniInsertNewGuid
-      //
+      // 
       this.mniInsertNewGuid.Name = "mniInsertNewGuid";
       this.mniInsertNewGuid.Size = new System.Drawing.Size(128, 22);
       this.mniInsertNewGuid.Text = "New GUID";
-      //
+      // 
       // toolStripSeparator5
-      //
+      // 
       this.toolStripSeparator5.Name = "toolStripSeparator5";
       this.toolStripSeparator5.Size = new System.Drawing.Size(197, 6);
-      //
+      // 
       // codeToolStripMenuItem
-      //
+      // 
       this.codeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniTidy,
             this.mniMinify});
       this.codeToolStripMenuItem.Name = "codeToolStripMenuItem";
       this.codeToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
       this.codeToolStripMenuItem.Text = "Code";
-      //
+      // 
       // mniTidy
-      //
+      // 
       this.mniTidy.Name = "mniTidy";
       this.mniTidy.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
       this.mniTidy.Size = new System.Drawing.Size(221, 22);
       this.mniTidy.Text = "Pretty Format / Tidy";
-      //
+      // 
       // mniMinify
-      //
+      // 
       this.mniMinify.Name = "mniMinify";
       this.mniMinify.Size = new System.Drawing.Size(221, 22);
       this.mniMinify.Text = "Minify";
-      //
+      // 
       // commentUncommentToolStripMenuItem
-      //
+      // 
       this.commentUncommentToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniToggleSingleLineComment,
             this.mniSingleLineComment,
@@ -522,39 +538,39 @@
       this.commentUncommentToolStripMenuItem.Name = "commentUncommentToolStripMenuItem";
       this.commentUncommentToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
       this.commentUncommentToolStripMenuItem.Text = "Comment/Uncomment";
-      //
+      // 
       // mniToggleSingleLineComment
-      //
+      // 
       this.mniToggleSingleLineComment.Name = "mniToggleSingleLineComment";
       this.mniToggleSingleLineComment.Size = new System.Drawing.Size(227, 22);
       this.mniToggleSingleLineComment.Text = "Toggle Single Line Comment";
-      //
+      // 
       // mniSingleLineComment
-      //
+      // 
       this.mniSingleLineComment.Name = "mniSingleLineComment";
       this.mniSingleLineComment.Size = new System.Drawing.Size(227, 22);
       this.mniSingleLineComment.Text = "Single Line Comment";
-      //
+      // 
       // mniSingleLineUncomment
-      //
+      // 
       this.mniSingleLineUncomment.Name = "mniSingleLineUncomment";
       this.mniSingleLineUncomment.Size = new System.Drawing.Size(227, 22);
       this.mniSingleLineUncomment.Text = "Single Line Uncomment";
-      //
+      // 
       // mniBlockComment
-      //
+      // 
       this.mniBlockComment.Name = "mniBlockComment";
       this.mniBlockComment.Size = new System.Drawing.Size(227, 22);
       this.mniBlockComment.Text = "Block Comment";
-      //
+      // 
       // mniBlockUncomment
-      //
+      // 
       this.mniBlockUncomment.Name = "mniBlockUncomment";
       this.mniBlockUncomment.Size = new System.Drawing.Size(227, 22);
       this.mniBlockUncomment.Text = "Block Uncomment";
-      //
+      // 
       // toolStripMenuItem1
-      //
+      // 
       this.toolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniUppercase,
             this.mniLowercase,
@@ -569,112 +585,112 @@
       this.toolStripMenuItem1.Name = "toolStripMenuItem1";
       this.toolStripMenuItem1.Size = new System.Drawing.Size(200, 22);
       this.toolStripMenuItem1.Text = "Convert Characters";
-      //
+      // 
       // mniUppercase
-      //
+      // 
       this.mniUppercase.Name = "mniUppercase";
       this.mniUppercase.ShortcutKeyDisplayString = "Ctrl+Shift+U";
       this.mniUppercase.Size = new System.Drawing.Size(211, 22);
       this.mniUppercase.Text = "UPPERCASE";
-      //
+      // 
       // mniLowercase
-      //
+      // 
       this.mniLowercase.Name = "mniLowercase";
       this.mniLowercase.ShortcutKeyDisplayString = "Ctrl+U";
       this.mniLowercase.Size = new System.Drawing.Size(211, 22);
       this.mniLowercase.Text = "lowercase";
-      //
+      // 
       // toolStripSeparator7
-      //
+      // 
       this.toolStripSeparator7.Name = "toolStripSeparator7";
       this.toolStripSeparator7.Size = new System.Drawing.Size(208, 6);
-      //
+      // 
       // mniDoubleToSingleQuotes
-      //
+      // 
       this.mniDoubleToSingleQuotes.Name = "mniDoubleToSingleQuotes";
       this.mniDoubleToSingleQuotes.Size = new System.Drawing.Size(211, 22);
       this.mniDoubleToSingleQuotes.Text = "Convert \" -> \'";
-      //
+      // 
       // mniSingleToDoubleQuotes
-      //
+      // 
       this.mniSingleToDoubleQuotes.Name = "mniSingleToDoubleQuotes";
       this.mniSingleToDoubleQuotes.Size = new System.Drawing.Size(211, 22);
       this.mniSingleToDoubleQuotes.Text = "Convert \' -> \"";
-      //
+      // 
       // toolStripSeparator8
-      //
+      // 
       this.toolStripSeparator8.Name = "toolStripSeparator8";
       this.toolStripSeparator8.Size = new System.Drawing.Size(208, 6);
-      //
+      // 
       // mniMd5Encode
-      //
+      // 
       this.mniMd5Encode.Name = "mniMd5Encode";
       this.mniMd5Encode.Size = new System.Drawing.Size(211, 22);
       this.mniMd5Encode.Text = "MD5 Encode";
-      //
+      // 
       // toolStripSeparator1
-      //
+      // 
       this.toolStripSeparator1.Name = "toolStripSeparator1";
       this.toolStripSeparator1.Size = new System.Drawing.Size(208, 6);
-      //
+      // 
       // mniBase64Encode
-      //
+      // 
       this.mniBase64Encode.Name = "mniBase64Encode";
       this.mniBase64Encode.Size = new System.Drawing.Size(211, 22);
       this.mniBase64Encode.Text = "Base64 Encode";
-      //
+      // 
       // mniBase64Decode
-      //
+      // 
       this.mniBase64Decode.Name = "mniBase64Decode";
       this.mniBase64Decode.Size = new System.Drawing.Size(211, 22);
       this.mniBase64Decode.Text = "Base64 Decode";
-      //
+      // 
       // lineOperationsToolStripMenuItem
-      //
+      // 
       this.lineOperationsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniMoveUpCurrentLine,
             this.mniMoveDownCurrentLine});
       this.lineOperationsToolStripMenuItem.Name = "lineOperationsToolStripMenuItem";
       this.lineOperationsToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
       this.lineOperationsToolStripMenuItem.Text = "Line Operations";
-      //
+      // 
       // mniMoveUpCurrentLine
-      //
+      // 
       this.mniMoveUpCurrentLine.Name = "mniMoveUpCurrentLine";
       this.mniMoveUpCurrentLine.ShortcutKeyDisplayString = "Ctrl+Shift+Up";
       this.mniMoveUpCurrentLine.Size = new System.Drawing.Size(303, 22);
       this.mniMoveUpCurrentLine.Text = "Move Up Current Line";
-      //
+      // 
       // mniMoveDownCurrentLine
-      //
+      // 
       this.mniMoveDownCurrentLine.Name = "mniMoveDownCurrentLine";
       this.mniMoveDownCurrentLine.ShortcutKeyDisplayString = "Ctrl+Shift+Down";
       this.mniMoveDownCurrentLine.Size = new System.Drawing.Size(303, 22);
       this.mniMoveDownCurrentLine.Text = "Move Down Current Line";
-      //
+      // 
       // xMLToolStripMenuItem
-      //
+      // 
       this.xMLToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniXmlToEntity,
             this.mniEntityToXml});
       this.xMLToolStripMenuItem.Name = "xMLToolStripMenuItem";
       this.xMLToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
       this.xMLToolStripMenuItem.Text = "XML";
-      //
+      // 
       // mniXmlToEntity
-      //
+      // 
       this.mniXmlToEntity.Name = "mniXmlToEntity";
       this.mniXmlToEntity.Size = new System.Drawing.Size(325, 22);
       this.mniXmlToEntity.Text = "Convert Selection XML to Text (<> => &&lt;&&gt;)";
-      //
+      // 
       // mniEntityToXml
-      //
+      // 
       this.mniEntityToXml.Name = "mniEntityToXml";
       this.mniEntityToXml.Size = new System.Drawing.Size(325, 22);
       this.mniEntityToXml.Text = "Convert Selection Text to XML (&&lt;&&gt; => <>)";
-      //
+      // 
       // toolStripDropDownButton4
-      //
+      // 
       this.toolStripDropDownButton4.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
       this.toolStripDropDownButton4.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniFind,
@@ -688,44 +704,44 @@
       this.toolStripDropDownButton4.ShowDropDownArrow = false;
       this.toolStripDropDownButton4.Size = new System.Drawing.Size(46, 22);
       this.toolStripDropDownButton4.Text = "&Search";
-      //
+      // 
       // mniFind
-      //
+      // 
       this.mniFind.Name = "mniFind";
       this.mniFind.ShortcutKeyDisplayString = "Ctrl+F";
       this.mniFind.Size = new System.Drawing.Size(196, 22);
       this.mniFind.Text = "Find...";
-      //
+      // 
       // mniFindNext
-      //
+      // 
       this.mniFindNext.Name = "mniFindNext";
       this.mniFindNext.ShortcutKeyDisplayString = "F3";
       this.mniFindNext.Size = new System.Drawing.Size(196, 22);
       this.mniFindNext.Text = "Find Next";
-      //
+      // 
       // mniFindPrevious
-      //
+      // 
       this.mniFindPrevious.Name = "mniFindPrevious";
       this.mniFindPrevious.ShortcutKeyDisplayString = "Shift+F3";
       this.mniFindPrevious.Size = new System.Drawing.Size(196, 22);
       this.mniFindPrevious.Text = "Find Previous";
-      //
+      // 
       // mniReplace
-      //
+      // 
       this.mniReplace.Name = "mniReplace";
       this.mniReplace.ShortcutKeyDisplayString = "Ctrl+H";
       this.mniReplace.Size = new System.Drawing.Size(196, 22);
       this.mniReplace.Text = "Replace...";
-      //
+      // 
       // mniGoTo
-      //
+      // 
       this.mniGoTo.Name = "mniGoTo";
       this.mniGoTo.ShortcutKeyDisplayString = "Ctrl+G";
       this.mniGoTo.Size = new System.Drawing.Size(196, 22);
       this.mniGoTo.Text = "Go To...";
-      //
+      // 
       // toolStripDropDownButton3
-      //
+      // 
       this.toolStripDropDownButton3.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
       this.toolStripDropDownButton3.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniPreferences});
@@ -735,15 +751,15 @@
       this.toolStripDropDownButton3.ShowDropDownArrow = false;
       this.toolStripDropDownButton3.Size = new System.Drawing.Size(39, 22);
       this.toolStripDropDownButton3.Text = "&Tools";
-      //
+      // 
       // mniPreferences
-      //
+      // 
       this.mniPreferences.Name = "mniPreferences";
       this.mniPreferences.Size = new System.Drawing.Size(144, 22);
       this.mniPreferences.Text = "Preferences...";
-      //
+      // 
       // exploreButton
-      //
+      // 
       this.exploreButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
       this.exploreButton.Image = ((System.Drawing.Image)(resources.GetObject("exploreButton.Image")));
       this.exploreButton.ImageTransparentColor = System.Drawing.Color.Magenta;
@@ -751,9 +767,9 @@
       this.exploreButton.Size = new System.Drawing.Size(58, 22);
       this.exploreButton.Text = "E&xplore...";
       this.exploreButton.Click += new System.EventHandler(this.exploreButton_Click);
-      //
+      // 
       // btnSubmit
-      //
+      // 
       this.btnSubmit.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
       this.btnSubmit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
       this.btnSubmit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -768,39 +784,39 @@
       this.btnSubmit.Text = "► &Run";
       this.btnSubmit.ToolTipText = "Run";
       this.btnSubmit.ButtonClick += new System.EventHandler(this.btnSubmit_Click);
-      //
+      // 
       // mniRunAll
-      //
+      // 
       this.mniRunAll.Name = "mniRunAll";
       this.mniRunAll.ShortcutKeyDisplayString = "F5";
       this.mniRunAll.Size = new System.Drawing.Size(225, 22);
       this.mniRunAll.Text = "Run All";
       this.mniRunAll.Click += new System.EventHandler(this.mniRunAll_Click);
-      //
+      // 
       // mniRunBatch
-      //
+      // 
       this.mniRunBatch.Name = "mniRunBatch";
       this.mniRunBatch.Size = new System.Drawing.Size(225, 22);
       this.mniRunBatch.Text = "Run Batch...";
       this.mniRunBatch.Click += new System.EventHandler(this.mniRunBatch_Click);
-      //
+      // 
       // mniRunCurrent
-      //
+      // 
       this.mniRunCurrent.Name = "mniRunCurrent";
       this.mniRunCurrent.ShortcutKeyDisplayString = "Ctrl+Enter";
       this.mniRunCurrent.Size = new System.Drawing.Size(225, 22);
       this.mniRunCurrent.Text = "Run Current";
       this.mniRunCurrent.Click += new System.EventHandler(this.mniRunCurrent_Click);
-      //
+      // 
       // mniRunCurrentNewWindow
-      //
+      // 
       this.mniRunCurrentNewWindow.Name = "mniRunCurrentNewWindow";
       this.mniRunCurrentNewWindow.Size = new System.Drawing.Size(225, 22);
       this.mniRunCurrentNewWindow.Text = "Run Current in New Window";
       this.mniRunCurrentNewWindow.Click += new System.EventHandler(this.mniRunCurrentNewWindow_Click);
-      //
+      // 
       // lblMaximize
-      //
+      // 
       this.lblMaximize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.lblMaximize.AutoSize = true;
       this.lblMaximize.BackColor = System.Drawing.Color.Transparent;
@@ -813,9 +829,9 @@
       this.lblMaximize.TabIndex = 13;
       this.lblMaximize.Text = "1";
       this.lblMaximize.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-      //
+      // 
       // lblMinimize
-      //
+      // 
       this.lblMinimize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.lblMinimize.AutoSize = true;
       this.lblMinimize.BackColor = System.Drawing.Color.Transparent;
@@ -828,9 +844,9 @@
       this.lblMinimize.TabIndex = 12;
       this.lblMinimize.Text = "0";
       this.lblMinimize.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-      //
+      // 
       // picLogo
-      //
+      // 
       this.picLogo.Location = new System.Drawing.Point(14, 3);
       this.picLogo.Margin = new System.Windows.Forms.Padding(14, 3, 14, 3);
       this.picLogo.Name = "picLogo";
@@ -839,9 +855,9 @@
       this.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
       this.picLogo.TabIndex = 15;
       this.picLogo.TabStop = false;
-      //
+      // 
       // tableLayoutPanel5
-      //
+      // 
       this.tableLayoutPanel5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
       this.tableLayoutPanel5.AutoSize = true;
       this.tableLayoutPanel5.BackColor = System.Drawing.Color.Transparent;
@@ -863,9 +879,9 @@
       this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
       this.tableLayoutPanel5.Size = new System.Drawing.Size(815, 23);
       this.tableLayoutPanel5.TabIndex = 0;
-      //
+      // 
       // lblSelection
-      //
+      // 
       this.lblSelection.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
       this.lblSelection.AutoEllipsis = true;
       this.lblSelection.AutoSize = true;
@@ -873,9 +889,9 @@
       this.lblSelection.Name = "lblSelection";
       this.lblSelection.Size = new System.Drawing.Size(231, 13);
       this.lblSelection.TabIndex = 4;
-      //
+      // 
       // lblVersion
-      //
+      // 
       this.lblVersion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
       this.lblVersion.AutoEllipsis = true;
       this.lblVersion.AutoSize = true;
@@ -883,9 +899,9 @@
       this.lblVersion.Name = "lblVersion";
       this.lblVersion.Size = new System.Drawing.Size(230, 13);
       this.lblVersion.TabIndex = 5;
-      //
+      // 
       // lblProgress
-      //
+      // 
       this.lblProgress.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
       this.lblProgress.AutoEllipsis = true;
       this.lblProgress.AutoSize = true;
@@ -894,37 +910,46 @@
       this.lblProgress.Name = "lblProgress";
       this.lblProgress.Size = new System.Drawing.Size(230, 13);
       this.lblProgress.TabIndex = 3;
-      //
+      // 
       // lblClock
-      //
+      // 
       this.lblClock.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblClock.AutoSize = true;
       this.lblClock.Location = new System.Drawing.Point(3, 5);
       this.lblClock.Name = "lblClock";
       this.lblClock.Size = new System.Drawing.Size(0, 13);
       this.lblClock.TabIndex = 6;
-      //
+      // 
+      // progQuery
+      // 
+      this.progQuery.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+      this.progQuery.Location = new System.Drawing.Point(6, 0);
+      this.progQuery.Margin = new System.Windows.Forms.Padding(0);
+      this.progQuery.Name = "progQuery";
+      this.progQuery.Size = new System.Drawing.Size(100, 23);
+      this.progQuery.TabIndex = 7;
+      // 
       // splitMain
-      //
+      // 
       this.tblMain.SetColumnSpan(this.splitMain, 3);
       this.splitMain.Dock = System.Windows.Forms.DockStyle.Fill;
       this.splitMain.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
       this.splitMain.Location = new System.Drawing.Point(6, 58);
       this.splitMain.Name = "splitMain";
-      //
+      // 
       // splitMain.Panel1
-      //
+      // 
       this.splitMain.Panel1.Controls.Add(this.tableLayoutPanel4);
-      //
+      // 
       // splitMain.Panel2
-      //
+      // 
       this.splitMain.Panel2.Controls.Add(this.splitEditors);
       this.splitMain.Size = new System.Drawing.Size(990, 581);
       this.splitMain.SplitterDistance = 220;
       this.splitMain.TabIndex = 0;
-      //
+      // 
       // tableLayoutPanel4
-      //
+      // 
       this.tableLayoutPanel4.ColumnCount = 1;
       this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
       this.tableLayoutPanel4.Controls.Add(this.treeItems, 0, 1);
@@ -937,9 +962,9 @@
       this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
       this.tableLayoutPanel4.Size = new System.Drawing.Size(220, 581);
       this.tableLayoutPanel4.TabIndex = 1;
-      //
+      // 
       // treeItems
-      //
+      // 
       this.treeItems.AllColumns.Add(this.colName);
       this.treeItems.AllColumns.Add(this.colDescription);
       this.treeItems.BorderStyle = System.Windows.Forms.BorderStyle.None;
@@ -964,24 +989,24 @@
       this.treeItems.Expanding += new System.EventHandler<BrightIdeasSoftware.TreeBranchExpandingEventArgs>(this.treeItems_Expanding);
       this.treeItems.CellRightClick += new System.EventHandler<BrightIdeasSoftware.CellRightClickEventArgs>(this.treeItems_CellRightClick);
       this.treeItems.CellToolTipShowing += new System.EventHandler<BrightIdeasSoftware.ToolTipShowingEventArgs>(this.treeItems_CellToolTipShowing);
-      //
+      // 
       // colName
-      //
+      // 
       this.colName.AspectName = "Name";
       this.colName.ImageAspectName = "";
       this.colName.Text = "Name";
       this.colName.Width = 150;
-      //
+      // 
       // colDescription
-      //
+      // 
       this.colDescription.AspectName = "Description";
       this.colDescription.FillsFreeSpace = true;
       this.colDescription.Text = "Description";
       this.colDescription.Width = 200;
-      //
+      // 
       // btnPanelToggle
-      //
-      this.btnPanelToggle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.btnPanelToggle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.btnPanelToggle.AutoSize = true;
       this.btnPanelToggle.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
@@ -1002,28 +1027,28 @@
       this.btnPanelToggle.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnPanelToggle.UseVisualStyleBackColor = false;
       this.btnPanelToggle.Click += new System.EventHandler(this.btnPanelToggle_Click);
-      //
+      // 
       // splitEditors
-      //
+      // 
       this.splitEditors.BackColor = System.Drawing.Color.Transparent;
       this.splitEditors.Dock = System.Windows.Forms.DockStyle.Fill;
       this.splitEditors.Location = new System.Drawing.Point(0, 0);
       this.splitEditors.Name = "splitEditors";
       this.splitEditors.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      //
+      // 
       // splitEditors.Panel1
-      //
+      // 
       this.splitEditors.Panel1.Controls.Add(this.tableLayoutPanel3);
-      //
+      // 
       // splitEditors.Panel2
-      //
+      // 
       this.splitEditors.Panel2.Controls.Add(this.tableLayoutPanel2);
       this.splitEditors.Size = new System.Drawing.Size(766, 581);
       this.splitEditors.SplitterDistance = 165;
       this.splitEditors.TabIndex = 0;
-      //
+      // 
       // tableLayoutPanel3
-      //
+      // 
       this.tableLayoutPanel3.ColumnCount = 2;
       this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -1037,9 +1062,9 @@
       this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
       this.tableLayoutPanel3.Size = new System.Drawing.Size(766, 165);
       this.tableLayoutPanel3.TabIndex = 1;
-      //
+      // 
       // inputEditor
-      //
+      // 
       this.inputEditor.BackColor = System.Drawing.Color.White;
       this.tableLayoutPanel3.SetColumnSpan(this.inputEditor, 2);
       this.inputEditor.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -1050,9 +1075,9 @@
       this.inputEditor.Size = new System.Drawing.Size(754, 153);
       this.inputEditor.TabIndex = 0;
       this.inputEditor.RunRequested += new System.EventHandler<InnovatorAdmin.Editor.RunRequestedEventArgs>(this.inputEditor_RunRequested);
-      //
+      // 
       // tableLayoutPanel2
-      //
+      // 
       this.tableLayoutPanel2.ColumnCount = 3;
       this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
@@ -1067,11 +1092,11 @@
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
       this.tableLayoutPanel2.Size = new System.Drawing.Size(766, 412);
       this.tableLayoutPanel2.TabIndex = 0;
-      //
+      // 
       // tbcOutputView
-      //
-      this.tbcOutputView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.tbcOutputView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.tableLayoutPanel2.SetColumnSpan(this.tbcOutputView, 3);
       this.tbcOutputView.Controls.Add(this.pgTools);
@@ -1088,20 +1113,20 @@
       this.tbcOutputView.Size = new System.Drawing.Size(766, 412);
       this.tbcOutputView.TabIndex = 5;
       this.tbcOutputView.SelectedIndexChanged += new System.EventHandler(this.tbcOutputView_SelectedIndexChanged);
-      //
+      // 
       // pgTools
-      //
+      // 
       this.pgTools.Controls.Add(this.tableLayoutPanel6);
-      this.pgTools.Location = new System.Drawing.Point(4, 29);
+      this.pgTools.Location = new System.Drawing.Point(4, 25);
       this.pgTools.Name = "pgTools";
       this.pgTools.Padding = new System.Windows.Forms.Padding(3);
       this.pgTools.Size = new System.Drawing.Size(758, 383);
       this.pgTools.TabIndex = 3;
       this.pgTools.Text = "Tools";
       this.pgTools.UseVisualStyleBackColor = true;
-      //
+      // 
       // tableLayoutPanel6
-      //
+      // 
       this.tableLayoutPanel6.ColumnCount = 1;
       this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
       this.tableLayoutPanel6.Controls.Add(this.flowLayoutPanel1, 0, 1);
@@ -1113,11 +1138,11 @@
       this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
       this.tableLayoutPanel6.Size = new System.Drawing.Size(752, 377);
       this.tableLayoutPanel6.TabIndex = 5;
-      //
+      // 
       // flowLayoutPanel1
-      //
-      this.flowLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.flowLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.flowLayoutPanel1.Controls.Add(this.btnInstall);
       this.flowLayoutPanel1.Controls.Add(this.btnCreate);
@@ -1126,10 +1151,10 @@
       this.flowLayoutPanel1.Name = "flowLayoutPanel1";
       this.flowLayoutPanel1.Size = new System.Drawing.Size(722, 347);
       this.flowLayoutPanel1.TabIndex = 4;
-      //
+      // 
       // btnInstall
-      //
-      this.btnInstall.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.btnInstall.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.btnInstall.AutoSize = true;
       this.btnInstall.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
@@ -1151,11 +1176,11 @@
       this.btnInstall.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnInstall.UseVisualStyleBackColor = true;
       this.btnInstall.Click += new System.EventHandler(this.btnInstall_Click);
-      //
+      // 
       // btnCreate
-      //
-      this.btnCreate.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.btnCreate.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.btnCreate.AutoSize = true;
       this.btnCreate.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
@@ -1177,19 +1202,19 @@
       this.btnCreate.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnCreate.UseVisualStyleBackColor = true;
       this.btnCreate.Click += new System.EventHandler(this.btnCreate_Click);
-      //
+      // 
       // pgTextOutput
-      //
+      // 
       this.pgTextOutput.Controls.Add(this.outputEditor);
-      this.pgTextOutput.Location = new System.Drawing.Point(4, 29);
+      this.pgTextOutput.Location = new System.Drawing.Point(4, 25);
       this.pgTextOutput.Name = "pgTextOutput";
       this.pgTextOutput.Size = new System.Drawing.Size(758, 383);
       this.pgTextOutput.TabIndex = 0;
       this.pgTextOutput.Text = "Code";
       this.pgTextOutput.UseVisualStyleBackColor = true;
-      //
+      // 
       // outputEditor
-      //
+      // 
       this.outputEditor.BackColor = System.Drawing.Color.White;
       this.outputEditor.Dock = System.Windows.Forms.DockStyle.Fill;
       this.outputEditor.Location = new System.Drawing.Point(0, 0);
@@ -1198,40 +1223,40 @@
       this.outputEditor.ReadOnly = true;
       this.outputEditor.Size = new System.Drawing.Size(758, 383);
       this.outputEditor.TabIndex = 0;
-      //
+      // 
       // pgHtml
-      //
+      // 
       this.pgHtml.Controls.Add(this.browser);
-      this.pgHtml.Location = new System.Drawing.Point(4, 29);
+      this.pgHtml.Location = new System.Drawing.Point(4, 25);
       this.pgHtml.Name = "pgHtml";
       this.pgHtml.Padding = new System.Windows.Forms.Padding(3);
       this.pgHtml.Size = new System.Drawing.Size(758, 383);
       this.pgHtml.TabIndex = 2;
       this.pgHtml.Text = "Report";
       this.pgHtml.UseVisualStyleBackColor = true;
-      //
+      // 
       // browser
-      //
+      // 
       this.browser.Dock = System.Windows.Forms.DockStyle.Fill;
       this.browser.Location = new System.Drawing.Point(3, 3);
       this.browser.MinimumSize = new System.Drawing.Size(20, 20);
       this.browser.Name = "browser";
       this.browser.Size = new System.Drawing.Size(752, 377);
       this.browser.TabIndex = 0;
-      //
+      // 
       // pgTableOutput
-      //
+      // 
       this.pgTableOutput.Controls.Add(this.dgvItems);
-      this.pgTableOutput.Location = new System.Drawing.Point(4, 29);
+      this.pgTableOutput.Location = new System.Drawing.Point(4, 25);
       this.pgTableOutput.Margin = new System.Windows.Forms.Padding(0);
       this.pgTableOutput.Name = "pgTableOutput";
       this.pgTableOutput.Size = new System.Drawing.Size(758, 383);
       this.pgTableOutput.TabIndex = 1;
       this.pgTableOutput.Text = "Table";
       this.pgTableOutput.UseVisualStyleBackColor = true;
-      //
+      // 
       // dgvItems
-      //
+      // 
       this.dgvItems.BackgroundColor = System.Drawing.Color.White;
       this.dgvItems.BorderStyle = System.Windows.Forms.BorderStyle.None;
       this.dgvItems.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -1242,9 +1267,9 @@
       this.dgvItems.Name = "dgvItems";
       this.dgvItems.Size = new System.Drawing.Size(758, 383);
       this.dgvItems.TabIndex = 0;
-      //
+      // 
       // conTable
-      //
+      // 
       this.conTable.ImageScalingSize = new System.Drawing.Size(32, 32);
       this.conTable.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniColumns,
@@ -1254,23 +1279,23 @@
       this.conTable.Name = "conTable";
       this.conTable.Size = new System.Drawing.Size(152, 92);
       this.conTable.Opening += new System.ComponentModel.CancelEventHandler(this.conTable_Opening);
-      //
+      // 
       // mniColumns
-      //
+      // 
       this.mniColumns.Name = "mniColumns";
       this.mniColumns.Size = new System.Drawing.Size(151, 22);
       this.mniColumns.Text = "Columns...";
       this.mniColumns.Click += new System.EventHandler(this.mniColumns_Click);
-      //
+      // 
       // mniSaveTableEdits
-      //
+      // 
       this.mniSaveTableEdits.Name = "mniSaveTableEdits";
       this.mniSaveTableEdits.Size = new System.Drawing.Size(151, 22);
       this.mniSaveTableEdits.Text = "Save";
       this.mniSaveTableEdits.Click += new System.EventHandler(this.mniSave_Click);
-      //
+      // 
       // mniScriptEdits
-      //
+      // 
       this.mniScriptEdits.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniTableEditsToClipboard,
             this.mniTableEditsToFile,
@@ -1278,37 +1303,37 @@
       this.mniScriptEdits.Name = "mniScriptEdits";
       this.mniScriptEdits.Size = new System.Drawing.Size(151, 22);
       this.mniScriptEdits.Text = "Save To";
-      //
+      // 
       // mniTableEditsToClipboard
-      //
+      // 
       this.mniTableEditsToClipboard.Name = "mniTableEditsToClipboard";
       this.mniTableEditsToClipboard.Size = new System.Drawing.Size(140, 22);
       this.mniTableEditsToClipboard.Text = "Clipboard";
       this.mniTableEditsToClipboard.Click += new System.EventHandler(this.mniTableEditsToClipboard_Click);
-      //
+      // 
       // mniTableEditsToFile
-      //
+      // 
       this.mniTableEditsToFile.Name = "mniTableEditsToFile";
       this.mniTableEditsToFile.Size = new System.Drawing.Size(140, 22);
       this.mniTableEditsToFile.Text = "File...";
       this.mniTableEditsToFile.Click += new System.EventHandler(this.mniTableEditsToFile_Click);
-      //
+      // 
       // mniTableEditsToQueryEditor
-      //
+      // 
       this.mniTableEditsToQueryEditor.Name = "mniTableEditsToQueryEditor";
       this.mniTableEditsToQueryEditor.Size = new System.Drawing.Size(140, 22);
       this.mniTableEditsToQueryEditor.Text = "Query Editor";
       this.mniTableEditsToQueryEditor.Click += new System.EventHandler(this.mniTableEditsToQueryEditor_Click);
-      //
+      // 
       // mniResetChanges
-      //
+      // 
       this.mniResetChanges.Name = "mniResetChanges";
       this.mniResetChanges.Size = new System.Drawing.Size(151, 22);
       this.mniResetChanges.Text = "Reset Changes";
       this.mniResetChanges.Click += new System.EventHandler(this.mniResetChanges_Click);
-      //
+      // 
       // btnOk
-      //
+      // 
       this.btnOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.btnOk.AutoSize = true;
       this.btnOk.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
@@ -1327,9 +1352,9 @@
       this.btnOk.Text = "&OK";
       this.btnOk.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnOk.UseVisualStyleBackColor = true;
-      //
+      // 
       // btnCancel
-      //
+      // 
       this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.btnCancel.AutoSize = true;
       this.btnCancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
@@ -1348,11 +1373,11 @@
       this.btnCancel.Text = "&Cancel";
       this.btnCancel.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnCancel.UseVisualStyleBackColor = true;
-      //
+      // 
       // pnlTopLeft
-      //
-      this.pnlTopLeft.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.pnlTopLeft.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.pnlTopLeft.BackColor = System.Drawing.Color.WhiteSmoke;
       this.pnlTopLeft.Location = new System.Drawing.Point(0, 0);
@@ -1360,11 +1385,11 @@
       this.pnlTopLeft.Name = "pnlTopLeft";
       this.pnlTopLeft.Size = new System.Drawing.Size(3, 3);
       this.pnlTopLeft.TabIndex = 6;
-      //
+      // 
       // pnlTop
-      //
-      this.pnlTop.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.pnlTop.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.pnlTop.BackColor = System.Drawing.Color.WhiteSmoke;
       this.tblMain.SetColumnSpan(this.pnlTop, 3);
@@ -1373,11 +1398,11 @@
       this.pnlTop.Name = "pnlTop";
       this.pnlTop.Size = new System.Drawing.Size(996, 3);
       this.pnlTop.TabIndex = 7;
-      //
+      // 
       // pnlTopRight
-      //
-      this.pnlTopRight.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.pnlTopRight.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.pnlTopRight.BackColor = System.Drawing.Color.WhiteSmoke;
       this.pnlTopRight.Location = new System.Drawing.Point(999, 0);
@@ -1385,11 +1410,11 @@
       this.pnlTopRight.Name = "pnlTopRight";
       this.pnlTopRight.Size = new System.Drawing.Size(3, 3);
       this.pnlTopRight.TabIndex = 8;
-      //
+      // 
       // pnlBottomLeft
-      //
-      this.pnlBottomLeft.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.pnlBottomLeft.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.pnlBottomLeft.BackColor = System.Drawing.Color.WhiteSmoke;
       this.pnlBottomLeft.Location = new System.Drawing.Point(0, 684);
@@ -1397,11 +1422,11 @@
       this.pnlBottomLeft.Name = "pnlBottomLeft";
       this.pnlBottomLeft.Size = new System.Drawing.Size(3, 3);
       this.pnlBottomLeft.TabIndex = 10;
-      //
+      // 
       // pnlBottom
-      //
-      this.pnlBottom.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.pnlBottom.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.pnlBottom.BackColor = System.Drawing.Color.WhiteSmoke;
       this.tblMain.SetColumnSpan(this.pnlBottom, 3);
@@ -1410,11 +1435,11 @@
       this.pnlBottom.Name = "pnlBottom";
       this.pnlBottom.Size = new System.Drawing.Size(996, 3);
       this.pnlBottom.TabIndex = 11;
-      //
+      // 
       // pnlBottomRight
-      //
-      this.pnlBottomRight.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.pnlBottomRight.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.pnlBottomRight.BackColor = System.Drawing.Color.WhiteSmoke;
       this.pnlBottomRight.Location = new System.Drawing.Point(999, 684);
@@ -1422,11 +1447,11 @@
       this.pnlBottomRight.Name = "pnlBottomRight";
       this.pnlBottomRight.Size = new System.Drawing.Size(3, 3);
       this.pnlBottomRight.TabIndex = 12;
-      //
+      // 
       // pnlRight
-      //
-      this.pnlRight.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.pnlRight.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.pnlRight.Location = new System.Drawing.Point(999, 51);
       this.pnlRight.Margin = new System.Windows.Forms.Padding(0);
@@ -1436,11 +1461,11 @@
       this.pnlRight.ShadowExtent = 5;
       this.pnlRight.Size = new System.Drawing.Size(3, 633);
       this.pnlRight.TabIndex = 14;
-      //
+      // 
       // pnlLeft
-      //
-      this.pnlLeft.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.pnlLeft.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.pnlLeft.Location = new System.Drawing.Point(0, 51);
       this.pnlLeft.Margin = new System.Windows.Forms.Padding(0);
@@ -1450,32 +1475,32 @@
       this.pnlLeft.ShadowExtent = 5;
       this.pnlLeft.Size = new System.Drawing.Size(3, 633);
       this.pnlLeft.TabIndex = 13;
-      //
+      // 
       // pnlLeftTop
-      //
-      this.pnlLeftTop.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.pnlLeftTop.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.pnlLeftTop.Location = new System.Drawing.Point(0, 3);
       this.pnlLeftTop.Margin = new System.Windows.Forms.Padding(0);
       this.pnlLeftTop.Name = "pnlLeftTop";
       this.pnlLeftTop.Size = new System.Drawing.Size(3, 48);
       this.pnlLeftTop.TabIndex = 15;
-      //
+      // 
       // pnlRightTop
-      //
-      this.pnlRightTop.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.pnlRightTop.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.pnlRightTop.Location = new System.Drawing.Point(999, 3);
       this.pnlRightTop.Margin = new System.Windows.Forms.Padding(0);
       this.pnlRightTop.Name = "pnlRightTop";
       this.pnlRightTop.Size = new System.Drawing.Size(3, 48);
       this.pnlRightTop.TabIndex = 16;
-      //
+      // 
       // pnlConnectionShadow
-      //
-      this.pnlConnectionShadow.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+      // 
+      this.pnlConnectionShadow.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.tblMain.SetColumnSpan(this.pnlConnectionShadow, 3);
       this.pnlConnectionShadow.Location = new System.Drawing.Point(3, 51);
@@ -1485,18 +1510,9 @@
       this.pnlConnectionShadow.ShadowExtent = 0;
       this.pnlConnectionShadow.Size = new System.Drawing.Size(996, 4);
       this.pnlConnectionShadow.TabIndex = 17;
-      //
-      // progQuery
-      //
-      this.progQuery.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-      this.progQuery.Location = new System.Drawing.Point(6, 0);
-      this.progQuery.Margin = new System.Windows.Forms.Padding(0);
-      this.progQuery.Name = "progQuery";
-      this.progQuery.Size = new System.Drawing.Size(100, 23);
-      this.progQuery.TabIndex = 7;
-      //
+      // 
       // EditorWindow
-      //
+      // 
       this.AcceptButton = this.btnOk;
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -1571,7 +1587,7 @@
     private System.Windows.Forms.ToolStripMenuItem mniRunAll;
     private System.Windows.Forms.ToolStripMenuItem mniRunCurrent;
     private System.Windows.Forms.ToolStripMenuItem mniRunCurrentNewWindow;
-    private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton2;
+    private System.Windows.Forms.ToolStripDropDownButton mniFile;
     private System.Windows.Forms.ToolStripMenuItem mniNewWindow;
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
     private System.Windows.Forms.ToolStripMenuItem mniClose;
@@ -1668,5 +1684,7 @@
     private System.Windows.Forms.ToolStripMenuItem mniBase64Decode;
     private System.Windows.Forms.ToolStripMenuItem mniRunBatch;
     private System.Windows.Forms.ProgressBar progQuery;
+    private System.Windows.Forms.ToolStripMenuItem mniNewDocument;
+    private System.Windows.Forms.ToolStripSeparator mniRecentDocsStart;
   }
 }

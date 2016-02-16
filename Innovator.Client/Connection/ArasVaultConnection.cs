@@ -11,7 +11,15 @@ namespace Innovator.Client.Connection
 {
   public class ArasVaultConnection
   {
-    private const string DownloadFileAmlFormat = "<Item type=\"File\" action=\"get\" select=\"id,filename\" id=\"{0}\"><Relationships><Item type=\"Located\" select=\"id,related_id,file_version\" action=\"get\"><related_id><Item type=\"Vault\" select=\"id,vault_url\" action=\"get\"></Item></related_id></Item></Relationships></Item>";
+    private const string DownloadFileAmlFormat = @"<Item type='File' action='get' select='id,filename' id='@0'>
+                                                    <Relationships>
+                                                      <Item type='Located' select='id,related_id,file_version' action='get'>
+                                                        <related_id>
+                                                          <Item type='Vault' select='id,vault_url' action='get'></Item>
+                                                        </related_id>
+                                                      </Item>
+                                                    </Relationships>
+                                                  </Item>";
 
     private IArasConnection _conn;
     private IVaultStrategy _vaultStrategy = new DefaultVaultStrategy();
@@ -137,8 +145,8 @@ namespace Innovator.Client.Connection
       // Files need to be uploaded, so build the vault request
 
       // Compile the headers and AML query into the appropriate content
-      var multiWriter = new MultiPartFormWriter(async);
-      multiWriter.AddFiles(upload.Files);
+      var multiWriter = new MultiPartFormWriter(async, _conn.AmlContext.LocalizationContext);
+      multiWriter.AddFiles(upload);
       _conn.SetDefaultHeaders(multiWriter.WriteFormField);
       multiWriter.WriteFormField("SOAPACTION", upload.Action.ToString());
       multiWriter.WriteFormField("VAULTID", upload.Vault.Id);

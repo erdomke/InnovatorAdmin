@@ -206,6 +206,12 @@ namespace InnovatorAdmin.Editor
         suite = TestSerializer.ReadTestSuite(reader);
       }
       var context = new TestContext(_conn);
+      foreach (var cred in ConnectionManager.Current.Library.Connections
+                            .Select(c => c.ArasCredentials())
+                            .Where(c => c != null))
+      {
+        context.CredentialStore.Add(cred);
+      }
       context.ProgressCallback = progressCallback;
       await suite.Run(context);
       return new ResultObject(suite, _conn);

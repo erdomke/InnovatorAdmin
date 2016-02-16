@@ -154,5 +154,17 @@ namespace InnovatorAdmin.Properties {
                 this["LastDpiScale"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string RecentDocument {
+            get {
+                return ((string)(this["RecentDocument"]));
+            }
+            set {
+                this["RecentDocument"] = value;
+            }
+        }
     }
 }

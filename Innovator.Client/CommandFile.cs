@@ -34,7 +34,7 @@ namespace Innovator.Client
     {
       _id = id;
       _path = NormalizePath(path);
-      
+
       if (data.CanSeek) data.Position = 0;
       _data = new byte[data.Length];
       data.Read(_data, 0, _data.Length);
@@ -98,9 +98,11 @@ namespace Innovator.Client
       }
     }
 
-    public int SetHeader(string brline)
+    public int SetHeader(string brline, Command cmd, IServerContext context)
     {
-      _header = Encoding.UTF8.GetBytes(string.Format("{0}\r\nContent-Disposition: form-data; name=\"{1}\"; filename=\"{2}\"\r\n\r\n", brline, _id, _path));
+      var id = _id[0] == '@' ? cmd.Substitute(_id, context) : _id;
+      var path = _path[0] == '@' ? cmd.Substitute(_path, context) : _path;
+      _header = Encoding.UTF8.GetBytes(string.Format("{0}\r\nContent-Disposition: form-data; name=\"{1}\"; filename=\"{2}\"\r\n\r\n", brline, id, path));
       return _header.Length;
     }
 

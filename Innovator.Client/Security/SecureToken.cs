@@ -52,8 +52,28 @@ namespace Innovator.Client
     {
       FromBytes(ref unencrypted, start, length);
     }
+    public SecureToken(Stream data)
+    {
+      _encrypted = new SecureString();
+      try
+      {
+        using (var reader = new StreamReader(data))
+        {
+          var value = reader.Read();
+          while (value > 0)
+          {
+            _encrypted.AppendChar((char)value);
+            value = reader.Read();
+          }
+        }
+      }
+      finally
+      {
+        _encrypted.MakeReadOnly();
+      }
+    }
 
-    private void FromBytes(ref byte[] unencrypted, int start, int length) 
+    private void FromBytes(ref byte[] unencrypted, int start, int length)
     {
       var chars = new char[length];
       var gch = new GCHandle();
@@ -270,6 +290,6 @@ namespace Innovator.Client
     public static implicit operator SecureToken(byte[] val)
     {
       return new SecureToken(ref val, 0, val.Length);
-    } 
+    }
   }
 }

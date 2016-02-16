@@ -1,0 +1,378 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{42C8FFE2-A1FE-4358-8DE2-7DBEB287A1E8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Pipes</RootNamespace>
+    <AssemblyName>Pipes</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;MOZ_FLEXBOX</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\lib\</OutputPath>
+    <DefineConstants>TRACE;MOZ_FLEXBOX</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ComponentFactory.Krypton.Toolkit, Version=4.3.2.0, Culture=neutral, PublicKeyToken=a87e673e9ecb6e8e, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Aras\ArasSqlTextWriter.cs" />
+    <Compile Include="Aras\DataItemReader.cs" />
+    <Compile Include="Aras\Error.cs" />
+    <Compile Include="Aras\Event.cs" />
+    <Compile Include="Aras\IDataItem.cs" />
+    <Compile Include="Aras\IError.cs" />
+    <Compile Include="Aras\IItem.cs" />
+    <Compile Include="Aras\IEvent.cs" />
+    <Compile Include="Aras\IItemWriter.cs" />
+    <Compile Include="Aras\IProperty.cs" />
+    <Compile Include="Aras\IResult.cs" />
+    <Compile Include="Aras\Item.cs" />
+    <Compile Include="Aras\ItemExtensions.cs" />
+    <Compile Include="Aras\Property.cs" />
+    <Compile Include="Aras\Result.cs" />
+    <Compile Include="Aras\ItemXmlReader.cs" />
+    <Compile Include="Aras\SelectColumn.cs" />
+    <Compile Include="Aras\SelectStatementReader.cs" />
+    <Compile Include="Code\IBaseCodeWriter.cs" />
+    <Compile Include="Code\IImperativeCodeWriter.cs" />
+    <Compile Include="Code\VisualBasicCodeWriter.cs" />
+    <Compile Include="Collections\BufferedEnumerator.cs" />
+    <Compile Include="Collections\InspectableQueue.cs" />
+    <Compile Include="Collections\SingleItemEnumerable.cs" />
+    <Compile Include="Conversion\BaseConverters.cs" />
+    <Compile Include="Code\BaseCodeTextWriter.cs" />
+    <Compile Include="Conversion\ApproxDateTime.cs" />
+    <Compile Include="Conversion\Certainty.cs" />
+    <Compile Include="Conversion\DateTimePrecision.cs" />
+    <Compile Include="Conversion\FullNaturalDateTime.cs" />
+    <Compile Include="Conversion\NaturalDateTime.cs" />
+    <Compile Include="Conversion\TriState.cs" />
+    <Compile Include="Css\GlobalStyleContext.cs" />
+    <Compile Include="Css\StyleContext.cs" />
+    <Compile Include="Css\Utils.cs" />
+    <Compile Include="Css\Model\MediaDefinition.cs" />
+    <Compile Include="Css\Model\MediaProperty.cs" />
+    <Compile Include="Css\Model\MediaType.cs" />
+    <Compile Include="Css\Model\MediaTypeModifier.cs" />
+    <Compile Include="Css\Model\Values\InitialTerm.cs" />
+    <Compile Include="Data\Table\BorderSides.cs" />
+    <Compile Include="Data\Table\ContentAlignment.cs" />
+    <Compile Include="Sgml\CssInliner.cs" />
+    <Compile Include="Sgml\Query\HtmlQueryEngine.cs" />
+    <Compile Include="Sgml\Query\IQueryEngine.cs" />
+    <Compile Include="Sgml\Query\QueryEngine.cs" />
+    <Compile Include="Sgml\Query\MatchVisitor.cs" />
+    <Compile Include="Sgml\Selector\Extensions.cs" />
+    <Compile Include="Css\IToString.cs" />
+    <Compile Include="Css\Lexer.cs" />
+    <Compile Include="Css\Model\Enumerations.cs" />
+    <Compile Include="Css\Model\Extensions\CharacterExtensions.cs" />
+    <Compile Include="Css\Model\Extensions\StringExtensions.cs" />
+    <Compile Include="Css\Model\FunctionBuffer.cs" />
+    <Compile Include="Css\Model\HtmlEncoding.cs" />
+    <Compile Include="Css\Model\ICssRules.cs" />
+    <Compile Include="Css\Model\ICssSelector.cs" />
+    <Compile Include="Css\Model\IStyleDeclaration.cs" />
+    <Compile Include="Css\Model\ISupportsMedia.cs" />
+    <Compile Include="Css\Model\MediaTypeList.cs" />
+    <Compile Include="Css\Model\Rules\AggregateRule.cs" />
+    <Compile Include="Css\Model\Rules\CharacterSetRule.cs" />
+    <Compile Include="Css\Model\Rules\ConditionalRule.cs" />
+    <Compile Include="Css\Model\Rules\DocumentRule.cs" />
+    <Compile Include="Css\Model\Rules\FontFaceRule.cs" />
+    <Compile Include="Css\Model\Rules\GenericRule.cs" />
+    <Compile Include="Css\Model\Rules\ImportRule.cs" />
+    <Compile Include="Css\Model\Rules\IRuleContainer.cs" />
+    <Compile Include="Css\Model\Rules\KeyframeRule.cs" />
+    <Compile Include="Css\Model\Rules\KeyframesRule.cs" />
+    <Compile Include="Css\Model\Rules\MediaRule.cs" />
+    <Compile Include="Css\Model\Rules\NamespaceRule.cs" />
+    <Compile Include="Css\Model\Rules\PageRule.cs" />
+    <Compile Include="Css\Model\Rules\RuleSet.cs" />
+    <Compile Include="Css\Model\Rules\StyleDeclaration.cs" />
+    <Compile Include="Css\Model\Rules\StyleRule.cs" />
+    <Compile Include="Css\Model\Rules\SupportsRule.cs" />
+    <Compile Include="Sgml\Selector\AggregateSelectorList.cs" />
+    <Compile Include="Sgml\Selector\AllSelector.cs" />
+    <Compile Include="Sgml\Selector\AttributeComparison.cs" />
+    <Compile Include="Sgml\Selector\AttributeRestriction.cs" />
+    <Compile Include="Sgml\Selector\BaseSelector.cs" />
+    <Compile Include="Sgml\Selector\Combinator.cs" />
+    <Compile Include="Sgml\Selector\CombinatorSelector.cs" />
+    <Compile Include="Sgml\Selector\ComplexSelector.cs" />
+    <Compile Include="Sgml\Selector\ElementRestriction.cs" />
+    <Compile Include="Sgml\Selector\InlineSelector.cs" />
+    <Compile Include="Sgml\Selector\ISelector.cs" />
+    <Compile Include="Sgml\Selector\ISelectorVisitor.cs" />
+    <Compile Include="Sgml\Selector\NthChildSelector.cs" />
+    <Compile Include="Sgml\Selector\PseudoElements.cs" />
+    <Compile Include="Sgml\Selector\PseudoElementSelector.cs" />
+    <Compile Include="Sgml\Selector\PseudoFunction.cs" />
+    <Compile Include="Sgml\Selector\PseudoSelector.cs" />
+    <Compile Include="Sgml\Selector\PseudoTypes.cs" />
+    <Compile Include="Css\SelectorFactory.cs" />
+    <Compile Include="Sgml\Selector\SelectorList.cs" />
+    <Compile Include="Sgml\Selector\SpecificityVisitor.cs" />
+    <Compile Include="Sgml\Selector\TextRendererSelectorVisitor.cs" />
+    <Compile Include="Sgml\Selector\UnknownSelector.cs" />
+    <Compile Include="Css\Model\Specification.cs" />
+    <Compile Include="Css\Model\TextBlocks\Block.cs" />
+    <Compile Include="Css\Model\TextBlocks\BracketBlock.cs" />
+    <Compile Include="Css\Model\TextBlocks\CharacterBlock.cs" />
+    <Compile Include="Css\Model\TextBlocks\CommentBlock.cs" />
+    <Compile Include="Css\Model\TextBlocks\DelimiterBlock.cs" />
+    <Compile Include="Css\Model\TextBlocks\MatchBlock.cs" />
+    <Compile Include="Css\Model\TextBlocks\NumericBlock.cs" />
+    <Compile Include="Css\Model\TextBlocks\PipeBlock.cs" />
+    <Compile Include="Css\Model\TextBlocks\RangeBlock.cs" />
+    <Compile Include="Css\Model\TextBlocks\SpecialCharacter.cs" />
+    <Compile Include="Css\Model\TextBlocks\StringBlock.cs" />
+    <Compile Include="Css\Model\TextBlocks\SymbolBlock.cs" />
+    <Compile Include="Css\Model\TextBlocks\UnitBlock.cs" />
+    <Compile Include="Css\Model\Values\Comma.cs" />
+    <Compile Include="Css\Model\Values\EqualSign.cs" />
+    <Compile Include="Css\Model\Values\GenericFunction.cs" />
+    <Compile Include="Css\Model\Values\HtmlColor.cs" />
+    <Compile Include="Css\Model\Values\InheritTerm.cs" />
+    <Compile Include="Css\Model\Values\PrimitiveTerm.cs" />
+    <Compile Include="Css\Model\Values\Property.cs" />
+    <Compile Include="Css\Model\Values\Term.cs" />
+    <Compile Include="Css\Model\Values\TermList.cs" />
+    <Compile Include="Css\Model\Values\Whitespace.cs" />
+    <Compile Include="Css\Parser.Blocks.cs" />
+    <Compile Include="Css\Parser.cs" />
+    <Compile Include="Css\StyleSheet.cs" />
+    <Compile Include="Css\StylesheetParseError.cs" />
+    <Compile Include="Css\StylesheetReader.cs" />
+    <Compile Include="Data\BaseSqlCriteriaWriter.cs" />
+    <Compile Include="Data\ComparisonItem.cs" />
+    <Compile Include="Data\ComparisonType.cs" />
+    <Compile Include="Data\DataExtensions.cs" />
+    <Compile Include="Data\DataRecord.cs" />
+    <Compile Include="Data\DataTableReader.cs" />
+    <Compile Include="Data\DelimitedTextDataReader.cs" />
+    <Compile Include="Data\DelimitedTextReader.cs" />
+    <Compile Include="Data\DelimitedTextLineReader.cs" />
+    <Compile Include="Data\ICriteria.cs" />
+    <Compile Include="Data\ICriteriaWriter.cs" />
+    <Compile Include="Data\LogicalOperator.cs" />
+    <Compile Include="Data\ParserMapping\CellAddress.cs" />
+    <Compile Include="Data\ParserMapping\CellRepeat.cs" />
+    <Compile Include="Data\ParserMapping\ColumnMapping.cs" />
+    <Compile Include="Data\ParserMapping\FileDataDirection.cs" />
+    <Compile Include="Data\ParserMapping\IDataSetParser.cs" />
+    <Compile Include="Data\ParserMapping\IDestinationColumn.cs" />
+    <Compile Include="Data\ParserMapping\ParserMapping.cs" />
+    <Compile Include="Data\ParserMapping\SimpleColumn.cs" />
+    <Compile Include="Data\ParserMapping\TextFileDataSetParser.cs" />
+    <Compile Include="Data\ParserMapping\XmlDataSetParser.cs" />
+    <Compile Include="Data\OracleSqlCriteriaWriter.cs" />
+    <Compile Include="Data\Reports\DataTableReport.cs" />
+    <Compile Include="Data\Reports\DataTableTable.cs" />
+    <Compile Include="Data\Reports\ListViewReport.cs" />
+    <Compile Include="Data\Reports\Report.cs" />
+    <Compile Include="Data\Table\DelimitedTableWriter.cs" />
+    <Compile Include="Data\Table\FormattedTable.cs" />
+    <Compile Include="Data\Table\HtmlTableWriter.cs" />
+    <Compile Include="Data\Table\Hyperlink.cs" />
+    <Compile Include="Data\Table\ReportParts.cs" />
+    <Compile Include="Data\Table\ReportWriter.cs" />
+    <Compile Include="Data\Table\BaseFormattedTableWriter.cs" />
+    <Compile Include="Data\Table\Column.cs" />
+    <Compile Include="Data\Reports\DataGridViewReport.cs" />
+    <Compile Include="Data\Table\CellAddress.cs" />
+    <Compile Include="Data\Table\CsvTableWriter.cs" />
+    <Compile Include="Data\Table\HidenColumnOptions.cs" />
+    <Compile Include="Data\Table\TableWriterSettings.cs" />
+    <Compile Include="Data\Table\TabDelimitedTableWriter.cs" />
+    <Compile Include="Data\Table\BaseFormattedTable.cs" />
+    <Compile Include="Data\Table\Cell.cs" />
+    <Compile Include="Data\Table\ColumnMetadata.cs" />
+    <Compile Include="Data\Table\DataTableWriter.cs" />
+    <Compile Include="Data\Table\Extension.cs" />
+    <Compile Include="Data\Table\ICell.cs" />
+    <Compile Include="Data\Table\IColumn.cs" />
+    <Compile Include="Data\Table\IColumnMetadata.cs" />
+    <Compile Include="Data\Table\IFormattedTable.cs" />
+    <Compile Include="Data\Table\IFormattedTableWriter.cs" />
+    <Compile Include="Data\Table\IHyperlink.cs" />
+    <Compile Include="Data\Table\IQueryableTable.cs" />
+    <Compile Include="Data\Table\IReport.cs" />
+    <Compile Include="Data\Table\IRow.cs" />
+    <Compile Include="Data\Table\ITable.cs" />
+    <Compile Include="Data\Table\ITableWriter.cs" />
+    <Compile Include="Data\Table\QueryableTable.cs" />
+    <Compile Include="Data\Table\Row.cs" />
+    <Compile Include="Diff\DiffAction.cs" />
+    <Compile Include="Diff\DiffRecord.cs" />
+    <Compile Include="Diff\IDiffRecord.cs" />
+    <Compile Include="Diff\KeyedListDiff.cs" />
+    <Compile Include="EnumerableExtension.cs" />
+    <Compile Include="Google\DateType.cs" />
+    <Compile Include="Google\VisJsonTextWriter.cs" />
+    <Compile Include="Google\VisTableJsonWriter.cs" />
+    <Compile Include="IConfigurable.cs" />
+    <Compile Include="IO\BufferedCharArray.cs" />
+    <Compile Include="IProcessor.cs" />
+    <Compile Include="IWriter.cs" />
+    <Compile Include="IO\WriterFactory.cs" />
+    <Compile Include="Json\IJsonNode.cs" />
+    <Compile Include="Json\JsonNode.cs" />
+    <Compile Include="Json\JsonNodeType.cs" />
+    <Compile Include="Json\JsonTextReader.cs" />
+    <Compile Include="Json\Util.cs" />
+    <Compile Include="Sgml\HtmlToText.cs" />
+    <Compile Include="Sgml\HtmlWriterWrapper.cs" />
+    <Compile Include="Sgml\Util.cs" />
+    <Compile Include="Data\FieldStatus.cs" />
+    <Compile Include="Data\FieldValue.cs" />
+    <Compile Include="Data\HtmlTableReader.cs" />
+    <Compile Include="Data\IDataRecord.cs" />
+    <Compile Include="Data\IFieldValue.cs" />
+    <Compile Include="Code\ICodeTextWriter.cs" />
+    <Compile Include="Data\OracleSqlTextWriter.cs" />
+    <Compile Include="Data\SqlServerTextWriter.cs" />
+    <Compile Include="Data\Table\CellStyle.cs" />
+    <Compile Include="Data\Table\FontStyle.cs" />
+    <Compile Include="Data\Table\ICellStyle.cs" />
+    <Compile Include="Data\Table\IFontStyle.cs" />
+    <Compile Include="Extension.cs" />
+    <Compile Include="IO\FileStreamSource.cs" />
+    <Compile Include="IO\StreamTextSource.cs" />
+    <Compile Include="IO\FileTextSource.cs" />
+    <Compile Include="IO\StringTextSource.cs" />
+    <Compile Include="IPipeInput.cs" />
+    <Compile Include="IPipeOutput.cs" />
+    <Compile Include="Json\IJsonWriter.cs" />
+    <Compile Include="Json\JsonTextWriter.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sgml\HtmlTextWriter.cs" />
+    <Compile Include="Sgml\HtmlWriterSettings.cs" />
+    <Compile Include="Sgml\ISgmlGroupWriter.cs" />
+    <Compile Include="Sgml\ISgmlTextWriter.cs" />
+    <Compile Include="Sgml\ISgmlWriter.cs" />
+    <Compile Include="Sgml\ISgmlTextWriterSettings.cs" />
+    <Compile Include="Sgml\SgmlParser.cs" />
+    <Compile Include="Sgml\SgmlReader.cs" />
+    <Compile Include="Sgml\SgmlTextReader.cs" />
+    <Compile Include="Sgml\WordHtmlCleaner.cs" />
+    <Compile Include="Xml\IAttributeContainer.cs" />
+    <Compile Include="Xml\IQueryableNode.cs" />
+    <Compile Include="Xml\IXmlAttribute.cs" />
+    <Compile Include="Xml\IXmlDocumentWriter.cs" />
+    <Compile Include="Xml\IXmlElement.cs" />
+    <Compile Include="Xml\IXmlFieldValue.cs" />
+    <Compile Include="Xml\IXmlName.cs" />
+    <Compile Include="Xml\IXmlNode.cs" />
+    <Compile Include="Xml\IXmlReader.cs" />
+    <Compile Include="Xml\Util.cs" />
+    <Compile Include="Xml\XAttributeWrapper.cs" />
+    <Compile Include="Xml\XElementWrapper.cs" />
+    <Compile Include="Xml\XElementWriter.cs" />
+    <Compile Include="Xml\XmlAttributeWrapper.cs" />
+    <Compile Include="Xml\XmlElementWriter.cs" />
+    <Compile Include="Xml\XmlJsonReader.cs" />
+    <Compile Include="Xml\XmlNodeNameWrapper.cs" />
+    <Compile Include="Xml\XmlElementReader.cs" />
+    <Compile Include="Xml\XmlElementSource.cs" />
+    <Compile Include="Xml\XmlFieldValue.cs" />
+    <Compile Include="Xml\XmlName.cs" />
+    <Compile Include="Xml\XmlNode.cs" />
+    <Compile Include="Xml\XmlElementWrapper.cs" />
+    <Compile Include="Xml\XmlJsonWriter.cs" />
+    <Compile Include="Xml\XmlNodeType.cs" />
+    <Compile Include="Xml\XmlNodeWrapper.cs" />
+    <Compile Include="Xml\XmlPath.cs" />
+    <Compile Include="Xml\XmlProcessor.cs" />
+    <Compile Include="Xml\XmlReaderHelper.cs" />
+    <Compile Include="Xml\XmlTextReader.cs" />
+    <Compile Include="Xml\XmlTextWriter.cs" />
+    <Compile Include="Xml\XmlWriterSettings.cs" />
+    <Compile Include="Xml\XNameWrapper.cs" />
+    <Compile Include="Xml\XNodeWrapper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties BuildVersion_BuildVersioningStyle="YearStamp.MonthStamp.DayStamp.TimeStamp" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_ConfigurationName="Release" />
+    </VisualStudio>
+  </ProjectExtensions>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

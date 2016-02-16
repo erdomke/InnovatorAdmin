@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -10,6 +11,11 @@ namespace InnovatorAdmin.Testing
 {
   public static class TestSerializer
   {
+    // TODO: Figure out login/logout handling
+    // TODO: Implement some sort of file download
+    // TODO: Create tests that expect an error
+
+    private static RNGCryptoServiceProvider _secureRandom = new RNGCryptoServiceProvider();
 
     public static TestSuite ReadTestSuite(TextReader reader)
     {
@@ -23,6 +29,7 @@ namespace InnovatorAdmin.Testing
     {
       var result = new TestSuite();
       string lastComment = null;
+      string sessionId = null;
 
       while (!reader.EOF)
       {
@@ -38,12 +45,13 @@ namespace InnovatorAdmin.Testing
             case "TestSuite":
               result.Comment = lastComment;
               lastComment = null;
+              sessionId = reader.GetAttribute("sessionId");
               reader.Read();
               break;
             case "Init":
               using (var r = reader.ReadSubtree())
               {
-                ReadItems<ICommand>(result.Init, r, ReadCommand);
+                ReadItems<ICommand>(result.Init, r, sessionId, ReadCommand);
               }
               break;
             case "Tests":
@@ -66,7 +74,7 @@ namespace InnovatorAdmin.Testing
                     };
                     using (var r = reader.ReadSubtree())
                     {
-                      ReadItems<ITestCommand>(test.Commands, r, ReadTestCommand);
+                      ReadItems<ITestCommand>(test.Commands, r, sessionId, ReadTestCommand);
                     }
                     result.Tests.Add(test);
                   }
@@ -83,7 +91,7 @@ namespace InnovatorAdmin.Testing
             case "Cleanup":
               using (var r = reader.ReadSubtree())
               {
-                ReadItems<ICommand>(result.Cleanup, r, ReadCommand);
+                ReadItems<ICommand>(result.Cleanup, r, sessionId, ReadCommand);
               }
               break;
             default:
@@ -103,7 +111,7 @@ namespace InnovatorAdmin.Testing
       return result;
     }
 
-    private static void ReadItems<T>(IList<T> items, XmlReader reader, Func<XmlReader, string, T> itemReader)
+    private static void ReadItems<T>(IList<T> items, XmlReader reader, string sessionId, Func<XmlReader, string, string, T> itemReader)
     {
       reader.Read();
       reader.Read();
@@ -118,7 +126,7 @@ namespace InnovatorAdmin.Testing
         }
         else if (reader.NodeType == XmlNodeType.Element)
         {
-          item = itemReader(reader, lastComment);
+          item = itemReader(reader, lastComment, sessionId);
           if (item == null)
             reader.Read();
           else
@@ -132,24 +140,38 @@ namespace InnovatorAdmin.Testing
       }
     }
 
-    private static ICommand ReadCommand(System.Xml.XmlReader reader, string comment)
+    private static ICommand ReadCommand(XmlReader reader, string comment, string sessionId)
     {
       switch (reader.LocalName)
       {
         case "Login":
-          return new Login()
+          var login = new Login()
           {
             Comment = comment,
             Database = reader.GetAttribute("database"),
-            Password = reader.GetAttribute("password"),
             Url = reader.GetAttribute("url"),
-            UserName = reader.GetAttribute("username")
-          };
+            UserName = reader.GetAttribute("username"),
+          }
+          .SetType(reader.GetAttribute("type"))
+          .SetPassword(reader.GetAttribute("password"), sessionId);
+          reader.Read();
+          return login;
         case "Logout":
-          return new Logout()
+          var logout = new Logout()
           {
             Comment = comment
           };
+          reader.Read();
+          return logout;
+        case "Delay":
+          var delay = new Delay()
+          {
+            BySeconds = reader.GetAttribute("by"),
+            From = reader.GetAttribute("from"),
+            Comment = comment
+          };
+          reader.Read();
+          return delay;
         case "sql":
         case "SQL":
         case "Item":
@@ -176,27 +198,55 @@ namespace InnovatorAdmin.Testing
 
     private static string ProcessXmlValue(string value, out bool isXml)
     {
-      isXml = false;
-      if (string.IsNullOrWhiteSpace(value))
+      isXml = IsXml(value);
+      if (isXml || string.IsNullOrWhiteSpace(value))
         return value;
-      if (value.TrimStart()[0] == '<')
-      {
-        isXml = true;
-        return value;
-      }
 
       using (var reader = new StringReader("<a>" + value + "</a>"))
       using (var xml = XmlReader.Create(reader))
       {
         xml.ReadToDescendant("a");
         xml.Read();
-        return xml.Value;
+        return string.IsNullOrWhiteSpace(xml.Value) ? null : xml.Value;
+      }
+    }
+    internal static bool IsXml(string value)
+    {
+      if (value == null)
+        return false;
+
+      var i = 0;
+      while (true)
+      {
+        while (i < value.Length && char.IsWhiteSpace(value[i]))
+          i++;
+        if ((i + 3) >= value.Length)
+          return false;
+        if (value[i] == '<')
+        {
+          if (value[i + 1] == '!' && value[i + 2] == '-' && value[i + 3] == '-')
+          {
+            i = value.IndexOf("-->", i + 3);
+            if (i < 0)
+              return false;
+            else
+              i += 3;
+          }
+          else
+          {
+            return true;
+          }
+        }
+        else
+        {
+          return false;
+        }
       }
     }
 
-    private static ITestCommand ReadTestCommand(System.Xml.XmlReader reader, string comment)
+    private static ITestCommand ReadTestCommand(System.Xml.XmlReader reader, string comment, string sessionId)
     {
-      var cmd = ReadCommand(reader, comment);
+      var cmd = ReadCommand(reader, comment, sessionId);
       if (cmd != null)
         return cmd;
 
@@ -242,250 +292,300 @@ namespace InnovatorAdmin.Testing
           }
           reader.Read();
           return result;
+        case "DownloadFile":
+          return new DownloadFile()
+          {
+            Comment = comment,
+            Text = reader.ReadInnerXml()
+          };
       }
       return null;
     }
 
-    public static void Write(this AssertMatch match, XmlWriter writer)
-    {
-      if (!string.IsNullOrWhiteSpace(match.Comment))
-        writer.WriteComment(match.Comment);
-      writer.WriteStartElement("AssertMatch");
-      if (!string.IsNullOrWhiteSpace(match.Match))
-        writer.WriteAttributeString("match", match.Match);
-      if (!match.RemoveSystemProperties)
-        writer.WriteAttributeString("removeSysProps", "0");
-      foreach (var remove in match.Removes)
-      {
-        writer.WriteStartElement("Remove");
-        writer.WriteAttributeString("match", remove);
-        writer.WriteEndElement();
-      }
-      if (string.IsNullOrWhiteSpace(match.Expected))
-      {
-        if (!string.IsNullOrEmpty(match.Actual))
-        {
-          writer.WriteStartElement("Actual");
-          WriteFormatted(match.Actual, match.IsXml, writer);
-          writer.WriteEndElement();
-        }
-      }
-      else
-      {
-        writer.WriteStartElement("Expected");
-        WriteFormatted(match.Expected, match.IsXml, writer);
-        writer.WriteEndElement();
-      }
-      writer.WriteEndElement();
-    }
-    public static void Write(this Login login, XmlWriter writer)
-    {
-      if (!string.IsNullOrWhiteSpace(login.Comment))
-        writer.WriteComment(login.Comment);
-      writer.WriteStartElement("Login");
-
-      writer.WriteEndElement();
-    }
-    public static void Write(this ParamAssign param, XmlWriter writer)
-    {
-      if (!string.IsNullOrWhiteSpace(param.Comment))
-        writer.WriteComment(param.Comment);
-      writer.WriteStartElement("Param");
-      if (!string.IsNullOrWhiteSpace(param.Name))
-        writer.WriteAttributeString("name", param.Name);
-      if (!string.IsNullOrWhiteSpace(param.Select))
-        writer.WriteAttributeString("select", param.Select);
-      if (string.IsNullOrEmpty(param.Value))
-      {
-        if (!string.IsNullOrEmpty(param.ActualValue)) writer.WriteComment(param.ActualValue);
-      }
-      else
-      {
-        WriteFormatted(param.Value, param.IsXml, writer);
-      }
-      writer.WriteEndElement();
-    }
-    public static void Write(this Query query, XmlWriter writer)
-    {
-      if (!string.IsNullOrWhiteSpace(query.Comment))
-        writer.WriteComment(query.Comment);
-      WriteFormatted(query.Text, true, writer);
-    }
-    public static void Write(this Test test, XmlWriter writer)
-    {
-      if (!string.IsNullOrWhiteSpace(test.Comment))
-        writer.WriteComment(test.Comment);
-      writer.WriteStartElement("Test");
-      if (!string.IsNullOrWhiteSpace(test.Name))
-        writer.WriteAttributeString("name", test.Name);
-      foreach (var cmd in test.Commands)
-        Write(cmd, writer);
-      writer.WriteEndElement();
-    }
-    public static void Write(this TestRun run, XmlWriter writer)
-    {
-      writer.WriteStartElement("Run");
-      if (!string.IsNullOrWhiteSpace(run.Name))
-        writer.WriteAttributeString("name", run.Name);
-      writer.WriteAttributeString("result", run.Result.ToString());
-      if (run.ElapsedMilliseconds > 0)
-        writer.WriteAttributeString("elapsedMs", run.ElapsedMilliseconds.ToString());
-      writer.WriteAttributeString("start", run.Start.ToString("s"));
-      if (run.ErrorLine > 0)
-        writer.WriteAttributeString("errorLine", run.ErrorLine.ToString());
-      if (!string.IsNullOrWhiteSpace(run.Message))
-        writer.WriteAttributeString("message", run.Message);
-      writer.WriteEndElement();
-    }
     public static void Write(this TestSuite suite, TextWriter writer)
     {
-      using (var xml = new XmlTextWriter(writer))
+      using (var visitor = new TestWriter(writer))
       {
+        visitor.Visit(suite);
+      }
+    }
+
+    private class TestWriter : ITestVisitor, IDisposable
+    {
+      private XmlWriter _xml;
+      private string _sessionId;
+
+      private TestWriter()
+      {
+        var data = new byte[24];
+        _secureRandom.GetNonZeroBytes(data);
+        _sessionId = Convert.ToBase64String(data);
+      }
+      public TestWriter(XmlWriter writer) : this()
+      {
+        _xml = writer;
+      }
+      public TestWriter(TextWriter writer) : this()
+      {
+        var xml = new XmlTextWriter(writer);
         xml.Indentation = 2;
         xml.IndentChar = ' ';
         xml.Formatting = Formatting.Indented;
         xml.QuoteChar = '\'';
-
-        suite.Write(xml);
-        xml.Flush();
-      }
-    }
-    public static void Write(this TestSuite suite, XmlWriter writer)
-    {
-      if (!string.IsNullOrWhiteSpace(suite.Comment))
-        writer.WriteComment(suite.Comment);
-      writer.WriteStartElement("TestSuite");
-      if (suite.Results.Any())
-      {
-        writer.WriteStartElement("Results");
-        foreach (var cmd in suite.Results)
-          Write(cmd, writer);
-        writer.WriteEndElement();
-      }
-      if (suite.Output.Any())
-      {
-        writer.WriteStartElement("Out");
-        foreach (var cmd in suite.Output)
-          Write(cmd, writer);
-        writer.WriteEndElement();
+        _xml = xml;
       }
 
-      if (suite.Init.Any())
+      public void Visit(AssertMatch match)
       {
-        writer.WriteStartElement("Init");
-        foreach (var cmd in suite.Init)
-          Write(cmd, writer);
-        writer.WriteEndElement();
-      }
-      if (suite.Tests.Any())
-      {
-        writer.WriteStartElement("Tests");
-        foreach (var cmd in suite.Tests)
-          Write(cmd, writer);
-        writer.WriteEndElement();
-      }
-      if (suite.Cleanup.Any())
-      {
-        writer.WriteStartElement("Cleanup");
-        foreach (var cmd in suite.Cleanup)
-          Write(cmd, writer);
-        writer.WriteEndElement();
-      }
-      writer.WriteEndElement();
-    }
-    private static void WriteFormatted(string value, bool isXml, XmlWriter writer)
-    {
-      if (!string.IsNullOrWhiteSpace(value))
-      {
-        if (isXml)
+        if (!string.IsNullOrWhiteSpace(match.Comment))
+          _xml.WriteComment(match.Comment);
+        _xml.WriteStartElement("AssertMatch");
+        if (!string.IsNullOrWhiteSpace(match.Match))
+          _xml.WriteAttributeString("match", match.Match);
+        if (!match.RemoveSystemProperties)
+          _xml.WriteAttributeString("removeSysProps", "0");
+        foreach (var remove in match.Removes)
         {
-          char[] writeNodeBuffer = null;
-          using (var reader = new XmlTextReader(value, XmlNodeType.Element, null))
+          _xml.WriteStartElement("Remove");
+          _xml.WriteAttributeString("match", remove);
+          _xml.WriteEndElement();
+        }
+        if (string.IsNullOrWhiteSpace(match.Expected))
+        {
+          if (!string.IsNullOrEmpty(match.Actual))
           {
-            reader.WhitespaceHandling = WhitespaceHandling.Significant;
-
-            bool canReadValueChunk = reader.CanReadValueChunk;
-            while (reader.Read())
-            {
-              switch (reader.NodeType)
-              {
-                case XmlNodeType.Element:
-                  writer.WriteStartElement(reader.Prefix, reader.LocalName, reader.NamespaceURI);
-                  writer.WriteAttributes(reader, false);
-                  if (reader.IsEmptyElement)
-                  {
-                    writer.WriteEndElement();
-                  }
-                  break;
-                case XmlNodeType.Text:
-                  if (canReadValueChunk)
-                  {
-                    if (writeNodeBuffer == null)
-                    {
-                      writeNodeBuffer = new char[1024];
-                    }
-                    int count;
-                    while ((count = reader.ReadValueChunk(writeNodeBuffer, 0, 1024)) > 0)
-                    {
-                      writer.WriteChars(writeNodeBuffer, 0, count);
-                    }
-                  }
-                  else
-                  {
-                    value = reader.Value;
-                    writer.WriteString(value);
-                  }
-                  break;
-                case XmlNodeType.CDATA:
-                  writer.WriteCData(reader.Value);
-                  break;
-                case XmlNodeType.EntityReference:
-                  writer.WriteEntityRef(reader.Name);
-                  break;
-                case XmlNodeType.ProcessingInstruction:
-                case XmlNodeType.XmlDeclaration:
-                  writer.WriteProcessingInstruction(reader.Name, reader.Value);
-                  break;
-                case XmlNodeType.Comment:
-                  writer.WriteComment(reader.Value);
-                  break;
-                case XmlNodeType.DocumentType:
-                  writer.WriteDocType(reader.Name, reader.GetAttribute("PUBLIC"), reader.GetAttribute("SYSTEM"), reader.Value);
-                  break;
-                //case XmlNodeType.Whitespace:
-                case XmlNodeType.SignificantWhitespace:
-                  writer.WriteWhitespace(reader.Value);
-                  break;
-                case XmlNodeType.EndElement:
-                  writer.WriteFullEndElement();
-                  break;
-              }
-            }
+            _xml.WriteStartElement("Actual");
+            WriteFormatted(match.Actual, match.IsXml, _xml);
+            _xml.WriteEndElement();
           }
         }
         else
         {
-          writer.WriteString(value);
+          _xml.WriteStartElement("Expected");
+          WriteFormatted(match.Expected, match.IsXml, _xml);
+          _xml.WriteEndElement();
+        }
+        _xml.WriteEndElement();
+      }
+      public void Visit(Delay delay)
+      {
+        if (!string.IsNullOrWhiteSpace(delay.Comment))
+          _xml.WriteComment(delay.Comment);
+        _xml.WriteStartElement("Delay");
+        if (!string.IsNullOrEmpty(delay.From))
+          _xml.WriteAttributeString("from", delay.From);
+        if (!string.IsNullOrEmpty(delay.BySeconds))
+          _xml.WriteAttributeString("by", delay.BySeconds);
+        _xml.WriteEndElement();
+      }
+      public void Visit(DownloadFile download)
+      {
+        if (!string.IsNullOrWhiteSpace(download.Comment))
+          _xml.WriteComment(download.Comment);
+        _xml.WriteStartElement("DownloadFile");
+        WriteFormatted(download.Text, true, _xml);
+        _xml.WriteEndElement();
+      }
+      public void Visit(Login login)
+      {
+        if (!string.IsNullOrWhiteSpace(login.Comment))
+          _xml.WriteComment(login.Comment);
+        _xml.WriteStartElement("Login");
+        _xml.WriteAttributeString("type", login.Type.ToString());
+        if (!string.IsNullOrEmpty(login.Url))
+          _xml.WriteAttributeString("url", login.Url);
+        if (!string.IsNullOrEmpty(login.Database))
+          _xml.WriteAttributeString("database", login.Database);
+        if (!string.IsNullOrEmpty(login.UserName))
+          _xml.WriteAttributeString("username", login.UserName);
+        if (login.HasPassword)
+          _xml.WriteAttributeString("password", login.GetEncryptedPassword(_sessionId));
+        _xml.WriteEndElement();
+      }
+      public void Visit(Logout logout)
+      {
+        if (!string.IsNullOrWhiteSpace(logout.Comment))
+          _xml.WriteComment(logout.Comment);
+        _xml.WriteStartElement("Logout");
+        _xml.WriteEndElement();
+      }
+      public void Visit(ParamAssign param)
+      {
+        if (!string.IsNullOrWhiteSpace(param.Comment))
+          _xml.WriteComment(param.Comment);
+        _xml.WriteStartElement("Param");
+        if (!string.IsNullOrWhiteSpace(param.Name))
+          _xml.WriteAttributeString("name", param.Name);
+        if (!string.IsNullOrWhiteSpace(param.Select))
+          _xml.WriteAttributeString("select", param.Select);
+        if (string.IsNullOrEmpty(param.Value))
+        {
+          if (!string.IsNullOrEmpty(param.ActualValue)) _xml.WriteComment(param.ActualValue);
+        }
+        else
+        {
+          WriteFormatted(param.Value, param.IsXml, _xml);
+        }
+        _xml.WriteEndElement();
+      }
+      public void Visit(Query query)
+      {
+        if (!string.IsNullOrWhiteSpace(query.Comment))
+          _xml.WriteComment(query.Comment);
+        WriteFormatted(query.Text, true, _xml);
+      }
+      public void Visit(Test test)
+      {
+        if (!string.IsNullOrWhiteSpace(test.Comment))
+          _xml.WriteComment(test.Comment);
+        _xml.WriteStartElement("Test");
+        if (!string.IsNullOrWhiteSpace(test.Name))
+          _xml.WriteAttributeString("name", test.Name);
+        foreach (var cmd in test.Commands)
+          cmd.Visit(this);
+        _xml.WriteEndElement();
+      }
+      public void Visit(TestRun run)
+      {
+        _xml.WriteStartElement("Run");
+        if (!string.IsNullOrWhiteSpace(run.Name))
+          _xml.WriteAttributeString("name", run.Name);
+        _xml.WriteAttributeString("result", run.Result.ToString());
+        if (run.ElapsedMilliseconds > 0)
+          _xml.WriteAttributeString("elapsedMs", run.ElapsedMilliseconds.ToString());
+        _xml.WriteAttributeString("start", run.Start.ToString("s"));
+        if (run.ErrorLine > 0)
+          _xml.WriteAttributeString("errorLine", run.ErrorLine.ToString());
+        if (!string.IsNullOrWhiteSpace(run.Message))
+          _xml.WriteAttributeString("message", run.Message);
+        _xml.WriteEndElement();
+      }
+      public void Visit(TestSuite suite)
+      {
+        if (!string.IsNullOrWhiteSpace(suite.Comment))
+          _xml.WriteComment(suite.Comment);
+        _xml.WriteStartElement("TestSuite");
+        _xml.WriteAttributeString("sessionId", _sessionId);
+        if (suite.Results.Any())
+        {
+          _xml.WriteStartElement("Results");
+          foreach (var cmd in suite.Results)
+            cmd.Visit(this);
+          _xml.WriteEndElement();
+        }
+        if (suite.Output.Any())
+        {
+          _xml.WriteStartElement("Out");
+          foreach (var cmd in suite.Output)
+            cmd.Visit(this);
+          _xml.WriteEndElement();
+        }
+
+        if (suite.Init.Any())
+        {
+          _xml.WriteStartElement("Init");
+          foreach (var cmd in suite.Init)
+            cmd.Visit(this);
+          _xml.WriteEndElement();
+        }
+        if (suite.Tests.Any())
+        {
+          _xml.WriteStartElement("Tests");
+          foreach (var cmd in suite.Tests)
+            cmd.Visit(this);
+          _xml.WriteEndElement();
+        }
+        if (suite.Cleanup.Any())
+        {
+          _xml.WriteStartElement("Cleanup");
+          foreach (var cmd in suite.Cleanup)
+            cmd.Visit(this);
+          _xml.WriteEndElement();
+        }
+        _xml.WriteEndElement();
+      }
+      private static void WriteFormatted(string value, bool isXml, XmlWriter writer)
+      {
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+          if (isXml)
+          {
+            char[] writeNodeBuffer = null;
+            using (var reader = new XmlTextReader(value, XmlNodeType.Element, null))
+            {
+              reader.WhitespaceHandling = WhitespaceHandling.Significant;
+
+              bool canReadValueChunk = reader.CanReadValueChunk;
+              while (reader.Read())
+              {
+                switch (reader.NodeType)
+                {
+                  case XmlNodeType.Element:
+                    writer.WriteStartElement(reader.Prefix, reader.LocalName, reader.NamespaceURI);
+                    writer.WriteAttributes(reader, false);
+                    if (reader.IsEmptyElement)
+                    {
+                      writer.WriteEndElement();
+                    }
+                    break;
+                  case XmlNodeType.Text:
+                    if (canReadValueChunk)
+                    {
+                      if (writeNodeBuffer == null)
+                      {
+                        writeNodeBuffer = new char[1024];
+                      }
+                      int count;
+                      while ((count = reader.ReadValueChunk(writeNodeBuffer, 0, 1024)) > 0)
+                      {
+                        writer.WriteChars(writeNodeBuffer, 0, count);
+                      }
+                    }
+                    else
+                    {
+                      value = reader.Value;
+                      writer.WriteString(value);
+                    }
+                    break;
+                  case XmlNodeType.CDATA:
+                    writer.WriteCData(reader.Value);
+                    break;
+                  case XmlNodeType.EntityReference:
+                    writer.WriteEntityRef(reader.Name);
+                    break;
+                  case XmlNodeType.ProcessingInstruction:
+                  case XmlNodeType.XmlDeclaration:
+                    writer.WriteProcessingInstruction(reader.Name, reader.Value);
+                    break;
+                  case XmlNodeType.Comment:
+                    writer.WriteComment(reader.Value);
+                    break;
+                  case XmlNodeType.DocumentType:
+                    writer.WriteDocType(reader.Name, reader.GetAttribute("PUBLIC"), reader.GetAttribute("SYSTEM"), reader.Value);
+                    break;
+                  //case XmlNodeType.Whitespace:
+                  case XmlNodeType.SignificantWhitespace:
+                    writer.WriteWhitespace(reader.Value);
+                    break;
+                  case XmlNodeType.EndElement:
+                    writer.WriteFullEndElement();
+                    break;
+                }
+              }
+            }
+          }
+          else
+          {
+            writer.WriteString(value);
+          }
         }
       }
-    }
-    private static void Write(ITestCommand cmd, XmlWriter writer)
-    {
-      var assert = cmd as AssertMatch;
-      if (assert != null)
-        assert.Write(writer);
-      else
-        Write((ICommand)cmd, writer);
-    }
-    private static void Write(ICommand cmd, XmlWriter writer)
-    {
-      var param = cmd as ParamAssign;
-      if (param != null)
-        param.Write(writer);
 
-      var query = cmd as Query;
-      if (query != null)
-        query.Write(writer);
+      public void Dispose()
+      {
+        _xml.Flush();
+        _xml.Dispose();
+      }
     }
   }
 }

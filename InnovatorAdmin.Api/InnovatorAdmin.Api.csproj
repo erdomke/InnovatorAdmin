@@ -57,6 +57,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
@@ -127,9 +129,14 @@
     <Compile Include="SystemPropertyGroup.cs" />
     <Compile Include="Testing\AssertionFailedException.cs" />
     <Compile Include="Testing\AssertMatch.cs" />
+    <Compile Include="Testing\CredentialType.cs" />
+    <Compile Include="Testing\Delay.cs" />
+    <Compile Include="Testing\DownloadFile.cs" />
     <Compile Include="Testing\ElementsXpathResult.cs" />
     <Compile Include="Testing\ICommand.cs" />
     <Compile Include="Testing\ITestCommand.cs" />
+    <Compile Include="Testing\ITestVisitable.cs" />
+    <Compile Include="Testing\ITestVisitor.cs" />
     <Compile Include="Testing\Login.cs" />
     <Compile Include="Testing\Logout.cs" />
     <Compile Include="Testing\ParamAssign.cs" />

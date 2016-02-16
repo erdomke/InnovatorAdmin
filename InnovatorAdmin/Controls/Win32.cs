@@ -33,9 +33,6 @@ namespace InnovatorAdmin.Controls
 
 		public Win32()
 		{
-			//
-			// TODO: Add constructor logic here
-			//
 		}
 
 		[DllImport("User32.dll",CharSet = CharSet.Auto)]

@@ -241,6 +241,12 @@ namespace InnovatorAdmin.Editor
               case "Test":
                 items = Attributes(notExisting, "name");
                 break;
+              case "Login":
+                items = Attributes(notExisting, "database", "url", "password", "username", "type");
+                break;
+              case "Delay":
+                items = Attributes(notExisting, "from", "by");
+                break;
               case "actual_data":
                 var lastItem = path.LastOrDefault(p => p.LocalName == "Item");
                 if (lastItem != null && lastItem.Type == "File")
@@ -539,6 +545,24 @@ namespace InnovatorAdmin.Editor
             {
               switch (attrName)
               {
+                case "type":
+                  if (path.Last().LocalName == "Login")
+                  {
+                    items = AttributeValues("Explicit", "Anonymous", "Windows");
+                  }
+                  break;
+                case "select":
+                  if (path.Last().LocalName == "Param")
+                  {
+                    items = AttributeValues("x:Database()", "x:NewId()", "x:Now()", "x:UserId()");
+                  }
+                  break;
+                case "match":
+                  if (path.Last().LocalName == "AssertMatch")
+                  {
+                    items = AttributeValues("(//Item)[1]");
+                  }
+                  break;
                 case "encoding":
                   items = AttributeValues("none", "base64");
                   break;
@@ -663,11 +687,15 @@ namespace InnovatorAdmin.Editor
             }
             else if (path.Last().LocalName == "Test")
             {
-              items = Elements("AssertMatch", "Param", "Item", "sql");
+              items = Elements("AssertMatch", "Param", "Item", "sql", "Login", "Logout", "Delay", "DownloadFile");
             }
             else if (path.Last().LocalName == "Init" || path.Last().LocalName == "Cleanup")
             {
-              items = Elements("Param", "Item", "sql");
+              items = Elements("Param", "Item", "sql", "Login", "Logout", "Delay");
+            }
+            else if (path.Last().LocalName == "DownloadFile")
+            {
+              items = Elements("Item");
             }
             else if (path.Last().LocalName == "AssertMatch")
             {
@@ -834,6 +862,18 @@ namespace InnovatorAdmin.Editor
 
       if (items == null)
         return new CompletionContext();
+
+      if (items.Any(i => i.Text == "Item"))
+      {
+        items = items.Concat(new AttributeCompletionData[] {
+          new AttributeCompletionData()
+          {
+            Text = "Item action='get'",
+            Action = () => "Item action='get' type",
+            Image = Icons.Attribute16.Wpf
+          }
+        });
+      }
 
       return new CompletionContext() {
         Items = FilterAndSort(items.Concat(appendItems), filter),
@@ -1259,8 +1299,8 @@ namespace InnovatorAdmin.Editor
         if (item == null)
           return;
 
-        var query = string.Format("<Item type='{0}' action='get'></Item>", _prop.Restrictions.First());
-        var items = EditorWindow.GetItems(_conn, query, query.Length - 7);
+        var query = string.Format("<Item type='{0}' action='get'><keyed_name condition='like'>**</keyed_name></Item>", _prop.Restrictions.First());
+        var items = EditorWindow.GetItems(_conn, query, query.Length - 21);
         if (items.Any(i => _prop.Restrictions.Contains(i.Type)))
         {
           var allItems = items.Where(i => _prop.Restrictions.Contains(i.Type)).ToArray();

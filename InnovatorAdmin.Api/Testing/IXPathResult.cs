@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Innovator.Client;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,10 +17,16 @@ namespace InnovatorAdmin.Testing
 
   public static class XPathResult
   {
-    public static IXPathResult Evaluate(XElement elem, string xPath)
+    public static IXPathResult Evaluate(XElement elem, string xPath, IConnection conn)
     {
+      if (xPath == "x:Database()")
+        return new StringXpathResult(conn.Database);
       if (xPath == "x:NewId()")
         return new StringXpathResult(Guid.NewGuid().ToString("N").ToUpperInvariant());
+      if (xPath == "x:Now()")
+        return new StringXpathResult(conn.AmlContext.LocalizationContext.Format(DateTime.UtcNow));
+      if (xPath == "x:UserId()")
+        return new StringXpathResult(conn.UserId);
 
       if (elem == null)
         throw new InvalidOperationException("Cannot match an XPath when data is available");

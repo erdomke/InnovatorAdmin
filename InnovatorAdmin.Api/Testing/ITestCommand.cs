@@ -6,8 +6,14 @@ using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Testing
 {
-  public interface ITestCommand
+  /// <summary>
+  /// Command which can only occur during a test
+  /// </summary>
+  public interface ITestCommand : ITestVisitable
   {
+    /// <summary>
+    /// Code for executing the command
+    /// </summary>
     Task Run(TestContext context);
   }
 }

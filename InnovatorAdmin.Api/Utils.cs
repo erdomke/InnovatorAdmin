@@ -148,6 +148,23 @@ namespace InnovatorAdmin
         return FormatChecksum(mD.ComputeHash(data));
       }
     }
+    public static async Task<MemoryStream> ToMemoryStream(this Stream stream)
+    {
+      var memStream = stream as MemoryStream;
+      if (memStream == null)
+      {
+        memStream = new MemoryStream();
+        await stream.CopyToAsync(memStream);
+      }
+      return memStream;
+    }
+    public static async Task<string> ReadStart(this Stream stream, int length)
+    {
+      var reader = new StreamReader(stream);
+      var buffer = new char[length];
+      var count = await reader.ReadBlockAsync(buffer, 0, buffer.Length);
+      return new string(buffer, 0, count);
+    }
     private static string FormatChecksum(byte[] array)
     {
       var stringBuilder = new StringBuilder(array.Length);

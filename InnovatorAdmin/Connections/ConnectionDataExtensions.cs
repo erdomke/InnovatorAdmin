@@ -30,22 +30,26 @@ namespace InnovatorAdmin
     {
       return ArasLogin(credentials, false).Value;
     }
+
+    public static ICredentials ArasCredentials(this ConnectionData credentials)
+    {
+      if (credentials.Type == ConnectionType.Innovator)
+      {
+        switch (credentials.Authentication)
+        {
+          case Authentication.Anonymous:
+            return new AnonymousCredentials(credentials.Database);
+          case Authentication.Windows:
+            return new WindowsCredentials(credentials.Database);
+          default:
+            return new ExplicitCredentials(credentials.Database, credentials.UserName, credentials.Password);
+        }
+      }
+      return null;
+    }
     public static IPromise<IAsyncConnection> ArasLogin(this ConnectionData credentials, bool async)
     {
-      ICredentials cred;
-      switch (credentials.Authentication)
-      {
-        case Authentication.Anonymous:
-          cred = new AnonymousCredentials(credentials.Database);
-          break;
-        case Authentication.Windows:
-          cred = new WindowsCredentials(credentials.Database);
-          break;
-        default:
-          cred = new ExplicitCredentials(credentials.Database, credentials.UserName, credentials.Password);
-          break;
-      }
-
+      var cred = credentials.ArasCredentials();
       var prefs = new ConnectionPreferences() { UserAgent = "InnovatorAdmin v" + Assembly.GetExecutingAssembly().GetName().Version.ToString() };
       var localePref = credentials.Params.FirstOrDefault(p => p.Name == "LOCALE");
       var tzPref = credentials.Params.FirstOrDefault(p => p.Name == "TIMEZONE_NAME");

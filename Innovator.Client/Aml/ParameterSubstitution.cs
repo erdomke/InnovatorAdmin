@@ -131,6 +131,11 @@ namespace Innovator.Client
       }
     }
 
+    internal string RenderParameter(string name, IServerContext context)
+    {
+      _context = context;
+      return RenderValue("", name).Value;
+    }
     private Parameter RenderValue(string context, string content)
     {
       object value;

@@ -37,7 +37,7 @@ namespace Innovator.Client.Connection
     public SessionPolicy SessionPolicy { get; set; }
     public Uri Url
     {
-      get 
+      get
       {
         return _endpoints.Base;
       }
@@ -59,7 +59,7 @@ namespace Innovator.Client.Connection
     {
       _timer.Enabled = false;
       PolicyToken(PolicyTokenType.connection, null, null, true)
-        .Continue(p => 
+        .Continue(p =>
         {
           return RenewSession(_renewalToken.Content, p, true).Done(r =>
           {
@@ -101,8 +101,8 @@ namespace Innovator.Client.Connection
         throw new ArgumentException("Cannot download a file with an upload request.");
       }
 
-      var multiWriter = new MultiPartFormWriter(async);
-      multiWriter.AddFiles(upload.Files);
+      var multiWriter = new MultiPartFormWriter(async, _factory.LocalizationContext);
+      multiWriter.AddFiles(upload);
       multiWriter.WriteFormField("SOAPACTION", request.Action.ToString());
       multiWriter.WriteFormField("XMLdata", "<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:i18n=\"http://www.aras.com/I18N\"><SOAP-ENV:Body><ApplyItem>"
         + upload.ToNormalizedAml(_factory.LocalizationContext)
@@ -123,7 +123,7 @@ namespace Innovator.Client.Connection
       }).Convert(r => r.AsStream);
 
     }
-    
+
     public IEnumerable<string> GetDatabases()
     {
       if (_databases == null)
@@ -158,7 +158,7 @@ namespace Innovator.Client.Connection
       }
       else
       {
-        var tokenPromise = (_lastLoginToken == null 
+        var tokenPromise = (_lastLoginToken == null
                         || _lastLoginToken.Expiration > DateTime.UtcNow.AddSeconds(-5)) ?
         Query(null, null, null, this.SessionPolicy, null, async)
           .Convert<IHttpResponse, InitializeSessionToken>((r, p) =>
@@ -167,7 +167,7 @@ namespace Innovator.Client.Connection
           }, (ex, p) =>
           {
             var httpEx = ex as HttpException;
-            if (httpEx != null 
+            if (httpEx != null
               && httpEx.Response.StatusCode == System.Net.HttpStatusCode.Forbidden)
             {
               var header = AuthenticationScheme.Parse(httpEx.Response.Headers["WWW-Authenticate"]);
@@ -186,7 +186,7 @@ namespace Innovator.Client.Connection
             }
           }) :
         Promises.Resolved(_lastLoginToken);
-      
+
       loginPromise = Promises.All(tokenPromise
                               , PolicyToken(PolicyTokenType.connection, null, null, async))
         .Continue(r =>
@@ -287,7 +287,7 @@ namespace Innovator.Client.Connection
           context.TimeZone = i18n.Element("time_zone").Value;
           _factory = new ElementFactory(context);
 
-          var upload = data.Element("WriteVault") == null 
+          var upload = data.Element("WriteVault") == null
             ? null : data.Element("WriteVault").Element("Item");
           if (upload == null)
           {
@@ -304,7 +304,7 @@ namespace Innovator.Client.Connection
           result.Resolve(_userId);
         }).Fail(ex => {
           var httpEx = ex as HttpException;
-          if (httpEx != null 
+          if (httpEx != null
             && httpEx.Response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
           {
             var auth = AuthenticationScheme.Parse(httpEx.Response.Headers["WWW-Authenticate"])
@@ -327,17 +327,17 @@ namespace Innovator.Client.Connection
       result.CancelTarget(loginPromise);
 
       return result;
-    }    
+    }
 
     private IPromise<Stream> DownloadFile(Command request, bool async)
     {
       var parsedAml = _factory.FromXml(request.ToNormalizedAml(_factory.LocalizationContext));
       var file = parsedAml.AssertItem("File");
-      if (string.IsNullOrEmpty(file.Id())) 
+      if (string.IsNullOrEmpty(file.Id()))
         return Promises.Rejected<Stream>(new ArgumentException("Request does not represent a single file item", "request"));
       var downloadBase = new Uri(_endpoints.Base, _endpoints.Download.First());
       return _service.Execute("GET"
-        , new Uri(downloadBase, Uri.EscapeUriString(_database) + "/" 
+        , new Uri(downloadBase, Uri.EscapeUriString(_database) + "/"
                                 + Uri.EscapeUriString(file.Id())).ToString()
         , null, CredentialCache.DefaultCredentials, async, _defaults)
         .Convert(r => r.AsStream);
@@ -430,10 +430,10 @@ namespace Innovator.Client.Connection
         if (action == "ValidateUser")
         {
           request.SetHeader("DesiredPolicy", ((int)policy).ToString());
-          if (!string.IsNullOrEmpty(policyToken)) 
+          if (!string.IsNullOrEmpty(policyToken))
             request.SetHeader(ProxyServerConnection.PolicyTokenHeader, policyToken);
         }
-        if (!string.IsNullOrEmpty(authorization)) 
+        if (!string.IsNullOrEmpty(authorization))
           request.SetHeader("Authorization", "Bearer " + authorization);
         if (!string.IsNullOrEmpty(action)) request.SetHeader("SOAPACTION", action);
         if (writer != null) writer.Invoke(request);
@@ -447,9 +447,9 @@ namespace Innovator.Client.Connection
       {
         _defaults.Invoke(request);
         request.SetHeader("Accept", "text/xml");
-        if (!string.IsNullOrEmpty(policyToken)) 
+        if (!string.IsNullOrEmpty(policyToken))
           request.SetHeader(ProxyServerConnection.PolicyTokenHeader, policyToken);
-        if (!string.IsNullOrEmpty(renewalToken)) 
+        if (!string.IsNullOrEmpty(renewalToken))
           request.SetHeader("Authorization", "Bearer " + renewalToken);
       });
     }

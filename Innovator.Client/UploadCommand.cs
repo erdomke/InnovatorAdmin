@@ -46,7 +46,7 @@ namespace Innovator.Client
     public UploadCommand(Vault vault)
     {
       _vault = vault;
-    }    
+    }
 
     ///// <summary>
     ///// Merge another request into this request
@@ -115,15 +115,16 @@ namespace Innovator.Client
                   && e.Elements("actual_filename").Any(p => !string.IsNullOrEmpty(p.Value))
                   && e.Attributes("id").Any(p => !string.IsNullOrEmpty(p.Value))
                   && e.Attributes("action").Any(p => !string.IsNullOrEmpty(p.Value)));
+      XElement newElem = null;
       foreach (var file in files.ToList())
       {
         var dataElem = file.Element("actual_data");
         if (dataElem == null)
         {
-          file.ReplaceWith(XElement.Parse(AddFile(
+          newElem = XElement.Parse(AddFile(
             file.Attribute("id").Value,
             file.Element("actual_filename").Value,
-            file.Attribute("action").Value == "add" || file.Attribute("action").Value == "create")));
+            file.Attribute("action").Value == "add" || file.Attribute("action").Value == "create"));
         }
         else
         {
@@ -132,14 +133,19 @@ namespace Innovator.Client
             ? Convert.FromBase64String(dataElem.Value)
             : Encoding.UTF8.GetBytes(dataElem.Value);
           var stream = new MemoryStream(data);
-          file.ReplaceWith(XElement.Parse(AddFile(
+          newElem = XElement.Parse(AddFile(
             file.Attribute("id").Value,
             file.Element("actual_filename").Value,
             stream,
-            file.Attribute("action").Value == "add" || file.Attribute("action").Value == "create")));
+            file.Attribute("action").Value == "add" || file.Attribute("action").Value == "create"));
+        }
+        if (file.Parent != null)
+        {
+          file.ReplaceWith(newElem);
+          newElem = null;
         }
       }
-      base.AddAml(elem.ToString());
+      base.AddAml(newElem != null ? newElem.ToString() : elem.ToString());
     }
   }
 }

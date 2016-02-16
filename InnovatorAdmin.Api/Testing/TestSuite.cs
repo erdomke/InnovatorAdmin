@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Testing
 {
-  public class TestSuite
+  public class TestSuite : ITestVisitable
   {
     private List<ICommand> _init = new List<ICommand>();
     private List<ICommand> _cleanup = new List<ICommand>();
@@ -15,6 +15,9 @@ namespace InnovatorAdmin.Testing
     private List<Test> _tests = new List<Test>();
 
     public IList<ICommand> Cleanup { get { return _cleanup; } }
+    /// <summary>
+    /// Comment preceding the command in the script
+    /// </summary>
     public string Comment { get; set; }
     public IList<ICommand> Init { get { return _init; } }
     public IEnumerable<ParamAssign> Output { get { return _output; } }
@@ -92,6 +95,11 @@ namespace InnovatorAdmin.Testing
           });
         }
       }
+    }
+
+    public void Visit(ITestVisitor visitor)
+    {
+      visitor.Visit(this);
     }
   }
 }

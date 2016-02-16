@@ -13,7 +13,9 @@ namespace InnovatorAdmin.Testing
     private Dictionary<string, string> _parameters = new Dictionary<string, string>();
     private Stack<IAsyncConnection> _conns = new Stack<IAsyncConnection>();
     private List<ProgressState> _progressStack = new List<ProgressState>();
+    private List<ICredentials> _credentialStore = new List<ICredentials>();
 
+    public IList<ICredentials> CredentialStore { get { return _credentialStore; } }
     public IAsyncConnection Connection { get { return _conns.Any() ? _conns.Peek() : null; } }
     public XElement LastResult { get; set; }
     public IDictionary<string, string> Parameters { get { return _parameters; } }
@@ -56,7 +58,7 @@ namespace InnovatorAdmin.Testing
         progress += factor * ((double)prog.Index) / prog.Count;
         factor *= 1.0 / prog.Count;
       }
-      ProgressCallback((int)progress, message);
+      ProgressCallback((int)(progress * 100), message);
     }
 
     private class ProgressState : IDisposable

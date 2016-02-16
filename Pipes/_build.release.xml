@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <OutDir35>..\publish\Pipes\lib\net35</OutDir35>
+    <OutDir40>..\publish\Pipes\lib\net40</OutDir40>
+    <ObjDir35>obj\net35</ObjDir35>
+    <ObjDir40>obj\net40</ObjDir40>
+  </PropertyGroup>
+  
+  <Target Name="Clean">
+    <Delete Files="$(OutDir35)*.*;$(OutDir40)*.*;$(ObjDir35)*.*;$(ObjDir40)*.*" />
+  </Target>
+  <Target Name="Build" DependsOnTargets="Clean">
+    <ItemGroup>
+      <ProjectToBuild3 Include="Pipes.csproj">
+        <Properties>OutputPath=$(OutDir35);IntermediateOutputPath=$(ObjDir35)\;TargetFrameworkVersion=v3.5;Configuration=Release</Properties>
+        <SGenToolPath>C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\sgen.exe</SGenToolPath>
+      </ProjectToBuild3>
+      <ProjectToBuild4 Include="Pipes.csproj">
+        <Properties>OutputPath=$(OutDir40);IntermediateOutputPath=$(ObjDir40)\;TargetFrameworkVersion=v4.0;Configuration=Release</Properties>
+        <SGenToolPath>C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\sgen.exe</SGenToolPath>
+      </ProjectToBuild4>
+    </ItemGroup>
+    <MSBuild Projects="@(ProjectToBuild3)" />
+    <MSBuild Projects="@(ProjectToBuild4)" />
+  </Target>
+</Project>

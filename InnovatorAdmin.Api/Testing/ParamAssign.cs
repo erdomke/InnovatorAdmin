@@ -12,6 +12,9 @@ namespace InnovatorAdmin.Testing
   public class ParamAssign : ICommand
   {
     public string ActualValue { get; set; }
+    /// <summary>
+    /// Comment preceding the command in the script
+    /// </summary>
     public string Comment { get; set; }
     public bool IsXml { get; set; }
     public string Name { get; set; }
@@ -22,7 +25,7 @@ namespace InnovatorAdmin.Testing
     {
       if (!string.IsNullOrWhiteSpace(this.Select))
       {
-        this.ActualValue = XPathResult.Evaluate(context.LastResult, this.Select).ToString();
+        this.ActualValue = XPathResult.Evaluate(context.LastResult, this.Select, context.Connection).ToString();
         context.Parameters[this.Name] = this.ActualValue;
       }
       else if (string.IsNullOrEmpty(this.Value))
@@ -33,6 +36,11 @@ namespace InnovatorAdmin.Testing
       {
         context.Parameters[this.Name] = this.Value;
       }
+    }
+
+    public void Visit(ITestVisitor visitor)
+    {
+      visitor.Visit(this);
     }
   }
 }

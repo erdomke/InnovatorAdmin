@@ -43,6 +43,7 @@ namespace InnovatorAdmin
     private bool _updateCheckComplete = false;
     private IHttpService _webService = new DefaultHttpService();
     private ConnectionType _oldConnType = ConnectionType.Innovator;
+    private List<string> _recentDocs = new List<string>();
 
     public bool AllowRun
     {
@@ -93,7 +94,7 @@ namespace InnovatorAdmin
     public EditorWindow() : base()
     {
       InitializeComponent();
-      
+
       this.TitleLabel = lblTitle;
       this.MaximizeLabel = lblMaximize;
       this.MinimizeLabel = lblMinimize;
@@ -165,29 +166,28 @@ namespace InnovatorAdmin
 
       UpdateTitle(null);
 
+      _recentDocs.AddRange((Properties.Settings.Default.RecentDocument ?? "").Split('|').Where(d => !string.IsNullOrEmpty(d)));
+      BuildRecentDocsMenu();
+
       // Wire up the commands
       _commands = new UiCommandManager(this);
       inputEditor.KeyDown += _commands.OnKeyDown;
       outputEditor.KeyDown += _commands.OnKeyDown;
       _commands.Add<Control>(btnEditConnections, e => e.KeyCode == Keys.Q && e.Modifiers == Keys.Control, ChangeConnection);
       _commands.Add<Control>(btnSoapAction, e => e.KeyCode == Keys.M && e.Modifiers == Keys.Control, ChangeSoapAction);
-      _commands.Add<Control>(mniNewWindow, e => e.KeyCode == Keys.N && e.Modifiers == Keys.Control, c => NewWindow().Show());
+      _commands.Add<Editor.FullEditor>(mniNewDocument, e => e.KeyCode == Keys.N && e.Modifiers == (Keys.Control), c =>
+      {
+        c.NewFile();
+        UpdateTitle(null);
+      });
+      _commands.Add<Control>(mniNewWindow, e => e.KeyCode == Keys.N && e.Modifiers == (Keys.Control | Keys.Shift), c => NewWindow().Show());
       _commands.Add<Editor.FullEditor>(mniOpen, e => e.KeyCode == Keys.O && e.Modifiers == Keys.Control, c =>
       {
         using (var dialog = new OpenFileDialog())
         {
           if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
           {
-            lblProgress.Text = "Opening file...";
-            c.OpenFile(dialog.FileName).ContinueWith(t => {
-              if (t.IsCanceled)
-                lblProgress.Text = "";
-              else if (t.IsFaulted)
-                lblProgress.Text = t.Exception.Message;
-              else
-                lblProgress.Text = "File opened";
-              UpdateTitle(null);
-            }, TaskScheduler.FromCurrentSynchronizationContext());
+            OpenFile(c, dialog.FileName);
           }
         }
       });
@@ -2026,6 +2026,107 @@ namespace InnovatorAdmin
       tblMain.RowStyles[tblMain.RowStyles.Count - 1].Height = size;
       btnInstall.MinimumSize = new Size((int)(120 * scale), (int)(40 * scale));
       btnCreate.MinimumSize = btnInstall.MinimumSize;
+    }
+
+    private void AddRecentDocument(string path)
+    {
+      _recentDocs.Remove(path);
+      _recentDocs.Insert(0, path);
+      while (_recentDocs.Count > 10)
+      {
+        _recentDocs.RemoveAt(_recentDocs.Count - 1);
+      }
+      BuildRecentDocsMenu();
+      Properties.Settings.Default.RecentDocument = string.Join("|", _recentDocs);
+      Properties.Settings.Default.Save();
+    }
+    private void BuildRecentDocsMenu()
+    {
+      if (!mniFile.DropDownItems.OfType<RecentDocItem>().Any())
+      {
+        var start = mniFile.DropDownItems.IndexOf(mniRecentDocsStart) + 1;
+        for (var i = 0; i < 10; i++)
+        {
+          mniFile.DropDownItems.Insert(start, new RecentDocItem(this) { Index = i + 1 });
+          start++;
+        }
+      }
+
+      var menuItems = mniFile.DropDownItems.OfType<RecentDocItem>().ToArray();
+
+      for (var i = 0; i < Math.Min(menuItems.Length, _recentDocs.Count); i++)
+      {
+        menuItems[i].Path = _recentDocs[i];
+      }
+    }
+
+    private void OpenFile(FullEditor control, string path)
+    {
+      lblProgress.Text = "Opening file...";
+      control.OpenFile(path).ContinueWith(t => {
+        if (t.IsCanceled)
+          lblProgress.Text = "";
+        else if (t.IsFaulted)
+          lblProgress.Text = t.Exception.Message;
+        else
+        {
+          lblProgress.Text = "File opened";
+          AddRecentDocument(path);
+        }
+        UpdateTitle(null);
+      }, TaskScheduler.FromCurrentSynchronizationContext());
+    }
+
+    private class RecentDocItem : ToolStripMenuItem
+    {
+      private EditorWindow _parent;
+      private string _path;
+      private int _index;
+
+      public RecentDocItem(EditorWindow parent)
+      {
+        _parent = parent;
+        this.Visible = false;
+      }
+
+      public string Path
+      {
+        get { return _path; }
+        set
+        {
+          _path = value;
+          UpdateText();
+          this.Visible = !string.IsNullOrEmpty(_path);
+        }
+      }
+      public int Index
+      {
+        get { return _index; }
+        set
+        {
+          _index = value;
+          UpdateText();
+        }
+      }
+
+      private void UpdateText()
+      {
+        this.Text = this.Index + ": " 
+          + (string.IsNullOrEmpty(_path) ? "" : Utils.Ellipsis(_path, 300, 9, TextFormatFlags.PathEllipsis).Replace("&", "&&"));
+      }
+      
+      protected override void OnClick(EventArgs e)
+      {
+        try
+        {
+          _parent.OpenFile(_parent.inputEditor, this.Path);
+        }
+        catch (Exception ex)
+        {
+          Utils.HandleError(ex);
+          throw;
+        }
+      }
     }
   }
 }

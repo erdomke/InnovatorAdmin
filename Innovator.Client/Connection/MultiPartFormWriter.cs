@@ -13,23 +13,25 @@ namespace Innovator.Client.Connection
     private StreamWriter _writer;
     private string _boundaryLine = GetBoundaryLine();
     private long _contentLength = -1;
-    private List<CommandFile> _files = new List<CommandFile>();
+    private UploadCommand _upload;
     private byte[] _finalBytes;
+    private IServerContext _context;
 
     public string ContentType
     {
       get { return "multipart/form-data; boundary=" + _boundaryLine.Substring(2); }
     }
 
-    public MultiPartFormWriter(bool async) 
+    public MultiPartFormWriter(bool async, IServerContext context)
     {
       _async = async;
+      _context = context;
       _writer = new StreamWriter(_content);
     }
 
-    public void AddFiles(IEnumerable<CommandFile> files)
+    public void AddFiles(UploadCommand upload)
     {
-      _files.AddRange(files);
+      _upload = upload;
     }
     public long GetLength()
     {
@@ -37,9 +39,9 @@ namespace Innovator.Client.Connection
       {
         _writer.Flush();
         _contentLength = _content.Length;
-        foreach (var file in _files)
+        foreach (var file in _upload.Files)
         {
-          _contentLength += file.SetHeader(_boundaryLine) + file.Length + 2;
+          _contentLength += file.SetHeader(_boundaryLine, _upload, _context) + file.Length + 2;
         }
         _finalBytes = Encoding.UTF8.GetBytes(_boundaryLine + "--\r\n");
         _contentLength += _finalBytes.Length;
@@ -51,7 +53,7 @@ namespace Innovator.Client.Connection
       if (_contentLength < 0) GetLength();
       _content.Position = 0;
       writer.Write(_content);
-      foreach (var file in _files)
+      foreach (var file in _upload.Files)
       {
         writer.Write(file.Header, 0, file.Header.Length);
         writer.Write(file.GetStream(_async));

@@ -18,7 +18,7 @@ namespace Innovator.Client
     private string _actionString;
 
     public string AcceptMimeType { get; set; }
-    public CommandAction Action 
+    public CommandAction Action
     {
       get { return _action; }
       set { _action = value; _actionString = null; }
@@ -32,8 +32,8 @@ namespace Innovator.Client
     /// <summary>
     /// The AML query
     /// </summary>
-    public virtual string Aml 
-    { 
+    public virtual string Aml
+    {
       get
       {
         if (_queries.Count < 1) return null;
@@ -61,10 +61,15 @@ namespace Innovator.Client
       }
     }
 
-    public Command() 
+    public Command()
     {
       this.AcceptMimeType = "text/xml";
       this.Action = CommandAction.ApplyItem;
+    }
+
+    internal string Substitute(string query, IServerContext context)
+    {
+      return _sub.RenderParameter(query, context);
     }
 
     /// <summary>

@@ -71,5 +71,19 @@ namespace InnovatorAdmin.Testing.Tests
         Assert.AreEqual(data, writer.ToString());
       }
     }
+
+    [TestMethod()]
+    public void IsXmlTest()
+    {
+      Assert.AreEqual(false, TestSerializer.IsXml(null));
+      Assert.AreEqual(false, TestSerializer.IsXml(""));
+      Assert.AreEqual(false, TestSerializer.IsXml("   "));
+      Assert.AreEqual(false, TestSerializer.IsXml("  <!--  "));
+      Assert.AreEqual(false, TestSerializer.IsXml("  <!--  asdfasdf -->  "));
+      Assert.AreEqual(false, TestSerializer.IsXml("  <!--  asdfasdf --> <a"));
+      Assert.AreEqual(true, TestSerializer.IsXml("  <!--  asdfasdf --> <and some=''"));
+      Assert.AreEqual(true, TestSerializer.IsXml("  <Item/>  "));
+      Assert.AreEqual(false, TestSerializer.IsXml("  asdfasdf "));
+    }
   }
 }
