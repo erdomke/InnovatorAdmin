@@ -69,7 +69,7 @@ namespace InnovatorAdmin.Editor
       return Enumerable.Empty<IEditorScript>();
     }
 
-    public virtual IEnumerable<IEditorScript> GetScripts(IEnumerable<System.Data.DataRow> rows)
+    public virtual IEnumerable<IEditorScript> GetScripts(IEnumerable<System.Data.DataRow> rows, string column)
     {
       return Enumerable.Empty<IEditorScript>();
     }

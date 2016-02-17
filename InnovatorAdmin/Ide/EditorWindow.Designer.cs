@@ -1267,6 +1267,7 @@
       this.dgvItems.Name = "dgvItems";
       this.dgvItems.Size = new System.Drawing.Size(758, 383);
       this.dgvItems.TabIndex = 0;
+      this.dgvItems.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.Grid_MouseDoubleClick);
       // 
       // conTable
       // 

@@ -76,6 +76,7 @@ namespace InnovatorAdmin.Testing
                     {
                       ReadItems<ITestCommand>(test.Commands, r, sessionId, ReadTestCommand);
                     }
+                    AddPrints(test.Commands);
                     result.Tests.Add(test);
                   }
                   reader.Read();
@@ -109,6 +110,24 @@ namespace InnovatorAdmin.Testing
         }
       }
       return result;
+    }
+
+    private static void AddPrints(IList<ITestCommand> commands)
+    {
+      var foundAssert = false;
+      for (var i = commands.Count - 1; i >= 0; i--)
+      {
+        if (commands[i] is Query)
+        {
+          if (!foundAssert)
+            commands.Insert(i + 1, new PrintError());
+          foundAssert = false;
+        }
+        else if (commands[i] is AssertMatch)
+        {
+          foundAssert = true;
+        }
+      }
     }
 
     private static void ReadItems<T>(IList<T> items, XmlReader reader, string sessionId, Func<XmlReader, string, string, T> itemReader)
@@ -176,6 +195,7 @@ namespace InnovatorAdmin.Testing
         case "SQL":
         case "Item":
         case "AML":
+        case "GetNextSequence":
           return new Query()
           {
             Comment = comment,
@@ -427,6 +447,13 @@ namespace InnovatorAdmin.Testing
           WriteFormatted(param.Value, param.IsXml, _xml);
         }
         _xml.WriteEndElement();
+      }
+      public void Visit(PrintError print)
+      {
+        if (!string.IsNullOrWhiteSpace(print.Comment))
+          _xml.WriteComment(print.Comment);
+        if (print.ErrorNode != null)
+          print.ErrorNode.WriteTo(_xml);
       }
       public void Visit(Query query)
       {

@@ -64,6 +64,7 @@
     <Compile Include="Aml\ItemExtensions.cs" />
     <Compile Include="Aml\JsonFormatter.cs" />
     <Compile Include="Aml\LockStatusType.cs" />
+    <Compile Include="Aml\LoggedOutException.cs" />
     <Compile Include="Aml\Model\Activity.cs" />
     <Compile Include="Aml\Model\ItemWrapper.cs" />
     <Compile Include="Aml\Model\LifeCycleState.cs" />

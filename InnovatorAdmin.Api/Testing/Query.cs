@@ -47,6 +47,8 @@ namespace InnovatorAdmin.Testing
         cmd.Action = CommandAction.ApplyItem;
         if (this.Text.StartsWith("<sql") || this.Text.StartsWith("<SQL"))
           cmd.Action = CommandAction.ApplySQL;
+        else if (this.Text.StartsWith("<GetNextSequence"))
+          cmd.Action = CommandAction.GetNextSequence;
       }
       foreach (var kvp in context.Parameters)
       {

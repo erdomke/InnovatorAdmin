@@ -14,6 +14,7 @@ namespace InnovatorAdmin.Testing
     void Visit(Login login);
     void Visit(Logout logout);
     void Visit(ParamAssign param);
+    void Visit(PrintError print);
     void Visit(Query query);
     void Visit(Test test);
     void Visit(TestRun run);

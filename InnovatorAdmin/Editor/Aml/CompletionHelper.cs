@@ -449,6 +449,14 @@ namespace InnovatorAdmin.Editor
                           Image = Icons.EnumValue16.Wpf
                         }));
                         break;
+                      case "Sequence":
+                        items = items.Concat(_metadata.Sequences.Select(r => new AttributeValueCompletionData()
+                        {
+                          Text = r.KeyedName,
+                          Action = () => r.Unique,
+                          Image = Icons.EnumValue16.Wpf
+                        }));
+                        break;
                     }
                   }
                   break;
@@ -554,7 +562,7 @@ namespace InnovatorAdmin.Editor
                 case "select":
                   if (path.Last().LocalName == "Param")
                   {
-                    items = AttributeValues("x:Database()", "x:NewId()", "x:Now()", "x:UserId()");
+                    items = AttributeValues("(//Item)[1]", "x:Database()", "x:FixedNewId()", "x:NewId()", "x:Now()", "x:UserId()");
                   }
                   break;
                 case "match":
@@ -669,7 +677,7 @@ namespace InnovatorAdmin.Editor
             {
               items = Elements("Item");
             }
-            else if (path.Count == 1 && path.First().LocalName.Equals("sql", StringComparison.OrdinalIgnoreCase) && soapAction == "ApplySQL")
+            else if (path.Last().LocalName.Equals("sql", StringComparison.OrdinalIgnoreCase) && !path.Any(p => p.LocalName == "Item"))
             {
               return await _sql.Completions(value, xml, caret, cdata ? "]]>" : "<").ToTask();
             }
@@ -687,13 +695,13 @@ namespace InnovatorAdmin.Editor
             }
             else if (path.Last().LocalName == "Test")
             {
-              items = Elements("AssertMatch", "Param", "Item", "sql", "Login", "Logout", "Delay", "DownloadFile");
+              items = Elements("AssertMatch", "Param", "Item", "sql", "GetNextSequence", "Login", "Logout", "Delay", "DownloadFile");
             }
             else if (path.Last().LocalName == "Init" || path.Last().LocalName == "Cleanup")
             {
-              items = Elements("Param", "Item", "sql", "Login", "Logout", "Delay");
+              items = Elements("Param", "Item", "sql", "GetNextSequence", "Login", "Logout", "Delay");
             }
-            else if (path.Last().LocalName == "DownloadFile")
+            else if (path.Last().LocalName == "DownloadFile" || path.Last().LocalName == "GetNextSequence")
             {
               items = Elements("Item");
             }
@@ -754,53 +762,65 @@ namespace InnovatorAdmin.Editor
                         , "ARG5", "ARG6", "ARG7", "ARG8", "ARG9");
                       break;
                     default:
-                      // Completions for item properties
-                      var buffer = new List<ICompletionData>();
-
-                      buffer.Add(new BasicCompletionData("Relationships") { Image = Icons.XmlTag16.Wpf });
-                      if (last.Action == "get")
+                      if (path.Any(n => n.LocalName == "GetNextSequence") || SoapAction == "GetNextSequence")
                       {
-                        buffer.Add(new BasicCompletionData("and") { Image = Icons.Operator16.Wpf });
-                        buffer.Add(new BasicCompletionData("not") { Image = Icons.Operator16.Wpf });
-                        buffer.Add(new BasicCompletionData("or") { Image = Icons.Operator16.Wpf });
-                      }
-                      ItemType itemType;
-                      if (!string.IsNullOrEmpty(last.Type)
-                        && _metadata.ItemTypeByName(last.Type, out itemType))
-                      {
-                        switch (last.Action)
-                        {
-                          case "add":
-                          case "create":
-                          case "edit":
-                          case "update":
-                          case "merge":
-                            items = await new PropertyCompletionFactory(_metadata, itemType)
-                            {
-                              Filter = p => !_systemControlledProperties.Contains(p.Name)
-                            }.GetPromise(buffer).ToTask();
-                            break;
-                          default:
-                            items = await new PropertyCompletionFactory(_metadata, itemType).GetPromise(buffer).ToTask();
-                            break;
-                        }
-                        if (itemType.Name == "File")
-                        {
-                          items = items.Concat(new[] {
-                            new BasicCompletionData() {
-                              Text = "actual_filename",
-                              Image = Icons.Property16.Wpf
-                            },
-                            new BasicCompletionData() {
-                              Text = "actual_data",
-                              Image = Icons.Property16.Wpf
-                            }
-                          });
-                        }
+                        items = new[] {
+                          new BasicCompletionData() {
+                            Text = "name",
+                            Image = Icons.Property16.Wpf
+                          }
+                        };
                       }
                       else
                       {
-                        items = buffer;
+                        // Completions for item properties
+                        var buffer = new List<ICompletionData>();
+
+                        buffer.Add(new BasicCompletionData("Relationships") { Image = Icons.XmlTag16.Wpf });
+                        if (last.Action == "get")
+                        {
+                          buffer.Add(new BasicCompletionData("and") { Image = Icons.Operator16.Wpf });
+                          buffer.Add(new BasicCompletionData("not") { Image = Icons.Operator16.Wpf });
+                          buffer.Add(new BasicCompletionData("or") { Image = Icons.Operator16.Wpf });
+                        }
+                        ItemType itemType;
+                        if (!string.IsNullOrEmpty(last.Type)
+                          && _metadata.ItemTypeByName(last.Type, out itemType))
+                        {
+                          switch (last.Action)
+                          {
+                            case "add":
+                            case "create":
+                            case "edit":
+                            case "update":
+                            case "merge":
+                              items = await new PropertyCompletionFactory(_metadata, itemType)
+                              {
+                                Filter = p => !_systemControlledProperties.Contains(p.Name)
+                              }.GetPromise(buffer).ToTask();
+                              break;
+                            default:
+                              items = await new PropertyCompletionFactory(_metadata, itemType).GetPromise(buffer).ToTask();
+                              break;
+                          }
+                          if (itemType.Name == "File")
+                          {
+                            items = items.Concat(new[] {
+                              new BasicCompletionData() {
+                                Text = "actual_filename",
+                                Image = Icons.Property16.Wpf
+                              },
+                              new BasicCompletionData() {
+                                Text = "actual_data",
+                                Image = Icons.Property16.Wpf
+                              }
+                            });
+                          }
+                        }
+                        else
+                        {
+                          items = buffer;
+                        }
                       }
                       break;
                   }
@@ -850,6 +870,10 @@ namespace InnovatorAdmin.Editor
                       if (items != null && paramNames.Any())
                         items = items.Concat(Parameters(paramNames.ToArray()));
                     }
+                    else if (path.Last().LocalName == "name" && (SoapAction == "GetNextSequence" || path.Any(n => n.LocalName == "GetNextSequence")))
+                    {
+                      items = _metadata.Sequences.Select(s => s.KeyedName).GetCompletions<BasicCompletionData>();
+                    }
                   }
                 }
               }
@@ -857,7 +881,6 @@ namespace InnovatorAdmin.Editor
 
             break;
         }
-
       }
 
       if (items == null)
@@ -1147,6 +1170,15 @@ namespace InnovatorAdmin.Editor
               Text = "Me",
               Image = Icons.EnumValue16.Wpf
             } });
+          }
+          if (p.Restrictions.Any(r => string.Equals(r, "Sequence", StringComparison.OrdinalIgnoreCase)))
+          {
+            completions = completions.Concat(_metadata.Sequences.Select(m => new BasicCompletionData()
+            {
+              Text = m.KeyedName,
+              Action = () => m.Unique,
+              Image = Icons.EnumValue16.Wpf
+            }));
           }
 
           return completions;

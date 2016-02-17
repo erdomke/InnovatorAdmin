@@ -150,23 +150,30 @@ namespace Innovator.Client
         .Progress((p, m) => result.Notify(p, m))
         .Done(r =>
         {
-          var res = conn.AmlContext.FromXml(r, request.Aml, conn);
-          var ex = res.Exception;
-          if (ex == null)
+          if (string.IsNullOrEmpty(conn.UserId))
           {
-
-            try
-            {
-              result.Resolve(res.AssertItem());
-            }
-            catch (Exception exc)
-            {
-              result.Reject(exc);
-            }
+            result.Reject(new LoggedOutException());
           }
           else
           {
-            result.Reject(ex);
+            var res = conn.AmlContext.FromXml(r, request.Aml, conn);
+            var ex = res.Exception;
+            if (ex == null)
+            {
+
+              try
+              {
+                result.Resolve(res.AssertItem());
+              }
+              catch (Exception exc)
+              {
+                result.Reject(exc);
+              }
+            }
+            else
+            {
+              result.Reject(ex);
+            }
           }
         }).Fail(ex => result.Reject(ex)));
       return result;
@@ -178,7 +185,7 @@ namespace Innovator.Client
 
       var aml = conn.AmlContext;
       var query = new Command("<Item><name>@0</name></Item>", sequenceName)
-                              .WithAction(CommandAction.ApplyItem);
+                              .WithAction(CommandAction.GetNextSequence);
       return aml.FromXml(conn.Process(query), query.Aml, conn).Value;
     }
     internal static IPromise<System.IO.Stream> ProcessAsync(this IConnection conn, Command cmd, bool async)

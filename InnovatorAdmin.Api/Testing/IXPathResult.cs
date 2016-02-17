@@ -1,10 +1,8 @@
 ﻿using Innovator.Client;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
@@ -19,17 +17,30 @@ namespace InnovatorAdmin.Testing
   {
     public static IXPathResult Evaluate(XElement elem, string xPath, IConnection conn)
     {
-      if (xPath == "x:Database()")
-        return new StringXpathResult(conn.Database);
-      if (xPath == "x:NewId()")
-        return new StringXpathResult(Guid.NewGuid().ToString("N").ToUpperInvariant());
-      if (xPath == "x:Now()")
-        return new StringXpathResult(conn.AmlContext.LocalizationContext.Format(DateTime.UtcNow));
-      if (xPath == "x:UserId()")
-        return new StringXpathResult(conn.UserId);
+      var elemIsEmpty = elem == null;
+
+      var fixedNow = conn.AmlContext.LocalizationContext.Format(DateTime.UtcNow);
+      var fixedNewId = Guid.NewGuid().ToString("N").ToUpperInvariant();
+      xPath = Regex.Replace(xPath, @"x:(\w+)\(\)", (m) =>
+      {
+        switch (m.Groups[1].Value)
+        {
+          case "Database":
+            return "'" + conn.Database + "'";
+          case "FixedNewId":
+            return "'" + fixedNewId + "'";
+          case "NewId":
+            return "'" + Guid.NewGuid().ToString("N").ToUpperInvariant() + "'";
+          case "Now":
+            return "'" + fixedNow + "'";
+          case "UserId":
+            return "'" + conn.UserId + "'";
+        }
+        return "''";
+      });
 
       if (elem == null)
-        throw new InvalidOperationException("Cannot match an XPath when data is available");
+        elem = new XElement("_" + Guid.NewGuid().ToString("N").ToUpperInvariant());
 
       var output = elem.XPathEvaluate(xPath);
       if (output is bool)
@@ -46,6 +57,9 @@ namespace InnovatorAdmin.Testing
       }
       else if (output is IEnumerable)
       {
+        if (elemIsEmpty)
+          throw new InvalidOperationException("Cannot match an XPath when no data is available");
+
         var enumerable = (IEnumerable)output;
         if (!enumerable.OfType<XObject>().Any())
           return new EmptyXpathResult();

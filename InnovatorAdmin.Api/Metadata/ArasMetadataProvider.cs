@@ -16,10 +16,10 @@ namespace InnovatorAdmin
     private Dictionary<string, ItemType> _itemTypesByName
       = new Dictionary<string, ItemType>(StringComparer.OrdinalIgnoreCase);
     private Dictionary<string, ItemType> _itemTypesById;
-    private IPromise _metadataComplete;
+    private Task<bool[]> _metadataComplete;
     private IEnumerable<Method> _methods = Enumerable.Empty<Method>();
     private IEnumerable<ItemReference> _polyItemLists = Enumerable.Empty<ItemReference>();
-    private IPromise _secondaryMetadata;
+    private IEnumerable<ItemReference> _sequences = Enumerable.Empty<ItemReference>();
     private Dictionary<string, Sql> _sql;
     private Dictionary<string, ItemReference> _systemIdentities;
     private Dictionary<string, IEnumerable<ListValue>> _listValues
@@ -63,6 +63,13 @@ namespace InnovatorAdmin
     public IEnumerable<ItemReference> PolyItemLists
     {
       get { return _polyItemLists; }
+    }
+    /// <summary>
+    /// Enumerable of all sequences
+    /// </summary>
+    public IEnumerable<ItemReference> Sequences
+    {
+      get { return _sequences; }
     }
     /// <summary>
     /// Enumerable of all system identities
@@ -238,12 +245,12 @@ namespace InnovatorAdmin
     /// </summary>
     public void Wait()
     {
-      Promises.All(_metadataComplete, _secondaryMetadata).Wait();
+      _metadataComplete.Wait();
     }
 
     public IPromise CompletePromise()
     {
-      return Promises.All(_metadataComplete, _secondaryMetadata);
+      return _metadataComplete.ToPromise();
     }
 
     /// <summary>
@@ -251,81 +258,21 @@ namespace InnovatorAdmin
     /// </summary>
     public void Reset()
     {
-      if (_metadataComplete == null || _metadataComplete.IsRejected || _metadataComplete.IsResolved)
-      {
-        _listValues.Clear();
-        _customProps.Clear();
-        _itemTypesByName.Clear();
-        _itemTypesById = null;
-        _metadataComplete = _conn.ApplyAsync(@"<Item type='ItemType' action='get' select='is_versionable,is_dependent,implementation_type,core,name,label'></Item>", true, true)
-          .Continue(r =>
-          {
-            ItemType result;
+      _metadataComplete = Task.WhenAll(ReloadItemTypeMetadata(), ReloadSecondaryMetadata());
+    }
 
-            foreach (var itemTypeData in r.Items())
-            {
-              result = new ItemType();
-              result.Id = itemTypeData.Id();
-              result.IsCore = itemTypeData.Property("core").AsBoolean(false);
-              result.IsDependent = itemTypeData.Property("is_dependent").AsBoolean(false);
-              result.IsFederated = itemTypeData.Property("implementation_type").Value == "federated";
-              result.IsPolymorphic = itemTypeData.Property("implementation_type").Value == "polymorphic";
-              result.IsVersionable = itemTypeData.Property("is_versionable").AsBoolean(false);
-              result.Label = itemTypeData.Property("label").Value;
-              result.Name = itemTypeData.Property("name").Value;
-              result.Reference = ItemReference.FromFullItem(itemTypeData, true);
-              _itemTypesByName[result.Name] = result;
-            }
-
-            _itemTypesById = _itemTypesByName.Values.ToDictionary(i => i.Id);
-            return _conn.ApplyAsync(@"<Item action='get' type='RelationshipType' related_expand='0' select='related_id,source_id,relationship_id,name,label' />", true, true);
-          })
-          .Continue(r =>
-          {
-            ItemType relType;
-            ItemType source;
-            ItemType related;
-
-            foreach (var rel in r.Items())
-            {
-              if (rel.SourceId().Attribute("name").HasValue()
-                && _itemTypesByName.TryGetValue(rel.SourceId().Attribute("name").Value, out source)
-                && rel.Property("relationship_id").Attribute("name").HasValue()
-                && _itemTypesByName.TryGetValue(rel.Property("relationship_id").Attribute("name").Value, out relType))
-              {
-                source.Relationships.Add(relType);
-                relType.Source = source;
-                relType.TabLabel = rel.Property("label").AsString(null);
-                if (rel.RelatedId().Attribute("name").HasValue()
-                  && _itemTypesByName.TryGetValue(rel.RelatedId().Attribute("name").Value, out related))
-                {
-                  relType.Related = related;
-                }
-              }
-            }
-
-            return _conn.ApplyAsync(@"<Item type='ItemType' action='get' select='id,name'>
+    private async Task<bool> ReloadItemTypeMetadata()
+    {
+      var itemTypes = _conn.ApplyAsync(@"<Item type='ItemType' action='get' select='is_versionable,is_dependent,implementation_type,core,name,label'></Item>", true, true).ToTask();
+      var relTypes = _conn.ApplyAsync(@"<Item action='get' type='RelationshipType' related_expand='0' select='related_id,source_id,relationship_id,name,label' />", true, true).ToTask();
+      var sortedTypes = _conn.ApplyAsync(@"<Item type='ItemType' action='get' select='id,name'>
                                       <id condition='in'>
-                                        (select it.ID
-                                        from innovator.[ITEMTYPE] it
-                                        where it.ID in
-                                          (select source_id
-                                           from innovator.[PROPERTY] p
-                                           where p.ORDER_BY is not null))
+                                        (select source_id
+                                        from innovator.[PROPERTY] p
+                                        where p.ORDER_BY is not null)
                                       </id>
-                                    </Item>", true, false);
-          }).Continue(r =>
-          {
-            ItemType result;
-            foreach (var itemType in r.Items())
-            {
-              if (_itemTypesByName.TryGetValue(itemType.Property("name").Value, out result))
-              {
-                result.IsSorted = true;
-              }
-            }
-
-            return _conn.ApplyAsync(@"<Item type='Property' action='get' select='source_id,item_behavior,name' related_expand='0'>
+                                    </Item>", true, false).ToTask();
+      var floatProps = _conn.ApplyAsync(@"<Item type='Property' action='get' select='source_id,item_behavior,name' related_expand='0'>
                                       <data_type>item</data_type>
                                       <data_source>
                                         <Item type='ItemType' action='get'>
@@ -334,59 +281,83 @@ namespace InnovatorAdmin
                                       </data_source>
                                       <item_behavior>float</item_behavior>
                                       <name condition='not in'>'config_id','id'</name>
-                                    </Item>", true, false);
-          })
-          .Done(r =>
-          {
-            ItemType result;
-            foreach (var floatProp in r.Items())
-            {
-              if (_itemTypesByName.TryGetValue(floatProp.SourceId().Attribute("name").Value.ToLowerInvariant(), out result))
-              {
-                result.FloatProperties.Add(floatProp.Property("name").AsString(""));
-              }
-            }
-          });
-        _secondaryMetadata = _conn.ApplyAsync(@"<Item type='Method' action='get' select='config_id,core,name'></Item>", true, false)
-          .Continue(r =>
-          {
-            _methods = r.Items().Select(i =>
-            {
-              var method = Method.FromFullItem(i, false);
-              method.KeyedName = i.Property("name").AsString("");
-              method.IsCore = i.Property("core").AsBoolean(false);
-              return method;
-            }).ToArray();
+                                    </Item>", true, false).ToTask();
 
-            return _conn.ApplyAsync(@"<Item type='Identity' action='get' select='id,name'>
+      // Load in the item types
+      var r = await itemTypes;
+      ItemType result;
+
+      foreach (var itemTypeData in r.Items())
+      {
+        result = new ItemType();
+        result.Id = itemTypeData.Id();
+        result.IsCore = itemTypeData.Property("core").AsBoolean(false);
+        result.IsDependent = itemTypeData.Property("is_dependent").AsBoolean(false);
+        result.IsFederated = itemTypeData.Property("implementation_type").Value == "federated";
+        result.IsPolymorphic = itemTypeData.Property("implementation_type").Value == "polymorphic";
+        result.IsVersionable = itemTypeData.Property("is_versionable").AsBoolean(false);
+        result.Label = itemTypeData.Property("label").Value;
+        result.Name = itemTypeData.Property("name").Value;
+        result.Reference = ItemReference.FromFullItem(itemTypeData, true);
+        _itemTypesByName[result.Name] = result;
+      }
+
+      _itemTypesById = _itemTypesByName.Values.ToDictionary(i => i.Id);
+
+      // Load in the relationship types
+      r = await relTypes;
+      ItemType relType;
+      ItemType source;
+      ItemType related;
+      foreach (var rel in r.Items())
+      {
+        if (rel.SourceId().Attribute("name").HasValue()
+          && _itemTypesByName.TryGetValue(rel.SourceId().Attribute("name").Value, out source)
+          && rel.Property("relationship_id").Attribute("name").HasValue()
+          && _itemTypesByName.TryGetValue(rel.Property("relationship_id").Attribute("name").Value, out relType))
+        {
+          source.Relationships.Add(relType);
+          relType.Source = source;
+          relType.TabLabel = rel.Property("label").AsString(null);
+          if (rel.RelatedId().Attribute("name").HasValue()
+            && _itemTypesByName.TryGetValue(rel.RelatedId().Attribute("name").Value, out related))
+          {
+            relType.Related = related;
+          }
+        }
+      }
+
+      // Sorted Types
+      r = await sortedTypes;
+      foreach (var itemType in r.Items())
+      {
+        if (_itemTypesByName.TryGetValue(itemType.Property("name").Value, out result))
+        {
+          result.IsSorted = true;
+        }
+      }
+
+      // Float props
+      r = await floatProps;
+      foreach (var floatProp in r.Items())
+      {
+        if (_itemTypesByName.TryGetValue(floatProp.SourceId().Attribute("name").Value.ToLowerInvariant(), out result))
+        {
+          result.FloatProperties.Add(floatProp.Property("name").AsString(""));
+        }
+      }
+
+      return true;
+    }
+
+    private async Task<bool> ReloadSecondaryMetadata()
+    {
+      var methods = _conn.ApplyAsync(@"<Item type='Method' action='get' select='config_id,core,name'></Item>", true, false).ToTask();
+      var sysIdents = _conn.ApplyAsync(@"<Item type='Identity' action='get' select='id,name'>
                                       <name condition='in'>'World', 'Creator', 'Owner', 'Manager', 'Innovator Admin', 'Super User'</name>
-                                    </Item>", true, true);
-          }).Continue(r =>
-          {
-            var sysIdents =
-              r.Items()
-              .Select(i =>
-              {
-                var itemRef = ItemReference.FromFullItem(i, false);
-                itemRef.KeyedName = i.Property("name").AsString("");
-                return itemRef;
-              });
-            _systemIdentities = sysIdents.ToDictionary(i => i.Unique);
-
-            return _conn.ApplyAsync(@"<Item type='SQL' action='get' select='id,name,type'></Item>", true, false);
-          }).Continue(r =>
-          {
-            var sqlItems = r.Items()
-              .Select(i =>
-              {
-                var itemRef = Sql.FromFullItem(i, false);
-                itemRef.KeyedName = i.Property("name").AsString("");
-                itemRef.Type = i.Property("type").AsString("");
-                return itemRef;
-              });
-            _sql = sqlItems.ToDictionary(i => i.KeyedName.ToLowerInvariant(), StringComparer.OrdinalIgnoreCase);
-
-            return _conn.ApplyAsync(@"<Item type='Property' action='get' select='name,source_id(id,name)'>
+                                    </Item>", true, true).ToTask();
+      var sqls = _conn.ApplyAsync(@"<Item type='SQL' action='get' select='id,name,type'></Item>", true, false).ToTask();
+      var customProps = _conn.ApplyAsync(@"<Item type='Property' action='get' select='name,source_id(id,name)'>
                                           <id condition='in'>(SELECT p.id
                                         from innovator.PROPERTY p
                                         inner join innovator.ITEMTYPE it
@@ -394,26 +365,8 @@ namespace InnovatorAdmin
                                         where p.CREATED_BY_ID &lt;&gt; 'AD30A6D8D3B642F5A2AFED1A4B02BEFA'
                                         and it.CORE = 1
                                         and it.CREATED_BY_ID = 'AD30A6D8D3B642F5A2AFED1A4B02BEFA')</id>
-                                        </Item>", true, false);
-          }).Continue(r =>
-          {
-            IReadOnlyItem itemType;
-            foreach (var customProp in r.Items())
-            {
-              itemType = customProp.SourceItem();
-              _customProps[new ItemProperty()
-              {
-                ItemType = itemType.Property("name").Value,
-                ItemTypeId = itemType.Id(),
-                Property = customProp.Property("name").Value,
-                PropertyId = customProp.Id()
-              }] = new ItemReference("Property", customProp.Id())
-              {
-                KeyedName = customProp.Property("name").Value
-              };
-            }
-
-            return _conn.ApplyAsync(@"<Item type='List' action='get' select='id'>
+                                        </Item>", true, false).ToTask();
+      var polyLists = _conn.ApplyAsync(@"<Item type='List' action='get' select='id'>
                                       <id condition='in'>(select l.id
                                         from innovator.LIST l
                                         inner join innovator.PROPERTY p
@@ -423,12 +376,58 @@ namespace InnovatorAdmin
                                         on it.id = p.SOURCE_ID
                                         and it.IMPLEMENTATION_TYPE = 'polymorphic')
                                       </id>
-                                    </Item>", true, false);
-          }).Done(r =>
-          {
-            _polyItemLists = r.Items().Select(i => ItemReference.FromFullItem(i, true));
-          });
+                                    </Item>", true, false).ToTask();
+      var sequences = _conn.ApplyAsync(@"<Item type='Sequence' action='get' select='name'></Item>", true, false).ToTask();
+
+      _methods = (await methods).Items().Select(i =>
+      {
+        var method = Method.FromFullItem(i, false);
+        method.KeyedName = i.Property("name").AsString("");
+        method.IsCore = i.Property("core").AsBoolean(false);
+        return method;
+      }).ToArray();
+
+
+      _systemIdentities = (await sysIdents).Items()
+        .Select(i =>
+        {
+          var itemRef = ItemReference.FromFullItem(i, false);
+          itemRef.KeyedName = i.Property("name").AsString("");
+          return itemRef;
+        }).ToDictionary(i => i.Unique);
+
+
+      _sql = (await sqls).Items()
+        .Select(i =>
+        {
+          var itemRef = Sql.FromFullItem(i, false);
+          itemRef.KeyedName = i.Property("name").AsString("");
+          itemRef.Type = i.Property("type").AsString("");
+          return itemRef;
+        }).ToDictionary(i => i.KeyedName.ToLowerInvariant(), StringComparer.OrdinalIgnoreCase);
+
+      var r = (await customProps);
+      IReadOnlyItem itemType;
+      foreach (var customProp in r.Items())
+      {
+        itemType = customProp.SourceItem();
+        _customProps[new ItemProperty()
+        {
+          ItemType = itemType.Property("name").Value,
+          ItemTypeId = itemType.Id(),
+          Property = customProp.Property("name").Value,
+          PropertyId = customProp.Id()
+        }] = new ItemReference("Property", customProp.Id())
+        {
+          KeyedName = customProp.Property("name").Value
+        };
       }
+
+      _polyItemLists = (await polyLists).Items().Select(i => ItemReference.FromFullItem(i, true)).ToArray();
+
+      _sequences = (await sequences).Items().Select(i => ItemReference.FromFullItem(i, true)).ToArray();
+
+      return true;
     }
 
     public IPromise<IEnumerable<Property>> GetPropertiesByTypeId(string id)

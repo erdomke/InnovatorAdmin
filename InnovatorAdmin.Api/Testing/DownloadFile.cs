@@ -35,17 +35,24 @@ namespace InnovatorAdmin.Testing
         cmd.WithParam(kvp.Key, kvp.Value);
       }
 
-      var stream = await context.Connection.Process(cmd, true).ToTask();
-      var memStream = await stream.ToMemoryStream();
-      var start = await memStream.ReadStart(500);
-      memStream.Position = 0;
-      if (start.IndexOf("http://www.aras.com/InnovatorFault") > 0)
+      try
       {
-        context.LastResult = XElement.Load(stream);
+        var stream = await context.Connection.Process(cmd, true).ToTask();
+        var memStream = await stream.ToMemoryStream();
+        var start = await memStream.ReadStart(500);
+        memStream.Position = 0;
+        if (start.IndexOf("http://www.aras.com/InnovatorFault") > 0)
+        {
+          context.LastResult = XElement.Load(stream);
+        }
+        else
+        {
+          context.LastResult = new XElement("Result", new XElement("Item", Convert.ToBase64String(memStream.ToArray())));
+        }
       }
-      else
+      catch (ServerException se)
       {
-        context.LastResult = new XElement("Result", new XElement("Item", Convert.ToBase64String(memStream.ToArray())));
+        context.LastResult = XElement.Parse(se.AsAmlString());
       }
     }
 

@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using System.Text;
+using System.ComponentModel;
 
 namespace InnovatorAdmin
 {
@@ -43,7 +44,6 @@ namespace InnovatorAdmin
     private bool _updateCheckComplete = false;
     private IHttpService _webService = new DefaultHttpService();
     private ConnectionType _oldConnType = ConnectionType.Innovator;
-    private List<string> _recentDocs = new List<string>();
 
     public bool AllowRun
     {
@@ -166,8 +166,26 @@ namespace InnovatorAdmin
 
       UpdateTitle(null);
 
-      _recentDocs.AddRange((Properties.Settings.Default.RecentDocument ?? "").Split('|').Where(d => !string.IsNullOrEmpty(d)));
+      if (_recentDocs.Count < 1 && !string.IsNullOrEmpty(Properties.Settings.Default.RecentDocument))
+      {
+        try
+        {
+          lock(_lock)
+          {
+            _recentDocs.RaiseListChangedEvents = false;
+            foreach (var path in (Properties.Settings.Default.RecentDocument ?? "").Split('|').Where(d => !string.IsNullOrEmpty(d)))
+            {
+              _recentDocs.Add(path);
+            }
+          }
+        }
+        finally
+        {
+          _recentDocs.RaiseListChangedEvents = true;
+        }
+      }
       BuildRecentDocsMenu();
+      _recentDocs.ListChanged += (s, e) => BuildRecentDocsMenu();
 
       // Wire up the commands
       _commands = new UiCommandManager(this);
@@ -667,11 +685,25 @@ namespace InnovatorAdmin
             grid.Location = new System.Drawing.Point(0, 0);
             grid.Margin = new System.Windows.Forms.Padding(0);
             grid.TabIndex = 0;
+            grid.MouseDoubleClick += Grid_MouseDoubleClick;
             pg.Controls.Add(grid);
             tbcOutputView.TabPages.Add(pg);
             FormatDataGrid(grid);
             i++;
           }
+        }
+      }
+    }
+
+    private void Grid_MouseDoubleClick(object sender, MouseEventArgs e)
+    {
+      if (this.Modal)
+      {
+        var grid = (DataGridView)sender;
+        if (grid.HitTest(e.X, e.Y).RowIndex >= 0)
+        {
+          this.DialogResult = DialogResult.OK;
+          this.Close();
         }
       }
     }
@@ -712,7 +744,6 @@ namespace InnovatorAdmin
         else if (dataCol.DataType == typeof(DateTime))
         {
           col = new Controls.DataGridViewCalendarColumn();
-
         }
         else
         {
@@ -784,11 +815,22 @@ namespace InnovatorAdmin
         col.Column.DisplayIndex = col.Index;
       }
 
-      grid.AllowUserToAddRows = _outputSet != null
-        && ((DataTable)grid.DataSource).Columns.Contains("id")
-        && ((DataTable)grid.DataSource).Columns.Contains(Extensions.AmlTable_TypeName);
-      grid.AllowUserToDeleteRows = grid.AllowUserToAddRows;
-      grid.ReadOnly = !grid.AllowUserToAddRows;
+      if (this.Modal)
+      {
+        grid.AllowUserToAddRows = false;
+        grid.AllowUserToDeleteRows = false;
+        grid.ReadOnly = true;
+        grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+      }
+      else
+      {
+        grid.AllowUserToAddRows = _outputSet != null
+          && ((DataTable)grid.DataSource).Columns.Contains("id")
+          && ((DataTable)grid.DataSource).Columns.Contains(Extensions.AmlTable_TypeName);
+        grid.AllowUserToDeleteRows = grid.AllowUserToAddRows;
+        grid.ReadOnly = !grid.AllowUserToAddRows;
+        grid.SelectionMode = DataGridViewSelectionMode.RowHeaderSelect;
+      }
     }
 
     private int GetSortOrder(DataGridViewColumn c)
@@ -1231,14 +1273,7 @@ namespace InnovatorAdmin
         {
           _result = null;
           _outputSet = null;
-          var pagesToRemove = tbcOutputView.TabPages.OfType<TabPage>()
-                  .Where(p => p.Name.StartsWith(GeneratedPage)).ToArray();
-          foreach (var page in pagesToRemove)
-          {
-            tbcOutputView.TabPages.Remove(page);
-          }
-          pgTableOutput.Text = "Table";
-          dgvItems.DataSource = null;
+          CleanupGrids();
         }
 
         if (_proxy.ConnData != null)
@@ -1305,6 +1340,21 @@ namespace InnovatorAdmin
         btnSubmit.Text = "► Run";
       }
       return _currentQuery;
+    }
+
+    private void CleanupGrids()
+    {
+      var pagesToRemove = tbcOutputView.TabPages.OfType<TabPage>()
+                  .Where(p => p.Name.StartsWith(GeneratedPage)).ToArray();
+      foreach (var page in pagesToRemove)
+      {
+        var grid = page.Controls.OfType<DataGridView>().FirstOrDefault();
+        if (grid != null)
+          grid.MouseDoubleClick -= Grid_MouseDoubleClick;
+        tbcOutputView.TabPages.Remove(page);
+      }
+      pgTableOutput.Text = "Table";
+      dgvItems.DataSource = null;
     }
 
     private void SetResult(IResultObject result, long milliseconds, OutputType preferred = OutputType.Any)
@@ -1967,17 +2017,44 @@ namespace InnovatorAdmin
         if (_proxy == null)
           return;
 
+        string columnPropertyName = null;
         var grid = (DataGridView)((ContextMenuStrip)sender).SourceControl;
         var rows = grid.SelectedRows.OfType<DataGridViewRow>();
         if (!rows.Any())
+        {
           rows = grid.SelectedCells.OfType<DataGridViewCell>().Select(c => c.OwningRow).Distinct();
+          var cols = grid.SelectedCells.OfType<DataGridViewCell>().Select(c => c.OwningColumn).Distinct().ToArray();
+          if (cols.Length == 1)
+            columnPropertyName = cols[0].DataPropertyName;
+        }
         if (!rows.Any())
+        {
           rows = Enumerable.Repeat(grid.CurrentCell.OwningRow, 1);
+          columnPropertyName = grid.CurrentCell.OwningColumn.DataPropertyName;
+        }
+        var client = grid.PointToClient(MousePosition);
+        var hit = grid.HitTest(client.X, client.Y);
+        if (!rows.Any(r => r.Index == hit.RowIndex))
+        {
+          if (hit.RowIndex >= 0)
+          {
+            rows = Enumerable.Repeat(grid.Rows[hit.RowIndex], 1);
+            columnPropertyName = grid.Columns[hit.ColumnIndex].DataPropertyName;
+          }
+          else
+          {
+            rows = Enumerable.Empty<DataGridViewRow>();
+            columnPropertyName = null;
+          }
+        }
+
         var dataRows = rows.Where(r => r.DataBoundItem is DataRowView)
           .Select(r => ((DataRowView)r.DataBoundItem).Row)
           .OfType<DataRow>()
+          .Concat(rows.Where(r => r.IsNewRow)
+            .Select(r => ((DataTable)r.DataGridView.DataSource).NewRow()))
           .ToArray();
-        var scripts = _proxy.GetHelper().GetScripts(dataRows);
+        var scripts = _proxy.GetHelper().GetScripts(dataRows, columnPropertyName);
 
         conTable.Items.Clear();
         EditorScript.BuildMenu(conTable.Items, scripts, Execute);
@@ -2028,15 +2105,29 @@ namespace InnovatorAdmin
       btnCreate.MinimumSize = btnInstall.MinimumSize;
     }
 
+    private static BindingList<string> _recentDocs = new BindingList<string>();
+    private static object _lock = new object();
+
     private void AddRecentDocument(string path)
     {
-      _recentDocs.Remove(path);
-      _recentDocs.Insert(0, path);
-      while (_recentDocs.Count > 10)
+      try
       {
-        _recentDocs.RemoveAt(_recentDocs.Count - 1);
+        lock (_lock)
+        {
+          _recentDocs.RaiseListChangedEvents = false;
+          _recentDocs.Remove(path);
+          _recentDocs.Insert(0, path);
+          while (_recentDocs.Count > 10)
+          {
+            _recentDocs.RemoveAt(_recentDocs.Count - 1);
+          }
+        }
       }
-      BuildRecentDocsMenu();
+      finally
+      {
+        _recentDocs.RaiseListChangedEvents = true;
+        _recentDocs.ResetBindings();
+      }
       Properties.Settings.Default.RecentDocument = string.Join("|", _recentDocs);
       Properties.Settings.Default.Save();
     }

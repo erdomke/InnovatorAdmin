@@ -140,6 +140,7 @@
     <Compile Include="Testing\Login.cs" />
     <Compile Include="Testing\Logout.cs" />
     <Compile Include="Testing\ParamAssign.cs" />
+    <Compile Include="Testing\PrintError.cs" />
     <Compile Include="Testing\Query.cs" />
     <Compile Include="Testing\Test.cs" />
     <Compile Include="Testing\TestContext.cs" />
