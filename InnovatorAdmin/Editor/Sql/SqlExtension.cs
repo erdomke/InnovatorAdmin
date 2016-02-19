@@ -22,7 +22,7 @@ namespace InnovatorAdmin
       using (var reader = await cmd.ExecuteReaderAsync())
       {
         var dataSet = new DataSet();
-        var nextResult = reader.HasRows;
+        var nextResult = reader.FieldCount > 0 || reader.HasRows;
         while (nextResult)
         {
           var table = new DataTable();

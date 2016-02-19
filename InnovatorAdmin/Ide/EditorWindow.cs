@@ -48,7 +48,7 @@ namespace InnovatorAdmin
     public bool AllowRun
     {
       get { return !splitEditors.Panel2Collapsed; }
-      set { splitEditors.Panel2Collapsed  = !value; }
+      set { splitEditors.Panel2Collapsed = !value; }
     }
     public OutputType PreferredMode { get; set; }
     public IEditorProxy Proxy
@@ -170,7 +170,7 @@ namespace InnovatorAdmin
       {
         try
         {
-          lock(_lock)
+          lock (_lock)
           {
             _recentDocs.RaiseListChangedEvents = false;
             foreach (var path in (Properties.Settings.Default.RecentDocument ?? "").Split('|').Where(d => !string.IsNullOrEmpty(d)))
@@ -254,48 +254,48 @@ namespace InnovatorAdmin
       _commands.Add<Editor.FullEditor>(mniBlockUncomment, null, BlockUncomment);
       _commands.Add<Editor.FullEditor>(mniInsertNewGuid, null, c => c.ReplaceSelectionSegments(t => Guid.NewGuid().ToString("N").ToUpperInvariant()));
       _commands.Add<Editor.FullEditor>(mniXmlToEntity, null, c => c.ReplaceSelectionSegments(t => {
-          try
+        try
+        {
+          var sb = new System.Text.StringBuilder();
+          var settings = new XmlWriterSettings();
+          settings.Indent = false;
+          settings.OmitXmlDeclaration = true;
+          using (var strWriter = new StringWriter(sb))
+          using (var writer = XmlWriter.Create(strWriter, settings))
           {
-            var sb = new System.Text.StringBuilder();
-            var settings = new XmlWriterSettings();
-            settings.Indent = false;
-            settings.OmitXmlDeclaration = true;
-            using (var strWriter = new StringWriter(sb))
-            using (var writer = XmlWriter.Create(strWriter, settings))
-            {
-              writer.WriteStartElement("a");
-              writer.WriteValue(t);
-              writer.WriteEndElement();
-            }
-            return sb.ToString(3, sb.Length - 7);
+            writer.WriteStartElement("a");
+            writer.WriteValue(t);
+            writer.WriteEndElement();
           }
-          catch (XmlException)
-          {
-            return t.Replace("<", "&lt;").Replace(">", "&gt;").Replace("&", "&amp;");
-          }
-        }));
+          return sb.ToString(3, sb.Length - 7);
+        }
+        catch (XmlException)
+        {
+          return t.Replace("<", "&lt;").Replace(">", "&gt;").Replace("&", "&amp;");
+        }
+      }));
       _commands.Add<Editor.FullEditor>(mniEntityToXml, null, c => c.ReplaceSelectionSegments(t => {
-          try
+        try
+        {
+          var xml = "<a>" + t + "</a>";
+          using (var strReader = new StringReader(xml))
+          using (var reader = XmlReader.Create(strReader))
           {
-            var xml = "<a>" + t + "</a>";
-            using (var strReader = new StringReader(xml))
-            using (var reader = XmlReader.Create(strReader))
+            while (reader.Read())
             {
-              while (reader.Read())
+              if (reader.NodeType == XmlNodeType.Text)
               {
-                if (reader.NodeType == XmlNodeType.Text)
-                {
-                  return reader.Value;
-                }
+                return reader.Value;
               }
             }
           }
-          catch (XmlException)
-          {
-            return t.Replace("&lt;", "<").Replace("&gt;", ">").Replace("&amp;", "&");
-          }
-          return t;
-        }));
+        }
+        catch (XmlException)
+        {
+          return t.Replace("&lt;", "<").Replace("&gt;", ">").Replace("&amp;", "&");
+        }
+        return t;
+      }));
       _commands.Add<Control>(mniPreferences, null, c =>
       {
         using (var dialog = new Dialog.SettingsDialog())
@@ -2080,7 +2080,7 @@ namespace InnovatorAdmin
         {
           dialog.Filter.Add(s => s.BatchSize);
           dialog.Filter.Add(s => s.ThreadCount);
-          dialog.Settings = Settings.Current;
+          dialog.DataSource = Settings.Current;
           dialog.Message = "Please verify the batch size and thread count settings";
           if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
             return;
@@ -2202,10 +2202,10 @@ namespace InnovatorAdmin
 
       private void UpdateText()
       {
-        this.Text = this.Index + ": " 
+        this.Text = this.Index + ": "
           + (string.IsNullOrEmpty(_path) ? "" : Utils.Ellipsis(_path, 300, 9, TextFormatFlags.PathEllipsis).Replace("&", "&&"));
       }
-      
+
       protected override void OnClick(EventArgs e)
       {
         try
@@ -2219,5 +2219,38 @@ namespace InnovatorAdmin
         }
       }
     }
+
+    private void lnkGitMergeHelper_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    {
+      try
+      {
+        using (var dialog = new Dialog.ConfigDialog<MergeSettings>())
+        {
+          var settings = new MergeSettings();
+          dialog.DataSource = settings;
+          if (dialog.ShowDialog() == DialogResult.OK)
+          {
+            var mergeOp = new GitMergeOperation(settings.RepoPath, settings.LocalBranch, settings.RemoteBranch);
+            var main = new Main();
+            main.GoToStep(new MergeInterface().Initialize(mergeOp));
+            main.Show();
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private class MergeSettings
+    {
+      [DisplayName("Git Repository Path"), ParamControl(typeof(Editor.FilePathControl))]
+      public string RepoPath { get; set; }
+      [DisplayName("Local Branch Name")]
+      public string LocalBranch { get; set; }
+      [DisplayName("Remote Branch Name")]
+      public string RemoteBranch { get; set; }
+    }  
   }
 }

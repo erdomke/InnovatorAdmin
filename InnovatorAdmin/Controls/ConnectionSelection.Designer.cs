@@ -45,18 +45,19 @@
       this.tableLayoutPanel1.RowCount = 2;
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-      this.tableLayoutPanel1.Size = new System.Drawing.Size(548, 318);
+      this.tableLayoutPanel1.Size = new System.Drawing.Size(670, 304);
       this.tableLayoutPanel1.TabIndex = 0;
       // 
       // connEditor
       // 
       this.connEditor.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.connEditor.Location = new System.Drawing.Point(3, 3);
+      this.connEditor.Location = new System.Drawing.Point(6, 6);
+      this.connEditor.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
       this.connEditor.MinimumSize = new System.Drawing.Size(425, 170);
       this.connEditor.MultiSelect = false;
       this.connEditor.Name = "connEditor";
-      this.connEditor.Size = new System.Drawing.Size(542, 239);
+      this.connEditor.Size = new System.Drawing.Size(658, 239);
       this.connEditor.TabIndex = 0;
       this.connEditor.SelectionChanged += new System.EventHandler(this.connEditor_SelectionChanged);
       this.connEditor.ConnectionSelected += new System.EventHandler(this.connEditor_ConnectionSelected);
@@ -66,8 +67,9 @@
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.Controls.Add(this.tableLayoutPanel1);
+      this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.Name = "ConnectionSelection";
-      this.Size = new System.Drawing.Size(548, 318);
+      this.Size = new System.Drawing.Size(670, 304);
       this.tableLayoutPanel1.ResumeLayout(false);
       this.ResumeLayout(false);
 

@@ -79,7 +79,7 @@ namespace Innovator.Client
       if (propNode == null)
       {
         propNode = _node.ChildNodes.OfType<XmlElement>()
-                        .SingleOrDefault(e => e.LocalName == name
+                        .FirstOrDefault(e => e.LocalName == name
                           && (!e.HasAttribute("xml:lang")
                             || (e.GetAttribute("xml:lang") == langSearch
                               && langSearch == _factory.LocalizationContext.LanguageCode)));

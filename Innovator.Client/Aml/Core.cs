@@ -25,7 +25,7 @@ namespace Innovator.Client
       return item.Attribute("type");
     }
     #endregion
-    
+
     #region "Item Attributes"
     public static IAttribute Action(this IItem item)
     {
@@ -88,7 +88,7 @@ namespace Innovator.Client
       return item.Attribute("where");
     }
     #endregion
-    
+
     #region "Item Properties"
     public static IProperty Classification(this IItem parent)
     {
@@ -271,7 +271,7 @@ namespace Innovator.Client
     }
     public static IReadOnlyAttribute TypeId(this IReadOnlyItem item)
     {
-      return item.Attribute("typeID");
+      return item.Attribute("typeId");
     }
     public static IReadOnlyAttribute Where(this IReadOnlyItem item)
     {

@@ -92,6 +92,8 @@ namespace InnovatorAdmin
       this.BottomLeftCornerPanel = pnlBottomLeft;
       this.InitializeTheme();
 
+      InitializeDpi();
+
       picLogo.Image = Properties.Resources.logo_black_opaque;
       picLogo.MouseDown += SystemLabel_MouseDown;
       picLogo.MouseUp += SystemLabel_MouseUp;
@@ -107,7 +109,9 @@ namespace InnovatorAdmin
         base.OnLoad(e);
 
         var bounds = Properties.Settings.Default.Main_Bounds;
-        var scale = DpiScale / Properties.Settings.Default.LastDpiScale;
+        var scale = DpiScale / (Properties.Settings.Default.LastDpiScale <= 0 ? 1 : Properties.Settings.Default.LastDpiScale);
+        Properties.Settings.Default.LastDpiScale = DpiScale;
+        Properties.Settings.Default.Save();
         if (Math.Round(scale, 5) != 1)
           bounds = new Rectangle(bounds.X, bounds.Y, (int)(bounds.Width * scale), (int)(bounds.Height * scale));
 
@@ -152,6 +156,7 @@ namespace InnovatorAdmin
 
       btnPrevious.Enabled = _history.Any();
       _history.Push(step);
+      System.Diagnostics.Debug.Print("{0}, {1}", this.Font.Size, ctrl.Font.Size);
     }
 
     private void btnClose_Click(object sender, EventArgs e)

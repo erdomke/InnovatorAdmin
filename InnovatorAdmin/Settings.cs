@@ -18,19 +18,45 @@ namespace InnovatorAdmin
     public int ThreadCount { get; set; }
     [DisplayName("Diff Tool"), ParamControl(typeof(Editor.FilePathControl), "Base|Compare")]
     public string DiffToolCommand { get; set; }
-    [DisplayName("Merge Tool"), ParamControl(typeof(Editor.FilePathControl), "Base|Local|Remote")]
+    [DisplayName("Merge Tool"), ParamControl(typeof(Editor.FilePathControl), "Base|Local|Remote|Merge")]
     public string MergeToolCommand { get; set; }
+
+    public string PromptMergeTool()
+    {
+      while (string.IsNullOrEmpty(this.MergeToolCommand)
+        || this.MergeToolCommand.IndexOf("$(base)", StringComparison.OrdinalIgnoreCase) < 0
+        || this.MergeToolCommand.IndexOf("$(local)", StringComparison.OrdinalIgnoreCase) < 0
+        || this.MergeToolCommand.IndexOf("$(remote)", StringComparison.OrdinalIgnoreCase) < 0
+        || this.MergeToolCommand.IndexOf("$(merge)", StringComparison.OrdinalIgnoreCase) < 0)
+      {
+        using (var dialog = new Dialog.SettingsDialog())
+        {
+          dialog.Filter.Add(s => s.MergeToolCommand);
+          dialog.DataSource = this;
+          dialog.Message = string.IsNullOrWhiteSpace(this.MergeToolCommand)
+            ? "Please specify a merge command. Use the macros '$(base)', '$(local)', '$(remote)' and '$(merge)' to specify where these paths should be placed."
+            : "The macros '$(base)', '$(local)', '$(remote)' and/or '$(merge)' are missing from the merge command; please add them";
+          if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+            return null;
+          this.Save();
+          //Properties.Settings.Default.MergeToolCommand = this.MergeToolCommand;
+
+        }
+      }
+      return this.MergeToolCommand;
+    }
 
     public async Task PerformDiff(string baseName, ITextSource baseSource
       , string compareName, ITextSource compareSource)
     {
-      while (this.DiffToolCommand.IndexOf("$(base)", StringComparison.OrdinalIgnoreCase) < 0
+      while (string.IsNullOrEmpty(this.DiffToolCommand)
+        || this.DiffToolCommand.IndexOf("$(base)", StringComparison.OrdinalIgnoreCase) < 0
         || this.DiffToolCommand.IndexOf("$(compare)", StringComparison.OrdinalIgnoreCase) < 0)
       {
         using (var dialog = new Dialog.SettingsDialog())
         {
           dialog.Filter.Add(s => s.DiffToolCommand);
-          dialog.Settings = this;
+          dialog.DataSource = this;
           dialog.Message = string.IsNullOrWhiteSpace(this.DiffToolCommand)
             ? "Please specify a diff command. Use the macros '$(base)' and '$(compare)' to specify where these paths should be placed."
             : "The macros '$(base)' and/or '$(compare)' are missing from the diff command; please add them";

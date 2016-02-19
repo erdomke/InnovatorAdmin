@@ -320,7 +320,7 @@ namespace InnovatorAdmin.Editor
                 case PropertyType.item:
                   yield return new EditorScriptExecute()
                   {
-                    Name = "Edit",
+                    Name = "Edit Value",
                     Execute = () =>
                     {
                       var query = string.Format("<Item type='{0}' action='get'><keyed_name condition='like'>**</keyed_name></Item>", prop.Restrictions.First());

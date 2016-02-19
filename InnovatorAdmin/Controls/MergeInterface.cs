@@ -207,6 +207,13 @@ namespace InnovatorAdmin.Controls
       foreach (var item in items)
       {
         var paths = _mergeOp.GetPaths(item.Path);
+        var mergeTool = Settings.Current.PromptMergeTool();
+        if (string.IsNullOrEmpty(mergeTool)) return;
+        mergeTool = mergeTool.Replace("$(base)", "\"" + paths.Base + "\"", StringComparison.OrdinalIgnoreCase)
+          .Replace("$(local)", "\"" + paths.Local + "\"", StringComparison.OrdinalIgnoreCase)
+          .Replace("$(remote)", "\"" + paths.Remote + "\"", StringComparison.OrdinalIgnoreCase)
+          .Replace("$(merged)", "\"" + paths.Merged + "\"", StringComparison.OrdinalIgnoreCase);
+
         var args = "\"" + paths.Base + "\""
           + " \"" + paths.Local + "\""
           + " \"" + paths.Remote + "\""

@@ -14,7 +14,13 @@ namespace InnovatorAdmin
 {
   public static class Utils
   {
-
+    public static void WriteTo(this Stream stream, string path)
+    {
+      using (var write = new FileStream(path, FileMode.Create, FileAccess.Write))
+      {
+        stream.CopyTo(write);
+      }
+    }
     public static IEnumerable<IEnumerable<TSource>> Batch<TSource>(
                   this IEnumerable<TSource> source, int size)
     {

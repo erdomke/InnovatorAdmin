@@ -122,6 +122,7 @@
       this.tbcOutputView = new InnovatorAdmin.Controls.FlatTabControl();
       this.pgTools = new System.Windows.Forms.TabPage();
       this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
+      this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
       this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
       this.btnInstall = new InnovatorAdmin.Controls.FlatButton();
       this.btnCreate = new InnovatorAdmin.Controls.FlatButton();
@@ -152,6 +153,7 @@
       this.pnlLeftTop = new System.Windows.Forms.Panel();
       this.pnlRightTop = new System.Windows.Forms.Panel();
       this.pnlConnectionShadow = new InnovatorAdmin.DropShadow();
+      this.lnkGitMergeHelper = new System.Windows.Forms.LinkLabel();
       this.tblMain.SuspendLayout();
       this.tblHeader.SuspendLayout();
       this.menuStrip.SuspendLayout();
@@ -172,6 +174,7 @@
       this.tbcOutputView.SuspendLayout();
       this.pgTools.SuspendLayout();
       this.tableLayoutPanel6.SuspendLayout();
+      this.flowLayoutPanel2.SuspendLayout();
       this.flowLayoutPanel1.SuspendLayout();
       this.pgTextOutput.SuspendLayout();
       this.pgHtml.SuspendLayout();
@@ -1069,7 +1072,7 @@
       this.tableLayoutPanel3.SetColumnSpan(this.inputEditor, 2);
       this.inputEditor.Dock = System.Windows.Forms.DockStyle.Fill;
       this.inputEditor.Location = new System.Drawing.Point(6, 6);
-      this.inputEditor.Margin = new System.Windows.Forms.Padding(6);
+      this.inputEditor.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
       this.inputEditor.Name = "inputEditor";
       this.inputEditor.ReadOnly = false;
       this.inputEditor.Size = new System.Drawing.Size(754, 153);
@@ -1117,10 +1120,10 @@
       // pgTools
       // 
       this.pgTools.Controls.Add(this.tableLayoutPanel6);
-      this.pgTools.Location = new System.Drawing.Point(4, 25);
+      this.pgTools.Location = new System.Drawing.Point(4, 29);
       this.pgTools.Name = "pgTools";
       this.pgTools.Padding = new System.Windows.Forms.Padding(3);
-      this.pgTools.Size = new System.Drawing.Size(758, 383);
+      this.pgTools.Size = new System.Drawing.Size(758, 379);
       this.pgTools.TabIndex = 3;
       this.pgTools.Text = "Tools";
       this.pgTools.UseVisualStyleBackColor = true;
@@ -1128,16 +1131,29 @@
       // tableLayoutPanel6
       // 
       this.tableLayoutPanel6.ColumnCount = 1;
-      this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-      this.tableLayoutPanel6.Controls.Add(this.flowLayoutPanel1, 0, 1);
+      this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+      this.tableLayoutPanel6.Controls.Add(this.flowLayoutPanel2, 0, 1);
+      this.tableLayoutPanel6.Controls.Add(this.flowLayoutPanel1, 0, 0);
       this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 3);
       this.tableLayoutPanel6.Name = "tableLayoutPanel6";
       this.tableLayoutPanel6.RowCount = 2;
-      this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-      this.tableLayoutPanel6.Size = new System.Drawing.Size(752, 377);
+      this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70F));
+      this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30F));
+      this.tableLayoutPanel6.Size = new System.Drawing.Size(752, 373);
       this.tableLayoutPanel6.TabIndex = 5;
+      // 
+      // flowLayoutPanel2
+      // 
+      this.flowLayoutPanel2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.flowLayoutPanel2.Controls.Add(this.lnkGitMergeHelper);
+      this.flowLayoutPanel2.Location = new System.Drawing.Point(15, 276);
+      this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(15);
+      this.flowLayoutPanel2.Name = "flowLayoutPanel2";
+      this.flowLayoutPanel2.Size = new System.Drawing.Size(722, 82);
+      this.flowLayoutPanel2.TabIndex = 5;
       // 
       // flowLayoutPanel1
       // 
@@ -1149,7 +1165,7 @@
       this.flowLayoutPanel1.Location = new System.Drawing.Point(15, 15);
       this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(15);
       this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-      this.flowLayoutPanel1.Size = new System.Drawing.Size(722, 347);
+      this.flowLayoutPanel1.Size = new System.Drawing.Size(722, 231);
       this.flowLayoutPanel1.TabIndex = 4;
       // 
       // btnInstall
@@ -1206,9 +1222,9 @@
       // pgTextOutput
       // 
       this.pgTextOutput.Controls.Add(this.outputEditor);
-      this.pgTextOutput.Location = new System.Drawing.Point(4, 25);
+      this.pgTextOutput.Location = new System.Drawing.Point(4, 29);
       this.pgTextOutput.Name = "pgTextOutput";
-      this.pgTextOutput.Size = new System.Drawing.Size(758, 383);
+      this.pgTextOutput.Size = new System.Drawing.Size(758, 379);
       this.pgTextOutput.TabIndex = 0;
       this.pgTextOutput.Text = "Code";
       this.pgTextOutput.UseVisualStyleBackColor = true;
@@ -1218,19 +1234,19 @@
       this.outputEditor.BackColor = System.Drawing.Color.White;
       this.outputEditor.Dock = System.Windows.Forms.DockStyle.Fill;
       this.outputEditor.Location = new System.Drawing.Point(0, 0);
-      this.outputEditor.Margin = new System.Windows.Forms.Padding(6);
+      this.outputEditor.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
       this.outputEditor.Name = "outputEditor";
       this.outputEditor.ReadOnly = true;
-      this.outputEditor.Size = new System.Drawing.Size(758, 383);
+      this.outputEditor.Size = new System.Drawing.Size(758, 379);
       this.outputEditor.TabIndex = 0;
       // 
       // pgHtml
       // 
       this.pgHtml.Controls.Add(this.browser);
-      this.pgHtml.Location = new System.Drawing.Point(4, 25);
+      this.pgHtml.Location = new System.Drawing.Point(4, 29);
       this.pgHtml.Name = "pgHtml";
       this.pgHtml.Padding = new System.Windows.Forms.Padding(3);
-      this.pgHtml.Size = new System.Drawing.Size(758, 383);
+      this.pgHtml.Size = new System.Drawing.Size(758, 379);
       this.pgHtml.TabIndex = 2;
       this.pgHtml.Text = "Report";
       this.pgHtml.UseVisualStyleBackColor = true;
@@ -1241,16 +1257,16 @@
       this.browser.Location = new System.Drawing.Point(3, 3);
       this.browser.MinimumSize = new System.Drawing.Size(20, 20);
       this.browser.Name = "browser";
-      this.browser.Size = new System.Drawing.Size(752, 377);
+      this.browser.Size = new System.Drawing.Size(752, 373);
       this.browser.TabIndex = 0;
       // 
       // pgTableOutput
       // 
       this.pgTableOutput.Controls.Add(this.dgvItems);
-      this.pgTableOutput.Location = new System.Drawing.Point(4, 25);
+      this.pgTableOutput.Location = new System.Drawing.Point(4, 29);
       this.pgTableOutput.Margin = new System.Windows.Forms.Padding(0);
       this.pgTableOutput.Name = "pgTableOutput";
-      this.pgTableOutput.Size = new System.Drawing.Size(758, 383);
+      this.pgTableOutput.Size = new System.Drawing.Size(758, 379);
       this.pgTableOutput.TabIndex = 1;
       this.pgTableOutput.Text = "Table";
       this.pgTableOutput.UseVisualStyleBackColor = true;
@@ -1265,7 +1281,7 @@
       this.dgvItems.Location = new System.Drawing.Point(0, 0);
       this.dgvItems.Margin = new System.Windows.Forms.Padding(0);
       this.dgvItems.Name = "dgvItems";
-      this.dgvItems.Size = new System.Drawing.Size(758, 383);
+      this.dgvItems.Size = new System.Drawing.Size(758, 379);
       this.dgvItems.TabIndex = 0;
       this.dgvItems.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.Grid_MouseDoubleClick);
       // 
@@ -1512,6 +1528,18 @@
       this.pnlConnectionShadow.Size = new System.Drawing.Size(996, 4);
       this.pnlConnectionShadow.TabIndex = 17;
       // 
+      // lnkGitMergeHelper
+      // 
+      this.lnkGitMergeHelper.AutoSize = true;
+      this.lnkGitMergeHelper.Location = new System.Drawing.Point(3, 3);
+      this.lnkGitMergeHelper.Margin = new System.Windows.Forms.Padding(3);
+      this.lnkGitMergeHelper.Name = "lnkGitMergeHelper";
+      this.lnkGitMergeHelper.Size = new System.Drawing.Size(95, 13);
+      this.lnkGitMergeHelper.TabIndex = 0;
+      this.lnkGitMergeHelper.TabStop = true;
+      this.lnkGitMergeHelper.Text = "Git Merge Helper";
+      this.lnkGitMergeHelper.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkGitMergeHelper_LinkClicked);
+      // 
       // EditorWindow
       // 
       this.AcceptButton = this.btnOk;
@@ -1552,6 +1580,8 @@
       this.tbcOutputView.ResumeLayout(false);
       this.pgTools.ResumeLayout(false);
       this.tableLayoutPanel6.ResumeLayout(false);
+      this.flowLayoutPanel2.ResumeLayout(false);
+      this.flowLayoutPanel2.PerformLayout();
       this.flowLayoutPanel1.ResumeLayout(false);
       this.flowLayoutPanel1.PerformLayout();
       this.pgTextOutput.ResumeLayout(false);
@@ -1687,5 +1717,7 @@
     private System.Windows.Forms.ProgressBar progQuery;
     private System.Windows.Forms.ToolStripMenuItem mniNewDocument;
     private System.Windows.Forms.ToolStripSeparator mniRecentDocsStart;
+    private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
+    private System.Windows.Forms.LinkLabel lnkGitMergeHelper;
   }
 }

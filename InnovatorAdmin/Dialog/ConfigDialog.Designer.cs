@@ -1,6 +1,6 @@
 ﻿namespace InnovatorAdmin.Dialog
 {
-  partial class SettingsDialog
+  partial class ConfigDialog<T>
   {
     /// <summary>
     /// Required designer variable.
