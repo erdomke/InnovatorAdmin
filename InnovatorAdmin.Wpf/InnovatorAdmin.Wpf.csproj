@@ -1,0 +1,302 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{745AE196-D80E-4760-AC98-7F3643149B2E}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>InnovatorAdmin</RootNamespace>
+    <AssemblyName>InnovatorAdmin.Wpf</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="FontAwesome.WPF, Version=4.5.0.32401, Culture=neutral, PublicKeyToken=0758b07a11a4f466, processorArchitecture=MSIL">
+      <HintPath>..\packages\FontAwesome.WPF.4.5.0.7\lib\net40\FontAwesome.WPF.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ICSharpCode.AvalonEdit, Version=5.0.1.0, Culture=neutral, PublicKeyToken=9cc39be672370310, processorArchitecture=MSIL">
+      <HintPath>..\packages\AvalonEdit.5.0.2\lib\Net40\ICSharpCode.AvalonEdit.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Innovator.Client, Version=2016.1.15.1759, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Innovator.Client.2016.02.12.1716\lib\net40\Innovator.Client.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MaterialDesignColors, Version=1.1.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MaterialDesignColors.1.1.2\lib\net45\MaterialDesignColors.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MaterialDesignThemes.Wpf, Version=1.4.1.485, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MaterialDesignThemes.1.4.1.485\lib\net45\MaterialDesignThemes.Wpf.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Windows7APICodePack-Core.1.1.0.0\lib\Microsoft.WindowsAPICodePack.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.Shell, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Windows7APICodePack-Shell.1.1.0.0\lib\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="ConnectionManager.cs" />
+    <Compile Include="Connections\Authentication.cs" />
+    <Compile Include="Connections\ConnectionData.cs" />
+    <Compile Include="Connections\ConnectionDataExtensions.cs" />
+    <Compile Include="Connections\ConnectionLibrary.cs" />
+    <Compile Include="Connections\ConnectionParameter.cs" />
+    <Compile Include="Connections\ConnectionType.cs" />
+    <Compile Include="Connections\RijndaelSimple.cs" />
+    <Compile Include="Controls\ConnectionEditor.xaml.cs">
+      <DependentUpon>ConnectionEditor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\EnumBooleanConverter.cs" />
+    <Compile Include="Dialogs\ConnectionEditorDialog.xaml.cs">
+      <DependentUpon>ConnectionEditorDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Editor\Aml\AmlEditorHelper.cs" />
+    <Compile Include="Editor\Aml\AmlFoldingStrategy.cs" />
+    <Compile Include="Editor\Aml\AmlLinkElementGenerator.cs" />
+    <Compile Include="Editor\Aml\AmlSimpleEditorHelper.cs" />
+    <Compile Include="Editor\Aml\AmlTransforms.cs" />
+    <Compile Include="Editor\Aml\ArasEditorProxy.cs" />
+    <Compile Include="Editor\Aml\AttributeCompletionData.cs" />
+    <Compile Include="Editor\Aml\AttributeValueCompletionData.cs" />
+    <Compile Include="Editor\Aml\CompletionContext.cs" />
+    <Compile Include="Editor\Aml\CompletionHelper.cs" />
+    <Compile Include="Editor\Aml\PropertyCompletionFactory.cs" />
+    <Compile Include="Editor\Aml\XmlFragmentReader.cs" />
+    <Compile Include="Editor\Aml\XmlState.cs" />
+    <Compile Include="Editor\Aml\XmlUtils.cs" />
+    <Compile Include="Editor\CompletionData\BasicCompletionData.cs" />
+    <Compile Include="Editor\CompletionData\CompletionExtensions.cs" />
+    <Compile Include="Editor\CompletionData\CompletionList.cs" />
+    <Compile Include="Editor\CompletionData\CompletionListBox.cs" />
+    <Compile Include="Editor\CompletionData\CompletionWindow.cs" />
+    <Compile Include="Editor\CompletionData\IContextCompletions.cs" />
+    <Compile Include="Editor\CompletionData\IMutableCompletionData.cs" />
+    <Compile Include="Editor\FormatText.cs" />
+    <Compile Include="Editor\Icons.cs" />
+    <Compile Include="Editor\IEditorHelper.cs" />
+    <Compile Include="Editor\IFoldingStrategy.cs" />
+    <Compile Include="Editor\Overload.cs" />
+    <Compile Include="Editor\PlainTextEditorHelper.cs" />
+    <Compile Include="Editor\QualifiedName.cs" />
+    <Compile Include="Editor\QualifiedNameCollection.cs" />
+    <Compile Include="Editor\RopeWriter.cs" />
+    <Compile Include="Editor\SearchResultBackgroundRenderer.cs" />
+    <Compile Include="Editor\SearchStrategy\RegexHelper.cs" />
+    <Compile Include="Editor\SearchStrategy\RegexReplacementHelper.cs" />
+    <Compile Include="Editor\SearchStrategy\RegexSearchStrategy.cs" />
+    <Compile Include="Editor\SearchStrategy\SearchFactory.cs" />
+    <Compile Include="Editor\SearchStrategy\SearchMode.cs" />
+    <Compile Include="Editor\SearchStrategy\SearchResult.cs" />
+    <Compile Include="Editor\SearchStrategy\StringHelper.cs" />
+    <Compile Include="Editor\SearchStrategy\StringLiteralHelper.cs" />
+    <Compile Include="Editor\SearchStrategy\XPathSearchStrategy.cs" />
+    <Compile Include="Editor\Sharepoint\SharepointEditorProxy.cs" />
+    <Compile Include="Editor\Soap\Facets.cs" />
+    <Compile Include="Editor\Soap\Generator.cs" />
+    <Compile Include="Editor\Soap\InstanceAttribute.cs" />
+    <Compile Include="Editor\Soap\InstanceElement.cs" />
+    <Compile Include="Editor\Soap\InstanceGroup.cs" />
+    <Compile Include="Editor\Soap\InstanceObject.cs" />
+    <Compile Include="Editor\Soap\SoapEditorProxy.cs" />
+    <Compile Include="Editor\Soap\XmlSampleGenerator.cs" />
+    <Compile Include="Editor\Soap\XmlSchemas.cs" />
+    <Compile Include="Editor\Sql\ISqlMetadataProvider.cs" />
+    <Compile Include="Editor\Sql\SqlColumn.cs" />
+    <Compile Include="Editor\Sql\SqlCompletionHelper.cs" />
+    <Compile Include="Editor\Sql\SqlEditorHelper.cs" />
+    <Compile Include="Editor\Sql\SqlEditorProxy.cs" />
+    <Compile Include="Editor\Sql\SqlExtension.cs" />
+    <Compile Include="Editor\Sql\SqlGeneralCompletionData.cs" />
+    <Compile Include="Editor\Sql\SqlMetadata.cs" />
+    <Compile Include="Editor\Sql\SqlObject.cs" />
+    <Compile Include="Editor\Sql\SqlResultObject.cs" />
+    <Compile Include="Editor\Sql\SqlSubType.cs" />
+    <Compile Include="Editor\TextDocumentWriter.cs" />
+    <Compile Include="Editor\VisualLineLinkText.cs" />
+    <Compile Include="Editor\XmlCompletionData.cs" />
+    <Compile Include="Editor\XmlCompletionDataCollection.cs" />
+    <Compile Include="Editor\XmlCompletionDataProvider.cs" />
+    <Compile Include="Editor\XmlEditorHelper.cs" />
+    <Compile Include="Editor\XmlElementPath.cs" />
+    <Compile Include="Editor\XmlParser.cs" />
+    <Compile Include="Editor\XmlSchemaCompletionData.cs" />
+    <Compile Include="Editor\XmlSchemaCompletionDataCollection.cs" />
+    <Compile Include="Editor\XPathReader\arraymanager.cs" />
+    <Compile Include="Editor\XPathReader\astnode.cs" />
+    <Compile Include="Editor\XPathReader\axis.cs" />
+    <Compile Include="Editor\XPathReader\AxisQuery.cs" />
+    <Compile Include="Editor\XPathReader\BaseQuery.cs" />
+    <Compile Include="Editor\XPathReader\ExprQuery.cs" />
+    <Compile Include="Editor\XPathReader\filter.cs" />
+    <Compile Include="Editor\XPathReader\FilterQuery.cs" />
+    <Compile Include="Editor\XPathReader\function.cs" />
+    <Compile Include="Editor\XPathReader\FunctionQuery.cs" />
+    <Compile Include="Editor\XPathReader\group.cs" />
+    <Compile Include="Editor\XPathReader\IQuery.cs" />
+    <Compile Include="Editor\XPathReader\operand.cs" />
+    <Compile Include="Editor\XPathReader\OperandQuery.cs" />
+    <Compile Include="Editor\XPathReader\operator.cs" />
+    <Compile Include="Editor\XPathReader\queryBuilder.cs" />
+    <Compile Include="Editor\XPathReader\root.cs" />
+    <Compile Include="Editor\XPathReader\variable.cs" />
+    <Compile Include="Editor\XPathReader\xmlchartype.cs" />
+    <Compile Include="Editor\XPathReader\XPathCollection.cs" />
+    <Compile Include="Editor\XPathReader\xpathexpr.cs" />
+    <Compile Include="Editor\XPathReader\xpathnodetype.cs" />
+    <Compile Include="Editor\XPathReader\xpathparser.cs" />
+    <Compile Include="Editor\XPathReader\xpathreader.cs" />
+    <Compile Include="Editor\XPathReader\XPathReaderException.cs" />
+    <Compile Include="Editor\XPathReader\xpathscanner.cs" />
+    <Compile Include="Ide\EditorScript.cs" />
+    <Compile Include="Ide\EditorScriptExecute.cs" />
+    <Compile Include="Ide\EditorTreeNode.cs" />
+    <Compile Include="Ide\ICommand.cs" />
+    <Compile Include="Ide\IEditorProxy.cs" />
+    <Compile Include="Ide\IEditorScript.cs" />
+    <Compile Include="Ide\IEditorTreeNode.cs" />
+    <Compile Include="Ide\IResultObject.cs" />
+    <Compile Include="Ide\OutputType.cs" />
+    <Compile Include="Utils.cs" />
+    <Page Include="Controls\ConnectionEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Dialogs\ConnectionEditorDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Editor\CompletionData\CompletionList.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Editor\CodeEditor.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Ide\Ide.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Editor\CodeEditor.xaml.cs">
+      <DependentUpon>CodeEditor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Ide\Ide.xaml.cs">
+      <DependentUpon>Ide.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Editor\xslt.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\InnovatorAdmin.Api\InnovatorAdmin.Api.csproj">
+      <Project>{7c397623-c59e-4db2-8879-8a3385dabcd9}</Project>
+      <Name>InnovatorAdmin.Api</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\TreeImages\assembly-16.png" />
+    <Resource Include="Resources\TreeImages\attribute-16.png" />
+    <Resource Include="Resources\TreeImages\class-16.png" />
+    <Resource Include="Resources\TreeImages\enum-value-16.png" />
+    <Resource Include="Resources\TreeImages\field-16.png" />
+    <Resource Include="Resources\TreeImages\folder-16.png" />
+    <Resource Include="Resources\TreeImages\folder-special-16.png" />
+    <Resource Include="Resources\TreeImages\method-16.png" />
+    <Resource Include="Resources\TreeImages\method-friend-16.png" />
+    <Resource Include="Resources\TreeImages\namespace-16.png" />
+    <Resource Include="Resources\TreeImages\operator-16.png" />
+    <Resource Include="Resources\TreeImages\property-16.png" />
+    <Resource Include="Resources\TreeImages\xml-tag-16.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

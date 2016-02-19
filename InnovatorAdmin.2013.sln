@@ -41,6 +41,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pipes", "Pipes\Pipes.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pipes.OfficeXml", "Pipes.OfficeXml\Pipes.OfficeXml.csproj", "{7909C327-9068-4BCE-8E53-168FDB23BDD8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnovatorAdmin.Wpf", "InnovatorAdmin.Wpf\InnovatorAdmin.Wpf.csproj", "{745AE196-D80E-4760-AC98-7F3643149B2E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -233,6 +235,24 @@ Global
 		{7909C327-9068-4BCE-8E53-168FDB23BDD8}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{7909C327-9068-4BCE-8E53-168FDB23BDD8}.Release|x86.ActiveCfg = Release|Any CPU
 		{7909C327-9068-4BCE-8E53-168FDB23BDD8}.Release|x86.Build.0 = Release|Any CPU
+		{745AE196-D80E-4760-AC98-7F3643149B2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{745AE196-D80E-4760-AC98-7F3643149B2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{745AE196-D80E-4760-AC98-7F3643149B2E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{745AE196-D80E-4760-AC98-7F3643149B2E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{745AE196-D80E-4760-AC98-7F3643149B2E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{745AE196-D80E-4760-AC98-7F3643149B2E}.Debug|x86.Build.0 = Debug|Any CPU
+		{745AE196-D80E-4760-AC98-7F3643149B2E}.Release 3.5|Any CPU.ActiveCfg = Release|Any CPU
+		{745AE196-D80E-4760-AC98-7F3643149B2E}.Release 3.5|Any CPU.Build.0 = Release|Any CPU
+		{745AE196-D80E-4760-AC98-7F3643149B2E}.Release 3.5|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{745AE196-D80E-4760-AC98-7F3643149B2E}.Release 3.5|Mixed Platforms.Build.0 = Release|Any CPU
+		{745AE196-D80E-4760-AC98-7F3643149B2E}.Release 3.5|x86.ActiveCfg = Release|Any CPU
+		{745AE196-D80E-4760-AC98-7F3643149B2E}.Release 3.5|x86.Build.0 = Release|Any CPU
+		{745AE196-D80E-4760-AC98-7F3643149B2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{745AE196-D80E-4760-AC98-7F3643149B2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{745AE196-D80E-4760-AC98-7F3643149B2E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{745AE196-D80E-4760-AC98-7F3643149B2E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{745AE196-D80E-4760-AC98-7F3643149B2E}.Release|x86.ActiveCfg = Release|Any CPU
+		{745AE196-D80E-4760-AC98-7F3643149B2E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
