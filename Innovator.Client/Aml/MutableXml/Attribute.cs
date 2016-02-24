@@ -24,7 +24,7 @@ namespace Innovator.Client
     public string Value
     {
       get { return this.Exists ? _attribute.Value : null; }
-      set 
+      set
       {
         if (!Exists)
         {
@@ -37,7 +37,7 @@ namespace Innovator.Client
             throw new InvalidOperationException();
           }
         }
-        _attribute.Value = value; 
+        _attribute.Value = value;
       }
     }
 
@@ -155,6 +155,17 @@ namespace Innovator.Client
       if (!this.Exists)
         return defaultValue;
       return this.Value;
+    }
+
+    public void Remove()
+    {
+      if (_attribute != null)
+      {
+        _parent = _attribute.OwnerElement;
+        _name = _attribute.LocalName;
+        _parent.RemoveAttributeNode(_attribute);
+        _attribute = null;
+      }
     }
   }
 }
