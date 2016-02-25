@@ -9,13 +9,11 @@ namespace Innovator.Server
   public interface IServerConnection : IConnection
   {
     IServerCache ApplicationCache { get; }
-    string IpAddress { get; }
     string OriginalRequest { get; }
     IServerPermissions Permissions { get; }
+    string RequestUrl { get; }
     IServerCache SessionCache { get; }
-    string UserAgent { get; }
 
-    IEnumerable<IReadOnlyItem> ApplySelect(string sql, string typeName = null);
-    IConnection NewConnection();
+    string GetHeader(string name);
   }
 }
