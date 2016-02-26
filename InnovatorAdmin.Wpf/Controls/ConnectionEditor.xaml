@@ -52,7 +52,7 @@
     <ListBox x:Name="lstConnections" 
              Grid.Row="1" Grid.RowSpan="8"
              HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto" Margin="3,3,3,3"
-             ItemsSource="{Binding Connections}" />
+             ItemsSource="{Binding Connections}" SelectionChanged="lstConnections_SelectionChanged" />
     <fa:ImageAwesome Icon="Globe" Foreground="LightGray" 
                      Grid.Row="1" Grid.Column="2" 
                      HorizontalAlignment="Right" VerticalAlignment="Stretch" Width="22" Margin="0,0,5,0" />
@@ -87,7 +87,7 @@
     <PasswordBox x:Name="txtPassword"
              Grid.Row="5" Grid.Column="3" Grid.ColumnSpan="2"
              materialDesign:TextFieldAssist.Hint="Password"
-             HorizontalAlignment="Stretch" VerticalAlignment="Top" Width="Auto" Height="23" Margin="3,3,3,3"/>
+             HorizontalAlignment="Stretch" VerticalAlignment="Top" Width="Auto" Height="23" Margin="3,3,3,3" PasswordChanged="txtPassword_PasswordChanged"/>
     <fa:ImageAwesome Icon="Database" Foreground="LightGray" 
                      Grid.Row="6" Grid.Column="2" 
                      HorizontalAlignment="Right" VerticalAlignment="Stretch" Width="22" Margin="0,0,5,0" />

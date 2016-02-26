@@ -26,7 +26,7 @@ namespace InnovatorAdmin.Connections
     [DisplayName("Database")]
     public string Database { get; set; }
     [DisplayName("Password"), PasswordPropertyText(true)]
-    public string Password { get; set; }
+    public SecureToken Password { get; set; }
     [DisplayName("Url")]
     public string Url { get; set; }
     [DisplayName("User Name")]
@@ -34,7 +34,7 @@ namespace InnovatorAdmin.Connections
     [DisplayName("Color")]
     public Color Color { get; set; }
     [DisplayName("Confirm")]
-    public Boolean Confirm { get; set; }
+    public bool Confirm { get; set; }
     [DisplayName("Timeout")]
     public int Timeout { get; set; }
 
@@ -181,7 +181,7 @@ namespace InnovatorAdmin.Connections
     {
       writer.WriteElementString("ConnectionName", this.ConnectionName);
       writer.WriteElementString("Database", this.Database);
-      writer.WriteElementString("Password", EncryptWindows(this.Password));
+      writer.WriteElementString("Password", this.Password.UseString((ref string p) => EncryptWindows(p)));
       writer.WriteElementString("Url", this.Url);
       writer.WriteElementString("UserName", this.UserName);
       writer.WriteElementString("Color", ToHex(this.Color));

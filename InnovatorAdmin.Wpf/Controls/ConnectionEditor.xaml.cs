@@ -26,5 +26,17 @@ namespace InnovatorAdmin.Controls
 
       this.DataContext = ConnectionManager.Current.Library;
     }
+
+    private void lstConnections_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+      var conn = e.AddedItems.OfType<Connections.ConnectionData>().First();
+      txtPassword.Password = conn.Password.UseString((ref string p) => new string(p.ToCharArray()));
+    }
+
+    private void txtPassword_PasswordChanged(object sender, RoutedEventArgs e)
+    {
+      var conn = (Connections.ConnectionData)lstConnections.SelectedItem;
+      conn.Password = txtPassword.SecurePassword;
+    }
   }
 }
