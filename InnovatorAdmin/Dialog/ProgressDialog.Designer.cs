@@ -28,7 +28,7 @@
     /// </summary>
     private void InitializeComponent()
     {
-      this.progressBar1 = new System.Windows.Forms.ProgressBar();
+      this.progBar = new System.Windows.Forms.ProgressBar();
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
       this.btnCancel = new InnovatorAdmin.Controls.FlatButton();
       this.label1 = new System.Windows.Forms.Label();
@@ -38,13 +38,13 @@
       // 
       // progressBar1
       // 
-      this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-      this.tableLayoutPanel1.SetColumnSpan(this.progressBar1, 2);
-      this.progressBar1.Location = new System.Drawing.Point(38, 41);
-      this.progressBar1.Name = "progressBar1";
-      this.progressBar1.Size = new System.Drawing.Size(279, 19);
-      this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
-      this.progressBar1.TabIndex = 0;
+      this.progBar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+      this.tableLayoutPanel1.SetColumnSpan(this.progBar, 2);
+      this.progBar.Location = new System.Drawing.Point(38, 41);
+      this.progBar.Name = "progressBar1";
+      this.progBar.Size = new System.Drawing.Size(279, 19);
+      this.progBar.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
+      this.progBar.TabIndex = 0;
       // 
       // tableLayoutPanel1
       // 
@@ -53,7 +53,7 @@
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 35F));
-      this.tableLayoutPanel1.Controls.Add(this.progressBar1, 1, 1);
+      this.tableLayoutPanel1.Controls.Add(this.progBar, 1, 1);
       this.tableLayoutPanel1.Controls.Add(this.btnCancel, 2, 2);
       this.tableLayoutPanel1.Controls.Add(this.label1, 1, 0);
       this.tableLayoutPanel1.Controls.Add(this.lblTime, 1, 2);
@@ -126,7 +126,7 @@
 
     #endregion
 
-    private System.Windows.Forms.ProgressBar progressBar1;
+    private System.Windows.Forms.ProgressBar progBar;
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     private Controls.FlatButton btnCancel;
     private System.Windows.Forms.Label label1;

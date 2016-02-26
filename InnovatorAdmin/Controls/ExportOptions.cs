@@ -75,7 +75,7 @@ namespace InnovatorAdmin.Controls
             dialog.Filter = "Innovator Package (Single file)|*.innpkg|Innovator Package (Multiple files: for development)|*.innpkg|Manifest (Backwards compatible)|*.mf";
             if (dialog.ShowDialog() == DialogResult.OK)
             {
-              ProgressDialog.Display(this, () =>
+              ProgressDialog.Display(this, (d) =>
               {
                 switch (dialog.FilterIndex)
                 {

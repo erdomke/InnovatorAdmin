@@ -18,10 +18,10 @@ namespace InnovatorAdmin
     private Commit _baseCommit;
     private string _path;
 
-    public GitMergeOperation(string repoPath, string localBrach, string remoteBranch)
+    public GitMergeOperation(Repository repo, string localBranch, string remoteBranch)
     {
-      _repo = new Repository(repoPath);
-      var local = _repo.Branches[localBrach];
+      _repo = repo;
+      var local = _repo.Branches[localBranch];
       _localCommit = local.Commits.First();
       var shas = new HashSet<string>(local.Commits.Select(c => c.Sha));
       var remote = _repo.Branches[remoteBranch];
@@ -55,7 +55,8 @@ namespace InnovatorAdmin
         InRemote = string.IsNullOrEmpty(s.RemoteSha) ? FileStatus.DoesntExist : (s.RemoteSha == s.BaseSha ? FileStatus.Unchanged : FileStatus.Modified)
       }).ToArray();
 
-      _path = Path.GetDirectoryName(_repo.Info.Path);
+      var i = _repo.Info.Path.LastIndexOf(".git");
+      _path = _repo.Info.Path.Substring(0, i - 1);
     }
 
     internal static void WalkTree(Tree parent, Action<string, Blob> visitor)

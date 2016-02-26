@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
+using System.Xml.Linq;
+using System.Xml;
 
 namespace InnovatorAdmin.Controls
 {
@@ -221,11 +223,31 @@ namespace InnovatorAdmin.Controls
         var checksum = Md5HashFile(paths.Merged);
         var proc = Process.Start(@"c:\Program Files\Perforce\p4merge.exe", args);
         proc.WaitForExit();
+
         var newChecksum = Md5HashFile(paths.Merged);
-        if (newChecksum != checksum
-          || Dialog.MessageDialog.Show("The merge file appears not to have changed.  Do you still want to mark it resolved anyway?",
+        // If the files are the same, only mark it if the user agrees to a prompt
+        if (newChecksum == checksum
+          && Dialog.MessageDialog.Show("The merge file appears not to have changed.  Do you still want to mark it resolved anyway?",
           "Merge Resolution", "Mark &Resolved", "&Ignore") == DialogResult.OK)
+        {
           item.ResolutionStatus = MergeStatus.ResolvedConflict;
+        }
+        else
+        {
+          try
+          {
+            var elem = XElement.Load(paths.Merged);
+            // If the XML parses, then mark it
+            item.ResolutionStatus = MergeStatus.ResolvedConflict;
+          }
+          catch (XmlException ex)
+          {
+            // If the XML does not parse, then prompt first
+            if (Dialog.MessageDialog.Show("The merge file does not appear to be valid XML.  In particular, " + ex.Message + ".  Do you still want to mark it resolved anyway?",
+              "Merge Resolution", "Mark &Resolved", "&Ignore") == DialogResult.OK)
+              item.ResolutionStatus = MergeStatus.ResolvedConflict;
+          }
+        }
 
         CleanupTempFiles(paths.Base, paths.Local, paths.Merged, paths.Remote);
       }

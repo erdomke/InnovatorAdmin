@@ -11,14 +11,15 @@ using System.Windows.Forms;
 
 namespace InnovatorAdmin
 {
-  public partial class ProgressDialog : Form
+  public partial class ProgressDialog : Form, IProgressDialog
   {
     private Thread _background;
     private LightBox _box;
     private System.Windows.Forms.Timer _clock = new System.Windows.Forms.Timer();
     private DateTime _start = DateTime.UtcNow;
+    private bool _isMarquee = true;
 
-    public Action Worker { get; set; }
+    public Action<IProgressDialog> Worker { get; set; }
 
     public ProgressDialog()
     {
@@ -34,6 +35,22 @@ namespace InnovatorAdmin
       _clock.Interval = 250;
       _clock.Tick += _clock_Tick;
       _clock.Enabled = true;
+    }
+
+    public void SetProgress(int value)
+    {
+      this.Invoke((Action)delegate ()
+      {
+        if (_isMarquee)
+        {
+          GlobalProgress.Instance.Start();
+          progBar.Style = ProgressBarStyle.Continuous;
+          _isMarquee = false;
+        }
+        GlobalProgress.Instance.Value(value);
+        progBar.Maximum = Math.Max(value, 100);
+        progBar.Value = value;
+      });
     }
 
     void _clock_Tick(object sender, EventArgs e)
@@ -53,14 +70,14 @@ namespace InnovatorAdmin
         _box.Show(ctrl.TopLevelControl, this);
       }
       _background = new Thread(PerformAction);
-      _background.Start();
+      _background.Start(this);
       GlobalProgress.Instance.Marquee();
       return base.ShowDialog(owner);
     }
 
-    private void PerformAction()
+    private void PerformAction(object dialog)
     {
-      this.Worker.Invoke();
+      this.Worker.Invoke((IProgressDialog)dialog);
       this.Invoke((Action)delegate()
       {
         this.DialogResult = System.Windows.Forms.DialogResult.OK;
@@ -83,7 +100,7 @@ namespace InnovatorAdmin
         _box.Dispose();
     }
 
-    public static DialogResult Display(IWin32Window owner, Action worker)
+    public static DialogResult Display(IWin32Window owner, Action<IProgressDialog> worker)
     {
       using (var dialog = new ProgressDialog())
       {
@@ -91,5 +108,10 @@ namespace InnovatorAdmin
         return dialog.ShowDialog(owner);
       }
     }
+  }
+
+  public interface IProgressDialog
+  {
+    void SetProgress(int value);
   }
 }

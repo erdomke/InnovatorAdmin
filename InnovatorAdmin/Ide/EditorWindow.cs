@@ -2230,7 +2230,7 @@ namespace InnovatorAdmin
           dialog.DataSource = settings;
           if (dialog.ShowDialog() == DialogResult.OK)
           {
-            var mergeOp = new GitMergeOperation(settings.RepoPath, settings.LocalBranch, settings.RemoteBranch);
+            var mergeOp = new GitRepo(settings.RepoPath).GetMerge(settings.LocalBranch, settings.RemoteBranch);
             var main = new Main();
             main.GoToStep(new MergeInterface().Initialize(mergeOp));
             main.Show();
@@ -2251,6 +2251,45 @@ namespace InnovatorAdmin
       public string LocalBranch { get; set; }
       [DisplayName("Remote Branch Name")]
       public string RemoteBranch { get; set; }
-    }  
+    }
+
+    private void lnkWriteMergeScripts_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    {
+      try
+      {
+        using (var dialog = new Dialog.ConfigDialog<ScriptWriterSettings>())
+        {
+          var settings = new ScriptWriterSettings();
+          dialog.DataSource = settings;
+          if (dialog.ShowDialog() == DialogResult.OK)
+          {
+            var repo = new GitRepo(settings.RepoPath);
+            var initDir = repo.GetDirectory(settings.InitCommit);
+            var destDir = repo.GetDirectory(settings.DestCommit);
+
+            ProgressDialog.Display(this, d =>
+            {
+              initDir.WriteAmlMergeScripts(destDir, settings.SaveDirectory, d.SetProgress);
+            });
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private class ScriptWriterSettings
+    {
+      [DisplayName("Git Repository Path"), ParamControl(typeof(Editor.FilePathControl))]
+      public string RepoPath { get; set; }
+      [DisplayName("Initial Commit")]
+      public string InitCommit { get; set; }
+      [DisplayName("Destination Commit")]
+      public string DestCommit { get; set; }
+      [DisplayName("Script Save Directory"), ParamControl(typeof(Editor.FilePathControl))]
+      public string SaveDirectory { get; set; }
+    }
   }
 }

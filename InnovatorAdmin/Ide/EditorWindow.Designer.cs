@@ -123,6 +123,8 @@
       this.pgTools = new System.Windows.Forms.TabPage();
       this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
       this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
+      this.lnkGitMergeHelper = new System.Windows.Forms.LinkLabel();
+      this.lnkWriteMergeScripts = new System.Windows.Forms.LinkLabel();
       this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
       this.btnInstall = new InnovatorAdmin.Controls.FlatButton();
       this.btnCreate = new InnovatorAdmin.Controls.FlatButton();
@@ -153,7 +155,6 @@
       this.pnlLeftTop = new System.Windows.Forms.Panel();
       this.pnlRightTop = new System.Windows.Forms.Panel();
       this.pnlConnectionShadow = new InnovatorAdmin.DropShadow();
-      this.lnkGitMergeHelper = new System.Windows.Forms.LinkLabel();
       this.tblMain.SuspendLayout();
       this.tblHeader.SuspendLayout();
       this.menuStrip.SuspendLayout();
@@ -1149,11 +1150,37 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.flowLayoutPanel2.Controls.Add(this.lnkGitMergeHelper);
-      this.flowLayoutPanel2.Location = new System.Drawing.Point(15, 276);
+      this.flowLayoutPanel2.Controls.Add(this.lnkWriteMergeScripts);
+      this.flowLayoutPanel2.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
+      this.flowLayoutPanel2.Location = new System.Drawing.Point(15, 347);
       this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(15);
       this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-      this.flowLayoutPanel2.Size = new System.Drawing.Size(722, 82);
+      this.flowLayoutPanel2.Size = new System.Drawing.Size(882, 113);
       this.flowLayoutPanel2.TabIndex = 5;
+      // 
+      // lnkGitMergeHelper
+      // 
+      this.lnkGitMergeHelper.AutoSize = true;
+      this.lnkGitMergeHelper.Location = new System.Drawing.Point(3, 3);
+      this.lnkGitMergeHelper.Margin = new System.Windows.Forms.Padding(3);
+      this.lnkGitMergeHelper.Name = "lnkGitMergeHelper";
+      this.lnkGitMergeHelper.Size = new System.Drawing.Size(183, 30);
+      this.lnkGitMergeHelper.TabIndex = 0;
+      this.lnkGitMergeHelper.TabStop = true;
+      this.lnkGitMergeHelper.Text = "Git Merge Helper";
+      this.lnkGitMergeHelper.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkGitMergeHelper_LinkClicked);
+      // 
+      // lnkWriteMergeScripts
+      // 
+      this.lnkWriteMergeScripts.AutoSize = true;
+      this.lnkWriteMergeScripts.Location = new System.Drawing.Point(3, 39);
+      this.lnkWriteMergeScripts.Margin = new System.Windows.Forms.Padding(3);
+      this.lnkWriteMergeScripts.Name = "lnkWriteMergeScripts";
+      this.lnkWriteMergeScripts.Size = new System.Drawing.Size(385, 30);
+      this.lnkWriteMergeScripts.TabIndex = 1;
+      this.lnkWriteMergeScripts.TabStop = true;
+      this.lnkWriteMergeScripts.Text = "Write Merge Scripts from Git Commits";
+      this.lnkWriteMergeScripts.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkWriteMergeScripts_LinkClicked);
       // 
       // flowLayoutPanel1
       // 
@@ -1528,18 +1555,6 @@
       this.pnlConnectionShadow.Size = new System.Drawing.Size(996, 4);
       this.pnlConnectionShadow.TabIndex = 17;
       // 
-      // lnkGitMergeHelper
-      // 
-      this.lnkGitMergeHelper.AutoSize = true;
-      this.lnkGitMergeHelper.Location = new System.Drawing.Point(3, 3);
-      this.lnkGitMergeHelper.Margin = new System.Windows.Forms.Padding(3);
-      this.lnkGitMergeHelper.Name = "lnkGitMergeHelper";
-      this.lnkGitMergeHelper.Size = new System.Drawing.Size(95, 13);
-      this.lnkGitMergeHelper.TabIndex = 0;
-      this.lnkGitMergeHelper.TabStop = true;
-      this.lnkGitMergeHelper.Text = "Git Merge Helper";
-      this.lnkGitMergeHelper.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkGitMergeHelper_LinkClicked);
-      // 
       // EditorWindow
       // 
       this.AcceptButton = this.btnOk;
@@ -1719,5 +1734,6 @@
     private System.Windows.Forms.ToolStripSeparator mniRecentDocsStart;
     private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
     private System.Windows.Forms.LinkLabel lnkGitMergeHelper;
+    private System.Windows.Forms.LinkLabel lnkWriteMergeScripts;
   }
 }

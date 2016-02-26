@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace InnovatorAdmin.Merge
+namespace InnovatorAdmin
 {
   class GitDiffDirectory : IDiffDirectory
   {

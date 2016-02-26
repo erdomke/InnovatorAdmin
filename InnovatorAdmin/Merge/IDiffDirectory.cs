@@ -57,39 +57,51 @@ namespace InnovatorAdmin
       return result;
     }
     public static void WriteAmlMergeScripts(this IDiffDirectory baseDir, IDiffDirectory compareDir
-      , string outputDirectory)
+      , string outputDirectory, Action<int> progressCallback = null)
     {
       Func<IDiffFile, IComparable> keyGetter = i => i.Path;
       var basePaths = baseDir.GetFiles().OrderBy(keyGetter).ToArray();
       var comparePaths = compareDir.GetFiles().OrderBy(keyGetter).ToArray();
+      var completed = 0;
+      var total = basePaths.Length + comparePaths.Length;
 
       var result = new List<FileDiff>();
 
       basePaths.MergeSorted(comparePaths, keyGetter, (i, b, c) =>
       {
-        var savePath = Path.Combine(outputDirectory, (b ?? c).Path);
-        if (savePath.EndsWith(".xslt.xml"))
-          return;
-
-        Directory.CreateDirectory(Path.GetDirectoryName(savePath));
-        switch (i)
+        try
         {
-          case -1:
-            SaveFile(AmlDiff.GetMergeScript(ReadFile(b,
-              p => basePaths.FirstOrDefault(f => f.Path == p)), null), savePath);
-            break;
-          case 1:
-            using (var baseStream = c.OpenRead())
-            using (var outStream = File.OpenWrite(savePath))
-            {
-              baseStream.CopyTo(outStream);
-            }
-            break;
-          default:
-            SaveFile(AmlDiff.GetMergeScript(
-              ReadFile(b, p => basePaths.FirstOrDefault(f => f.Path == p)), 
-              ReadFile(c, p => comparePaths.FirstOrDefault(f => f.Path == p))), savePath);
-            break;
+          var savePath = Path.Combine(outputDirectory, (b ?? c).Path);
+          if (savePath.EndsWith(".xslt.xml"))
+            return;
+
+          Directory.CreateDirectory(Path.GetDirectoryName(savePath));
+          switch (i)
+          {
+            case -1:
+              SaveFile(AmlDiff.GetMergeScript(ReadFile(b,
+                p => basePaths.FirstOrDefault(f => f.Path == p)), null), savePath);
+              break;
+            case 1:
+              using (var baseStream = c.OpenRead())
+              using (var outStream = File.OpenWrite(savePath))
+              {
+                baseStream.CopyTo(outStream);
+              }
+              break;
+            default:
+              SaveFile(AmlDiff.GetMergeScript(
+                ReadFile(b, p => basePaths.FirstOrDefault(f => f.Path == p)),
+                ReadFile(c, p => comparePaths.FirstOrDefault(f => f.Path == p))), savePath);
+              total--;
+              break;
+          }
+          completed++;
+          if (progressCallback != null) progressCallback(completed * 100 / total);
+        }
+        catch (XmlException ex)
+        {
+          throw new XmlException(string.Format("{0} ({1}, {2}, {3})", ex.Message, i, b.Path, c.Path), ex);
         }
       });
     }
@@ -98,7 +110,13 @@ namespace InnovatorAdmin
     {
       if (file.Path.EndsWith(".xslt", StringComparison.OrdinalIgnoreCase))
       {
-        return InnovatorPackage.ReadReport(file.Path, p => fileGetter(p).OpenRead()).OuterXml;
+        return InnovatorPackage.ReadReport(file.Path, p => 
+        {
+          var f = fileGetter(p);
+          if (f != null)
+            return f.OpenRead();
+          return new MemoryStream(Encoding.UTF8.GetBytes("<Result><Item></Item></Result>"));
+        }).OuterXml;
       }
       else
       {

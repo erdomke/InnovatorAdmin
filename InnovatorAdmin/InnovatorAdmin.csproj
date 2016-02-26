@@ -276,6 +276,7 @@
     <Compile Include="Editor\CompletionData\CompletionWindow.cs" />
     <Compile Include="Merge\GitDiffDirectory.cs" />
     <Compile Include="Merge\GitMergeOperation.cs" />
+    <Compile Include="Merge\GitRepo.cs" />
     <Compile Include="PropertyFilter.cs" />
     <Compile Include="Dialog\ConfigDialog.cs">
       <SubType>Form</SubType>
@@ -514,8 +515,6 @@
     <Compile Include="Merge\FileCompare.cs" />
     <Compile Include="Merge\FileDiff.cs" />
     <Compile Include="Merge\FileStatus.cs" />
-    <Compile Include="Merge\HgDiffDirectory.cs" />
-    <Compile Include="Merge\HgMergeOperation.cs" />
     <Compile Include="Merge\IDiffDirectory.cs" />
     <Compile Include="Merge\IDiffFile.cs" />
     <Compile Include="Merge\IMergeOperation.cs" />
