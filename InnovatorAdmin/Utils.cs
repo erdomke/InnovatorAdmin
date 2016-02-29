@@ -14,6 +14,21 @@ namespace InnovatorAdmin
 {
   public static class Utils
   {
+    public static bool EndsWith(this IList<string> values, params string[] predicate)
+    {
+      if (predicate == null || predicate.Length < 1)
+        return true;
+      if (values.Count < predicate.Length)
+        return false;
+      var offset = values.Count - predicate.Length;
+      for (var i = 0; i < predicate.Length; i++)
+      {
+        if (!string.Equals(values[i + offset], predicate[i]))
+          return false;
+      }
+      return true;
+    }
+
     public static void WriteTo(this Stream stream, string path)
     {
       using (var write = new FileStream(path, FileMode.Create, FileAccess.Write))

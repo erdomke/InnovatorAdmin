@@ -597,13 +597,14 @@ namespace InnovatorAdmin.Editor
         return _dataSet;
       }
 
+
+
       private void IndentXml(TextReader xmlContent, TextWriter writer, out int itemCount)
       {
         itemCount = 0;
         char[] writeNodeBuffer = null;
         var levels = new int[64];
-        int level = 0;
-        string lastElement = null;
+        var elemIds = new List<string>();
         string value;
 
         var settings = new XmlWriterSettings();
@@ -628,7 +629,7 @@ namespace InnovatorAdmin.Editor
 
                 if (reader.LocalName == "Item")
                 {
-                  levels[level]++;
+                  levels[elemIds.Count]++;
                   var currType = reader.GetAttribute("type");
                   if (!string.IsNullOrWhiteSpace(currType)) types.Add(currType);
                 }
@@ -643,12 +644,32 @@ namespace InnovatorAdmin.Editor
                 }
                 else
                 {
-                  lastElement = reader.LocalName;
-                  level++;
+                  if (reader.LocalName == "Item")
+                  {
+                    var currType = reader.GetAttribute("type");
+                    elemIds.Add(string.IsNullOrWhiteSpace(currType) ? reader.LocalName : currType);
+                  }
+                  else
+                  {
+                    elemIds.Add(reader.LocalName);
+                  }
                 }
                 break;
               case XmlNodeType.Text:
-                if (canReadValueChunk && lastElement != "Result")
+                if (elemIds.EndsWith("Action", "item_query")
+                  || elemIds.EndsWith("EMail Message", "body_html")
+                  || elemIds.EndsWith("EMail Message", "body_plain")
+                  || elemIds.EndsWith("EMail Message", "query_string")
+                  || elemIds.EndsWith("Grid", "query")
+                  || elemIds.EndsWith("Method", "method_code")
+                  || elemIds.EndsWith("Report", "xsl_stylesheet")
+                  || elemIds.EndsWith("SavedSearch", "criteria")
+                  || elemIds.EndsWith("SQL", "sqlserver_body")
+                  )
+                {
+                  xmlWriter.WriteCData(reader.Value);
+                }
+                else if (canReadValueChunk && elemIds.Last() != "Result")
                 {
                   if (writeNodeBuffer == null)
                   {
@@ -663,7 +684,7 @@ namespace InnovatorAdmin.Editor
                 else
                 {
                   value = reader.Value;
-                  if (lastElement == "Result" && value.Trim().StartsWith("<"))
+                  if (elemIds.Last() == "Result" && value.Trim().StartsWith("<"))
                   {
                     _html = value;
                     _preferredMode = OutputType.Html;
@@ -692,7 +713,7 @@ namespace InnovatorAdmin.Editor
                 break;
               case XmlNodeType.EndElement:
                 xmlWriter.WriteFullEndElement();
-                level--;
+                elemIds.RemoveAt(elemIds.Count - 1);
                 break;
             }
           }
