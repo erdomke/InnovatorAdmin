@@ -196,7 +196,7 @@
   <xsl:template match="itemtype"/>
   <xsl:template match="Item[@type='Property' and data_type!='item' ]/item_behavior"/>
   <xsl:template match="Relationships/Item/source_id" />
-  
+
   <!-- Custom property -->
   <xsl:template match="Item[@type='Method']/checksum"/>
 
@@ -214,7 +214,7 @@
 
   <!-- Second ItemType tag to deal with is_keyed and modified system properties -->
   <xsl:template mode="fix" match="Item[@type='ItemType']">
-    <xsl:variable name="modifiedSystemProps" select="Relationships/Item[@type='Property'][name='behavior'][string(label)!='' or string(data_type)!='list' or string(stored_length)!='64' or string(column_alignment)!='left' or string(is_hidden)!='1' or string(is_hidden2)!='1' or string(column_width)!='' or string(readonly)!='0' or string(is_keyed)!='0' or string(order_by)!=''] |
+    <xsl:variable name="modifiedSystemProps" select="Relationships/Item[@type='Property'][name='behavior'][string(label)!='' or string(data_type)!='list' or (stored_length and string(stored_length)!='64') or string(column_alignment)!='left' or string(is_hidden)!='1' or string(is_hidden2)!='1' or string(column_width)!='' or string(readonly)!='0' or string(is_keyed)!='0' or string(order_by)!=''] |
                                   Relationships/Item[@type='Property'][name='classification'][string(label)!='Classification' or string(data_type)!='string' or string(stored_length)!='512' or string(column_alignment)!='left' or string(is_hidden)!='1' or string(is_hidden2)!='1' or string(column_width)!='' or string(readonly)!='0' or string(is_keyed)!='0' or string(order_by)!=''] |
                                   Relationships/Item[@type='Property'][name='config_id'][string(label)!='' or string(data_type)!='item' or string(stored_length)!='' or string(column_alignment)!='left' or string(is_hidden)!='1' or string(is_hidden2)!='1' or string(column_width)!='' or string(readonly)!='1' or string(is_keyed)!='0' or string(order_by)!=''] |
                                   Relationships/Item[@type='Property'][name='created_by_id'][string(label)!='' or string(data_type)!='item' or string(stored_length)!='' or string(column_alignment)!='left' or string(is_hidden)!='1' or string(is_hidden2)!='1' or string(column_width)!='' or string(readonly)!='1' or string(is_keyed)!='0' or string(order_by)!=''] |

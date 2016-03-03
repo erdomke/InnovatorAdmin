@@ -310,7 +310,8 @@
       // 
       // txtMessage
       // 
-      this.txtMessage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+      this.txtMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.txtMessage.BackColor = System.Drawing.Color.White;
       this.txtMessage.BorderStyle = System.Windows.Forms.BorderStyle.None;
@@ -320,7 +321,7 @@
       this.txtMessage.Multiline = true;
       this.txtMessage.Name = "txtMessage";
       this.txtMessage.ReadOnly = true;
-      this.txtMessage.Size = new System.Drawing.Size(412, 37);
+      this.txtMessage.Size = new System.Drawing.Size(412, 38);
       this.txtMessage.TabIndex = 22;
       // 
       // MessageDialog

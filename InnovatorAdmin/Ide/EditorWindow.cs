@@ -2227,12 +2227,15 @@ namespace InnovatorAdmin
         using (var dialog = new Dialog.ConfigDialog<MergeSettings>())
         {
           var settings = new MergeSettings();
+          settings.ContinueLast = true;
           dialog.DataSource = settings;
           if (dialog.ShowDialog() == DialogResult.OK)
           {
             var mergeOp = new GitRepo(settings.RepoPath).GetMerge(settings.LocalBranch, settings.RemoteBranch);
             var main = new Main();
-            main.GoToStep(new MergeInterface().Initialize(mergeOp));
+            var step = new MergeInterface();
+            step.ContinueLastMerge = settings.ContinueLast;
+            main.GoToStep(step.Initialize(mergeOp));
             main.Show();
           }
         }
@@ -2245,6 +2248,8 @@ namespace InnovatorAdmin
 
     private class MergeSettings
     {
+      [DisplayName("Continue Last Merge")]
+      public bool ContinueLast { get; set; }
       [DisplayName("Git Repository Path"), ParamControl(typeof(Editor.FilePathControl))]
       public string RepoPath { get; set; }
       [DisplayName("Local Branch Name")]

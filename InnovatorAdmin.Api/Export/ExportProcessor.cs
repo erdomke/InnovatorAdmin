@@ -257,6 +257,7 @@ namespace InnovatorAdmin
         FixForeignProperties(doc);
         FixCyclicalWorkflowLifeCycleRefs(doc);
         FixCyclicalWorkflowItemTypeRefs(doc);
+        FixCyclicalContentTypeTabularViewRefs(doc);
 
         RemoveEmptyRelationshipTags(doc);
         RemoveVersionableRelIds(doc);
@@ -347,6 +348,9 @@ namespace InnovatorAdmin
       var analyzer = new DependencyAnalyzer(metadata);
       while (loops < 10 && state == CycleState.ResolvedCycle)
       {
+        if (loops > 0)
+          analyzer.Reset();
+
         foreach (var newInstallItem in items)
         {
           analyzer.GatherDependencies(newInstallItem.Script, newInstallItem.Reference, newInstallItem.CoreDependencies);
@@ -799,7 +803,32 @@ namespace InnovatorAdmin
         workflowRef.Attr(XmlFlags.Attr_IsScript, "1");
       }
     }
-
+    /// <summary>
+    /// Fix cyclical workflow-itemtype references by creating an edit script
+    /// </summary>
+    private void FixCyclicalContentTypeTabularViewRefs(XmlDocument doc)
+    {
+      var viewRefs = doc.ElementsByXPath("//Item/Relationships/Item[@type='cmf_ContentTypeView' and (@action='add' or @action='merge' or @action='create')]").ToList();
+      XmlElement type;
+      XmlElement sourceId;
+      foreach (var viewRef in viewRefs)
+      {
+        if (!viewRef.Elements("source_id").Any())
+        {
+          type = (XmlElement)viewRef.ParentNode.ParentNode;
+          sourceId = viewRef.Elem("source_id");
+          sourceId.SetAttribute("type", type.Attribute("type"));
+          sourceId.SetAttribute("keyed_name", type.Element("id").Attribute("keyed_name", ""));
+          sourceId.InnerText = type.Attribute("id");
+        }
+        viewRef.Attr(XmlFlags.Attr_ScriptType, "3");
+        type = viewRef.Parents().Last(e => e.LocalName == "Item");
+        //while (type.NextSibling.Attribute("action") == "edit") type = (XmlElement)type.NextSibling;
+        viewRef.ParentNode.RemoveChild(viewRef);
+        type.ParentNode.InsertAfter(viewRef, type);
+        viewRef.Attr(XmlFlags.Attr_IsScript, "1");
+      }
+    }
     /// <summary>
     /// Fix cyclical workflow-life cycle references by creating an edit script
     /// </summary>
@@ -1119,7 +1148,10 @@ namespace InnovatorAdmin
       IList<ItemReference> cycle = new List<ItemReference>() { null };
       List<XmlNode> refs;
 
-      sorted = lookup.Keys.DependencySort<ItemReference>(d =>
+      // Bias the install order initially to try and help the dependency sort properly handle anything 
+      // where explicit dependencies don't exist.  Then, perform the dependency sort.
+      var initialSort = lookup.Keys.OrderBy(DefaultInstallOrder);
+      sorted = initialSort.DependencySort<ItemReference>(d =>
       {
         IEnumerable<InstallItem> res = null;
         if (lookup.TryGetValue(d, out res)) return res.SelectMany(r =>
@@ -1179,6 +1211,40 @@ namespace InnovatorAdmin
 
       return result;
     }
+
+    private static int DefaultInstallOrder(ItemReference itemRef)
+    {
+      switch (itemRef.Type)
+      {
+        case "List": return 1;
+        case "Sequence": return 2;
+        case "Revision": return 3;
+        case "Variable": return 4;
+        case "Method": return 5;
+        case "Identity": return 6;
+        case "Member": return 7;
+        case "User": return 8;
+        case "Permission": return 9;
+        case "EMail Message": return 10;
+        case "Action": return 11;
+        case "Report": return 12;
+        case "Form": return 13;
+        case "Workflow Map": return 14;
+        case "Life Cycle Map": return 15;
+        case "Grid": return 16;
+        case "ItemType": return 17;
+        case "RelationshipType": return 18;
+        case "Field": return 19;
+        case "Property": return 20;
+        case "View": return 21;
+        case "SQL": return 22;
+        case "Metric": return 23;
+        case "Chart": return 24;
+        case "Dashboard": return 25;
+      }
+      return 99;
+    }
+    
 
     /// <summary>
     /// Move the form nodes inline with the itemtype create script
@@ -1361,10 +1427,8 @@ namespace InnovatorAdmin
           levels = Math.Min(itemRefOpts.Levels, 1);
         }
 
-        Debug.Print(parents.GroupConcat(" > ", p => ItemReference.FromFullItem(p, true).ToString()) + " > " + ItemReference.FromFullItem(elem.Element("Item"), true).ToString());
         if (parents.Count >= levels && _metadata.ItemTypeByName(elem.Element("Item").Attribute("type").ToLowerInvariant(), out itemType) && !itemType.IsDependent)
         {
-          Debug.Print("Removing");
           if (itemType.IsVersionable && elem.Parent().Element("behavior", "").IndexOf("float") >= 0)
           {
             elem.Attr(XmlFlags.Attr_Float, "1");

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Innovator.Client;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,6 +14,8 @@ namespace InnovatorAdmin
 {
   public partial class ErrorWindow : Form
   {
+    private IAsyncConnection _conn;
+
     public ErrorWindow()
     {
       InitializeComponent();
@@ -28,10 +31,11 @@ namespace InnovatorAdmin
       this.TopMost = false;
     }
 
-    public static void HandleEvent(RecoverableErrorEventArgs args)
+    public static void HandleEvent(RecoverableErrorEventArgs args, IAsyncConnection conn)
     {
       using (var dialog = new ErrorWindow())
       {
+        dialog._conn = conn;
         dialog.txtMessage.Text = args.Message ?? args.Exception.Message;
         dialog.txtErrorDetails.Text = Utils.IndentXml(args.Exception.AsAmlString());
         dialog.txtQuery.Text = Utils.IndentXml(args.Exception.Query);
@@ -80,6 +84,22 @@ namespace InnovatorAdmin
       try
       {
         txtQuery.Enabled = true;
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void btnAmlStudio_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        using (var dialog = new EditorWindow())
+        {
+          dialog.SetConnection(_conn);
+          dialog.ShowDialog(this);
+        }
       }
       catch (Exception ex)
       {

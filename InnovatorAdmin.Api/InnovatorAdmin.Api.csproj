@@ -69,6 +69,7 @@
     <Compile Include="ActionCompleteEventArgs.cs" />
     <Compile Include="AmlDiff.cs" />
     <Compile Include="AmlSelectColumn.cs" />
+    <Compile Include="Export\ListCompare.cs" />
     <Compile Include="Metadata\ArasMetadataProvider.cs" />
     <Compile Include="Connection\IProgressCallback.cs" />
     <Compile Include="DependencyAnalyzer.cs" />
@@ -162,10 +163,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ADiff.Api\ADiff.Api.csproj">
-      <Project>{8d33a5d4-206d-4e3e-9609-968417bdeb23}</Project>
-      <Name>ADiff.Api</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Innovator.Client\Innovator.Client.csproj">
       <Project>{d909ef15-81aa-4119-ab5a-1636ca8c08fc}</Project>
       <Name>Innovator.Client</Name>

@@ -112,17 +112,5 @@ namespace Pipes.Sgml
       return this.GetEnumerator();
     }
 
-    public static void Test(string html)
-    {
-      var reader = new Pipes.IO.StringTextSource(html).Pipe(new Pipes.Sgml.SgmlTextReader()).Pipe(new WordHtmlCleaner());
-      using (var text = new System.IO.StringWriter())
-      {
-        using (var writer = Sgml.HtmlTextWriter.Create(text))
-        {
-          reader.WriteTo(writer);
-        }
-        System.Diagnostics.Debug.Print(text.ToString());
-      }
-    }
   }
 }

@@ -25,7 +25,8 @@ namespace InnovatorAdmin
         return false;
       }
       else if (token.Text.Equals("as", StringComparison.OrdinalIgnoreCase)
-          && !this.Any(l => l.Text.Equals("as", StringComparison.OrdinalIgnoreCase)))
+          && !this.Any(l => l.Text.Equals("as", StringComparison.OrdinalIgnoreCase))
+          && this.Any())
       {
         this.Add(token);
         return true;

@@ -156,7 +156,6 @@ namespace InnovatorAdmin
 
       btnPrevious.Enabled = _history.Any();
       _history.Push(step);
-      System.Diagnostics.Debug.Print("{0}, {1}", this.Font.Size, ctrl.Font.Size);
     }
 
     private void btnClose_Click(object sender, EventArgs e)

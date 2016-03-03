@@ -132,7 +132,7 @@ namespace InnovatorAdmin.Controls
       this.UiThreadInvoke(() =>
       {
         GlobalProgress.Instance.Error();
-        ErrorWindow.HandleEvent(e);
+        ErrorWindow.HandleEvent(e, _wizard.Connection);
         GlobalProgress.Instance.Start();
       });
     }

@@ -399,7 +399,7 @@ namespace Pipes.Css
         default:
           return false;
       }
-        
+
     }
 
     public static IEnumerable<Property> ApplicableProperties(this IEnumerable<StyleRule> rules, IQueryableNode node, IQueryEngine engine, StringComparison comparison, GlobalStyleContext settings)
@@ -431,7 +431,7 @@ namespace Pipes.Css
                 existing.Property = prop;
               }
             }
-            else 
+            else
             {
               terms[prop.Name] = new TermSpecificity() { Property = prop, Specificity = propSpecificity };
             }
@@ -515,10 +515,10 @@ namespace Pipes.Css
       {
         var loader = new ImportLoader(rules.OfType<ImportRule>()
                                            .Where(i => !i.Media.Any() || i.Media.Any(m => MediaMatches(m, settings)))
-                                           .ToList(), 
+                                           .ToList(),
                                       settings.ResourceLoader);
         loader.Start();
-        
+
         foreach (var rule in rules)
         {
           style = rule as StyleRule;
@@ -548,12 +548,7 @@ namespace Pipes.Css
         {
           rules = Enumerable.Empty<RuleSet>();
         }
-      }  
-    }
-
-    private static void DoSomething(object o)
-    {
-      System.Diagnostics.Debug.Print("A thread was started");
+      }
     }
 
     private static bool MediaMatches(MediaDefinition d, GlobalStyleContext settings)
@@ -637,7 +632,7 @@ namespace Pipes.Css
       switch(style.Name.ToLowerInvariant())
       {
         case "background":
-          children = new Dictionary<string, Property>() 
+          children = new Dictionary<string, Property>()
           {
             {"background-color",    new Property("background-color")    { Term = new InitialTerm() }},
             {"background-image",    new Property("background-image")    { Term = new InitialTerm() }},
@@ -697,7 +692,7 @@ namespace Pipes.Css
           foreach (var val in children.Values) yield return val;
           break;
         case "font":
-          children = new Dictionary<string, Property>() 
+          children = new Dictionary<string, Property>()
           {
             {"font-style",    new Property("font-style")    { Term = new InitialTerm() }},
             {"font-weight",   new Property("font-weight")   { Term = new InitialTerm() }},
@@ -774,7 +769,7 @@ namespace Pipes.Css
           foreach (var val in children.Values) yield return val;
           break;
         case "border":
-          children = new Dictionary<string, Property>() 
+          children = new Dictionary<string, Property>()
           {
             {"border-width",    new Property("border-width")    { Term = new InitialTerm() }},
             {"border-style",    new Property("border-style")    { Term = new InitialTerm() }},
@@ -921,7 +916,6 @@ namespace Pipes.Css
       var parser = new Parser();
       //var stylesheet = parser.Parse(System.IO.File.ReadAllText(@"C:\Users\edomke\Documents\Local_Projects\Lumen\Editing\Lumen\css\lumen.posts.css"));
       var stylesheet = parser.Parse("p {font-family: Arial, 'Times New Roman', sans-serif}");
-      System.Diagnostics.Debug.Print("hit");
     }
 #endif
 

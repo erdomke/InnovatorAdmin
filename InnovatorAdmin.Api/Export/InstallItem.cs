@@ -43,6 +43,7 @@ namespace InnovatorAdmin
       }
       set { _name = value; }
     }
+    public string Path { get; set; }
     public XmlElement Script { get { return _elem; } }
 
     public InstallItem() { }
@@ -66,6 +67,12 @@ namespace InnovatorAdmin
       return this.Name;
     }
 
+    public static InstallItem FromScript(XmlElement elem, string path)
+    {
+      var result = FromScript(elem);
+      result.Path = path;
+      return result;
+    }
     public static InstallItem FromScript(XmlElement elem
       , Func<XmlElement, string> keyedNameGetter = null)
     {

@@ -104,8 +104,6 @@ namespace InnovatorAdmin.Controls
 
         AddControl(source, prop, null, currRow);
       }
-
-      System.Diagnostics.Debug.Print("{0}", this.Height);
     }
 
     private void AddControl(BindingSource source, PropertyDescriptor prop, Type type, int row)

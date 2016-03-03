@@ -7,6 +7,7 @@
              xmlns:conn="clr-namespace:InnovatorAdmin.Connections"
              xmlns:System="clr-namespace:System;assembly=mscorlib"
              xmlns:fa="http://schemas.fontawesome.io/icons/"
+             xmlns:toasty="clr-namespace:Toast;assembly=Toast"
              mc:Ignorable="d" 
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              Background="{DynamicResource MaterialDesignPaper}"
@@ -21,7 +22,7 @@
     <local:EnumBooleanConverter x:Key="enumBooleanConverter" />
     <!--<Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="RadioButton"/>-->
   </UserControl.Resources>
-  <Grid Margin="0,0,0,0">
+  <Grid Margin="5,5,5,5">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="Auto"/>
@@ -33,7 +34,7 @@
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="80*"/>
       <RowDefinition Height="29*"/>
-      <RowDefinition Height="25*"/>
+      <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="80*"/>
@@ -94,7 +95,7 @@
     <ComboBox x:Name="cboDatabase" SelectedItem="{Binding ElementName=lstConnections, Path=SelectedItem.Database}" 
               Grid.Row="6" Grid.Column="3" Grid.ColumnSpan="2"
               materialDesign:TextFieldAssist.Hint="Database"
-              HorizontalAlignment="Stretch" VerticalAlignment="Top" Width="Auto" Height="23" Margin="3,3,3,3" />
+              HorizontalAlignment="Stretch" VerticalAlignment="Top" Width="Auto" Height="23" Margin="3,3,3,3" DropDownOpened="cboDatabase_DropDownOpened" />
     <fa:ImageAwesome Icon="Bookmark" Foreground="LightGray" 
                      Grid.Row="7" Grid.Column="2" 
                      HorizontalAlignment="Right" VerticalAlignment="Stretch" Width="22" Margin="0,0,5,0" />
@@ -102,5 +103,13 @@
              Grid.Row="7" Grid.Column="3"
              materialDesign:TextFieldAssist.Hint="Connection Name"
              HorizontalAlignment="Stretch" VerticalAlignment="Top" Width="Auto" Height="23" Margin="3,3,3,3"/>
-  </Grid>
+
+        <toasty:Toasty x:Name="toast"
+        Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="5"
+        Height="30"
+            VerticalAlignment="Bottom"
+            Duration="0:0:0:2"
+        MessageColor="White"
+        Background="Black" />
+    </Grid>
 </UserControl>

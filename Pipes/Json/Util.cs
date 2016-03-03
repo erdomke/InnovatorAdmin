@@ -39,7 +39,6 @@ namespace Pipes.Json
       foreach (var node in source)
       {
         writer.Node(node);
-        System.Diagnostics.Debug.Print("{0}, {1}", node.Type, node.Name);
       }
     }
   }

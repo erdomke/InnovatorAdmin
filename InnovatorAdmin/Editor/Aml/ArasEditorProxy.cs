@@ -566,7 +566,6 @@ namespace InnovatorAdmin.Editor
       }
       public ResultObject(Stream aml, IAsyncConnection conn, string select)
       {
-        System.Diagnostics.Debug.Print("{0:hh:MM:ss} Document loaded", DateTime.Now);
         _conn = conn;
         var rope = new Rope<char>();
         using (var reader = new StreamReader(aml))
@@ -577,7 +576,6 @@ namespace InnovatorAdmin.Editor
         _amlLength = rope.Length;
         _text = new RopeTextSource(rope);
         _select = select;
-        System.Diagnostics.Debug.Print("{0:hh:MM:ss} Document rendered", DateTime.Now);
       }
 
       public ITextSource GetTextSource()

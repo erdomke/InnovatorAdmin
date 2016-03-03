@@ -20,6 +20,8 @@ namespace InnovatorAdmin.Controls
     private FullBindingList<FileCompare> _mergeData;
     private IWizard _wizard;
 
+    public bool ContinueLastMerge { get; set; }
+
     public MergeInterface()
     {
       InitializeComponent();
@@ -36,12 +38,15 @@ namespace InnovatorAdmin.Controls
     {
       _mergeOp = op;
       _mergeData = new FullBindingList<FileCompare>(_mergeOp.GetChanges());
-      var existing = GetExisting();
-      MergeStatus status;
-      foreach (var item in _mergeData)
+      if (ContinueLastMerge)
       {
-        if (existing.TryGetValue(item.Path, out status))
-          item.ResolutionStatus = status;
+        var existing = GetExisting();
+        MergeStatus status;
+        foreach (var item in _mergeData)
+        {
+          if (existing.TryGetValue(item.Path, out status))
+            item.ResolutionStatus = status;
+        }
       }
       lblFilter.Text = string.Format("Filter: ({0} row(s))", _mergeData.Count);
       _mergeData.ListChanged += _mergeData_ListChanged;
@@ -226,11 +231,11 @@ namespace InnovatorAdmin.Controls
 
         var newChecksum = Md5HashFile(paths.Merged);
         // If the files are the same, only mark it if the user agrees to a prompt
-        if (newChecksum == checksum
-          && Dialog.MessageDialog.Show("The merge file appears not to have changed.  Do you still want to mark it resolved anyway?",
-          "Merge Resolution", "Mark &Resolved", "&Ignore") == DialogResult.OK)
+        if (newChecksum == checksum)
         {
-          item.ResolutionStatus = MergeStatus.ResolvedConflict;
+          if (Dialog.MessageDialog.Show("The merge file appears not to have changed.  Do you still want to mark it resolved anyway?",
+            "Merge Resolution", "Mark &Resolved", "&Ignore") == DialogResult.OK)
+            item.ResolutionStatus = MergeStatus.ResolvedConflict;
         }
         else
         {

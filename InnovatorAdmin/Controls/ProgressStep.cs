@@ -73,7 +73,9 @@ namespace InnovatorAdmin.Controls
         }
         else
         {
+          lblMessage.Text = "ERROR: " + e.Exception.Message;
           Utils.HandleError(e.Exception);
+          GlobalProgress.Instance.Error();
         }
       });
     }

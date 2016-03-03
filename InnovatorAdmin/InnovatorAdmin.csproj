@@ -75,8 +75,8 @@
       <HintPath>..\packages\AvalonEdit.5.0.2\lib\Net40\ICSharpCode.AvalonEdit.dll</HintPath>
     </Reference>
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\squirrel.windows.1.2.3\lib\Net45\ICSharpCode.SharpZipLib.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\squirrel.windows.1.2.5\lib\Net45\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
     <Reference Include="LibGit2Sharp, Version=0.21.0.176, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\LibGit2Sharp.0.21.0.176\lib\net40\LibGit2Sharp.dll</HintPath>
@@ -121,8 +121,8 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="NuGet.Squirrel, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\squirrel.windows.1.2.3\lib\Net45\NuGet.Squirrel.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\squirrel.windows.1.2.5\lib\Net45\NuGet.Squirrel.dll</HintPath>
     </Reference>
     <Reference Include="ObjectListView, Version=2.9.0.25611, Culture=neutral, PublicKeyToken=b1c5bf581481bcd4, processorArchitecture=MSIL">
       <HintPath>..\packages\ObjectListView.Official.2.9.0\lib\net20\ObjectListView.dll</HintPath>
@@ -134,9 +134,9 @@
       <HintPath>..\packages\Splat.1.6.2\lib\Net45\Splat.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Squirrel, Version=1.2.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\squirrel.windows.1.2.3\lib\Net45\Squirrel.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Squirrel, Version=1.2.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\squirrel.windows.1.2.5\lib\Net45\Squirrel.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -187,6 +187,12 @@
     </Compile>
     <Compile Include="Controls\FlatTabControl.cs">
       <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\InstallOptions.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\InstallOptions.Designer.cs">
+      <DependentUpon>InstallOptions.cs</DependentUpon>
     </Compile>
     <Compile Include="Controls\InstallProgress.cs">
       <SubType>UserControl</SubType>
@@ -612,6 +618,9 @@
     <EmbeddedResource Include="Controls\FlatTabControl.resx">
       <DependentUpon>FlatTabControl.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Controls\InstallOptions.resx">
+      <DependentUpon>InstallOptions.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Controls\MergeInterface.resx">
       <DependentUpon>MergeInterface.cs</DependentUpon>
     </EmbeddedResource>
@@ -672,6 +681,9 @@
     <EmbeddedResource Include="Editor\FullEditor.resx">
       <DependentUpon>FullEditor.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="ErrorWindow.resx">
+      <DependentUpon>ErrorWindow.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Ide\EditorWindow.resx">
       <DependentUpon>EditorWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -712,14 +724,6 @@
     <EmbeddedResource Include="resources\FilePath.xshd" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ADiff\ADiff.Ui.csproj">
-      <Project>{f74031e5-f623-46e7-b21a-ac093dbadd2e}</Project>
-      <Name>ADiff.Ui</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\HgSharp.Core\HgSharp.Core.csproj">
-      <Project>{7a342412-e7f3-42a2-a902-349d45c5eafa}</Project>
-      <Name>HgSharp.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Innovator.Client\Innovator.Client.csproj">
       <Project>{d909ef15-81aa-4119-ab5a-1636ca8c08fc}</Project>
       <Name>Innovator.Client</Name>

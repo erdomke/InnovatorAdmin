@@ -13,6 +13,30 @@ namespace InnovatorAdmin.Tests
   public class SqlParserTests
   {
     [TestMethod()]
+    public void TriggerSqlTest()
+    {
+      var sql = @"CREATE TRIGGER [Project_Task_Step04_Create_Trigger] ON [PROJECT_TASK]
+INSTEAD OF UPDATE
+AS
+BEGIN
+  UPDATE Activity2
+  SET locked_by_id = inserted.locked_by_id
+  FROM inserted
+  WHERE Activity2.id = inserted.id
+
+  UPDATE Activity2_Assignment
+  SET locked_by_id = inserted.locked_by_id
+  FROM inserted
+  WHERE Activity2_Assignment.id = inserted.id
+
+END";
+      var names = DependencyAnalyzer.GetInnovatorNames(sql)
+        .Select(n => n.FullName).ToArray();
+      var correct = new string[] { "Project_Task_Step04_Create_Trigger", "Activity2", "inserted", "Activity2_Assignment", "inserted" };
+      CollectionAssert.AreEqual(correct, names);
+    }
+
+    [TestMethod()]
     public void FindSqlServerObjectNamesTest()
     {
       var correct = new string[] {

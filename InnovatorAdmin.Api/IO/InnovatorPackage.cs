@@ -64,11 +64,12 @@ namespace InnovatorAdmin
 
             foreach (var item in doc.DocumentElement.Elements("Item"))
             {
-              scripts.Add(InstallItem.FromScript(item));
+              scripts.Add(InstallItem.FromScript(item, path));
             }
           }
         }
       }
+
       result.Lines = scripts;
       result.Lines.CleanKeyedNames();
 

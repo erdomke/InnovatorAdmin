@@ -63,12 +63,6 @@
     <Compile Include="DiffTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ADiff.Api\ADiff.Api.csproj">
-      <Project>{8D33A5D4-206D-4E3E-9609-968417BDEB23}</Project>
-      <Name>ADiff.Api</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

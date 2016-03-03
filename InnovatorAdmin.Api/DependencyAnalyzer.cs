@@ -177,8 +177,8 @@ namespace InnovatorAdmin
         }
         catch (ArgumentException)
         {
-          throw new ArgumentException(string.Format("Error: {0} is defined twice, once in {1} and another time in {2}",
-            defn, _allDefinitions[defn], itemRef));
+          throw new ArgumentException(string.Format("Error: {0} is defined twice, once in {1} and another time in {2}.\r\nCurrently processing {3}",
+            defn, _allDefinitions[defn], itemRef, elem.OuterXml));
         }
       }
       _dependencies.ExceptWith(_metadata.SystemIdentities);
@@ -197,7 +197,7 @@ namespace InnovatorAdmin
 
       foreach (var depend in _dependencies)
       {
-          depend.Origin = itemRef;
+        depend.Origin = itemRef;
       }
 
       if (_dependencies.Any())
@@ -221,30 +221,43 @@ namespace InnovatorAdmin
     public void CleanDependencies()
     {
       ItemReference topDefn;
+      ItemReference currValue;
       foreach (var kvp in _allItemDependencies)
       {
         foreach (var value in kvp.Value.ToList())
         {
-          if (_allDefinitions.TryGetValue(value, out topDefn))
-          {
-            kvp.Value.Remove(value);
-            kvp.Value.Add(topDefn);
-          }
-          else if (value.Unique.StartsWith(ItemTypeByNameWhere))
+          currValue = value;
+          if (currValue.Unique.StartsWith(ItemTypeByNameWhere))
           {
             // If there is a dependency on an item type solely by name, add dependences on the
             // item type creation script and all subsequent edit scripts
             topDefn = _allDefinitions.Values
-              .Where(v => v.KeyedName == value.KeyedName
+              .FirstOrDefault(v => v.KeyedName == currValue.KeyedName
+                && v.Type == "ItemType") ??
+              _allDefinitions.Keys
+              .FirstOrDefault(v => v.KeyedName == currValue.KeyedName
                 && v.Type == "ItemType")
-              .FirstOrDefault();
-            if (topDefn != null)
+              ;
+            if (topDefn == null)
             {
-              kvp.Value.Remove(value);
+              System.Diagnostics.Debug.Print("Unable to find definition for " + currValue.Unique);
+            }
+            else
+            {
+              kvp.Value.Remove(currValue);
               kvp.Value.Add(topDefn);
               kvp.Value.UnionWith(_allItemDependencies.Keys
                 .Where(k => k.Type == InstallItem.ScriptType && k.Unique.Contains(topDefn.Unique)));
+              currValue = topDefn;
             }
+          }
+
+          // Make sure the dependency points to the root dependency and not a child that can't be found
+          // and sorted properly
+          if (_allDefinitions.TryGetValue(currValue, out topDefn))
+          {
+            kvp.Value.Remove(currValue);
+            kvp.Value.Add(topDefn);
           }
         }
       }
@@ -345,7 +358,7 @@ namespace InnovatorAdmin
       {
         if (elem != _elem && elem.LocalName == "Item" && elem.HasAttribute("type") && elem.HasAttribute("id"))
         {
-          _definitions.Add(ItemReference.FromFullItem(elem, false));
+          _definitions.Add(ItemReference.FromFullItem(elem, elem.Attribute("type") == "ItemType"));
         }
         var isItem = (elem.LocalName == "Item" && elem.HasAttribute("type"));
         ItemProperty newProp;
