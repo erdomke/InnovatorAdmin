@@ -10,6 +10,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Xml;
 using System.Windows.Forms.Integration;
+using ICSharpCode.AvalonEdit.Document;
 
 namespace InnovatorAdmin.Controls
 {
@@ -44,30 +45,27 @@ namespace InnovatorAdmin.Controls
     {
       try
       {
-        //if (e.ColumnIndex == colCompare.DisplayIndex && e.RowIndex >= 0)
-        //{
-        //  var diff = (InstallItemDiff)gridDiffs.Rows[e.RowIndex].DataBoundItem;
-        //  if (diff.DiffType == DiffType.Different)
-        //  {
-        //    var diffWin = new ADiff.DiffWindow();
-        //    diffWin.LeftText = diff.LeftScript.OuterXml;
-        //    diffWin.RightText = diff.RightScript.OuterXml;
-        //    ElementHost.EnableModelessKeyboardInterop(diffWin);
-        //    diffWin.Show();
-        //  }
-        //  else
-        //  {
-        //    using (var dialog = new EditorWindow())
-        //    {
-        //      dialog.AllowRun = false;
-        //      dialog.AmlGetter = o => Utils.FormatXml(diff.LeftScript ?? diff.RightScript);
-        //      dialog.DisplayMember = "Name";
-        //      dialog.DataSource = new List<InstallItemDiff>() { diff };
-        //      dialog.SetConnection(_wizard.Connection, _wizard.ConnectionInfo.First().ConnectionName);
-        //      dialog.ShowDialog(this);
-        //    }
-        //  }
-        //}
+        if (e.ColumnIndex == colCompare.DisplayIndex && e.RowIndex >= 0)
+        {
+          var diff = (InstallItemDiff)gridDiffs.Rows[e.RowIndex].DataBoundItem;
+          if (diff.DiffType == DiffType.Different)
+          {
+            Settings.Current.PerformDiff("Left"
+              , new StringTextSource(diff.LeftScript.OuterXml)
+              , "Right"
+              , new StringTextSource(diff.RightScript.OuterXml));
+          }
+          else
+          {
+            using (var dialog = new EditorWindow())
+            {
+              dialog.AllowRun = false;
+              dialog.Script = Utils.FormatXml(diff.LeftScript ?? diff.RightScript);
+              dialog.SetConnection(_wizard.Connection, _wizard.ConnectionInfo.First().ConnectionName);
+              dialog.ShowDialog(this);
+            }
+          }
+        }
       }
       catch (Exception ex)
       {

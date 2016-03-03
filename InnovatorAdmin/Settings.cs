@@ -62,7 +62,7 @@ namespace InnovatorAdmin
             : "The macros '$(base)' and/or '$(compare)' are missing from the diff command; please add them";
           if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
             return;
-          this.DiffToolCommand = Properties.Settings.Default.DiffToolCommand;
+          this.Save();
         }
       }
 
