@@ -7,15 +7,14 @@ using System.Xml;
 
 namespace Innovator.Client
 {
-  internal abstract class Element : 
+  internal abstract class Element :
     #if NET4
-    System.Dynamic.DynamicObject, 
+    System.Dynamic.DynamicObject,
     #endif
     IElement
   {
-    protected XmlElement _node;
     protected ElementFactory _factory;
-
+    protected XmlElement _node;
     public bool Exists
     {
       get { return _node != null; }
@@ -30,17 +29,19 @@ namespace Innovator.Client
     }
     public virtual IElement Parent
     {
-      get 
+      get
       {
-        return _factory.ElementFromXml((XmlElement)_node.ParentNode); 
+        if (_node == null || _node.ParentNode == null)
+          return GenericElement.NullElement;
+        return _factory.ElementFromXml((XmlElement)_node.ParentNode);
       }
     }
     public virtual string Value
     {
-      get 
+      get
       {
         if (_node == null) return null;
-        return _node.InnerText; 
+        return _node.InnerText;
       }
     }
 
@@ -126,21 +127,48 @@ namespace Innovator.Client
     {
       if (this.Exists) _node.ParentNode.RemoveChild(_node);
     }
-    public void RemoveNodes()
-    {
-      _node.IsEmpty = true;
-    }
     public void RemoveAttributes()
     {
       _node.RemoveAllAttributes();
     }
 
+    public void RemoveNodes()
+    {
+      _node.IsEmpty = true;
+    }
+
+    public virtual string ToAml()
+    {
+      if (_node == null) return null;
+      return _node.OuterXml;
+    }
+
+    public void ToAml(XmlWriter writer)
+    {
+      _node.WriteTo(writer);
+    }
     public override string ToString()
     {
       if (_node == null) return null;
       return _node.OuterXml;
     }
-    
+
+    internal static bool ObjectEquals(object x, object y)
+    {
+      if (x == null && y == null)
+      {
+        return true;
+      }
+      else if (x == null || y == null)
+      {
+        return false;
+      }
+      else
+      {
+        return x.Equals(y);
+      }
+    }
+
 
     internal void SetAttribute(string name, object value)
     {
@@ -172,7 +200,7 @@ namespace Innovator.Client
           foreach (var curr in existing.Skip(1))
           {
             _node.RemoveChild(curr);
-          } 
+          }
         }
         else
         {
@@ -203,23 +231,6 @@ namespace Innovator.Client
       element = _factory.ElementFromXml(_node.ChildNodes.OfType<XmlElement>().SingleOrDefault(e => e.LocalName == name));
       return element != null;
     }
-
-    internal static bool ObjectEquals(object x, object y)
-    {
-      if (x == null && y == null)
-      {
-        return true;
-      }
-      else if (x == null || y == null)
-      {
-        return false;
-      }
-      else
-      {
-        return x.Equals(y);
-      }
-    }
-
     //public static explicit operator Element(string value)
     //{
     //  var buffer = new XmlDocument(BufferDocument.NameTable);
@@ -254,22 +265,9 @@ namespace Innovator.Client
       get { return this.Parent; }
     }
 
-
     IServerContext IReadOnlyElement.Context
     {
       get { return _factory.LocalizationContext; }
-    }
-
-
-    public virtual string ToAml()
-    {
-      if (_node == null) return null;
-      return _node.OuterXml;
-    }
-
-    public void ToAml(XmlWriter writer)
-    {
-      _node.WriteTo(writer);
     }
   }
 }

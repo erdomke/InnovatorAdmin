@@ -9,6 +9,8 @@ namespace Innovator.Client
   internal class GenericElement : Element
   {
     internal GenericElement(ElementFactory factory, string name, params object[] content) : base(factory, name, content) {}
-    internal GenericElement(ElementFactory factory, XmlElement node) : base(factory, node) { } 
+    internal GenericElement(ElementFactory factory, XmlElement node) : base(factory, node) { }
+
+    internal static readonly GenericElement NullElement = new GenericElement(null, (XmlElement)null);
   }
 }

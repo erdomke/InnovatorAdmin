@@ -25,18 +25,18 @@ namespace Innovator.Client
     {
       get { return _fault; }
     }
-    public string FaultCode 
-    { 
+    public string FaultCode
+    {
       get { return _fault.Elements().Single(e => e.Name == "faultcode").Value; }
       set { ((Element)_fault).SetElement("faultcode", value); }
     }
     public string Query { get { return _query; } }
 
-    internal ServerException(ElementFactory factory, string message) 
+    internal ServerException(ElementFactory factory, string message)
       : this(factory, message, 1) { }
-    internal ServerException(ElementFactory factory, string message, Exception innerException) 
+    internal ServerException(ElementFactory factory, string message, Exception innerException)
       : this(factory, message, 1, innerException) { }
-    
+
     public ServerException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
       _factory = ElementFactory.Local;
@@ -74,10 +74,10 @@ namespace Innovator.Client
     private void CreateXml(string message, int code)
     {
       var doc = new XmlDocument(Element.BufferDocument.NameTable);
-      doc.LoadXml("<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\"><SOAP-ENV:Body><SOAP-ENV:Fault xmlns:af=\"http://www.aras.com/InnovatorFault\"><faultcode>" 
+      doc.LoadXml("<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\"><SOAP-ENV:Body><SOAP-ENV:Fault xmlns:af=\"http://www.aras.com/InnovatorFault\"><faultcode>"
         + code.ToString()
-        + "</faultcode><faultstring>" 
-        + message 
+        + "</faultcode><faultstring>"
+        + message
         + "</faultstring></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>");
       ConfigureFaultNode(doc.DocumentElement);
     }
@@ -85,7 +85,17 @@ namespace Innovator.Client
     public override void GetObjectData(SerializationInfo info, StreamingContext context)
     {
       base.GetObjectData(info, context);
-      info.AddValue(FaultNodeEntry, _fault.Parent.Parent.ToString());
+      if (_fault != null)
+      {
+        if (_fault.Parent.Parent.Exists)
+        {
+          info.AddValue(FaultNodeEntry, _fault.Parent.Parent.ToString());
+        }
+        else
+        {
+          info.AddValue(FaultNodeEntry, _fault.ToString());
+        }
+      }
       info.AddValue(DatabaseEntry, this.Database);
       info.AddValue(QueryEntry, this.Query);
     }
@@ -135,7 +145,7 @@ namespace Innovator.Client
       settings.Indent = true;
       settings.IndentChars = "  ";
       settings.OmitXmlDeclaration = true;
-      using (var xml = XmlWriter.Create(builder, settings)) 
+      using (var xml = XmlWriter.Create(builder, settings))
       {
         xml.WriteStartElement("Fault");
         // Render the non-redundant information
