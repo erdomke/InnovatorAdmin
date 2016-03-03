@@ -103,7 +103,7 @@ namespace Innovator.Client
     private void ConfigureFaultNode(XmlElement node)
     {
       _faultNode = GetFaultNode(node);
-      _fault = _factory.ElementFromXml(_faultNode);
+      _fault = (_factory ?? ElementFactory.Local).ElementFromXml(_faultNode);
     }
 
     internal static XmlElement GetFaultNode(XmlElement node)

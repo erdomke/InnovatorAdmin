@@ -67,6 +67,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Aml\ElementFactoryTests.cs" />
+    <Compile Include="Aml\ServerExceptionTests.cs" />
     <Compile Include="CommandTests.cs" />
     <Compile Include="Connection\AuthenticationSchemeTests.cs" />
     <Compile Include="Connection\DefaultHttpServiceTests.cs" />

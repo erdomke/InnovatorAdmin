@@ -26,7 +26,7 @@ namespace Innovator.Client
     {
       return _context.Format(value);
     }
-    
+
     public IResult FromXml(string xml)
     {
       return new Result(this, xml);
@@ -59,8 +59,6 @@ namespace Innovator.Client
     internal IElement ElementFromXml(XmlElement xml)
     {
       if (xml == null) return null;
-      if (xml.LocalName == "Envelope" && (xml.NamespaceURI == "http://schemas.xmlsoap.org/soap/envelope/" || string.IsNullOrEmpty(xml.NamespaceURI)))
-        return null;
       if (xml.LocalName == "Item") return new Item(this, xml);
       if (xml.LocalName == "and") return new Logical(this, xml);
       if (xml.LocalName == "not") return new Logical(this, xml);

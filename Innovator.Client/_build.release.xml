@@ -32,7 +32,7 @@
     <Delete Files="@(FilesToDelete)" />
   </Target>
   <Target Name="GenerateFiles">
-    <!--<WriteLinesToFile File="AssemblyInfo.Version.cs" Lines="$(AssemInfo)" Overwrite="true" />-->
+    <WriteLinesToFile File="AssemblyInfo.Version.cs" Lines="$(AssemInfo)" Overwrite="true" />
     <WriteLinesToFile File="$(NuSpecPath)" Lines="$(NuSpecContent)" Overwrite="true" />
   </Target>
   <Target Name="Build">

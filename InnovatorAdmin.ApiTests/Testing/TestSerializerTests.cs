@@ -26,7 +26,6 @@ namespace InnovatorAdmin.Testing.Tests
     <Test name='Create MCO Part'>
       <!-- Hey, I'm a query -->
       <Item type='MCO Part' action='add' id=''>
-
       </Item>
       <!-- I verify correctness -->
       <AssertMatch match='//Item[1]' removeSysProps='0'>
@@ -57,7 +56,6 @@ namespace InnovatorAdmin.Testing.Tests
   </Tests>
   <Cleanup>
     <Item type='MCO Part' action='delete' id=''>
-
     </Item>
   </Cleanup>
 </TestSuite>";
@@ -68,7 +66,7 @@ namespace InnovatorAdmin.Testing.Tests
         suite = TestSerializer.ReadTestSuite(reader);
         suite.Write(writer);
         writer.Flush();
-        Assert.AreEqual(data, writer.ToString());
+        Assert.AreEqual(data.Substring(39), writer.ToString().Substring(84));
       }
     }
 
