@@ -46,8 +46,14 @@ namespace InnovatorAdmin
       return this.MergeToolCommand;
     }
 
-    public async Task PerformDiff(string baseName, ITextSource baseSource
+    public Task PerformDiff(string baseName, ITextSource baseSource
       , string compareName, ITextSource compareSource)
+    {
+      return PerformDiff(baseName, s => WriteTextSource(s, baseSource)
+        , compareName, s => WriteTextSource(s, compareSource));
+    }
+    public async Task PerformDiff(string baseName, Func<Stream, Task> baseWriter
+      , string compareName, Func<Stream, Task> compareWriter)
     {
       while (string.IsNullOrEmpty(this.DiffToolCommand)
         || this.DiffToolCommand.IndexOf("$(base)", StringComparison.OrdinalIgnoreCase) < 0
@@ -66,12 +72,12 @@ namespace InnovatorAdmin
         }
       }
 
-      var basePath = await WriteTempFile(baseName, baseSource);
-      var comparePath = await WriteTempFile(compareName, compareSource);
+      var basePath = WriteTempFile(baseName, baseWriter);
+      var comparePath = WriteTempFile(compareName, compareWriter);
 
       var cmd = GetFilePathAndArguments(this.DiffToolCommand
-        .Replace("$(base)", "\"" + basePath + "\"", StringComparison.OrdinalIgnoreCase)
-        .Replace("$(compare)", "\"" + comparePath + "\"", StringComparison.OrdinalIgnoreCase));
+        .Replace("$(base)", "\"" + (await basePath) + "\"", StringComparison.OrdinalIgnoreCase)
+        .Replace("$(compare)", "\"" + (await comparePath) + "\"", StringComparison.OrdinalIgnoreCase));
       Process.Start(cmd.Item1, cmd.Item2);
     }
 
@@ -99,16 +105,23 @@ namespace InnovatorAdmin
       }
     }
 
-    private async Task<string> WriteTempFile(string name, ITextSource data)
+    private async Task<string> WriteTempFile(string name, Func<Stream, Task> writer)
     {
       var path = Path.Combine(Path.GetTempPath(), SnippetManager.CleanFileName(name) + ".txt");
       using (var stream = new FileStream(path, FileMode.Create, FileAccess.Write))
+      {
+        await writer.Invoke(stream);
+      }
+      return path;
+    }
+
+    private async Task WriteTextSource(Stream stream, ITextSource data)
+    {
       using (var writer = new StreamWriter(stream))
       using (var reader = data.CreateReader())
       {
         await reader.CopyToAsync(writer);
       }
-      return path;
     }
 
     public void Save()

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace InnovatorAdmin
 {
@@ -17,30 +19,6 @@ namespace InnovatorAdmin
       set { _lastQueryKey = value; }
     }
     private Dictionary<string, Snippet> _cache = new Dictionary<string, Snippet>();
-    private BlockingCollection<Action> _queue = new BlockingCollection<Action>(100);
-    private Thread _thread;
-
-    [System.Diagnostics.DebuggerStepThrough()]
-    public SnippetManager()
-    {
-      _thread = new Thread(() =>
-      {
-        Action action;
-        while (!_queue.IsCompleted)
-        {
-          action = null;
-          try
-          {
-            action = _queue.Take();
-          }
-          catch (InvalidOperationException) { }
-
-          if (action != null)
-            action.Invoke();
-        }
-      });
-      _thread.Start();
-    }
 
     public Snippet GetLastQueryByConnection(string connection)
     {
@@ -76,13 +54,20 @@ namespace InnovatorAdmin
         var key = CleanFileName(name);
         _cache[key] = value;
         var path = GetFolder() + key + ".txt";
-        _queue.Add(() =>
-        {
-          System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path));
-          System.IO.File.WriteAllText(path, value.ToString());
-        });
+        WriteAllText(path, value.ToString());
       }
     }
+
+    public async Task WriteAllText(string path, string value)
+    {
+      System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path));
+      using (var stream = new FileStream(path, FileMode.Create, FileAccess.Write))
+      using (var writer = new StreamWriter(stream))
+      using (var reader = new StringReader(value))
+      {
+        await reader.CopyToAsync(writer);
+      }
+  }
 
     public bool ContainsName(string name)
     {
@@ -111,12 +96,6 @@ namespace InnovatorAdmin
       }
 
       return new string(nameArray);
-    }
-
-    public void Close()
-    {
-      _queue.CompleteAdding();
-      _thread.Join(3000);
     }
 
     internal static string GetFolder()

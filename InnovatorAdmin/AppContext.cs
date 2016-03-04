@@ -102,7 +102,6 @@ namespace InnovatorAdmin
       {
         try
         {
-          SnippetManager.Instance.Close();
           GenerateBatFile();
           base.OnMainFormClosed(sender, e);
           #if !DEBUG

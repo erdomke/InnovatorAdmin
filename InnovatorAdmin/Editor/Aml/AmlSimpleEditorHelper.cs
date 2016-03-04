@@ -189,6 +189,58 @@ namespace InnovatorAdmin.Editor
         if (_row.RowState != DataRowState.Detached)
           _row.Delete();
       }
+
+      public async Task ToAml(Stream stream)
+      {
+        var settings = new XmlWriterSettings();
+        settings.OmitXmlDeclaration = true;
+        settings.Indent = true;
+        settings.IndentChars = "  ";
+        settings.CheckCharacters = true;
+        settings.Async = true;
+
+        var types = new HashSet<string>();
+
+        using (var xmlWriter = XmlWriter.Create(stream, settings))
+        {
+          await ToAml(xmlWriter);
+        }
+      }
+      public async Task ToAml(XmlWriter writer)
+      {
+        var factory = ElementFactory.Local;
+        await writer.WriteStartElementAsync(null, "Item", null);
+        var id = (string)Property("id");
+        var type = (string)Property(Extensions.AmlTable_TypeName);
+        var typeId = (string)Property(Extensions.AmlTable_TypeId);
+        if (!string.IsNullOrEmpty(id))
+          await writer.WriteAttributeStringAsync(null, "id", null, id);
+        if (!string.IsNullOrEmpty(type))
+          await writer.WriteAttributeStringAsync(null, "type", null, type);
+        if (!string.IsNullOrEmpty(typeId))
+          await writer.WriteAttributeStringAsync(null, "typeId", null, typeId);
+
+        var cols = _row.Table.Columns.OfType<DataColumn>()
+          .Where(c => !_row.IsNull(c))
+          .OrderBy(c => c.ColumnName)
+          .ToArray();
+        for (var i = 0; i < cols.Length; i++)
+        {
+          await writer.WriteStartElementAsync(null, cols[i].ColumnName, null);
+          var j = i + 1;
+          var prefix = cols[i].ColumnName + "/";
+          while (j < cols.Length && cols[j].ColumnName.StartsWith(prefix))
+          {
+            await writer.WriteAttributeStringAsync(null, cols[j].ColumnName.Substring(prefix.Length), null
+              , factory.FormatAmlValue(_row[cols[j]]));
+            j++;
+          }
+          await writer.WriteStringAsync(factory.FormatAmlValue(_row[cols[i]]));
+          await writer.WriteEndElementAsync();
+          i += (j - i) - 1;
+        }
+        await writer.WriteEndElementAsync();
+      }
     }
 
     private class ScriptMenuGenerator
@@ -237,6 +289,31 @@ namespace InnovatorAdmin.Editor
               Script = builder.ToString()
             };
           }
+
+          var dataRows = items.OfType<DataRowItemData>()
+            .OrderBy(r => r.Property("generation")).ThenBy(r => r.Id)
+            .ToArray();
+          if (dataRows.Length == 2) // There are exactly two items
+          {
+            yield return new EditorScript()
+            {
+              Name = "------"
+            };
+            yield return new EditorScriptExecute()
+            {
+              Name = "Compare",
+              Execute = () =>
+              {
+                Settings.Current.PerformDiff(dataRows[0].Id, dataRows[0].ToAml
+                  , dataRows[1].Id, dataRows[1].ToAml)
+                  .ContinueWith(t =>
+                  {
+                    if (t.IsFaulted)
+                      Utils.HandleError(t.Exception);
+                  });
+              }
+            };
+          }
           yield return new EditorScript()
           {
             Name = "------"
@@ -265,36 +342,14 @@ namespace InnovatorAdmin.Editor
               metadata = null;
           }
 
-          if (metadata != null)
+          if (Conn != null)
           {
-            yield return new EditorScript()
-            {
-              Name = "View \"" + (itemType.Label ?? itemType.Name) + "\"",
-              Action = "ApplyItem",
-              Script = string.Format("<Item type='{0}' id='{1}' action='get' levels='1'></Item>", item.Type, item.Id),
-              AutoRun = true,
-              PreferredOutput = OutputType.Table
-            };
-            if (item.Property("related_id") != null && itemType.Related != null)
-            {
-              yield return new EditorScript()
-              {
-                Name = "View \"" + (itemType.Related.Label ?? itemType.Related.Name) + "\"",
-                Action = "ApplyItem",
-                Script = string.Format("<Item type='{0}' id='{1}' action='get' levels='1'></Item>", itemType.Related.Name, item.Property("related_id")),
-                AutoRun = true,
-                PreferredOutput = OutputType.Table
-              };
-            }
+            yield return ArasEditorProxy.ItemTypeAddScript(Conn, itemType);
           }
           yield return new EditorScript()
           {
             Name = "------"
           };
-          if (Conn != null)
-          {
-            yield return ArasEditorProxy.ItemTypeAddScript(Conn, itemType);
-          }
           if (rowItem == null)
           {
             yield return new EditorScript()
@@ -302,12 +357,6 @@ namespace InnovatorAdmin.Editor
               Name = "Edit",
               Action = "ApplyItem",
               Script = string.Format("<Item type='{0}' id='{1}' action='edit'></Item>", item.Type, item.Id)
-            };
-            yield return new EditorScript()
-            {
-              Name = "Delete",
-              Action = "ApplyItem",
-              Script = string.Format("<Item type='{0}' id='{1}' action='delete'></Item>", item.Type, item.Id)
             };
           }
           else
@@ -337,6 +386,44 @@ namespace InnovatorAdmin.Editor
                   break;
               }
             }
+          }
+          if (metadata != null)
+          {
+            yield return new EditorScript()
+            {
+              Name = "View \"" + (itemType.Label ?? itemType.Name) + "\"",
+              Action = "ApplyItem",
+              Script = string.Format("<Item type='{0}' id='{1}' action='get' levels='1'></Item>", item.Type, item.Id),
+              AutoRun = true,
+              PreferredOutput = OutputType.Table
+            };
+            if (item.Property("related_id") != null && itemType.Related != null)
+            {
+              yield return new EditorScript()
+              {
+                Name = "View \"" + (itemType.Related.Label ?? itemType.Related.Name) + "\"",
+                Action = "ApplyItem",
+                Script = string.Format("<Item type='{0}' id='{1}' action='get' levels='1'></Item>", itemType.Related.Name, item.Property("related_id")),
+                AutoRun = true,
+                PreferredOutput = OutputType.Table
+              };
+            }
+          }
+          yield return new EditorScript()
+          {
+            Name = "------"
+          };
+          if (rowItem == null)
+          {
+            yield return new EditorScript()
+            {
+              Name = "Delete",
+              Action = "ApplyItem",
+              Script = string.Format("<Item type='{0}' id='{1}' action='delete'></Item>", item.Type, item.Id)
+            };
+          }
+          else
+          {
             yield return new EditorScriptExecute()
             {
               Name = "Delete",
@@ -355,6 +442,64 @@ namespace InnovatorAdmin.Editor
               var refs = new[] { new ItemReference(item.Type, item.Id) };
               StartExport(refs);
             }
+          };
+          yield return new EditorScript()
+          {
+            Name = "------"
+          };
+          yield return new EditorScript()
+          {
+            Name = "Lock",
+            Action = "ApplyItem",
+            Script = string.Format("<Item type='{0}' id='{1}' action='lock'></Item>", item.Type, item.Id)
+          };
+          yield return new EditorScript()
+          {
+            Name = "------"
+          };
+          if (itemType != null && itemType.IsVersionable)
+          {
+            yield return new EditorScript()
+            {
+              Name = "Revisions",
+              Action = "ApplyItem",
+              Script = string.Format(@"<Item type='{0}' action='get'>
+  <config_id condition='in'>(select config_id from innovator.[{1}] where id = '{2}')</config_id>
+  <generation condition='gt'>0</generation>
+</Item>", item.Type, item.Type.Replace(' ', '_'), item.Id)
+            };
+            yield return new EditorScript()
+            {
+              Name = "------"
+            };
+          }
+          yield return new EditorScript()
+          {
+            Name = "Promote",
+            Action = "ApplyItem",
+            Script = string.Format("<Item type='{0}' id='{1}' action='promoteItem'></Item>", item.Type, item.Id)
+          };
+          yield return new EditorScript()
+          {
+            Name = "------"
+          };
+          yield return new EditorScript()
+          {
+            Name = "Where Used",
+            Action = "ApplyItem",
+            Script = string.Format("<Item type='{0}' id='{1}' action='getItemWhereUsed'></Item>", item.Type, item.Id)
+          };
+          yield return new EditorScript()
+          {
+            Name = "Structure Browser",
+            Action = "ApplyItem",
+            Script = string.Format(@"<Item type='Method' action='GetItemsForStructureBrowser'>
+  <Item type='{0}' id='{1}' action='GetItemsForStructureBrowser' levels='2' />
+</Item>", item.Type, item.Id)
+          };
+          yield return new EditorScript()
+          {
+            Name = "------"
           };
           if (metadata != null)
           {
