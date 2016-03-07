@@ -14,7 +14,7 @@
   
   <Target Name="Clean">
     <ItemGroup>
-      <FilesToDelete Include="$(OutDir45)\*.*;$(ObjDir45)\*.*;*.nupkg"/>
+      <FilesToDelete Include="$(OutDir45)\**\*.*;$(ObjDir45)\**\*.*;*.nupkg"/>
     </ItemGroup>   
     <Delete Files="@(FilesToDelete)" />
   </Target>
@@ -35,7 +35,7 @@
   </Target>
   <Target Name="GenerateNupkg">
     <ItemGroup>
-      <AllFiles Include="$(OutDir45)\*.dll;$(OutDir45)\*.exe" />
+      <AllFiles Include="$(OutDir45)\**\*.dll;$(OutDir45)\**\*.exe" />
       <Line Include="line01"><Text><![CDATA[<?xml version="1.0" encoding="utf-8"?>
   <package>
     <metadata>
@@ -47,7 +47,7 @@
       <iconUrl>file:///icon.png</iconUrl>
     </metadata>
     <files>]]></Text></Line>
-      <Line Include="line02"><Text><![CDATA[<file src="%(AllFiles.Identity)" target="lib/net45" />]]></Text></Line>
+      <Line Include="line02"><Text><![CDATA[<file src="bin\Release\**\*.*" target="lib\net45" exclude="bin\Release\*.pdb%3Bbin\Release\*.nupkg%3Bbin\Release\*.vshost.*"/>]]></Text></Line>
       <Line Include="line03"><Text><![CDATA[  </files>
   </package>]]></Text></Line>
       <LineText Include="%(Line.Text)" />
@@ -66,6 +66,6 @@
       <NuPkgPath Include="$(ProjectName).*.nupkg" />
     </ItemGroup>
     <Exec Command="..\.nuget\NuGet.exe Push @(NuPkgPath)" />
-    <Exec Command="@(SquirrelPath) --releasify=@(NuPkgPath)" />
+    <Exec Command="@(SquirrelPath) --releasify=@(NuPkgPath) --no-msi" />
   </Target>
 </Project>

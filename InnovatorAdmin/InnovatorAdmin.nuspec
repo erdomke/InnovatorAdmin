@@ -2,38 +2,13 @@
   <package>
     <metadata>
       <id>InnovatorAdmin</id>
-      <version>2016.03.03.2139</version>
+      <version>2016.03.07.0911</version>
       <authors>eric.domke</authors>
       <requireLicenseAcceptance>false</requireLicenseAcceptance>
       <description>Application for administrating an Aras Innovator instance</description>
       <iconUrl>file:///icon.png</iconUrl>
     </metadata>
     <files>
-<file src="bin\Release\DeltaCompressionDotNet.dll" target="lib/net45" />
-<file src="bin\Release\DeltaCompressionDotNet.MsDelta.dll" target="lib/net45" />
-<file src="bin\Release\DeltaCompressionDotNet.PatchApi.dll" target="lib/net45" />
-<file src="bin\Release\DocumentFormat.OpenXml.dll" target="lib/net45" />
-<file src="bin\Release\FontAwesome.WPF.dll" target="lib/net45" />
-<file src="bin\Release\ICSharpCode.AvalonEdit.dll" target="lib/net45" />
-<file src="bin\Release\ICSharpCode.SharpZipLib.dll" target="lib/net45" />
-<file src="bin\Release\Innovator.Client.dll" target="lib/net45" />
-<file src="bin\Release\InnovatorAdmin.Api.dll" target="lib/net45" />
-<file src="bin\Release\LibGit2Sharp.dll" target="lib/net45" />
-<file src="bin\Release\Microsoft.WindowsAPICodePack.dll" target="lib/net45" />
-<file src="bin\Release\Microsoft.WindowsAPICodePack.Shell.dll" target="lib/net45" />
-<file src="bin\Release\Mono.Cecil.dll" target="lib/net45" />
-<file src="bin\Release\Mono.Cecil.Mdb.dll" target="lib/net45" />
-<file src="bin\Release\Mono.Cecil.Pdb.dll" target="lib/net45" />
-<file src="bin\Release\Mono.Cecil.Rocks.dll" target="lib/net45" />
-<file src="bin\Release\Mvp.Xml.dll" target="lib/net45" />
-<file src="bin\Release\Nancy.dll" target="lib/net45" />
-<file src="bin\Release\Nancy.Hosting.Self.dll" target="lib/net45" />
-<file src="bin\Release\NuGet.Squirrel.dll" target="lib/net45" />
-<file src="bin\Release\ObjectListView.dll" target="lib/net45" />
-<file src="bin\Release\Pipes.dll" target="lib/net45" />
-<file src="bin\Release\Pipes.OfficeXml.dll" target="lib/net45" />
-<file src="bin\Release\Splat.dll" target="lib/net45" />
-<file src="bin\Release\Squirrel.dll" target="lib/net45" />
-<file src="bin\Release\InnovatorAdmin.exe" target="lib/net45" />
+<file src="bin\Release\**\*.*" target="lib\net45" exclude="bin\Release\*.pdb;bin\Release\*.nupkg;bin\Release\*.vshost.*"/>
 </files>
   </package>
