@@ -141,11 +141,28 @@ namespace Innovator.Client
         }
         if (file.Parent != null)
         {
-          file.ReplaceWith(newElem);
+          MergeIfMissing(newElem, file);
           newElem = null;
         }
       }
       base.AddAml(newElem != null ? newElem.ToString() : elem.ToString());
+    }
+
+    private void MergeIfMissing(XElement source, XElement target)
+    {
+      XElement targetElem;
+      foreach (var elem in source.Elements())
+      {
+        targetElem = target.Element(elem.Name);
+        if (targetElem == null)
+        {
+          target.Add(elem);
+        }
+        else
+        {
+          MergeIfMissing(elem, targetElem);
+        }
+      }
     }
   }
 }
