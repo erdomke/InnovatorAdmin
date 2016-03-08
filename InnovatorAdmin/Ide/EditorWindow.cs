@@ -354,7 +354,7 @@ namespace InnovatorAdmin
       _oldConnType = ConnectionType.Innovator;
     }
 
-    public void SetConnection(ConnectionData conn)
+    public async Task<bool> SetConnection(ConnectionData conn)
     {
       if (!_loadingConnection && !string.IsNullOrEmpty(conn.Url))
       {
@@ -376,26 +376,21 @@ namespace InnovatorAdmin
         try
         {
           btnEditConnections.Text = "Connecting... ▼";
-          ProxyFactory.FromConn(conn)
-            .UiPromise(this)
-            .Done(proxy =>
-            {
-              SetProxy(proxy);
-              _disposeProxy = true;
-            })
-            .Fail(ex =>
-            {
-              lblProgress.Text = ex.Message;
-              btnEditConnections.Text = "Not Connected ▼";
-              lblConnection.Visible = true;
-              btnEditConnections.Visible = lblConnection.Visible;
-            }).Always(() => _loadingConnection = false);
+          var proxy = await ProxyFactory.FromConn(conn).ToTask();
+          SetProxy(proxy);
+          _disposeProxy = true;
         }
         catch (Exception ex)
         {
-          Utils.HandleError(ex);
+          lblProgress.Text = ex.Message;
+          btnEditConnections.Text = "Not Connected ▼";
+          lblConnection.Visible = true;
+          btnEditConnections.Visible = lblConnection.Visible;
         }
+        _loadingConnection = false;
+        return true;
       }
+      return false;
     }
 
     public void SetProxy(IEditorProxy proxy)
@@ -2017,44 +2012,16 @@ namespace InnovatorAdmin
         if (_proxy == null)
           return;
 
-        string columnPropertyName = null;
         var grid = (DataGridView)((ContextMenuStrip)sender).SourceControl;
-        var rows = grid.SelectedRows.OfType<DataGridViewRow>();
-        if (!rows.Any())
-        {
-          rows = grid.SelectedCells.OfType<DataGridViewCell>().Select(c => c.OwningRow).Distinct();
-          var cols = grid.SelectedCells.OfType<DataGridViewCell>().Select(c => c.OwningColumn).Distinct().ToArray();
-          if (cols.Length == 1)
-            columnPropertyName = cols[0].DataPropertyName;
-        }
-        if (!rows.Any())
-        {
-          rows = Enumerable.Repeat(grid.CurrentCell.OwningRow, 1);
-          columnPropertyName = grid.CurrentCell.OwningColumn.DataPropertyName;
-        }
-        var client = grid.PointToClient(MousePosition);
-        var hit = grid.HitTest(client.X, client.Y);
-        if (!rows.Any(r => r.Index == hit.RowIndex))
-        {
-          if (hit.RowIndex >= 0)
-          {
-            rows = Enumerable.Repeat(grid.Rows[hit.RowIndex], 1);
-            columnPropertyName = grid.Columns[hit.ColumnIndex].DataPropertyName;
-          }
-          else
-          {
-            rows = Enumerable.Empty<DataGridViewRow>();
-            columnPropertyName = null;
-          }
-        }
+        var sel = new DataGridViewSelection(grid);
 
-        var dataRows = rows.Where(r => r.DataBoundItem is DataRowView)
+        var dataRows = sel.Rows.Where(r => r.DataBoundItem is DataRowView)
           .Select(r => ((DataRowView)r.DataBoundItem).Row)
           .OfType<DataRow>()
-          .Concat(rows.Where(r => r.IsNewRow)
+          .Concat(sel.Rows.Where(r => r.IsNewRow)
             .Select(r => ((DataTable)r.DataGridView.DataSource).NewRow()))
           .ToArray();
-        var scripts = _proxy.GetHelper().GetScripts(dataRows, columnPropertyName);
+        var scripts = _proxy.GetHelper().GetScripts(dataRows, sel.ColumnPropertyName);
 
         conTable.Items.Clear();
         EditorScript.BuildMenu(conTable.Items, scripts, Execute);

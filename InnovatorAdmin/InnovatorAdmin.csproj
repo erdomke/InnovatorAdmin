@@ -182,6 +182,7 @@
     </Compile>
     <Compile Include="Controls\DataGridViewCalendarColumn.cs" />
     <Compile Include="Controls\DataGridViewListColumn.cs" />
+    <Compile Include="Controls\DataGridViewSelection.cs" />
     <Compile Include="Controls\DropShadow.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -277,6 +278,7 @@
     <Compile Include="Dialog\SettingsDialog.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Editor\Aml\ScriptMenuGenerator.cs" />
     <Compile Include="Editor\CompletionData\CompletionList.cs" />
     <Compile Include="Editor\CompletionData\CompletionListBox.cs" />
     <Compile Include="Editor\CompletionData\CompletionWindow.cs" />

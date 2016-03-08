@@ -50,6 +50,7 @@
       this.mniLevels6 = new System.Windows.Forms.ToolStripMenuItem();
       this.mniLevels7 = new System.Windows.Forms.ToolStripMenuItem();
       this.mniLevels8 = new System.Windows.Forms.ToolStripMenuItem();
+      this.conReferenceOptions = new System.Windows.Forms.ContextMenuStrip(this.components);
       this.tbcSearch = new InnovatorAdmin.Controls.FlatTabControl();
       this.pgSearchBy = new System.Windows.Forms.TabPage();
       this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
@@ -73,6 +74,7 @@
       this.btnUnselect = new InnovatorAdmin.Controls.FlatButton();
       this.btnUnselectAll = new InnovatorAdmin.Controls.FlatButton();
       this.btnAdvanced = new InnovatorAdmin.Controls.FlatButton();
+      this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
       this.tableLayoutPanel1.SuspendLayout();
       this.tableLayoutPanel4.SuspendLayout();
       this.conStrip.SuspendLayout();
@@ -133,9 +135,9 @@
       // label2
       // 
       this.label2.AutoSize = true;
-      this.label2.Font = new System.Drawing.Font(this.Font, System.Drawing.FontStyle.Bold);
+      this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
       this.label2.Location = new System.Drawing.Point(3, 3);
-      this.label2.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+      this.label2.Margin = new System.Windows.Forms.Padding(3);
       this.label2.Name = "label2";
       this.label2.Size = new System.Drawing.Size(96, 13);
       this.label2.TabIndex = 6;
@@ -145,11 +147,11 @@
       // 
       this.label3.AutoSize = true;
       this.tableLayoutPanel1.SetColumnSpan(this.label3, 2);
-      this.label3.Font = new System.Drawing.Font(this.Font, System.Drawing.FontStyle.Bold);
+      this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
       this.label3.Location = new System.Drawing.Point(391, 3);
-      this.label3.Margin = new System.Windows.Forms.Padding(3, 3, 3, 3);
+      this.label3.Margin = new System.Windows.Forms.Padding(3);
       this.label3.Name = "label3";
-      this.label3.Size = new System.Drawing.Size(279, 14);
+      this.label3.Size = new System.Drawing.Size(151, 13);
       this.label3.TabIndex = 7;
       this.label3.Text = "Items selected for export:";
       // 
@@ -173,9 +175,10 @@
             this.mniPermissions,
             this.mniState,
             this.mniVersion,
-            this.mniLevels});
+            this.mniLevels,
+            this.toolStripSeparator1});
       this.conStrip.Name = "conStrip";
-      this.conStrip.Size = new System.Drawing.Size(207, 114);
+      this.conStrip.Size = new System.Drawing.Size(207, 142);
       this.conStrip.Closed += new System.Windows.Forms.ToolStripDropDownClosedEventHandler(this.conStrip_Closed);
       // 
       // mniHistory
@@ -287,6 +290,12 @@
       this.mniLevels8.Text = "8";
       this.mniLevels8.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mniLevelItem_Click);
       // 
+      // conReferenceOptions
+      // 
+      this.conReferenceOptions.Name = "conReferenceOptions";
+      this.conReferenceOptions.Size = new System.Drawing.Size(61, 4);
+      this.conReferenceOptions.Opening += new System.ComponentModel.CancelEventHandler(this.conReferenceOptions_Opening);
+      // 
       // tbcSearch
       // 
       this.tbcSearch.Controls.Add(this.pgSearchBy);
@@ -304,10 +313,10 @@
       // pgSearchBy
       // 
       this.pgSearchBy.Controls.Add(this.tableLayoutPanel2);
-      this.pgSearchBy.Location = new System.Drawing.Point(4, 29);
+      this.pgSearchBy.Location = new System.Drawing.Point(4, 25);
       this.pgSearchBy.Name = "pgSearchBy";
-      this.pgSearchBy.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-      this.pgSearchBy.Size = new System.Drawing.Size(340, 283);
+      this.pgSearchBy.Padding = new System.Windows.Forms.Padding(3);
+      this.pgSearchBy.Size = new System.Drawing.Size(340, 287);
       this.pgSearchBy.TabIndex = 0;
       this.pgSearchBy.Text = "List items by...";
       this.pgSearchBy.UseVisualStyleBackColor = true;
@@ -332,7 +341,7 @@
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel2.Size = new System.Drawing.Size(334, 277);
+      this.tableLayoutPanel2.Size = new System.Drawing.Size(334, 281);
       this.tableLayoutPanel2.TabIndex = 0;
       // 
       // btnRecentlyModified
@@ -344,12 +353,13 @@
       this.btnRecentlyModified.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnRecentlyModified.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnRecentlyModified.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnRecentlyModified.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnRecentlyModified.ForeColor = System.Drawing.Color.Black;
       this.btnRecentlyModified.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
       this.btnRecentlyModified.Location = new System.Drawing.Point(3, 155);
       this.btnRecentlyModified.Name = "btnRecentlyModified";
       this.btnRecentlyModified.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnRecentlyModified.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+      this.btnRecentlyModified.Padding = new System.Windows.Forms.Padding(2);
       this.btnRecentlyModified.Size = new System.Drawing.Size(161, 70);
       this.btnRecentlyModified.TabIndex = 5;
       this.btnRecentlyModified.Text = "Recently Modified";
@@ -368,13 +378,14 @@
       this.btnDbPackage.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnDbPackage.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnDbPackage.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnDbPackage.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnDbPackage.ForeColor = System.Drawing.Color.Black;
       this.btnDbPackage.Image = global::InnovatorAdmin.Properties.Resources.packageDefinition;
       this.btnDbPackage.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
       this.btnDbPackage.Location = new System.Drawing.Point(3, 3);
       this.btnDbPackage.Name = "btnDbPackage";
       this.btnDbPackage.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnDbPackage.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+      this.btnDbPackage.Padding = new System.Windows.Forms.Padding(2);
       this.btnDbPackage.Size = new System.Drawing.Size(161, 70);
       this.btnDbPackage.TabIndex = 0;
       this.btnDbPackage.Text = "Package Definition (Db)";
@@ -393,13 +404,14 @@
       this.btnPackageFile.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnPackageFile.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnPackageFile.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnPackageFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnPackageFile.ForeColor = System.Drawing.Color.Black;
       this.btnPackageFile.Image = global::InnovatorAdmin.Properties.Resources.innPkg32;
       this.btnPackageFile.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
       this.btnPackageFile.Location = new System.Drawing.Point(3, 79);
       this.btnPackageFile.Name = "btnPackageFile";
       this.btnPackageFile.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnPackageFile.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+      this.btnPackageFile.Padding = new System.Windows.Forms.Padding(2);
       this.btnPackageFile.Size = new System.Drawing.Size(161, 70);
       this.btnPackageFile.TabIndex = 2;
       this.btnPackageFile.Text = "Innovator Package (File)";
@@ -418,13 +430,14 @@
       this.btnItem.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnItem.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnItem.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnItem.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnItem.ForeColor = System.Drawing.Color.Black;
       this.btnItem.Image = global::InnovatorAdmin.Properties.Resources.search32;
       this.btnItem.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
       this.btnItem.Location = new System.Drawing.Point(170, 3);
       this.btnItem.Name = "btnItem";
       this.btnItem.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnItem.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+      this.btnItem.Padding = new System.Windows.Forms.Padding(2);
       this.btnItem.Size = new System.Drawing.Size(161, 70);
       this.btnItem.TabIndex = 1;
       this.btnItem.Text = "Search (Db)";
@@ -443,13 +456,14 @@
       this.btnAmlStudio.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnAmlStudio.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnAmlStudio.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnAmlStudio.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnAmlStudio.ForeColor = System.Drawing.Color.Black;
       this.btnAmlStudio.Image = global::InnovatorAdmin.Properties.Resources.amlStudio32black;
       this.btnAmlStudio.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
       this.btnAmlStudio.Location = new System.Drawing.Point(170, 79);
       this.btnAmlStudio.Name = "btnAmlStudio";
       this.btnAmlStudio.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnAmlStudio.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+      this.btnAmlStudio.Padding = new System.Windows.Forms.Padding(2);
       this.btnAmlStudio.Size = new System.Drawing.Size(161, 70);
       this.btnAmlStudio.TabIndex = 4;
       this.btnAmlStudio.Text = "Advanced Search";
@@ -462,10 +476,10 @@
       // pgResults
       // 
       this.pgResults.Controls.Add(this.tableLayoutPanel5);
-      this.pgResults.Location = new System.Drawing.Point(4, 29);
+      this.pgResults.Location = new System.Drawing.Point(4, 25);
       this.pgResults.Name = "pgResults";
-      this.pgResults.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-      this.pgResults.Size = new System.Drawing.Size(230, 260);
+      this.pgResults.Padding = new System.Windows.Forms.Padding(3);
+      this.pgResults.Size = new System.Drawing.Size(340, 287);
       this.pgResults.TabIndex = 1;
       this.pgResults.Text = "Search Results";
       this.pgResults.UseVisualStyleBackColor = true;
@@ -485,7 +499,7 @@
       this.tableLayoutPanel5.RowCount = 2;
       this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-      this.tableLayoutPanel5.Size = new System.Drawing.Size(224, 254);
+      this.tableLayoutPanel5.Size = new System.Drawing.Size(334, 281);
       this.tableLayoutPanel5.TabIndex = 0;
       // 
       // txtFind
@@ -493,7 +507,7 @@
       this.txtFind.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
       this.txtFind.Location = new System.Drawing.Point(3, 10);
       this.txtFind.Name = "txtFind";
-      this.txtFind.Size = new System.Drawing.Size(144, 20);
+      this.txtFind.Size = new System.Drawing.Size(254, 20);
       this.txtFind.TabIndex = 0;
       this.txtFind.TextChanged += new System.EventHandler(this.txtFind_TextChanged);
       this.txtFind.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtFind_KeyDown);
@@ -512,12 +526,13 @@
             this.colType,
             this.colName});
       this.tableLayoutPanel5.SetColumnSpan(this.gridAvailable, 2);
+      this.gridAvailable.ContextMenuStrip = this.conReferenceOptions;
       this.gridAvailable.Location = new System.Drawing.Point(3, 44);
       this.gridAvailable.Name = "gridAvailable";
       this.gridAvailable.ReadOnly = true;
       this.gridAvailable.RowHeadersVisible = false;
       this.gridAvailable.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-      this.gridAvailable.Size = new System.Drawing.Size(218, 207);
+      this.gridAvailable.Size = new System.Drawing.Size(328, 234);
       this.gridAvailable.StandardTab = true;
       this.gridAvailable.TabIndex = 0;
       this.gridAvailable.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.gridAvailable_CellMouseDoubleClick);
@@ -550,11 +565,12 @@
       this.btnFind.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnFind.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnFind.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnFind.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnFind.ForeColor = System.Drawing.Color.Black;
-      this.btnFind.Location = new System.Drawing.Point(153, 3);
+      this.btnFind.Location = new System.Drawing.Point(263, 3);
       this.btnFind.Name = "btnFind";
       this.btnFind.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnFind.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+      this.btnFind.Padding = new System.Windows.Forms.Padding(2);
       this.btnFind.Size = new System.Drawing.Size(68, 35);
       this.btnFind.TabIndex = 1;
       this.btnFind.Text = "Find";
@@ -612,12 +628,13 @@
       this.btnSelectAll.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnSelectAll.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnSelectAll.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnSelectAll.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnSelectAll.ForeColor = System.Drawing.Color.Black;
       this.btnSelectAll.Image = global::InnovatorAdmin.Properties.Resources.arrowRightAllSimpleBlack16;
       this.btnSelectAll.Location = new System.Drawing.Point(3, 105);
       this.btnSelectAll.Name = "btnSelectAll";
       this.btnSelectAll.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnSelectAll.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+      this.btnSelectAll.Padding = new System.Windows.Forms.Padding(2);
       this.btnSelectAll.Size = new System.Drawing.Size(28, 28);
       this.btnSelectAll.TabIndex = 3;
       this.btnSelectAll.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
@@ -631,12 +648,13 @@
       this.btnSelect.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnSelect.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnSelect.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnSelect.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnSelect.ForeColor = System.Drawing.Color.Black;
       this.btnSelect.Image = global::InnovatorAdmin.Properties.Resources.arrowRightSimpleBlack16;
       this.btnSelect.Location = new System.Drawing.Point(3, 71);
       this.btnSelect.Name = "btnSelect";
       this.btnSelect.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnSelect.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+      this.btnSelect.Padding = new System.Windows.Forms.Padding(2);
       this.btnSelect.Size = new System.Drawing.Size(28, 28);
       this.btnSelect.TabIndex = 2;
       this.btnSelect.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
@@ -650,12 +668,13 @@
       this.btnUnselect.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnUnselect.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnUnselect.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnUnselect.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnUnselect.ForeColor = System.Drawing.Color.Black;
       this.btnUnselect.Image = global::InnovatorAdmin.Properties.Resources.arrowLeftSimpleBlack16;
       this.btnUnselect.Location = new System.Drawing.Point(3, 37);
       this.btnUnselect.Name = "btnUnselect";
       this.btnUnselect.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnUnselect.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+      this.btnUnselect.Padding = new System.Windows.Forms.Padding(2);
       this.btnUnselect.Size = new System.Drawing.Size(28, 28);
       this.btnUnselect.TabIndex = 1;
       this.btnUnselect.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
@@ -669,12 +688,13 @@
       this.btnUnselectAll.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnUnselectAll.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnUnselectAll.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnUnselectAll.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnUnselectAll.ForeColor = System.Drawing.Color.Black;
       this.btnUnselectAll.Image = global::InnovatorAdmin.Properties.Resources.arrowLeftAllSimpleBlack16;
       this.btnUnselectAll.Location = new System.Drawing.Point(3, 3);
       this.btnUnselectAll.Name = "btnUnselectAll";
       this.btnUnselectAll.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnUnselectAll.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+      this.btnUnselectAll.Padding = new System.Windows.Forms.Padding(2);
       this.btnUnselectAll.Size = new System.Drawing.Size(28, 28);
       this.btnUnselectAll.TabIndex = 0;
       this.btnUnselectAll.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
@@ -690,17 +710,23 @@
       this.btnAdvanced.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnAdvanced.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
       this.btnAdvanced.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnAdvanced.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnAdvanced.ForeColor = System.Drawing.Color.Black;
       this.btnAdvanced.Location = new System.Drawing.Point(628, 304);
       this.btnAdvanced.Name = "btnAdvanced";
       this.btnAdvanced.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnAdvanced.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+      this.btnAdvanced.Padding = new System.Windows.Forms.Padding(2);
       this.btnAdvanced.Size = new System.Drawing.Size(143, 35);
       this.btnAdvanced.TabIndex = 8;
       this.btnAdvanced.Text = "Advanced ▼";
       this.btnAdvanced.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnAdvanced.UseVisualStyleBackColor = false;
       this.btnAdvanced.Click += new System.EventHandler(this.btnAdvanced_Click);
+      // 
+      // toolStripSeparator1
+      // 
+      this.toolStripSeparator1.Name = "toolStripSeparator1";
+      this.toolStripSeparator1.Size = new System.Drawing.Size(203, 6);
       // 
       // ExportSelect
       // 
@@ -775,5 +801,7 @@
     private System.Windows.Forms.ToolStripMenuItem mniLevels8;
     private FlatButton btnRecentlyModified;
     private System.Windows.Forms.CheckBox chkDependencies;
+    private System.Windows.Forms.ContextMenuStrip conReferenceOptions;
+    private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
   }
 }

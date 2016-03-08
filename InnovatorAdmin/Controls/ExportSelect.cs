@@ -502,6 +502,10 @@ namespace InnovatorAdmin.Controls
         mniState.Checked = ((sysProps & SystemPropertyGroup.State) == SystemPropertyGroup.State);
         mniVersion.Checked = ((sysProps & SystemPropertyGroup.Versioning) == SystemPropertyGroup.Versioning);
 
+        while (conStrip.Items.Count > 6)
+          conStrip.Items.RemoveAt(conStrip.Items.Count - 1);
+        AddRefMenuItems(conStrip, items);
+
         conStrip.Show(pt);
       }
     }
@@ -591,6 +595,37 @@ namespace InnovatorAdmin.Controls
       {
         Utils.HandleError(ex);
       }
+    }
+
+    private void conReferenceOptions_Opening(object sender, CancelEventArgs e)
+    {
+      try
+      {
+        var grid = (DataGridView)((ContextMenuStrip)sender).SourceControl;
+        var sel = new DataGridViewSelection(grid);
+        AddRefMenuItems(conReferenceOptions, sel.Rows.Select(r => (ItemReference)r.DataBoundItem));
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void AddRefMenuItems(ContextMenuStrip conMenu, IEnumerable<ItemReference> refs)
+    {
+      var gen = new Editor.ScriptMenuGenerator();
+      gen.SetItems(refs);
+      gen.Conn = _wizard.Connection;
+      gen.ConnData = _wizard.ConnectionInfo.First();
+      conReferenceOptions.Items.Clear();
+      EditorScript.BuildMenu(conMenu.Items, gen.GetScripts(), async s =>
+      {
+        var win = new EditorWindow();
+        var result = win.SetConnection(_wizard.ConnectionInfo.First());
+        win.Show();
+        await result;
+        win.Execute(s);
+      });
     }
   }
 }
