@@ -13,6 +13,12 @@ namespace InnovatorAdmin.Editor
     private IEditorHelper _parent;
     private EditorWinForm _control;
 
+    public char QuoteChar { get; set; }
+
+    public AttributeCompletionData() : base()
+    {
+      this.QuoteChar = '\'';
+    }
 
     public void SetContext(IEditorHelper parent, EditorWinForm control)
     {
@@ -22,7 +28,7 @@ namespace InnovatorAdmin.Editor
 
     public override void Complete(TextArea textArea, ISegment completionSegment, EventArgs insertionRequestEventArgs)
     {
-      textArea.Document.Replace(completionSegment, (Action == null ? this.Text : Action.Invoke()) + "=''");
+      textArea.Document.Replace(completionSegment, (Action == null ? this.Text : Action.Invoke()) + "=" + QuoteChar + QuoteChar);
       textArea.Caret.Offset -= 1;
       _parent.ShowCompletions(_control);
     }

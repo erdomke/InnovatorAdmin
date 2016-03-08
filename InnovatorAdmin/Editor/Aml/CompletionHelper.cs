@@ -301,7 +301,11 @@ namespace InnovatorAdmin.Editor
                       attributes.Add("repeatTimes");
                     }
 
-                    items = Attributes(notExisting, attributes.ToArray());
+                    items = Attributes(notExisting, attributes.ToArray()).ToArray();
+                    foreach (var item in items.OfType<AttributeCompletionData>().Where(i => i.Text == "where"))
+                    {
+                      item.QuoteChar = '"';
+                    }
                     break;
                 }
                 break;
