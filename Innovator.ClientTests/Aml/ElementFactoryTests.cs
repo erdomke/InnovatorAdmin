@@ -11,14 +11,6 @@ namespace Innovator.Client.Aml.Tests
   public class ElementFactoryTests
   {
     [TestMethod()]
-    public void SelectColumnsTest()
-    {
-      var cols = SubSelect.FromString("first, second (thing, another2(id, config_id)), no_paren, third (stuff), another (id)");
-      var expected = new string[] { "first", "second", "no_paren", "third", "another" };
-      CollectionAssert.AreEqual(expected, cols.Select(c => c.Name).ToArray());
-    }
-
-    [TestMethod()]
     public void SubSelect_EnsurePath()
     {
       var subSelect = new SubSelect();

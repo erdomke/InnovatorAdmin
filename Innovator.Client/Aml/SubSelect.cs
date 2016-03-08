@@ -167,7 +167,7 @@ namespace Innovator.Client
 
       if (start < select.Length)
       {
-        result.Add(new SubSelect(select.Substring(0, select.Length - start).Trim()));
+        result.Add(new SubSelect(select.Substring(start, select.Length - start).Trim()));
       }
       return result;
     }
