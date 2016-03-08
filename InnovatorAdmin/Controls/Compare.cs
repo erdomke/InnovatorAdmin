@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Xml;
 using System.Windows.Forms.Integration;
 using ICSharpCode.AvalonEdit.Document;
+using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Controls
 {
@@ -51,9 +52,9 @@ namespace InnovatorAdmin.Controls
           if (diff.DiffType == DiffType.Different)
           {
             Settings.Current.PerformDiff("Left"
-              , new StringTextSource(diff.LeftScript.OuterXml)
+              , s => ToAml(s, diff.LeftScript)
               , "Right"
-              , new StringTextSource(diff.RightScript.OuterXml));
+              , s => ToAml(s, diff.RightScript));
           }
           else
           {
@@ -70,6 +71,20 @@ namespace InnovatorAdmin.Controls
       catch (Exception ex)
       {
         Utils.HandleError(ex);
+      }
+    }
+
+    public async Task ToAml(Stream stream, XmlElement elem)
+    {
+      var settings = new XmlWriterSettings();
+      settings.OmitXmlDeclaration = true;
+      settings.Indent = true;
+      settings.IndentChars = "  ";
+      settings.CheckCharacters = true;
+
+      using (var xmlWriter = XmlWriter.Create(stream, settings))
+      {
+        elem.WriteTo(xmlWriter);
       }
     }
 
