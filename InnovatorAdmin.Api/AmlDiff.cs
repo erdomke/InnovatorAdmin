@@ -153,6 +153,8 @@ namespace InnovatorAdmin
         case XmlFlags.Attr_ConfigId:
         case "_keyed_name":
           return true;
+        case "action":
+          return a.Value == "get";
       }
       return false;
     }
