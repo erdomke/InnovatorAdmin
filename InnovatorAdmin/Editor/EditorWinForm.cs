@@ -42,6 +42,7 @@ namespace InnovatorAdmin.Editor
     private ToolStripMenuItem mniCompareTo;
     private Placeholder _placeholder;
 
+    public event EventHandler<FileOpeningEventArgs> FileOpening;
     public event EventHandler<RunRequestedEventArgs> RunRequested;
     public event EventHandler<SelectionChangedEventArgs> SelectionChanged;
 
@@ -141,6 +142,11 @@ namespace InnovatorAdmin.Editor
 
       _extEditor = new ExtendedEditor();
       _extEditor.Host = this;
+      _extEditor.FileOpening += (s, e) =>
+      {
+        if (FileOpening != null)
+          FileOpening.Invoke(this, e);
+      };
 
       var editor = _extEditor.editor;
       editor.FontFamily = _fixedWidth;

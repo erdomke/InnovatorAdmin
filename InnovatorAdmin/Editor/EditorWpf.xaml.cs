@@ -27,6 +27,8 @@ namespace InnovatorAdmin.Editor
     private IFoldingStrategy _foldingStrategy;
     private DispatcherTimer _foldingUpdateTimer = new DispatcherTimer();
 
+    public event EventHandler<FileOpeningEventArgs> FileOpening;
+
     public IEditorHelper Helper
     {
       get { return _helper; }
@@ -63,7 +65,62 @@ namespace InnovatorAdmin.Editor
       _foldingUpdateTimer.Tick += delegate { UpdateFoldings(); };
       _foldingUpdateTimer.Start();
 
+      this.AllowDrop = true;
       this.editor.TextArea.MouseRightButtonDown += TextArea_MouseRightButtonDown;
+    }
+
+    protected override void OnDrop(DragEventArgs e)
+    {
+      try
+      {
+        base.OnDrop(e);
+        if (DataObjectContainsFile(e.Data))
+        {
+          var files = e.Data.GetData(DataFormats.FileDrop) as string[];
+          if (files != null && files.Length > 0)
+          {
+            OnFileOpening(new FileOpeningEventArgs() { Path = files.First() });
+          }
+        }
+
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+    protected override void OnDragEnter(DragEventArgs e)
+    {
+      try
+      {
+        base.OnDragEnter(e);
+        if (DataObjectContainsFile(e.Data))
+        {
+          e.Effects = DragDropEffects.Copy;
+        }
+        else
+        {
+          e.Effects = DragDropEffects.None;
+        }
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    protected virtual void OnFileOpening(FileOpeningEventArgs e)
+    {
+      if (FileOpening != null)
+        FileOpening.Invoke(this, e);
+    }
+
+    private bool DataObjectContainsFile(IDataObject data)
+    {
+      var fmts = data.GetFormats(true);
+      return fmts.Contains(DataFormats.FileDrop);
+        //|| fmts.Contains(DataFormats.Text) --> Text is already handled by the control
+        //|| fmts.Contains("FileGroupDescriptor"); --> used for outlook data
     }
 
     void TextArea_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
@@ -224,5 +281,12 @@ namespace InnovatorAdmin.Editor
         _foldingUpdateTimer.Stop();
       _foldingUpdateTimer = null;
     }
+  }
+
+  public class FileOpeningEventArgs : EventArgs
+  {
+    public string Path { get; set; }
+
+    public FileOpeningEventArgs() : base() { }
   }
 }

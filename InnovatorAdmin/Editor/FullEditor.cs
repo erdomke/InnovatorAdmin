@@ -130,6 +130,7 @@ namespace InnovatorAdmin.Editor
 
       _renderer = new SearchResultBackgroundRenderer();
       editor.Editor.TextArea.TextView.BackgroundRenderers.Add(_renderer);
+      editor.FileOpening += (s, e) => OpenFile(e.Path);
 
       editor.KeyDown += editor_KeyDown;
       editor.RunRequested += editor_RunRequested;
