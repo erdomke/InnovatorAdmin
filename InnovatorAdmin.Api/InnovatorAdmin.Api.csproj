@@ -67,9 +67,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActionCompleteEventArgs.cs" />
-    <Compile Include="AmlDiff.cs" />
+    <Compile Include="Merge\AmlDiff.cs" />
     <Compile Include="AmlSelectColumn.cs" />
     <Compile Include="Export\ListCompare.cs" />
+    <Compile Include="Merge\FileDiff.cs" />
+    <Compile Include="Merge\FileStatus.cs" />
+    <Compile Include="Merge\FileSysDiffDirectory.cs" />
+    <Compile Include="Merge\IDiffDirectory.cs" />
+    <Compile Include="Merge\IDiffFile.cs" />
     <Compile Include="Metadata\ArasMetadataProvider.cs" />
     <Compile Include="Connection\IProgressCallback.cs" />
     <Compile Include="DependencyAnalyzer.cs" />
@@ -151,6 +156,7 @@
     <Compile Include="Testing\TestSuite.cs" />
     <Compile Include="Testing\IXPathResult.cs" />
     <Compile Include="Utils.cs" />
+    <Compile Include="XmlNodeWriter.cs" />
     <Compile Include="XmlUtils.cs" />
     <Compile Include="Xslt\ArasXsltExtensions.cs" />
   </ItemGroup>

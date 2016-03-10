@@ -74,6 +74,7 @@
     <Compile Include="Testing\LoginTests.cs" />
     <Compile Include="Testing\TestSerializerTests.cs" />
     <Compile Include="UtilsTests.cs" />
+    <Compile Include="XmlNodeWriterTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\InnovatorAdmin.Api\InnovatorAdmin.Api.csproj">

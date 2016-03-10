@@ -5,7 +5,7 @@ using System.Xml;
 
 namespace InnovatorAdmin
 {
-  public class InstallScript
+  public class InstallScript : IDiffDirectory
   {
     private List<Version> _supportedVersions = new List<Version>();
 
@@ -26,6 +26,11 @@ namespace InnovatorAdmin
     public InstallScript()
     {
       this.DependencySorted = true;
+    }
+
+    IEnumerable<IDiffFile> IDiffDirectory.GetFiles()
+    {
+      return this.Lines;
     }
 
     //public IEnumerable<IEnumerable<InstallItem>> GroupLines(Func<InstallItem, bool> predicate = null)

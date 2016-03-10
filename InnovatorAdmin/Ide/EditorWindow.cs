@@ -458,6 +458,8 @@ namespace InnovatorAdmin
         dialog.PreferredMode = OutputType.Table;
         setConn(dialog);
         if (dialog.ShowDialog() == DialogResult.OK
+          && dialog._outputSet != null
+          && dialog._outputSet.Tables.Count > 0
           && dialog._outputSet.Tables[0].Columns.Contains(Extensions.AmlTable_TypeName)
           && dialog._outputSet.Tables[0].Columns.Contains("id"))
         {
@@ -1807,12 +1809,13 @@ namespace InnovatorAdmin
       }
     }
 
-    public void Execute(IEditorScript script)
+    public async Task Execute(IEditorScript script)
     {
       this.SoapAction = script.Action;
-      inputEditor.Document.Insert(0, script.Script + Environment.NewLine + Environment.NewLine);
+      var text = await script.GetScript();
+      inputEditor.Document.Insert(0, text + Environment.NewLine + Environment.NewLine);
       if (script.AutoRun)
-        Submit(script.Script, script.PreferredOutput);
+        Submit(text, script.PreferredOutput);
     }
 
     private void treeItems_CellToolTipShowing(object sender, BrightIdeasSoftware.ToolTipShowingEventArgs e)
@@ -2262,6 +2265,21 @@ namespace InnovatorAdmin
       public string DestCommit { get; set; }
       [DisplayName("Script Save Directory"), ParamControl(typeof(Editor.FilePathControl))]
       public string SaveDirectory { get; set; }
+    }
+
+    private void btnCompare_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        var main = new Main();
+        var compareSel = new CompareSelect();
+        main.GoToStep(compareSel);
+        main.Show();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
     }
   }
 }

@@ -2,12 +2,12 @@
 {
   partial class ExportResolve
   {
-    /// <summary> 
+    /// <summary>
     /// Required designer variable.
     /// </summary>
     private System.ComponentModel.IContainer components = null;
 
-    /// <summary> 
+    /// <summary>
     /// Clean up any resources being used.
     /// </summary>
     /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
@@ -22,8 +22,8 @@
 
     #region Component Designer generated code
 
-    /// <summary> 
-    /// Required method for Designer support - do not modify 
+    /// <summary>
+    /// Required method for Designer support - do not modify
     /// the contents of this method with the code editor.
     /// </summary>
     private void InitializeComponent()
@@ -32,7 +32,7 @@
       System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
       System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
       System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-      this.resolveGrid = new System.Windows.Forms.DataGridView();
+      this.resolveGrid = new Controls.DataGrid();
       this.colName = new System.Windows.Forms.DataGridViewTextBoxColumn();
       this.colOrigin = new System.Windows.Forms.DataGridViewTextBoxColumn();
       this.colType = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -50,9 +50,9 @@
       this.conStrip.SuspendLayout();
       this.tableLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
-      // 
+      //
       // resolveGrid
-      // 
+      //
       this.resolveGrid.AllowUserToAddRows = false;
       this.resolveGrid.AllowUserToDeleteRows = false;
       dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -95,32 +95,32 @@
       this.resolveGrid.TabIndex = 0;
       this.resolveGrid.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.resolveGrid_CellFormatting);
       this.resolveGrid.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.resolveGrid_CellMouseClick);
-      // 
+      //
       // colName
-      // 
+      //
       this.colName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
       this.colName.DataPropertyName = "Name";
       this.colName.HeaderText = "Name";
       this.colName.MinimumWidth = 300;
       this.colName.Name = "colName";
       this.colName.ReadOnly = true;
-      // 
+      //
       // colOrigin
-      // 
+      //
       this.colOrigin.DataPropertyName = "Origin";
       this.colOrigin.HeaderText = "Origin";
       this.colOrigin.Name = "colOrigin";
       this.colOrigin.ReadOnly = true;
-      // 
+      //
       // colType
-      // 
+      //
       this.colType.DataPropertyName = "Type";
       this.colType.HeaderText = "Type";
       this.colType.Name = "colType";
       this.colType.ReadOnly = true;
-      // 
+      //
       // conStrip
-      // 
+      //
       this.conStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniEdit,
             this.mniIncludeInPackage,
@@ -129,44 +129,44 @@
             this.mniReset});
       this.conStrip.Name = "conStrip";
       this.conStrip.Size = new System.Drawing.Size(216, 114);
-      // 
+      //
       // mniEdit
-      // 
+      //
       this.mniEdit.Name = "mniEdit";
       this.mniEdit.Size = new System.Drawing.Size(215, 22);
       this.mniEdit.Text = "Edit";
       this.mniEdit.Click += new System.EventHandler(this.mniEdit_Click);
-      // 
+      //
       // mniIncludeInPackage
-      // 
+      //
       this.mniIncludeInPackage.Name = "mniIncludeInPackage";
       this.mniIncludeInPackage.Size = new System.Drawing.Size(215, 22);
       this.mniIncludeInPackage.Text = "Include in Package";
       this.mniIncludeInPackage.Click += new System.EventHandler(this.mniIncludeInPackage_Click);
-      // 
+      //
       // mniRemoveReferencingItems
-      // 
+      //
       this.mniRemoveReferencingItems.Name = "mniRemoveReferencingItems";
       this.mniRemoveReferencingItems.Size = new System.Drawing.Size(215, 22);
       this.mniRemoveReferencingItems.Text = "Remove Referencing Items";
       this.mniRemoveReferencingItems.Click += new System.EventHandler(this.mniRemoveReferencingItems_Click);
-      // 
+      //
       // mniRemoveReferences
-      // 
+      //
       this.mniRemoveReferences.Name = "mniRemoveReferences";
       this.mniRemoveReferences.Size = new System.Drawing.Size(215, 22);
       this.mniRemoveReferences.Text = "Remove References";
       this.mniRemoveReferences.Click += new System.EventHandler(this.mniRemoveReferences_Click);
-      // 
+      //
       // mniReset
-      // 
+      //
       this.mniReset.Name = "mniReset";
       this.mniReset.Size = new System.Drawing.Size(215, 22);
       this.mniReset.Text = "Reset Action";
       this.mniReset.Click += new System.EventHandler(this.mniReset_Click);
-      // 
+      //
       // tableLayoutPanel1
-      // 
+      //
       this.tableLayoutPanel1.BackColor = System.Drawing.Color.White;
       this.tableLayoutPanel1.ColumnCount = 3;
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -184,9 +184,9 @@
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
       this.tableLayoutPanel1.Size = new System.Drawing.Size(523, 306);
       this.tableLayoutPanel1.TabIndex = 1;
-      // 
+      //
       // btnActions
-      // 
+      //
       this.btnActions.AutoSize = true;
       this.btnActions.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnActions.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
@@ -202,9 +202,9 @@
       this.btnActions.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnActions.UseVisualStyleBackColor = false;
       this.btnActions.Click += new System.EventHandler(this.btnActions_Click);
-      // 
+      //
       // label1
-      // 
+      //
       this.label1.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.label1.AutoSize = true;
       this.label1.Location = new System.Drawing.Point(382, 11);
@@ -212,18 +212,18 @@
       this.label1.Size = new System.Drawing.Size(32, 13);
       this.label1.TabIndex = 2;
       this.label1.Text = "Filter:";
-      // 
+      //
       // txtFilter
-      // 
+      //
       this.txtFilter.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.txtFilter.Location = new System.Drawing.Point(420, 7);
       this.txtFilter.Name = "txtFilter";
       this.txtFilter.Size = new System.Drawing.Size(100, 20);
       this.txtFilter.TabIndex = 3;
       this.txtFilter.TextChanged += new System.EventHandler(this.txtFilter_TextChanged);
-      // 
+      //
       // ExportResolve
-      // 
+      //
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.Controls.Add(this.tableLayoutPanel1);
@@ -239,7 +239,7 @@
 
     #endregion
 
-    private System.Windows.Forms.DataGridView resolveGrid;
+    private Controls.DataGrid resolveGrid;
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     private System.Windows.Forms.ContextMenuStrip conStrip;
     private System.Windows.Forms.ToolStripMenuItem mniIncludeInPackage;

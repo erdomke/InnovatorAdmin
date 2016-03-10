@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 
 namespace InnovatorAdmin
 {
-  public class InstallItem
+  public class InstallItem : IDiffFile
   {
     public const string ScriptType = "*Script";
 
@@ -45,6 +47,40 @@ namespace InnovatorAdmin
     }
     public string Path { get; set; }
     public XmlElement Script { get { return _elem; } }
+
+    string IDiffFile.Path
+    {
+      get
+      {
+        if (!string.IsNullOrWhiteSpace(this.Path))
+          return this.Path;
+        var folder = Type == InstallType.Script ? "_Scripts" : Reference.Type;
+        return folder + "\\" + Utils.CleanFileName((Reference.KeyedName ?? "") + "_" + Reference.Unique) + ".xml";
+      }
+    }
+
+    private string _compare;
+    IComparable IDiffFile.CompareKey
+    {
+      get
+      {
+        if (_compare == null)
+        {
+          using (var md5 = new MD5CryptoServiceProvider())
+          using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(Script.OuterXml)))
+          {
+            var result = new StringBuilder(32);
+            var hash = md5.ComputeHash(stream);
+            for (var i = 0; i < hash.Length; i++)
+            {
+              result.AppendFormat("{0:x2}", hash[i]);
+            }
+            return result.ToString();
+          }
+        }
+        return _compare;
+      }
+    }
 
     public InstallItem() { }
 
@@ -247,6 +283,26 @@ namespace InnovatorAdmin
       }
 
       return builder.ToString();
+    }
+
+    Stream IDiffFile.OpenRead()
+    {
+      var settings = new XmlWriterSettings();
+      settings.OmitXmlDeclaration = true;
+      settings.Indent = true;
+      settings.IndentChars = "  ";
+      settings.CloseOutput = false;
+
+      var result = new MemoryStream();
+      using (var writer = XmlTextWriter.Create(result, settings))
+      {
+        writer.WriteStartElement("AML");
+        this.Script.WriteTo(writer);
+        writer.WriteEndElement();
+        writer.Flush();
+      }
+      result.Position = 0;
+      return result;
     }
   }
 

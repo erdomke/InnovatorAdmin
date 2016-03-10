@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace InnovatorAdmin
@@ -16,21 +18,41 @@ namespace InnovatorAdmin
       ElementName
     }
 
-    public static bool IsDifferent(string start, string dest)
+    //public static bool IsDifferent(string start, string dest)
+    //{
+    //  return GetMergeScript(start, dest).Elements().Any();
+    //}
+
+    public static bool IsDifferent(XmlReader start, XmlReader dest)
     {
       return GetMergeScript(start, dest).Elements().Any();
     }
 
-    public static XElement GetMergeScript(string start, string dest)
+    public static XElement GetMergeScript(XmlReader start, XmlReader dest)
     {
-      if (string.IsNullOrWhiteSpace(start))
+      var startElem = XElement.Load(start);
+      var result = new XElement(startElem.Name);
+
+      // Create merges/deletes as necessary
+      var destElem = XElement.Load(dest);
+      GetMergeScript(startElem, destElem, result);
+      foreach (var elem in result.DescendantsAndSelf())
+        elem.RemoveAnnotations<ElementKey>();
+      return result;
+    }
+
+    public static XElement GetMergeScript(Stream start, Stream dest)
+    {
+      var startStream = Seekable(start);
+      var destStream = Seekable(dest);
+      if (start == null || startStream.Length < 1)
         return new XElement("AML");
 
-      var startElem = XElement.Parse(start);
+      var startElem = XElement.Load(startStream);
       var result = new XElement(startElem.Name);
 
       // Create deletes
-      if (string.IsNullOrEmpty(dest))
+      if (dest == null || destStream.Length < 1)
       {
         var itemTag = startElem.DescendantsAndSelf().First(e => e.Name.LocalName == "Item");
         var items = itemTag.Parent.Elements("Item").Where(e => e.Attribute("action") != null
@@ -46,12 +68,53 @@ namespace InnovatorAdmin
       }
 
       // Create merges/deletes as necessary
-      var destElem = XElement.Parse(dest);
+      var destElem = XElement.Load(dest);
       GetMergeScript(startElem, destElem, result);
       foreach (var elem in result.DescendantsAndSelf())
         elem.RemoveAnnotations<ElementKey>();
       return result;
     }
+
+    private static Stream Seekable(Stream input)
+    {
+      if (input == null || input.CanSeek)
+        return input;
+      var result = new MemoryStream();
+      input.CopyTo(result);
+      return result;
+    }
+
+    //public static XElement GetMergeScript(string start, string dest)
+    //{
+    //  if (string.IsNullOrWhiteSpace(start))
+    //    return new XElement("AML");
+
+    //  var startElem = XElement.Parse(start);
+    //  var result = new XElement(startElem.Name);
+
+    //  // Create deletes
+    //  if (string.IsNullOrEmpty(dest))
+    //  {
+    //    var itemTag = startElem.DescendantsAndSelf().First(e => e.Name.LocalName == "Item");
+    //    var items = itemTag.Parent.Elements("Item").Where(e => e.Attribute("action") != null
+    //      && (e.Attribute("action").Value == "merge" || e.Attribute("action").Value == "add"
+    //        || e.Attribute("action").Value == "create"));
+    //    XElement newItem;
+    //    foreach (var item in items)
+    //    {
+    //      newItem = new XElement(item.Name, item.Attributes().Where(IsAttributeToCopy));
+    //      newItem.SetAttributeValue("action", "delete");
+    //    }
+    //    return result;
+    //  }
+
+    //  // Create merges/deletes as necessary
+    //  var destElem = XElement.Parse(dest);
+    //  GetMergeScript(startElem, destElem, result);
+    //  foreach (var elem in result.DescendantsAndSelf())
+    //    elem.RemoveAnnotations<ElementKey>();
+    //  return result;
+    //}
 
     private static void GetMergeScript(XElement start, XElement dest, XElement result)
     {

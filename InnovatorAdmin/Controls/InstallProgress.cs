@@ -97,8 +97,8 @@ namespace InnovatorAdmin.Controls
         _ex = null;
         var thread = new Thread(o =>
         {
-          _wizard.InstallProcessor.Initialize(_wizard.InstallScript);
-          _wizard.InstallProcessor.Install();
+          _wizard.InstallProcessor.Initialize(_wizard.InstallScript)
+            .ContinueWith(t => _wizard.InstallProcessor.Install());
         });
         thread.Start();
         return true;

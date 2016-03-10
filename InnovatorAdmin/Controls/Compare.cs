@@ -30,16 +30,16 @@ namespace InnovatorAdmin.Controls
     public void Configure(IWizard wizard)
     {
       _wizard = wizard;
-      wizard.NextLabel = "Start Over";
-      wizard.NextEnabled = true;
+      wizard.NextEnabled = false;
       var diffs = new FullBindingList<InstallItemDiff>();
       diffs.AddRange(InstallItemDiff.GetDiffs(BaseInstall, _wizard.InstallScript));
       gridDiffs.DataSource = diffs;
+      gridDiffs.AutoResizeRows(DataGridViewAutoSizeRowsMode.AllCells);
     }
 
     public void GoNext()
     {
-      _wizard.GoToStep(new Welcome());
+      // Do nothing
     }
 
     private void gridDiffs_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -104,6 +104,60 @@ namespace InnovatorAdmin.Controls
         return writer.ToString();
       }
 
+    }
+
+    private void btnPatchLeftRight_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        GetPatchPackage(BaseInstall, _wizard.InstallScript);
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void btnPatchRightLeft_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        GetPatchPackage(_wizard.InstallScript, BaseInstall);
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void GetPatchPackage(InstallScript start, InstallScript dest)
+    {
+      var docs = new List<Tuple<XmlDocument, string>>();
+      ProgressDialog.Display(this, d =>
+      {
+        start.WriteAmlMergeScripts(dest, (path, prog) =>
+        {
+          d.SetProgress(prog);
+          var doc = new XmlDocument();
+          docs.Add(Tuple.Create(doc, path));
+          return new XmlNodeWriter(doc);
+        });
+      });
+
+      var items = (from d in docs
+                  where d.Item1.DocumentElement != null
+                  select InstallItem.FromScript(GetFirstItem(d.Item1.DocumentElement), d.Item2))
+                  .ToArray();
+      _wizard.InstallScript = new InstallScript() { Lines = items };
+      _wizard.GoToStep(new ExportOptions());
+    }
+
+    private XmlElement GetFirstItem(XmlElement elem)
+    {
+      var curr = elem;
+      while (curr != null && curr.LocalName != "Item")
+        curr = curr.ChildNodes.OfType<XmlElement>().FirstOrDefault();
+      return curr ?? elem;
     }
   }
 }

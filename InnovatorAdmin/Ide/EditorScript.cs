@@ -9,8 +9,7 @@ namespace InnovatorAdmin
 {
   public class EditorScript : IEditorScript
   {
-    private string _script;
-    private bool _scriptLoaded;
+    private Task<string> _script;
     private List<IEditorScript> _children;
 
     public bool AutoRun { get; set; }
@@ -24,23 +23,16 @@ namespace InnovatorAdmin
     {
       get
       {
-        if (!_scriptLoaded)
-        {
-          _scriptLoaded = true;
-          if (this.ScriptGetter != null)
-          {
-            Utils.CallWithTimeout(5000, () => _script = this.ScriptGetter.Invoke());
-          }
-        }
-        return _script;
+        if (_script.IsCompleted)
+          return _script.Result;
+        return null;
       }
       set
       {
-        _script = value;
-        _scriptLoaded = true;
+        _script = Task.FromResult(value);
       }
     }
-    public Func<string> ScriptGetter { get; set; }
+    public Func<Task<string>> ScriptGetter { get; set; }
     public OutputType PreferredOutput { get; set; }
 
     public EditorScript()
@@ -55,8 +47,16 @@ namespace InnovatorAdmin
       _children.Add(child);
       return this;
     }
+    public Task<string> GetScript()
+    {
+      if (_script == null)
+      {
+        _script = ScriptGetter.Invoke();
+      }
+      return _script;
+    }
 
-    public static void BuildMenu(ToolStripItemCollection items, IEnumerable<IEditorScript> scripts, Action<IEditorScript> callback)
+    public static void BuildMenu(ToolStripItemCollection items, IEnumerable<IEditorScript> scripts, Func<IEditorScript, Task> callback)
     {
       foreach (var script in scripts)
       {
@@ -72,12 +72,12 @@ namespace InnovatorAdmin
         }
         else
         {
-          items.Add(new ToolStripMenuItem(script.Name, null, (s, ev) =>
+          items.Add(new ToolStripMenuItem(script.Name, null, async (s, ev) =>
           {
-            var query = script.Script; // Trigger execution
-            if (!string.IsNullOrEmpty(query))
+            var text = await script.GetScript(); // Trigger execution
+            if (!string.IsNullOrEmpty(text))
             {
-              callback(script);
+              await callback(script);
             }
           }));
         }

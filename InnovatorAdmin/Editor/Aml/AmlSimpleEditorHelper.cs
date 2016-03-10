@@ -67,6 +67,7 @@ namespace InnovatorAdmin.Editor
               AmlTransforms.CriteriaToWhereClause(elem);
               doc.Replace(segment.Offset, segment.Length, elem.ToString());
             }
+            return Task.FromResult(true);
           }
         }, 1));
       }

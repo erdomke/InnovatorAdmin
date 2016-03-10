@@ -823,7 +823,7 @@ namespace InnovatorAdmin.Editor
                                 </Item>
                               </Relationships>
                             </Item>", true, false),
-          ArasMetadataProvider.Cached(_conn).CompletePromise())
+          ArasMetadataProvider.Cached(_conn).ReloadPromise())
         .Convert(r =>
         {
           _itemTypeReportNames = ((IReadOnlyResult)r[1]).AssertItem().Relationships()
@@ -990,11 +990,11 @@ namespace InnovatorAdmin.Editor
       {
         Name = "New " + (itemType.Label ?? itemType.Name),
         Action = "ApplyItem",
-        ScriptGetter = () =>
+        ScriptGetter = async () =>
         {
           var builder = new StringBuilder();
           builder.AppendFormat("<Item type='{0}' action='add'>", itemType.Name).AppendLine();
-          foreach (var prop in ArasMetadataProvider.Cached(conn).GetProperties(itemType).Wait()
+          foreach (var prop in (await ArasMetadataProvider.Cached(conn).GetProperties(itemType).ToTask())
                                 .Where(p => p.DefaultValue != null))
           {
             builder.Append("  <").Append(prop.Name).Append(">");
@@ -1012,14 +1012,14 @@ namespace InnovatorAdmin.Editor
       {
         Name = "List " + (itemType.Label ?? itemType.Name),
         Action = "ApplyItem",
-        ScriptGetter = () => {
-          var it = _conn.Apply(@"<Item type='ItemType' action='get' select='default_page_size'>
+        ScriptGetter = async () => {
+          var it = (await _conn.ApplyAsync(@"<Item type='ItemType' action='get' select='default_page_size'>
                                       <name>@0</name>
                                       <Relationships>
                                         <Item type='Property' action='get' select='default_search'>
                                         </Item>
                                       </Relationships>
-                                    </Item>", itemType.Name).AssertItem();
+                                    </Item>", true, false, itemType.Name).ToTask()).AssertItem();
           var builder = new StringBuilder();
           builder.AppendFormat("<Item type='{0}' action='get'", itemType.Name);
           if (it.Property("default_page_size").HasValue())
@@ -1067,12 +1067,11 @@ namespace InnovatorAdmin.Editor
       };
     }
 
-    private string SqlSelect(ItemType itemType)
+    private async Task<string> SqlSelect(ItemType itemType)
     {
       var metadata = ArasMetadataProvider.Cached(_conn);
-      var props = metadata
-        .GetProperties(itemType)
-        .Wait();
+      var props = await metadata
+        .GetProperties(itemType).ToTask();
 
       var script = new StringBuilder("<sql>").AppendLine().AppendLine("select");
       var relations = new StringBuilder();

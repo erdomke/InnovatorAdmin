@@ -56,8 +56,9 @@ namespace InnovatorAdmin
       });
       return result;
     }
+
     public static void WriteAmlMergeScripts(this IDiffDirectory baseDir, IDiffDirectory compareDir
-      , string outputDirectory, Action<int> progressCallback = null)
+      , Func<string, int, XmlWriter> callback = null)
     {
       Func<IDiffFile, IComparable> keyGetter = i => i.Path;
       var basePaths = baseDir.GetFiles().OrderBy(keyGetter).ToArray();
@@ -71,33 +72,41 @@ namespace InnovatorAdmin
       {
         try
         {
-          var savePath = Path.Combine(outputDirectory, (b ?? c).Path);
-          if (savePath.EndsWith(".xslt.xml"))
+          var path = (b ?? c).Path;
+          if (path.EndsWith(".xslt.xml"))
             return;
 
-          Directory.CreateDirectory(Path.GetDirectoryName(savePath));
+          completed++;
           switch (i)
           {
-            case -1:
-              SaveFile(AmlDiff.GetMergeScript(ReadFile(b,
-                p => basePaths.FirstOrDefault(f => f.Path == p)), null), savePath);
-              break;
-            case 1:
-              using (var baseStream = c.OpenRead())
-              using (var outStream = File.OpenWrite(savePath))
+            case -1: // Delete
+              using (var baseStream = ReadFile(b, p => basePaths.FirstOrDefault(f => f.Path == p)))
+              using (var writer = callback(path, completed * 100 / total))
               {
-                baseStream.CopyTo(outStream);
+                var elem = AmlDiff.GetMergeScript(baseStream, null);
+                if (elem.Elements().Any())
+                  elem.WriteTo(writer);
               }
               break;
-            default:
-              SaveFile(AmlDiff.GetMergeScript(
-                ReadFile(b, p => basePaths.FirstOrDefault(f => f.Path == p)),
-                ReadFile(c, p => comparePaths.FirstOrDefault(f => f.Path == p))), savePath);
+            case 1: // Add
+              using (var baseStream = c.OpenRead())
+              using (var writer = callback(path, completed * 100 / total))
+              {
+                XElement.Load(baseStream).WriteTo(writer);
+              }
+              break;
+            default: // Edit
               total--;
+              using (var baseStream = ReadFile(b, p => basePaths.FirstOrDefault(f => f.Path == p)))
+              using (var compareStream = ReadFile(c, p => comparePaths.FirstOrDefault(f => f.Path == p)))
+              using (var writer = callback(path, completed * 100 / total))
+              {
+                var elem = AmlDiff.GetMergeScript(baseStream, compareStream);
+                if (elem.Elements().Any())
+                  elem.WriteTo(writer);
+              }
               break;
           }
-          completed++;
-          if (progressCallback != null) progressCallback(completed * 100 / total);
         }
         catch (XmlException ex)
         {
@@ -106,43 +115,54 @@ namespace InnovatorAdmin
       });
     }
 
-    private static string ReadFile(IDiffFile file, Func<string, IDiffFile> fileGetter)
+    public static void WriteAmlMergeScripts(this IDiffDirectory baseDir, IDiffDirectory compareDir
+      , string outputDirectory, Action<int> progressCallback = null)
+    {
+      WriteAmlMergeScripts(baseDir, compareDir, (path, progress) =>
+      {
+        if (progressCallback != null) progressCallback(progress);
+
+        var savePath = Path.Combine(outputDirectory, path);
+        Directory.CreateDirectory(Path.GetDirectoryName(savePath));
+
+        var settings = new XmlWriterSettings();
+        settings.OmitXmlDeclaration = true;
+        settings.Indent = true;
+        settings.IndentChars = "  ";
+        var stream = new FileStream(path, FileMode.Create, FileAccess.Write);
+        return XmlWriter.Create(stream, settings);
+      });
+    }
+
+    private static Stream ReadFile(IDiffFile file, Func<string, IDiffFile> fileGetter)
     {
       if (file.Path.EndsWith(".xslt", StringComparison.OrdinalIgnoreCase))
       {
-        return InnovatorPackage.ReadReport(file.Path, p => 
+        var report = InnovatorPackage.ReadReport(file.Path, p =>
         {
           var f = fileGetter(p);
           if (f != null)
             return f.OpenRead();
           return new MemoryStream(Encoding.UTF8.GetBytes("<Result><Item></Item></Result>"));
-        }).OuterXml;
-      }
-      else
-      {
-        using (var baseStream = file.OpenRead())
-        using (var baseRead = new StreamReader(baseStream))
-        {
-          return baseRead.ReadToEnd();
-        }
-      }
-      
-    }
+        });
 
-    private static void SaveFile(XElement elem, string path)
-    {
-      if (elem.Elements().Any())
-      {
         var settings = new XmlWriterSettings();
         settings.OmitXmlDeclaration = true;
         settings.Indent = true;
         settings.IndentChars = "  ";
-        using (var stream = new FileStream(path, FileMode.Create, FileAccess.Write))
-        using (var writer = XmlWriter.Create(stream, settings))
+        var result = new MemoryStream();
+        using (var writer = XmlWriter.Create(result, settings))
         {
-          elem.Save(writer);
-        }
+          report.WriteTo(writer);
+        };
+        result.Position = 0;
+        return result;
       }
+      else
+      {
+        return file.OpenRead();
+      }
+
     }
   }
 }

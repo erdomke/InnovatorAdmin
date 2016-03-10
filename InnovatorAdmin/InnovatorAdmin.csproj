@@ -171,6 +171,12 @@
     <Compile Include="Connections\ConnectionDataExtensions.cs" />
     <Compile Include="Connections\ConnectionParameter.cs" />
     <Compile Include="Connections\ConnectionType.cs" />
+    <Compile Include="Controls\CompareSelect.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\CompareSelect.Designer.cs">
+      <DependentUpon>CompareSelect.cs</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Compare.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -521,10 +527,6 @@
       <DependentUpon>Main.cs</DependentUpon>
     </Compile>
     <Compile Include="Merge\FileCompare.cs" />
-    <Compile Include="Merge\FileDiff.cs" />
-    <Compile Include="Merge\FileStatus.cs" />
-    <Compile Include="Merge\IDiffDirectory.cs" />
-    <Compile Include="Merge\IDiffFile.cs" />
     <Compile Include="Merge\IMergeOperation.cs" />
     <Compile Include="Merge\MergeFilePaths.cs" />
     <Compile Include="Merge\MergeStatus.cs" />
@@ -601,6 +603,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ConnectionEditorForm.resx">
       <DependentUpon>ConnectionEditorForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\CompareSelect.resx">
+      <DependentUpon>CompareSelect.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\Compare.resx">
       <DependentUpon>Compare.cs</DependentUpon>

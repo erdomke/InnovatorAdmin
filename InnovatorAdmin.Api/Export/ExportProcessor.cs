@@ -48,11 +48,11 @@ namespace InnovatorAdmin
     /// <summary>
     /// Fill an install script with exports of the specified items
     /// </summary>
-    public void Export(InstallScript script, IEnumerable<ItemReference> items
+    public async Task Export(InstallScript script, IEnumerable<ItemReference> items
       , bool checkDependencies = true)
     {
       ReportProgress(0, "Loading system data");
-      _metadata.Wait();
+      await _metadata.ReloadTask();
 
       var uniqueItems = new HashSet<ItemReference>(items);
       if (script.Lines != null) uniqueItems.ExceptWith(script.Lines.Select(l => l.Reference));
@@ -246,12 +246,12 @@ namespace InnovatorAdmin
     /// <summary>
     /// Fill an install script with exports of the items in the XmlDocument
     /// </summary>
-    public void Export(InstallScript script, XmlDocument doc
+    public async Task Export(InstallScript script, XmlDocument doc
       , HashSet<ItemReference> warnings = null, bool checkDependencies = true)
     {
       try
       {
-        _metadata.Wait();
+        await _metadata.ReloadTask();
         FixPolyItemReferences(doc);
         FixPolyItemListReferences(doc);
         FixForeignProperties(doc);
@@ -338,13 +338,13 @@ namespace InnovatorAdmin
       }
     }
 
-    public static IEnumerable<InstallItem> SortByDependencies(IEnumerable<InstallItem> items, IAsyncConnection conn)
+    public static async Task<IEnumerable<InstallItem>> SortByDependencies(IEnumerable<InstallItem> items, IAsyncConnection conn)
     {
       int loops = 0;
       var state = CycleState.ResolvedCycle;
       var results = items;
       var metadata = ArasMetadataProvider.Cached(conn);
-      metadata.Wait();
+      await metadata.ReloadTask();
       var analyzer = new DependencyAnalyzer(metadata);
       while (loops < 10 && state == CycleState.ResolvedCycle)
       {

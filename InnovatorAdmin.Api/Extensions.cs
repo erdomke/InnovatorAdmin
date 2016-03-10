@@ -320,7 +320,7 @@ namespace InnovatorAdmin
                 if (pMeta.DefaultValue != null) newColumn.DefaultValue = pMeta.DefaultValue;
                 if (kvp.Key != mainType && !string.IsNullOrEmpty(mainId) && pMeta.Name == "source_id")
                   newColumn.DefaultValue = mainId;
-                newColumn.ReadOnly = pMeta.ReadOnly;
+                newColumn.ReadOnly = pMeta.ReadOnly && pMeta.Name != "related_id" && pMeta.Name != "source_id";
                 newColumn.AllowDBNull = selectedCols.Any() || !pMeta.IsRequired || !string.IsNullOrEmpty(propAddendum);
                 // Ignore constraints on the following columns
                 switch (pMeta.Name)

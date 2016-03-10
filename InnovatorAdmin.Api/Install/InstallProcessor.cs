@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using Innovator.Client;
+using System.Threading.Tasks;
 
 namespace InnovatorAdmin
 {
@@ -55,13 +56,13 @@ namespace InnovatorAdmin
       return result;
     }
 
-    public void Initialize(InstallScript script)
+    public async Task Initialize(InstallScript script)
     {
       _log.Length = 0;
       _script = script;
       _lines = (_script.DependencySorted
         ? _script.Lines
-        : ExportProcessor.SortByDependencies(script.Lines, _conn)
+        : (await ExportProcessor.SortByDependencies(script.Lines, _conn))
           .Where(l => l.Type != InstallType.DependencyCheck)
       ).Where(l => l.Script != null && l.Type != InstallType.Warning).ToList();
       _currLine = -1;
@@ -125,7 +126,7 @@ namespace InnovatorAdmin
             {
               // If the original item uses a where clause or is versionable or the target item is versionable
 
-              if ((query.Attribute("action") == "merge" || query.Attribute("action") == "edit") && TryGetConfigId(query, out configId) 
+              if ((query.Attribute("action") == "merge" || query.Attribute("action") == "edit") && TryGetConfigId(query, out configId)
                  && (query.Attribute("where") != null || (_itemTypes.TryGetValue(query.Attribute("type").ToLowerInvariant(), out itemType)) && itemType.IsVersionable ))
               {
                 newQuery = query.Clone() as XmlElement;

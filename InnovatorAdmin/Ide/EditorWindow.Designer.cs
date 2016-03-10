@@ -128,6 +128,7 @@
       this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
       this.btnInstall = new InnovatorAdmin.Controls.FlatButton();
       this.btnCreate = new InnovatorAdmin.Controls.FlatButton();
+      this.btnCompare = new InnovatorAdmin.Controls.FlatButton();
       this.pgTextOutput = new System.Windows.Forms.TabPage();
       this.outputEditor = new InnovatorAdmin.Editor.FullEditor();
       this.pgHtml = new System.Windows.Forms.TabPage();
@@ -1048,7 +1049,7 @@
       // 
       this.splitEditors.Panel2.Controls.Add(this.tableLayoutPanel2);
       this.splitEditors.Size = new System.Drawing.Size(766, 581);
-      this.splitEditors.SplitterDistance = 165;
+      this.splitEditors.SplitterDistance = 164;
       this.splitEditors.TabIndex = 0;
       // 
       // tableLayoutPanel3
@@ -1064,7 +1065,7 @@
       this.tableLayoutPanel3.RowCount = 2;
       this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-      this.tableLayoutPanel3.Size = new System.Drawing.Size(766, 165);
+      this.tableLayoutPanel3.Size = new System.Drawing.Size(766, 164);
       this.tableLayoutPanel3.TabIndex = 1;
       // 
       // inputEditor
@@ -1073,10 +1074,10 @@
       this.tableLayoutPanel3.SetColumnSpan(this.inputEditor, 2);
       this.inputEditor.Dock = System.Windows.Forms.DockStyle.Fill;
       this.inputEditor.Location = new System.Drawing.Point(6, 6);
-      this.inputEditor.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+      this.inputEditor.Margin = new System.Windows.Forms.Padding(6);
       this.inputEditor.Name = "inputEditor";
       this.inputEditor.ReadOnly = false;
-      this.inputEditor.Size = new System.Drawing.Size(754, 153);
+      this.inputEditor.Size = new System.Drawing.Size(754, 152);
       this.inputEditor.TabIndex = 0;
       this.inputEditor.RunRequested += new System.EventHandler<InnovatorAdmin.Editor.RunRequestedEventArgs>(this.inputEditor_RunRequested);
       // 
@@ -1094,7 +1095,7 @@
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-      this.tableLayoutPanel2.Size = new System.Drawing.Size(766, 412);
+      this.tableLayoutPanel2.Size = new System.Drawing.Size(766, 413);
       this.tableLayoutPanel2.TabIndex = 0;
       // 
       // tbcOutputView
@@ -1114,17 +1115,17 @@
       this.tbcOutputView.Name = "tbcOutputView";
       this.tbcOutputView.Padding = new System.Drawing.Point(0, 0);
       this.tbcOutputView.SelectedIndex = 0;
-      this.tbcOutputView.Size = new System.Drawing.Size(766, 412);
+      this.tbcOutputView.Size = new System.Drawing.Size(766, 413);
       this.tbcOutputView.TabIndex = 5;
       this.tbcOutputView.SelectedIndexChanged += new System.EventHandler(this.tbcOutputView_SelectedIndexChanged);
       // 
       // pgTools
       // 
       this.pgTools.Controls.Add(this.tableLayoutPanel6);
-      this.pgTools.Location = new System.Drawing.Point(4, 29);
+      this.pgTools.Location = new System.Drawing.Point(4, 25);
       this.pgTools.Name = "pgTools";
       this.pgTools.Padding = new System.Windows.Forms.Padding(3);
-      this.pgTools.Size = new System.Drawing.Size(758, 379);
+      this.pgTools.Size = new System.Drawing.Size(758, 384);
       this.pgTools.TabIndex = 3;
       this.pgTools.Text = "Tools";
       this.pgTools.UseVisualStyleBackColor = true;
@@ -1141,7 +1142,7 @@
       this.tableLayoutPanel6.RowCount = 2;
       this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70F));
       this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30F));
-      this.tableLayoutPanel6.Size = new System.Drawing.Size(752, 373);
+      this.tableLayoutPanel6.Size = new System.Drawing.Size(752, 378);
       this.tableLayoutPanel6.TabIndex = 5;
       // 
       // flowLayoutPanel2
@@ -1152,10 +1153,10 @@
       this.flowLayoutPanel2.Controls.Add(this.lnkGitMergeHelper);
       this.flowLayoutPanel2.Controls.Add(this.lnkWriteMergeScripts);
       this.flowLayoutPanel2.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-      this.flowLayoutPanel2.Location = new System.Drawing.Point(15, 347);
+      this.flowLayoutPanel2.Location = new System.Drawing.Point(15, 279);
       this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(15);
       this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-      this.flowLayoutPanel2.Size = new System.Drawing.Size(882, 113);
+      this.flowLayoutPanel2.Size = new System.Drawing.Size(722, 84);
       this.flowLayoutPanel2.TabIndex = 5;
       // 
       // lnkGitMergeHelper
@@ -1164,7 +1165,7 @@
       this.lnkGitMergeHelper.Location = new System.Drawing.Point(3, 3);
       this.lnkGitMergeHelper.Margin = new System.Windows.Forms.Padding(3);
       this.lnkGitMergeHelper.Name = "lnkGitMergeHelper";
-      this.lnkGitMergeHelper.Size = new System.Drawing.Size(183, 30);
+      this.lnkGitMergeHelper.Size = new System.Drawing.Size(95, 13);
       this.lnkGitMergeHelper.TabIndex = 0;
       this.lnkGitMergeHelper.TabStop = true;
       this.lnkGitMergeHelper.Text = "Git Merge Helper";
@@ -1173,10 +1174,10 @@
       // lnkWriteMergeScripts
       // 
       this.lnkWriteMergeScripts.AutoSize = true;
-      this.lnkWriteMergeScripts.Location = new System.Drawing.Point(3, 39);
+      this.lnkWriteMergeScripts.Location = new System.Drawing.Point(3, 22);
       this.lnkWriteMergeScripts.Margin = new System.Windows.Forms.Padding(3);
       this.lnkWriteMergeScripts.Name = "lnkWriteMergeScripts";
-      this.lnkWriteMergeScripts.Size = new System.Drawing.Size(385, 30);
+      this.lnkWriteMergeScripts.Size = new System.Drawing.Size(200, 13);
       this.lnkWriteMergeScripts.TabIndex = 1;
       this.lnkWriteMergeScripts.TabStop = true;
       this.lnkWriteMergeScripts.Text = "Write Merge Scripts from Git Commits";
@@ -1189,10 +1190,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.flowLayoutPanel1.Controls.Add(this.btnInstall);
       this.flowLayoutPanel1.Controls.Add(this.btnCreate);
+      this.flowLayoutPanel1.Controls.Add(this.btnCompare);
       this.flowLayoutPanel1.Location = new System.Drawing.Point(15, 15);
       this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(15);
       this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-      this.flowLayoutPanel1.Size = new System.Drawing.Size(722, 231);
+      this.flowLayoutPanel1.Size = new System.Drawing.Size(722, 234);
       this.flowLayoutPanel1.TabIndex = 4;
       // 
       // btnInstall
@@ -1246,12 +1248,37 @@
       this.btnCreate.UseVisualStyleBackColor = true;
       this.btnCreate.Click += new System.EventHandler(this.btnCreate_Click);
       // 
+      // btnCompare
+      // 
+      this.btnCompare.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.btnCompare.AutoSize = true;
+      this.btnCompare.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnCompare.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnCompare.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnCompare.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnCompare.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+      this.btnCompare.ForeColor = System.Drawing.Color.Black;
+      this.btnCompare.Location = new System.Drawing.Point(371, 3);
+      this.btnCompare.MinimumSize = new System.Drawing.Size(120, 40);
+      this.btnCompare.Name = "btnCompare";
+      this.btnCompare.Orientation = System.Windows.Forms.Orientation.Horizontal;
+      this.btnCompare.Padding = new System.Windows.Forms.Padding(2);
+      this.btnCompare.Size = new System.Drawing.Size(218, 61);
+      this.btnCompare.TabIndex = 4;
+      this.btnCompare.Text = "Compare Packages";
+      this.btnCompare.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+      this.btnCompare.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnCompare.UseVisualStyleBackColor = true;
+      this.btnCompare.Click += new System.EventHandler(this.btnCompare_Click);
+      // 
       // pgTextOutput
       // 
       this.pgTextOutput.Controls.Add(this.outputEditor);
-      this.pgTextOutput.Location = new System.Drawing.Point(4, 29);
+      this.pgTextOutput.Location = new System.Drawing.Point(4, 25);
       this.pgTextOutput.Name = "pgTextOutput";
-      this.pgTextOutput.Size = new System.Drawing.Size(758, 379);
+      this.pgTextOutput.Size = new System.Drawing.Size(758, 384);
       this.pgTextOutput.TabIndex = 0;
       this.pgTextOutput.Text = "Code";
       this.pgTextOutput.UseVisualStyleBackColor = true;
@@ -1261,19 +1288,19 @@
       this.outputEditor.BackColor = System.Drawing.Color.White;
       this.outputEditor.Dock = System.Windows.Forms.DockStyle.Fill;
       this.outputEditor.Location = new System.Drawing.Point(0, 0);
-      this.outputEditor.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+      this.outputEditor.Margin = new System.Windows.Forms.Padding(6);
       this.outputEditor.Name = "outputEditor";
       this.outputEditor.ReadOnly = true;
-      this.outputEditor.Size = new System.Drawing.Size(758, 379);
+      this.outputEditor.Size = new System.Drawing.Size(758, 384);
       this.outputEditor.TabIndex = 0;
       // 
       // pgHtml
       // 
       this.pgHtml.Controls.Add(this.browser);
-      this.pgHtml.Location = new System.Drawing.Point(4, 29);
+      this.pgHtml.Location = new System.Drawing.Point(4, 25);
       this.pgHtml.Name = "pgHtml";
       this.pgHtml.Padding = new System.Windows.Forms.Padding(3);
-      this.pgHtml.Size = new System.Drawing.Size(758, 379);
+      this.pgHtml.Size = new System.Drawing.Size(758, 363);
       this.pgHtml.TabIndex = 2;
       this.pgHtml.Text = "Report";
       this.pgHtml.UseVisualStyleBackColor = true;
@@ -1284,16 +1311,16 @@
       this.browser.Location = new System.Drawing.Point(3, 3);
       this.browser.MinimumSize = new System.Drawing.Size(20, 20);
       this.browser.Name = "browser";
-      this.browser.Size = new System.Drawing.Size(752, 373);
+      this.browser.Size = new System.Drawing.Size(752, 357);
       this.browser.TabIndex = 0;
       // 
       // pgTableOutput
       // 
       this.pgTableOutput.Controls.Add(this.dgvItems);
-      this.pgTableOutput.Location = new System.Drawing.Point(4, 29);
+      this.pgTableOutput.Location = new System.Drawing.Point(4, 25);
       this.pgTableOutput.Margin = new System.Windows.Forms.Padding(0);
       this.pgTableOutput.Name = "pgTableOutput";
-      this.pgTableOutput.Size = new System.Drawing.Size(758, 379);
+      this.pgTableOutput.Size = new System.Drawing.Size(758, 363);
       this.pgTableOutput.TabIndex = 1;
       this.pgTableOutput.Text = "Table";
       this.pgTableOutput.UseVisualStyleBackColor = true;
@@ -1308,7 +1335,7 @@
       this.dgvItems.Location = new System.Drawing.Point(0, 0);
       this.dgvItems.Margin = new System.Windows.Forms.Padding(0);
       this.dgvItems.Name = "dgvItems";
-      this.dgvItems.Size = new System.Drawing.Size(758, 379);
+      this.dgvItems.Size = new System.Drawing.Size(758, 363);
       this.dgvItems.TabIndex = 0;
       this.dgvItems.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.Grid_MouseDoubleClick);
       // 
@@ -1735,5 +1762,6 @@
     private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
     private System.Windows.Forms.LinkLabel lnkGitMergeHelper;
     private System.Windows.Forms.LinkLabel lnkWriteMergeScripts;
+    private Controls.FlatButton btnCompare;
   }
 }

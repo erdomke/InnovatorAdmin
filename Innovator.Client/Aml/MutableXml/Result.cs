@@ -13,7 +13,7 @@ namespace Innovator.Client
     private IReadOnlyItem _errorContext;
     private List<string> _errors;
     private List<string> _properties;
-    
+
     public ServerException Exception
     {
       get
@@ -33,18 +33,18 @@ namespace Innovator.Client
           }
         }
 
-        if (_node.LocalName == "Envelope" 
-          && (_node.NamespaceURI == "http://schemas.xmlsoap.org/soap/envelope/" || string.IsNullOrEmpty(_node.NamespaceURI)) 
+        if (_node.LocalName == "Envelope"
+          && (_node.NamespaceURI == "http://schemas.xmlsoap.org/soap/envelope/" || string.IsNullOrEmpty(_node.NamespaceURI))
           && _node.HasChildNodes)
         {
           var node = _node.ChildNodes.OfType<XmlElement>().First();
-          if (node.LocalName == "Body" 
-            && (node.NamespaceURI == "http://schemas.xmlsoap.org/soap/envelope/" || string.IsNullOrEmpty(node.NamespaceURI)) 
+          if (node.LocalName == "Body"
+            && (node.NamespaceURI == "http://schemas.xmlsoap.org/soap/envelope/" || string.IsNullOrEmpty(node.NamespaceURI))
             && node.HasChildNodes)
           {
             node = node.ChildNodes.OfType<XmlElement>().First();
-            if (node.LocalName == "Fault" 
-              && (node.NamespaceURI == "http://schemas.xmlsoap.org/soap/envelope/" || string.IsNullOrEmpty(node.NamespaceURI)) 
+            if (node.LocalName == "Fault"
+              && (node.NamespaceURI == "http://schemas.xmlsoap.org/soap/envelope/" || string.IsNullOrEmpty(node.NamespaceURI))
               && node.HasChildNodes)
             {
               return _factory.ServerException(node).SetDetails(_conn == null ? null : _conn.Database, _query);
@@ -88,7 +88,7 @@ namespace Innovator.Client
       _conn = conn;
     }
     internal Result(ElementFactory factory, XmlNode node) : base(factory, GetElem(node)) {}
-    
+
     private static XmlElement GetElem(string xml)
     {
       var doc = new XmlDocument(Element.BufferDocument.NameTable);
@@ -213,7 +213,7 @@ namespace Innovator.Client
     {
       return AssertNoError();
     }
-    
+
     public IErrorBuilder ErrorContext(IReadOnlyItem item)
     {
       _errorContext = item;

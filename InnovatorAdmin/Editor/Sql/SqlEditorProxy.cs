@@ -303,7 +303,7 @@ WHERE ind.index_id = {0} and ind.object_id = {1};", c.Id, c.ParentId)
       yield return new EditorScript()
       {
         Name = "Create Script",
-        ScriptGetter = () =>
+        ScriptGetter = async () =>
         {
           if (string.Equals(obj.Type, "table", StringComparison.OrdinalIgnoreCase))
           {
@@ -411,9 +411,8 @@ from sys.sql_modules m
 where m.object_id = @id", _conn);
             cmd.Parameters.AddWithValue("id", obj.Id);
 
-            var data = cmd.GetResultAsync();
-            data.Wait();
-            var tbl = data.Result.GetDataSet().Tables[0];
+            var data = await cmd.GetResultAsync();
+            var tbl = data.GetDataSet().Tables[0];
             if (tbl.Rows.Count < 1)
               return string.Empty;
             return (string)tbl.Rows[0][0];

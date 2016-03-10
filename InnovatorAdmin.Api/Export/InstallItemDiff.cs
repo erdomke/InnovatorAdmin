@@ -93,7 +93,7 @@ namespace InnovatorAdmin
           {
             _itemRef = leftList[compare.Base].Reference,
             _type = leftList[compare.Base].Type,
-            DiffType = (AmlDiff.IsDifferent(leftList[compare.Base].Script.OuterXml, rightList[compare.Compare].Script.OuterXml) ?
+            DiffType = (AmlDiff.IsDifferent(new XmlNodeReader(leftList[compare.Base].Script), new XmlNodeReader(rightList[compare.Compare].Script)) ?
                         DiffType.Different : DiffType.Identical),
             LeftScript = leftList[compare.Base].Script,
             RightScript = rightList[compare.Compare].Script

@@ -30,6 +30,7 @@ namespace InnovatorAdmin.Controls
       _items = new FullBindingList<ImportStepResolve>(
         _wizard.InstallScript.Lines.Select(i => new ImportStepResolve() { Item = i }));
       resolveGrid.DataSource = _items;
+      resolveGrid.AutoResizeRows(DataGridViewAutoSizeRowsMode.AllCells);
     }
 
     public void GoNext()

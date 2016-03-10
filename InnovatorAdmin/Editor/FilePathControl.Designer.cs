@@ -28,29 +28,16 @@
     /// </summary>
     private void InitializeComponent()
     {
-      this.txtPath = new InnovatorAdmin.Editor.EditorWinForm();
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
       this.btnBrowse = new InnovatorAdmin.Controls.FlatButton();
+      this.txtPath = new InnovatorAdmin.Editor.EditorWinForm();
       this.tableLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
       // 
-      // txtPath
-      // 
-      this.txtPath.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-      this.txtPath.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-      this.txtPath.Location = new System.Drawing.Point(0, 0);
-      this.txtPath.Margin = new System.Windows.Forms.Padding(0);
-      this.txtPath.Name = "txtPath";
-      this.txtPath.PlaceholderText = "";
-      this.txtPath.ReadOnly = false;
-      this.txtPath.ShowLineNumbers = false;
-      this.txtPath.ShowScrollbars = false;
-      this.txtPath.SingleLine = true;
-      this.txtPath.Size = new System.Drawing.Size(212, 22);
-      this.txtPath.TabIndex = 0;
-      // 
       // tableLayoutPanel1
       // 
+      this.tableLayoutPanel1.AutoSize = true;
+      this.tableLayoutPanel1.BackColor = System.Drawing.Color.White;
       this.tableLayoutPanel1.ColumnCount = 2;
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
@@ -62,11 +49,12 @@
       this.tableLayoutPanel1.Name = "tableLayoutPanel1";
       this.tableLayoutPanel1.RowCount = 1;
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel1.Size = new System.Drawing.Size(241, 22);
+      this.tableLayoutPanel1.Size = new System.Drawing.Size(261, 32);
       this.tableLayoutPanel1.TabIndex = 1;
       // 
       // btnBrowse
       // 
+      this.btnBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.btnBrowse.AutoSize = true;
       this.btnBrowse.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
       this.btnBrowse.FlatAppearance.BorderSize = 0;
@@ -75,28 +63,45 @@
       this.btnBrowse.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnBrowse.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnBrowse.ForeColor = System.Drawing.Color.Black;
-      this.btnBrowse.Location = new System.Drawing.Point(212, 0);
+      this.btnBrowse.Location = new System.Drawing.Point(217, 0);
       this.btnBrowse.Margin = new System.Windows.Forms.Padding(0);
       this.btnBrowse.Name = "btnBrowse";
       this.btnBrowse.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnBrowse.Padding = new System.Windows.Forms.Padding(2, 0, 2, 0);
-      this.btnBrowse.Size = new System.Drawing.Size(29, 22);
+      this.btnBrowse.Size = new System.Drawing.Size(44, 32);
       this.btnBrowse.TabIndex = 1;
       this.btnBrowse.Text = "...";
       this.btnBrowse.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnBrowse.UseVisualStyleBackColor = false;
       this.btnBrowse.Click += new System.EventHandler(this.btnBrowse_Click);
       // 
+      // txtPath
+      // 
+      this.txtPath.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+      this.txtPath.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+      this.txtPath.Location = new System.Drawing.Point(0, 5);
+      this.txtPath.Margin = new System.Windows.Forms.Padding(0);
+      this.txtPath.Name = "txtPath";
+      this.txtPath.PlaceholderText = "";
+      this.txtPath.ReadOnly = false;
+      this.txtPath.ShowLineNumbers = false;
+      this.txtPath.ShowScrollbars = false;
+      this.txtPath.SingleLine = true;
+      this.txtPath.Size = new System.Drawing.Size(217, 22);
+      this.txtPath.TabIndex = 0;
+      // 
       // FilePathControl
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+      this.AutoSize = true;
       this.Controls.Add(this.tableLayoutPanel1);
       this.Name = "FilePathControl";
-      this.Size = new System.Drawing.Size(241, 22);
+      this.Size = new System.Drawing.Size(261, 32);
       this.tableLayoutPanel1.ResumeLayout(false);
       this.tableLayoutPanel1.PerformLayout();
       this.ResumeLayout(false);
+      this.PerformLayout();
 
     }
 

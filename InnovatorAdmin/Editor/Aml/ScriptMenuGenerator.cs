@@ -75,6 +75,7 @@ namespace InnovatorAdmin.Editor
               {
                 row.Delete();
               }
+              return Task.FromResult(true);
             }
           };
         }
@@ -106,15 +107,17 @@ namespace InnovatorAdmin.Editor
           yield return new EditorScriptExecute()
           {
             Name = "Compare",
-            Execute = () =>
+            Execute = async () =>
             {
-              Settings.Current.PerformDiff(dataRows[0].Id, dataRows[0].ToAml
-                , dataRows[1].Id, dataRows[1].ToAml)
-                .ContinueWith(t =>
-                {
-                  if (t.IsFaulted)
-                    Utils.HandleError(t.Exception);
-                });
+              try
+              {
+                await Settings.Current.PerformDiff(dataRows[0].Id, dataRows[0].ToAml
+                  , dataRows[1].Id, dataRows[1].ToAml);
+              }
+              catch (Exception ex)
+              {
+                Utils.HandleError(ex);
+              }
             }
           };
         }
@@ -131,6 +134,7 @@ namespace InnovatorAdmin.Editor
             if (!refs.Any())
               refs = items.Select(i => new ItemReference(i.Type, i.Id));
             StartExport(refs);
+            return Task.FromResult(true);
           }
         };
       }
@@ -194,6 +198,7 @@ namespace InnovatorAdmin.Editor
                       rowItem.SetProperty(prop.Name + "/keyed_name", results[0].KeyedName);
                       rowItem.SetProperty(prop.Name + "/type", results[0].Type);
                     }
+                    return Task.FromResult(true);
                   }
                 };
                 break;
@@ -240,7 +245,79 @@ namespace InnovatorAdmin.Editor
           yield return new EditorScriptExecute()
           {
             Name = "Delete",
-            Execute = () => rowItem.Delete()
+            Execute = () => 
+            {
+              rowItem.Delete();
+              return Task.FromResult(true);
+            }
+          };
+        }
+        if (item.Id.IsGuid())
+        {
+          yield return new EditorScript()
+          {
+            Name = "Replace Item",
+            Action = "ApplySql",
+            ScriptGetter = async () =>
+            {
+              var aml = string.Format("<Item type='{0}' action='get'><keyed_name condition='like'>**</keyed_name></Item>", item.Type);
+              var replace = EditorWindow.GetItems(Conn, aml, aml.Length - 21);
+              if (replace.Count() == 1)
+              {
+                var sqlItem = Conn.AmlContext.FromXml(_whereUsedSqlAml).AssertItem();
+                var export = new ExportProcessor(Conn);
+                var script = new InstallScript();
+                var itemRef = ItemReference.FromFullItem(sqlItem, true);
+                await export.Export(script, new[] { itemRef });
+                var existing = script.Lines.FirstOrDefault(i => i.Reference.Equals(itemRef));
+                var needsSql = true;
+                if (existing != null)
+                {
+                  var merge = AmlDiff.GetMergeScript(XmlReader.Create(new StringReader(_whereUsedSqlAml)), new XmlNodeReader(existing.Script));
+                  needsSql = merge.Elements().Any();
+                }
+
+                if (needsSql)
+                {
+                  if (Dialog.MessageDialog.Show("To run this action, InnovatorAdmin needs to install the SQL WhereUsed_General into the database.  Do you want to install this?", "Install SQL", "Install", "Cancel") == System.Windows.Forms.DialogResult.OK)
+                  {
+                    await Conn.ApplyAsync(_whereUsedSqlAml, true, false).ToTask();
+                  }
+                  else
+                  {
+                    return null;
+                  }
+                }
+
+                var result = await Conn.ApplyAsync(@"<AML>
+                                   <Item type='SQL' action='SQL PROCESS'>
+                                     <name>WhereUsed_General</name>
+                                     <PROCESS>CALL</PROCESS>
+                                     <ARG1>@0</ARG1>
+                                     <ARG2>@1</ARG2>
+                                   </Item>
+                                 </AML>", true, false, item.Type, item.Id).ToTask();
+                var sql = new StringBuilder("<sql>");
+                var whereUsed = result.Items().Where(i => !i.Property("type").HasValue() || i.Property("type").Value == i.Property("parent_type").Value);
+                var replaceId = replace.First().Unique;
+                sql.AppendLine();
+                foreach (var i in whereUsed)
+                {
+                  var props = (from p in i.Elements().OfType<IReadOnlyProperty>()
+                               where p.Name.Length == 2 && p.Name[0] == 'p' && char.IsNumber(p.Name[1])
+                               select p.Value).GroupConcat(" = '" + replaceId + "',");
+                  sql.Append("update innovator.[").Append(i.Property("main_type").Value.Replace(' ', '_')).Append("] set ");
+                  sql.Append(props).Append(" = '").Append(replaceId).Append("'");
+                  sql.Append(" where id ='").Append(i.Property("main_id").Value).Append("';");
+                  sql.AppendLine();
+                }
+                sql.Append("</sql>");
+
+                return sql.ToString();
+              }
+
+              return null;
+            }
           };
         }
         yield return new EditorScript()
@@ -254,6 +331,7 @@ namespace InnovatorAdmin.Editor
           {
             var refs = new[] { new ItemReference(item.Type, item.Id) };
             StartExport(refs);
+            return Task.FromResult(true);
           }
         };
         yield return new EditorScript()
@@ -381,6 +459,7 @@ namespace InnovatorAdmin.Editor
             Execute = () =>
             {
               System.Windows.Clipboard.SetText(item.Id);
+              return Task.FromResult(true);
             }
           };
         }
@@ -410,6 +489,163 @@ namespace InnovatorAdmin.Editor
       main.Show();
       wizard.GoToStep(prog);
     }
+
+
+    private const string _whereUsedSqlAml = @"<Item type='SQL' id='B14305C457DB4474BFF2E852459DAEB0' _keyed_name='WhereUsed_General' action='merge' _dependencies_analyzed='1'>
+  <execution_flag>immediate</execution_flag>
+  <old_name>WhereUsed_General</old_name>
+  <sqlserver_body><![CDATA[/*
+name: WhereUsed_General
+solution: Extension to core
+created: 2014-02-13
+purpose: Get detailed where used information for the purpose of generating a replace script
+*/
+CREATE PROCEDURE innovator.WhereUsed_General(@itemtype as nvarchar(32), @itemid as char(32))
+AS
+BEGIN
+/*
+arguments:
+@itemtype - the item type (name) for the item
+@itemid - id of the item
+*/
+
+SELECT 
+    p.NAME prop_name
+  , it.NAME it_name
+  , it.INSTANCE_DATA it_table_name
+  , it.IMPLEMENTATION_TYPE
+  , sit.NAME parent_name
+  , sit.INSTANCE_DATA parent_table_name
+  , isnull(sit.OPEN_ICON, it.OPEN_ICON) open_icon
+  , ROW_NUMBER() over (partition by it.ID order by p.NAME) p_num
+into #PropData
+from innovator.PROPERTY p
+inner join innovator.ITEMTYPE ds
+on p.DATA_SOURCE = ds.id
+LEFT join 
+  (innovator.MORPHAE m
+   inner join innovator.ITEMTYPE ds2
+   on ds2.id = m.RELATED_ID
+  )
+on m.SOURCE_ID = ds.ID
+inner join innovator.ITEMTYPE it
+on it.ID = p.SOURCE_ID
+LEFT JOIN 
+  (innovator.RELATIONSHIPTYPE rt
+   inner join innovator.ITEMTYPE sit
+   on sit.ID = rt.SOURCE_ID
+  )
+on rt.RELATIONSHIP_ID = it.ID
+WHERE (ds.NAME = @itemtype or ds2.NAME = @itemtype) 
+and not p.name in ('config_id', 'id') and (sit.id is null or ds.id <> sit.id) -- Ignore links to itself
+and it.IMPLEMENTATION_TYPE = 'table'
+;
+
+create table #WhereUsed (
+  [icon] [nvarchar](128) NULL,
+  [main_id] [char](32) NOT NULL,
+	[main_type] [nvarchar](32) NOT NULL,
+	[parent_id] [char](32) NOT NULL,
+	[parent_type] [nvarchar](32) NOT NULL,
+	[KEYED_NAME] [nvarchar](128) NULL,
+	[MAJOR_REV] [nvarchar](8) NULL,
+	[GENERATION] [int] NULL,
+	[p1] [nvarchar](32) NULL,
+	[p2] [nvarchar](32) NULL,
+	[p3] [nvarchar](32) NULL,
+	[p4] [nvarchar](32) NULL,
+	[p5] [nvarchar](32) NULL,
+	[p6] [nvarchar](32) NULL,
+	[p7] [nvarchar](32) NULL,
+	[p8] [nvarchar](32) NULL,
+	[p9] [nvarchar](32) NULL,
+	[p10] [nvarchar](32) NULL,
+	[p11] [nvarchar](32) NULL,
+	[p12] [nvarchar](32) NULL
+);
+
+declare @DynamicSql nvarchar(MAX);
+declare @Params nvarchar(MAX);
+
+-- Create a cursor for looping through the sql statements
+declare sqlCursor cursor fast_forward for
+SELECT
+  CASE WHEN r.parent_name is null then 
+    'INSERT INTO #WhereUsed (icon,main_id,main_type,parent_id,parent_type,keyed_name,major_rev,generation,' + left(value_clause, len(value_clause) - 1) + ')
+    SELECT ' + isnull('''' + open_icon + '''', 'null') + ' icon, m.id main_id, ''' + it_name + ''' main_type
+      , m.id parent_id, ''' + it_name + ''' parent_type, m.KEYED_NAME, m.MAJOR_REV, m.GENERATION' + select_clause + 
+    ' FROM innovator.[' + it_table_name + '] m
+    where ' + LEFT(where_clause, LEN(where_clause) - 3) + ';'
+  else
+    'INSERT INTO #WhereUsed (icon,main_id,main_type,parent_id,parent_type,keyed_name,major_rev,generation,' + left(value_clause, len(value_clause) - 1) + ')
+    SELECT ' + isnull('''' + open_icon + '''', 'null') + ' icon, m.id main_id, ''' + it_name + ''' main_type
+      , p.ID parent_id, ''' + parent_name + ''' parent_type, p.KEYED_NAME, p.MAJOR_REV, p.GENERATION' + select_clause + 
+    ' FROM innovator.[' + it_table_name + '] m
+    left join innovator.[' + parent_table_name + '] p
+    on p.id = m.source_id
+    where ' + LEFT(where_clause, LEN(where_clause) - 3) + ';'
+  end sql
+from #PropData as r
+CROSS APPLY
+(
+  SELECT 'm.' + prop_name + ' = @id or ' as [text()]
+  from #PropData w
+  where w.it_name = r.it_name
+  for XML path ('')
+) pre_trim_where(where_clause)
+CROSS APPLY
+(
+  SELECT ', case when m.' + prop_name + ' = @id then ''' + prop_name + ''' else null end p' + cast(p_num AS nvarchar(5)) as [text()]
+  from #PropData s
+  where s.it_name = r.it_name
+  for XML path ('')
+) pre_trim_select(select_clause)
+CROSS APPLY
+(
+  SELECT 'p' + cast(p_num AS nvarchar(5)) +',' as [text()]
+  from #PropData v
+  where v.it_name = r.it_name
+  for XML path ('')
+) pre_trim_value(value_clause)
+GROUP by it_name, where_clause, select_clause, value_clause
+, it_name
+, it_table_name
+, IMPLEMENTATION_TYPE
+, parent_name
+, parent_table_name
+, open_icon
+;
+
+set @Params = N'@id as char(32)';
+
+-- For each sql statement, execute it
+open sqlCursor
+fetch next from sqlCursor 
+into @DynamicSql
+
+while @@FETCH_STATUS = 0
+begin
+	Execute sp_executesql @DynamicSql, @Params, @id = @itemid;
+	
+	fetch next from sqlCursor 
+	into @DynamicSql
+end
+
+close sqlCursor
+deallocate sqlCursor
+
+SELECT *
+from #WhereUsed
+
+drop table #PropData
+drop table #WhereUsed
+
+end]]></sqlserver_body>
+  <stale>0</stale>
+  <transform_first>0</transform_first>
+  <type>procedure</type>
+  <name>WhereUsed_General</name>
+</Item>";
   }
 
   public interface IItemData

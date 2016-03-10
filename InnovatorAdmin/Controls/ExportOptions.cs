@@ -25,8 +25,11 @@ namespace InnovatorAdmin.Controls
       _wizard.Message = "Specify package metadata (optional) and select and export type.";
       _wizard.NextEnabled = false;
 
+      string userName = null;
+      if (_wizard.ConnectionInfo != null && _wizard.ConnectionInfo.Any())
+        userName = _wizard.ConnectionInfo.First().UserName;
       txtName.Text = _wizard.InstallScript.Title;
-      txtAuthor.Text = _wizard.InstallScript.Creator ?? _wizard.ConnectionInfo.First().UserName;
+      txtAuthor.Text = _wizard.InstallScript.Creator ?? userName;
       txtWebsite.Text = (_wizard.InstallScript.Website == null ? "" : _wizard.InstallScript.Website.ToString());
       txtDescription.Text = _wizard.InstallScript.Description;
 

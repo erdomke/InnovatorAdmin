@@ -30,6 +30,7 @@
     {
       this.components = new System.ComponentModel.Container();
       this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+      this.conReferenceOptions = new System.Windows.Forms.ContextMenuStrip(this.components);
       this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
       this.label2 = new System.Windows.Forms.Label();
       this.label3 = new System.Windows.Forms.Label();
@@ -50,7 +51,7 @@
       this.mniLevels6 = new System.Windows.Forms.ToolStripMenuItem();
       this.mniLevels7 = new System.Windows.Forms.ToolStripMenuItem();
       this.mniLevels8 = new System.Windows.Forms.ToolStripMenuItem();
-      this.conReferenceOptions = new System.Windows.Forms.ContextMenuStrip(this.components);
+      this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
       this.tbcSearch = new InnovatorAdmin.Controls.FlatTabControl();
       this.pgSearchBy = new System.Windows.Forms.TabPage();
       this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
@@ -74,7 +75,6 @@
       this.btnUnselect = new InnovatorAdmin.Controls.FlatButton();
       this.btnUnselectAll = new InnovatorAdmin.Controls.FlatButton();
       this.btnAdvanced = new InnovatorAdmin.Controls.FlatButton();
-      this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
       this.tableLayoutPanel1.SuspendLayout();
       this.tableLayoutPanel4.SuspendLayout();
       this.conStrip.SuspendLayout();
@@ -106,11 +106,18 @@
       this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
       this.tableLayoutPanel1.Name = "tableLayoutPanel1";
       this.tableLayoutPanel1.RowCount = 3;
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel1.Size = new System.Drawing.Size(774, 342);
       this.tableLayoutPanel1.TabIndex = 2;
+      // 
+      // conReferenceOptions
+      // 
+      this.conReferenceOptions.ImageScalingSize = new System.Drawing.Size(32, 32);
+      this.conReferenceOptions.Name = "conReferenceOptions";
+      this.conReferenceOptions.Size = new System.Drawing.Size(86, 4);
+      this.conReferenceOptions.Opening += new System.ComponentModel.CancelEventHandler(this.conReferenceOptions_Opening);
       // 
       // tableLayoutPanel4
       // 
@@ -121,7 +128,7 @@
       this.tableLayoutPanel4.Controls.Add(this.btnSelect, 0, 2);
       this.tableLayoutPanel4.Controls.Add(this.btnUnselect, 0, 1);
       this.tableLayoutPanel4.Controls.Add(this.btnUnselectAll, 0, 0);
-      this.tableLayoutPanel4.Location = new System.Drawing.Point(354, 20);
+      this.tableLayoutPanel4.Location = new System.Drawing.Point(353, 32);
       this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(0);
       this.tableLayoutPanel4.Name = "tableLayoutPanel4";
       this.tableLayoutPanel4.RowCount = 4;
@@ -139,7 +146,7 @@
       this.label2.Location = new System.Drawing.Point(3, 3);
       this.label2.Margin = new System.Windows.Forms.Padding(3);
       this.label2.Name = "label2";
-      this.label2.Size = new System.Drawing.Size(96, 13);
+      this.label2.Size = new System.Drawing.Size(182, 26);
       this.label2.TabIndex = 6;
       this.label2.Text = "Available items:";
       // 
@@ -148,10 +155,10 @@
       this.label3.AutoSize = true;
       this.tableLayoutPanel1.SetColumnSpan(this.label3, 2);
       this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
-      this.label3.Location = new System.Drawing.Point(391, 3);
+      this.label3.Location = new System.Drawing.Point(390, 3);
       this.label3.Margin = new System.Windows.Forms.Padding(3);
       this.label3.Name = "label3";
-      this.label3.Size = new System.Drawing.Size(151, 13);
+      this.label3.Size = new System.Drawing.Size(282, 26);
       this.label3.TabIndex = 7;
       this.label3.Text = "Items selected for export:";
       // 
@@ -160,9 +167,9 @@
       this.chkDependencies.AutoSize = true;
       this.chkDependencies.Checked = true;
       this.chkDependencies.CheckState = System.Windows.Forms.CheckState.Checked;
-      this.chkDependencies.Location = new System.Drawing.Point(391, 304);
+      this.chkDependencies.Location = new System.Drawing.Point(390, 303);
       this.chkDependencies.Name = "chkDependencies";
-      this.chkDependencies.Size = new System.Drawing.Size(129, 17);
+      this.chkDependencies.Size = new System.Drawing.Size(229, 30);
       this.chkDependencies.TabIndex = 9;
       this.chkDependencies.Text = "Check Dependencies";
       this.chkDependencies.UseVisualStyleBackColor = true;
@@ -170,6 +177,7 @@
       // 
       // conStrip
       // 
+      this.conStrip.ImageScalingSize = new System.Drawing.Size(32, 32);
       this.conStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniHistory,
             this.mniPermissions,
@@ -178,34 +186,34 @@
             this.mniLevels,
             this.toolStripSeparator1});
       this.conStrip.Name = "conStrip";
-      this.conStrip.Size = new System.Drawing.Size(207, 142);
+      this.conStrip.Size = new System.Drawing.Size(381, 200);
       this.conStrip.Closed += new System.Windows.Forms.ToolStripDropDownClosedEventHandler(this.conStrip_Closed);
       // 
       // mniHistory
       // 
       this.mniHistory.Name = "mniHistory";
-      this.mniHistory.Size = new System.Drawing.Size(206, 22);
+      this.mniHistory.Size = new System.Drawing.Size(380, 38);
       this.mniHistory.Text = "Include History Data";
       this.mniHistory.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mniSysProps_MouseDown);
       // 
       // mniPermissions
       // 
       this.mniPermissions.Name = "mniPermissions";
-      this.mniPermissions.Size = new System.Drawing.Size(206, 22);
+      this.mniPermissions.Size = new System.Drawing.Size(380, 38);
       this.mniPermissions.Text = "Include Permissions Data";
       this.mniPermissions.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mniSysProps_MouseDown);
       // 
       // mniState
       // 
       this.mniState.Name = "mniState";
-      this.mniState.Size = new System.Drawing.Size(206, 22);
+      this.mniState.Size = new System.Drawing.Size(380, 38);
       this.mniState.Text = "Include State Data";
       this.mniState.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mniSysProps_MouseDown);
       // 
       // mniVersion
       // 
       this.mniVersion.Name = "mniVersion";
-      this.mniVersion.Size = new System.Drawing.Size(206, 22);
+      this.mniVersion.Size = new System.Drawing.Size(380, 38);
       this.mniVersion.Text = "Include Version Data";
       this.mniVersion.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mniSysProps_MouseDown);
       // 
@@ -222,13 +230,13 @@
             this.mniLevels7,
             this.mniLevels8});
       this.mniLevels.Name = "mniLevels";
-      this.mniLevels.Size = new System.Drawing.Size(206, 22);
+      this.mniLevels.Size = new System.Drawing.Size(380, 38);
       this.mniLevels.Text = "Levels";
       // 
       // mniLevels0
       // 
       this.mniLevels0.Name = "mniLevels0";
-      this.mniLevels0.Size = new System.Drawing.Size(80, 22);
+      this.mniLevels0.Size = new System.Drawing.Size(128, 38);
       this.mniLevels0.Text = "0";
       this.mniLevels0.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mniLevelItem_Click);
       // 
@@ -237,64 +245,63 @@
       this.mniLevels1.Checked = true;
       this.mniLevels1.CheckState = System.Windows.Forms.CheckState.Checked;
       this.mniLevels1.Name = "mniLevels1";
-      this.mniLevels1.Size = new System.Drawing.Size(80, 22);
+      this.mniLevels1.Size = new System.Drawing.Size(128, 38);
       this.mniLevels1.Text = "1";
       this.mniLevels1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mniLevelItem_Click);
       // 
       // mniLevels2
       // 
       this.mniLevels2.Name = "mniLevels2";
-      this.mniLevels2.Size = new System.Drawing.Size(80, 22);
+      this.mniLevels2.Size = new System.Drawing.Size(128, 38);
       this.mniLevels2.Text = "2";
       this.mniLevels2.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mniLevelItem_Click);
       // 
       // mniLevels3
       // 
       this.mniLevels3.Name = "mniLevels3";
-      this.mniLevels3.Size = new System.Drawing.Size(80, 22);
+      this.mniLevels3.Size = new System.Drawing.Size(128, 38);
       this.mniLevels3.Text = "3";
       this.mniLevels3.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mniLevelItem_Click);
       // 
       // mniLevels4
       // 
       this.mniLevels4.Name = "mniLevels4";
-      this.mniLevels4.Size = new System.Drawing.Size(80, 22);
+      this.mniLevels4.Size = new System.Drawing.Size(128, 38);
       this.mniLevels4.Text = "4";
       this.mniLevels4.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mniLevelItem_Click);
       // 
       // mniLevels5
       // 
       this.mniLevels5.Name = "mniLevels5";
-      this.mniLevels5.Size = new System.Drawing.Size(80, 22);
+      this.mniLevels5.Size = new System.Drawing.Size(128, 38);
       this.mniLevels5.Text = "5";
       this.mniLevels5.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mniLevelItem_Click);
       // 
       // mniLevels6
       // 
       this.mniLevels6.Name = "mniLevels6";
-      this.mniLevels6.Size = new System.Drawing.Size(80, 22);
+      this.mniLevels6.Size = new System.Drawing.Size(128, 38);
       this.mniLevels6.Text = "6";
       this.mniLevels6.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mniLevelItem_Click);
       // 
       // mniLevels7
       // 
       this.mniLevels7.Name = "mniLevels7";
-      this.mniLevels7.Size = new System.Drawing.Size(80, 22);
+      this.mniLevels7.Size = new System.Drawing.Size(128, 38);
       this.mniLevels7.Text = "7";
       this.mniLevels7.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mniLevelItem_Click);
       // 
       // mniLevels8
       // 
       this.mniLevels8.Name = "mniLevels8";
-      this.mniLevels8.Size = new System.Drawing.Size(80, 22);
+      this.mniLevels8.Size = new System.Drawing.Size(128, 38);
       this.mniLevels8.Text = "8";
       this.mniLevels8.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mniLevelItem_Click);
       // 
-      // conReferenceOptions
+      // toolStripSeparator1
       // 
-      this.conReferenceOptions.Name = "conReferenceOptions";
-      this.conReferenceOptions.Size = new System.Drawing.Size(61, 4);
-      this.conReferenceOptions.Opening += new System.ComponentModel.CancelEventHandler(this.conReferenceOptions_Opening);
+      this.toolStripSeparator1.Name = "toolStripSeparator1";
+      this.toolStripSeparator1.Size = new System.Drawing.Size(377, 6);
       // 
       // tbcSearch
       // 
@@ -302,21 +309,21 @@
       this.tbcSearch.Controls.Add(this.pgResults);
       this.tbcSearch.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tbcSearch.DrawBorder = false;
-      this.tbcSearch.Location = new System.Drawing.Point(3, 23);
+      this.tbcSearch.Location = new System.Drawing.Point(3, 35);
       this.tbcSearch.myBackColor = System.Drawing.Color.White;
       this.tbcSearch.Name = "tbcSearch";
       this.tableLayoutPanel1.SetRowSpan(this.tbcSearch, 2);
       this.tbcSearch.SelectedIndex = 0;
-      this.tbcSearch.Size = new System.Drawing.Size(348, 316);
+      this.tbcSearch.Size = new System.Drawing.Size(347, 304);
       this.tbcSearch.TabIndex = 0;
       // 
       // pgSearchBy
       // 
       this.pgSearchBy.Controls.Add(this.tableLayoutPanel2);
-      this.pgSearchBy.Location = new System.Drawing.Point(4, 25);
+      this.pgSearchBy.Location = new System.Drawing.Point(8, 30);
       this.pgSearchBy.Name = "pgSearchBy";
       this.pgSearchBy.Padding = new System.Windows.Forms.Padding(3);
-      this.pgSearchBy.Size = new System.Drawing.Size(340, 287);
+      this.pgSearchBy.Size = new System.Drawing.Size(331, 266);
       this.pgSearchBy.TabIndex = 0;
       this.pgSearchBy.Text = "List items by...";
       this.pgSearchBy.UseVisualStyleBackColor = true;
@@ -341,7 +348,7 @@
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel2.Size = new System.Drawing.Size(334, 281);
+      this.tableLayoutPanel2.Size = new System.Drawing.Size(325, 260);
       this.tableLayoutPanel2.TabIndex = 0;
       // 
       // btnRecentlyModified
@@ -360,7 +367,7 @@
       this.btnRecentlyModified.Name = "btnRecentlyModified";
       this.btnRecentlyModified.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnRecentlyModified.Padding = new System.Windows.Forms.Padding(2);
-      this.btnRecentlyModified.Size = new System.Drawing.Size(161, 70);
+      this.btnRecentlyModified.Size = new System.Drawing.Size(156, 70);
       this.btnRecentlyModified.TabIndex = 5;
       this.btnRecentlyModified.Text = "Recently Modified";
       this.btnRecentlyModified.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -386,7 +393,7 @@
       this.btnDbPackage.Name = "btnDbPackage";
       this.btnDbPackage.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnDbPackage.Padding = new System.Windows.Forms.Padding(2);
-      this.btnDbPackage.Size = new System.Drawing.Size(161, 70);
+      this.btnDbPackage.Size = new System.Drawing.Size(156, 70);
       this.btnDbPackage.TabIndex = 0;
       this.btnDbPackage.Text = "Package Definition (Db)";
       this.btnDbPackage.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -412,7 +419,7 @@
       this.btnPackageFile.Name = "btnPackageFile";
       this.btnPackageFile.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnPackageFile.Padding = new System.Windows.Forms.Padding(2);
-      this.btnPackageFile.Size = new System.Drawing.Size(161, 70);
+      this.btnPackageFile.Size = new System.Drawing.Size(156, 70);
       this.btnPackageFile.TabIndex = 2;
       this.btnPackageFile.Text = "Innovator Package (File)";
       this.btnPackageFile.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -434,11 +441,11 @@
       this.btnItem.ForeColor = System.Drawing.Color.Black;
       this.btnItem.Image = global::InnovatorAdmin.Properties.Resources.search32;
       this.btnItem.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-      this.btnItem.Location = new System.Drawing.Point(170, 3);
+      this.btnItem.Location = new System.Drawing.Point(165, 3);
       this.btnItem.Name = "btnItem";
       this.btnItem.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnItem.Padding = new System.Windows.Forms.Padding(2);
-      this.btnItem.Size = new System.Drawing.Size(161, 70);
+      this.btnItem.Size = new System.Drawing.Size(157, 70);
       this.btnItem.TabIndex = 1;
       this.btnItem.Text = "Search (Db)";
       this.btnItem.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -460,11 +467,11 @@
       this.btnAmlStudio.ForeColor = System.Drawing.Color.Black;
       this.btnAmlStudio.Image = global::InnovatorAdmin.Properties.Resources.amlStudio32black;
       this.btnAmlStudio.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-      this.btnAmlStudio.Location = new System.Drawing.Point(170, 79);
+      this.btnAmlStudio.Location = new System.Drawing.Point(165, 79);
       this.btnAmlStudio.Name = "btnAmlStudio";
       this.btnAmlStudio.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnAmlStudio.Padding = new System.Windows.Forms.Padding(2);
-      this.btnAmlStudio.Size = new System.Drawing.Size(161, 70);
+      this.btnAmlStudio.Size = new System.Drawing.Size(157, 70);
       this.btnAmlStudio.TabIndex = 4;
       this.btnAmlStudio.Text = "Advanced Search";
       this.btnAmlStudio.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -476,10 +483,10 @@
       // pgResults
       // 
       this.pgResults.Controls.Add(this.tableLayoutPanel5);
-      this.pgResults.Location = new System.Drawing.Point(4, 25);
+      this.pgResults.Location = new System.Drawing.Point(8, 30);
       this.pgResults.Name = "pgResults";
       this.pgResults.Padding = new System.Windows.Forms.Padding(3);
-      this.pgResults.Size = new System.Drawing.Size(340, 287);
+      this.pgResults.Size = new System.Drawing.Size(331, 278);
       this.pgResults.TabIndex = 1;
       this.pgResults.Text = "Search Results";
       this.pgResults.UseVisualStyleBackColor = true;
@@ -499,15 +506,15 @@
       this.tableLayoutPanel5.RowCount = 2;
       this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-      this.tableLayoutPanel5.Size = new System.Drawing.Size(334, 281);
+      this.tableLayoutPanel5.Size = new System.Drawing.Size(325, 272);
       this.tableLayoutPanel5.TabIndex = 0;
       // 
       // txtFind
       // 
       this.txtFind.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-      this.txtFind.Location = new System.Drawing.Point(3, 10);
+      this.txtFind.Location = new System.Drawing.Point(3, 5);
       this.txtFind.Name = "txtFind";
-      this.txtFind.Size = new System.Drawing.Size(254, 20);
+      this.txtFind.Size = new System.Drawing.Size(245, 32);
       this.txtFind.TabIndex = 0;
       this.txtFind.TextChanged += new System.EventHandler(this.txtFind_TextChanged);
       this.txtFind.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtFind_KeyDown);
@@ -527,12 +534,12 @@
             this.colName});
       this.tableLayoutPanel5.SetColumnSpan(this.gridAvailable, 2);
       this.gridAvailable.ContextMenuStrip = this.conReferenceOptions;
-      this.gridAvailable.Location = new System.Drawing.Point(3, 44);
+      this.gridAvailable.Location = new System.Drawing.Point(3, 45);
       this.gridAvailable.Name = "gridAvailable";
       this.gridAvailable.ReadOnly = true;
       this.gridAvailable.RowHeadersVisible = false;
       this.gridAvailable.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-      this.gridAvailable.Size = new System.Drawing.Size(328, 234);
+      this.gridAvailable.Size = new System.Drawing.Size(319, 224);
       this.gridAvailable.StandardTab = true;
       this.gridAvailable.TabIndex = 0;
       this.gridAvailable.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.gridAvailable_CellMouseDoubleClick);
@@ -547,6 +554,7 @@
       this.colType.MinimumWidth = 100;
       this.colType.Name = "colType";
       this.colType.ReadOnly = true;
+      this.colType.Width = 104;
       // 
       // colName
       // 
@@ -567,11 +575,11 @@
       this.btnFind.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnFind.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnFind.ForeColor = System.Drawing.Color.Black;
-      this.btnFind.Location = new System.Drawing.Point(263, 3);
+      this.btnFind.Location = new System.Drawing.Point(254, 3);
       this.btnFind.Name = "btnFind";
       this.btnFind.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnFind.Padding = new System.Windows.Forms.Padding(2);
-      this.btnFind.Size = new System.Drawing.Size(68, 35);
+      this.btnFind.Size = new System.Drawing.Size(68, 36);
       this.btnFind.TabIndex = 1;
       this.btnFind.Text = "Find";
       this.btnFind.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
@@ -592,12 +600,12 @@
             this.colTypeSelected,
             this.colNameSelected});
       this.tableLayoutPanel1.SetColumnSpan(this.gridSelected, 2);
-      this.gridSelected.Location = new System.Drawing.Point(391, 23);
+      this.gridSelected.Location = new System.Drawing.Point(390, 35);
       this.gridSelected.Name = "gridSelected";
       this.gridSelected.ReadOnly = true;
       this.gridSelected.RowHeadersVisible = false;
       this.gridSelected.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-      this.gridSelected.Size = new System.Drawing.Size(380, 275);
+      this.gridSelected.Size = new System.Drawing.Size(381, 262);
       this.gridSelected.TabIndex = 1;
       this.gridSelected.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.gridSelected_CellMouseClick);
       this.gridSelected.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.gridSelected_CellMouseDoubleClick);
@@ -611,6 +619,7 @@
       this.colTypeSelected.MinimumWidth = 100;
       this.colTypeSelected.Name = "colTypeSelected";
       this.colTypeSelected.ReadOnly = true;
+      this.colTypeSelected.Width = 104;
       // 
       // colNameSelected
       // 
@@ -712,25 +721,20 @@
       this.btnAdvanced.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
       this.btnAdvanced.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnAdvanced.ForeColor = System.Drawing.Color.Black;
-      this.btnAdvanced.Location = new System.Drawing.Point(628, 304);
+      this.btnAdvanced.Location = new System.Drawing.Point(626, 303);
       this.btnAdvanced.Name = "btnAdvanced";
       this.btnAdvanced.Orientation = System.Windows.Forms.Orientation.Horizontal;
       this.btnAdvanced.Padding = new System.Windows.Forms.Padding(2);
-      this.btnAdvanced.Size = new System.Drawing.Size(143, 35);
+      this.btnAdvanced.Size = new System.Drawing.Size(145, 36);
       this.btnAdvanced.TabIndex = 8;
       this.btnAdvanced.Text = "Advanced ▼";
       this.btnAdvanced.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
       this.btnAdvanced.UseVisualStyleBackColor = false;
       this.btnAdvanced.Click += new System.EventHandler(this.btnAdvanced_Click);
       // 
-      // toolStripSeparator1
-      // 
-      this.toolStripSeparator1.Name = "toolStripSeparator1";
-      this.toolStripSeparator1.Size = new System.Drawing.Size(203, 6);
-      // 
       // ExportSelect
       // 
-      this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+      this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 26F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.Controls.Add(this.tableLayoutPanel1);
       this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);

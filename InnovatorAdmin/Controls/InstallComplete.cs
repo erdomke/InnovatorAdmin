@@ -22,14 +22,13 @@ namespace InnovatorAdmin.Controls
 
     public void Configure(IWizard wizard)
     {
-      wizard.NextLabel = "Start Over";
-      wizard.NextEnabled = true;
+      wizard.NextEnabled = false;
       _wizard = wizard;
     }
 
     public void GoNext()
     {
-      _wizard.GoToStep(new Welcome());
+      // Do nothing
     }
 
     private void btnResetServerCache_Click(object sender, EventArgs e)

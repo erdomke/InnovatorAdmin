@@ -195,7 +195,8 @@ namespace InnovatorAdmin.Editor
             {
               var ide = this.FindForm() as EditorWindow;
               if (ide != null)
-                ide.Execute(script);
+                return ide.Execute(script);
+              return Task.FromResult(false);
             });
 
         OnMouseDown(new MouseEventArgs(System.Windows.Forms.MouseButtons.Right, e.ClickCount, pt.X, pt.Y, 0));

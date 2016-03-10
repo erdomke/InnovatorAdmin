@@ -243,12 +243,11 @@ namespace InnovatorAdmin
     /// <summary>
     /// Wait synchronously for the asynchronous data loads to complete
     /// </summary>
-    public void Wait()
+    public Task ReloadTask()
     {
-      _metadataComplete.Wait();
+      return _metadataComplete;
     }
-
-    public IPromise CompletePromise()
+    public IPromise ReloadPromise()
     {
       return _metadataComplete.ToPromise();
     }

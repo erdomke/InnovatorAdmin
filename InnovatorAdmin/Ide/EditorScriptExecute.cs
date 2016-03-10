@@ -17,19 +17,16 @@ namespace InnovatorAdmin
       get { return _children ?? Enumerable.Empty<IEditorScript>(); }
     }
     public string Name { get; set; }
-    public string Script
+
+    public Func<Task> Execute { get; set; }
+    public async Task<string> GetScript()
     {
-      get
+      if (Execute != null)
       {
-        if (Execute != null)
-          Execute();
-        return null;
+        await Execute.Invoke();
       }
+      return null;
     }
-
-
-    public Action Execute { get; set; }
-
 
     public EditorScriptExecute Add(IEditorScript child)
     {

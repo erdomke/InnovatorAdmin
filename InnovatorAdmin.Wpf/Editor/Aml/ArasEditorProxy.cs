@@ -802,7 +802,7 @@ namespace InnovatorAdmin.Editor
                                 </Item>
                               </Relationships>
                             </Item>", true, false),
-          ArasMetadataProvider.Cached(_conn).CompletePromise())
+          ArasMetadataProvider.Cached(_conn).ReloadPromise())
         .Convert(r =>
         {
           _itemTypeReportNames = ((IReadOnlyResult)r[1]).AssertItem().Relationships()

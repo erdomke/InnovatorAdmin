@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
+using System.IO;
 
 namespace InnovatorAdmin.Tests
 {
@@ -824,7 +826,8 @@ namespace InnovatorAdmin.Tests
   </Item>
 </AML>";
 
-      var diff = AmlDiff.GetMergeScript(start, dest);
+      var diff = AmlDiff.GetMergeScript(XmlReader.Create(new StringReader(start)),
+        XmlReader.Create(new StringReader(dest)));
       Assert.AreEqual(expected, diff.ToString());
     }
   }

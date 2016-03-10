@@ -16,6 +16,16 @@ namespace InnovatorAdmin.Controls
       this.BackgroundColor = System.Drawing.Color.White;
       this.BorderStyle = System.Windows.Forms.BorderStyle.None;
       this.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+
+      using (var g = this.CreateGraphics())
+      {
+        var dpi = g.DpiX;
+        if (this.RowTemplate.Height <= 22 && dpi > 96)
+        {
+          this.RowTemplate.Height = (int)((double)this.RowTemplate.Height * dpi / 96.0);
+        }
+      }
+
     }
 
     protected override void OnCellFormatting(DataGridViewCellFormattingEventArgs e)
