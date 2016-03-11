@@ -42,6 +42,7 @@ namespace InnovatorAdmin.Editor
             "DeleteItem",
             "DeleteUsers",
             "DeleteVersionFile",
+            "DownloadFile",
             "EditItem",
             "EvaluateActivity",
             "ExecuteEscalations",
@@ -279,7 +280,11 @@ namespace InnovatorAdmin.Editor
         return (IResultObject)result;
       };
 
-      if (queries.Length == 1)
+      if (cmd.Action == CommandAction.DownloadFile)
+      {
+        return DownloadFile(queries, cmd, innCmd, async).ToPromise();
+      }
+      else if (queries.Length == 1)
       {
         return ProcessCommand(GetCommand(queries[0], cmd, innCmd.Parameters, true), async)
           .Convert(getResult);
@@ -532,6 +537,56 @@ namespace InnovatorAdmin.Editor
     public Editor.IEditorHelper GetHelper()
     {
       return _helper;
+    }
+
+
+    private async Task<IResultObject> DownloadFile(XElement[] queries, Command cmd, InnovatorCommand innCmd, bool async)
+    {
+      if (queries.Length != 1)
+        throw new NotSupportedException("Can only download a single file");
+      if (queries[0].Attribute("type").Value != "File")
+        throw new NotSupportedException("Can only download Items of type 'File'");
+
+      queries[0].Attribute("action").Value = "get";
+      queries[0].Attribute("select").Value = "filename,mimetype";
+      var fileCmd = GetCommand(queries[0], cmd, innCmd.Parameters, true);
+      var fileData = await ProcessCommand(fileCmd, async).ToTask();
+      fileCmd.Action = CommandAction.ApplyItem;
+      var metadata = _conn.AmlContext.FromXml(await ProcessCommand(fileCmd, async).ToTask(), fileCmd.Aml, _conn).AssertItem();
+      var fileName = metadata.Property("filename").Value;
+      var path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + "\\" + fileName);
+      Directory.CreateDirectory(Path.GetDirectoryName(path));
+      using (var dest = new FileStream(path, FileMode.Create, FileAccess.Write))
+      {
+        await fileData.CopyToAsync(dest);
+      }
+      var result = new DownloadResult();
+      result.Html = string.Format(@"<html><body><a href='file:///{0}' style='font-size:200%'>{1}</a></body></html>", path.Replace('\\', '/'), fileName);
+      return result;
+    }
+
+    private class DownloadResult : IResultObject
+    {
+      public string Html { get; set; }
+
+      public int ItemCount { get { return 1; } }
+
+      public OutputType PreferredMode
+      {
+        get { return OutputType.Html; }
+      }
+
+      public string Title { get; set; }
+
+      public DataSet GetDataSet()
+      {
+        throw new NotSupportedException();
+      }
+
+      public ITextSource GetTextSource()
+      {
+        return new StringTextSource(this.Html);
+      }
     }
 
     private class ResultObject : IResultObject

@@ -50,7 +50,7 @@ namespace InnovatorAdmin.Merge
               {
                 result.AppendFormat("{0:x2}", hash[i]);
               }
-              return result.ToString();
+              _compare = result.ToString();
             }
           }
           return _compare;
