@@ -311,6 +311,18 @@ namespace InnovatorAdmin.Editor
                 break;
               default:
                 items = Attributes(notExisting, "condition", "is_null");
+                items = items.Concat(new [] {
+                  new BasicCompletionData() { Text = "between", Action = () => "condition='between'", Image = Icons.EnumValue16.Wpf },
+                  new BasicCompletionData() { Text = "eq", Action = () => "condition='eq'", Content = "eq (=, Equals)", Image = Icons.EnumValue16.Wpf },
+                  new BasicCompletionData() { Text = "ge", Action = () => "condition='ge'", Content = "ge (>=, Greather than or equal to)", Image = Icons.EnumValue16.Wpf },
+                  new BasicCompletionData() { Text = "gt", Action = () => "condition='gt'", Content = "gt (>, Greather than)", Image = Icons.EnumValue16.Wpf },
+                  new BasicCompletionData() { Text = "in", Action = () => "condition='in'", Image = Icons.EnumValue16.Wpf },
+                  new BasicCompletionData() { Text = "is", Action = () => "condition='is'", Image = Icons.EnumValue16.Wpf },
+                  new BasicCompletionData() { Text = "le", Action = () => "condition='le'", Content = "le (<=, Less than or equal to)", Image = Icons.EnumValue16.Wpf },
+                  new BasicCompletionData() { Text = "like", Action = () => "condition='like'", Description = "Both * and % are wildcards", Image = Icons.EnumValue16.Wpf },
+                  new BasicCompletionData() { Text = "lt", Action = () => "condition='lt'", Content = "lt (<, Less than)", Image = Icons.EnumValue16.Wpf },
+                  new BasicCompletionData() { Text = "ne", Action = () => "condition='ne'", Content = "ne (<>, !=, Not Equals)", Image = Icons.EnumValue16.Wpf }
+                });
                 break;
             }
 
@@ -580,88 +592,21 @@ namespace InnovatorAdmin.Editor
                   break;
                 case "condition":
                   items = new ICompletionData[] {
-                    new AttributeValueCompletionData()
-                    {
-                      Text = "between",
-                      Image = Icons.EnumValue16.Wpf
-                    },
-                    new AttributeValueCompletionData()
-                    {
-                      Text = "eq",
-                      Content = "eq (=, Equals)",
-                      Image = Icons.EnumValue16.Wpf
-                    },
-                    new AttributeValueCompletionData()
-                    {
-                      Text = "ge",
-                      Content = "ge (>=, Greather than or equal to)",
-                      Image = Icons.EnumValue16.Wpf
-                    },
-                    new AttributeValueCompletionData()
-                    {
-                      Text = "gt",
-                      Content = "gt (>, Greather than)",
-                      Image = Icons.EnumValue16.Wpf
-                    },
-                    new AttributeValueCompletionData()
-                    {
-                      Text = "in",
-                      Image = Icons.EnumValue16.Wpf
-                    },
-                    new AttributeValueCompletionData()
-                    {
-                      Text = "is not null",
-                      Image = Icons.EnumValue16.Wpf
-                    },
-                    new AttributeValueCompletionData()
-                    {
-                      Text = "is null",
-                      Image = Icons.EnumValue16.Wpf
-                    },
-                    new AttributeValueCompletionData()
-                    {
-                      Text = "is",
-                      Image = Icons.EnumValue16.Wpf
-                    },
-                    new AttributeValueCompletionData()
-                    {
-                      Text = "le",
-                      Content = "le (<=, Less than or equal to)",
-                      Image = Icons.EnumValue16.Wpf
-                    },
-                    new AttributeValueCompletionData()
-                    {
-                      Text = "like",
-                      Description = "Both * and % are wildcards",
-                      Image = Icons.EnumValue16.Wpf
-                    },
-                    new AttributeValueCompletionData()
-                    {
-                      Text = "lt",
-                      Content = "lt (<, Less than)",
-                      Image = Icons.EnumValue16.Wpf
-                    },
-                    new AttributeValueCompletionData()
-                    {
-                      Text = "ne",
-                      Content = "ne (<>, !=, Not Equals)",
-                      Image = Icons.EnumValue16.Wpf
-                    },
-                    new AttributeValueCompletionData()
-                    {
-                      Text = "not between",
-                      Image = Icons.EnumValue16.Wpf
-                    },
-                    new AttributeValueCompletionData()
-                    {
-                      Text = "not in",
-                      Image = Icons.EnumValue16.Wpf
-                    },
-                    new AttributeValueCompletionData()
-                    {
-                      Text = "not like",
-                      Image = Icons.EnumValue16.Wpf
-                    }
+                    new AttributeValueCompletionData() { Text = "between", Image = Icons.EnumValue16.Wpf },
+                    new AttributeValueCompletionData() { Text = "eq", Content = "eq (=, Equals)", Image = Icons.EnumValue16.Wpf },
+                    new AttributeValueCompletionData() { Text = "ge", Content = "ge (>=, Greather than or equal to)", Image = Icons.EnumValue16.Wpf },
+                    new AttributeValueCompletionData() { Text = "gt", Content = "gt (>, Greather than)", Image = Icons.EnumValue16.Wpf },
+                    new AttributeValueCompletionData() { Text = "in", Image = Icons.EnumValue16.Wpf },
+                    new AttributeValueCompletionData() { Text = "is not null", Image = Icons.EnumValue16.Wpf },
+                    new AttributeValueCompletionData() { Text = "is null", Image = Icons.EnumValue16.Wpf },
+                    new AttributeValueCompletionData() { Text = "is", Image = Icons.EnumValue16.Wpf },
+                    new AttributeValueCompletionData() { Text = "le", Content = "le (<=, Less than or equal to)", Image = Icons.EnumValue16.Wpf },
+                    new AttributeValueCompletionData() { Text = "like", Description = "Both * and % are wildcards", Image = Icons.EnumValue16.Wpf },
+                    new AttributeValueCompletionData() { Text = "lt", Content = "lt (<, Less than)", Image = Icons.EnumValue16.Wpf },
+                    new AttributeValueCompletionData() { Text = "ne", Content = "ne (<>, !=, Not Equals)", Image = Icons.EnumValue16.Wpf },
+                    new AttributeValueCompletionData() { Text = "not between", Image = Icons.EnumValue16.Wpf },
+                    new AttributeValueCompletionData() { Text = "not in", Image = Icons.EnumValue16.Wpf },
+                    new AttributeValueCompletionData() { Text = "not like", Image = Icons.EnumValue16.Wpf }
                   };
                   break;
                 case "is_null":

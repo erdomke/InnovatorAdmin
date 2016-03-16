@@ -715,6 +715,7 @@ namespace InnovatorAdmin.Editor
                   || elemIds.EndsWith("EMail Message", "query_string")
                   || elemIds.EndsWith("Grid", "query")
                   || elemIds.EndsWith("Method", "method_code")
+                  || elemIds.EndsWith("Report", "report_query")
                   || elemIds.EndsWith("Report", "xsl_stylesheet")
                   || elemIds.EndsWith("SavedSearch", "criteria")
                   || elemIds.EndsWith("SQL", "sqlserver_body")

@@ -291,30 +291,37 @@ namespace InnovatorAdmin
               {
                 pMeta = metadata.GetProperty(itemType, propName).Wait();
 
-                switch (pMeta.Type)
+                if (string.IsNullOrEmpty(propAddendum))
                 {
-                  case PropertyType.boolean:
-                    newColumn = new DataColumn(prop, typeof(bool));
-                    if (pMeta.IsRequired && pMeta.DefaultValue == null)
-                      newColumn.DefaultValue = false;
-                    break;
-                  case PropertyType.date:
-                    newColumn = new DataColumn(prop, typeof(DateTime));
-                    break;
-                  case PropertyType.number:
-                    if (string.Equals(pMeta.TypeName, "integer", StringComparison.OrdinalIgnoreCase))
-                    {
-                      newColumn = new DataColumn(prop, typeof(int));
-                    }
-                    else
-                    {
-                      newColumn = new DataColumn(prop, typeof(double));
-                    }
-                    break;
-                  default:
-                    newColumn = new DataColumn(prop, typeof(string));
-                    if (pMeta.StoredLength > 0) newColumn.MaxLength = pMeta.StoredLength;
-                    break;
+                  switch (pMeta.Type)
+                  {
+                    case PropertyType.boolean:
+                      newColumn = new DataColumn(prop, typeof(bool));
+                      if (pMeta.IsRequired && pMeta.DefaultValue == null)
+                        newColumn.DefaultValue = false;
+                      break;
+                    case PropertyType.date:
+                      newColumn = new DataColumn(prop, typeof(DateTime));
+                      break;
+                    case PropertyType.number:
+                      if (string.Equals(pMeta.TypeName, "integer", StringComparison.OrdinalIgnoreCase))
+                      {
+                        newColumn = new DataColumn(prop, typeof(int));
+                      }
+                      else
+                      {
+                        newColumn = new DataColumn(prop, typeof(double));
+                      }
+                      break;
+                    default:
+                      newColumn = new DataColumn(prop, typeof(string));
+                      if (pMeta.StoredLength > 0) newColumn.MaxLength = pMeta.StoredLength;
+                      break;
+                  }
+                }
+                else
+                {
+                  newColumn = new DataColumn(prop, typeof(string));
                 }
                 newColumn.Caption = (pMeta.Label ?? pMeta.Name) + propAddendum;
                 if (pMeta.DefaultValue != null) newColumn.DefaultValue = pMeta.DefaultValue;
