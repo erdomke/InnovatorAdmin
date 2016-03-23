@@ -5,11 +5,17 @@ using System.Text;
 
 namespace Innovator.Client
 {
+  /// <summary>
+  /// Class for parsing and storing AML select attributes
+  /// </summary>
   public class SubSelect : IEnumerable<SubSelect>
   {
     private string _name;
     private List<SubSelect> _children;
 
+    /// <summary>
+    /// Number of child columns
+    /// </summary>
     public int Count
     {
       get
@@ -18,10 +24,16 @@ namespace Innovator.Client
         return _children.Count;
       }
     }
+    /// <summary>
+    /// Name of the current column
+    /// </summary>
     public string Name
     {
       get { return _name; }
     }
+    /// <summary>
+    /// Access a child sub-select by index
+    /// </summary>
     public SubSelect this[int index]
     {
       get

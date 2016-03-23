@@ -70,6 +70,7 @@
     <Compile Include="Aml\ServerExceptionTests.cs" />
     <Compile Include="Aml\SubSelectTests.cs" />
     <Compile Include="CommandTests.cs" />
+    <Compile Include="Connection\ArasHttpConnectionTests.cs" />
     <Compile Include="Connection\AuthenticationSchemeTests.cs" />
     <Compile Include="Connection\DefaultHttpServiceTests.cs" />
     <Compile Include="ItemTests.cs" />

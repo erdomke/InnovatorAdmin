@@ -84,7 +84,9 @@ namespace Innovator.Client.Connection
 
       _vaultConn = new ArasVaultConnection(this);
     }
-
+    /// <summary>
+    /// Process a command by crafting the appropriate HTTP request and returning the HTTP response stream
+    /// </summary>
     public Stream Process(Command request)
     {
       var upload = request as UploadCommand;
@@ -97,7 +99,9 @@ namespace Innovator.Client.Connection
       }
       return Process(request, false).Value;
     }
-
+    /// <summary>
+    /// Process a command asynchronously by crafting the appropriate HTTP request and returning the HTTP response stream
+    /// </summary>
     public IPromise<Stream> Process(Command request, bool async)
     {
       var upload = request as UploadCommand;

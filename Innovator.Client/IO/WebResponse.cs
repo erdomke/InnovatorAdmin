@@ -21,7 +21,7 @@ namespace Innovator.Client
     }
     public string AsString
     {
-      get 
+      get
       {
         var reader = new StreamReader(_content, GuessDownloadEncoding());
         var result = reader.ReadToEnd();
@@ -44,10 +44,10 @@ namespace Innovator.Client
 
     public WebResponse(HttpWebRequest request, HttpWebResponse response)
     {
-      _requestContentType = request.ContentType;
+      _requestContentType = request == null ? null : request.ContentType;
       _response = response;
-      _headers = new NameValueDictionary(response == null 
-        ? new System.Collections.Specialized.NameValueCollection() 
+      _headers = new NameValueDictionary(response == null
+        ? new System.Collections.Specialized.NameValueCollection()
         : response.Headers);
 
       _content = new MemoryStream();
@@ -101,6 +101,6 @@ namespace Innovator.Client
       return Encoding.UTF8;
     }
 
-    
+
   }
 }
