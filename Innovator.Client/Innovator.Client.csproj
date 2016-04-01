@@ -95,7 +95,9 @@
     <Compile Include="Connection\IArasConnection.cs" />
     <Compile Include="Connection\IHttpService.cs" />
     <Compile Include="Connection\IVaultStrategy.cs" />
+    <Compile Include="Connection\MappedConnection.cs" />
     <Compile Include="Connection\MultiPartFormWriter.cs" />
+    <Compile Include="Connection\ServerMapping.cs" />
     <Compile Include="IAsyncConnection.cs" />
     <Compile Include="IAsyncScript.cs" />
     <Compile Include="IO\SmartCompressionStream.cs" />

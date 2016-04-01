@@ -63,11 +63,30 @@ namespace Innovator.Client
     {
       url = (url ?? "").TrimEnd('/');
       if (!url.EndsWith("/server", StringComparison.OrdinalIgnoreCase)) url += "/Server";
+      var configUrl = url + "/mapping.xml";
+
       var masterService = preferences.HttpService ?? DefaultService.Invoke();
       var arasSerice = preferences.HttpService ?? new DefaultHttpService() { Compression = CompressionType.none };
+      Func<ServerMapping, IRemoteConnection> connFactory = m =>
+      {
+        var uri = (m.Url ?? "").TrimEnd('/');
+        if (!uri.EndsWith("/server", StringComparison.OrdinalIgnoreCase)) url += "/Server";
+        switch (m.Type)
+        {
+          case ServerType.Proxy:
+            m.Endpoints.Base = new Uri(uri + "/");
+            var conn = new Connection.ProxyServerConnection(masterService, m.Endpoints);
+            conn.SessionPolicy = preferences.SessionPolicy;
+            if (!string.IsNullOrEmpty(preferences.UserAgent))
+              conn.DefaultSettings(req => req.UserAgent = preferences.UserAgent);
+            return conn;
+          default:
+            return ArasConn(arasSerice, uri, preferences);
+        }
+      };
 
       var result = new Promise<IRemoteConnection>();
-      result.CancelTarget(masterService.Execute("OPTIONS", url, null, CredentialCache.DefaultCredentials
+      result.CancelTarget(masterService.Execute("GET", configUrl, null, CredentialCache.DefaultCredentials
                                           , async, request =>
         {
           request.UserAgent = preferences.UserAgent;
@@ -83,12 +102,23 @@ namespace Innovator.Client
           {
             try
             {
-              var endpoints = new Endpoints(XElement.Parse(data)) { Base = new Uri(url + "/") };
-              var conn = new Connection.ProxyServerConnection(masterService, endpoints);
-              conn.SessionPolicy = preferences.SessionPolicy;
-              if (!string.IsNullOrEmpty(preferences.UserAgent))
-                conn.DefaultSettings(req => req.UserAgent = preferences.UserAgent);
-              result.Resolve(conn);
+              var servers = ServerMapping.FromXml(data).ToArray();
+              if (servers.Length < 1)
+              {
+                result.Resolve(ArasConn(arasSerice, url, preferences));
+              }
+              else if (servers.Length == 1)
+              {
+                result.Resolve(connFactory(servers.Single()));
+              }
+              else
+              {
+                foreach (var server in servers)
+                {
+                  server.Factory = connFactory;
+                }
+                result.Resolve(new MappedConnection(servers));
+              }
             }
             catch (XmlException)
             {
