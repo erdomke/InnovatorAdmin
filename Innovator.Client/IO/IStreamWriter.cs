@@ -4,6 +4,7 @@ namespace Innovator.Client
 {
   public interface IStreamWriter
   {
+    IPromise<bool> Promise { get; }
     void Close();
     IStreamWriter Write(params byte[] value);
     IStreamWriter Write(byte[] buffer, int offset, int count);

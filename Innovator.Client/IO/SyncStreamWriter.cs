@@ -9,21 +9,26 @@ namespace Innovator.Client
   internal class SyncStreamWriter : IStreamWriter
   {
     private Stream _stream;
+    private Promise<bool> _promise;
+
+    public IPromise<bool> Promise { get { return _promise; } }
 
     public SyncStreamWriter(Stream stream)
     {
       _stream = stream;
+      _promise = new Promise<bool>();
     }
 
     public void Close()
     {
       if (_stream != null)
       {
-        if (_stream.ShouldClose()) 
+        if (_stream.ShouldClose())
           _stream.Dispose();
         else
           _stream.Flush();
         _stream = null;
+        _promise.Resolve(true);
       }
     }
 
@@ -42,6 +47,7 @@ namespace Innovator.Client
     public IStreamWriter Write(System.IO.Stream value)
     {
       value.CopyTo(_stream);
+      value.Dispose();
       return this;
     }
 

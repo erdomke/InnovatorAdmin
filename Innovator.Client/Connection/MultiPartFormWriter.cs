@@ -56,7 +56,9 @@ namespace Innovator.Client.Connection
       foreach (var file in _upload.Files)
       {
         writer.Write(file.Header, 0, file.Header.Length);
-        writer.Write(file.GetStream(_async));
+        var stream = file.GetStream(_async);
+        writer.Write(stream);
+        writer.Promise.Always(() => stream.Dispose());
         writer.Write(13, 10);
       }
       writer.Write(_finalBytes, 0, _finalBytes.Length);

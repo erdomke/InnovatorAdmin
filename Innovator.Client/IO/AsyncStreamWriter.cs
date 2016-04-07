@@ -12,17 +12,19 @@ namespace Innovator.Client
     private const int BufferSize = 4096;
 
     private bool _isClosed = false;
-    private Action _onComplete;
-    private Action<Exception> _onError;
+    private Promise<bool> _promise;
     private WorkQueue _readQueue = new WorkQueue();
     private Stream _stream;
     private WorkQueue _writeQueue = new WorkQueue();
 
+    public IPromise<bool> Promise { get { return _promise; } }
+
     public AsyncStreamWriter(Stream stream, Action onComplete, Action<Exception> onError)
     {
       _stream = stream;
-      _onComplete = onComplete;
-      _onError = onError;
+      _promise = new Promise<bool>();
+      if (onComplete != null) _promise.Done(r => onComplete());
+      if (onError != null) _promise.Fail(onError);
     }
 
     public void Close()
@@ -39,11 +41,11 @@ namespace Innovator.Client
                 _stream.Dispose();
               else
                 _stream.Flush();
-              _onComplete.Invoke();
+              _promise.Resolve(true);
             }
             catch (Exception ex)
             {
-              if (_onError != null) _onError.Invoke(ex);
+              _promise.Reject(ex);
             }
           });
           _readQueue.StartNext();
@@ -108,13 +110,13 @@ namespace Innovator.Client
           }
           catch (Exception ex)
           {
-            if (_onError != null) _onError.Invoke(ex);
+            _promise.Reject(ex);
           }
         }), buffer);
       }
       catch (Exception ex)
       {
-        if (_onError != null) _onError.Invoke(ex);
+        _promise.Reject(ex);
       }
     }
 
@@ -129,7 +131,7 @@ namespace Innovator.Client
         }
         catch (Exception ex)
         {
-          if (_onError != null) _onError.Invoke(ex);
+          _promise.Reject(ex);
         }
       }), true);
     }
@@ -149,7 +151,7 @@ namespace Innovator.Client
       public void StartNext()
       {
         _items.Dequeue();
-        if (_items.Count > 0) 
+        if (_items.Count > 0)
           _items.Peek().Invoke();
       }
     }
