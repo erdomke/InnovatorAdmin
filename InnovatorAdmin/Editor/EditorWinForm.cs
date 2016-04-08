@@ -754,6 +754,7 @@ namespace InnovatorAdmin.Editor
 
       public void AutoGrow()
       {
+        if (null == this.CompletionList.ScrollViewer) return;
         var addition = this.CompletionList.ScrollViewer.ExtentWidth - this.CompletionList.ScrollViewer.ViewportWidth;
         var client = this.TextArea.PointFromScreen(new System.Windows.Point(this.Left, this.Top));
         addition = Math.Max(0, Math.Min(addition, this.TextArea.ActualWidth - this.Width - client.X));
