@@ -5,8 +5,43 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:InnovatorAdmin.Wpf"
         mc:Ignorable="d"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Background="{DynamicResource MaterialDesignPaper}"
         Title="MainWindow" Height="366.138" Width="541.138">
-    <Grid>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="100*"/>
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="80*"/>
+      <ColumnDefinition Width="3"/>
+      <ColumnDefinition Width="40"/>
+      <ColumnDefinition Width="160*"/>
+      <ColumnDefinition Width="22"/>
+    </Grid.ColumnDefinitions>
 
-    </Grid>
+    <Expander x:Name="expander" HorizontalAlignment="Stretch" Margin="0,0,0,0" VerticalAlignment="Stretch" IsExpanded="True" ExpandDirection="Right"
+              Grid.Column="0" Grid.Row="1" >
+      <Expander.Header>
+        <TextBlock Text="Table of Contents" >
+          <TextBlock.LayoutTransform>
+            <RotateTransform Angle="-90" />
+          </TextBlock.LayoutTransform>
+        </TextBlock>
+      </Expander.Header>
+      <Grid>
+        
+      </Grid>
+    </Expander>
+    <Menu x:Name="menu" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top"
+          Grid.Column="0" Grid.Row="0">
+      <MenuItem Header="_File">
+        <MenuItem Header="{Binding NewDocument.Text}" Command="{Binding NewDocument}" InputGestureText="{Binding NewDocument.GestureText}" />
+        <MenuItem Header="{Binding NewWindow.Text}" Command="{Binding NewWindow}" InputGestureText="{Binding NewWindow.GestureText}" />
+      </MenuItem>
+      <MenuItem Header="_Edit"/>
+    </Menu>
+
+  </Grid>
 </Window>

@@ -20,8 +20,15 @@ namespace InnovatorAdmin.Wpf
   /// </summary>
   public partial class MainWindow : Window
   {
+    public RoutedUICommand NewDocument { get; private set; }
+    public RoutedUICommand NewWindow { get; private set; }
+
     public MainWindow()
     {
+      this.DataContext = this;
+      //this.NewDocument = new RoutedUICommand("New Document", "New Document", typeof(MainWindow));
+      //this.NewWindow = new Ide.Commands.NewWindowCommand();
+
       InitializeComponent();
     }
   }

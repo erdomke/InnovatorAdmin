@@ -2281,5 +2281,12 @@ namespace InnovatorAdmin
         Utils.HandleError(ex);
       }
     }
+
+    private void btnTest_Click(object sender, EventArgs e)
+    {
+      var wpfwindow = new RoslynPad.MainWindow();
+      System.Windows.Forms.Integration.ElementHost.EnableModelessKeyboardInterop(wpfwindow);
+      wpfwindow.Show();
+    }
   }
 }

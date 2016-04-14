@@ -129,6 +129,7 @@
       this.btnInstall = new InnovatorAdmin.Controls.FlatButton();
       this.btnCreate = new InnovatorAdmin.Controls.FlatButton();
       this.btnCompare = new InnovatorAdmin.Controls.FlatButton();
+      this.btnTest = new InnovatorAdmin.Controls.FlatButton();
       this.pgTextOutput = new System.Windows.Forms.TabPage();
       this.outputEditor = new InnovatorAdmin.Editor.FullEditor();
       this.pgHtml = new System.Windows.Forms.TabPage();
@@ -1049,7 +1050,7 @@
       // 
       this.splitEditors.Panel2.Controls.Add(this.tableLayoutPanel2);
       this.splitEditors.Size = new System.Drawing.Size(766, 581);
-      this.splitEditors.SplitterDistance = 164;
+      this.splitEditors.SplitterDistance = 163;
       this.splitEditors.TabIndex = 0;
       // 
       // tableLayoutPanel3
@@ -1065,7 +1066,7 @@
       this.tableLayoutPanel3.RowCount = 2;
       this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-      this.tableLayoutPanel3.Size = new System.Drawing.Size(766, 164);
+      this.tableLayoutPanel3.Size = new System.Drawing.Size(766, 163);
       this.tableLayoutPanel3.TabIndex = 1;
       // 
       // inputEditor
@@ -1074,10 +1075,10 @@
       this.tableLayoutPanel3.SetColumnSpan(this.inputEditor, 2);
       this.inputEditor.Dock = System.Windows.Forms.DockStyle.Fill;
       this.inputEditor.Location = new System.Drawing.Point(6, 6);
-      this.inputEditor.Margin = new System.Windows.Forms.Padding(6);
+      this.inputEditor.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
       this.inputEditor.Name = "inputEditor";
       this.inputEditor.ReadOnly = false;
-      this.inputEditor.Size = new System.Drawing.Size(754, 152);
+      this.inputEditor.Size = new System.Drawing.Size(754, 151);
       this.inputEditor.TabIndex = 0;
       this.inputEditor.RunRequested += new System.EventHandler<InnovatorAdmin.Editor.RunRequestedEventArgs>(this.inputEditor_RunRequested);
       // 
@@ -1095,7 +1096,7 @@
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
       this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-      this.tableLayoutPanel2.Size = new System.Drawing.Size(766, 413);
+      this.tableLayoutPanel2.Size = new System.Drawing.Size(766, 414);
       this.tableLayoutPanel2.TabIndex = 0;
       // 
       // tbcOutputView
@@ -1115,17 +1116,17 @@
       this.tbcOutputView.Name = "tbcOutputView";
       this.tbcOutputView.Padding = new System.Drawing.Point(0, 0);
       this.tbcOutputView.SelectedIndex = 0;
-      this.tbcOutputView.Size = new System.Drawing.Size(766, 413);
+      this.tbcOutputView.Size = new System.Drawing.Size(766, 414);
       this.tbcOutputView.TabIndex = 5;
       this.tbcOutputView.SelectedIndexChanged += new System.EventHandler(this.tbcOutputView_SelectedIndexChanged);
       // 
       // pgTools
       // 
       this.pgTools.Controls.Add(this.tableLayoutPanel6);
-      this.pgTools.Location = new System.Drawing.Point(4, 25);
+      this.pgTools.Location = new System.Drawing.Point(4, 29);
       this.pgTools.Name = "pgTools";
       this.pgTools.Padding = new System.Windows.Forms.Padding(3);
-      this.pgTools.Size = new System.Drawing.Size(758, 384);
+      this.pgTools.Size = new System.Drawing.Size(758, 381);
       this.pgTools.TabIndex = 3;
       this.pgTools.Text = "Tools";
       this.pgTools.UseVisualStyleBackColor = true;
@@ -1142,7 +1143,7 @@
       this.tableLayoutPanel6.RowCount = 2;
       this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70F));
       this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30F));
-      this.tableLayoutPanel6.Size = new System.Drawing.Size(752, 378);
+      this.tableLayoutPanel6.Size = new System.Drawing.Size(752, 375);
       this.tableLayoutPanel6.TabIndex = 5;
       // 
       // flowLayoutPanel2
@@ -1153,10 +1154,10 @@
       this.flowLayoutPanel2.Controls.Add(this.lnkGitMergeHelper);
       this.flowLayoutPanel2.Controls.Add(this.lnkWriteMergeScripts);
       this.flowLayoutPanel2.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-      this.flowLayoutPanel2.Location = new System.Drawing.Point(15, 279);
+      this.flowLayoutPanel2.Location = new System.Drawing.Point(15, 277);
       this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(15);
       this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-      this.flowLayoutPanel2.Size = new System.Drawing.Size(722, 84);
+      this.flowLayoutPanel2.Size = new System.Drawing.Size(722, 83);
       this.flowLayoutPanel2.TabIndex = 5;
       // 
       // lnkGitMergeHelper
@@ -1191,10 +1192,11 @@
       this.flowLayoutPanel1.Controls.Add(this.btnInstall);
       this.flowLayoutPanel1.Controls.Add(this.btnCreate);
       this.flowLayoutPanel1.Controls.Add(this.btnCompare);
+      this.flowLayoutPanel1.Controls.Add(this.btnTest);
       this.flowLayoutPanel1.Location = new System.Drawing.Point(15, 15);
       this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(15);
       this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-      this.flowLayoutPanel1.Size = new System.Drawing.Size(722, 234);
+      this.flowLayoutPanel1.Size = new System.Drawing.Size(722, 232);
       this.flowLayoutPanel1.TabIndex = 4;
       // 
       // btnInstall
@@ -1273,12 +1275,33 @@
       this.btnCompare.UseVisualStyleBackColor = true;
       this.btnCompare.Click += new System.EventHandler(this.btnCompare_Click);
       // 
+      // btnTest
+      // 
+      this.btnTest.AutoSize = true;
+      this.btnTest.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(221)))), ((int)(((byte)(221)))));
+      this.btnTest.FlatAppearance.BorderSize = 0;
+      this.btnTest.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnTest.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(196)))), ((int)(((byte)(196)))), ((int)(((byte)(196)))));
+      this.btnTest.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+      this.btnTest.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.875F);
+      this.btnTest.ForeColor = System.Drawing.Color.Black;
+      this.btnTest.Location = new System.Drawing.Point(3, 70);
+      this.btnTest.Name = "btnTest";
+      this.btnTest.Orientation = System.Windows.Forms.Orientation.Horizontal;
+      this.btnTest.Padding = new System.Windows.Forms.Padding(2);
+      this.btnTest.Size = new System.Drawing.Size(129, 39);
+      this.btnTest.TabIndex = 5;
+      this.btnTest.Text = "Test";
+      this.btnTest.Theme = InnovatorAdmin.Controls.FlatButtonTheme.LightGray;
+      this.btnTest.UseVisualStyleBackColor = false;
+      this.btnTest.Click += new System.EventHandler(this.btnTest_Click);
+      // 
       // pgTextOutput
       // 
       this.pgTextOutput.Controls.Add(this.outputEditor);
-      this.pgTextOutput.Location = new System.Drawing.Point(4, 25);
+      this.pgTextOutput.Location = new System.Drawing.Point(4, 29);
       this.pgTextOutput.Name = "pgTextOutput";
-      this.pgTextOutput.Size = new System.Drawing.Size(758, 384);
+      this.pgTextOutput.Size = new System.Drawing.Size(758, 360);
       this.pgTextOutput.TabIndex = 0;
       this.pgTextOutput.Text = "Code";
       this.pgTextOutput.UseVisualStyleBackColor = true;
@@ -1288,19 +1311,19 @@
       this.outputEditor.BackColor = System.Drawing.Color.White;
       this.outputEditor.Dock = System.Windows.Forms.DockStyle.Fill;
       this.outputEditor.Location = new System.Drawing.Point(0, 0);
-      this.outputEditor.Margin = new System.Windows.Forms.Padding(6);
+      this.outputEditor.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
       this.outputEditor.Name = "outputEditor";
       this.outputEditor.ReadOnly = true;
-      this.outputEditor.Size = new System.Drawing.Size(758, 384);
+      this.outputEditor.Size = new System.Drawing.Size(758, 360);
       this.outputEditor.TabIndex = 0;
       // 
       // pgHtml
       // 
       this.pgHtml.Controls.Add(this.browser);
-      this.pgHtml.Location = new System.Drawing.Point(4, 25);
+      this.pgHtml.Location = new System.Drawing.Point(4, 29);
       this.pgHtml.Name = "pgHtml";
       this.pgHtml.Padding = new System.Windows.Forms.Padding(3);
-      this.pgHtml.Size = new System.Drawing.Size(758, 363);
+      this.pgHtml.Size = new System.Drawing.Size(758, 360);
       this.pgHtml.TabIndex = 2;
       this.pgHtml.Text = "Report";
       this.pgHtml.UseVisualStyleBackColor = true;
@@ -1311,16 +1334,16 @@
       this.browser.Location = new System.Drawing.Point(3, 3);
       this.browser.MinimumSize = new System.Drawing.Size(20, 20);
       this.browser.Name = "browser";
-      this.browser.Size = new System.Drawing.Size(752, 357);
+      this.browser.Size = new System.Drawing.Size(752, 354);
       this.browser.TabIndex = 0;
       // 
       // pgTableOutput
       // 
       this.pgTableOutput.Controls.Add(this.dgvItems);
-      this.pgTableOutput.Location = new System.Drawing.Point(4, 25);
+      this.pgTableOutput.Location = new System.Drawing.Point(4, 29);
       this.pgTableOutput.Margin = new System.Windows.Forms.Padding(0);
       this.pgTableOutput.Name = "pgTableOutput";
-      this.pgTableOutput.Size = new System.Drawing.Size(758, 363);
+      this.pgTableOutput.Size = new System.Drawing.Size(758, 360);
       this.pgTableOutput.TabIndex = 1;
       this.pgTableOutput.Text = "Table";
       this.pgTableOutput.UseVisualStyleBackColor = true;
@@ -1335,7 +1358,7 @@
       this.dgvItems.Location = new System.Drawing.Point(0, 0);
       this.dgvItems.Margin = new System.Windows.Forms.Padding(0);
       this.dgvItems.Name = "dgvItems";
-      this.dgvItems.Size = new System.Drawing.Size(758, 363);
+      this.dgvItems.Size = new System.Drawing.Size(758, 360);
       this.dgvItems.TabIndex = 0;
       this.dgvItems.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.Grid_MouseDoubleClick);
       // 
@@ -1763,5 +1786,6 @@
     private System.Windows.Forms.LinkLabel lnkGitMergeHelper;
     private System.Windows.Forms.LinkLabel lnkWriteMergeScripts;
     private Controls.FlatButton btnCompare;
+    private Controls.FlatButton btnTest;
   }
 }

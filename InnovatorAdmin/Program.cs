@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using System.Windows.Forms.Integration;
 
 namespace InnovatorAdmin
 {
@@ -32,7 +33,7 @@ namespace InnovatorAdmin
       {
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
-
+        
         var amlStudioStart = args.FirstOrDefault(a =>
           a.StartsWith("/amlstudio:", StringComparison.OrdinalIgnoreCase));
 
@@ -72,6 +73,22 @@ namespace InnovatorAdmin
         var uri = new UriBuilder(codeBase);
         var path = Uri.UnescapeDataString(uri.Path);
         return Path.GetFullPath(path);
+      }
+    }
+
+    public static void EnsureApplicationResources()
+    {
+      if (System.Windows.Application.Current == null)
+      {
+        //// create the Application object
+        //new System.Windows.Application();
+        //
+        //// merge in your application resources
+        //System.Windows.Application.Current.Resources.MergedDictionaries.Add(
+        //    System.Windows.Application.LoadComponent(
+        //        new Uri("InnovatorAdmin;component/App.xaml",
+        //        UriKind.Relative)) as System.Windows.ResourceDictionary);
+        new RoslynPad.App();
       }
     }
   }

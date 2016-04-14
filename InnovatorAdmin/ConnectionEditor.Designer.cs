@@ -136,10 +136,10 @@
       this.btnMoveDown.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnMoveDown.ForeColor = System.Drawing.Color.Black;
       this.btnMoveDown.Location = new System.Drawing.Point(187, 272);
-      this.btnMoveDown.Margin = new System.Windows.Forms.Padding(2);
+      this.btnMoveDown.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
       this.btnMoveDown.Name = "btnMoveDown";
       this.btnMoveDown.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnMoveDown.Padding = new System.Windows.Forms.Padding(1);
+      this.btnMoveDown.Padding = new System.Windows.Forms.Padding(1, 1, 1, 1);
       this.btnMoveDown.Size = new System.Drawing.Size(30, 30);
       this.btnMoveDown.TabIndex = 11;
       this.btnMoveDown.TabStop = false;
@@ -159,10 +159,10 @@
       this.btnNew.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnNew.ForeColor = System.Drawing.Color.Black;
       this.btnNew.Location = new System.Drawing.Point(2, 272);
-      this.btnNew.Margin = new System.Windows.Forms.Padding(2);
+      this.btnNew.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
       this.btnNew.Name = "btnNew";
       this.btnNew.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnNew.Padding = new System.Windows.Forms.Padding(1);
+      this.btnNew.Padding = new System.Windows.Forms.Padding(1, 1, 1, 1);
       this.btnNew.Size = new System.Drawing.Size(30, 30);
       this.btnNew.TabIndex = 7;
       this.btnNew.TabStop = false;
@@ -182,10 +182,10 @@
       this.btnMoveUp.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnMoveUp.ForeColor = System.Drawing.Color.Black;
       this.btnMoveUp.Location = new System.Drawing.Point(153, 272);
-      this.btnMoveUp.Margin = new System.Windows.Forms.Padding(2);
+      this.btnMoveUp.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
       this.btnMoveUp.Name = "btnMoveUp";
       this.btnMoveUp.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnMoveUp.Padding = new System.Windows.Forms.Padding(1);
+      this.btnMoveUp.Padding = new System.Windows.Forms.Padding(1, 1, 1, 1);
       this.btnMoveUp.Size = new System.Drawing.Size(30, 30);
       this.btnMoveUp.TabIndex = 10;
       this.btnMoveUp.TabStop = false;
@@ -205,10 +205,10 @@
       this.btnCopy.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnCopy.ForeColor = System.Drawing.Color.Black;
       this.btnCopy.Location = new System.Drawing.Point(36, 272);
-      this.btnCopy.Margin = new System.Windows.Forms.Padding(2);
+      this.btnCopy.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
       this.btnCopy.Name = "btnCopy";
       this.btnCopy.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnCopy.Padding = new System.Windows.Forms.Padding(1);
+      this.btnCopy.Padding = new System.Windows.Forms.Padding(1, 1, 1, 1);
       this.btnCopy.Size = new System.Drawing.Size(30, 30);
       this.btnCopy.TabIndex = 8;
       this.btnCopy.TabStop = false;
@@ -228,10 +228,10 @@
       this.btnDelete.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
       this.btnDelete.ForeColor = System.Drawing.Color.Black;
       this.btnDelete.Location = new System.Drawing.Point(70, 272);
-      this.btnDelete.Margin = new System.Windows.Forms.Padding(2);
+      this.btnDelete.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
       this.btnDelete.Name = "btnDelete";
       this.btnDelete.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnDelete.Padding = new System.Windows.Forms.Padding(1);
+      this.btnDelete.Padding = new System.Windows.Forms.Padding(1, 1, 1, 1);
       this.btnDelete.Size = new System.Drawing.Size(30, 30);
       this.btnDelete.TabIndex = 9;
       this.btnDelete.TabStop = false;
@@ -278,7 +278,7 @@
       this.lstConnections.DataSource = null;
       this.lstConnections.DisplayMember = "";
       this.lstConnections.Location = new System.Drawing.Point(4, 4);
-      this.lstConnections.Margin = new System.Windows.Forms.Padding(4);
+      this.lstConnections.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
       this.lstConnections.Multiselect = false;
       this.lstConnections.Name = "lstConnections";
       this.lstConnections.Size = new System.Drawing.Size(211, 262);
@@ -414,7 +414,7 @@
       this.txtUrl.MinimumSize = new System.Drawing.Size(4, 22);
       this.txtUrl.Name = "txtUrl";
       this.txtUrl.PlaceholderText = "Address / URL";
-      this.txtUrl.Size = new System.Drawing.Size(381, 20);
+      this.txtUrl.Size = new System.Drawing.Size(381, 22);
       this.txtUrl.TabIndex = 3;
       // 
       // txtName
@@ -473,7 +473,7 @@
       this.exploreButton.Location = new System.Drawing.Point(205, 3);
       this.exploreButton.Name = "exploreButton";
       this.exploreButton.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.exploreButton.Padding = new System.Windows.Forms.Padding(2);
+      this.exploreButton.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
       this.exploreButton.Size = new System.Drawing.Size(100, 36);
       this.exploreButton.TabIndex = 1;
       this.exploreButton.Text = "E&xplore";
@@ -494,7 +494,7 @@
       this.btnAdvanced.Location = new System.Drawing.Point(76, 3);
       this.btnAdvanced.Name = "btnAdvanced";
       this.btnAdvanced.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnAdvanced.Padding = new System.Windows.Forms.Padding(2);
+      this.btnAdvanced.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
       this.btnAdvanced.Size = new System.Drawing.Size(123, 36);
       this.btnAdvanced.TabIndex = 2;
       this.btnAdvanced.Text = "&Advanced";
@@ -517,7 +517,7 @@
       this.btnTest.MinimumSize = new System.Drawing.Size(0, 31);
       this.btnTest.Name = "btnTest";
       this.btnTest.Orientation = System.Windows.Forms.Orientation.Horizontal;
-      this.btnTest.Padding = new System.Windows.Forms.Padding(2);
+      this.btnTest.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
       this.btnTest.Size = new System.Drawing.Size(67, 31);
       this.btnTest.TabIndex = 0;
       this.btnTest.Text = "&Test";

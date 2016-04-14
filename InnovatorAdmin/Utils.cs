@@ -187,25 +187,32 @@ namespace InnovatorAdmin
     public static void HandleError(Exception ex)
     {
       if (ex == null) return;
-      using (var dialog = new Dialog.MessageDialog())
+      try
       {
-        var agg = ex as AggregateException;
-        if (agg != null && agg.Flatten().InnerExceptions.Count == 1)
+        using (var dialog = new Dialog.MessageDialog())
         {
-          var inner = agg.Flatten().InnerExceptions[0];
-          dialog.Message = inner.Message;
-          dialog.Details = inner.ToString();
-        }
-        else
-        {
-          dialog.Message = ex.Message;
-          dialog.Details = ex.ToString();
-        }
+          var agg = ex as AggregateException;
+          if (agg != null && agg.Flatten().InnerExceptions.Count == 1)
+          {
+            var inner = agg.Flatten().InnerExceptions[0];
+            dialog.Message = inner.Message;
+            dialog.Details = inner.ToString();
+          }
+          else
+          {
+            dialog.Message = ex.Message;
+            dialog.Details = ex.ToString();
+          }
 
-        dialog.OkText = "&Keep Going";
-        dialog.Caption = "Oops, that error wasn't expected";
-        dialog.CaptionColor = System.Drawing.Color.Red;
-        dialog.ShowDialog();
+          dialog.OkText = "&Keep Going";
+          dialog.Caption = "Oops, that error wasn't expected";
+          dialog.CaptionColor = System.Drawing.Color.Red;
+          dialog.ShowDialog();
+        }
+      }
+      catch
+      {
+        //Eat the error for now
       }
     }
 
