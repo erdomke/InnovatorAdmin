@@ -67,7 +67,7 @@ namespace InnovatorAdmin.Editor
         return type;
       var typeId = reader.GetAttribute("typeId");
       ItemType itemType;
-      if (!string.IsNullOrEmpty(typeId) && _metadata != null && _metadata.TypeById(typeId, out itemType))
+      if (!string.IsNullOrEmpty(typeId) && _metadata != null && _metadata.ItemTypeById(typeId, out itemType))
         return itemType.Name;
 
       return null;
@@ -1197,13 +1197,13 @@ namespace InnovatorAdmin.Editor
         else if ((p.Name == "name" || p.Name == "keyed_name") && itemType.Name == "Property" && lastItem.Action == "get"
           && lastItem.Values.TryGetValue("source_id", out itemValue))
         {
-          var parentType = _metadata.TypeById(itemValue);
+          var parentType = _metadata.ItemTypeById(itemValue);
           return await new PropertyCompletionFactory(_metadata, parentType).GetPromise().ToTask();
         }
         else if (p.Name == "class_path" && itemType.Name == "Property"
           && lastItem.Values.TryGetValue("source_id", out itemValue))
         {
-          var parentType = _metadata.TypeById(itemValue);
+          var parentType = _metadata.ItemTypeById(itemValue);
           var paths = await _metadata.GetClassPaths(parentType).ToTask();
           return paths.GetCompletions<BasicCompletionData>();
         }

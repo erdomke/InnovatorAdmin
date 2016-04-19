@@ -148,38 +148,6 @@
   <xsl:template match="Item[@type='Property'][name='superseded_date'][../../is_versionable='1']"/>
   <xsl:template match="Item[@type='Property'][name='team_id']"/>
 
-  <!-- Handle foreign properties -->
-  <xsl:template match="Item[@type='Property'][data_type='foreign']/data_source">
-    <xsl:variable name="data_source" select="../data_source"/>
-    <data_source>
-      <Item type="Property" action="get" select="id">
-        <name>
-          <xsl:value-of select="../../Item[@type='Property'][id=$data_source]/name"/>
-        </name>
-        <source_id>
-          <xsl:value-of select="../source_id"/>
-        </source_id>
-      </Item>
-    </data_source>
-  </xsl:template>
-  <xsl:template match="Item[@type='Property'][data_type='foreign']/foreign_property">
-    <xsl:variable name="data_source" select="../data_source"/>
-    <foreign_property>
-      <Item type="Property" action="get" select="id">
-        <keyed_name>
-          <xsl:value-of select="../foreign_property/@keyed_name"/>
-        </keyed_name>
-        <source_id>
-          <Item type="ItemType" action="get" select="id">
-            <name>
-              <xsl:value-of select="../../Item[@type='Property'][id=$data_source]/data_source/@name"/>
-            </name>
-          </Item>
-        </source_id>
-      </Item>
-    </foreign_property>
-  </xsl:template>
-
   <!-- Eliminate the system properties from all ItemTypes -->
   <xsl:template match="cache_query"/>
   <xsl:template match="config_id"/>

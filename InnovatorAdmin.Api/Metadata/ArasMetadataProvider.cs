@@ -95,17 +95,20 @@ namespace InnovatorAdmin
     /// <summary>
     /// Get an Item Type by ID
     /// </summary>
-    public ItemType TypeById(string id)
+    public ItemType ItemTypeById(string id)
     {
       return _itemTypesById[id];
     }
     /// <summary>
     /// Try to get an Item Type by ID
     /// </summary>
-    public bool TypeById(string id, out ItemType type)
+    public bool ItemTypeById(string id, out ItemType type)
     {
       return _itemTypesById.TryGetValue(id, out type);
     }
+    /// <summary>
+    /// Get an Item Type by name
+    /// </summary>
     public ItemType ItemTypeByName(string name)
     {
       return _itemTypesByName[name];
@@ -558,6 +561,7 @@ namespace InnovatorAdmin
       foreach (var prop in props)
       {
         newProp = new Property(prop.Property("name").Value);
+        newProp.Id = prop.Id();
         newProp.Label = prop.Property("label").Value;
         newProp.SetType(prop.Property("data_type").Value);
         newProp.Precision = prop.Property("prec").AsInt(-1);

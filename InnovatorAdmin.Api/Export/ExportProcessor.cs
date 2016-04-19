@@ -209,7 +209,7 @@ namespace InnovatorAdmin
         RemoveVersionableRelIds(doc);
         //TODO: Replace references to poly item lists
 
-        Export(script, doc, warnings, checkDependencies);
+        await Export(script, doc, warnings, checkDependencies);
         CleanUpSystemProps(doc.DocumentElement.Elements(), items.ToDictionary(i => i), true);
         ConvertFloatProps(doc);
         RemoveKeyedNameAttributes(doc.DocumentElement);
@@ -254,7 +254,8 @@ namespace InnovatorAdmin
         await _metadata.ReloadTask();
         FixPolyItemReferences(doc);
         FixPolyItemListReferences(doc);
-        FixForeignProperties(doc);
+        await FixForeignPropertyReferences(doc);
+        FixForeignPropertyDependencies(doc);
         FixCyclicalWorkflowLifeCycleRefs(doc);
         FixCyclicalWorkflowItemTypeRefs(doc);
         FixCyclicalContentTypeTabularViewRefs(doc);
@@ -879,7 +880,7 @@ namespace InnovatorAdmin
     /// Move all foreign properties to a script.  This is because the other properties must be created first before these can
     /// be added.
     /// </summary>
-    private void FixForeignProperties(XmlDocument doc)
+    private void FixForeignPropertyDependencies(XmlDocument doc)
     {
       var itemTypes = doc.ElementsByXPath("//Item[@type='ItemType' and Relationships/Item[@type = 'Property' and data_type = 'foreign']]").ToList();
       XmlElement fix = null;
@@ -897,6 +898,48 @@ namespace InnovatorAdmin
         {
           foreignProp.Detatch();
           fix.AppendChild(foreignProp);
+        }
+      }
+    }
+
+    /// <summary>
+    /// Handle foreign properties correctly even if they are not being exported as part of a larger item type.
+    /// </summary>
+    private async Task FixForeignPropertyReferences(XmlDocument doc)
+    {
+      var props = doc.ElementsByXPath("//Item[@type='Property'][data_type='foreign']").ToList();
+      foreach (var prop in props)
+      {
+        var dataSource = prop.Element("data_source");
+        var sourceIdElem = prop.Element("source_id");
+        var sourceId = sourceIdElem == null ? prop.Parent().Parent().Attribute("id") : sourceIdElem.InnerText;
+        var parentId = dataSource.InnerText;
+        if (parentId.IsGuid())
+        {
+          dataSource.IsEmpty = true;
+          var dataSourceQuery = dataSource.Elem("Item").Attr("type", "Property").Attr("action", "get").Attr("select", "id");
+          dataSourceQuery.Elem("source_id", sourceId);
+          prop.Element("foreign_property").IsEmpty = true;
+          var foreignPropQuery = prop.Element("foreign_property")
+            .Elem("Item").Attr("type", "Property").Attr("action", "get").Attr("select", "id");
+          foreignPropQuery.Elem("keyed_name", prop.Element("foreign_property").Attribute("keyed_name"));
+          var itemTypeQuery = foreignPropQuery.Elem("source_id").Elem("Item").Attr("type", "ItemType").Attr("action", "get").Attr("select", "id");
+
+          var refProp = prop.Parent().Elements(e => e.Attribute("type") == "Property" && e.Attribute("id") == parentId).FirstOrDefault();
+          if (refProp != null)
+          {
+            dataSourceQuery.Elem("name", refProp.Element("name").InnerText);
+            itemTypeQuery.Elem("name", refProp.Element("data_source").Attribute("name"));
+          }
+          else
+          {
+            var parentProp = (await _metadata.GetPropertiesByTypeId(sourceId).ToTask()).FirstOrDefault(p => p.Id == parentId);
+            if (parentProp != null)
+            {
+              dataSourceQuery.Elem("name", parentProp.Name);
+              itemTypeQuery.Elem("name", _metadata.ItemTypeById(parentProp.DataSource).Name);
+            }
+          }
         }
       }
     }
@@ -988,7 +1031,7 @@ namespace InnovatorAdmin
         {
           if (elementsByRef.TryGetValue(ItemReference.FromFullItem(item, false), out fixElems))
           {
-            fullType = _metadata.TypeById(item.Property("itemtype").AsString(""));
+            fullType = _metadata.ItemTypeById(item.Property("itemtype").AsString(""));
             if (fullType != null)
             {
               foreach (var elem in fixElems)
@@ -1018,7 +1061,7 @@ namespace InnovatorAdmin
         var item = _conn.Apply(whereQuery.Query).Items().FirstOrDefault();
         if (elementsByRef.TryGetValue(whereQuery.Ref, out fixElems))
         {
-          fullType = _metadata.TypeById(item.Property("itemtype").AsString(""));
+          fullType = _metadata.ItemTypeById(item.Property("itemtype").AsString(""));
           if (fullType != null)
           {
             foreach (var elem in fixElems)
@@ -1706,16 +1749,24 @@ namespace InnovatorAdmin
       List<XmlElement> parents;
       int levels;
 
-      foreach (var elem in doc.ElementsByXPath(".//Relationships/Item/related_id[Item/@id!='']").ToList())
+      // get the related_id of the current relationship (if it is a relationship) along with the
+      // related_id inside any Relationships tags
+      var relateds = doc.ElementsByXPath("./related_id[Item/@id!='']")
+        .Concat(doc.ElementsByXPath(".//Relationships/Item/related_id[Item/@id!='']"))
+        .ToList();
+
+      foreach (var elem in relateds)
       {
         parents = elem.Parents().Where(e => e.LocalName == "Item").Skip(1).ToList();
         levels = 1;
-        if (itemDict.TryGetValue(ItemReference.FromFullItem(parents.Last(), false), out itemRefOpts))
+        if (parents.Any() && itemDict.TryGetValue(ItemReference.FromFullItem(parents.Last(), false), out itemRefOpts))
         {
           levels = Math.Min(itemRefOpts.Levels, 1);
         }
 
-        if (parents.Count >= levels && _metadata.ItemTypeByName(elem.Element("Item").Attribute("type").ToLowerInvariant(), out itemType) && !itemType.IsDependent)
+        var parentCount = parents.Count;
+        if (parentCount < 1) parentCount = 1;
+        if (parentCount >= levels && _metadata.ItemTypeByName(elem.Element("Item").Attribute("type").ToLowerInvariant(), out itemType) && !itemType.IsDependent)
         {
           if (itemType.IsVersionable && elem.Parent().Element("behavior", "").IndexOf("float") >= 0)
           {
@@ -1740,126 +1791,126 @@ namespace InnovatorAdmin
           if (_arasVersion < 11)
           {
             queryElem.InnerXml = @"<Relationships>
-	<Item type='Property' action='get'>
-		<Relationships>
-			<Item type='Grid Event' action='get' />
-		</Relationships>
-	</Item>
-	<Item type='RelationshipType' action='get' />
-	<Item type='View' action='get'>
-		<related_id>
-			<Item type='Form' action='get'>
-				<Relationships>
-					<Item type='Body' action='get' />
-				</Relationships>
-			</Item>
-		</related_id>
-	</Item>
-	<Item type='Server Event' action='get' />
-	<Item type='Item Action' action='get' />
-	<Item type='ItemType Life Cycle' action='get' />
-	<Item type='Allowed Workflow' action='get' />
-	<Item type='TOC Access' action='get'>
-		<related_id>
-			<Item type='Identity' action='get'>
-				<Relationships>
-					<Item type='Member' action='get' />
-				</Relationships>
-			</Item>
-		</related_id>
-	</Item>
-	<Item type='TOC View' action='get' />
-	<Item type='Client Event' action='get' />
-	<Item type='Can Add' action='get'>
-		<related_id>
-			<Item type='Identity' action='get'>
-				<Relationships>
-					<Item type='Member' action='get' />
-				</Relationships>
-			</Item>
-		</related_id>
-	</Item>
-	<Item type='Allowed Permission' action='get'>
-		<related_id>
-			<Item type='Permission' action='get'>
-				<Relationships>
-					<Item type='Access' action='get' />
-				</Relationships>
-			</Item>
-		</related_id>
-	</Item>
-	<Item type='Item Report' action='get' />
-	<Item type='Morphae' action='get' />
+  <Item type='Property' action='get'>
+    <Relationships>
+      <Item type='Grid Event' action='get' />
+    </Relationships>
+  </Item>
+  <Item type='RelationshipType' action='get' />
+  <Item type='View' action='get'>
+    <related_id>
+      <Item type='Form' action='get'>
+        <Relationships>
+          <Item type='Body' action='get' />
+        </Relationships>
+      </Item>
+    </related_id>
+  </Item>
+  <Item type='Server Event' action='get' />
+  <Item type='Item Action' action='get' />
+  <Item type='ItemType Life Cycle' action='get' />
+  <Item type='Allowed Workflow' action='get' />
+  <Item type='TOC Access' action='get'>
+    <related_id>
+      <Item type='Identity' action='get'>
+        <Relationships>
+          <Item type='Member' action='get' />
+        </Relationships>
+      </Item>
+    </related_id>
+  </Item>
+  <Item type='TOC View' action='get' />
+  <Item type='Client Event' action='get' />
+  <Item type='Can Add' action='get'>
+    <related_id>
+      <Item type='Identity' action='get'>
+        <Relationships>
+          <Item type='Member' action='get' />
+        </Relationships>
+      </Item>
+    </related_id>
+  </Item>
+  <Item type='Allowed Permission' action='get'>
+    <related_id>
+      <Item type='Permission' action='get'>
+        <Relationships>
+          <Item type='Access' action='get' />
+        </Relationships>
+      </Item>
+    </related_id>
+  </Item>
+  <Item type='Item Report' action='get' />
+  <Item type='Morphae' action='get' />
 </Relationships>";
           }
           else
           {
             queryElem.InnerXml = @"<Relationships>
-	<Item type='DiscussionTemplate' action='get'>
-		<Relationships>
-			<Item type='FeedTemplate' action='get'>
-				<Relationships>
-					<Item type='FileSelectorTemplate' action='get' />
-				</Relationships>
-			</Item>
-			<Item type='DiscussionTemplateView' action='get' >
-				<related_id>
-					<Item type='SSVCPresentationConfiguration' action='get'/>
-				</related_id>
-			</Item>
-		</Relationships>
-	</Item>
-	<Item type='ITPresentationConfiguration' action='get' related_expand='0'/>
-	<Item type='Property' action='get'>
-		<Relationships>
-			<Item type='Grid Event' action='get' />
-		</Relationships>
-	</Item>
-	<Item type='RelationshipType' action='get' />
-	<Item type='View' action='get'>
-		<related_id>
-			<Item type='Form' action='get'>
-				<Relationships>
-					<Item type='Body' action='get' />
-				</Relationships>
-			</Item>
-		</related_id>
-	</Item>
-	<Item type='Server Event' action='get' />
-	<Item type='Item Action' action='get' />
-	<Item type='ItemType Life Cycle' action='get' />
-	<Item type='Allowed Workflow' action='get' />
-	<Item type='TOC Access' action='get'>
-		<related_id>
-			<Item type='Identity' action='get'>
-				<Relationships>
-					<Item type='Member' action='get' />
-				</Relationships>
-			</Item>
-		</related_id>
-	</Item>
-	<Item type='TOC View' action='get' />
-	<Item type='Client Event' action='get' />
-	<Item type='Can Add' action='get'>
-		<related_id>
-			<Item type='Identity' action='get'>
-				<Relationships>
-					<Item type='Member' action='get' />
-				</Relationships>
-			</Item>
-		</related_id>
-	</Item>
-	<Item type='Allowed Permission' action='get'>
-		<related_id>
-			<Item type='Permission' action='get'>
-				<Relationships>
-					<Item type='Access' action='get' />
-				</Relationships>
-			</Item>
-		</related_id>
-	</Item>
-	<Item type='Item Report' action='get' />
-	<Item type='Morphae' action='get' />
+  <Item type='DiscussionTemplate' action='get'>
+    <Relationships>
+      <Item type='FeedTemplate' action='get'>
+        <Relationships>
+          <Item type='FileSelectorTemplate' action='get' />
+        </Relationships>
+      </Item>
+      <Item type='DiscussionTemplateView' action='get' >
+        <related_id>
+          <Item type='SSVCPresentationConfiguration' action='get'/>
+        </related_id>
+      </Item>
+    </Relationships>
+  </Item>
+  <Item type='ITPresentationConfiguration' action='get' related_expand='0'/>
+  <Item type='Property' action='get'>
+    <Relationships>
+      <Item type='Grid Event' action='get' />
+    </Relationships>
+  </Item>
+  <Item type='RelationshipType' action='get' />
+  <Item type='View' action='get'>
+    <related_id>
+      <Item type='Form' action='get'>
+        <Relationships>
+          <Item type='Body' action='get' />
+        </Relationships>
+      </Item>
+    </related_id>
+  </Item>
+  <Item type='Server Event' action='get' />
+  <Item type='Item Action' action='get' />
+  <Item type='ItemType Life Cycle' action='get' />
+  <Item type='Allowed Workflow' action='get' />
+  <Item type='TOC Access' action='get'>
+    <related_id>
+      <Item type='Identity' action='get'>
+        <Relationships>
+          <Item type='Member' action='get' />
+        </Relationships>
+      </Item>
+    </related_id>
+  </Item>
+  <Item type='TOC View' action='get' />
+  <Item type='Client Event' action='get' />
+  <Item type='Can Add' action='get'>
+    <related_id>
+      <Item type='Identity' action='get'>
+        <Relationships>
+          <Item type='Member' action='get' />
+        </Relationships>
+      </Item>
+    </related_id>
+  </Item>
+  <Item type='Allowed Permission' action='get'>
+    <related_id>
+      <Item type='Permission' action='get'>
+        <Relationships>
+          <Item type='Access' action='get' />
+        </Relationships>
+      </Item>
+    </related_id>
+  </Item>
+  <Item type='Item Report' action='get' />
+  <Item type='Morphae' action='get' />
 </Relationships>";
           }
           levels = 1;
@@ -1912,55 +1963,55 @@ namespace InnovatorAdmin
           break;
         case "cmf_ContentType":
           queryElem.InnerXml = @"<Relationships>
-	<Item type='cmf_ContentTypeView' action='get'>
-	</Item>
-	<Item type='cmf_ElementType' action='get'>
-		<Relationships>
-			<Item type='cmf_ElementAllowedPermission' action='get'>
-			</Item>
-			<Item type='cmf_ElementBinding' action='get'>
-				<Relationships>
-					<Item type='cmf_PropertyBinding' action='get'>
-					</Item>
-				</Relationships>
-			</Item>
-			<Item type='cmf_PropertyType' action='get'>
-				<Relationships>
-					<Item type='cmf_ComputedProperty' action='get'>
-					</Item>
-					<Item type='cmf_PropertyAllowedPermission' action='get'>
-					</Item>
-				</Relationships>
-			</Item>
-		</Relationships>
-	</Item>
-	<Item type='cmf_ContentTypeExportRel' action='get'>
-	</Item>
-	<Item type='cmf_DocumentLifeCycleState' action='get'>
-	</Item>
+  <Item type='cmf_ContentTypeView' action='get'>
+  </Item>
+  <Item type='cmf_ElementType' action='get'>
+    <Relationships>
+      <Item type='cmf_ElementAllowedPermission' action='get'>
+      </Item>
+      <Item type='cmf_ElementBinding' action='get'>
+        <Relationships>
+          <Item type='cmf_PropertyBinding' action='get'>
+          </Item>
+        </Relationships>
+      </Item>
+      <Item type='cmf_PropertyType' action='get'>
+        <Relationships>
+          <Item type='cmf_ComputedProperty' action='get'>
+          </Item>
+          <Item type='cmf_PropertyAllowedPermission' action='get'>
+          </Item>
+        </Relationships>
+      </Item>
+    </Relationships>
+  </Item>
+  <Item type='cmf_ContentTypeExportRel' action='get'>
+  </Item>
+  <Item type='cmf_DocumentLifeCycleState' action='get'>
+  </Item>
 </Relationships>";
           levels = 0;
           break;
         case "cmf_TabularView":
           queryElem.InnerXml = @"<Relationships>
-	<Item type='cmf_TabularViewColumn' action='get'>
-		<Relationships>
-			<Item type='cmf_AdditionalPropertyType' action='get'>
-			</Item>
-		</Relationships>
-	</Item>
-	<Item type='cmf_TabularViewHeaderRows' action='get'>
-		<related_id>
-			<Item type='cmf_TabularViewHeaderRow' action='get'>
-				<Relationships>
-					<Item type='cmf_TabularViewColumnGroups' action='get'>
-					</Item>
-				</Relationships>
-			</Item>
-		</related_id>
-	</Item>
-	<Item type='cmf_TabularViewTree' action='get'>
-	</Item>
+  <Item type='cmf_TabularViewColumn' action='get'>
+    <Relationships>
+      <Item type='cmf_AdditionalPropertyType' action='get'>
+      </Item>
+    </Relationships>
+  </Item>
+  <Item type='cmf_TabularViewHeaderRows' action='get'>
+    <related_id>
+      <Item type='cmf_TabularViewHeaderRow' action='get'>
+        <Relationships>
+          <Item type='cmf_TabularViewColumnGroups' action='get'>
+          </Item>
+        </Relationships>
+      </Item>
+    </related_id>
+  </Item>
+  <Item type='cmf_TabularViewTree' action='get'>
+  </Item>
 </Relationships>";
           levels = 0;
           break;

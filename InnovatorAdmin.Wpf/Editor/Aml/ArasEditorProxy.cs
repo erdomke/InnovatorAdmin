@@ -897,7 +897,7 @@ namespace InnovatorAdmin.Editor
             Image = Icons.Class16,
             Description = "ItemType: " + item.Property("name").Value,
             HasChildren = true,
-            ScriptGetter = () => ItemTypeScripts(ArasMetadataProvider.Cached(_conn).TypeById(item.Property("itemtype_id").Value)),
+            ScriptGetter = () => ItemTypeScripts(ArasMetadataProvider.Cached(_conn).ItemTypeById(item.Property("itemtype_id").Value)),
             Children = ItemTypeChildren(item.Property("itemtype_id").Value)
             .Concat(item.Relationships().Select(r => ProcessTreeNode(r.RelatedItem())))
           };
@@ -934,7 +934,7 @@ namespace InnovatorAdmin.Editor
             .OrderBy(n => n.Name)
         }
       };
-      var rels = ArasMetadataProvider.Cached(_conn).TypeById(typeId).Relationships;
+      var rels = ArasMetadataProvider.Cached(_conn).ItemTypeById(typeId).Relationships;
       if (rels.Any())
       {
         result.Add(new EditorTreeNode()
@@ -943,7 +943,7 @@ namespace InnovatorAdmin.Editor
           Image = Icons.Folder16,
           HasChildren = true,
           ChildGetter = () => ArasMetadataProvider.Cached(_conn)
-            .TypeById(typeId).Relationships
+            .ItemTypeById(typeId).Relationships
             .Select(ItemTypeNode)
             .OrderBy(n => n.Name)
         });
