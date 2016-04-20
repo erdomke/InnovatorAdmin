@@ -1,27 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
 namespace InnovatorAdmin
 {
+  [DebuggerDisplay("Base: {Base}, Compare: {Compare}, Diff? {IsDifferent}")]
   public struct ListCompare
   {
     private int _base;
     private int _compare;
     private bool _isDifferent;
 
-    public int Base 
+    public int Base
     {
       get { return _base; }
       set { _base = value; }
     }
-    public int Compare 
+    public int Compare
     {
       get { return _compare; }
       set { _compare = value; }
     }
-    public bool IsDifferent 
+    public bool IsDifferent
     {
       get { return _isDifferent; }
       set { _isDifferent = value; }
@@ -117,6 +119,7 @@ namespace InnovatorAdmin
       return results;
     }
 
+    [DebuggerDisplay("Index: {OriginalIndex}, Key: {Key}")]
     private class IndexedKey<T>
     {
       public T Key { get; set; }

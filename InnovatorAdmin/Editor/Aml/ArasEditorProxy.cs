@@ -719,6 +719,7 @@ namespace InnovatorAdmin.Editor
                   || elemIds.EndsWith("Report", "xsl_stylesheet")
                   || elemIds.EndsWith("SavedSearch", "criteria")
                   || elemIds.EndsWith("SQL", "sqlserver_body")
+                  || elemIds.EndsWith("ItemType", "class_structure")
                   )
                 {
                   xmlWriter.WriteCData(reader.Value);

@@ -260,7 +260,8 @@ namespace InnovatorAdmin
     /// </summary>
     public void Reset()
     {
-      _metadataComplete = Task.WhenAll(ReloadItemTypeMetadata(), ReloadSecondaryMetadata());
+      if (_metadataComplete == null || _metadataComplete.IsCompleted)
+        _metadataComplete = Task.WhenAll(ReloadItemTypeMetadata(), ReloadSecondaryMetadata());
     }
 
     private async Task<bool> ReloadItemTypeMetadata()

@@ -473,6 +473,13 @@ namespace InnovatorAdmin.Editor
                           Image = Icons.EnumValue16.Wpf
                         }));
                         break;
+                      case "User":
+                        items = items.Concat(new ICompletionData[] { new AttributeValueCompletionData() {
+                          Action = () => _conn.UserId,
+                          Text = "Me",
+                          Image = Icons.EnumValue16.Wpf
+                        } });
+                        break;
                     }
                   }
                   break;

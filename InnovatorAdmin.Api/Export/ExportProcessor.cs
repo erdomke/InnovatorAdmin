@@ -1791,10 +1791,7 @@ namespace InnovatorAdmin
           if (_arasVersion < 11)
           {
             queryElem.InnerXml = @"<Relationships>
-  <Item type='Property' action='get'>
-    <Relationships>
-      <Item type='Grid Event' action='get' />
-    </Relationships>
+  <Item type='Property' action='get' levels='1'>
   </Item>
   <Item type='RelationshipType' action='get' />
   <Item type='View' action='get'>
@@ -1861,10 +1858,7 @@ namespace InnovatorAdmin
     </Relationships>
   </Item>
   <Item type='ITPresentationConfiguration' action='get' related_expand='0'/>
-  <Item type='Property' action='get'>
-    <Relationships>
-      <Item type='Grid Event' action='get' />
-    </Relationships>
+  <Item type='Property' action='get' levels='1'>
   </Item>
   <Item type='RelationshipType' action='get' />
   <Item type='View' action='get'>

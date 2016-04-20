@@ -127,9 +127,16 @@ namespace InnovatorAdmin.Editor
         using (var xmlReader = XmlReader.Create(reader, readerSettings))
         using (var xmlWriter = new XmlTextWriter(writer))
         {
-          xmlWriter.Indentation = 2;
-          xmlWriter.IndentChar = ' ';
-          xmlWriter.Formatting = Formatting.Indented;
+          if (indent)
+          {
+            xmlWriter.Indentation = 2;
+            xmlWriter.IndentChar = ' ';
+            xmlWriter.Formatting = Formatting.Indented;
+          }
+          else
+          {
+            xmlWriter.Formatting = Formatting.None;
+          }
           xmlWriter.QuoteChar = '\'';
           while (!xmlReader.EOF)
           {
