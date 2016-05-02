@@ -25,10 +25,15 @@ namespace InnovatorAdmin.Controls
         if (cols.Length == 1)
           _columnPropertyName = cols[0].DataPropertyName;
       }
-      if (!_rows.Any())
+      if (!_rows.Any() && grid.CurrentCell != null)
       {
         _rows = Enumerable.Repeat(grid.CurrentCell.OwningRow, 1);
         _columnPropertyName = grid.CurrentCell.OwningColumn.DataPropertyName;
+      }
+      else
+      {
+        _rows = Enumerable.Empty<DataGridViewRow>();
+        _columnPropertyName = null;
       }
       var client = grid.PointToClient(Cursor.Position);
       var hit = grid.HitTest(client.X, client.Y);

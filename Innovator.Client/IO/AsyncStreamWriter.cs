@@ -143,16 +143,25 @@ namespace Innovator.Client
 
       public void QueueAndStart(Action workItem)
       {
-        var needsStart = _items.Count < 1;
-        _items.Enqueue(workItem);
-        if (needsStart) workItem.Invoke();
+        if (workItem == null)
+          throw new ArgumentNullException("workItem");
+
+        lock (_mutex)
+        {
+          var needsStart = _items.Count < 1;
+          _items.Enqueue(workItem);
+          if (needsStart) workItem.Invoke();
+        }
       }
 
       public void StartNext()
       {
-        _items.Dequeue();
-        if (_items.Count > 0)
-          _items.Peek().Invoke();
+        lock (_mutex)
+        {
+          _items.Dequeue();
+          if (_items.Count > 0)
+            _items.Peek().Invoke();
+        }
       }
     }
   }

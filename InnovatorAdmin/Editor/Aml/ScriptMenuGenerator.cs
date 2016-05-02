@@ -245,7 +245,7 @@ namespace InnovatorAdmin.Editor
           yield return new EditorScriptExecute()
           {
             Name = "Delete",
-            Execute = () => 
+            Execute = () =>
             {
               rowItem.Delete();
               return Task.FromResult(true);
@@ -509,7 +509,7 @@ arguments:
 @itemid - id of the item
 */
 
-SELECT 
+SELECT
     p.NAME prop_name
   , it.NAME it_name
   , it.INSTANCE_DATA it_table_name
@@ -522,7 +522,7 @@ into #PropData
 from innovator.PROPERTY p
 inner join innovator.ITEMTYPE ds
 on p.DATA_SOURCE = ds.id
-LEFT join 
+LEFT join
   (innovator.MORPHAE m
    inner join innovator.ITEMTYPE ds2
    on ds2.id = m.RELATED_ID
@@ -530,13 +530,13 @@ LEFT join
 on m.SOURCE_ID = ds.ID
 inner join innovator.ITEMTYPE it
 on it.ID = p.SOURCE_ID
-LEFT JOIN 
+LEFT JOIN
   (innovator.RELATIONSHIPTYPE rt
    inner join innovator.ITEMTYPE sit
    on sit.ID = rt.SOURCE_ID
   )
 on rt.RELATIONSHIP_ID = it.ID
-WHERE (ds.NAME = @itemtype or ds2.NAME = @itemtype) 
+WHERE (ds.NAME = @itemtype or ds2.NAME = @itemtype)
 and not p.name in ('config_id', 'id') and (sit.id is null or ds.id <> sit.id) -- Ignore links to itself
 and it.IMPLEMENTATION_TYPE = 'table'
 ;
@@ -544,24 +544,24 @@ and it.IMPLEMENTATION_TYPE = 'table'
 create table #WhereUsed (
   [icon] [nvarchar](128) NULL,
   [main_id] [char](32) NOT NULL,
-	[main_type] [nvarchar](32) NOT NULL,
-	[parent_id] [char](32) NOT NULL,
-	[parent_type] [nvarchar](32) NOT NULL,
-	[KEYED_NAME] [nvarchar](128) NULL,
-	[MAJOR_REV] [nvarchar](8) NULL,
-	[GENERATION] [int] NULL,
-	[p1] [nvarchar](32) NULL,
-	[p2] [nvarchar](32) NULL,
-	[p3] [nvarchar](32) NULL,
-	[p4] [nvarchar](32) NULL,
-	[p5] [nvarchar](32) NULL,
-	[p6] [nvarchar](32) NULL,
-	[p7] [nvarchar](32) NULL,
-	[p8] [nvarchar](32) NULL,
-	[p9] [nvarchar](32) NULL,
-	[p10] [nvarchar](32) NULL,
-	[p11] [nvarchar](32) NULL,
-	[p12] [nvarchar](32) NULL
+  [main_type] [nvarchar](32) NOT NULL,
+  [parent_id] [char](32) NOT NULL,
+  [parent_type] [nvarchar](32) NOT NULL,
+  [KEYED_NAME] [nvarchar](128) NULL,
+  [MAJOR_REV] [nvarchar](8) NULL,
+  [GENERATION] [int] NULL,
+  [p1] [nvarchar](32) NULL,
+  [p2] [nvarchar](32) NULL,
+  [p3] [nvarchar](32) NULL,
+  [p4] [nvarchar](32) NULL,
+  [p5] [nvarchar](32) NULL,
+  [p6] [nvarchar](32) NULL,
+  [p7] [nvarchar](32) NULL,
+  [p8] [nvarchar](32) NULL,
+  [p9] [nvarchar](32) NULL,
+  [p10] [nvarchar](32) NULL,
+  [p11] [nvarchar](32) NULL,
+  [p12] [nvarchar](32) NULL
 );
 
 declare @DynamicSql nvarchar(MAX);
@@ -570,16 +570,16 @@ declare @Params nvarchar(MAX);
 -- Create a cursor for looping through the sql statements
 declare sqlCursor cursor fast_forward for
 SELECT
-  CASE WHEN r.parent_name is null then 
+  CASE WHEN r.parent_name is null then
     'INSERT INTO #WhereUsed (icon,main_id,main_type,parent_id,parent_type,keyed_name,major_rev,generation,' + left(value_clause, len(value_clause) - 1) + ')
     SELECT ' + isnull('''' + open_icon + '''', 'null') + ' icon, m.id main_id, ''' + it_name + ''' main_type
-      , m.id parent_id, ''' + it_name + ''' parent_type, m.KEYED_NAME, m.MAJOR_REV, m.GENERATION' + select_clause + 
+      , m.id parent_id, ''' + it_name + ''' parent_type, m.KEYED_NAME, m.MAJOR_REV, m.GENERATION' + select_clause +
     ' FROM innovator.[' + it_table_name + '] m
     where ' + LEFT(where_clause, LEN(where_clause) - 3) + ';'
   else
     'INSERT INTO #WhereUsed (icon,main_id,main_type,parent_id,parent_type,keyed_name,major_rev,generation,' + left(value_clause, len(value_clause) - 1) + ')
     SELECT ' + isnull('''' + open_icon + '''', 'null') + ' icon, m.id main_id, ''' + it_name + ''' main_type
-      , p.ID parent_id, ''' + parent_name + ''' parent_type, p.KEYED_NAME, p.MAJOR_REV, p.GENERATION' + select_clause + 
+      , p.ID parent_id, ''' + parent_name + ''' parent_type, p.KEYED_NAME, p.MAJOR_REV, p.GENERATION' + select_clause +
     ' FROM innovator.[' + it_table_name + '] m
     left join innovator.[' + parent_table_name + '] p
     on p.id = m.source_id
@@ -620,15 +620,15 @@ set @Params = N'@id as char(32)';
 
 -- For each sql statement, execute it
 open sqlCursor
-fetch next from sqlCursor 
+fetch next from sqlCursor
 into @DynamicSql
 
 while @@FETCH_STATUS = 0
 begin
-	Execute sp_executesql @DynamicSql, @Params, @id = @itemid;
-	
-	fetch next from sqlCursor 
-	into @DynamicSql
+  Execute sp_executesql @DynamicSql, @Params, @id = @itemid;
+
+  fetch next from sqlCursor
+  into @DynamicSql
 end
 
 close sqlCursor
@@ -664,12 +664,11 @@ end]]></sqlserver_body>
       _row = row;
     }
 
-    public string Id { get { return (string)_row["id"]; } }
-    public string Type { get { return (string)_row[Extensions.AmlTable_TypeName]; } }
+    public string Id { get { return (string)Property("id"); } }
+    public string Type { get { return (string)Property(Extensions.AmlTable_TypeName); } }
 
     public object Property(string name)
     {
-
       if (_row.Table.Columns.Contains(name) && !_row.IsNull(name))
         return _row[name];
       return null;
