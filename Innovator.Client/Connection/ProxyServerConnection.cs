@@ -15,10 +15,11 @@ namespace Innovator.Client.Connection
 
     private string[] _databases;
     private string _database;
-    private Action<IHttpRequest> _defaults = r => { };
+    private List<Action<IHttpRequest>> _defaults = new List<Action<IHttpRequest>>();
     private Endpoints _endpoints;
     private ElementFactory _factory;
     private IHttpService _service;
+    private ICredentials _lastCredentials;
     private InitializeSessionToken _lastLoginToken;
     private TokenCredentials _renewalToken;
     private string _sessionToken;
@@ -112,7 +113,10 @@ namespace Innovator.Client.Connection
         , null, CredentialCache.DefaultCredentials, async, req =>
       {
         req.ConfigureForFileUpload();
-        _defaults.Invoke(req);
+        foreach (var a in _defaults)
+        {
+          a.Invoke(req);
+        }
         req.Timeout = -1;
         req.SetHeader("Content-Length", multiWriter.GetLength().ToString());
         req.SetHeader("Accept", "text/xml");
@@ -143,6 +147,7 @@ namespace Innovator.Client.Connection
     {
       var result = new Promise<string>();
 
+      _lastCredentials = credentials;
       var database = string.Empty;
       var tokenCred = credentials as TokenCredentials;
       IPromise<IHttpResponse> loginPromise;
@@ -339,7 +344,13 @@ namespace Innovator.Client.Connection
       return _service.Execute("GET"
         , new Uri(downloadBase, Uri.EscapeUriString(_database) + "/"
                                 + Uri.EscapeUriString(file.Id())).ToString()
-        , null, CredentialCache.DefaultCredentials, async, _defaults)
+        , null, CredentialCache.DefaultCredentials, async, r =>
+        {
+          foreach (var a in _defaults)
+          {
+            a.Invoke(r);
+          }
+        })
         .Convert(r => r.AsStream);
     }
 
@@ -370,7 +381,7 @@ namespace Innovator.Client.Connection
 
     public void DefaultSettings(Action<IHttpRequest> callback)
     {
-      _defaults = callback;
+      _defaults.Add(callback);
     }
 
     private enum PolicyTokenType
@@ -408,7 +419,10 @@ namespace Innovator.Client.Connection
         , new Uri(_endpoints.Base, _endpoints.Databases.First()).ToString()
         , null, CredentialCache.DefaultCredentials, async, request =>
       {
-        _defaults.Invoke(request);
+        foreach (var a in _defaults)
+        {
+          a.Invoke(request);
+        }
         request.SetHeader("Accept", "text/xml");
       });
     }
@@ -425,7 +439,10 @@ namespace Innovator.Client.Connection
       return _service.Execute("POST", new Uri(_endpoints.Base, queryEndpoint).ToString()
                               , null, credentials, async, request =>
       {
-        _defaults.Invoke(request);
+        foreach (var a in _defaults)
+        {
+          a.Invoke(request);
+        }
         request.SetHeader("Accept", "text/xml");
         if (action == "ValidateUser")
         {
@@ -445,7 +462,10 @@ namespace Innovator.Client.Connection
       return _service.Execute("POST", new Uri(_endpoints.Base, _endpoints.RenewSession.First()).ToString()
         , null, CredentialCache.DefaultCredentials, async, request =>
       {
-        _defaults.Invoke(request);
+        foreach (var a in _defaults)
+        {
+          a.Invoke(request);
+        }
         request.SetHeader("Accept", "text/xml");
         if (!string.IsNullOrEmpty(policyToken))
           request.SetHeader(ProxyServerConnection.PolicyTokenHeader, policyToken);
@@ -467,7 +487,10 @@ namespace Innovator.Client.Connection
         , new Uri(_endpoints.Base, _endpoints.PolicyService.First()).ToString()
         , query, CredentialCache.DefaultCredentials, async, request =>
       {
-        _defaults.Invoke(request);
+        foreach (var a in _defaults)
+        {
+          a.Invoke(request);
+        }
         request.SetHeader("Accept", "text/xml");
       });
     }
@@ -500,6 +523,15 @@ namespace Innovator.Client.Connection
       return this._endpoints.Base.GetHashCode()
         ^ (_database ?? "").GetHashCode()
         ^ (_userId ?? "").GetHashCode();
+    }
+
+    public IPromise<IRemoteConnection> Clone(bool async)
+    {
+      var newConn = new ProxyServerConnection(_service, _endpoints);
+      newConn.SessionPolicy = this.SessionPolicy;
+      newConn._defaults = this._defaults;
+      return newConn.Login(_lastCredentials, async)
+        .Convert(u => (IRemoteConnection)newConn);
     }
   }
 }

@@ -19,11 +19,12 @@ namespace Innovator.Client.Connection
     private string _httpDatabase;
     private string _httpPassword;
     private string _httpUsername;
+    private ICredentials _lastCredentials;
     private Uri _innovatorServerBaseUrl;
     private Uri _innovatorServerUrl;
     private Uri _innovatorClientBin;
     private string _userId;
-    private Action<IHttpRequest> _defaultSettings = r => { };
+    private List<Action<IHttpRequest>> _defaults = new List<Action<IHttpRequest>>();
     private ArasVaultConnection _vaultConn;
     private List<KeyValuePair<string, string>> _serverInfo = new List<KeyValuePair<string, string>>();
 
@@ -159,6 +160,7 @@ namespace Innovator.Client.Connection
       _httpPassword = explicitCred.Password == null ? _httpPassword
         : explicitCred.Password.UseBytes<string>((ref byte[] b) =>
                                                   CalcMd5(ref b).ToLowerInvariant());
+      _lastCredentials = credentials;
 
       var result = new Promise<string>();
       result.CancelTarget(
@@ -259,7 +261,7 @@ namespace Innovator.Client.Connection
 
     public void DefaultSettings(Action<IHttpRequest> callback)
     {
-      _defaultSettings = callback;
+      _defaults.Add(callback);
     }
 
     public void SetVaultStrategy(IVaultStrategy strategy)
@@ -273,7 +275,13 @@ namespace Innovator.Client.Connection
       return _service.Execute("POST", uri.ToString(), null, CredentialCache.DefaultCredentials, async, req =>
       {
         ((IArasConnection)this).SetDefaultHeaders((k, v) => { req.SetHeader(k, v); });
-        (request.Settings ?? _defaultSettings).Invoke(req);
+
+        foreach (var a in _defaults)
+        {
+          a.Invoke(req);
+        }
+        if (request.Settings != null) request.Settings.Invoke(req);
+
         if (!string.IsNullOrEmpty(action)) req.SetHeader("SOAPACTION", action);
         req.SetContent(w => w.Write("<?xml version=\"1.0\" encoding=\"utf-8\" ?>" + request.ToNormalizedAml(_factory.LocalizationContext)).Close(), "text/xml");
       });
@@ -286,7 +294,10 @@ namespace Innovator.Client.Connection
       req.Proxy.Credentials = CredentialCache.DefaultCredentials;
 
       var result = new WebRequest(req, this.Compression);
-      _defaultSettings.Invoke(result);
+      foreach (var a in _defaults)
+      {
+        a.Invoke(result);
+      }
       return result;
     }
 
@@ -330,9 +341,9 @@ namespace Innovator.Client.Connection
       return new Uri(this._innovatorClientBin, relativeUrl).ToString();
     }
 
-    Action<IHttpRequest> IArasConnection.DefaultSettings
+    List<Action<IHttpRequest>> IArasConnection.DefaultSettings
     {
-      get { return _defaultSettings; }
+      get { return _defaults; }
     }
 
     private string CalcMd5(ref byte[] value)
@@ -360,6 +371,14 @@ namespace Innovator.Client.Connection
       return this._innovatorServerBaseUrl.GetHashCode()
         ^ (_httpDatabase ?? "").GetHashCode()
         ^ (_userId ?? "").GetHashCode();
+    }
+
+    public IPromise<IRemoteConnection> Clone(bool async)
+    {
+      var newConn = new ArasHttpConnection(new DefaultHttpService() { Compression = CompressionType.none }, _innovatorServerUrl.ToString());
+      newConn._defaults = this._defaults;
+      return newConn.Login(_lastCredentials, async)
+        .Convert(u => (IRemoteConnection)newConn);
     }
   }
 }

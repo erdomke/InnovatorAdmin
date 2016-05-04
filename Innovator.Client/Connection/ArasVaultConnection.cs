@@ -135,7 +135,12 @@ namespace Innovator.Client.Connection
         req.Headers.Set("VAULTID", vault.Id);
 
         var result = new WebRequest(req, _conn.Compression);
-        (request.Settings ?? _conn.DefaultSettings).Invoke(result);
+        foreach (var a in _conn.DefaultSettings)
+        {
+          a.Invoke(result);
+        }
+        if (request.Settings != null) request.Settings.Invoke(result);
+
         return result.Execute(async);
       });
     }
@@ -197,7 +202,12 @@ namespace Innovator.Client.Connection
         }
 
         var req = new WebRequest(hReq, _conn.Compression);
-        (upload.Settings ?? _conn.DefaultSettings).Invoke(req);
+        foreach (var ac in _conn.DefaultSettings)
+        {
+          ac.Invoke(req);
+        }
+        if (upload.Settings != null) upload.Settings.Invoke(req);
+
         //hReq.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; MyIE2; .NET CLR 1.1.4322)";
         req.SetContent(multiWriter.WriteToRequest);
         return req.Execute(async);

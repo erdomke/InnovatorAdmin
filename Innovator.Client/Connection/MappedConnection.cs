@@ -10,6 +10,7 @@ namespace Innovator.Client.Connection
   {
     private IRemoteConnection _current;
     private IEnumerable<ServerMapping> _mappings;
+    private ICredentials _lastCredentials;
 
     public ElementFactory AmlContext { get { return _current.AmlContext; } }
     public string Database { get { return _current.Database; } }
@@ -43,6 +44,7 @@ namespace Innovator.Client.Connection
 
     public void Login(ICredentials credentials)
     {
+      _lastCredentials = credentials;
       var mapping = _mappings.First(m => m.Databases.Contains(credentials.Database));
       _current = mapping.Connection;
       _current.Login(credentials);
@@ -50,6 +52,7 @@ namespace Innovator.Client.Connection
 
     public IPromise<string> Login(ICredentials credentials, bool async)
     {
+      _lastCredentials = credentials;
       var mapping = _mappings.First(m => m.Databases.Contains(credentials.Database));
       _current = mapping.Connection;
       return _current.Login(credentials, async);
@@ -80,6 +83,13 @@ namespace Innovator.Client.Connection
     public IPromise<Stream> Process(Command request, bool async)
     {
       return _current.Process(request, async);
+    }
+
+    public IPromise<IRemoteConnection> Clone(bool async)
+    {
+      var newConn = new MappedConnection(_mappings);
+      return newConn.Login(_lastCredentials, async)
+        .Convert(u => (IRemoteConnection)newConn);
     }
   }
 }

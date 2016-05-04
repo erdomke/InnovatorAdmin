@@ -12,7 +12,7 @@ namespace Innovator.Client
     /// URL that the instance resides at
     /// </summary>
     Uri Url { get; }
-    
+
     /// <summary>
     /// Log in to the database asynchronosuly
     /// </summary>
@@ -42,5 +42,12 @@ namespace Innovator.Client
     /// </summary>
     /// <returns>A set of databases which can be connected to using this URL</returns>
     IEnumerable<string> GetDatabases();
+
+    /// <summary>
+    /// Gets a new connection logged in with the same credentials
+    /// </summary>
+    /// <param name="async">Whether to perform this action asynchronously</param>
+    /// <returns>A promise to return a new connection</returns>
+    IPromise<IRemoteConnection> Clone(bool async);
   }
 }

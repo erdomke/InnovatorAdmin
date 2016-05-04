@@ -291,8 +291,11 @@ namespace InnovatorAdmin.Editor
       }
       else
       {
-        return new DataPromise(queries, innCmd.ConcurrentCount, _conn
-          , (q, ct) => ProcessCommand(GetCommand(q, cmd, innCmd.Parameters, false), async).ToTask(ct)
+        var remote = _conn as IRemoteConnection;
+        if (remote == null)
+          return Promises.Rejected<IResultObject>(new Exception("Connection must be an IRemoteConnection to use batch processing"));
+        return new DataPromise(queries, innCmd.ConcurrentCount, remote
+          , (q) => GetCommand(q, cmd, innCmd.Parameters, false)
           , getResult)
           .Progress(progressCallback);
       }
@@ -310,8 +313,8 @@ namespace InnovatorAdmin.Editor
       private CancellationTokenSource _cts = new CancellationTokenSource();
       private Func<Stream, IResultObject> _getResult;
 
-      public DataPromise(IList<XElement> queries, int concurrentCount, IConnection conn
-        , Func<XElement, CancellationToken, Task<Stream>> processQuery
+      public DataPromise(IList<XElement> queries, int concurrentCount, IRemoteConnection conn
+        , Func<XElement, Command> getCommand
         , Func<Stream, IResultObject> getResult)
       {
         var settings = new XmlWriterSettings()
@@ -327,7 +330,7 @@ namespace InnovatorAdmin.Editor
 
         base.CancelTarget(this);
 
-        ProcessPooled(queries, concurrentCount, processQuery, conn)
+        ProcessPooled(queries, concurrentCount, getCommand, conn)
           .ContinueWith(t =>
           {
             if (t.IsFaulted)
@@ -406,12 +409,13 @@ namespace InnovatorAdmin.Editor
         }
       }
 
-      private async Task ProcessPooled(IList<XElement> queries, int concurrentCount, Func<XElement, CancellationToken, Task<Stream>> getResult, IConnection conn)
+      private async Task ProcessPooled(IList<XElement> queries, int concurrentCount, Func<XElement, Command> getCommand, IRemoteConnection conn)
       {
         // now let's send HTTP requests to each of these URLs in parallel
         var allTasks = new List<Task>();
         var throttler = new SemaphoreSlim(initialCount: concurrentCount);
         var factory = conn.AmlContext;
+        var pool = await ConnectionPool.Create(conn, concurrentCount).ToTask(_cts.Token);
 
         foreach (var query in queries)
         {
@@ -425,8 +429,21 @@ namespace InnovatorAdmin.Editor
             try
             {
               Interlocked.Increment(ref _started);
-              var stream = await getResult(query, _cts.Token);
+              var cmd = getCommand(query);
+              var stream = await pool.Process(cmd, true).ToTask(_cts.Token);
               RecordResult(factory.FromXml(stream, null, conn), query);
+            }
+            catch (Exception ex)
+            {
+              _writer.WriteStartElement("Error");
+              _writer.WriteStartElement("Details");
+              _writer.WriteCData(ex.ToString());
+              _writer.WriteEndElement();
+              _writer.WriteStartElement("Query");
+              query.WriteTo(_writer);
+              _writer.WriteEndElement();
+              _writer.WriteEndElement();
+              _errorCount++;
             }
             finally
             {
@@ -547,8 +564,8 @@ namespace InnovatorAdmin.Editor
       if (queries[0].Attribute("type").Value != "File")
         throw new NotSupportedException("Can only download Items of type 'File'");
 
-      queries[0].Attribute("action").Value = "get";
-      queries[0].Attribute("select").Value = "filename,mimetype";
+      queries[0].SetAttributeValue("action", "get");
+      queries[0].SetAttributeValue("select", "filename,mimetype");
       var fileCmd = GetCommand(queries[0], cmd, innCmd.Parameters, true);
       var fileData = await ProcessCommand(fileCmd, async).ToTask();
       fileCmd.Action = CommandAction.ApplyItem;
