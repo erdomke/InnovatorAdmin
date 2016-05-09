@@ -182,7 +182,7 @@ namespace Innovator.Client.Connection
             var res = r.AsXml().DescendantsAndSelf("Result").FirstOrDefault();
             _httpUsername = res.Element("user").Value;
             var pwd = res.Element("password").Value;
-            if (string.IsNullOrWhiteSpace(pwd))
+            if (pwd.IsNullOrWhiteSpace())
               throw new Exception("Failed to authenticate with Innovator server '" + _innovatorServerUrl + "'. Original error: " + _httpUsername);
             var needHash = res.Element("hash").Value;
             if (string.Equals(needHash.Trim(), "false", StringComparison.OrdinalIgnoreCase))
@@ -206,7 +206,7 @@ namespace Innovator.Client.Connection
 
       var result = new Promise<string>();
       result.CancelTarget(
-        authProcess.Continue(_ => 
+        authProcess.Continue(_ =>
           Process(new Command("<Item/>").WithAction(CommandAction.ValidateUser), async)
         )
           .Progress((p, m) => result.Notify(p, m))

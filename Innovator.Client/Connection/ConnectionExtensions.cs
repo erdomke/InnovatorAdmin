@@ -104,9 +104,9 @@ namespace Innovator.Client
     /// <param name="id">ID of the item</param>
     public static IReadOnlyItem ItemById(this IConnection conn, string itemTypeName, string id)
     {
-      if (itemTypeName.IsNullOrWhitespace())
+      if (itemTypeName.IsNullOrWhiteSpace())
         throw new ArgumentException("Item type must be specified", "itemTypeName");
-      if (id.IsNullOrWhitespace())
+      if (id.IsNullOrWhiteSpace())
         throw new ArgumentException("ID must be specified", "id");
 
       var aml = conn.AmlContext;
@@ -125,9 +125,9 @@ namespace Innovator.Client
     /// <param name="mapper">Mapping function used to get an object from the item data</param>
     public static T ItemById<T>(this IConnection conn, string itemTypeName, string id, Func<IReadOnlyItem, T> mapper)
     {
-      if (itemTypeName.IsNullOrWhitespace())
+      if (itemTypeName.IsNullOrWhiteSpace())
         throw new ArgumentException("Item type must be specified", "itemTypeName");
-      if (id.IsNullOrWhitespace())
+      if (id.IsNullOrWhiteSpace())
         throw new ArgumentException("ID must be specified", "id");
 
       var aml = conn.AmlContext;
@@ -143,9 +143,9 @@ namespace Innovator.Client
     /// <param name="keyedName">Keyed name of the item</param>
     public static IReadOnlyItem ItemByKeyedName(this IConnection conn, string itemTypeName, string keyedName)
     {
-      if (itemTypeName.IsNullOrWhitespace())
+      if (itemTypeName.IsNullOrWhiteSpace())
         throw new ArgumentException("Item type must be specified", "itemTypeName");
-      if (keyedName.IsNullOrWhitespace())
+      if (keyedName.IsNullOrWhiteSpace())
         throw new ArgumentException("Keyed name must be specified", "keyedName");
 
       var aml = conn.AmlContext;
@@ -219,7 +219,7 @@ namespace Innovator.Client
     }
     public static string NextSequence(this IConnection conn, string sequenceName)
     {
-      if (sequenceName.IsNullOrWhitespace())
+      if (sequenceName.IsNullOrWhiteSpace())
         throw new ArgumentException("Sequence name must be specified", "sequenceName");
 
       var aml = conn.AmlContext;
@@ -248,7 +248,7 @@ namespace Innovator.Client
     }
     public static IReadOnlyResult Promote(this IConnection conn, string itemTypeName, string id, string newState, string comments = null)
     {
-      if (newState.IsNullOrWhitespace()) throw new ArgumentException("State must be a non-empty string to run a promotion.", "state");
+      if (newState.IsNullOrWhiteSpace()) throw new ArgumentException("State must be a non-empty string to run a promotion.", "state");
       var aml = conn.AmlContext;
       var promoteItem = aml.Item(aml.Action("promoteItem"),
         aml.Type(itemTypeName),

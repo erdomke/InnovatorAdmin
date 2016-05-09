@@ -140,7 +140,7 @@ namespace Innovator.Client
     {
       object value;
       var param = new Parameter();
-      if (content.IsNullOrWhitespace())
+      if (content.IsNullOrWhiteSpace())
       {
         return param.WithValue(content);
       }

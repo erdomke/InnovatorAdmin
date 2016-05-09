@@ -24,7 +24,7 @@ namespace Innovator.Client
       return result;
     }
 
-    internal static bool IsNullOrWhitespace(this string value)
+    internal static bool IsNullOrWhiteSpace(this string value)
     {
       return value == null || value.Trim().Length == 0;
     }

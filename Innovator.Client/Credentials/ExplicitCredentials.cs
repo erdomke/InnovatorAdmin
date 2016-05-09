@@ -12,7 +12,12 @@ namespace Innovator.Client
     private SecureToken _password;
     private string _username;
 
+#if NET4
     public System.Net.ICredentials Credentials { get { return new NetworkCredential(_username, _password); } }
+#else
+    public System.Net.ICredentials Credentials { get { return new NetworkCredential(_username
+      , _password.UseString((ref string s) => new string(s.ToCharArray()))); } }
+#endif
     public string Database { get { return _database; } }
     public SecureToken Password { get { return _password; } }
     public string Username { get { return _username; } }

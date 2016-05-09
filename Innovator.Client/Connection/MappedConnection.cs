@@ -66,7 +66,7 @@ namespace Innovator.Client.Connection
             var res = r.AsXml().DescendantsAndSelf("Result").FirstOrDefault();
             var user = res.Element("user").Value;
             var pwd = res.Element("password").Value;
-            if (string.IsNullOrWhiteSpace(pwd))
+            if (pwd.IsNullOrWhiteSpace())
               promise.Reject(new Exception("Failed to authenticate with Innovator server '" + mapping.Url + "'. Original error: " + user));
             var needHash = !string.Equals(res.Element("hash").Value, "false", StringComparison.OrdinalIgnoreCase);
             if (needHash)
