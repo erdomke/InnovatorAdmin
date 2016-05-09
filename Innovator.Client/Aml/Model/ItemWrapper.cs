@@ -104,5 +104,10 @@ namespace Innovator.Client
     {
       return _item.Clone();
     }
+
+    public string TypeName()
+    {
+      return _item.TypeName();
+    }
   }
 }

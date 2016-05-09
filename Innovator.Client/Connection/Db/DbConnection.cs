@@ -269,5 +269,10 @@ namespace Innovator.Client.Connection
     {
       return _item.Property(name, lang);
     }
+
+    public string TypeName()
+    {
+      return _item.TypeName();
+    }
   }
 }

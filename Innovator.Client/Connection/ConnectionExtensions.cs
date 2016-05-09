@@ -96,6 +96,12 @@ namespace Innovator.Client
       return new Connection.DbConnection(conn);
     }
 
+    /// <summary>
+    /// Retrieve an item based on its type and ID
+    /// </summary>
+    /// <param name="conn">Connection to query the item on</param>
+    /// <param name="itemTypeName">Name of the item type</param>
+    /// <param name="id">ID of the item</param>
     public static IReadOnlyItem ItemById(this IConnection conn, string itemTypeName, string id)
     {
       if (itemTypeName.IsNullOrWhitespace())
@@ -110,6 +116,31 @@ namespace Innovator.Client
       return aml.FromXml(conn.Process(query), query.Aml, conn).AssertItem();
     }
 
+    /// <summary>
+    /// Retrieve an item based on its type and ID and map it to an object
+    /// </summary>
+    /// <param name="conn">Connection to query the item on</param>
+    /// <param name="itemTypeName">Name of the item type</param>
+    /// <param name="id">ID of the item</param>
+    /// <param name="mapper">Mapping function used to get an object from the item data</param>
+    public static T ItemById<T>(this IConnection conn, string itemTypeName, string id, Func<IReadOnlyItem, T> mapper)
+    {
+      if (itemTypeName.IsNullOrWhitespace())
+        throw new ArgumentException("Item type must be specified", "itemTypeName");
+      if (id.IsNullOrWhitespace())
+        throw new ArgumentException("ID must be specified", "id");
+
+      var aml = conn.AmlContext;
+      var itemQuery = aml.Item(aml.Type(itemTypeName), aml.Id(id));
+      return itemQuery.LazyMap(conn, mapper);
+    }
+
+    /// <summary>
+    /// Retrieve an item based on its type and keyed name
+    /// </summary>
+    /// <param name="conn">Connection to query the item on</param>
+    /// <param name="itemTypeName">Name of the item type</param>
+    /// <param name="keyedName">Keyed name of the item</param>
     public static IReadOnlyItem ItemByKeyedName(this IConnection conn, string itemTypeName, string keyedName)
     {
       if (itemTypeName.IsNullOrWhitespace())
@@ -178,6 +209,14 @@ namespace Innovator.Client
         }).Fail(ex => result.Reject(ex)));
       return result;
     }
+    public static IReadOnlyItem Lock(this IConnection conn, string itemTypeName, string id)
+    {
+      var aml = conn.AmlContext;
+      return aml.Item(aml.Action("lock"),
+        aml.Type(itemTypeName),
+        aml.Id(id)
+      ).Apply(conn).AssertItem();
+    }
     public static string NextSequence(this IConnection conn, string sequenceName)
     {
       if (sequenceName.IsNullOrWhitespace())
@@ -206,6 +245,26 @@ namespace Innovator.Client
         result.Reject(ex);
       }
       return result;
+    }
+    public static IReadOnlyResult Promote(this IConnection conn, string itemTypeName, string id, string newState, string comments = null)
+    {
+      if (newState.IsNullOrWhitespace()) throw new ArgumentException("State must be a non-empty string to run a promotion.", "state");
+      var aml = conn.AmlContext;
+      var promoteItem = aml.Item(aml.Action("promoteItem"),
+        aml.Type(itemTypeName),
+        aml.Id(id),
+        aml.State(newState)
+      );
+      if (!string.IsNullOrEmpty(comments)) promoteItem.Add(aml.Property("comments", comments));
+      return promoteItem.Apply(conn).AssertNoError();
+    }
+    public static IReadOnlyItem Unlock(this IConnection conn, string itemTypeName, string id)
+    {
+      var aml = conn.AmlContext;
+      return aml.Item(aml.Action("unlock"),
+        aml.Type(itemTypeName),
+        aml.Id(id)
+      ).Apply(conn).AssertItem();
     }
   }
 }

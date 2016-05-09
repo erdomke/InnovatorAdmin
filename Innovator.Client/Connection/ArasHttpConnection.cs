@@ -153,18 +153,62 @@ namespace Innovator.Client.Connection
     public IPromise<string> Login(ICredentials credentials, bool async)
     {
       var explicitCred = credentials as ExplicitCredentials;
-      if (explicitCred == null) throw new NotSupportedException("This connection implementation only supports explicit credentials");
+      var hashCred = credentials as ExplicitHashCredentials;
+      var winCred = credentials as WindowsCredentials;
 
-      _httpDatabase = explicitCred.Database;
-      _httpUsername = explicitCred.Username;
-      _httpPassword = explicitCred.Password == null ? _httpPassword
-        : explicitCred.Password.UseBytes<string>((ref byte[] b) =>
-                                                  CalcMd5(ref b).ToLowerInvariant());
+      IPromise<bool> authProcess;
+      if (explicitCred != null)
+      {
+        _httpDatabase = explicitCred.Database;
+        _httpUsername = explicitCred.Username;
+        _httpPassword = explicitCred.Password.UseBytes<string>((ref byte[] b) =>
+                                                    CalcMd5(ref b).ToLowerInvariant());
+        authProcess = Promises.Resolved(true);
+      }
+      else if (hashCred != null)
+      {
+        _httpDatabase = hashCred.Database;
+        _httpUsername = hashCred.Username;
+        _httpPassword = hashCred.PasswordHash;
+        authProcess = Promises.Resolved(true);
+      }
+      else if (winCred != null)
+      {
+        var waLoginUrl = new Uri(this._innovatorClientBin, "../scripts/IOMLogin.aspx");
+        _httpDatabase = winCred.Database;
+        authProcess = UploadAml(waLoginUrl, "", "<Item />", async)
+          .Convert(r =>
+          {
+            var res = r.AsXml().DescendantsAndSelf("Result").FirstOrDefault();
+            _httpUsername = res.Element("user").Value;
+            var pwd = res.Element("password").Value;
+            if (string.IsNullOrWhiteSpace(pwd))
+              throw new Exception("Failed to authenticate with Innovator server '" + _innovatorServerUrl + "'. Original error: " + _httpUsername);
+            var needHash = res.Element("hash").Value;
+            if (string.Equals(needHash.Trim(), "false", StringComparison.OrdinalIgnoreCase))
+            {
+              _httpPassword = pwd;
+            }
+            else
+            {
+              var bytes = Encoding.UTF8.GetBytes(pwd);
+              _httpPassword = CalcMd5(ref bytes).ToLowerInvariant();
+            }
+            return true;
+          });
+      }
+      else
+      {
+        throw new NotSupportedException("This connection implementation does not support the specified credential type");
+      }
+
       _lastCredentials = credentials;
 
       var result = new Promise<string>();
       result.CancelTarget(
-        Process(new Command("<Item/>").WithAction(CommandAction.ValidateUser), async)
+        authProcess.Continue(_ => 
+          Process(new Command("<Item/>").WithAction(CommandAction.ValidateUser), async)
+        )
           .Progress((p, m) => result.Notify(p, m))
           .Done(r =>
           {
@@ -232,12 +276,6 @@ namespace Innovator.Client.Connection
             result.Reject(ex);
           }));
       return result;
-    }
-
-    public void LoginToken(string database, string username, SecureToken token)
-    {
-      _httpPassword = token.UseString<string>((ref string p) => new string(p.ToCharArray()));
-      Login(new ExplicitCredentials(database, username, null), false);
     }
 
     public void Logout(bool unlockOnLogout)
@@ -346,7 +384,7 @@ namespace Innovator.Client.Connection
       get { return _defaults; }
     }
 
-    private string CalcMd5(ref byte[] value)
+    private static string CalcMd5(ref byte[] value)
     {
       using (var md5Provider = new MD5CryptoServiceProvider())
       {

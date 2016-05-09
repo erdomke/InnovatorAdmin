@@ -15,7 +15,7 @@ namespace Innovator.Server
     public IResult _result;
 
 
-    public IItem Changes
+    public IItem Item
     {
       get { return _changes; }
     }
@@ -33,7 +33,7 @@ namespace Innovator.Server
     }
     public IReadOnlyItem Existing
     {
-      get 
+      get
       {
         EnsureExisting();
         return _existing;
@@ -41,17 +41,17 @@ namespace Innovator.Server
     }
     public bool IsNew
     {
-      get 
+      get
       {
         EnsureExisting();
         return _existing != null;
       }
     }
     public Action<IItem> QueryDefaults { get; set; }
-    
+
     public IReadOnlyItem Merged
     {
-      get 
+      get
       {
         if (this.IsNew) return _changes;
         var merges = _existing.Clone();
@@ -95,7 +95,7 @@ namespace Innovator.Server
       var result = _changes.Property(name);
       if (result.Exists) return result;
 
-      if (this.IsNew) 
+      if (this.IsNew)
       {
         var item = _changes as Item;
         if (item == null) return Property.NullProperty;
@@ -120,7 +120,7 @@ namespace Innovator.Server
         if (!string.IsNullOrEmpty(_changes.Id()))
         {
           var aml = Conn.AmlContext;
-          var query = aml.Item(Changes.Type(), aml.Id(Changes.Id()), aml.Action("get"));
+          var query = aml.Item(Item.Type(), aml.Id(Item.Id()), aml.Action("get"));
           if (QueryDefaults != null) QueryDefaults.Invoke(query);
           var items = query.Apply(Conn).Items();
           if (items.Any()) _existing = items.Single();

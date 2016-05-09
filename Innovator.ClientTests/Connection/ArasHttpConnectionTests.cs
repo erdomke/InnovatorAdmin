@@ -23,10 +23,8 @@ namespace Innovator.Client.Connection.Tests
         var result = await conn.Process(cmd, true).ToTask();
         Assert.Fail();
       }
-      catch (HttpException)
-      {
-
-      }
+      catch (HttpException) { }
+      catch (HttpTimeoutException) { }
     }
   }
 }

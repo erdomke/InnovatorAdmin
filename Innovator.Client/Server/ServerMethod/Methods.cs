@@ -39,7 +39,7 @@ namespace Innovator.Server
     /// The changes given to the database.  This object should be modified to make any additional 
     /// changes
     /// </summary>
-    IItem Changes { get; }
+    IItem Item { get; }
 
     /// <summary>
     /// Gets an item which represents the new item after the changes are applied
@@ -59,7 +59,7 @@ namespace Innovator.Server
     bool IsChanging(params string[] names);
 
     /// <summary>
-    /// Gets a property from the <see cref="Changes"/> item (if it exists).  Otherwise, the property 
+    /// Gets a property from the <see cref="Item"/> item (if it exists).  Otherwise, the property 
     /// from <see cref="Existing"/> is returned
     /// </summary>
     IReadOnlyProperty NewOrExisting(string name);

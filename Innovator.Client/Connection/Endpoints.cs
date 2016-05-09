@@ -8,14 +8,16 @@ namespace Innovator.Client.Connection
 {
   internal class Endpoints
   {
-    private List<String> _databases = new List<string>();
-    private List<String> _download = new List<string>();
-    private List<String> _policyService = new List<string>();
-    private List<String> _query = new List<string>();
-    private List<String> _renewSession = new List<string>();
+    private List<string> _auths = new List<string>();
+    private List<string> _databases = new List<string>();
+    private List<string> _download = new List<string>();
+    private List<string> _policyService = new List<string>();
+    private List<string> _query = new List<string>();
+    private List<string> _renewSession = new List<string>();
 
     public Uri Base { get; set; }
 
+    public IList<string> Auths { get { return _auths; } }
     public IList<string> Databases { get { return _databases; } }
     public IList<string> Download { get { return _download; } }
     public IList<string> PolicyService { get { return _policyService; } }
@@ -28,6 +30,9 @@ namespace Innovator.Client.Connection
       {
         switch (endpoint.Attribute("action").Value)
         {
+          case "Auth":
+            _auths = endpoint.Elements("uri").Select(e => e.Value).ToList();
+            break;
           case "Databases":
             _databases = endpoint.Elements("uri").Select(e => e.Value).ToList();
             break;

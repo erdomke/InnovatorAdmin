@@ -179,7 +179,7 @@ namespace Innovator.Client
       return this.Relationships(type).Cast<IReadOnlyItem>();
     }
 
-    #if NET4
+#if NET4
     public override bool TrySetMember(System.Dynamic.SetMemberBinder binder, object value)
     {
       this.Property(binder.Name).Set(value);
@@ -199,6 +199,11 @@ namespace Innovator.Client
         .Where(e => e.LocalName != "Relationships")
         .Select(e => e.LocalName);
     }
-    #endif
+#endif
+
+    public string TypeName()
+    {
+      return this.Type().Value;
+    }
   }
 }

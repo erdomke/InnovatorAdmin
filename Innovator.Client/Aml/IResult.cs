@@ -10,7 +10,7 @@ namespace Innovator.Client
     new string Value { get; set; }
   }
 
-  public interface IReadOnlyResult
+  public interface IReadOnlyResult : IAmlNode
   {
     IReadOnlyItem AssertItem(string type = null);
     IEnumerable<IReadOnlyItem> AssertItems();
@@ -18,6 +18,5 @@ namespace Innovator.Client
     ServerException Exception { get; }
     IEnumerable<IReadOnlyItem> Items();
     string Value { get; }
-    string ToAml();
   }
 }

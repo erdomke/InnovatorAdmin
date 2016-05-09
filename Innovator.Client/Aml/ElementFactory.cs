@@ -297,13 +297,12 @@ namespace Innovator.Client
     {
       return new Relationships(this, content);
     }
-    public IResult Result()
+    /// <summary>Create a new Result AML tag</summary>
+    public IResult Result(params object[] content)
     {
-      return new Result(this);
-    }
-    public IResult Result(string value)
-    {
-      return new Result(this) { Value = value };
+      var result = new Result(this);
+      result.Add(content);
+      return result;
     }
     /// <summary>Create a new select attribute tag</summary>
     public IAttribute Select(string value)

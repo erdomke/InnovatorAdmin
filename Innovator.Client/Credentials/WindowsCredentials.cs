@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Innovator.Client
 {
-  public class WindowsCredentials : ICredentials
+  public class WindowsCredentials : INetCredentials
   {
     private System.Net.ICredentials _credentials;
     private string _database;

@@ -118,6 +118,21 @@ namespace Innovator.Client
       result.AppendChild(result.GetLocalNode(content.Node));
       return this;
     }
+    public override IElement Add(object content)
+    {
+      var origNode = _node;
+      IElement result = null;
+      try
+      {
+        _node = (XmlElement)FindOrCreateResult();
+        result = base.Add(content);
+      }
+      finally
+      {
+        _node = origNode;
+      }
+      return result;
+    }
 
     /// <summary>
     /// Throws any contained exception

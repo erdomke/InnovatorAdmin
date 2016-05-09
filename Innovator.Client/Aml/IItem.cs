@@ -3,13 +3,11 @@ using System.Collections.Generic;
 
 namespace Innovator.Client
 {
-  public interface IReadOnlyItem : IReadOnlyElement
+  public interface IReadOnlyItem : IReadOnlyElement, IItemRef
   {
     IReadOnlyResult AsResult();
     /// <summary>Creates a duplicate of the item object.  All properties (including the ID) are preserved</summary>
     new IItem Clone();
-    /// <summary>The ID of the item as retrieved from either the attribute or the property</summary>
-    string Id();
     /// <summary>Returns a reference to the property with the specified name</summary>
     /// <remarks>If the property does not exist, the .Exists member of the property will return false</remarks>
     IReadOnlyProperty Property(string name);

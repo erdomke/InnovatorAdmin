@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 
 namespace Innovator.Client.Connection
@@ -44,18 +45,63 @@ namespace Innovator.Client.Connection
 
     public void Login(ICredentials credentials)
     {
-      _lastCredentials = credentials;
-      var mapping = _mappings.First(m => m.Databases.Contains(credentials.Database));
-      _current = mapping.Connection;
-      _current.Login(credentials);
+      Login(credentials, false).Wait();
     }
 
     public IPromise<string> Login(ICredentials credentials, bool async)
     {
       _lastCredentials = credentials;
       var mapping = _mappings.First(m => m.Databases.Contains(credentials.Database));
+      var netCred = credentials as INetCredentials;
+      IPromise<ICredentials> credPromise;
+      if (mapping.Endpoints.Auths.Any() && netCred != null)
+      {
+        var http = Factory.DefaultService.Invoke();
+        var promise = new Promise<ICredentials>();
+        credPromise = promise;
+
+        http.Execute("GET", mapping.Endpoints.Auths.First(), null, netCred.Credentials, async, null)
+          .Done(r =>
+          {
+            var res = r.AsXml().DescendantsAndSelf("Result").FirstOrDefault();
+            var user = res.Element("user").Value;
+            var pwd = res.Element("password").Value;
+            if (string.IsNullOrWhiteSpace(pwd))
+              promise.Reject(new Exception("Failed to authenticate with Innovator server '" + mapping.Url + "'. Original error: " + user));
+            var needHash = !string.Equals(res.Element("hash").Value, "false", StringComparison.OrdinalIgnoreCase);
+            if (needHash)
+            {
+              promise.Resolve(new ExplicitCredentials(netCred.Database, user, pwd));
+            }
+            else
+            {
+              promise.Resolve(new ExplicitHashCredentials(netCred.Database, user, pwd));
+            }
+          }).Fail(ex =>
+          {
+            // Only hard fail for problems which aren't time outs and not found issues.
+            var webEx = ex as HttpException;
+            var timeout = ex as HttpTimeoutException;
+            if (webEx != null && webEx.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+              promise.Resolve(credentials);
+            }
+            else if (timeout != null)
+            {
+              promise.Resolve(credentials);
+            }
+            else
+            {
+              promise.Reject(ex);
+            }
+          });
+      }
+      else
+      {
+        credPromise = Promises.Resolved(credentials);
+      }
       _current = mapping.Connection;
-      return _current.Login(credentials, async);
+      return credPromise.Continue(cred => _current.Login(cred, async));
     }
 
     public void Logout(bool unlockOnLogout)

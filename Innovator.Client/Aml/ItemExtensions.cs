@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using System.IO;
+using System.Xml.Linq;
 
 namespace Innovator.Client
 {
@@ -78,10 +79,10 @@ namespace Innovator.Client
       }
       return false;
     }
-    public static IReadOnlyResult Edit(this IReadOnlyItem item, IConnection conn, params object[] contents)
+    public static IReadOnlyResult Edit(this IItemRef item, IConnection conn, params object[] contents)
     {
       var aml = conn.AmlContext;
-      var editItem = aml.Item(aml.Action("edit"), aml.Type(item.Type().Value), aml.Id(item.Id()));
+      var editItem = aml.Item(aml.Action("edit"), aml.Type(item.TypeName()), aml.Id(item.Id()));
       foreach (var content in contents)
         editItem.Add(content);
       var query = editItem.ToString();
@@ -119,14 +120,12 @@ namespace Innovator.Client
     {
       return attr.Exists && !string.IsNullOrEmpty(attr.Value);
     }
-    public static void Lock(this IItem item, IConnection conn)
+    public static void Lock(this IItemRef item, IConnection conn)
     {
-      var aml = conn.AmlContext;
-      var result = aml.Item(aml.Action("lock"),
-        aml.Type(item.Type().Value),
-        aml.Id(item.Id())
-      ).Apply(conn).AssertItem();
-      item.LockedById().Set(result.LockedById().Value);
+      var result = conn.Lock(item.TypeName(), item.Id());
+      var editable = item as IItem;
+      if (editable != null)
+        editable.LockedById().Set(result.LockedById().Value);
     }
     public static LockStatusType LockStatus(this IReadOnlyItem item, IConnection conn)
     {
@@ -141,26 +140,25 @@ namespace Innovator.Client
       if (result == null) throw new NotImplementedException();
       return result;
     }
-    public static IReadOnlyResult Promote(this IReadOnlyItem item, IConnection conn, string state, string comments = null)
+    public static IReadOnlyResult Promote(this IItemRef item, IConnection conn, string state, string comments = null)
     {
-      if (state.IsNullOrWhitespace()) throw new ArgumentException("State must be a non-empty string to run a promotion.", "state");
-      var aml = conn.AmlContext;
-      var promoteItem = aml.Item(aml.Action("promoteItem"),
-        aml.Type(item.Type().Value),
-        aml.Id(item.Id()),
-        aml.State(state)
-      );
-      if (!comments.IsNullOrWhitespace()) promoteItem.Add(aml.Property("comments", comments));
-      return promoteItem.Apply(conn).AssertNoError();
+      return conn.Promote(item.TypeName(), item.Id(), state, comments);
     }
-    public static void Unlock(this IItem item, IConnection conn)
+    public static XElement ToXml(this IAmlNode node)
     {
-      var aml = conn.AmlContext;
-      var result = aml.Item(aml.Action("unlock"),
-        aml.Type(item.Type().Value),
-        aml.Id(item.Id())
-      ).Apply(conn).AssertItem();
-      item.LockedById().Remove();
+      var doc = new XDocument();
+      using (var writer = doc.CreateWriter())
+      {
+        node.ToAml(writer);
+      }
+      return doc.Root;
+    }
+    public static void Unlock(this IItemRef item, IConnection conn)
+    {
+      conn.Unlock(item.TypeName(), item.Id());
+      var editable = item as IItem;
+      if (editable != null)
+        editable.LockedById().Remove();
     }
 
     //public static IReadOnlyItem LazyFetch(this IReadOnlyItem item, IConnection conn, params SubSelect[] properties)
@@ -193,8 +191,33 @@ namespace Innovator.Client
         if (string.IsNullOrEmpty(item.Id())) throw new ArgumentException(string.Format("No id specified for the item '{0}'", item.ToAml()));
         var aml = conn.AmlContext;
         var query = aml.Item(aml.Action("get"), aml.Type(item.Type().Value), aml.Select(select), aml.Id(item.Id()));
-        var context = query.Apply(conn).AssertItem();
-        result = mapper.Invoke(context);
+        var res = query.Apply(conn);
+        if (res.Items().Any())
+        {
+          result = mapper.Invoke(res.AssertItem());
+        }
+        // So the top item couldn't be found (e.g. perhaps this is during an onBeforeAdd).  Now, let's try filling
+        // in any multi-level selects
+        else if (select.First().Any(s => s.Any()))
+        {
+          var clone = item.Clone();
+          foreach (var multiSelect in select.First().Where(s => s.Any() && s.Name != "id" && s.Name != "config_id"))
+          {
+            if (clone.Property(multiSelect.Name).HasValue() && clone.Property(multiSelect.Name).Type().HasValue())
+            {
+              query = aml.Item(aml.Action("get")
+                , aml.Type(clone.Property(multiSelect.Name).Type().Value)
+                , aml.Select(multiSelect)
+                , aml.Id(clone.Property(multiSelect.Name).Value));
+              res = query.Apply(conn);
+              if (res.Items().Any())
+              {
+                clone.Property(multiSelect.Name).Set(res.AssertItem());
+              }
+            }
+          }
+          result = mapper.Invoke(clone);
+        }
       }
       return result;
     }

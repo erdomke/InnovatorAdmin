@@ -45,6 +45,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
@@ -55,13 +56,16 @@
   <ItemGroup>
     <Compile Include="Aml\DateMagnitude.cs" />
     <Compile Include="Aml\DynamicDateTimeRange.cs" />
+    <Compile Include="Aml\IAmlNode.cs" />
     <Compile Include="Aml\IAttribute.cs" />
     <Compile Include="Aml\IElement.cs" />
     <Compile Include="Aml\IErrorBuilder.cs" />
     <Compile Include="Aml\IItem.cs" />
+    <Compile Include="Aml\IItemRef.cs" />
     <Compile Include="Aml\IProperty.cs" />
     <Compile Include="Aml\IResult.cs" />
     <Compile Include="Aml\ItemExtensions.cs" />
+    <Compile Include="Aml\ItemRef.cs" />
     <Compile Include="Aml\JsonFormatter.cs" />
     <Compile Include="Aml\LockStatusType.cs" />
     <Compile Include="Aml\LoggedOutException.cs" />
@@ -99,8 +103,10 @@
     <Compile Include="Connection\MultiPartFormWriter.cs" />
     <Compile Include="Connection\ConnectionPool.cs" />
     <Compile Include="Connection\ServerMapping.cs" />
+    <Compile Include="Credentials\ExplicitHashCredentials.cs" />
     <Compile Include="IAsyncConnection.cs" />
     <Compile Include="IAsyncScript.cs" />
+    <Compile Include="INetCredentials.cs" />
     <Compile Include="IO\SmartCompressionStream.cs" />
     <Compile Include="MemoryCache.cs" />
     <Compile Include="Connection\QueryString.cs" />

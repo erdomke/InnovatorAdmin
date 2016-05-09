@@ -4,7 +4,7 @@ using System.Xml;
 
 namespace Innovator.Client
 {
-  public interface IReadOnlyElement : ICloneable
+  public interface IReadOnlyElement : ICloneable, IAmlNode
   {
     IReadOnlyAttribute Attribute(string name);
     IEnumerable<IReadOnlyAttribute> Attributes();
@@ -20,9 +20,6 @@ namespace Innovator.Client
     IReadOnlyElement Parent { get; }
     /// <summary>String value of the element</summary>
     string Value { get; }
-
-    string ToAml();
-    void ToAml(XmlWriter writer);
   }
   public interface IElement : IReadOnlyElement
   {
