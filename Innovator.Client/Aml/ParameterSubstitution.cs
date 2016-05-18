@@ -8,32 +8,59 @@ using System.Xml;
 
 namespace Innovator.Client
 {
+  public enum ParameterSubstitutionMode
+  {
+    Aml,
+    Sql
+  }
   public class ParameterSubstitution
   {
     private IServerContext _context;
+    private SqlFormatter _sqlFormatter;
     private Dictionary<string, object> _parameters = new Dictionary<string, object>();
     private int _itemCount = 0;
 
     public int ItemCount { get { return _itemCount; } }
+    public ParameterSubstitutionMode Mode { get; set; }
     public int ParamCount { get { return _parameters.Count; } }
     public Action<string> ParameterAccessListener { get; set; }
 
-    public ParameterSubstitution() { }
+    public ParameterSubstitution()
+    {
+      this.Mode = ParameterSubstitutionMode.Aml;
+    }
 
+    public void AddIndexedParameters(object[] values)
+    {
+      for (var i = 0; i < values.Length; i++)
+      {
+        AddParameter(i.ToString(), values[i]);
+      }
+    }
     public void AddParameter(string name, object value)
     {
       _parameters.Add(name, value);
     }
 
+    public void ClearParameters()
+    {
+      _parameters.Clear();
+    }
+
     public string Substitute(string query, IServerContext context)
     {
-      _context = context;
+      if (_context != context)
+      {
+        _context = context;
+        _sqlFormatter = new SqlFormatter(context);
+      }
+
       if (string.IsNullOrEmpty(query)) return query;
       var i = 0;
       while (i < query.Length && char.IsWhiteSpace(query[i])) i++;
       if (i >= query.Length) return query;
 
-      if (query[i] == '<')
+      if (query[i] == '<' && this.Mode == ParameterSubstitutionMode.Aml)
       {
         var builder = new StringBuilder(query.Length);
         using (var reader = new StringReader(query))
@@ -290,7 +317,6 @@ namespace Innovator.Client
     private string SqlReplace(string query)
     {
       var builder = new StringBuilder(query.Length);
-      var formatter = new SqlFormatter(_context);
       SqlReplace(query, '@', builder, p =>
       {
         object value;
@@ -299,15 +325,15 @@ namespace Innovator.Client
           IFormattable num;
           if (ServerContext.TryCastNumber(value, out num))
           {
-            return formatter.Format(num);
+            return _sqlFormatter.Format(num);
           }
           else if (builder.ToString().EndsWith(" in ") && value is IEnumerable)
           {
-            return "(" + RenderSqlEnum(value, true, o => formatter.Format(o)) + ")";
+            return "(" + RenderSqlEnum(value, true, o => _sqlFormatter.Format(o)) + ")";
           }
           else
           {
-            return "N'" + RenderSqlEnum(value, false, o => formatter.Format(o)) + "'";
+            return "N'" + RenderSqlEnum(value, false, o => _sqlFormatter.Format(o)) + "'";
           }
         }
         else

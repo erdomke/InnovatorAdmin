@@ -134,10 +134,7 @@ namespace Innovator.Client
     public Command WithAml(string query, params object[] args)
     {
       this.Aml = query;
-      for (var i = 0; i < args.Length; i++)
-      {
-        _sub.AddParameter(i.ToString(), args[i]);
-      }
+      _sub.AddIndexedParameters(args);
       return this;
     }
     public Command WithMimeType(string mimeType)

@@ -10,7 +10,7 @@ namespace Innovator.Client
   {
     private IConnection _conn;
     private StringBuilder _builder;
-    private IFormatProvider _provider;
+    private ParameterSubstitution _subs;
     private int _commands = 0;
     private string _lastQuery;
     private IPromise<Stream> _lastResult = null;
@@ -22,7 +22,10 @@ namespace Innovator.Client
     {
       _builder = new StringBuilder(capacity).Append("<sql>");
       _conn = conn;
-      _provider = new SqlFormatter(conn.AmlContext.LocalizationContext);
+      _subs = new ParameterSubstitution()
+      {
+        Mode = ParameterSubstitutionMode.Sql
+      };
       this.Threshold = 3000;
     }
 
@@ -40,8 +43,10 @@ namespace Innovator.Client
     }
     public SqlBatchWriter Command(string format, params object[] args)
     {
-      _builder.AppendEscapedXml(string.Format(_provider, format, args)).AppendLine();
+      _subs.AddIndexedParameters(args);
+      _builder.AppendEscapedXml(_subs.Substitute(format, _conn.AmlContext.LocalizationContext)).AppendLine();
       ProcessCommand(false);
+      _subs.ClearParameters();
       return this;
     }
     public SqlBatchWriter Part(string value)
@@ -51,7 +56,9 @@ namespace Innovator.Client
     }
     public SqlBatchWriter Part(string format, params object[] args)
     {
-      _builder.AppendEscapedXml(string.Format(_provider, format, args)).AppendLine();
+      _subs.AddIndexedParameters(args);
+      _builder.AppendEscapedXml(_subs.Substitute(format, _conn.AmlContext.LocalizationContext)).AppendLine();
+      _subs.ClearParameters();
       return this;
     }
 
@@ -90,6 +97,11 @@ namespace Innovator.Client
         _conn.AmlContext.FromXml(_lastResult.Wait(), _lastQuery, _conn).AssertNoError();
         _lastResult = null;
       }
+    }
+
+    public override string ToString()
+    {
+      return _builder.ToString() + "</sql>";
     }
 
     public void Flush()
