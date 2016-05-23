@@ -73,7 +73,7 @@ namespace Innovator.Client
       }
 
       var ienum = content as IEnumerable;
-      if (ienum != null)
+      if (ienum != null && !(content is string))
       {
         foreach (var obj in ienum)
         {
