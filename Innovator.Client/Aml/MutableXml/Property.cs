@@ -176,10 +176,8 @@ namespace Innovator.Client
       IAttribute type;
       if (item == null && this.Value.IsGuid() && this.TryGetAttribute("type", out type))
       {
-        item = _factory.Item(this._node.OwnerDocument.CreateElement("Item"));
-        item.Type().Set(type.Value);
-        item.Attribute("id").Set(this.Value);
-
+        item = _factory.Item(_factory.Type(type.Value), _factory.Id(this.Value));
+        
         IAttribute keyedName;
         if (this.TryGetAttribute("keyed_name", out keyedName))
         {

@@ -75,23 +75,25 @@ namespace Innovator.Client
       var ienum = content as IEnumerable;
       if (ienum != null)
       {
-        if (ienum.OfType<Element>().Any(e => e != null))
+        foreach (var obj in ienum)
         {
-          foreach (var e in ienum.OfType<Element>().Where(e => e != null))
+          var e = obj as Element;
+          var a = obj as Attribute;
+          if (e != null)
           {
             _node.AppendChild(_node.GetLocalNode(e._node));
           }
-          return this;
-        }
-
-        if (ienum.OfType<Attribute>().Any(a => a != null))
-        {
-          foreach (var a in ienum.OfType<Attribute>().Where(a => a != null))
+          else if (a != null)
           {
             _node.Attributes.SetNamedItem(_node.GetLocalNode(a._attribute));
           }
-          return this;
+          else
+          {
+            _node.InnerText = _factory.LocalizationContext.Format(obj);
+          }
         }
+
+        return this;
       }
 
       _node.InnerText = _factory.LocalizationContext.Format(content);

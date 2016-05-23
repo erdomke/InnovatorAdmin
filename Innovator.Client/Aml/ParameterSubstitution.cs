@@ -323,7 +323,11 @@ namespace Innovator.Client
         if (TryGetParamValue(p, out value))
         {
           IFormattable num;
-          if (ServerContext.TryCastNumber(value, out num))
+          if (value == null || value == DBNull.Value)
+          {
+            return "null";
+          }
+          else if (ServerContext.TryCastNumber(value, out num))
           {
             return _sqlFormatter.Format(num);
           }

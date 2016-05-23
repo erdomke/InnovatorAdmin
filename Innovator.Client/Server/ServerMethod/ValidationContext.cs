@@ -44,7 +44,7 @@ namespace Innovator.Server
       get
       {
         EnsureExisting();
-        return _existing != null;
+        return _existing == null;
       }
     }
     public Action<IItem> QueryDefaults { get; set; }

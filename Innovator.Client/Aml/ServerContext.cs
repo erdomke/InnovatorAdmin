@@ -123,7 +123,7 @@ namespace Innovator.Client
     private string Format(object value, Func<IFormattable, string> numberRenderer, Func<object, string> stringRenderer)
     {
       IFormattable number;
-      if (value == null)
+      if (value == null || value == DBNull.Value)
       {
         return null;
       }
@@ -233,7 +233,7 @@ namespace Innovator.Client
 
     public string Format(string format, object arg, IFormatProvider formatProvider)
     {
-      // Check whether this is an appropriate callback              
+      // Check whether this is an appropriate callback
       if (!this.Equals(formatProvider)) return null;
       if (arg == null) return null;
 
@@ -267,7 +267,7 @@ namespace Innovator.Client
       var formattable = obj as IFormattable;
       if (!string.IsNullOrEmpty(format) && formattable != null)
         return formattable.ToString(format, CultureInfo.InvariantCulture);
-      
+
       var node = obj as System.Xml.XmlNode;
       if (node != null) return node.OuterXml;
 
@@ -278,7 +278,7 @@ namespace Innovator.Client
     {
       return new StringBuilder(value.Length + 10).AppendEscapedXml(value).ToString();
     }
-    
+
     internal static bool TryCastNumber(object value, out IFormattable number)
     {
       if (value is short || value is int || value is long

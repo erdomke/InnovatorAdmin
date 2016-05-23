@@ -69,6 +69,7 @@
     <Compile Include="Aml\ElementFactoryTests.cs" />
     <Compile Include="Aml\ItemExtensionsTests.cs" />
     <Compile Include="Aml\ItemTests.cs" />
+    <Compile Include="Aml\ParameterSubstitutionTests.cs" />
     <Compile Include="Aml\ServerExceptionTests.cs" />
     <Compile Include="Aml\SqlBatchWriterTests.cs" />
     <Compile Include="Aml\SubSelectTests.cs" />
