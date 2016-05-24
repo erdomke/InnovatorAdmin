@@ -89,8 +89,12 @@ namespace Innovator.Client
     public DateTime? AsDateTimeUtc(string value)
     {
       if (string.IsNullOrEmpty(value)) return null;
-      var result = DateTime.Parse(value, _culture, DateTimeStyles.AssumeUniversal);
-      if (_timeZone == TimeZoneInfo.Utc) return result;
+      var result = DateTime.Parse(value, _culture, DateTimeStyles.AssumeLocal);
+      if (_timeZone == TimeZoneInfo.Utc)
+      {
+        result = DateTime.SpecifyKind(result, DateTimeKind.Utc);
+        return result;
+      }
       result = DateTime.SpecifyKind(result, DateTimeKind.Unspecified);
       result = TimeZoneInfo.ConvertTime(result, _timeZone, TimeZoneInfo.Utc);
       return result;

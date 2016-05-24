@@ -21,6 +21,17 @@ namespace Innovator.Client.Tests
       item.Property("some_date_2").Set(someDate2);
       Assert.AreEqual("<Item type=\"Stuff\" action=\"edit\"><some_date is_null=\"1\" /><some_date_2>2016-01-01T00:00:00</some_date_2></Item>", item.ToAml());
     }
+
+    [TestMethod()]
+    public void UtcDateConversion()
+    {
+      var aml = ElementFactory.Local;
+      var item = aml.Item(aml.Type("stuff"), aml.Property("created_on", "2016-05-24T13:22:42"));
+      var localDate = item.CreatedOn().AsDateTime().Value;
+      var utcDate = item.CreatedOn().AsDateTimeUtc().Value;
+      Assert.AreEqual(DateTime.Parse("2016-05-24T13:22:42"), localDate);
+      Assert.AreEqual(DateTime.Parse("2016-05-24T17:22:42"), utcDate);
+    }
     [TestMethod()]
     public void PropertyItemExtraction()
     {
