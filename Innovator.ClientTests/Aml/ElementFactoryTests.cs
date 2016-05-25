@@ -1,15 +1,24 @@
-﻿using System;
+﻿using Innovator.Client;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Innovator.Client.Aml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-namespace Innovator.Client.Aml.Tests
+
+namespace Innovator.Client.Tests
 {
   [TestClass()]
   public class ElementFactoryTests
   {
+    [TestMethod()]
+    public void AmlTest()
+    {
+      var aml = ElementFactory.Local;
+      var str = aml.Aml(aml.Item(aml.Type("stuff"))).ToAml();
+      Assert.AreEqual("<AML><Item type=\"stuff\" /></AML>", str);
+    }
+
     [TestMethod()]
     public void SubSelect_EnsurePath()
     {

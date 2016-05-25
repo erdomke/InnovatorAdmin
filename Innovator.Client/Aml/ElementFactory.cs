@@ -75,6 +75,11 @@ namespace Innovator.Client
     {
       return new Attribute(this, "action", value);
     }
+    /// <summary>Create a new AML tag (for use with the ApplyAML method)</summary>
+    public IElement Aml(params object[] content)
+    {
+      return new GenericElement(this, "AML", content);
+    }
     public ILogical And(params object[] content)
     {
       return new Logical(this, "and", content);
