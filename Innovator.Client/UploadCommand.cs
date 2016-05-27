@@ -43,6 +43,10 @@ namespace Innovator.Client
     internal IEnumerable<CommandFile> Files { get { return _files; } }
     internal Vault Vault { get { return _vault; } }
 
+    /// <summary>
+    /// Create an upload command with the specified vault metadata
+    /// </summary>
+    /// <param name="vault">Vault metadata</param>
     public UploadCommand(Vault vault)
     {
       _vault = vault;

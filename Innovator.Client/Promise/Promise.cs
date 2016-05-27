@@ -5,6 +5,7 @@ using System.Text;
 
 namespace Innovator.Client
 {
+  /// <inheritdoc/>
   public class Promise<T> : IPromise<T>
   {
     private enum Status
@@ -38,26 +39,29 @@ namespace Innovator.Client
 
     public Action<Delegate, object[]> Invoker { get; set; }
 
+    /// <inheritdoc/>
     public virtual bool IsRejected
     {
       get { return _status == Status.Rejected || _status == Status.Canceled; }
     }
 
+    /// <inheritdoc/>
     public virtual bool IsResolved
     {
       get { return _status == Status.Resolved; }
     }
 
+    /// <summary>Indicates that the operation completed (either successfully or with an error)</summary>
     public virtual bool IsComplete
     {
       get { return _status != Status.Pending; }
     }
-
+    /// <inheritdoc/>
     public int PercentComplete
     {
       get { return _percentComplete; }
     }
-
+    /// <inheritdoc/>
     public T Value
     {
       get
@@ -68,7 +72,7 @@ namespace Innovator.Client
         return (T)_arg;
       }
     }
-
+    /// <inheritdoc/>
     public IPromise<T> Always(Action callback)
     {
       if (_status != Status.Pending)
@@ -81,13 +85,15 @@ namespace Innovator.Client
       }
       return this;
     }
-    
+    /// <summary>
+    /// Set the object to be canceled when the promise is canceled
+    /// </summary>
     public C CancelTarget<C>(C cancelTarget) where C : ICancelable
     {
       _cancelTarget = cancelTarget;
       return cancelTarget;
     }
-
+    /// <inheritdoc/>
     public IPromise<T> Done(Action<T> callback)
     {
       if (_status == Status.Resolved)
@@ -100,7 +106,7 @@ namespace Innovator.Client
       }
       return this;
     }
-
+    /// <inheritdoc/>
     public IPromise<T> Fail(Action<Exception> callback)
     {
       if (_status == Status.Rejected)
@@ -113,6 +119,7 @@ namespace Innovator.Client
       }
       return this;
     }
+    /// <inheritdoc/>
     public IPromise<T> Progress(Action<int, string> callback)
     {
       if (_status == Status.Pending)
@@ -121,13 +128,17 @@ namespace Innovator.Client
       }
       return this;
     }
-
+    /// <summary>
+    /// Notify promise listeners of a change in the progres
+    /// </summary>
     public void Notify(int progress, string message)
     {
       _percentComplete = progress;
       ExecuteCallbacks(Condition.Progress, progress, message);
     }
-
+    /// <summary>
+    /// Mark the promise as having completed successfully providing the requested data
+    /// </summary>
     public virtual void Resolve(T data)
     {
       if (_status == Status.Pending)
@@ -141,7 +152,9 @@ namespace Innovator.Client
         _cancelTarget = null;
       }
     }
-
+    /// <summary>
+    /// Mark the promise as having encountered an error
+    /// </summary>
     public virtual void Reject(Exception error)
     {
       if (_status == Status.Pending)
@@ -153,7 +166,9 @@ namespace Innovator.Client
         _cancelTarget = null;
       }
     }
-
+    /// <summary>
+    /// Execute the stored callbacks for the given condition
+    /// </summary>
     protected void ExecuteCallbacks(Condition condition, object arg, object arg2 = null)
     {
       var current = _callback;
@@ -179,6 +194,9 @@ namespace Innovator.Client
       }
     }
 
+    /// <summary>
+    /// Condition under which callbacks should be executed
+    /// </summary>
     protected enum Condition
     {
       Success = 1,
@@ -235,6 +253,7 @@ namespace Innovator.Client
       return this.Progress(callback);
     }
 
+    /// <inheritdoc/>
     public virtual void Cancel()
     {
       if (_status == Status.Pending)

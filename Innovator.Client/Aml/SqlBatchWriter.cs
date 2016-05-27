@@ -6,6 +6,10 @@ using System.Text;
 
 namespace Innovator.Client
 {
+  /// <summary>
+  /// Class for building a large string of SQL which will be sent to the database in batches for
+  /// execution using the ApplySQL action
+  /// </summary>
   public class SqlBatchWriter : IDisposable
   {
     private IConnection _conn;
@@ -15,9 +19,14 @@ namespace Innovator.Client
     private string _lastQuery;
     private IPromise<Stream> _lastResult = null;
 
+    /// <summary>
+    /// Nuumber of commands at which to send the query to the database
+    /// </summary>
     public int Threshold { get; set; }
 
+    /// <summary>Instantiate the writer with a connection</summary>
     public SqlBatchWriter(IConnection conn) : this(conn, 96) { }
+    /// <summary>Instantiate the writer with a connection and an initial capacity for the internal <c>StringBuilder</c></summary>
     public SqlBatchWriter(IConnection conn, int capacity)
     {
       _builder = new StringBuilder(capacity).Append("<sql>");
@@ -29,18 +38,21 @@ namespace Innovator.Client
       this.Threshold = 3000;
     }
 
+    /// <summary>Append a new line (empty command) to the SQL</summary>
     public SqlBatchWriter Command()
     {
       _builder.AppendLine();
       ProcessCommand(false);
       return this;
     }
+    /// <summary>Append the specified command to the SQL</summary>
     public SqlBatchWriter Command(string value)
     {
       _builder.AppendEscapedXml(value).AppendLine();
       ProcessCommand(false);
       return this;
     }
+    /// <summary>Append the specified command with parameters the SQL.  @# (e.g. @0) style parameters are replaced</summary>
     public SqlBatchWriter Command(string format, params object[] args)
     {
       _subs.AddIndexedParameters(args);
@@ -49,11 +61,13 @@ namespace Innovator.Client
       _subs.ClearParameters();
       return this;
     }
+    /// <summary>Append a part of a command to the SQL</summary>
     public SqlBatchWriter Part(string value)
     {
       _builder.AppendEscapedXml(value);
       return this;
     }
+    /// <summary>Append a part of a command with parameters the SQL.  @# (e.g. @0) style parameters are replaced</summary>
     public SqlBatchWriter Part(string format, params object[] args)
     {
       _subs.AddIndexedParameters(args);
@@ -99,17 +113,25 @@ namespace Innovator.Client
       }
     }
 
+    /// <summary>
+    /// Render the current buffer to a string
+    /// </summary>
     public override string ToString()
     {
       return _builder.ToString() + "</sql>";
     }
 
+    /// <summary>
+    /// Send the current buffer to the database
+    /// </summary>
     public void Flush()
     {
       ProcessCommand(true);
       WaitLastResult();
     }
-
+    /// <summary>
+    /// Send the current buffer to the database
+    /// </summary>
     public void Dispose()
     {
       this.Flush();

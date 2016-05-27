@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace Innovator.Client
 {
+  /// <summary>
+  /// Various methods useful for interacting with promises
+  /// </summary>
   public static class Promises
   {
     public static IPromise<T1> All<T1>(IPromise<T1> promise1)
@@ -191,7 +194,7 @@ namespace Innovator.Client
 
 #if NET4
     /// <summary>
-    /// Convert a promise to a .Net 4.0 Task
+    /// Convert a promise to a .Net 4.0 Task for use with the <c>async</c>/<c>await</c> keywords
     /// </summary>
     public static Task<T> ToTask<T>(this IPromise<T> promise, CancellationToken ct = default(CancellationToken))
     {

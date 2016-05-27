@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Innovator.Client
 {
+  /// <summary>
+  /// Wrapper for items representing Life Cycle States
+  /// </summary>
   public class LifeCycleState : ItemWrapper
   {
     public LifeCycleState(IReadOnlyItem item) : base(item) { }

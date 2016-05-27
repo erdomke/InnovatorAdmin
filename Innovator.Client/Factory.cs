@@ -9,6 +9,17 @@ using System.Net;
 
 namespace Innovator.Client
 {
+  /// <summary>
+  /// Class for generating connection to an Aras Innovator instance
+  /// </summary>
+  /// <example>
+  /// <code lang="C#">
+  /// using Innovator.Client;
+  ///
+  /// var conn = Factory.GetConnection("URL", "USER_AGENT");
+  /// conn.Login(new ExplicitCredentials("DATABASE", "USER_NAME", "PASSWORD"));
+  /// </code>
+  /// </example>
   public static class Factory
   {
     private static MemoryCache<string, byte[]> _imageCache = new MemoryCache<string, byte[]>();
@@ -24,6 +35,11 @@ namespace Innovator.Client
       DefaultService = () => new Connection.DefaultHttpService();
     }
 
+    /// <summary>
+    /// How many images to buffer in memory when downloading image files.  This cache is used 
+    /// by the <see cref="ItemExtensions.AsFile(IReadOnlyProperty, IConnection, bool)"/>
+    /// extension method.
+    /// </summary>
     public static long ImageBufferSize
     {
       get { return _imageCache.MaxSize; }
@@ -36,6 +52,14 @@ namespace Innovator.Client
     /// <param name="url">URL of the innovator instance (or proxy)</param>
     /// <param name="userAgent">User agent string to use for the connection</param>
     /// <returns>A connection object</returns>
+    /// <example>
+    /// <code lang="C#">
+    /// using Innovator.Client;
+    ///
+    /// var conn = Factory.GetConnection("URL", "USER_AGENT");
+    /// conn.Login(new ExplicitCredentials("DATABASE", "USER_NAME", "PASSWORD"));
+    /// </code>
+    /// </example>
     public static IRemoteConnection GetConnection(string url, string userAgent)
     {
       return GetConnection(url, new ConnectionPreferences() { UserAgent = userAgent }, false).Value;
@@ -57,6 +81,8 @@ namespace Innovator.Client
     /// </summary>
     /// <param name="url">URL of the innovator instance (or proxy)</param>
     /// <param name="preferences">Object containing preferences for the connection</param>
+    /// <param name="async">Whether or not to return the connection asynchronously.  This is important
+    /// as an HTTP request must be issued to determine the type of connection to create</param>
     /// <returns>A promise to return a connection object</returns>
     public static IPromise<IRemoteConnection> GetConnection(string url
       , ConnectionPreferences preferences, bool async)

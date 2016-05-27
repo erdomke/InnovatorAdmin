@@ -8,18 +8,30 @@ using System.Xml.Linq;
 
 namespace Innovator.Client
 {
+  /// <summary>
+  /// Various extension methods pertaining to various AML interfaces
+  /// </summary>
   public static class ItemExtensions
   {
+    /// <summary>
+    /// Apply this item in the database
+    /// </summary>
     public static IReadOnlyResult Apply(this IReadOnlyItem item, IConnection conn)
     {
       var aml = conn.AmlContext;
       var query = item.ToString();
       return aml.FromXml(conn.Process(query), query, conn);
     }
+    /// <summary>Download the file represented by the property </summary>
+    /// <returns>This will return the file contents for item properties of type 'File' and 
+    /// image properties that point to vault files</returns>
     public static Stream AsFile(this IReadOnlyProperty prop, IConnection conn)
     {
       return prop.AsFile(conn, false).Value;
     }
+    /// <summary>Asynchronously download the file represented by the property</summary>
+    /// <returns>This will return the file contents for item properties of type 'File' and 
+    /// image properties that point to vault files</returns>
     public static IPromise<Stream> AsFile(this IReadOnlyProperty prop, IConnection conn, bool async)
     {
       if (prop == null)
@@ -64,7 +76,7 @@ namespace Innovator.Client
       return Promises.Rejected<Stream>(
         new ArgumentException(string.Format("Property '{0}' does not reference a file to download", prop.Name), "prop"));
     }
-
+    /// <summary>Determine if the <c>classification</c> starts with one of the specified root paths</summary>
     public static bool ClassStartsWith(this IReadOnlyItem item, params string[] roots)
     {
       if (roots == null) return false;
@@ -79,6 +91,10 @@ namespace Innovator.Client
       }
       return false;
     }
+    /// <summary>
+    /// Send an AML edit query to the database with the body of the Item tab being the contents specified
+    /// </summary>
+    /// <param name="contents">Body of the Item action='edit' tag</param>
     public static IReadOnlyResult Edit(this IItemRef item, IConnection conn, params object[] contents)
     {
       var aml = conn.AmlContext;
@@ -88,13 +104,10 @@ namespace Innovator.Client
       var query = editItem.ToString();
       return aml.FromXml(conn.Process(query), query, conn);
     }
-    //public static IProperty Ensure(this IProperty prop, IConnection conn)
-    //{
-    //  if (prop.Exists) return prop;
-    //  var parent = (Item)prop.Parent;
-    //  if (parent == null) return Property.NullProperty;
-    //  return parent.WithProperties(conn, prop.Name).Property(prop.Name);
-    //}
+    /// <summary>
+    /// Retrieve the lock status from the database
+    /// </summary>
+    /// <remarks>If the item is editable, the <c>locked_by_id</c> property will be updated</remarks>
     public static LockStatusType FetchLockStatus(this IReadOnlyItem item, IConnection conn)
     {
       var aml = conn.AmlContext;
@@ -104,18 +117,36 @@ namespace Innovator.Client
         aml.Select("locked_by_id")
       ).Apply(conn).AssertItem().LockStatus(conn);
     }
+    /// <summary>
+    /// Returns either the first item from the enumerable or a 'null' item (where <c>Exists</c> is <c>false</c>)
+    /// if there are no items
+    /// </summary>
     public static IReadOnlyItem FirstOrNullItem(this IEnumerable<IReadOnlyItem> items)
     {
       return items.FirstOrDefault() ?? Item.NullItem;
     }
+    /// <summary>
+    /// Returns either the first matching item from the enumerable or a 'null' item (where <c>Exists</c> is <c>false</c>)
+    /// if there are no items which match the predicate
+    /// </summary>
+    /// <param name="predicate">Criteria to match</param>
     public static IReadOnlyItem FirstOrNullItem(this IEnumerable<IReadOnlyItem> items, Func<IReadOnlyItem, bool> predicate)
     {
       return items.FirstOrDefault(predicate) ?? Item.NullItem;
     }
+    /// <summary>
+    /// Indicates that the property is neither null nor empty
+    /// </summary>
+    /// <remarks>If the property is empty but has <c>is_null='0'</c>, then this will return <c>true</c></remarks>
     public static bool HasValue(this IReadOnlyProperty prop)
     {
-      return prop.Exists && !prop.IsNull().AsBoolean(false);
+      return prop.Exists 
+        && (!string.IsNullOrEmpty(prop.Value)
+          || prop.IsNull().AsBoolean() == false);
     }
+    /// <summary>
+    /// Indicates that the attribute is neither null nor empty
+    /// </summary>
     public static bool HasValue(this IReadOnlyAttribute attr)
     {
       return attr.Exists && !string.IsNullOrEmpty(attr.Value);
@@ -140,10 +171,26 @@ namespace Innovator.Client
       if (result == null) throw new NotImplementedException();
       return result;
     }
+    /// <summary>
+    /// Promote the itme to the specified state
+    /// </summary>
+    /// <param name="item">Item to promote</param>
+    /// <param name="conn">Connection to execute the promotion on</param>
+    /// <param name="state">New state of the item</param>
+    /// <param name="comments">Comments to include with the promotion</param>
+    /// <example>
+    /// <code lang="C#">
+    /// // Promote the item. Throw an exception if an error occurs.
+    /// comp.Promote(conn, "Released").AssertNoError();
+    /// </code>
+    /// </example>
     public static IReadOnlyResult Promote(this IItemRef item, IConnection conn, string state, string comments = null)
     {
       return conn.Promote(item.TypeName(), item.Id(), state, comments);
     }
+    /// <summary>
+    /// Renders an AML node to XML
+    /// </summary>
     public static XElement ToXml(this IAmlNode node)
     {
       var doc = new XDocument();
@@ -160,23 +207,13 @@ namespace Innovator.Client
       if (editable != null)
         editable.LockedById().Remove();
     }
-
-    //public static IReadOnlyItem LazyFetch(this IReadOnlyItem item, IConnection conn, params SubSelect[] properties)
-    //{
-    //  if (!properties.Any()) return item;
-
-    //  var missing = MissingProperties(item, null, properties);
-    //  if (missing.Any())
-    //  {
-    //    if (string.IsNullOrEmpty(item.Id())) throw new ArgumentException(string.Format("No id specified for the item '{0}'", item.ToAml()));
-    //    var aml = conn.AmlContext;
-    //    var query = aml.Item(aml.Action("get"), aml.Type(item.Type().Value), aml.Select(properties), aml.Id(item.Id()));
-    //    return query.Apply(conn).AssertItem();
-    //  }
-
-    //  return item;
-    //}
-
+    
+    /// <summary>
+    /// Maps an item to a new object.  If there are properties which couldn't be found during the
+    /// initial mapping, the method will query the database and run the mapper again with the
+    /// database results
+    /// </summary>
+    /// <param name="mapper">Function which creates a new object by referencing values from the item</param>
     public static T LazyMap<T>(this IReadOnlyItem item, IConnection conn, Func<IReadOnlyItem, T> mapper)
     {
       var select = new SubSelect();

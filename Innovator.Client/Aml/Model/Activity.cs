@@ -5,10 +5,16 @@ using System.Text;
 
 namespace Innovator.Client
 {
+  /// <summary>
+  /// Wrapper for items representing Activities
+  /// </summary>
   public class Activity : ItemWrapper
   {
     public Activity(IReadOnlyItem item) : base(item) { }
 
+    /// <summary>
+    /// Retrieve the Workflow Process Path by name
+    /// </summary>
     public IReadOnlyItem Path(IConnection conn, string name)
     {
       var path = this.Relationships("Workflow Process Path").FirstOrDefault(i => i.Property("name").Value == name);
@@ -18,6 +24,9 @@ namespace Innovator.Client
                                               <name>@1</name>
                                             </Item>", this.Id(), name));
     }
+    /// <summary>
+    /// Perform a vote for a specified assignment and path
+    /// </summary>
     public IReadOnlyResult PerformVote(IConnection conn, string assignmentId, string pathName, 
       string comment = null)
     {

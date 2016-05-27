@@ -17,12 +17,21 @@ namespace Innovator.Client
     private CommandAction _action;
     private string _actionString;
 
+    /// <summary>
+    /// What MIME type the client should accept for the request
+    /// </summary>
     public string AcceptMimeType { get; set; }
+    /// <summary>
+    /// SOAP action to use with the AML
+    /// </summary>
     public CommandAction Action
     {
       get { return _action; }
       set { _action = value; _actionString = null; }
     }
+    /// <summary>
+    /// SOAP action to use with the AML (represented as a string)
+    /// </summary>
     public string ActionString
     {
       get { return _actionString ?? Action.ToString(); }
@@ -61,6 +70,9 @@ namespace Innovator.Client
       }
     }
 
+    /// <summary>
+    /// Instantiate a new command
+    /// </summary>
     public Command()
     {
       this.AcceptMimeType = "text/xml";
@@ -99,18 +111,27 @@ namespace Innovator.Client
         _sub.AddParameter(param.ParameterName, param.Value);
       }
     }
-    public Command(IReadOnlyItem aml) : this(aml.ToAml()) { }
-    public Command(IEnumerable<IReadOnlyItem> aml) : this()
+    public Command(IElement aml) : this(aml.ToAml())
+    {
+      if (aml.Name == "AML" && aml.Elements().Count() > 1)
+        this.Action = CommandAction.ApplyAML;
+    }
+    public Command(IEnumerable<IElement> aml) : this()
     {
       this.Aml = "<AML>" + aml.GroupConcat("", i => i.ToAml()) + "</AML>";
       this.Action = CommandAction.ApplyAML;
     }
-
+    /// <summary>
+    /// Specify the SOAP action to use with the AML
+    /// </summary>
     public Command WithAction(CommandAction action)
     {
       this.Action = action;
       return this;
     }
+    /// <summary>
+    /// Specify the SOAP action to use with the AML (as a string)
+    /// </summary>
     public Command WithAction(string action)
     {
       CommandAction parsed;
@@ -137,11 +158,17 @@ namespace Innovator.Client
       _sub.AddIndexedParameters(args);
       return this;
     }
+    /// <summary>
+    /// Specify the MIME type to accept
+    /// </summary>
     public Command WithMimeType(string mimeType)
     {
       this.AcceptMimeType = mimeType;
       return this;
     }
+    /// <summary>
+    /// Specify a named parameter and its value
+    /// </summary>
     public Command WithParam(string name, object value)
     {
       _sub.AddParameter(name, value);
@@ -157,40 +184,45 @@ namespace Innovator.Client
       _queries.Add(query);
     }
 
-    ///// <summary>
-    ///// Merge another request into this request
-    ///// </summary>
-    ///// <param name="request">Request to merge into this one</param>
-    //public virtual Command MergeWith(Command request)
-    //{
-    //  _queries.AddRange(request._queries);
-    //  return this;
-    //}
-
     /// <summary>
     /// Specify a method to configure each outgoing HTTP request associated specifically with this AML request
     /// </summary>
     public Action<IHttpRequest> Settings { get; set; }
 
+    /// <summary>
+    /// Implicitly convert strings to commands as needed
+    /// </summary>
     public static implicit operator Command(string aml)
     {
       return new Command() { Aml = aml };
     }
+    /// <summary>
+    /// Implicitly convert XML elements to commands as needed
+    /// </summary>
     public static implicit operator Command(XElement aml)
     {
       return new Command() { Aml = aml.ToString() };
     }
+    /// <summary>
+    /// Implicitly convert XML elements to commands as needed
+    /// </summary>
     public static implicit operator Command(XmlNode aml)
     {
       return new Command() { Aml = aml.OuterXml };
     }
 
+    /// <summary>
+    /// Perform parameter substitutions and return the resulting AML
+    /// </summary>
     public string ToNormalizedAml(IServerContext context)
     {
       if (_sub.ParamCount > 0)
         return _sub.Substitute(this.Aml, context);
       return this.Aml;
     }
+    /// <summary>
+    /// Return the AML string
+    /// </summary>
     public override string ToString()
     {
       return this.Aml;

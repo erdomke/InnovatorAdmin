@@ -31,12 +31,17 @@ namespace Innovator.Server
     IErrorBuilder ErrorBuilder { get; }
 
     /// <summary>
+    /// Get the exception object created for any errors that have happened so far.
+    /// </summary>
+    Exception Exception { get; }
+
+    /// <summary>
     /// Get the existing item in the database
     /// </summary>
     IReadOnlyItem Existing { get; }
 
     /// <summary>
-    /// The changes given to the database.  This object should be modified to make any additional 
+    /// The changes given to the database.  This object should be modified to make any additional
     /// changes
     /// </summary>
     IItem Item { get; }
@@ -47,7 +52,7 @@ namespace Innovator.Server
     IReadOnlyItem Merged { get; }
 
     /// <summary>
-    /// Indicates if a property is being set null.  Note that this does not detect if the property 
+    /// Indicates if a property is being set null.  Note that this does not detect if the property
     /// already is null.
     /// </summary>
     bool IsBeingSetNull(string name);
@@ -59,7 +64,7 @@ namespace Innovator.Server
     bool IsChanging(params string[] names);
 
     /// <summary>
-    /// Gets a property from the <see cref="Item"/> item (if it exists).  Otherwise, the property 
+    /// Gets a property from the <see cref="Item"/> item (if it exists).  Otherwise, the property
     /// from <see cref="Existing"/> is returned
     /// </summary>
     IReadOnlyProperty NewOrExisting(string name);
@@ -81,14 +86,33 @@ namespace Innovator.Server
   }
   public interface IPromotionContext : ISingleItemContext
   {
+    /// <summary>
+    /// The Life Cycle transition which is taking place
+    /// </summary>
     LifeCycleTransition Transition { get; }
   }
   public interface IWorkflowContext : IContext
   {
+    /// <summary>
+    /// The activity during which the method is being called
+    /// </summary>
     Activity Activity { get; }
+    /// <summary>
+    /// The item which is the context of the workflow
+    /// </summary>
     IReadOnlyItem Context { get; }
+    /// <summary>
+    /// The event for which the server method is being called
+    /// </summary>
     WorkflowEvent WorkflowEvent { get; }
+    /// <summary>
+    /// Error builder which captures any errors which are encountered
+    /// </summary>
     IErrorBuilder ErrorBuilder { get; }
+    /// <summary>
+    /// Get the exception object created for any errors that have happened so far.
+    /// </summary>
+    Exception Exception { get; }
     /// <summary>
     /// Method for modifying the query to get the context item
     /// </summary>
@@ -96,12 +120,24 @@ namespace Innovator.Server
   }
   public interface IVoteContext : IWorkflowContext
   {
+    /// <summary>
+    /// Which assignment the event pertains to
+    /// </summary>
     IReadOnlyItem Assignment { get; }
+    /// <summary>
+    /// The workflow path being voted for
+    /// </summary>
     string Path { get; }
   }
   public interface IDelegateContext : IWorkflowContext
   {
+    /// <summary>
+    /// Which assignment the event pertains to
+    /// </summary>
     IReadOnlyItem Assignment { get; }
+    /// <summary>
+    /// The identity which is being delegated to
+    /// </summary>
     IReadOnlyItem DelegateTo { get; }
   }
 

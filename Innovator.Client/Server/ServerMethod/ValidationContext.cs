@@ -110,6 +110,7 @@ namespace Innovator.Server
       _changes = changes;
       _conn = conn;
       _result = _conn.AmlContext.Result();
+      _result.ErrorContext(_changes);
     }
 
     private void EnsureExisting()

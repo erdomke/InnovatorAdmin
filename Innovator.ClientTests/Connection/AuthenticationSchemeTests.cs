@@ -13,6 +13,7 @@ namespace Innovator.Client.Connection.Tests
   [TestClass()]
   public class AuthenticationSchemeTests
   {
+
     [TestMethod()]
     public void AuthenticationSchemeParse_simplebasic()
     {

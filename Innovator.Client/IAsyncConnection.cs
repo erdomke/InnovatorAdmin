@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Innovator.Client
 {
+  /// <summary>
+  /// Interface for a connection to an Aras Innovator instance that allows asynchronous calls
+  /// </summary>
   public interface IAsyncConnection : IConnection
   {
     /// <summary>

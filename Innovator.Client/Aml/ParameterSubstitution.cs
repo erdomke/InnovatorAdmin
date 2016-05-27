@@ -13,6 +13,12 @@ namespace Innovator.Client
     Aml,
     Sql
   }
+
+  /// <summary>
+  /// Class for substituting @-prefixed parameters with their values
+  /// </summary>
+  /// <remarks>This class will escape values thereby preventing SQL/AML injection unless the 
+  /// parameter name ends with an exclamtion mark (e.g. @fileItem!)</remarks>
   public class ParameterSubstitution
   {
     private IServerContext _context;

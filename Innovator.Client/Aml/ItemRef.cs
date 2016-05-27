@@ -10,11 +10,13 @@ namespace Innovator.Client
     private string _id;
     private string _type;
 
+    /// <inheritdoc/>
     public string Id()
     {
       return _id;
     }
 
+    /// <inheritdoc/>
     public string TypeName()
     {
       return _type;

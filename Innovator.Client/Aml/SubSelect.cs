@@ -58,16 +58,28 @@ namespace Innovator.Client
       _children = children.ToList();
     }
 
+    /// <summary>
+    /// Add a child <c>SubSelect</c> to this instance
+    /// </summary>
+    /// <param name="child"></param>
     public void Add(SubSelect child)
     {
       if (child == null) return;
       if (_children == null) _children = new List<SubSelect>();
       _children.Add(child);
     }
+    /// <summary>
+    /// Ensure that the path of properties exists in the select statement
+    /// </summary>
+    /// <example>Sending in <c>"created_by_id, first_name"</c> will result in the select statement <c>created_by_id(first_name)</c></example>
     public void EnsurePath(params string[] path)
     {
       EnsurePath((IEnumerable<string>)path);
     }
+    /// <summary>
+    /// Ensure that the path of properties exists in the select statement
+    /// </summary>
+    /// <example>Sending in <c>new string[] {"created_by_id, first_name"}</c> will result in the select statement <c>created_by_id(first_name)</c></example>
     public void EnsurePath(IEnumerable<string> path)
     {
       if (!path.Any()) return;
@@ -88,6 +100,9 @@ namespace Innovator.Client
       return _children.GetEnumerator();
     }
 
+    /// <summary>
+    /// Sort the properties by name
+    /// </summary>
     public void Sort()
     {
       if (_children != null)
@@ -141,6 +156,9 @@ namespace Innovator.Client
       return Write(new StringBuilder(), items).ToString();
     }
 
+    /// <summary>
+    /// Parse an AML select statement into a <c>SubSelect structure</c>
+    /// </summary>
     public static SubSelect FromString(string select)
     {
       var result = new SubSelect();

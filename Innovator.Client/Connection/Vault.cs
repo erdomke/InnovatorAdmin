@@ -7,6 +7,9 @@ using System.Text;
 
 namespace Innovator.Client
 {
+  /// <summary>
+  /// Provides metadata for an Aras file vault
+  /// </summary>
   public class Vault
   {
     private CookieContainer _cookies = new CookieContainer();
@@ -25,6 +28,9 @@ namespace Innovator.Client
 
     private static Dictionary<string, Vault> _vaults = new Dictionary<string, Vault>();
 
+    /// <summary>
+    /// Creates a vault from metadata stored in an Aras Item
+    /// </summary>
     public static Vault GetVault(IReadOnlyItem i)
     {
       if (i == null || !i.Exists) return null;
@@ -36,6 +42,9 @@ namespace Innovator.Client
       }
       return result;
     }
+    /// <summary>
+    /// Creates a vault from an ID
+    /// </summary>
     public static Vault GetVault(string id)
     {
       Vault result;

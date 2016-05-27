@@ -9,13 +9,22 @@ namespace Innovator.Client
   public static class ConnectionExtensions
   {
     /// <summary>
-    /// Get the result of executing the specified query
+    /// Get the result of executing the specified AML query
     /// </summary>
-    /// <param name="conn">Database action</param>
-    /// <param name="action">SOAP action</param>
-    /// <param name="query">Query to be performed.  If parameters are specified, then the query is fomatted using the <see cref="ElementFactory.FormatQuery"/> method</param>
+    /// <param name="conn">Connection to execute the query on</param>
+    /// <param name="query">Query to be performed.  If parameters are specified, they will be substituted into the query</param>
     /// <param name="parameters">Parameters to be injected into the query</param>
     /// <returns>A read-only result</returns>
+    /// <example>
+    /// <code lang="C#">
+    /// // Get preliminary parts which have existed for a little bit of time
+    /// var components = conn.Apply(@"<Item type='Part' action='get'>
+    ///                             <classification>@0</classification>
+    ///                             <created_on condition='lt'>@1</created_on>
+    ///                             <state>Preliminary</state>
+    ///                             </Item>", classification, DateTime.Now.AddMinutes(-20)).Items();
+    /// </code>
+    /// </example>
     public static IReadOnlyResult Apply(this IConnection conn, Command query, params object[] parameters)
     {
       if (parameters != null)
@@ -27,6 +36,15 @@ namespace Innovator.Client
       }
       return conn.AmlContext.FromXml(conn.Process(query), query.Aml, conn);
     }
+    /// <summary>
+    /// Get the result of executing the specified AML query
+    /// </summary>
+    /// <param name="conn">Connection to execute the query on</param>
+    /// <param name="query">Query to be performed.  If parameters are specified, they will be substituted into the query</param>
+    /// <param name="async">Whether to perform the query asynchronously</param>
+    /// <param name="noItemsIsError">Whether a 'No items found' exception should be signaled to the <see cref="IPromise"/> as an exception</param>
+    /// <param name="parameters">Parameters to be injected into the query</param>
+    /// <returns>A read-only result</returns>
     public static IPromise<IReadOnlyResult> ApplyAsync(this IAsyncConnection conn, Command query, bool async, bool noItemsIsError, params object[] parameters)
     {
       var result = new Promise<IReadOnlyResult>();
@@ -66,7 +84,13 @@ namespace Innovator.Client
           }));
       return result;
     }
-
+    /// <summary>
+    /// Get the result of executing the specified SQL query
+    /// </summary>
+    /// <param name="conn">Connection to execute the query on</param>
+    /// <param name="sql">SQL query to be performed.  If parameters are specified, they will be substituted into the query</param>
+    /// <param name="parameters">Parameters to be injected into the query</param>
+    /// <returns>A read-only result</returns>
     public static IReadOnlyResult ApplySql(this IConnection conn, Command sql, params object[] parameters)
     {
       if (parameters != null)
@@ -82,7 +106,13 @@ namespace Innovator.Client
       }
       return conn.Apply(sql.WithAction(CommandAction.ApplySQL));
     }
-
+    /// <summary>
+    /// Get the result of executing the specified SQL query
+    /// </summary>
+    /// <param name="conn">Connection to execute the query on</param>
+    /// <param name="sql">SQL query to be performed.  If parameters are specified, they will be substituted into the query</param>
+    /// <param name="async">Whether to perform the query asynchronously</param>
+    /// <returns>A read-only result</returns>
     public static IPromise<IReadOnlyResult> ApplySql(this IAsyncConnection conn, Command sql, bool async)
     {
       if (!sql.Aml.TrimStart().StartsWith("<"))
@@ -159,7 +189,6 @@ namespace Innovator.Client
     /// Get a single item from the database using the specified query.  If the result is not a single item, an exception will be thrown
     /// </summary>
     /// <param name="conn">Server connection</param>
-    /// <param name="action">SOAP action</param>
     /// <param name="request">Query/command which should return a single item</param>
     /// <returns>A single readonly item</returns>
     public static IReadOnlyItem ItemByQuery(this IConnection conn, Command request)
@@ -170,7 +199,6 @@ namespace Innovator.Client
     /// Get a single item from the database using the specified query asynchronously.  If the result is not a single item, an exception will be thrown
     /// </summary>
     /// <param name="conn">Server connection</param>
-    /// <param name="action">SOAP action</param>
     /// <param name="request">Query/command which should return a single item</param>
     /// <param name="async">Whether to perform this request asynchronously</param>
     /// <returns>A promise to return a single readonly item</returns>

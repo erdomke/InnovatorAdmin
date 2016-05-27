@@ -2,6 +2,9 @@
 
 namespace Innovator.Client
 {
+  /// <summary>
+  /// Interface for a connection to an Aras Innovator instance
+  /// </summary>
   public interface IConnection
   {
     /// <summary>
@@ -9,7 +12,7 @@ namespace Innovator.Client
     /// </summary>
     ElementFactory AmlContext { get; }
     /// <summary>
-    /// Name of the connected database 
+    /// Name of the connected database
     /// </summary>
     string Database { get; }
     /// <summary>

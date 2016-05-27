@@ -14,7 +14,7 @@ namespace Innovator.Server
     private IReadOnlyItem _context;
     private bool _contextLoaded = false;
     private IResult _result;
-    
+
     public Activity Activity
     {
       get { return _activity; }
@@ -25,7 +25,7 @@ namespace Innovator.Server
     }
     public IReadOnlyItem Context
     {
-      get 
+      get
       {
         EnsureContext();
         return _context;
@@ -111,6 +111,7 @@ namespace Innovator.Server
           aml.Id(workflow.SourceId().Value), aml.Action("get"));
         if (QueryDefaults != null) QueryDefaults(query);
         _context = Conn.ItemByQuery(query.ToAml());
+        _result.ErrorContext(_context);
       }
     }
   }

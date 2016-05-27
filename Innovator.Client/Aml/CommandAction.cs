@@ -1,5 +1,6 @@
 ﻿namespace Innovator.Client
 {
+  /// <summary>Allowable SOAP actions</summary>
   public enum CommandAction
   {
     ActivateActivity
@@ -24,8 +25,9 @@
     ,CreateItem
     ,DeleteItem
     ,DeleteUsers
-    ,DeleteVersionFile
-    ,DownloadFile
+    ,DeleteVersionFile,
+    /// <summary>Command action specific to this library used for downloading files</summary>
+    DownloadFile
     ,EditItem
     ,EvaluateActivity
     ,ExecuteEscalations
