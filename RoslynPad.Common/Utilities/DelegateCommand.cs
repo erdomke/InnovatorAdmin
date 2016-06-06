@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace RoslynPad.Utilities
 {
-    internal sealed class DelegateCommand : ICommand
+    public sealed class DelegateCommand : ICommand
     {
         private readonly Action _action;
         private readonly Func<bool> _canExecute;
@@ -62,7 +62,7 @@ namespace RoslynPad.Utilities
         }
     }
 
-    internal sealed class DelegateCommand<T> : ICommand
+    public sealed class DelegateCommand<T> : ICommand
     {
         private readonly Action<T> _action;
         private readonly Func<T, bool> _canExecute;

@@ -117,7 +117,7 @@ namespace RoslynPad
           this).ConfigureAwait(true);
 
       var documentText = await _viewModel.LoadText().ConfigureAwait(true);
-      Editor.AppendText(documentText);
+      Editor.Document.Replace(0, Editor.Document.TextLength, documentText);
       Editor.Document.UndoStack.ClearAll();
       Editor.Document.TextChanged += (o, e) => _viewModel.SetDirty(Editor.Document.TextLength);
 

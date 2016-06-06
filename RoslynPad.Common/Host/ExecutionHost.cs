@@ -21,7 +21,7 @@ using RoslynPad.Utilities;
 
 namespace RoslynPad.Host
 {
-    internal class ExecutionHost : IDisposable
+    public class ExecutionHost : IDisposable
     {
         private const int MillisecondsTimeout = 5000;
         private const int MaxAttemptsToCreateProcess = 2;
@@ -279,7 +279,7 @@ namespace RoslynPad.Host
             }
             catch (OperationCanceledException)
             {
-                // The user reset the process during initialization. 
+                // The user reset the process during initialization.
                 // The reset operation will recreate the process.
             }
             return null;

@@ -5,7 +5,7 @@ using ICSharpCode.AvalonEdit.Document;
 
 namespace RoslynPad.Editor
 {
-    internal sealed class TextMarker : TextSegment
+    public sealed class TextMarker : TextSegment
     {
         private readonly TextMarkerService _service;
 

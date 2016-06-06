@@ -6,7 +6,7 @@ using TextDocument = ICSharpCode.AvalonEdit.Document.TextDocument;
 
 namespace RoslynPad.RoslynEditor
 {
-    internal sealed class RoslynHighlightingColorizer : HighlightingColorizer
+    public sealed class RoslynHighlightingColorizer : HighlightingColorizer
     {
         private readonly DocumentId _documentId;
         private readonly RoslynHost _roslynHost;

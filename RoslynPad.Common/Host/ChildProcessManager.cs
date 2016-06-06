@@ -6,7 +6,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace RoslynPad.Host
 {
-    internal sealed class ChildProcessManager : IDisposable
+    public sealed class ChildProcessManager : IDisposable
     {
         private SafeJobHandle _handle;
         private bool _disposed;

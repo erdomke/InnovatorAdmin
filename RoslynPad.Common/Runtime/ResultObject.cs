@@ -10,7 +10,7 @@ using System.Runtime.Serialization;
 namespace RoslynPad.Runtime
 {
     [DataContract(IsReference = true)]
-    internal sealed class ResultObject : INotifyPropertyChanged
+    public sealed class ResultObject : INotifyPropertyChanged
     {
         private const int MaxDepth = 5;
         private const int MaxStringLength = 10000;

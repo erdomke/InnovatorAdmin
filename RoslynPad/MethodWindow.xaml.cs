@@ -24,7 +24,7 @@ namespace RoslynPad
     public MethodWindow()
     {
       _viewModel = new WindowViewModel();
-      _viewModel.CurrentOpenDocument = new MethodViewModel(_viewModel, null);
+      _viewModel.CurrentOpenDocument = new MethodViewModel(_viewModel, null, _viewModel.MethodConfigId);
       DataContext = _viewModel;
       InitializeComponent();
       docView.DataContext = _viewModel.CurrentOpenDocument;

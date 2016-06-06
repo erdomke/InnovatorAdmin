@@ -64,9 +64,9 @@ namespace RoslynPad.Roslyn
 
         private int _documentNumber;
 
-        internal ImmutableArray<MetadataReference> DefaultReferences { get; }
+        public ImmutableArray<MetadataReference> DefaultReferences { get; }
 
-        internal ImmutableArray<string> DefaultImports { get; }
+        public ImmutableArray<string> DefaultImports { get; }
 
         #endregion
 

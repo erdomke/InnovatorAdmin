@@ -14,6 +14,7 @@ using RoslynPad.Roslyn.Diagnostics;
 using RoslynPad.Runtime;
 using RoslynPad.Utilities;
 using System.Windows;
+using InnovatorAdmin;
 using InnovatorAdmin.Connections;
 using Innovator.Client;
 
@@ -34,7 +35,7 @@ namespace RoslynPad
     private bool _isSaving;
     private IDisposable _viewDisposable;
     private string _configId;
-    private IAsyncConnection _conn;
+    private Task<IAsyncConnection> _conn;
 
     public ObservableCollection<ResultObject> Results
     {
@@ -47,6 +48,7 @@ namespace RoslynPad
     public MethodViewModel(IParentViewModel parentViewModel, DocumentViewModel document, string configId = null)
     {
       _configId = configId;
+      _conn = parentViewModel.ConnData.ArasLogin(true).ToTask();
       Document = document;
       ParentViewModel = parentViewModel;
       NuGet = new NuGetDocumentViewModel(parentViewModel.NuGet);
@@ -335,14 +337,13 @@ var __param_pass = ""{3}"";"
 
     public async Task<string> LoadText()
     {
-      if (Document == null)
+      if (string.IsNullOrEmpty(_configId))
       {
         return string.Empty;
       }
-      using (var fileStream = new StreamReader(Document.Path))
-      {
-        return await fileStream.ReadToEndAsync().ConfigureAwait(false);
-      }
+      var conn = await _conn;
+      var result = await conn.ApplyAsync("<Item type='Method' action='get'><config_id>@0</config_id></Item>", true, true, _configId).ToTask();
+      return GetMethodCode(result.AssertItem().Property("method_code").Value, ParentViewModel.ConnData);
     }
 
     public void Close()

@@ -35,6 +35,8 @@ namespace RoslynPad
     public RoslynHost RoslynHost { get; }
     public InnovatorAdmin.Connections.ConnectionData ConnData { get; private set; }
 
+    public string MethodConfigId { get; }
+
     public WindowViewModel()
     {
       var library = InnovatorAdmin.Connections.ConnectionLibrary.FromFile(Utils.GetConnectionFilePath());
@@ -43,6 +45,9 @@ namespace RoslynPad
         .Where(c => c.Type == InnovatorAdmin.Connections.ConnectionType.Innovator
           && (args.Length <= 1 || args[1] == c.ConnectionName))
         .FirstOrDefault();
+
+      if (args.Length > 2)
+        this.MethodConfigId = args[2];
 
       NuGet = new NuGetViewModel();
       NuGetConfiguration = new NuGetConfiguration(NuGet.GlobalPackageFolder, NuGetPathVariableName);

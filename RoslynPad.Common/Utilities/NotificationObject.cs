@@ -5,7 +5,7 @@ using RoslynPad.Annotations;
 
 namespace RoslynPad.Utilities
 {
-    internal abstract class NotificationObject : INotifyPropertyChanged
+    public abstract class NotificationObject : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

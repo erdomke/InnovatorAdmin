@@ -11,7 +11,7 @@ using RoslynPad.Roslyn.Snippets;
 
 namespace RoslynPad.RoslynEditor
 {
-    internal sealed class RoslynCodeEditorCompletionProvider : ICodeEditorCompletionProvider
+    public sealed class RoslynCodeEditorCompletionProvider : ICodeEditorCompletionProvider
     {
         private readonly DocumentId _documentId;
         private readonly RoslynHost _roslynHost;
