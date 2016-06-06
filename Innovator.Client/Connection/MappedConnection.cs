@@ -12,11 +12,12 @@ namespace Innovator.Client.Connection
     private IRemoteConnection _current;
     private IEnumerable<ServerMapping> _mappings;
     private ICredentials _lastCredentials;
+    private Action<IHttpRequest> _settings;
 
-    public ElementFactory AmlContext { get { return _current.AmlContext; } }
-    public string Database { get { return _current.Database; } }
-    public Uri Url { get { return _current.Url; } }
-    public string UserId { get { return _current.UserId; } }
+    public ElementFactory AmlContext { get { return _current == null ? ElementFactory.Local : _current.AmlContext; } }
+    public string Database { get { return _current == null ? null : _current.Database; } }
+    public Uri Url { get { return _current == null ? null : _current.Url; } }
+    public string UserId { get { return _current == null ? null : _current.UserId; } }
 
     public MappedConnection(IEnumerable<ServerMapping> mappings)
     {
@@ -30,12 +31,15 @@ namespace Innovator.Client.Connection
 
     public void DefaultSettings(Action<IHttpRequest> settings)
     {
-      _current.DefaultSettings(settings);
+      if (_current != null)
+        _current.DefaultSettings(settings);
+      _settings = settings;
     }
 
     public void Dispose()
     {
-      _current.Dispose();
+      if (_current != null)
+        _current.Dispose();
     }
 
     public IEnumerable<string> GetDatabases()
@@ -101,18 +105,22 @@ namespace Innovator.Client.Connection
         credPromise = Promises.Resolved(credentials);
       }
       _current = mapping.Connection;
+      if (_settings != null)
+        _current.DefaultSettings(_settings);
       return credPromise.Continue(cred => _current.Login(cred, async));
     }
 
     public void Logout(bool unlockOnLogout)
     {
-      _current.Logout(unlockOnLogout);
+      if (_current != null)
+        _current.Logout(unlockOnLogout);
       _current = null;
     }
 
     public void Logout(bool unlockOnLogout, bool async)
     {
-      _current.Logout(unlockOnLogout, async);
+      if (_current != null)
+        _current.Logout(unlockOnLogout, async);
       _current = null;
     }
 
