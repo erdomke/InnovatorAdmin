@@ -1,0 +1,20 @@
+﻿{
+  "frameworks": {
+    "net46": {}
+  },
+  "runtimes": {
+    "win": {}
+  },
+  "dependencies": {
+    "AvalonEdit": "5.0.3",
+    "AvalonLibrary": "2.3.0",
+    "Extended.Wpf.Toolkit": "2.8.0",
+    "Microsoft.ApplicationInsights.WindowsServer": "2.0.0",
+    "Microsoft.CodeAnalysis.CSharp": "1.2.2",
+    "Microsoft.CodeAnalysis.CSharp.Features": "1.2.2",
+    "Microsoft.CodeAnalysis.CSharp.Scripting": "1.2.2",
+    "Microsoft.CodeAnalysis.CSharp.Workspaces": "1.2.2",
+    "Microsoft.CodeAnalysis.EditorFeatures": "1.2.0",
+    "NuGet.PackageManagement": "3.4.3"
+  }
+}

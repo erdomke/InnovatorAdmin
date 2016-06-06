@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{2F7723C1-297B-416F-9A78-153156D319B9}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>RoslynPad</RootNamespace>
+    <AssemblyName>RoslynPad</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Resources\RoslynPad.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\Keys\RoslynInternalKey.Private.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="..\InnovatorAdmin\Connections\Authentication.cs">
+      <Link>Connection\Authentication.cs</Link>
+    </Compile>
+    <Compile Include="..\InnovatorAdmin\Connections\ConnectionData.cs">
+      <Link>Connection\ConnectionData.cs</Link>
+    </Compile>
+    <Compile Include="..\InnovatorAdmin\Connections\ConnectionDataExtensions.cs">
+      <Link>Connection\ConnectionDataExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\InnovatorAdmin\Connections\ConnectionLibrary.cs">
+      <Link>Connection\ConnectionLibrary.cs</Link>
+    </Compile>
+    <Compile Include="..\InnovatorAdmin\Connections\ConnectionParameter.cs">
+      <Link>Connection\ConnectionParameter.cs</Link>
+    </Compile>
+    <Compile Include="..\InnovatorAdmin\Connections\ConnectionType.cs">
+      <Link>Connection\ConnectionType.cs</Link>
+    </Compile>
+    <Compile Include="..\InnovatorAdmin\Connections\RijndaelSimple.cs">
+      <Link>Connection\RijndaelSimple.cs</Link>
+    </Compile>
+    <Compile Include="DocumentViewModel.cs" />
+    <Compile Include="Formatting\BooleanToVisibilityConverter.cs" />
+    <Compile Include="IParentViewModel.cs" />
+    <Compile Include="WindowViewModel.cs" />
+    <Compile Include="MethodWindow.xaml.cs">
+      <DependentUpon>MethodWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MethodViewModel.cs" />
+    <Compile Include="Formatting\CodeActionsConverter.cs" />
+    <Compile Include="Formatting\CodeActionToGlyphConverter.cs" />
+    <Compile Include="RegionFoldingStrategy.cs" />
+    <Compile Include="ReportProblemDialog.xaml.cs">
+      <DependentUpon>ReportProblemDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SaveDocumentDialog.xaml.cs">
+      <DependentUpon>SaveDocumentDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TreeListView.cs" />
+    <Compile Include="Utils.cs" />
+    <Page Include="DocumentView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MainViewModel.cs" />
+    <Compile Include="DocumentView.xaml.cs">
+      <DependentUpon>DocumentView.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MethodWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ReportProblemDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Resources\Glyphs.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Icons.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SaveDocumentDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="NuGetViewModel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <None Include="project.json" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+    <Resource Include="Resources\DefaultMethodCode.csx" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\RoslynPad.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Innovator.Client\Innovator.Client.csproj">
+      <Project>{d909ef15-81aa-4119-ab5a-1636ca8c08fc}</Project>
+      <Name>Innovator.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RoslynPad.Common\RoslynPad.Common.csproj">
+      <Project>{fae8af1b-5004-42b6-8b42-eff1db5b677f}</Project>
+      <Name>RoslynPad.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RoslynPad.Host64\RoslynPad.Host64.csproj">
+      <Project>{4dab681a-d6ce-4b39-8ed1-6218bb6679fd}</Project>
+      <Name>RoslynPad.Host64</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RoslynPad.Host\RoslynPad.Host32.csproj">
+      <Project>{ca953492-94c7-4f25-9cf2-eb70aa07a55f}</Project>
+      <Name>RoslynPad.Host32</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RoslynPad.RoslynEditor\RoslynPad.RoslynEditor.csproj">
+      <Project>{5fc3a02c-33b5-4e32-8512-7053474d9c57}</Project>
+      <Name>RoslynPad.RoslynEditor</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RoslynPad.Roslyn\RoslynPad.Roslyn.csproj">
+      <Project>{ac9f325f-a3ff-4561-941e-49ce4736cbd0}</Project>
+      <Name>RoslynPad.Roslyn</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
