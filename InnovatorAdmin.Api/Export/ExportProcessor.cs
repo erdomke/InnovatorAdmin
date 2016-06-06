@@ -54,8 +54,11 @@ namespace InnovatorAdmin
       ReportProgress(0, "Loading system data");
       await _metadata.ReloadTask();
 
+      // On each scan, reload everything from the database.  Even if this might degrade
+      // performance, it is much more reliable
       var uniqueItems = new HashSet<ItemReference>(items);
-      if (script.Lines != null) uniqueItems.ExceptWith(script.Lines.Select(l => l.Reference));
+      uniqueItems.UnionWith(script.Lines.Where(l => l.Type == InstallType.Create).Select(l => l.Reference));
+      script.Lines = null;
       var itemList = uniqueItems.ToList();
 
       ItemType metaData;
