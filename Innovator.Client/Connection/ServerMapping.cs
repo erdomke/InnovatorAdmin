@@ -61,6 +61,10 @@ namespace Innovator.Client.Connection
         {
           mapping.Endpoints = new Endpoints(server);
         }
+        else
+        {
+          mapping.Endpoints = new Endpoints();
+        }
         return mapping;
       });
     }

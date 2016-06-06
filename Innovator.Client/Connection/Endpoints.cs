@@ -24,6 +24,7 @@ namespace Innovator.Client.Connection
     public IList<string> Query { get { return _query; } }
     public IList<string> RenewSession { get { return _renewSession; } }
 
+    public Endpoints() { }
     public Endpoints(XElement elem)
     {
       foreach (var endpoint in elem.Elements("endpoint"))
