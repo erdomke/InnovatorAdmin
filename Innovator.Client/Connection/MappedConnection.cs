@@ -13,15 +13,17 @@ namespace Innovator.Client.Connection
     private IEnumerable<ServerMapping> _mappings;
     private ICredentials _lastCredentials;
     private Action<IHttpRequest> _settings;
+    private bool _allowAuth;
 
     public ElementFactory AmlContext { get { return _current == null ? ElementFactory.Local : _current.AmlContext; } }
     public string Database { get { return _current == null ? null : _current.Database; } }
     public Uri Url { get { return _current == null ? null : _current.Url; } }
     public string UserId { get { return _current == null ? null : _current.UserId; } }
 
-    public MappedConnection(IEnumerable<ServerMapping> mappings)
+    public MappedConnection(IEnumerable<ServerMapping> mappings, bool allowAuth)
     {
       _mappings = mappings;
+      _allowAuth = allowAuth;
     }
 
     public UploadCommand CreateUploadCommand()
@@ -58,13 +60,13 @@ namespace Innovator.Client.Connection
       var mapping = _mappings.First(m => m.Databases.Contains(credentials.Database));
       var netCred = credentials as INetCredentials;
       IPromise<ICredentials> credPromise;
-      if (mapping.Endpoints.Auths.Any() && netCred != null)
+      if (mapping.Endpoints.Auths.Any() && netCred != null && _allowAuth)
       {
         var http = Factory.DefaultService.Invoke();
         var promise = new Promise<ICredentials>();
         credPromise = promise;
 
-        http.Execute("GET", mapping.Endpoints.Auths.First(), null, netCred.Credentials, async, null)
+        http.Execute("GET", mapping.Endpoints.Auths.First(), new QueryString() { { "db", credentials.Database } }, netCred.Credentials, async, null)
           .Done(r =>
           {
             var res = r.AsXml().DescendantsAndSelf("Result").FirstOrDefault();
@@ -141,7 +143,7 @@ namespace Innovator.Client.Connection
 
     public IPromise<IRemoteConnection> Clone(bool async)
     {
-      var newConn = new MappedConnection(_mappings);
+      var newConn = new MappedConnection(_mappings, _allowAuth);
       return newConn.Login(_lastCredentials, async)
         .Convert(u => (IRemoteConnection)newConn);
     }

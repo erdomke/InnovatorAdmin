@@ -26,7 +26,7 @@ namespace Innovator.Client.Connection
     public const int DefaultTimeout = 100000;
 
     private CookieContainer _cookieContainer = new CookieContainer();
-    
+
     public bool AllowAutoRedirect { get; set; }
     public bool AutomaticDecompression { get; set; }
     public CompressionType Compression { get; set; }
@@ -56,6 +56,8 @@ namespace Innovator.Client.Connection
         req.CachePolicy = new RequestCachePolicy(RequestCacheLevel.NoCacheNoStore);
       }
       req.Credentials = credentials;
+      if (credentials != null)
+        req.PreAuthenticate = true;
       var result = new WebRequest(req, this.Compression);
       if (configure != null) configure.Invoke(result);
 

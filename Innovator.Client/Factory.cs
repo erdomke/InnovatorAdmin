@@ -36,7 +36,7 @@ namespace Innovator.Client
     }
 
     /// <summary>
-    /// How many images to buffer in memory when downloading image files.  This cache is used 
+    /// How many images to buffer in memory when downloading image files.  This cache is used
     /// by the <see cref="ItemExtensions.AsFile(IReadOnlyProperty, IConnection, bool)"/>
     /// extension method.
     /// </summary>
@@ -143,7 +143,7 @@ namespace Innovator.Client
                 {
                   server.Factory = connFactory;
                 }
-                result.Resolve(new MappedConnection(servers));
+                result.Resolve(new MappedConnection(servers, preferences.AllowAuthPreCheck));
               }
             }
             catch (XmlException)

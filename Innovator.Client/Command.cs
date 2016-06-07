@@ -111,12 +111,13 @@ namespace Innovator.Client
         _sub.AddParameter(param.ParameterName, param.Value);
       }
     }
-    public Command(IElement aml) : this(aml.ToAml())
+    public Command(IAmlNode aml) : this(aml.ToAml())
     {
-      if (aml.Name == "AML" && aml.Elements().Count() > 1)
+      var elem = aml as IReadOnlyElement;
+      if (elem != null && elem.Name == "AML" && elem.Elements().Count() > 1)
         this.Action = CommandAction.ApplyAML;
     }
-    public Command(IEnumerable<IElement> aml) : this()
+    public Command(IEnumerable<IAmlNode> aml) : this()
     {
       this.Aml = "<AML>" + aml.GroupConcat("", i => i.ToAml()) + "</AML>";
       this.Action = CommandAction.ApplyAML;
