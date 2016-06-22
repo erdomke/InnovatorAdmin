@@ -61,63 +61,138 @@ namespace Innovator.Client
       info.AddValue("time_zone", this.TimeZone);
     }
 
-    public bool? AsBoolean(string value)
+    /// <summary>
+    /// Coerse an <c>object</c> to a <c>bool?</c>.  Handles <c>bool</c> or <c>string</c> values
+    /// </summary>
+    public bool? AsBoolean(object value)
     {
-      if (string.IsNullOrEmpty(value)) return null;
-      if (value == "0")
+      if (value == null) return null;
+      if (value is bool) return (bool)value;
+      if (!(value is string))
+        throw new InvalidCastException();
+
+      if ((string)value == "0")
       {
         return false;
       }
-      else if (value == "1")
+      else if ((string)value == "1")
       {
         return true;
+      }
+      else if ((string)value == "")
+      {
+        return null;
       }
       else
       {
         throw new InvalidCastException();
       }
     }
-    public DateTime? AsDateTime(string value)
+    /// <summary>
+    /// Coerse an <c>object</c> to a <c>DateTime?</c> in the local timezone.  Handles <c>DateTime</c> or <c>string</c> values
+    /// </summary>
+    public DateTime? AsDateTime(object value)
     {
-      if (string.IsNullOrEmpty(value)) return null;
-      var result = DateTime.Parse(value, _culture, DateTimeStyles.AssumeLocal);
-      if (_timeZone.Equals(TimeZoneInfo.Local)) return result;
+      if (value == null) return null;
+      DateTime result;
+      if (value is DateTime)
+      {
+        result = (DateTime)value;
+        if (result.Kind == DateTimeKind.Utc)
+          return TimeZoneInfo.ConvertTime(result, TimeZoneInfo.Utc, TimeZoneInfo.Local);
+        return result;
+      }
+      else
+      {
+        if (!(value is string))
+          throw new InvalidCastException();
+        if ((string)value == "") return null;
+
+        result = DateTime.Parse((string)value, _culture, DateTimeStyles.AssumeLocal);
+        if (_timeZone.Equals(TimeZoneInfo.Local)) return result;
+      }
       result = DateTime.SpecifyKind(result, DateTimeKind.Unspecified);
       result = TimeZoneInfo.ConvertTime(result, _timeZone, TimeZoneInfo.Local);
       return result;
     }
-    public DateTime? AsDateTimeUtc(string value)
+    /// <summary>
+    /// Coerse an <c>object</c> to a <c>DateTime?</c> in the UTC timezone.  Handles <c>DateTime</c> or <c>string</c> values
+    /// </summary>
+    public DateTime? AsDateTimeUtc(object value)
     {
-      if (string.IsNullOrEmpty(value)) return null;
-      var result = DateTime.Parse(value, _culture, DateTimeStyles.AssumeLocal);
-      if (_timeZone == TimeZoneInfo.Utc)
+      if (value == null) return null;
+      DateTime result;
+      if (value is DateTime)
       {
-        result = DateTime.SpecifyKind(result, DateTimeKind.Utc);
+        result = (DateTime)value;
+        if (result.Kind == DateTimeKind.Local)
+          return TimeZoneInfo.ConvertTime(result, TimeZoneInfo.Local, TimeZoneInfo.Utc);
         return result;
+      }
+      else
+      {
+        if (!(value is string))
+          throw new InvalidCastException();
+        if ((string)value == "") return null;
+
+        result = DateTime.Parse((string)value, _culture, DateTimeStyles.AssumeLocal);
+        if (_timeZone == TimeZoneInfo.Utc)
+        {
+          result = DateTime.SpecifyKind(result, DateTimeKind.Utc);
+          return result;
+        }
       }
       result = DateTime.SpecifyKind(result, DateTimeKind.Unspecified);
       result = TimeZoneInfo.ConvertTime(result, _timeZone, TimeZoneInfo.Utc);
       return result;
     }
-    public decimal? AsDecimal(string value)
+    /// <summary>
+    /// Coerse an <c>object</c> to a <c>decimal?</c>.  Handles <c>decimal</c> or <c>string</c> values
+    /// </summary>
+    public decimal? AsDecimal(object value)
     {
-      if (string.IsNullOrEmpty(value)) return null;
-      return decimal.Parse(value, CultureInfo.InvariantCulture);
+      if (value == null) return null;
+      if (value is decimal) return (decimal)value;
+      if (!(value is string))
+        throw new InvalidCastException();
+      if ((string)value == "") return null;
+      return decimal.Parse((string)value, CultureInfo.InvariantCulture);
     }
-    public double? AsDouble(string value)
+    /// <summary>
+    /// Coerse an <c>object</c> to a <c>double?</c>.  Handles <c>double</c> or <c>string</c> values
+    /// </summary>
+    public double? AsDouble(object value)
     {
-      if (string.IsNullOrEmpty(value)) return null;
-      return double.Parse(value, CultureInfo.InvariantCulture);
+      if (value == null) return null;
+      if (value is double) return (double)value;
+      if (!(value is string))
+        throw new InvalidCastException();
+      if ((string)value == "") return null;
+      return double.Parse((string)value, CultureInfo.InvariantCulture);
     }
-    public int? AsInt(string value)
+    /// <summary>
+    /// Coerse an <c>object</c> to a <c>int?</c>.  Handles <c>int</c> or <c>string</c> values
+    /// </summary>
+    public int? AsInt(object value)
     {
-      if (string.IsNullOrEmpty(value)) return null;
-      return int.Parse(value, CultureInfo.InvariantCulture);
+      if (value == null) return null;
+      if (value is int) return (int)value;
+      if (!(value is string))
+        throw new InvalidCastException();
+      if ((string)value == "") return null;
+      return int.Parse((string)value, CultureInfo.InvariantCulture);
     }
-    public long? AsLong(string value)
+    /// <summary>
+    /// Coerse an <c>object</c> to a <c>long?</c>.  Handles <c>long</c> or <c>string</c> values
+    /// </summary>
+    public long? AsLong(object value)
     {
-      if (string.IsNullOrEmpty(value)) return null;
-      return long.Parse(value, CultureInfo.InvariantCulture);
+      if (value == null) return null;
+      if (value is long) return (long)value;
+      if (!(value is string))
+        throw new InvalidCastException();
+      if ((string)value == "") return null;
+      return long.Parse((string)value, CultureInfo.InvariantCulture);
     }
 
     public string Format(object value)
@@ -201,6 +276,10 @@ namespace Innovator.Client
       {
         var range = ((DynamicDateTimeRange)value).ToStatic(_timeZone);
         return stringRenderer(range.StartDate.ToString("s") + " AND " + range.EndDate.ToString("s"));
+      }
+      else if (value is IReadOnlyItem)
+      {
+        return ((IReadOnlyItem)value).Id();
       }
       else
       {

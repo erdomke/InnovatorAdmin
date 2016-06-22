@@ -14,6 +14,37 @@ namespace Innovator.Client
   public static class ItemExtensions
   {
     /// <summary>
+    /// Convert an item to a result object so that it can be more easily
+    /// returned from a server method
+    /// </summary>
+    public static IReadOnlyResult AsResult(this IReadOnlyItem item)
+    {
+      return item.AmlContext.FromXml(item.ToAml());
+    }
+
+    /// <summary>
+    /// Converts an AML node into an AML string
+    /// </summary>
+    public static string ToAml(this IAmlNode node, AmlWriterSettings settings = null)
+    {
+      using (var writer = new StringWriter())
+      using (var xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings() { OmitXmlDeclaration = true }))
+      {
+        node.ToAml(xmlWriter, settings ?? new AmlWriterSettings());
+        xmlWriter.Flush();
+        return writer.ToString();
+      }
+    }
+
+    /// <summary>
+    /// Converts an AML node into an AML string
+    /// </summary>
+    public static void ToAml(this IAmlNode node, XmlWriter writer)
+    {
+      node.ToAml(writer, new AmlWriterSettings());
+    }
+
+    /// <summary>
     /// Apply this item in the database
     /// </summary>
     public static IReadOnlyResult Apply(this IReadOnlyItem item, IConnection conn)
@@ -23,14 +54,14 @@ namespace Innovator.Client
       return aml.FromXml(conn.Process(query), query, conn);
     }
     /// <summary>Download the file represented by the property </summary>
-    /// <returns>This will return the file contents for item properties of type 'File' and 
+    /// <returns>This will return the file contents for item properties of type 'File' and
     /// image properties that point to vault files</returns>
     public static Stream AsFile(this IReadOnlyProperty prop, IConnection conn)
     {
       return prop.AsFile(conn, false).Value;
     }
     /// <summary>Asynchronously download the file represented by the property</summary>
-    /// <returns>This will return the file contents for item properties of type 'File' and 
+    /// <returns>This will return the file contents for item properties of type 'File' and
     /// image properties that point to vault files</returns>
     public static IPromise<Stream> AsFile(this IReadOnlyProperty prop, IConnection conn, bool async)
     {
@@ -140,7 +171,7 @@ namespace Innovator.Client
     /// <remarks>If the property is empty but has <c>is_null='0'</c>, then this will return <c>true</c></remarks>
     public static bool HasValue(this IReadOnlyProperty prop)
     {
-      return prop.Exists 
+      return prop.Exists
         && (!string.IsNullOrEmpty(prop.Value)
           || prop.IsNull().AsBoolean() == false);
     }
@@ -207,7 +238,7 @@ namespace Innovator.Client
       if (editable != null)
         editable.LockedById().Remove();
     }
-    
+
     /// <summary>
     /// Maps an item to a new object.  If there are properties which couldn't be found during the
     /// initial mapping, the method will query the database and run the mapper again with the
@@ -380,9 +411,9 @@ namespace Innovator.Client
         return _prop.Elements();
       }
 
-      public IServerContext Context
+      public ElementFactory AmlContext
       {
-        get { return _prop.Context; }
+        get { return _prop.AmlContext; }
       }
 
       public bool Exists
@@ -405,21 +436,10 @@ namespace Innovator.Client
         get { return _prop.Value; }
       }
 
-      public string ToAml()
+      public void ToAml(XmlWriter writer, AmlWriterSettings settings)
       {
-        return _prop.ToAml();
+        _prop.ToAml(writer, settings);
       }
-
-      public void ToAml(XmlWriter writer)
-      {
-        _prop.ToAml(writer);
-      }
-
-      public object Clone()
-      {
-        return _prop.Clone();
-      }
-
 
       public long? AsLong()
       {

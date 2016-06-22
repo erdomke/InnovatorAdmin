@@ -217,9 +217,10 @@ namespace Innovator.Client
     /// </summary>
     public string ToNormalizedAml(IServerContext context)
     {
-      if (_sub.ParamCount > 0)
-        return _sub.Substitute(this.Aml, context);
-      return this.Aml;
+      var aml = this.Aml;
+      if (_sub.ParamCount > 0 || aml.IndexOf("origDateRange") > 0)
+        return _sub.Substitute(aml, context);
+      return aml;
     }
     /// <summary>
     /// Return the AML string

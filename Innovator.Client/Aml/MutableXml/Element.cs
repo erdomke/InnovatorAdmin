@@ -145,7 +145,7 @@ namespace Innovator.Client
       return _node.OuterXml;
     }
 
-    public void ToAml(XmlWriter writer)
+    public void ToAml(XmlWriter writer, AmlWriterSettings settings)
     {
       _node.WriteTo(writer);
     }
@@ -242,7 +242,7 @@ namespace Innovator.Client
 
     internal static readonly XmlDocument BufferDocument = new XmlDocument();
 
-    object ICloneable.Clone()
+    protected IElement Clone()
     {
       return _factory.ElementFromXml((XmlElement)_node.CloneNode(true));
     }
@@ -267,9 +267,9 @@ namespace Innovator.Client
       get { return this.Parent; }
     }
 
-    IServerContext IReadOnlyElement.Context
+    ElementFactory IReadOnlyElement.AmlContext
     {
-      get { return _factory.LocalizationContext; }
+      get { return _factory; }
     }
   }
 }

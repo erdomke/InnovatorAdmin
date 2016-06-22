@@ -29,7 +29,7 @@ namespace InnovatorAdmin
       var pkgDoc = new XmlDocument(result.NameTable);
       pkgDoc.Load(_path);
       string folderPath;
-      result.AppendChild(result.CreateElement("AML"));
+      var root = result.AppendChild(result.CreateElement("AML"));
       XmlElement child;
 
       var scripts = new List<InstallItem>();
@@ -45,7 +45,7 @@ namespace InnovatorAdmin
           child.InnerXml = System.IO.File.ReadAllText(file);
           foreach (var item in child.Element("AML").Elements("Item"))
           {
-            result.AppendChild(item);
+            root.AppendChild(item);
           }
         }
       }

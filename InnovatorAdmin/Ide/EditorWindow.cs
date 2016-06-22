@@ -128,7 +128,7 @@ namespace InnovatorAdmin
 
       _uid = GetUid();
       var assy = Assembly.GetExecutingAssembly().GetName().Version;
-      this.lblVersion.Text = "v" + assy.ToString();
+      this.lblVersion.Text = string.Format("v{0}, [port {1}]", assy.ToString(), Program.PortNumber);
 
       tbcOutputView.TabsVisible = false;
 
@@ -1945,18 +1945,40 @@ namespace InnovatorAdmin
       }
       else
       {
-        var arasProxy = _proxy as ArasEditorProxy;
-        if (arasProxy != null && arasProxy.Connection != null)
+        var parts = context.Request.Url.Path.Split('/');
+        if (parts.Length > 4 && parts[2] == "ProcessMapXml")
         {
-          var reportUrlBase = GetReportUri().LocalPath;
-          var idx = reportUrlBase.IndexOf("/Client/") + 8;
-          var relativeUrl = "../" + context.Request.Url.Path.Substring(idx);
-          var absUrl = arasProxy.Connection.MapClientUrl(relativeUrl);
-          var pResp = _webService.Execute("GET", absUrl, null, null, false, null).Wait();
-          var resp = new Response().WithStatusCode((int)pResp.StatusCode);
-          resp.ContentType = pResp.Headers["Content-Type"];
-          resp.Contents = s => pResp.AsStream.CopyTo(s);
-          return resp;
+          var type = parts[3];
+          var id = parts[4];
+          var cmd = _proxy.NewCommand();
+          switch (type.ToLowerInvariant())
+          {
+            case "life cycle map":
+              cmd.WithAction("ApplyItem")
+                .WithQuery("<Item type='Life Cycle Map' action='get' id='@id' levels='1'></Item>")
+                .WithParam("id", id);
+              var resultObj = _proxy.Process(cmd, false, null).Wait();
+              var aml = ElementFactory.Local;
+              var map = aml.FromXml(resultObj.GetTextSource().CreateReader()).AssertItem();
+
+              break;
+          }
+        }
+        else
+        {
+          var arasProxy = _proxy as ArasEditorProxy;
+          if (arasProxy != null && arasProxy.Connection != null)
+          {
+            var reportUrlBase = GetReportUri().LocalPath;
+            var idx = reportUrlBase.IndexOf("/Client/") + 8;
+            var relativeUrl = "../" + context.Request.Url.Path.Substring(idx);
+            var absUrl = arasProxy.Connection.MapClientUrl(relativeUrl);
+            var pResp = _webService.Execute("GET", absUrl, null, null, false, null).Wait();
+            var resp = new Response().WithStatusCode((int)pResp.StatusCode);
+            resp.ContentType = pResp.Headers["Content-Type"];
+            resp.Contents = s => pResp.AsStream.CopyTo(s);
+            return resp;
+          }
         }
       }
 

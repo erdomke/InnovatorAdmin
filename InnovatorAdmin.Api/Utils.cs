@@ -12,6 +12,8 @@ namespace InnovatorAdmin
   {
     public static string Left(this string value, int count)
     {
+      if (value == null)
+        return value;
       return value.Length > count
         ? value.Substring(0, count)
         : value;

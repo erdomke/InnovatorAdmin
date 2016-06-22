@@ -17,6 +17,7 @@ namespace Innovator.Client.Connection
     private string _database;
     private List<Action<IHttpRequest>> _defaults = new List<Action<IHttpRequest>>();
     private Endpoints _endpoints;
+    private IAmlDeserializer _deserializer;
     private ElementFactory _factory;
     private IHttpService _service;
     private ICredentials _lastCredentials;
@@ -48,9 +49,10 @@ namespace Innovator.Client.Connection
       get { return _userId; }
     }
 
-    internal ProxyServerConnection(IHttpService service, Endpoints endpoints)
+    internal ProxyServerConnection(IHttpService service, Endpoints endpoints, IAmlDeserializer deserializer)
     {
       _service = service;
+      _deserializer = deserializer;
       _endpoints = endpoints;
       _timer = new System.Timers.Timer();
       _timer.Elapsed += _timer_Elapsed;
@@ -290,7 +292,7 @@ namespace Innovator.Client.Connection
           context.LanguageSuffix = i18n.Element("language_suffix").Value;
           context.Locale = i18n.Element("locale").Value;
           context.TimeZone = i18n.Element("time_zone").Value;
-          _factory = new ElementFactory(context);
+          _factory = new ElementFactory(context, _deserializer);
 
           var upload = data.Element("WriteVault") == null
             ? null : data.Element("WriteVault").Element("Item");
@@ -527,7 +529,7 @@ namespace Innovator.Client.Connection
 
     public IPromise<IRemoteConnection> Clone(bool async)
     {
-      var newConn = new ProxyServerConnection(_service, _endpoints);
+      var newConn = new ProxyServerConnection(_service, _endpoints, _deserializer);
       newConn.SessionPolicy = this.SessionPolicy;
       newConn._defaults = this._defaults;
       return newConn.Login(_lastCredentials, async)

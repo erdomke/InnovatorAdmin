@@ -19,11 +19,6 @@ namespace Innovator.Client
     }
 
     /// <inheritdoc/>
-    public IReadOnlyResult AsResult()
-    {
-      return _item.AsResult();
-    }
-    /// <inheritdoc/>
     public IItem Clone()
     {
       return _item.Clone();
@@ -69,9 +64,9 @@ namespace Innovator.Client
       return _item.Elements();
     }
     /// <inheritdoc/>
-    public IServerContext Context
+    public ElementFactory AmlContext
     {
-      get { return _item.Context; }
+      get { return _item.AmlContext; }
     }
     /// <inheritdoc/>
     public bool Exists
@@ -99,14 +94,9 @@ namespace Innovator.Client
       return _item.ToAml();
     }
     /// <inheritdoc/>
-    public void ToAml(XmlWriter writer)
+    public void ToAml(XmlWriter writer, AmlWriterSettings settings)
     {
-      _item.ToAml(writer);
-    }
-
-    object ICloneable.Clone()
-    {
-      return _item.Clone();
+      _item.ToAml(writer, settings);
     }
     /// <inheritdoc/>
     public string TypeName()

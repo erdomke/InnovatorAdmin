@@ -32,27 +32,48 @@ namespace Innovator.Client
     public StaticDateTimeRange ToStatic(TimeZoneInfo timeZone)
     {
       var result = new StaticDateTimeRange();
-      result.StartDate = GetDateFromDynamic(this.StartMagnitude, this.StartOffset, false, DateTimeOffset.UtcNow, this.FirstDayOfWeek, timeZone);
-      result.EndDate = GetDateFromDynamic(this.EndMagnitude, this.EndOffset, true, DateTimeOffset.UtcNow, this.FirstDayOfWeek, timeZone);
+      var now = _clock.Invoke();
+      result.StartDate = GetDateFromDynamic(this.StartMagnitude, this.StartOffset, false, now, this.FirstDayOfWeek, timeZone);
+      result.EndDate = GetDateFromDynamic(this.EndMagnitude, this.EndOffset, true, now, this.FirstDayOfWeek, timeZone);
       result.TimeZone = timeZone;
       return result;
     }
 
     public static DynamicDateTimeRange Deserialize(string value)
     {
-      var parts = value.Split('|');
-      if (parts.Length != 5) throw new ArgumentException();
-
-      var result = new DynamicDateTimeRange();
-      result.StartMagnitude = (DateMagnitude)Enum.Parse(typeof(DateMagnitude), parts[0]);
-      result.StartOffset = int.Parse(parts[1]);
-      result.EndMagnitude = (DateMagnitude)Enum.Parse(typeof(DateMagnitude), parts[2]);
-      result.EndOffset = int.Parse(parts[3]);
-      result.FirstDayOfWeek = (DayOfWeek)Enum.Parse(typeof(DayOfWeek), parts[4]);
+      DynamicDateTimeRange result;
+      if (!TryDeserialize(value, out result))
+        throw new ArgumentException();
       return result;
     }
 
-    public static DateTime GetDateFromDynamic(DateMagnitude magnitude, int offset, bool isEndDate, DateTimeOffset todaysDate, DayOfWeek weekStart, TimeZoneInfo timeZone)
+    public static bool TryDeserialize(string value, out DynamicDateTimeRange range)
+    {
+      range = null;
+      var parts = value.Split('|');
+      if (parts[0] == "Static")
+        return false;
+      if (parts[0] == "Dynamic")
+        parts = parts.Skip(1).Concat(new string[] { DayOfWeek.Sunday.ToString() }).ToArray();
+      if (parts.Length != 5) return false;
+
+
+      try
+      {
+        var result = new DynamicDateTimeRange();
+        result.StartMagnitude = (DateMagnitude)Enum.Parse(typeof(DateMagnitude), parts[0]);
+        result.StartOffset = int.Parse(parts[1]);
+        result.EndMagnitude = (DateMagnitude)Enum.Parse(typeof(DateMagnitude), parts[2]);
+        result.EndOffset = int.Parse(parts[3]);
+        result.FirstDayOfWeek = (DayOfWeek)Enum.Parse(typeof(DayOfWeek), parts[4]);
+        range = result;
+        return true;
+      }
+      catch (ArgumentException) { return false; }
+      catch (OverflowException) { return false; }
+    }
+
+    internal static DateTime GetDateFromDynamic(DateMagnitude magnitude, int offset, bool isEndDate, DateTimeOffset todaysDate, DayOfWeek weekStart, TimeZoneInfo timeZone)
     {
       var localToday = TimeZoneInfo.ConvertTime(todaysDate, timeZone);
       DateTimeOffset result;
@@ -112,11 +133,13 @@ namespace Innovator.Client
       if (isEndDate) return result.Date.AddMilliseconds(-1);
       return result.Date;
     }
-    public static DateTimeOffset GetWeekStart(DateTimeOffset value, DayOfWeek firstDayOfWeek = DayOfWeek.Sunday)
+    internal static DateTimeOffset GetWeekStart(DateTimeOffset value, DayOfWeek firstDayOfWeek = DayOfWeek.Sunday)
     {
       var offset = (int)firstDayOfWeek - (int)value.DayOfWeek;
       if (offset > 0) offset -= 7;
       return value.AddDays(offset);
     }
+
+    internal static Func<DateTimeOffset> _clock = () => DateTimeOffset.UtcNow;
   }
 }

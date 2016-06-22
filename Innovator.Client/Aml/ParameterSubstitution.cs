@@ -17,7 +17,7 @@ namespace Innovator.Client
   /// <summary>
   /// Class for substituting @-prefixed parameters with their values
   /// </summary>
-  /// <remarks>This class will escape values thereby preventing SQL/AML injection unless the 
+  /// <remarks>This class will escape values thereby preventing SQL/AML injection unless the
   /// parameter name ends with an exclamtion mark (e.g. @fileItem!)</remarks>
   public class ParameterSubstitution
   {
@@ -75,6 +75,7 @@ namespace Innovator.Client
         using (var xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings() { OmitXmlDeclaration = true }))
         {
           string condition = null;
+          DynamicDateTimeRange dateRange = null;
           var hasItem = false;
           var tagNames = new List<string>();
           string tagName;
@@ -94,6 +95,7 @@ namespace Innovator.Client
                 xmlWriter.WriteComment(xmlReader.Value);
                 break;
               case XmlNodeType.Element:
+                dateRange = null;
                 xmlWriter.WriteStartElement(xmlReader.Prefix, xmlReader.LocalName
                   , xmlReader.NamespaceURI);
                 tagName = xmlReader.LocalName;
@@ -110,6 +112,10 @@ namespace Innovator.Client
                   if (xmlReader.LocalName == "condition")
                   {
                     condition = xmlReader.Value;
+                  }
+                  else if (xmlReader.LocalName == "origDateRange" && !DynamicDateTimeRange.TryDeserialize(xmlReader.Value, out dateRange))
+                  {
+                    dateRange = null;
                   }
                 }
 
@@ -142,7 +148,7 @@ namespace Innovator.Client
                 xmlWriter.WriteWhitespace(xmlReader.Value);
                 break;
               case XmlNodeType.Text:
-                param = RenderValue(condition, xmlReader.Value);
+                param = RenderValue(condition, dateRange == null ? xmlReader.Value : _context.Format(dateRange));
                 if (param.IsRaw)
                 {
                   xmlWriter.WriteRaw(param.Value);

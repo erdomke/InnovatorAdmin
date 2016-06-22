@@ -16,6 +16,7 @@ namespace Innovator.Client
     /// </summary>
     public bool AllowAuthPreCheck { get; set; }
     public ITokenStore CredentialStore { get; set; }
+    public IAmlDeserializer Deserializer { get; set; }
     public Connection.IHttpService HttpService { get; set; }
     /// <summary>
     /// Locale to use when logging in

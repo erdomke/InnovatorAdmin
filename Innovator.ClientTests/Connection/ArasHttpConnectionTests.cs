@@ -17,7 +17,7 @@ namespace Innovator.Client.Connection.Tests
       try
       {
         var service = new DefaultHttpService();
-        var conn = new ArasHttpConnection(service, "http://www.aras.com/subscriberportal/");
+        var conn = new ArasHttpConnection(service, "http://www.aras.com/subscriberportal/", null);
         var cmd = new Command("<Item type='User' action='get' id='1234' />");
         cmd.Settings = r => r.Timeout = 1;
         var result = await conn.Process(cmd, true).ToTask();

@@ -16,15 +16,21 @@ namespace Innovator.Client
   /// var aml = conn.AmlContext;
   /// // --- OR ---
   /// var aml = ElementFactory.Local;
-  /// 
+  ///
   /// IItem myItem = aml.Item(aml.Type(myType), aml.Action(myAction));
   /// IResult myResult = aml.Result(resultText);
-  /// ServerException = aml.ServerException(errorMessage); 
+  /// ServerException = aml.ServerException(errorMessage);
   /// </code>
   /// </example>
   public class ElementFactory
   {
+    private IAmlDeserializer _deserializer;
     private IServerContext _context;
+
+    internal IAmlDeserializer Deserializer
+    {
+      get { return _deserializer; }
+    }
 
     /// <summary>
     /// Context for serializing/deserializing native types (e.g. <c>DateTime</c>, <c>double</c>, <c>boolean</c>, etc.)
@@ -34,9 +40,13 @@ namespace Innovator.Client
       get { return _context; }
     }
 
-    public ElementFactory(IServerContext context)
+    public ElementFactory(IServerContext context, IAmlDeserializer deserializer = null)
     {
       _context = context;
+      var defaultDeserializer = new FactoryDeserializer(this);
+      if (deserializer != null)
+        deserializer.SetDefault(defaultDeserializer);
+      _deserializer = deserializer ?? defaultDeserializer;
     }
 
     public string FormatAmlValue(object value)
@@ -47,29 +57,61 @@ namespace Innovator.Client
     /// <summary>Return a result from an AML string</summary>
     public IResult FromXml(string xml)
     {
-      return new Result(this, xml);
+      using (var strReader = new StringReader(xml))
+      using (var xmlReader = XmlReader.Create(strReader))
+      {
+        return _deserializer.FromXml(xmlReader);
+      }
     }
     /// <summary>Return a result from an AML node</summary>
     public IResult FromXml(XmlNode xml)
     {
-      return new Result(this, xml);
+      return _deserializer.FromXml(xml);
+    }
+    /// <summary>Return a result from a stream</summary>
+    public IResult FromXml(Stream xml)
+    {
+      using (var xmlReader = XmlReader.Create(xml))
+      {
+        return _deserializer.FromXml(xmlReader);
+      }
+    }
+    /// <summary>Return a result from an AML text reader</summary>
+    public IResult FromXml(TextReader xml)
+    {
+      using (var xmlReader = XmlReader.Create(xml))
+      {
+        return _deserializer.FromXml(xmlReader);
+      }
+    }
+    /// <summary>Return a result from an XML reader</summary>
+    public IResult FromXml(XmlReader xml)
+    {
+      var doc = new XmlDocument();
+      doc.Load(xml);
+      return new Result(this, doc.DocumentElement);
     }
     /// <summary>Return a result from an AML string indicating that it is the result of a query performed on a specific connection</summary>
     public IReadOnlyResult FromXml(string xml, string query, IConnection conn)
     {
-      return new Result(this, xml, query, conn);
+      using (var strReader = new StringReader(xml))
+      using (var xmlReader = XmlReader.Create(strReader))
+      {
+        return _deserializer.FromXml(xmlReader, query, conn == null ? null : conn.Database);
+      }
     }
     /// <summary>Return a result from an AML stream indicating that it is the result of a query performed on a specific connection</summary>
     public IReadOnlyResult FromXml(Stream xml, string query, IConnection conn)
     {
-      var doc = new XmlDocument();
-      doc.Load(xml);
-      return new Result(this, doc.DocumentElement, query, conn);
+      using (var xmlReader = XmlReader.Create(xml))
+      {
+        return _deserializer.FromXml(xmlReader, query, conn == null ? null : conn.Database);
+      }
     }
     /// <summary>Return a result from an AML node indicating that it is the result of a query performed on a specific connection</summary>
     public IReadOnlyResult FromXml(XmlNode xml, string query, IConnection conn)
     {
-      return new Result(this, xml, query, conn);
+      return _deserializer.FromXml(xml, query, conn == null ? null : conn.Database);
     }
 
     internal IElement ElementFromXml(string xml)
@@ -170,6 +212,11 @@ namespace Innovator.Client
     }
     /// <summary>Create a new where <c>id</c> attribute</summary>
     public IAttribute Id(string value)
+    {
+      return new Attribute(this, "id", value);
+    }
+    /// <summary>Create a new where <c>id</c> attribute</summary>
+    public IAttribute Id(Guid? value)
     {
       return new Attribute(this, "id", value);
     }
@@ -445,6 +492,46 @@ namespace Innovator.Client
           return new NoItemsFoundException(this, fault);
         default:
           return new ServerException(this, fault);
+      }
+    }
+
+
+    private class FactoryDeserializer : IAmlDeserializer
+    {
+      private ElementFactory _factory;
+
+      public FactoryDeserializer(ElementFactory factory)
+      {
+        _factory = factory;
+      }
+
+      public IResult FromXml(XmlNode xml)
+      {
+        return new Result(_factory, xml);
+      }
+
+      public IResult FromXml(XmlReader xml)
+      {
+        var doc = new XmlDocument(Innovator.Client.Element.BufferDocument.NameTable);
+        doc.Load(xml);
+        return new Result(_factory, doc.DocumentElement);
+      }
+
+      public IReadOnlyResult FromXml(XmlNode xml, string query, string database)
+      {
+        return new Result(_factory, xml, query, database);
+      }
+
+      public IReadOnlyResult FromXml(XmlReader xml, string query, string database)
+      {
+        var doc = new XmlDocument(Innovator.Client.Element.BufferDocument.NameTable);
+        doc.Load(xml);
+        return new Result(_factory, doc.DocumentElement, query, database);
+      }
+
+      public void SetDefault(IAmlDeserializer defaultImpl)
+      {
+        // do nothing
       }
     }
   }

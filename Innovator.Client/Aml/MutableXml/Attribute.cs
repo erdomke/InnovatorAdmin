@@ -141,6 +141,12 @@ namespace Innovator.Client
       if (result.HasValue) return result.Value;
       return defaultValue;
     }
+    public string AsString(string defaultValue)
+    {
+      if (!this.Exists)
+        return defaultValue;
+      return this.Value;
+    }
 
     public void Set(object value)
     {
@@ -148,14 +154,6 @@ namespace Innovator.Client
     }
 
     internal static readonly Attribute NullAttribute = new Attribute(null, (XmlAttribute)null);
-
-
-    public string AsString(string defaultValue)
-    {
-      if (!this.Exists)
-        return defaultValue;
-      return this.Value;
-    }
 
     public void Remove()
     {

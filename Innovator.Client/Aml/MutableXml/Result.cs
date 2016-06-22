@@ -8,11 +8,11 @@ namespace Innovator.Client
 {
   internal class Result : Element, IResult
   {
-    private string _query;
-    private IConnection _conn;
+    private string _database;
     private IReadOnlyItem _errorContext;
     private List<string> _errors;
     private List<string> _properties;
+    private string _query;
 
     public ServerException Exception
     {
@@ -23,13 +23,13 @@ namespace Innovator.Client
           if (_errorContext == null)
           {
             return _factory.ServerException(_errors.GroupConcat(Environment.NewLine))
-              .SetDetails(_conn == null ? null : _conn.Database, _query);
+              .SetDetails(_database, _query);
           }
           else
           {
             var props = (_properties ?? Enumerable.Empty<string>()).ToArray();
             return _factory.ValidationException(_errors.GroupConcat(Environment.NewLine), _errorContext, props)
-              .SetDetails(_conn == null ? null : _conn.Database, _query);
+              .SetDetails(_database, _query);
           }
         }
 
@@ -47,7 +47,7 @@ namespace Innovator.Client
               && (node.NamespaceURI == "http://schemas.xmlsoap.org/soap/envelope/" || string.IsNullOrEmpty(node.NamespaceURI))
               && node.HasChildNodes)
             {
-              return _factory.ServerException(node).SetDetails(_conn == null ? null : _conn.Database, _query);
+              return _factory.ServerException(node).SetDetails(_database, _query);
             }
           }
         }
@@ -77,15 +77,15 @@ namespace Innovator.Client
       _node = _node.ChildNodes.OfType<XmlElement>().SingleOrDefault();
     }
     internal Result(ElementFactory factory, string xml) : base(factory, GetElem(xml)) { }
-    internal Result(ElementFactory factory, string xml, string query, IConnection conn) : base(factory, GetElem(xml))
+    internal Result(ElementFactory factory, string xml, string query, string database) : base(factory, GetElem(xml))
     {
       _query = query;
-      _conn = conn;
+      _database = database;
     }
-    internal Result(ElementFactory factory, XmlNode xml, string query, IConnection conn) : base(factory, GetElem(xml))
+    internal Result(ElementFactory factory, XmlNode xml, string query, string database) : base(factory, GetElem(xml))
     {
       _query = query;
-      _conn = conn;
+      _database = database;
     }
     internal Result(ElementFactory factory, XmlNode node) : base(factory, GetElem(node)) {}
 
@@ -213,11 +213,11 @@ namespace Innovator.Client
     private ServerException NewNoItemsException()
     {
       return (this.Exception as NoItemsFoundException) ??
-        _factory.NoItemsFoundException("?", _query ?? "?").SetDetails(_conn == null ? null : _conn.Database, _query);
+        _factory.NoItemsFoundException("?", _query ?? "?").SetDetails(_database, _query);
     }
     private ServerException NewServerException(string message)
     {
-      return _factory.ServerException(message).SetDetails(_conn == null ? null : _conn.Database, _query);
+      return _factory.ServerException(message).SetDetails(_database, _query);
     }
     private ServerException NewServerException(string format, params object[] args)
     {

@@ -87,7 +87,11 @@ namespace Innovator.Client
     public static IPromise<IRemoteConnection> GetConnection(string url
       , ConnectionPreferences preferences, bool async)
     {
+      preferences = preferences ?? new ConnectionPreferences();
+
       url = (url ?? "").TrimEnd('/');
+      if (url.EndsWith("Server/InnovatorServer.aspx", StringComparison.OrdinalIgnoreCase))
+        url = url.Substring(0, url.Length - 21);
       if (!url.EndsWith("/server", StringComparison.OrdinalIgnoreCase)) url += "/Server";
       var configUrl = url + "/mapping.xml";
 
@@ -101,7 +105,7 @@ namespace Innovator.Client
         {
           case ServerType.Proxy:
             m.Endpoints.Base = new Uri(uri + "/");
-            var conn = new Connection.ProxyServerConnection(masterService, m.Endpoints);
+            var conn = new Connection.ProxyServerConnection(masterService, m.Endpoints, preferences.Deserializer);
             conn.SessionPolicy = preferences.SessionPolicy;
             if (!string.IsNullOrEmpty(preferences.UserAgent))
               conn.DefaultSettings(req => req.UserAgent = preferences.UserAgent);
@@ -159,7 +163,7 @@ namespace Innovator.Client
 
     private static IRemoteConnection ArasConn(IHttpService arasService, string url, ConnectionPreferences preferences)
     {
-      var result = new Connection.ArasHttpConnection(arasService, url);
+      var result = new Connection.ArasHttpConnection(arasService, url, preferences.Deserializer);
       if (!string.IsNullOrEmpty(preferences.Locale)
         || !string.IsNullOrEmpty(preferences.TimeZone)
         || !string.IsNullOrEmpty(preferences.UserAgent))

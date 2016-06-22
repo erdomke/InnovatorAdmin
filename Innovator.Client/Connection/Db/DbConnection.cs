@@ -180,11 +180,6 @@ namespace Innovator.Client.Connection
       _item = item;
     }
 
-    public IReadOnlyResult AsResult()
-    {
-      return _item.AsResult();
-    }
-
     public IItem Clone()
     {
       return _item.Clone();
@@ -225,9 +220,9 @@ namespace Innovator.Client.Connection
       return _item.Elements();
     }
 
-    public IServerContext Context
+    public ElementFactory AmlContext
     {
-      get { return _item.Context; }
+      get { return _item.AmlContext; }
     }
 
     public bool Exists
@@ -255,14 +250,9 @@ namespace Innovator.Client.Connection
       return _item.ToAml();
     }
 
-    public void ToAml(XmlWriter writer)
+    public void ToAml(XmlWriter writer, AmlWriterSettings settings)
     {
-      _item.ToAml(writer);
-    }
-
-    object ICloneable.Clone()
-    {
-      return _item.Clone();
+      _item.ToAml(writer, settings);
     }
 
     public IReadOnlyProperty Property(string name, string lang)

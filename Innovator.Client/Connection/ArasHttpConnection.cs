@@ -59,11 +59,11 @@ namespace Innovator.Client.Connection
       get { return _arasVersion; }
     }
 
-    public ArasHttpConnection(IHttpService service, string innovatorServerUrl)
+    public ArasHttpConnection(IHttpService service, string innovatorServerUrl, IAmlDeserializer deserializer)
     {
       _service = service;
       this.Compression = CompressionType.none;
-      _factory = new ElementFactory(_context);
+      _factory = new ElementFactory(_context, deserializer);
 
       if (innovatorServerUrl.EndsWith("Server/InnovatorServer.aspx", StringComparison.OrdinalIgnoreCase))
       {
@@ -413,7 +413,7 @@ namespace Innovator.Client.Connection
 
     public IPromise<IRemoteConnection> Clone(bool async)
     {
-      var newConn = new ArasHttpConnection(new DefaultHttpService() { Compression = CompressionType.none }, _innovatorServerUrl.ToString());
+      var newConn = new ArasHttpConnection(new DefaultHttpService() { Compression = CompressionType.none }, _innovatorServerUrl.ToString(), _factory.Deserializer);
       newConn._defaults = this._defaults;
       return newConn.Login(_lastCredentials, async)
         .Convert(u => (IRemoteConnection)newConn);

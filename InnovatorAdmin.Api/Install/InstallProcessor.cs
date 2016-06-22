@@ -31,7 +31,7 @@ namespace InnovatorAdmin
       _currLine = -1;
     }
 
-    public InstallScript ConvertManifestXml(XmlDocument doc, string name)
+    public async Task<InstallScript> ConvertManifestXml(XmlDocument doc, string name)
     {
       ExportProcessor.EnsureSystemData(_conn, ref _itemTypes);
 
@@ -52,7 +52,7 @@ namespace InnovatorAdmin
 
       var result = new InstallScript();
       result.Title = name;
-      _exportTools.Export(result, doc);
+      await _exportTools.Export(result, doc).ConfigureAwait(false);
       return result;
     }
 

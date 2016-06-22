@@ -5,7 +5,7 @@ using System.Xml;
 namespace Innovator.Client
 {
   /// <summary>A read-only AML element.  This element could be an Item, property, result tag, or something else</summary>
-  public interface IReadOnlyElement : ICloneable, IAmlNode
+  public interface IReadOnlyElement : IAmlNode
   {
     /// <summary>Retrieve the attribute with the specified name</summary>
     IReadOnlyAttribute Attribute(string name);
@@ -14,7 +14,7 @@ namespace Innovator.Client
     /// <summary>Retrieve all child elements</summary>
     IEnumerable<IReadOnlyElement> Elements();
     /// <summary>Retrieve the context used for rendering primitive values</summary>
-    IServerContext Context { get; }
+    ElementFactory AmlContext { get; }
     /// <summary>Returns <c>true</c> if this element actually exists in the underlying AML,
     /// otherwise, returns <c>false</c> to indicate that the element is just a null placeholder
     /// put in place to reduce unnecessary null reference checks</summary>
@@ -39,8 +39,6 @@ namespace Innovator.Client
     new IElement Parent { get; }
     /// <summary>Add new content to the element</summary>
     IElement Add(params object[] content);
-    /// <summary>Add new content to the element</summary>
-    IElement Add(object content);
     /// <summary>Remove the element from its parent</summary>
     void Remove();
     /// <summary>Remove attributes from the element</summary>

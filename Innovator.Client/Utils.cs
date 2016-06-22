@@ -13,6 +13,10 @@ namespace Innovator.Client
 {
   public static class Utils
   {
+    public static string ToArasId(this Guid guid)
+    {
+      return guid.ToString("N").ToUpperInvariant();
+    }
     internal static T[] ToArray<T>(this ArraySegment<T> data)
     {
       return data.Array.ToArray(data.Offset, data.Count);

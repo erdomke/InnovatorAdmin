@@ -79,6 +79,20 @@ namespace Aras.Innovator.Tests
         item.ToAml());
     }
 
+    [TestMethod()]
+    public void LanguageHandling_v2()
+    {
+      var aml = @"<AML xmlns:i18n='http://www.aras.com/I18N'><Item type='Property' id='1234'>
+  <label xml:lang='en'>Finished Part Diameter</label>
+  <i18n:label xml:lang='de'>Fertigteildurchmesser</i18n:label>
+  <i18n:label xml:lang='en'>Finished Part Diameter</i18n:label>
+</Item></AML>";
+      var item = ElementFactory.Local.FromXml(aml).AssertItem();
+      Assert.AreEqual("Finished Part Diameter", item.Property("label").Value);
+      Assert.AreEqual("Finished Part Diameter", item.Property("label", "en").Value);
+      Assert.AreEqual("Fertigteildurchmesser", item.Property("label", "de").Value);
+    }
+
     [TestMethod]
     public void VerifyItemCount()
     {

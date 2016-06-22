@@ -21,7 +21,7 @@ namespace InnovatorAdmin
       var parts = context.Request.Path.TrimStart('/').Split('/');
       var window = Application.OpenForms.OfType<EditorWindow>().FirstOrDefault(e => e.Uid == parts[0]);
       if (window == null)
-        return new Response().WithStatusCode(HttpStatusCode.NotFound);
+        return null;
       return window.GetResponse(context, rootPath);
     }
   }

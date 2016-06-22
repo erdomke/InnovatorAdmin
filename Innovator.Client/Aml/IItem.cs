@@ -9,12 +9,8 @@ namespace Innovator.Client
   /// </summary>
   public interface IReadOnlyItem : IReadOnlyElement, IItemRef
   {
-    /// <summary>
-    /// Convert the Item to a Result object that can be returned by a server method
-    /// </summary>
-    IReadOnlyResult AsResult();
     /// <summary>Creates a duplicate of the item object.  All properties (including the ID) are preserved</summary>
-    new IItem Clone();
+    IItem Clone();
     /// <summary>Returns a reference to the property with the specified name</summary>
     /// <remarks>If the property does not exist, a non-null object will be returned that has an <c>Exists</c> member which will return <c>false</c></remarks>
     /// <param name="name">Name of the property</param>

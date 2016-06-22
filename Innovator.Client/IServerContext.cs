@@ -12,13 +12,13 @@ namespace Innovator.Client
     string Locale { get; }
     string TimeZone { get; }
 
-    bool? AsBoolean(string value);
-    DateTime? AsDateTime(string value);
-    DateTime? AsDateTimeUtc(string value);
-    decimal? AsDecimal(string value);
-    double? AsDouble(string value);
-    int? AsInt(string value);
-    long? AsLong(string value);
+    bool? AsBoolean(object value);
+    DateTime? AsDateTime(object value);
+    DateTime? AsDateTimeUtc(object value);
+    decimal? AsDecimal(object value);
+    double? AsDouble(object value);
+    int? AsInt(object value);
+    long? AsLong(object value);
     string Format(object value);
   }
 }

@@ -55,8 +55,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Aml\AmlWriterSettings.cs" />
     <Compile Include="Aml\DateMagnitude.cs" />
     <Compile Include="Aml\DynamicDateTimeRange.cs" />
+    <Compile Include="Aml\IAmlDeserializer.cs" />
     <Compile Include="Aml\IAmlNode.cs" />
     <Compile Include="Aml\IAttribute.cs" />
     <Compile Include="Aml\IElement.cs" />
@@ -77,6 +79,17 @@
     <Compile Include="Aml\Model\WorkflowProcess.cs" />
     <Compile Include="Aml\ParameterSubstitution.cs" />
     <Compile Include="Aml\CommandAction.cs" />
+    <Compile Include="Aml\Simple\Attribute.cs" />
+    <Compile Include="Aml\Simple\Element.cs" />
+    <Compile Include="Aml\Simple\GenericElement.cs" />
+    <Compile Include="Aml\Simple\ILink.cs" />
+    <Compile Include="Aml\Simple\ILinkedElement.cs" />
+    <Compile Include="Aml\Simple\Item.cs" />
+    <Compile Include="Aml\Simple\ItemList.cs" />
+    <Compile Include="Aml\Simple\LinkedListOps.cs" />
+    <Compile Include="Aml\Simple\Logical.cs" />
+    <Compile Include="Aml\Simple\Property.cs" />
+    <Compile Include="Aml\Simple\Relationships.cs" />
     <Compile Include="Aml\SqlBatchWriter.cs" />
     <Compile Include="Aml\SqlFormatter.cs" />
     <Compile Include="Aml\StaticDateTimeRange.cs" />

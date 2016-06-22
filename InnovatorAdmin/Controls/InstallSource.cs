@@ -8,12 +8,14 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Controls
 {
   public partial class InstallSource : UserControl, IWizardStep
   {
     private IWizard _wizard;
+    private Func<Task<InstallScript>> _createInstallScript;
 
     public InstallSource()
     {
@@ -35,15 +37,17 @@ namespace InnovatorAdmin.Controls
               {
                 _wizard.InstallScript = pkg.Read();
               }
+              SetMetadata();
             }
             else
             {
               var pkg = new ManifestFolder(dialog.FileName);
               string title;
               var doc = pkg.Read(out title);
-              _wizard.InstallScript = _wizard.InstallProcessor.ConvertManifestXml(doc, title);
+              _createInstallScript = () => _wizard.InstallProcessor.ConvertManifestXml(doc, title);
+              lblName.Text = title;
+              _wizard.NextEnabled = true;
             }
-            SetMetadata();
           }
         }
       }
@@ -71,11 +75,13 @@ namespace InnovatorAdmin.Controls
 
     public void GoNext()
     {
-      _wizard.InstallScript.AddPackage = chkAddPackage.Checked;
       var connStep = new ConnectionSelection();
       connStep.MultiSelect = true;
-      connStep.GoNextAction = () =>
+      connStep.GoNextAction = async () =>
       {
+        if (_createInstallScript != null)
+          _wizard.InstallScript = await _createInstallScript.Invoke();
+        _wizard.InstallScript.AddPackage = chkAddPackage.Checked;
         _wizard.GoToStep(new InstallProgress());
       };
       _wizard.GoToStep(connStep);

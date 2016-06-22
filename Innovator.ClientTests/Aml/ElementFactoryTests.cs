@@ -126,5 +126,14 @@ namespace Innovator.Client.Tests
         new Command("<Item><name>@0</name><is_current>@0!</is_current></Item>",
           "<Item />", true, new DateTime(2015, 1, 1)).ToNormalizedAml(ElementFactory.Local.LocalizationContext));
     }
+
+    [TestMethod()]
+    public void FormatAmlTest_DynamicDate()
+    {
+      DynamicDateTimeRange._clock = () => DateTimeOffset.FromFileTime(131109073341417792);
+      Assert.AreEqual("<Item action=\"get\" type=\"Part\"><created_on condition=\"between\" origDateRange=\"Dynamic|Month|-1|Month|-1\">2016-05-01T00:00:00 AND 2016-05-31T23:59:59</created_on></Item>",
+        new Command("<Item action='get' type='Part'><created_on condition='between' origDateRange='Dynamic|Month|-1|Month|-1'>random query</created_on></Item>")
+          .ToNormalizedAml(ElementFactory.Local.LocalizationContext));
+    }
   }
 }
