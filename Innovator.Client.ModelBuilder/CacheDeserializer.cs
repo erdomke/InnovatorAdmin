@@ -11,19 +11,9 @@ namespace Innovator.Client.ModelBuilder
   {
     private IAmlDeserializer _default;
 
-    public IResult FromXml(XmlNode xml)
-    {
-      return _default.FromXml(xml);
-    }
-
     public IResult FromXml(XmlReader xml)
     {
       return _default.FromXml(xml);
-    }
-
-    public IReadOnlyResult FromXml(XmlNode xml, string query, string database)
-    {
-      return FromXml(new XmlNodeReader(xml), query, database);
     }
 
     public IReadOnlyResult FromXml(XmlReader xml, string query, string database)

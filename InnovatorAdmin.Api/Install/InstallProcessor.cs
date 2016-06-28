@@ -201,7 +201,7 @@ namespace InnovatorAdmin
             catch (ServerException ex)
             {
               _log.Append(DateTime.Now.ToString("s")).AppendLine(": ERROR");
-              _log.AppendLine(ex.AsAmlString());
+              _log.AppendLine(ex.ToAml());
               _log.AppendLine(" for query ");
               _log.AppendLine(ex.Query);
               args = new RecoverableErrorEventArgs() { Exception = ex };

@@ -37,7 +37,7 @@ namespace InnovatorAdmin
       {
         dialog._conn = conn;
         dialog.txtMessage.Text = args.Message ?? args.Exception.Message;
-        dialog.txtErrorDetails.Text = Utils.IndentXml(args.Exception.AsAmlString());
+        dialog.txtErrorDetails.Text = Utils.IndentXml(args.Exception.ToAml());
         dialog.txtQuery.Text = Utils.IndentXml(args.Exception.Query);
         dialog.TopMost = true;
         switch (dialog.ShowDialog())

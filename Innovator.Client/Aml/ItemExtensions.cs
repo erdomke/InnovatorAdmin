@@ -19,7 +19,9 @@ namespace Innovator.Client
     /// </summary>
     public static IReadOnlyResult AsResult(this IReadOnlyItem item)
     {
-      return item.AmlContext.FromXml(item.ToAml());
+      var result = new Result(item.AmlContext);
+      result.AddReadOnly(item);
+      return result;
     }
 
     /// <summary>
@@ -50,7 +52,7 @@ namespace Innovator.Client
     public static IReadOnlyResult Apply(this IReadOnlyItem item, IConnection conn)
     {
       var aml = conn.AmlContext;
-      var query = item.ToString();
+      var query = item.ToAml();
       return aml.FromXml(conn.Process(query), query, conn);
     }
     /// <summary>Download the file represented by the property </summary>
@@ -201,6 +203,10 @@ namespace Innovator.Client
       var result = item as IItem;
       if (result == null) throw new NotImplementedException();
       return result;
+    }
+    public static IElement Add(this IElement elem, params object[] content)
+    {
+      return elem.Add((object)content);
     }
     /// <summary>
     /// Promote the itme to the specified state

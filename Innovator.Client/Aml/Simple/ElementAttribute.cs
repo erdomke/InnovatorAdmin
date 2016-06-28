@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Innovator.Client
 {
-  public interface ILink<T> where T : ILink<T>
+  internal enum ElementAttribute
   {
-    string Name { get; }
-    T Next { get; set; }
+    FromDataStore,
+    ReadOnly
   }
 }

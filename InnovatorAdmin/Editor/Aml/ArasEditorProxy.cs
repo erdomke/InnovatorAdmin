@@ -397,7 +397,7 @@ namespace InnovatorAdmin.Editor
             else
             {
               _writer.WriteStartElement("Error");
-              result.Exception.AsAmlString(_writer);
+              result.Exception.ToAml(_writer);
               _writer.WriteStartElement("Query");
               query.WriteTo(_writer);
               _writer.WriteEndElement();
@@ -661,7 +661,7 @@ namespace InnovatorAdmin.Editor
         {
           var doc = new XmlDocument();
           doc.Load(_text.CreateReader());
-          _dataSet = Extensions.GetItemTable(_conn.AmlContext.FromXml(doc.DocumentElement)
+          _dataSet = Extensions.GetItemTable(_conn.AmlContext.FromXml(new XmlNodeReader(doc.DocumentElement))
             , ArasMetadataProvider.Cached(_conn), _select);
         }
         return _dataSet;

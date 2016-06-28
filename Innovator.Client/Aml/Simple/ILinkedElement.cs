@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Innovator.Client.Aml.Simple
+namespace Innovator.Client
 {
-  interface ILinkedElement : IElement, ILink<ILinkedElement>
+  public interface ILinkedElement : ILink<ILinkedElement>
   {
   }
 }

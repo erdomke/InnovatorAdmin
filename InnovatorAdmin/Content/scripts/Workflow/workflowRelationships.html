@@ -1,0 +1,384 @@
+﻿<!DOCTYPE html>
+<!-- (c) Copyright by Aras Corporation, 2004-2013. -->
+<html>
+<head>
+	<title></title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<script type="text/javascript" src="../../javascript/include.aspx?classes=/dojo.js" data-dojo-config="baseUrl:'../../javascript/dojo'"></script>
+	<script type="text/javascript" src="../../javascript/QueryString.js"></script>
+	<style type="text/css">
+		@import "../../javascript/dojo/resources/dojo.css";
+		@import "../../javascript/dijit/themes/claro/claro.css";
+		@import "../../javascript/include.aspx?classes=common.css";
+		@import "../../styles/default.css";
+
+		html,body{
+			overflow: hidden;
+			width: 100%;
+			height: 100%;
+			margin: 0px;
+			padding: 0px;
+		}
+		.activeTab{
+			z-index: 1;
+		}
+		.inactiveTab{
+			z-index: -1;
+		}
+	</style>
+	<script type="text/javascript">
+	var aras = parent.aras;
+	var currIFrameID = "",
+		LocationSearches = {};
+
+	var activityTabId = aras.getRelationshipTypeId('Workflow Map Activity');
+	var pathTabId = aras.getRelationshipTypeId('Workflow Map Path');
+
+	var oldSetControlEnabled = new Object();
+	var oldHandleCellEvent = new Object();
+	var oldComputeCorrectControlState = new Object();
+	var relationships = this;
+
+	var isEditMode = (QueryString("editMode").toString() == '1');
+	var itemID = QueryString("itemID").toString();
+	var itemTypeName = QueryString("ITName").toString();
+	var item = null;
+
+	onload = function () {
+		initRelTabbar();
+	}
+
+	var iframesCollection = null;
+	function initIframesCollection(currIFrameID){
+	  if (!iframesCollection)
+		iframesCollection = new Object();
+
+	  for (var iframeID in iframesCollection){
+		if (!currIFrameID || iframeID != currIFrameID){
+		  if (iframesCollection[iframeID].contentWindow.onbeforeunload)
+			iframesCollection[iframeID].contentWindow.onbeforeunload();
+			iframesCollection[iframeID].src = "../blank.html";
+		  aras.deletePropertyFromObject(iframesCollection,iframeID);
+		}
+	  }
+	}
+	initIframesCollection();
+
+	function initItem(){
+		item = parent.currWFNode;
+		if (itemTypeName != 'Workflow Map'){
+			item = item.selectSingleNode(".//Item[@id='" + itemID + "']");
+
+			if (!item)
+				item = parent.currWFNode;
+		}
+	}
+	initItem();
+
+	function setEditMode(){
+		isEditMode = true;
+		initItem();
+		initIframesCollection(currIFrameID);
+		var currIFrame = iframesCollection[currIFrameID];
+		if (currIFrame && currIFrame.contentWindow.setEditMode)
+			currIFrame.contentWindow.setEditMode();
+	}
+
+	function setViewMode(){
+		isEditMode = false;
+		initItem();
+		initIframesCollection(currIFrameID);
+		var currIFrame = iframesCollection[currIFrameID];
+		if (currIFrame && currIFrame.contentWindow.setViewMode)
+			currIFrame.contentWindow.setViewMode();
+	}
+
+	function getIFrameSrc(tabID){
+		var db = aras.getDatabase();
+		var where = QueryString("where").toString();
+		var toolbar = QueryString("toolbar").toString();
+		var editMode = (isEditMode) ? 1 : 0;
+
+		if ((tabID == activityTabId) || (tabID == pathTabId))
+			toolbar = 0;
+
+		var itemType = aras.getRelationshipType(tabID);
+		if (!itemType) return "../blank.html";
+
+		var RelationshipView = aras.uiGetRelationshipView4ItemTypeEx(itemType.node);
+		var url = "";
+		var parameters = "";
+
+		if (RelationshipView){
+			url = aras.getItemProperty(RelationshipView, "start_page");
+			parameters = aras.getItemProperty(RelationshipView, "parameters");
+		}
+
+		if (url == "")
+			url = aras.getScriptsURL() + "relationshipsGrid.html";
+
+		if (parameters == "")
+			parameters = "'db='+db+'&ITName='+itemTypeName+'&itemID='+itemID+'&relTypeID='+tabID+'&editMode='+editMode+'&toolbar='+toolbar+'&where='+where";
+
+		var parameters_res = "";
+		try{
+			parameters_res = eval(parameters);
+		}
+		catch (excep){
+			aras.AlertError(aras.getResource("", "workflowrelships.params_arent_valid", parameters));
+			return "../blank.html";
+		}
+
+		LocationSearches[tabID] = parameters_res;
+		return url;
+	}
+
+	function callOldSetControlEnabled(ctrlName, b){
+		var f = oldSetControlEnabled[currIFrameID];
+		try{ // to avoid "execute code from freed script" message
+			f(ctrlName, b);
+		}
+		catch (excep) { }
+	}
+
+	function callOldComputeCorrectControlState(controlName){
+		var f = oldComputeCorrectControlState[currIFrameID];
+		try{ 
+			// to avoid "execute code from freed script" message
+			return f(controlName);
+		}
+		catch (excep) { }
+	}
+
+	function callOldHandleCellEvent(eventName, rowId, col){
+		var f = oldHandleCellEvent[currIFrameID];
+		try{ 
+			// to avoid "execute code from freed script" message
+			return f(eventName, rowId, col);
+		}
+		catch (excep) { }
+	}
+
+	function getCurrContentWindow(){
+		return iframesCollection[currIFrameID].contentWindow;
+	}
+
+	function replaceSetControlEnabled(){
+		//Verification added to avoid StackOverflowException
+		if (oldSetControlEnabled[currIFrameID] == undefined){
+			var win = getCurrContentWindow();
+			oldSetControlEnabled[currIFrameID] = win.setControlEnabled;
+			win.setControlEnabled = workflowSetControlEnabled;
+		}
+	}
+
+	function replaceHandleCellEvent(){
+		var win = getCurrContentWindow();
+		oldHandleCellEvent[currIFrameID] = win.handleCellEvent;
+		win.handleCellEvent = workflowHandleCellEvent;
+	}
+
+	function replaceComputeCorrectControlState(){
+		var win = getCurrContentWindow();
+		oldComputeCorrectControlState[currIFrameID] = win.computeCorrectControlState;
+		win.computeCorrectControlState = workflowComputeCorrectControlState;
+	}
+
+	function overrideProcessCommand(){
+		var win = getCurrContentWindow();
+
+		win.processCommand = function processCommand(cmdId, col){
+			if (cmdId == "hideCol") { win.hideColumn(col); return; }
+			else if (cmdId == "addCol") { win.showColumn(col); return; }
+		}
+	}
+
+	function replaceStandardFunctions(tabId){
+		replaceSetControlEnabled();
+		replaceHandleCellEvent();
+		replaceComputeCorrectControlState();
+
+		//ignore processCommand in relationship "Path"
+		if (tabId){
+			var relType_name = aras.getRelationshipTypeName(tabId);
+			if (relType_name && relType_name == "Workflow Map Path")
+				overrideProcessCommand();
+		}
+
+		//remove onDoubleClick handler to not allow open instances in separate windows
+		//to not break configuration
+		var win = getCurrContentWindow();
+		win.onDoubleClick = new Function("return true;");
+	}
+
+	function onTab(tabID){
+		if (!tabID) return;
+		var iframeID = tabID + itemID;
+		if (currIFrameID == iframeID) return;
+
+		var prevIFrame = (currIFrameID ? iframesCollection[currIFrameID] : null);
+		if (prevIFrame){
+			var prevTabID = currIFrameID.slice(0, 32);
+			prevIFrame.className = "inactiveTab";
+
+			if (prevIFrame.contentWindow.searchContainer)
+				prevIFrame.contentWindow.searchContainer.onEndSearchContainer();
+		}
+
+		var newIFrame = iframesCollection[iframeID];
+		if (!newIFrame) {
+			var iframeSrc = getIFrameSrc(tabID);
+			newIFrame = document.createElement("iframe");
+			newIFrame.setAttribute("id", tabID);
+			newIFrame.setAttribute("src", iframeSrc);
+			newIFrame.setAttribute("frameBorder", "0");
+			newIFrame.setAttribute("width", "100%");
+			newIFrame.setAttribute("height", "100%");
+			newIFrame.setAttribute("scrolling", "no");
+			newIFrame.style.position = "absolute";
+			newIFrame.style.display = "block";
+			newIFrame.onload =
+			function frame_onload_handler() {
+				var mainWnd = aras.getMostTopWindowWithAras(window);
+				mainWnd.ITEM_WINDOW.registerStandardShortcuts(this.contentWindow);
+				eval("replaceStandardFunctions('" + tabID + "');\n");
+
+				if (mainWnd.returnBlockerHelper) {
+					mainWnd.returnBlockerHelper.attachBlocker(this.contentWindow);
+				}
+				if (mainWnd.DragDropHelper) {
+					mainWnd.DragDropHelper.disableDnD(this.contentWindow);
+				}
+			};
+
+			iframesCollection[iframeID] = newIFrame;
+			content_area.appendChild(newIFrame);
+		}
+
+		if (newIFrame.contentWindow.searchContainer){
+			newIFrame.contentWindow.searchContainer.onStartSearchContainer();
+
+			if (newIFrame.contentWindow.AUTO_SEARCH_FLAG){
+				newIFrame.contentWindow.doSearch();
+			}
+		}
+
+		currIFrameID = iframeID;
+		newIFrame.className = "activeTab";
+	}
+
+	var tabbar = null;
+	function initRelTabbar(){
+		if (QueryString("tabbar").toString() == "1"){
+			clientControlsFactory.createControl("Aras.Client.Controls.Experimental.SimpleTabbar", { region: "center", style: "width: 100%; height: 100%;" }, function(control) {
+				tabbar = tabbarApplet = control;
+				document.getElementById("tabbar_container").appendChild(tabbarApplet.domNode);
+				clientControlsFactory.on(tabbarApplet, {
+					"onClick": onTab
+				});
+				tabbar.startup();
+				showTabbar(itemTypeName, itemID);
+			});
+		}
+	}
+
+	function onRelTabbarLoaded(tb){
+		tabbar.clear();
+
+		for (var i = 0; i < tb.length; i++)
+			tabbar.addTab(tb[i].id, tb[i].label);
+	}
+
+	function showTabbar(new_ITName, new_itemID){
+		var tabId;
+		var selectedTab = tabbarApplet.GetSelectedTab();
+
+		itemID = new_itemID;
+		itemTypeName = new_ITName;
+		initItem();
+
+		if (tabbar == null) return; //func initRelTabbar isn't yet performed
+
+		var tmpTabbar = parent.tabbars[itemTypeName];
+		tabId = tmpTabbar[0].id;
+		if (selectedTab != tabId)
+			onRelTabbarLoaded(tmpTabbar);
+
+		tabbar.selectTab(tabId);
+		onTab(tabId);
+	}
+
+	function workflowSetControlEnabled(ctrlName, b){
+		var prevTabID = currIFrameID.slice(0, 32);
+
+		if ((prevTabID == activityTabId) || (prevTabID == pathTabId)){
+			b = false;
+		}
+		var mainWnd = aras.getMostTopWindowWithAras(window);
+		var menuFrame = (mainWnd.isTearOff ? mainWnd.tearOffMenuController : mainWnd.main.menu);
+		with (menuFrame){
+			if (ctrlName == "paste"){
+				setControlEnabled(ctrlName, b);
+				setControlEnabled(ctrlName + "_special", b);
+			}
+		}
+		callOldSetControlEnabled(ctrlName, b);
+	}
+
+	function workflowHandleCellEvent(eventName, rowId, col){
+		var res;
+		// avoid execute code from freed script
+		try{
+			res = callOldHandleCellEvent(eventName, rowId, col);
+		}
+		catch (e) { }
+
+		if (eventName == "onchangecell"){
+			var item = parent.currWFNode.selectSingleNode("//Item[@id='" + rowId + "']");
+			if (item) {
+				var mainWnd = aras.getMostTopWindowWithAras(window);
+				mainWnd.update2Edit(item);
+
+				if (item.getAttribute("isDirty") == "1"){
+					parent.currWFNode.setAttribute("isDirty", "1");
+				}
+
+				var itemTypeName = item.getAttribute("type");
+				if (itemTypeName == "Workflow Map Path"){
+					parent.getFrameWindow('editor').handlePathChange("name", item.selectSingleNode("name").text, item.getAttribute("id"));
+				}
+				else if (itemTypeName == "Workflow Map Activity"){
+					parent.getFrameWindow("editor").handleActivityChange("name",
+											item.selectSingleNode("related_id/Item/name").text,
+											item.selectSingleNode("related_id/Item/@id").text);
+				}
+
+				var related_idNd = item.selectSingleNode("related_id/Item");
+				if (related_idNd){
+					if (related_idNd.getAttribute("isDirty") == "1"){
+						parent.currWFNode.setAttribute("isDirty", "1");
+					}
+				}
+
+				mainWnd.updateItemsGrid(parent.currWFNode);
+			}
+		}
+
+		return res;
+	}
+
+	function workflowComputeCorrectControlState(controlName){
+		var tabID = currIFrameID.slice(0, 32);
+		if ((tabID == activityTabId) || (tabID == pathTabId)){
+			return false;
+		}
+
+		return callOldComputeCorrectControlState(controlName);
+	}
+	</script>
+	</head>
+	<body class="claro">
+		<div id="tabbar_container" style="position:absolute; top:0px; left:0px; right:0px; height: 30px;"></div>
+		<div id="content_area" style="position:absolute; top:30px; left:0px; right:0px; bottom:0px;"></div>
+	</body>
+</html>

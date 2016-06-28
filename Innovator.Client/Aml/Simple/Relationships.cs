@@ -1,15 +1,17 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
 
-namespace Innovator.Client.Aml.Simple
+namespace Innovator.Client
 {
   class Relationships : ILinkedElement, IRelationships
   {
     private ItemList _relList;
     private ILinkedElement _next;
+    private IElement _parent;
 
     public virtual ElementFactory AmlContext
     {
@@ -27,31 +29,47 @@ namespace Innovator.Client.Aml.Simple
       get { return _next; }
       set { _next = value; }
     }
-    public IElement Parent { get; set; }
+    public IElement Parent
+    {
+      get { return _parent ?? Item.NullItem; }
+      set { _parent = value; }
+    }
     IReadOnlyElement IReadOnlyElement.Parent { get { return this.Parent; } }
     public string Value { get { return null; } }
 
     public Relationships() { }
-
-    public virtual IElement Add(params object[] content)
+    public Relationships(IElement parent)
     {
-      foreach (var item in Simple.Element.Flatten(content).OfType<IReadOnlyItem>())
+      _parent = parent;
+    }
+    public Relationships(params object[] content) : this()
+    {
+      for (var i = 0; i < content.Length; i++)
       {
-        var typeName = item.TypeName();
-        var list = LinkedListOps.Find(_relList, typeName);
-        if (list == null)
-        {
-          list = new ItemList() { Name = typeName };
-          _relList = LinkedListOps.Add(_relList, list);
-        }
-        list.Add(item);
+        Add(content[i]);
       }
+    }
+
+    public IElement Add(object content)
+    {
+      var item = content as IReadOnlyItem;
+      if (item == null)
+        return this;
+
+      var typeName = item.TypeName();
+      var list = LinkedListOps.Find(_relList, typeName);
+      if (list == null)
+      {
+        list = new ItemList() { Name = typeName };
+        _relList = LinkedListOps.Add(_relList, list);
+      }
+      list.Add(item);
       return this;
     }
 
     public IAttribute Attribute(string name)
     {
-      return Simple.Attribute.NullAttr;
+      return Innovator.Client.Attribute.NullAttr;
     }
 
     public IEnumerable<IAttribute> Attributes()

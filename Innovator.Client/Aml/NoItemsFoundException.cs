@@ -10,32 +10,32 @@ namespace Innovator.Client
   [Serializable]
   public class NoItemsFoundException : ServerException
   {
-    internal NoItemsFoundException(ElementFactory factory, string type, string query)
-      : base(factory, "No items of type " + type + " found.", 0)
+    internal NoItemsFoundException(string type, string query)
+      : base("No items of type " + type + " found.", 0)
     {
       var detail = CreateDetailElement();
-      detail.AppendChild(_faultNode.OwnerDocument.CreateElement("af", "legacy_faultstring", "http://www.aras.com/InnovatorFault")).InnerText =
-        "No items of type " + type + " found using the criteria: " + query;
+      detail.Add(new AmlElement(_fault.AmlContext, "af:legacy_faultstring", "No items of type " + type + " found using the criteria: " + query));
       this._query = query;
     }
-    internal NoItemsFoundException(ElementFactory factory, string message)
-      : base(factory, message, 0)
+    internal NoItemsFoundException(string message)
+      : base(message, 0)
     {
       CreateDetailElement();
     }
-    internal NoItemsFoundException(ElementFactory factory, string message, Exception innerException)
-      : base(factory, message, 0, innerException)
+    internal NoItemsFoundException(string message, Exception innerException)
+      : base(message, 0, innerException)
     {
       CreateDetailElement();
     }
+    internal NoItemsFoundException(Element fault) : base(fault) { }
     public NoItemsFoundException(SerializationInfo info, StreamingContext context)
       : base(info, context) { }
-    internal NoItemsFoundException(ElementFactory factory, XmlElement node) : base(factory, node) { }
 
-    private XmlElement CreateDetailElement()
+    private IElement CreateDetailElement()
     {
-      var detail = _faultNode.Elem("detail");
-      detail.AppendChild(_faultNode.OwnerDocument.CreateElement("af", "legacy_detail", "http://www.aras.com/InnovatorFault")).InnerText = this.Message;
+      var detail = _fault.ElementByName("detail") as Element;
+      if (!detail.Exists || string.IsNullOrEmpty(detail.ElementByName("af:legacy_detail").Value))
+        detail.Add(new AmlElement(_fault.AmlContext, "af:legacy_detail", this.Message));
       return detail;
     }
   }

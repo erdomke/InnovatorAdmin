@@ -5,13 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 
-namespace Innovator.Client.Aml.Simple
+namespace Innovator.Client
 {
-  abstract class Element : ILinkedElement
+  public abstract class Element : IElement, ILinkedElement
   {
+    private ElementAttribute _attr;
     protected object _content;
-    private Attribute _lastAttr;
-    protected ILinkedElement _next;
+    private ILinkedAnnotation _lastAttr;
+    internal protected ILinkedElement _next;
 
     public virtual ElementFactory AmlContext
     {
@@ -33,18 +34,50 @@ namespace Innovator.Client.Aml.Simple
           _next = value;
       }
     }
-    public abstract IElement Parent { get; }
+    public abstract IElement Parent { get; set; }
     IReadOnlyElement IReadOnlyElement.Parent { get { return this.Parent; } }
     public string Value
     {
       get
       {
-        return AmlContext.LocalizationContext.Format(_content);
+        if (_content != null && AmlContext != null)
+          return AmlContext.LocalizationContext.Format(_content);
+        return null;
+      }
+      set { _content = value; }
+    }
+
+    public bool ReadOnly
+    {
+      get { return string.IsNullOrEmpty(Name)
+          || (_attr & ElementAttribute.ReadOnly) > 0; }
+      set
+      {
+        if (value)
+          _attr = _attr | ElementAttribute.ReadOnly;
+        else
+          _attr = _attr & ~ElementAttribute.ReadOnly;
+      }
+    }
+    protected bool FromDataStore
+    {
+      get { return (_attr & ElementAttribute.FromDataStore) > 0; }
+      set
+      {
+        if (value)
+          _attr = _attr | ElementAttribute.FromDataStore;
+        else
+          _attr = _attr & ~ElementAttribute.FromDataStore;
       }
     }
 
     public Element() { }
     public Element(IReadOnlyElement elem)
+    {
+      CopyData(elem);
+    }
+
+    protected void CopyData(IReadOnlyElement elem)
     {
       Add(elem.Attributes());
       Add(elem.Elements());
@@ -52,93 +85,121 @@ namespace Innovator.Client.Aml.Simple
         Add(elem.Value);
     }
 
-    public virtual IElement Add(params object[] content)
+    public virtual IElement Add(object content)
     {
-      if (string.IsNullOrEmpty(Name))
-        throw new InvalidOperationException();
+      if (content == null)
+        return this;
 
-      foreach (var obj in Flatten(content))
+      var id = content as IdAnnotation;
+      if (id != null)
       {
-        var attr = Simple.Attribute.TryGet(obj, this);
-        if (attr != null)
-        {
-          _lastAttr = LinkedListOps.Add(_lastAttr, attr);
-        }
-        else
-        {
-          var elem = TryGet(obj, this);
-          if (elem != null)
-          {
-            _content = LinkedListOps.Add(_content as ILinkedElement, elem);
-          }
-          else
-          {
-            _content = obj;
-          }
-        }
+        QuickAddAttribute(id);
+        return this;
       }
+
+      var elem = TryGet(content, this);
+      if (elem != null)
+      {
+        QuickAddElement(elem);
+        return this;
+      }
+
+      if (content is string)
+      {
+        _content = content;
+        return this;
+      }
+
+      var attr = Innovator.Client.Attribute.TryGet(content, this);
+      if (attr != null)
+      {
+        QuickAddAttribute(attr);
+        return this;
+      }
+
+      var enumerable = content as IEnumerable;
+      if (enumerable != null)
+      {
+        foreach (var curr in enumerable)
+        {
+          Add(curr);
+        }
+        return this;
+      }
+
+      _content = content;
       return this;
     }
 
-    static Element TryGet(object value, Element newParent)
+    internal void QuickAddElement(ILinkedElement elem)
+    {
+      _content = LinkedListOps.Add(_content as ILinkedElement, elem);
+    }
+
+    internal void QuickAddAttribute(ILinkedAnnotation attr)
+    {
+      _lastAttr = LinkedListOps.Add(_lastAttr, attr);
+    }
+
+    static ILinkedElement TryGet(object value, Element newParent)
     {
       var impl = value as Element;
       if (impl != null)
       {
-        if (impl.Parent == null || impl.Parent == newParent)
+        if (impl.Parent == null || !impl.Parent.Exists || impl.Parent == newParent)
+        {
+          impl.Parent = newParent;
           return impl;
-        return new GenericElement(impl, newParent);
+        }
+        return new AmlElement(newParent, impl);
+      }
+
+      var rel = value as Relationships;
+      if (rel != null)
+      {
+        if (rel.Parent == null || !rel.Parent.Exists || rel.Parent == newParent)
+        {
+          rel.Parent = newParent;
+          return rel;
+        }
+        return new Relationships(rel.Elements());
       }
 
       var elem = value as IReadOnlyElement;
       if (elem != null)
       {
-        return new GenericElement(elem, newParent);
+        return new AmlElement(newParent, elem);
       }
 
       return null;
     }
 
-    public static IEnumerable<object> Flatten(IEnumerable<object> content)
-    {
-      foreach (var value in content)
-      {
-        var ienum = content as IEnumerable;
-        if (ienum != null
-          && (ienum.OfType<IReadOnlyAttribute>().Any()
-            || ienum.OfType<IReadOnlyElement>().Any()))
-        {
-          foreach (var obj in ienum)
-          {
-            yield return obj;
-          }
-        }
-        else
-        {
-          yield return value;
-        }
-      }
-    }
-
     public IAttribute Attribute(string name)
     {
-      if (!Exists)
-        return Simple.Attribute.NullAttr;
-      return LinkedListOps.Find(_lastAttr, name)
-        ?? new Attribute(name, this);
+      return (((IReadOnlyElement)this).Attribute(name) as IAttribute)
+        ?? Client.Attribute.NullAttr;
     }
 
     public IEnumerable<IAttribute> Attributes()
     {
-      return LinkedListOps.Enumerate(_lastAttr);
+      return LinkedListOps.Enumerate(_lastAttr).OfType<IAttribute>();
     }
 
     public IEnumerable<IElement> Elements()
     {
-      var lastElem = _content as ILinkedElement;
-      if (lastElem == null)
-        return Enumerable.Empty<IElement>();
-      return LinkedListOps.Enumerate(lastElem);
+      return LinkedListOps.Enumerate(_content as ILinkedElement).OfType<IElement>();
+    }
+
+    internal Element ElementByName(string name)
+    {
+      var elem = _content as ILinkedElement;
+      if (elem != null)
+      {
+        var result = (LinkedListOps.Find(elem, name) as Element);
+        if (result != null)
+          return result;
+      }
+      return new AmlElement(this, name);
     }
 
     public void Remove()
@@ -150,16 +211,19 @@ namespace Innovator.Client.Aml.Simple
           elem.RemoveNode(this);
       }
     }
-    public void RemoveAttribute(Attribute attr)
+    internal void RemoveAttribute(Attribute attr)
     {
+      AssertModifiable();
       LinkedListOps.Remove(_lastAttr, attr);
     }
     public void RemoveAttributes()
     {
+      AssertModifiable();
       _lastAttr = null;
     }
-    public void RemoveNode(ILinkedElement elem)
+    internal void RemoveNode(ILinkedElement elem)
     {
+      AssertModifiable();
       var lastElem = _content as ILinkedElement;
       if (lastElem == null)
         return;
@@ -167,15 +231,65 @@ namespace Innovator.Client.Aml.Simple
     }
     public void RemoveNodes()
     {
+      AssertModifiable();
       _content = null;
     }
 
     public void ToAml(XmlWriter writer, AmlWriterSettings settings)
     {
-      writer.WriteStartElement(this.Name);
-      foreach (var attr in LinkedListOps.Enumerate(_lastAttr))
+      var name = this.Name;
+      var i = name.IndexOf(':');
+      var attrs = LinkedListOps.Enumerate(_lastAttr).OfType<IReadOnlyAttribute>().ToArray();
+      if (attrs.Any(a => a.Name == "xml:lang" && a.Value != AmlContext.LocalizationContext.LanguageCode))
       {
-        writer.WriteAttributeString(attr.Name, attr.Value);
+        writer.WriteStartElement("i18n", name, "http://www.aras.com/I18N");
+      }
+      else if (i > 0)
+      {
+        var prefix = name.Substring(0, i);
+        name = name.Substring(i + 1);
+        var ns = "";
+        switch (prefix)
+        {
+          case "SOAP-ENV":
+            ns = "http://schemas.xmlsoap.org/soap/envelope/";
+            break;
+          case "af":
+            ns = "http://www.aras.com/InnovatorFault";
+            break;
+          default:
+            throw new NotSupportedException();
+        }
+        writer.WriteStartElement(prefix, name, ns);
+      }
+      else
+      {
+        writer.WriteStartElement(name);
+      }
+
+      foreach (var attr in attrs)
+      {
+        i = attr.Name.IndexOf(':');
+        if (i > 0)
+        {
+          var prefix = attr.Name.Substring(0, i);
+          name = attr.Name.Substring(i + 1);
+          var ns = "";
+          switch (prefix)
+          {
+            case "xml":
+              ns = "http://www.w3.org/XML/1998/namespace";
+              break;
+            default:
+              throw new NotSupportedException();
+          }
+          writer.WriteAttributeString(prefix, name, ns, attr.Value);
+        }
+        else
+        {
+          writer.WriteAttributeString(attr.Name, attr.Value);
+        }
+
       }
       var elem = _content as ILinkedElement;
       if (elem == null)
@@ -184,7 +298,8 @@ namespace Innovator.Client.Aml.Simple
       }
       else
       {
-        var item = LinkedListOps.Enumerate(elem).OfType<IReadOnlyItem>().FirstOrDefault();
+        var elems = LinkedListOps.Enumerate(elem).ToArray();
+        var item = elems.OfType<IReadOnlyItem>().FirstOrDefault();
         if (this is IReadOnlyProperty
           && !settings.ExpandPropertyItems
           && item != null
@@ -198,7 +313,7 @@ namespace Innovator.Client.Aml.Simple
         }
         else
         {
-          foreach (var e in LinkedListOps.Enumerate(elem))
+          foreach (var e in elems.OfType<IAmlNode>())
           {
             e.ToAml(writer, settings);
           }
@@ -209,17 +324,31 @@ namespace Innovator.Client.Aml.Simple
 
     IReadOnlyAttribute IReadOnlyElement.Attribute(string name)
     {
-      return this.Attribute(name);
+      if (!Exists)
+        return Innovator.Client.Attribute.NullAttr;
+      return (LinkedListOps.Find(_lastAttr, name) as IReadOnlyAttribute)
+        ?? new Attribute(this, name);
     }
 
     IEnumerable<IReadOnlyAttribute> IReadOnlyElement.Attributes()
     {
-      return this.Attributes();
+      return LinkedListOps.Enumerate(_lastAttr).OfType<IReadOnlyAttribute>();
     }
 
     IEnumerable<IReadOnlyElement> IReadOnlyElement.Elements()
     {
-      return this.Elements();
+      return LinkedListOps.Enumerate(_content as ILinkedElement).OfType<IReadOnlyElement>();
+    }
+
+    public override string ToString()
+    {
+      return this.ToAml();
+    }
+
+    protected void AssertModifiable()
+    {
+      if (this.ReadOnly)
+        throw new InvalidOperationException("Cannot modify a read only element");
     }
   }
 }

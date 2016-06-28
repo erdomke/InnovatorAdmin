@@ -16,20 +16,28 @@ namespace Innovator.Client.Tests
     {
       var aml = ElementFactory.Local;
       var res = aml.Result();
-      Assert.AreEqual(@"<SOAP-ENV:Body xmlns:SOAP-ENV=""http://schemas.xmlsoap.org/soap/envelope/""></SOAP-ENV:Body>", res.ToXml().ToString());
+      Assert.AreEqual(@"<SOAP-ENV:Envelope xmlns:SOAP-ENV=""http://schemas.xmlsoap.org/soap/envelope/"">
+  <SOAP-ENV:Body>
+    <Result />
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>", res.ToXml().ToString());
 
       res = aml.Result("Value");
-      Assert.AreEqual(@"<SOAP-ENV:Body xmlns:SOAP-ENV=""http://schemas.xmlsoap.org/soap/envelope/"">
-  <Result>Value</Result>
-</SOAP-ENV:Body>", res.ToXml().ToString());
+      Assert.AreEqual(@"<SOAP-ENV:Envelope xmlns:SOAP-ENV=""http://schemas.xmlsoap.org/soap/envelope/"">
+  <SOAP-ENV:Body>
+    <Result>Value</Result>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>", res.ToXml().ToString());
 
       res = aml.Result(aml.Item(aml.Type("Part"), aml.Id("1234")), aml.Item(aml.Type("Part"), aml.Id("4567")));
-      Assert.AreEqual(@"<SOAP-ENV:Body xmlns:SOAP-ENV=""http://schemas.xmlsoap.org/soap/envelope/"">
-  <Result>
-    <Item type=""Part"" id=""1234"" />
-    <Item type=""Part"" id=""4567"" />
-  </Result>
-</SOAP-ENV:Body>", res.ToXml().ToString());
+      Assert.AreEqual(@"<SOAP-ENV:Envelope xmlns:SOAP-ENV=""http://schemas.xmlsoap.org/soap/envelope/"">
+  <SOAP-ENV:Body>
+    <Result>
+      <Item id=""1234"" type=""Part"" />
+      <Item id=""4567"" type=""Part"" />
+    </Result>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>", res.ToXml().ToString());
     }
 
     [TestMethod()]

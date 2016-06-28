@@ -38,7 +38,7 @@ namespace Innovator.Client
     /// <summary>Retrieve the parent element</summary>
     new IElement Parent { get; }
     /// <summary>Add new content to the element</summary>
-    IElement Add(params object[] content);
+    IElement Add(object content);
     /// <summary>Remove the element from its parent</summary>
     void Remove();
     /// <summary>Remove attributes from the element</summary>

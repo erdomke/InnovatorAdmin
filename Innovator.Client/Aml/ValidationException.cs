@@ -10,39 +10,38 @@ namespace Innovator.Client
   [Serializable]
   public class ValidationException : ServerException
   {
-    internal ValidationException(ElementFactory factory, string message
+    internal ValidationException(string message
       , IReadOnlyItem item, params string[] properties)
-      : base(factory, message, properties.Any() ? 1001 : 1)
+      : base(message, properties.Any() ? 1001 : 1)
     {
       CreateDetailElement(item, properties);
     }
-    internal ValidationException(ElementFactory factory, string message, Exception innerException
+    internal ValidationException(string message, Exception innerException
       , IReadOnlyItem item, params string[] properties)
-      : base(factory, message, properties.Any() ? 1001 : 1, innerException)
+      : base(message, properties.Any() ? 1001 : 1, innerException)
     {
       CreateDetailElement(item, properties);
     }
     public ValidationException(SerializationInfo info, StreamingContext context)
       : base(info, context) { }
-    internal ValidationException(ElementFactory factory, XmlElement node) : base(factory, node) { }
+    internal ValidationException(Element fault) : base(fault) { }
 
-    private XmlElement CreateDetailElement(IReadOnlyItem item, params string[] properties)
+    private IElement CreateDetailElement(IReadOnlyItem item, params string[] properties)
     {
-      if (item != null)
+      var detail = _fault.ElementByName("detail");
+      detail.Add(new AmlElement(_fault.AmlContext, "item"
+        , new Attribute("type", item.Type().Value)
+        , new Attribute("id", item.Id())));
+      if (properties.Any())
       {
-        var detail = _faultNode.Elem("detail");
-        detail.Elem("item").Attr("type", item.Type().Value).Attr("id", item.Id());
-        if (properties.Any())
+        var props = new AmlElement(_fault.AmlContext, "properties");
+        foreach (var prop in properties)
         {
-          var props = detail.Elem("properties");
-          foreach (var prop in properties)
-          {
-            props.Elem("property", prop);
-          }
+          props.Add(new AmlElement(_fault.AmlContext, "property", prop));
         }
-        return detail;
+        detail.Add(props);
       }
-      return null;
+      return detail;
     }
   }
 }

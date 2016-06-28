@@ -9,9 +9,7 @@ namespace Innovator.Client
   public interface IAmlDeserializer
   {
     IResult FromXml(XmlReader xml);
-    IResult FromXml(XmlNode xml);
     IReadOnlyResult FromXml(XmlReader xml, string query, string database);
-    IReadOnlyResult FromXml(XmlNode xml, string query, string database);
     void SetDefault(IAmlDeserializer defaultImpl);
   }
 }

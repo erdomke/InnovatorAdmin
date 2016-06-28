@@ -1,108 +1,23 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Innovator.Client;
 
-namespace Innovator.Client.Tests
+namespace PerfTests
 {
-  [TestClass()]
-  public class ItemTests
+  class Program
   {
-    [TestMethod()]
-    public void PropertySetWithNullableData()
+    static void Main(string[] args)
     {
-      var aml = ElementFactory.Local;
-      var item = aml.Item(aml.Type("Stuff"), aml.Action("edit"));
-      DateTime? someDate = null;
-      DateTime? someDate2 = new DateTime(2016, 01, 01);
-      item.Property("some_date").Set(someDate);
-      item.Property("some_date_2").Set(someDate2);
-      Assert.AreEqual("<Item action=\"edit\" type=\"Stuff\"><some_date is_null=\"1\" /><some_date_2>2016-01-01T00:00:00</some_date_2></Item>", item.ToAml());
+      for (var i = 0; i < 100; i++)
+      {
+        ElementFactory.Local.FromXml(_itemTypeAml);
+      }
     }
 
-    [TestMethod()]
-    public void UtcDateConversion()
-    {
-      var aml = ElementFactory.Local;
-      var item = aml.Item(aml.Type("stuff"), aml.Property("created_on", "2016-05-24T13:22:42"));
-      var localDate = item.CreatedOn().AsDateTime().Value;
-      var utcDate = item.CreatedOn().AsDateTimeUtc().Value;
-      Assert.AreEqual(DateTime.Parse("2016-05-24T13:22:42"), localDate);
-      Assert.AreEqual(DateTime.Parse("2016-05-24T17:22:42"), utcDate);
-    }
-    [TestMethod()]
-    public void PropertyItemExtraction()
-    {
-      var aml = ElementFactory.Local;
-      var result = aml.FromXml("<Item type='thing' id='1234'><item_prop type='another' keyed_name='stuff'>12345ABCDE12345612345ABCDE123456</item_prop></Item>");
-      var propItem = result.AssertItem().Property("item_prop").AsItem().ToAml();
-      Assert.AreEqual("<Item id=\"12345ABCDE12345612345ABCDE123456\" type=\"another\"><id keyed_name=\"stuff\" type=\"another\">12345ABCDE12345612345ABCDE123456</id><keyed_name>stuff</keyed_name></Item>", propItem);
-    }
-    [TestMethod()]
-    public void AmlFromArray()
-    {
-      var aml = ElementFactory.Local;
-      IEnumerable<object> parts = new object[] { aml.Type("stuff"), aml.Attribute("keyed_name", "thingy"), "12345ABCDE12345612345ABCDE123456" };
-      var item = aml.Item(aml.Type("Random Thing"),
-        aml.Property("item_ref", parts)
-      );
-      Assert.AreEqual("<Item type=\"Random Thing\"><item_ref keyed_name=\"thingy\" type=\"stuff\">12345ABCDE12345612345ABCDE123456</item_ref></Item>", item.ToAml());
-    }
-
-    [TestMethod()]
-    public void CloneTest()
-    {
-      var itemAml = @"<SOAP-ENV:Envelope xmlns:SOAP-ENV=""http://schemas.xmlsoap.org/soap/envelope/"">
-  <SOAP-ENV:Body>
-    <Result>
-      <Item type=""ItemType"" typeId=""450906E86E304F55A34B3C0D65C097EA"" id=""F0834BBA6FB64394B78DF5BB725532DD"">
-        <created_by_id keyed_name=""_Super User"" type=""User"">
-          <Item type=""User"" typeId=""45E899CD2859442982EB22BB2DF683E5"" id=""AD30A6D8D3B642F5A2AFED1A4B02BEFA"">
-            <id keyed_name=""_Super User"" type=""User"">AD30A6D8D3B642F5A2AFED1A4B02BEFA</id>
-            <first_name>_Super</first_name>
-            <itemtype>45E899CD2859442982EB22BB2DF683E5</itemtype>
-          </Item>
-        </created_by_id>
-        <id keyed_name=""Report"" type=""ItemType"">F0834BBA6FB64394B78DF5BB725532DD</id>
-        <label xml:lang=""en"">Report</label>
-      </Item>
-    </Result>
-  </SOAP-ENV:Body>
-</SOAP-ENV:Envelope>";
-      var item = ElementFactory.Local.FromXml(itemAml).AssertItem();
-      var clone = item.Clone();
-      var cloneAml = clone.ToAml();
-      var expected = @"<Item id=""F0834BBA6FB64394B78DF5BB725532DD"" type=""ItemType"" typeId=""450906E86E304F55A34B3C0D65C097EA""><created_by_id keyed_name=""_Super User"" type=""User""><Item id=""AD30A6D8D3B642F5A2AFED1A4B02BEFA"" type=""User"" typeId=""45E899CD2859442982EB22BB2DF683E5""><first_name>_Super</first_name><id keyed_name=""_Super User"" type=""User"">AD30A6D8D3B642F5A2AFED1A4B02BEFA</id><itemtype>45E899CD2859442982EB22BB2DF683E5</itemtype></Item></created_by_id><id keyed_name=""Report"" type=""ItemType"">F0834BBA6FB64394B78DF5BB725532DD</id><label xml:lang=""en"">Report</label></Item>";
-      Assert.AreEqual(expected, cloneAml);
-    }
-
-    [TestMethod()]
-    public void PerformanceTest()
-    {
-      Assert.AreEqual(99, ElementFactory.Local.FromXml(_itemTypeAml).Items().Count());
-    }
-
-    [TestMethod()]
-    public void PerformanceTest_Benchmark()
-    {
-      var doc = new System.Xml.XmlDocument();
-      doc.LoadXml(_itemTypeAml);
-      Assert.AreEqual(1, 1);
-    }
-
-    [TestMethod()]
-    public void PerformanceTest_Benchmark2()
-    {
-      var container = new System.Xml.Linq.XElement("Test");
-      var writer = container.CreateWriter();
-      var reader = System.Xml.XmlReader.Create(new System.IO.StringReader(_itemTypeAml));
-      writer.WriteNode(reader, false);
-      Assert.AreEqual(1, 1);
-    }
-
-    private string _itemTypeAml = @"<SOAP-ENV:Envelope xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
+    private static string _itemTypeAml = @"<SOAP-ENV:Envelope xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
   <SOAP-ENV:Body>
     <Result>
       <Item type='ItemType' typeId='450906E86E304F55A34B3C0D65C097EA' id='AEFCD3D2DC1D4E3EA126D49D68041EB6'>

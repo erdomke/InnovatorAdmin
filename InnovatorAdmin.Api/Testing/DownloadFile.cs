@@ -52,7 +52,7 @@ namespace InnovatorAdmin.Testing
       }
       catch (ServerException se)
       {
-        context.LastResult = XElement.Parse(se.AsAmlString());
+        context.LastResult = se.ToXml();
       }
     }
 

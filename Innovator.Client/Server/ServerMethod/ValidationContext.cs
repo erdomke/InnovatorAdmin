@@ -98,8 +98,8 @@ namespace Innovator.Server
       if (this.IsNew)
       {
         var item = _changes as Item;
-        if (item == null) return Property.NullProperty;
-        return Conn.AmlContext.PropertyTemplate(name, null, item.Node);
+        if (item == null) return Property.NullProp;
+        return item.Property(name);
       }
 
       return _existing.Property(name);

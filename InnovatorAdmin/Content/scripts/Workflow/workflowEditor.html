@@ -1,0 +1,801 @@
+﻿<!DOCTYPE html>
+<!-- (c) Copyright by Aras Corporation, 2004-2013. -->
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		@import "../../javascript/dojo/resources/dojo.css";
+		@import "../../javascript/dijit/themes/claro/claro.css";
+		@import "../../javascript/include.aspx?classes=common.css";
+
+		html, body {
+			overflow: hidden;
+			width: 100%;
+			height: 100%;
+			margin: 0px;
+			padding: 0px;
+		}
+	</style>
+	<script type="text/javascript" src="../../javascript/include.aspx?classes=/dojo.js" data-dojo-config="isDebug: false, parseOnLoad: false, baseUrl:'../../javascript/dojo'"></script>
+	<script type="text/javascript" src="../../javascript/include.aspx?classes=XmlDocument"></script>
+	<script type="text/javascript">
+		var aras = parent.aras;
+		var workflowApplet = null;
+
+		var currentForm = "";   //  path, map, activity
+		var lastSelectedActivityID = "";
+		var lastSelectedPathID = "";
+		var lastSelectedActivityNd = null;
+		var lastSelectedPathNd = null;
+
+		var selectedNodeID = "";
+		var selectedNode = null;
+
+		var contextMenu = [
+			{ id: "Add Activity", name: aras.getResource("", "workfloweditor.cntxt_menu.add_act"), onClick: AddActivity },
+			{ id: "Remove Activity", name: aras.getResource("", "workfloweditor.cntxt_menu.remove_act"), onClick: RemoveActivity },
+			{ id: "Add Path", name: aras.getResource("", "workfloweditor.cntxt_menu.add_path"),
+				onClick: function (args) {
+					workflowApplet.transitions.startAdd(args.id);
+				}
+			},
+			{ id: "Remove Path", name: aras.getResource("", "workfloweditor.cntxt_menu.remove_path"), onClick: RemovePath },
+			{ id: "Insert Activity", name: aras.getResource("", "workfloweditor.cntxt_menu.insert_act"), onClick: InsertActivity },
+			{ id: "Add Break", name: aras.getResource("", "common.cntxt_menu.add_break"), onClick: function (args) { HandleBreak('add', args.id, args.location.x, args.location.y); } },
+			{ id: "Remove Break", name: aras.getResource("", "common.cntxt_menu.remove_break"), onClick: function (args) { HandleBreak('remove', args.id, args.location.x, args.location.y); } },
+			{ separator: true },
+			{ id: "Properties", name: aras.getResource("", "workfloweditor.cntxt_menu.props"),
+				onClick: function (args) {
+					var isNode = workflowApplet.nodes.is(args.id);
+					return isNode ? PropertyActivity(args.id) : PropertyPath(args.id)
+				}
+			}
+		];
+
+		clientControlsFactory.createControl("Aras.Client.Controls.Experimental.Workflow", "workflow", function(control) {
+			workflowApplet = control;
+
+			clientControlsFactory.on(workflowApplet, {
+				"onClick": onClick,
+				"onMenuInit": onMenuShow,
+				"onDrop": onDrop
+			});
+			clientControlsFactory.on(workflowApplet.transitions, {
+				"endAdd": addNewTransition
+			});
+			workflowApplet.contextMenu.addRange(contextMenu);
+			populateWorkflow();
+		});
+
+		function getPathNdFromId(pathId){
+			return parent.currWFNode.selectSingleNode('Relationships/Item[@type="Workflow Map Activity"]/' +
+				'related_id/Item[not(@action) or (@action!="delete" and @action!="purge")]/' +
+				'Relationships/Item[@type="Workflow Map Path" and @id="' + pathId + '" and ' +
+				'(not(@action) or (@action!="delete" and @action!="purge"))]');
+		}
+
+		function populateWorkflow(){
+			parent.setFlag('editorFReady', false);
+			var wfXML = '<Process nodeSize="25" nodeBGColor="#FFFFFF">';
+			wfXML += '<Menu default="yes"/>';
+			var tmpDom = aras.createXMLDocument();
+			var tmpNode;
+
+			var workflowMap = parent.currWFNode;
+			var activities = workflowMap.selectNodes('Relationships/Item[@type="Workflow Map Activity"]/' +
+				'related_id/Item[not(@action) or (@action!="delete" and @action!="purge")]');
+			var startActivityID = workflowMap.selectSingleNode('Relationships/Item[@type="Workflow Map Activity"]/' +
+				'related_id/Item[name="START"]/@id');
+			if (startActivityID) startActivityID = startActivityID.text;
+			else startActivityID = "";
+
+			if (!lastSelectedActivityNd){
+				if (startActivityID)
+					lastSelectedActivityNd = workflowMap.selectSingleNode('Relationships/Item[@type="Workflow Map Activity"]/related_id/' +
+						'Item[name="START" and @id="' + startActivityID + '"]');
+
+				if (!lastSelectedActivityNd) {
+					lastSelectedActivityNd = activities[0];
+				}
+
+				lastSelectedActivityID = lastSelectedActivityNd.getAttribute("id");
+			}
+			else{
+				lastSelectedActivityNd = workflowMap.selectSingleNode('Relationships/Item[@type="Workflow Map Activity"]/related_id/' +
+					'Item[name="START" and @id="' + lastSelectedActivityID + '"]');
+			}
+
+			// Loop through Activities - building control friendly XML
+			var i, wfActivity, wfActivityImg;
+			with (aras) for (i = 0; i < activities.length; i++){
+				wfActivity = activities[i];
+
+				wfActivityImg = getNodeElement(wfActivity, "icon");
+				if (wfActivityImg != ""){
+					tmpNode = tmpDom.createElement("img");
+					tmpNode.setAttribute("id", wfActivityImg);
+					tmpNode.setAttribute("src", wfActivityImg);
+					wfXML += tmpNode.xml;
+				}
+
+				var wfActivityID = wfActivity.getAttribute("id");
+				tmpNode = tmpDom.createElement("Node");
+				tmpNode.setAttribute("id", wfActivityID);
+
+				var actName = getNodeElement(wfActivity, "label");
+				if (actName == ""){
+					actName = getNodeElement(wfActivity, 'name');
+				}
+
+				tmpNode.setAttribute("name", actName);
+				tmpNode.setAttribute("id", getNodeElement(wfActivity, "id"));
+				tmpNode.setAttribute("x", getNodeElement(wfActivity, "x"));
+				tmpNode.setAttribute("y", getNodeElement(wfActivity, "y"));
+				if (wfActivityImg != "") tmpNode.setAttribute("img", wfActivityImg);
+				if (startActivityID == wfActivityID) tmpNode.setAttribute('label2', 'start');
+				wfXML += tmpNode.xml;
+			}
+
+			// Loop through Activities again - fetching the PATHS each time - to add to the Applet XML
+			var paths = workflowMap.selectNodes('Relationships/Item[@type="Workflow Map Activity"]/' +
+				'related_id/Item[not(@action) or (@action!="delete" and @action!="purge")]/' +
+				'Relationships/Item[@type="Workflow Map Path" and ' +
+				'(not(@action) or (@action!="delete" and @action!="purge"))]');
+
+			if (paths.length > 0 && !lastSelectedPathNd){
+				if (startActivityID)
+					lastSelectedPathNd = workflowMap.selectSingleNode('Relationships/Item[@type="Workflow Map Activity"]/' +
+						'related_id/Item[@id="' + startActivityID + '"]/' +
+						'Relationships/Item[@type="Workflow Map Path" and ' +
+						'(not(@action) or (@action!="delete" and @action!="purge"))]');
+
+				if (!lastSelectedPathNd){
+					lastSelectedPathNd = paths[0];
+				}
+				lastSelectedPathID = lastSelectedPathNd.getAttribute("id");
+			}
+			else{
+				lastSelectedPathNd = getPathNdFromId(lastSelectedPathID);
+			}
+
+			var path, pathID, pathName, nameX, nameY, segments;
+			with (aras) for (i = 0; i < paths.length; i++){
+				path = paths[i];
+
+				pathName = getNodeElement(path, 'label');
+				if (pathName == ""){
+					pathName = getNodeElement(path, 'name');
+				}
+
+				pathID = path.getAttribute('id');
+				segments = getNodeElement(path, 'segments');
+
+				var fromActivityId = aras.getItemProperty(path, "source_id");
+				var toActivityId = aras.getItemProperty(path, "related_id");
+				//+++ this code is here because of backward compatibility
+				//to remove this code whole editor must be analyzed and tested
+				path.selectSingleNode("related_id").text = toActivityId;
+				//--- this code is here because of backward compatibility
+
+				tmpNode = tmpDom.createElement('Transition');
+				tmpNode.setAttribute('sourceNode', fromActivityId);
+				tmpNode.setAttribute('destinationNode', toActivityId);
+				tmpNode.setAttribute('id', pathID);
+				tmpNode.setAttribute('name', pathName);
+				tmpNode.setAttribute('nameX', getNodeElement(path, 'x'));
+				tmpNode.setAttribute('nameY', getNodeElement(path, 'y'));
+
+				if (segments != ''){
+					segments = segments.split('|');
+					for (var j = 0; j < segments.length; j++){
+						var segment = segments[j].split(',');
+						var tmpNode2 = tmpDom.createElement('Segment');
+						tmpNode2.setAttribute('x', segment[0]);
+						tmpNode2.setAttribute('y', segment[1]);
+						tmpNode.appendChild(tmpNode2);
+					}
+				}
+
+				wfXML += tmpNode.xml;
+			}
+
+			wfXML += '</Process>';
+			var rels = workflowMap.selectSingleNode('Relationships');
+			if (!rels){
+				workflowMap.appendChild(workflowMap.ownerDocument.createElement('Relationships'));
+			}
+
+			workflowApplet.load(wfXML);
+			showWorkflowMap(true);
+			parent.setFlag("editorFReady", true);
+		}
+
+		function onNameEdit(mode, item, saveChanges){
+			if (!parent.isEditMode) return false;
+
+			if (saveChanges == undefined) saveChanges = false;
+
+			var isNode = item.isNode();
+
+			if (mode == 0){
+				if (isNode && item.getLabel2() == 'start') return false;
+				else return true;
+			}
+			if (mode == 2){
+				var nodeID = item.getId();
+
+				var node;
+				if (isNode) node = parent.currWFNode.selectSingleNode('Relationships/Item/related_id/Item[@id="' + nodeID + '"]');
+				else node = getPathNdFromId(nodeID);
+
+				if (!node) return false;
+
+				if (saveChanges){
+					var name = item.getName();
+					aras.setNodeElementWithAction(node, 'name', name);
+
+					with (parent.frames['forms'])
+						aras.uiPopulateFormWithItemEx(document.forms.MainDataForm, node, document.itemType, true);
+				}
+				else item.setName(aras.getNodeElement(node, 'name'));
+			}
+		}
+
+		function onMenuShow(id, location, isBreak){
+			workflowApplet.set("showMenu", parent.isEditMode);
+			if (!parent.isEditMode) {
+				return false;
+			}
+
+			var menu = workflowApplet.contextMenu,
+				hideActivityCmd = !workflowApplet.nodes.is(id),
+				hideTransitionCmd = !workflowApplet.transitions.is(id);
+
+			menu.setHide('Add Activity', !(hideActivityCmd && hideTransitionCmd));
+			menu.setHide('Remove Activity', hideActivityCmd);
+			menu.setHide('Add Path', hideActivityCmd);
+			menu.setHide('Properties', hideActivityCmd && hideTransitionCmd);
+			menu.setHide('Remove Path', hideTransitionCmd);
+			menu.setHide('Insert Activity', hideTransitionCmd);
+			menu.setHide('Add Break', hideTransitionCmd);
+			menu.setHide('Remove Break', !isBreak);
+		}
+
+		var wfNd = parent.currWFNode;
+		function handleActivityChange(propNm, propVal, activityID){
+			if (wfNd.getAttribute("isDirty") != "1"){
+				wfNd.setAttribute("isDirty", "1");
+
+				var actionType = wfNd.getAttribute("action");
+				if ((actionType != "add") && (actionType != "create")){
+					wfNd.setAttribute("action", "edit");
+				}
+			}
+
+			if (propNm == "name" || propNm == "icon"){
+				if (lastSelectedActivityID){
+					workflowApplet.nodes.set(lastSelectedActivityID, propNm == "name" ? "label" : "img", propVal);
+				}
+			}
+			var mainWnd = aras.getMostTopWindowWithAras(window);
+			if (mainWnd.updateItemsGrid) {
+				mainWnd.updateItemsGrid(wfNd);
+			}
+		}
+
+		function handlePathChange(propNm, propVal, pathID){
+			if (wfNd.getAttribute("isDirty") != "1"){
+				wfNd.setAttribute("isDirty", "1");
+
+				var actionType = wfNd.getAttribute("action");
+				if ((actionType != "add") && (actionType != "create")){
+					wfNd.setAttribute("action", "edit");
+				}
+			}
+
+			if (propNm == "name") with (parent.getFrameWindow("editor")){
+				var flg = pathID && (typeof (pathID) != "boolean");
+				var path = flg ? pathID : lastSelectedPathID;
+
+				if (path){
+					workflowApplet.transitions.set(path, "label", propVal);
+				}
+			}
+			var mainWnd = aras.getMostTopWindowWithAras(window);
+			if (mainWnd.updateItemsGrid) {
+				mainWnd.updateItemsGrid(wfNd);
+			}
+		}
+
+		function addNewTransition(n){
+			var toNodeID = n.destination;
+			var fromNodeID = n.source;
+
+			parent.setFlag('editorFReady', false);
+
+			var fromNd = parent.currWFNode.selectSingleNode('Relationships/Item[@type="Workflow Map Activity"]/' +
+				'related_id/Item[@id="' + fromNodeID + '"]');
+			var toNd = parent.currWFNode.selectSingleNode('Relationships/Item[@type="Workflow Map Activity"]/' +
+				'related_id/Item[@id="' + toNodeID + '"]');
+
+			var newPath = aras.newRelationship(parent.path_id_const, fromNd, false);
+			parent.setFlag('editorFReady', true);
+			if (!newPath)
+				return false;
+
+			with (aras){
+				setNodeElement(newPath, 'name', '[none]');
+				setNodeElement(newPath, 'source_id', fromNd.getAttribute("id"));
+				setNodeElement(newPath, 'related_id', toNd.getAttribute("id"));
+				setNodeElement(newPath, "x", 0);
+				setNodeElement(newPath, "y", 0);
+			}
+
+			var tr = {
+				uniqueId: newPath.getAttribute('id'),
+				label: '[none]',
+				source: fromNodeID,
+				destination: toNodeID
+			};
+
+			workflowApplet.transitions.add(tr);
+			workflowApplet.transitions.select(tr.uniqueId, true);
+			showTransition(tr.uniqueId);
+		}
+
+		function showWorkflowMap( forceRefresh ){
+			selectedNodeID = "";
+			selectedNode = null;
+			if (forceRefresh || currentForm != "map"){
+				parent.showItemForm("Workflow Map", (parent.isEditMode ? "edit" : "view"), parent.currWFNode);
+				currentForm = "map";
+
+				var tabsFrame = parent.getFrameWindow("tabs");
+				if (forceRefresh){
+					tabsFrame.location.href = aras.getScriptsURL() + 'workflow/workflowRelationships.html?db=' + aras.getDatabase() +
+						'&ITName=Workflow Map&itemID=' + parent.currWFID + '&editMode=' + (parent.isEditMode ? 1 : 0) + '&tabbar=1&toolbar=1&where=workflowtool';
+					var mainWnd = aras.getMostTopWindowWithAras(window);
+					if (mainWnd.DragDropHelper) {
+						mainWnd.DragDropHelper.disableDnD(tabsFrame);
+					}
+				}
+				else{
+					tabsFrame.showTabbar("Workflow Map", parent.currWFID);
+				}
+				workflowApplet.unselectAll();
+			}
+		}
+
+		function showActivity(id, forceRefresh){
+			if (!forceRefresh && selectedNodeID == id && currentForm == "activity")
+				return;
+
+			selectedNodeID = id;
+			selectedNode = parent.currWFNode.selectSingleNode('Relationships/Item[@type="Workflow Map Activity"]/' +
+				'related_id/Item[@id="' + selectedNodeID + '"]');
+
+			if (selectedNode){
+				lastSelectedActivityID = selectedNodeID;
+				lastSelectedActivityNd = selectedNode;
+
+				//show activity form and attach changeHandler
+				parent.showItemForm("Activity Template", (parent.isEditMode ? "edit" : "view"), selectedNode, null, handleActivityChange);
+				currentForm = "activity";
+
+				parent.getFrameWindow("tabs").showTabbar("Activity Template", lastSelectedActivityID);
+			} 
+			else{
+				showWorkflowMap();
+			}
+		}
+
+		function replaceUserChangeHandler(newHandler){
+			parent.document.getElementById("forms").addEventListener("load",  function (){ 
+				parent.document.getElementById('forms').contentWindow.document.userChangeHandler = newHandler;
+			}, false);
+		}
+
+		function showTransition(id, event, forceRefresh){
+			if (parent.isEditMode && event && event.ctrlKey){
+				HandleBreak('add', id, event.clientX, event.clientY);
+			}
+
+			if (!forceRefresh && selectedNodeID == id && currentForm == "path")
+				return;
+
+			selectedNodeID = id;
+			selectedNode = getPathNdFromId(selectedNodeID);
+			if (selectedNode){
+				lastSelectedPathID = selectedNodeID;
+				lastSelectedPathNd = selectedNode;
+
+				//show transition form and attach changeHandler
+				parent.showItemForm("Workflow Map Path", (parent.isEditMode ? "edit" : "view"), selectedNode, null, handlePathChange);
+				currentForm = "path";
+
+				parent.getFrameWindow("tabs").showTabbar("Workflow Map Path", lastSelectedPathID);
+			}
+			else{
+				showWorkflowMap();
+			}
+		}
+
+		function onClick(id, event){
+			var isActivity = workflowApplet.nodes.is(id);
+			var isTransition = workflowApplet.transitions.is(id);
+
+			blurPropertiesFrame();
+			if (isActivity || isTransition){
+				isActivity ? showActivity(id) : showTransition(id, event);
+			} else{
+				showWorkflowMap();
+			}
+			if(event && (isActivity || isTransition)){
+				event.preventDefault();
+				event.stopPropagation();
+			}
+		}
+
+		// Synchronization of "Properties" window with 
+		var Synchronizers = new Object();
+		// Constructor
+		function Synchronizer(relID, win, syncInterval){
+			this.relID = relID;
+			this.win = win;
+			syncInterval = syncInterval || 1000;
+
+			Synchronizers[relID] = this;
+			this.interval = setInterval('if (Synchronizers["' + relID + '"] && Synchronizers["' + relID + '"].updateData) Synchronizers["' + relID + '"].updateData();', syncInterval);
+		}
+
+		function updateName(){
+			if (selectedNode) {
+				var isNode = workflowApplet.nodes.is(selectedNodeID),
+					nameItem = isNode ? workflowApplet.nodes.get(selectedNodeID, "label") : workflowApplet.transitions.get(selectedNodeID, "label"),
+					nameNode = aras.getNodeElement(selectedNode, "name");
+
+				if (nameNode !== nameItem) {
+					isNode ? workflowApplet.nodes.set(selectedNodeID, "label", nameNode) : workflowApplet.transitions.set(selectedNodeID, "label", nameNode);
+				}
+			}
+		}
+
+		Synchronizer.prototype.updateData = function(){
+			if (aras.isWindowClosed(this.win)){
+				clearInterval(this.interval);
+				aras.deletePropertyFromObject(Synchronizers,this.relID);
+			}
+
+			updateName();
+		}
+
+		// command handlers
+		function AddActivity(args){
+			parent.setFlag("editorFReady", false);
+			var newWFActivity = aras.newRelationship(parent.activity_id_const, parent.currWFNode, false);
+			parent.setFlag("editorFReady", true);
+			if (!newWFActivity) return false;
+			newWFActivity = newWFActivity.selectSingleNode("related_id/Item");
+			if (!newWFActivity) return false;
+
+			var id = newWFActivity.getAttribute("id");
+			var obj = {
+				uniqueId: id,
+				label: aras.getResource("", "workfloweditor.new_activity"),
+				x: float2Int(args.location.x),
+				y: float2Int(args.location.y),
+				img: '../images/WorkflowNode.svg'
+			};
+
+			aras.setNodeElement(newWFActivity, "name", obj.label);
+			aras.setNodeElement(newWFActivity, "icon", obj.img);
+			aras.setNodeElement(newWFActivity, "x", obj.x);
+			aras.setNodeElement(newWFActivity, "y", obj.y);
+
+			workflowApplet.nodes.add(obj);
+			workflowApplet.nodes.select(id, true);
+			showActivity(id);
+		}
+
+		function RemoveActivity(args){
+			var curID = args.id;
+			var links = workflowApplet.nodes.get(curID, "link");
+
+			if (links.length){
+				aras.AlertError(aras.getResource("", "workfloweditor.remove_dependent_paths"));
+				onClick(curID);
+				return;
+			}
+
+			//todo: implement "start" validation
+			/*
+		if (node.getLabel2() == 'start'){
+			aras.AlertError(aras.getResource("", "workfloweditor.cannot_remove_start_act"));
+			onClick(node);
+			return;
+		}
+		*/
+
+			var activityNd = parent.currWFNode.selectSingleNode('Relationships/' +
+				'Item[@type="Workflow Map Activity"]/related_id/Item[@id="' + curID + '"]');
+			if (!activityNd) return false;
+
+			var wfActivityNd = activityNd.parentNode.parentNode;
+
+			if (aras.isTempEx(activityNd)) activityNd.parentNode.removeChild(activityNd);
+			else activityNd.setAttribute('action', 'delete');
+
+			if (aras.isTempEx(wfActivityNd)) wfActivityNd.parentNode.removeChild(wfActivityNd);
+			else wfActivityNd.setAttribute('action', 'delete');
+
+			if (!aras.isTempEx(parent.currWFNode))
+				parent.currWFNode.setAttribute('isDirty', '1');
+
+			workflowApplet.nodes.remove(curID);
+			if (curID == lastSelectedActivityID){
+				lastSelectedActivityID = '';
+				lastSelectedActivityNd = null;
+			}
+
+			if (curID == selectedNodeID){
+				selectedNodeID = '';
+				selectedNode = null;
+				with (parent) if (getFrameWindow('tabs').currTabID == 'Activity')
+					getFrameWindow('forms').location.replace(emptyPage);
+			}
+			showWorkflowMap();
+		}
+
+		function RemovePath(args){
+			var curID = args.id;
+			var pathNd = getPathNdFromId(curID);
+
+			if (pathNd.getAttribute("isTemp") == "1") pathNd.parentNode.removeChild(pathNd);
+			else pathNd.setAttribute("action", "delete");
+
+			if (!aras.isTempEx(parent.currWFNode))
+				parent.currWFNode.setAttribute("isDirty", "1");
+
+			workflowApplet.transitions.remove(curID);
+			if (curID == lastSelectedPathID){
+				lastSelectedPathID = "";
+				lastSelectedPathNd = null;
+			}
+
+			if (curID == selectedNodeID){
+				selectedNodeID = "";
+				selectedNode = null;
+			}
+			showWorkflowMap();
+		}
+
+		function InsertActivity(args){
+			var curPathID = args.id;
+			var curPath = getPathNdFromId(curPathID);
+			var destNodeId = workflowApplet.transitions.get(curPathID, "destination");
+
+			parent.setFlag("editorFReady", false);
+			var newWFActivity = aras.newRelationship(parent.activity_id_const, parent.currWFNode, false);
+			parent.setFlag("editorFReady", true);
+			if (!newWFActivity) return false;
+			newWFActivity = newWFActivity.selectSingleNode("related_id/Item");
+			if (!newWFActivity) return false;
+			var newWFActivityID = newWFActivity.getAttribute("id");
+
+			var node = {
+				uniqueId: newWFActivityID,
+				label: aras.getResource("", "workfloweditor.new_activity"),
+				x: float2Int(args.location.x),
+				y: float2Int(args.location.y),
+				img: '../images/WorkflowNode.svg'
+			};
+
+			with (aras){
+				setNodeElement(newWFActivity, "name", node.label);
+				setNodeElement(newWFActivity, "icon", node.img);
+				setNodeElement(newWFActivity, "x", node.x);
+				setNodeElement(newWFActivity, "y", node.y);
+				setNodeElement(curPath, "related_id", newWFActivityID);
+			}
+
+			var pathAction = curPath.getAttribute("action");
+			if ((pathAction != "add") && (pathAction != "create")) 
+				curPath.setAttribute("action", "edit");
+
+			workflowApplet.nodes.add(node);
+			workflowApplet.transitions.set(curPathID, "destination", newWFActivityID);
+
+			var fromNd = newWFActivity;
+			var newPath = aras.newRelationship(parent.path_id_const, fromNd, false);
+
+			if (!newPath) return false;
+
+			with (aras){
+				setNodeElement(newPath, "related_id", destNodeId);
+				setNodeElement(newPath, "source_id", fromNd.getAttribute("id"));
+				setNodeElement(newPath, "name", aras.getResource("", "workfloweditor._none_"));
+			}
+
+			workflowApplet.transitions.add({
+				uniqueId: newPath.getAttribute("id"),
+				source: newWFActivityID,
+				label: aras.getResource("", "workfloweditor._none_"),
+				destination: destNodeId
+			});
+
+			showActivity(newWFActivityID);
+		}
+
+		function float2Int(floatValue) {
+			return floatValue | 0;
+		}
+
+		function HandleBreak(action, tranID, pX, pY) {
+			workflowApplet.transitions[action+'Break'](tranID, pX, pY);
+			var segments = workflowApplet.transitions.get(tranID, "segments"),
+				curNode = getPathNdFromId(tranID),
+				res = segments.length ? (float2Int(segments[0].x) + "," + float2Int(segments[0].y)) : "";
+			for (var i = 1, l = segments.length; i < l; i++) {
+				res += "|" + float2Int(segments[i].x) + "," + float2Int(segments[i].y);
+			}
+			aras.setNodeElementWithAction(curNode, 'segments', res);
+		}
+
+		function PropertyActivity(activityId) {
+			onClick(activityId);
+
+			selectedNodeID = activityId;
+			selectedNode = parent.currWFNode.selectSingleNode('Relationships/Item[@type="Workflow Map Activity"]/' + 'related_id/Item[@id="' + selectedNodeID + '"]');
+
+			// Global setup of vars
+			lastSelectedActivityID = selectedNodeID;
+			lastSelectedActivityNd = selectedNode;
+
+			// get type name
+			var TypeName = lastSelectedActivityNd.getAttribute('type');
+			if (!TypeName) return;
+
+			// Show modal Form
+			var params = {
+				writeContent: writeContent,
+				aras: aras,
+				callback: function () {
+					aras.uiShowItemInFrameEx(parent.getFrameWindow('forms'), lastSelectedActivityNd, (parent.isEditMode ? 'edit' : 'view'));
+					currentForm = "activity";
+					updateName();
+				}
+			}
+			var options = {
+				dialogWidth: 850,
+				dialogHeight: 550,
+				resizable: true
+			};
+			var win = aras.getMostTopWindowWithAras(window);
+			aras.modalDialogHelper.show("DefaultPopup", win.main || win, params, options, "modalDialog.html");
+		}
+
+		function PropertyPath(pathId){
+			onClick(pathId);
+			// Selected node ID
+			selectedNodeID = pathId;
+			if (selectedNodeID == null) return;
+
+			// map only
+			//if (currentForm =="path") return;
+
+			// selected XML node
+			selectedNode = getPathNdFromId(pathId);
+
+			if (selectedNode == null) return;
+
+			// Global setup of vars
+			lastSelectedActivityID = selectedNodeID;
+			lastSelectedActivityNd = selectedNode;
+
+			// asserting
+			if (!aras) return;
+
+			// get type name
+			var TypeName = lastSelectedActivityNd.getAttribute('type');
+			if (!TypeName) return;
+			// Show form      
+			// aras.uiShowItem(  TypeName , lastSelectedActivityID, 'tab view', true);
+			// aras.uiShowItemEx(  lastSelectedActivityNd, 'tab view', true);
+			var params = {
+				writeContent: writeContent,
+				aras: aras,
+				callback: function () {
+					aras.uiShowItemInFrameEx(parent.getFrameWindow('forms'), lastSelectedActivityNd, (parent.isEditMode ? 'edit' : 'view'));
+					currentForm = "path";
+					updateName();
+				}
+			};
+			var options = {
+				dialogWidth: 750,
+				dialogHeight: 550,
+				resizable: true
+			};
+			var win = aras.getMostTopWindowWithAras(window);
+			aras.modalDialogHelper.show("DefaultPopup", win.main || win, params, options, "modalDialog.html");
+		}
+
+		function blurPropertiesFrame(){
+			var visibleForm = parent.getVisibleItemForm();
+			if(visibleForm && visibleForm.formContentLoaded){
+				var activeField = visibleForm.contentDocument.activeElement;
+				if( activeField && ["input", "select", "textarea"].indexOf(activeField.tagName.toLowerCase()) > -1) {
+					activeField.blur();
+				}
+			}
+		}
+
+		function onDrop(id){
+			//if user has dropped not current selectedNode, then selectedNode will be changed to node with "id"
+			var isNode = workflowApplet.nodes.is(id);
+			if (selectedNodeID != id) {
+				blurPropertiesFrame();
+				isNode ? showActivity(id) : showTransition(id);
+			}
+
+			if(selectedNode){
+				if (parent.isEditMode) {
+					// in old version here was a check on "action"=create, may be it must be returned back, and action "edit" instead of "update"
+					if (selectedNode.getAttribute("action") != "add") {
+						selectedNode.setAttribute("action", "update");
+					}
+
+					var point;
+					if (isNode) {
+						point = workflowApplet.nodes.get(id, "XY");
+					}
+					else {
+						point = workflowApplet.transitions.get(id, "labelXY");
+						var segments = workflowApplet.transitions.get(id, "segments"),
+							res = segments.length ? (float2Int(segments[0].x) + "," + float2Int(segments[0].y)) : "";
+
+						for (var i = 1, l = segments.length; i < l; i++) {
+							res += "|" + float2Int(segments[i].x) + "," + float2Int(segments[i].y);
+						}
+						aras.setNodeElementWithAction(selectedNode, "segments", res);
+					}
+					aras.setNodeElementWithAction(selectedNode, "x", float2Int(point.x));
+					aras.setNodeElementWithAction(selectedNode, "y", float2Int(point.y));
+				}
+			}
+		}
+
+		function writeContent(win){
+			var doc = win.document;
+			var mainWnd = aras.getMostTopWindowWithAras(window);
+			win.opener = mainWnd.opener;
+			win.aras = aras;
+			win.isEditMode = parent.isEditMode;
+			win.lastSelectedActivityNd = lastSelectedActivityNd;
+
+			var tag = '<iframe frameborder="0" width="100%" height="100%" src = "../blank.html" "scrolling="no" name="form_frame" id="form_frame"></iframe>';
+			doc.write(tag);
+
+			var script =
+				"<script>\n" +
+					"onload = function onload_handler(){\n" +
+					"document.body.style.height = '100%'; \n" +
+					"document.body.style.padding = 0; \n" +
+					"document.body.style.margin = 0; \n" +
+					"document.body.style.overflow = 'hidden'; \n" +
+					"document.documentElement.style.height = '100%'; \n" +
+					"window.aras.uiShowItemInFrameEx(document.getElementById('form_frame').contentWindow, window.lastSelectedActivityNd, (window.isEditMode ? 'edit':'view')); \n" +
+					"}\n" +
+					"window.addEventListener(\"beforeunload\", function () { var callback = window.dialogArguments.callback; if (callback) { callback(); } });\n" +
+					"</" + "script>";
+			doc.write(script);
+		}
+
+		onresize = function(){
+			workflowApplet._resizeCanvas();
+		}
+	</script>
+	</head>
+	<body class="claro">
+		<div id="workflow" style="position:absolute; left:0px; top:0px; right:0px; bottom:0px; overflow:auto;"></div>
+	</body>
+</html>

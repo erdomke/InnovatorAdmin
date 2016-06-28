@@ -8,16 +8,14 @@ using System.Xml;
 namespace Innovator.Client
 {
   [Serializable]
-  public class ServerException : Exception
+  public class ServerException : Exception, IAmlNode
   {
     private const string FaultNodeEntry = "``FaultNode";
     private const string DatabaseEntry = "``Database";
     private const string QueryEntry = "``Query";
 
     protected string _database;
-    protected XmlElement _faultNode;
-    private IElement _fault;
-    private ElementFactory _factory;
+    protected Element _fault;
     protected string _query;
 
     public string Database { get { return _database; } }
@@ -27,40 +25,36 @@ namespace Innovator.Client
     }
     public string FaultCode
     {
-      get { return _fault.Elements().Single(e => e.Name == "faultcode").Value; }
-      set { ((Element)_fault).SetElement("faultcode", value); }
+      get { return _fault.ElementByName("faultcode").Value; }
+      set { _fault.ElementByName("faultcode").Add(value); }
     }
     public string Query { get { return _query; } }
 
-    internal ServerException(ElementFactory factory, string message)
-      : this(factory, message, 1) { }
-    internal ServerException(ElementFactory factory, string message, Exception innerException)
-      : this(factory, message, 1, innerException) { }
+    internal ServerException(string message)
+      : this(message, 1) { }
+    internal ServerException(string message, Exception innerException)
+      : this(message, 1, innerException) { }
 
     public ServerException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
-      _factory = ElementFactory.Local;
-      var doc = new XmlDocument(Element.BufferDocument.NameTable);
-      doc.LoadXml(info.GetString(FaultNodeEntry));
-      ConfigureFaultNode(doc.DocumentElement);
+      var result = ElementFactory.Local.FromXml(info.GetString(FaultNodeEntry));
+      _fault = result.Exception._fault;
       _database = info.GetString(DatabaseEntry);
       _query = info.GetString(QueryEntry);
     }
-    internal ServerException(ElementFactory factory, XmlElement node) : base(GetFaultString(node))
+    public ServerException(Element fault) : base(fault.ElementByName("faultstring").Value ?? "An unexpected error occurred")
     {
-      _factory = factory;
-      ConfigureFaultNode(node);
+      _fault = fault;
     }
-    protected ServerException(ElementFactory factory, string message, int code)
+
+    protected ServerException(string message, int code)
       : base(message)
     {
-      _factory = factory;
       CreateXml(message, code);
     }
-    protected ServerException(ElementFactory factory, string message, int code, Exception innerException)
+    protected ServerException(string message, int code, Exception innerException)
       : base(message, innerException)
     {
-      _factory = factory;
       CreateXml(message, code);
     }
 
@@ -73,13 +67,8 @@ namespace Innovator.Client
 
     private void CreateXml(string message, int code)
     {
-      var doc = new XmlDocument(Element.BufferDocument.NameTable);
-      doc.LoadXml("<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\"><SOAP-ENV:Body><SOAP-ENV:Fault xmlns:af=\"http://www.aras.com/InnovatorFault\"><faultcode>"
-        + code.ToString()
-        + "</faultcode><faultstring>"
-        + message
-        + "</faultstring></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>");
-      ConfigureFaultNode(doc.DocumentElement);
+      var aml = ElementFactory.Local;
+      _fault = aml.Element("SOAP-ENV:Fault", aml.Element("faultcode", code), aml.Element("faultstring", message)) as Element;
     }
 
     public override void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -89,73 +78,51 @@ namespace Innovator.Client
       {
         if (_fault.Parent.Parent.Exists)
         {
-          info.AddValue(FaultNodeEntry, _fault.Parent.Parent.ToString());
+          info.AddValue(FaultNodeEntry, _fault.ToAml());
         }
         else
         {
-          info.AddValue(FaultNodeEntry, _fault.ToString());
+          info.AddValue(FaultNodeEntry, _fault.ToAml());
         }
       }
       info.AddValue(DatabaseEntry, this.Database);
       info.AddValue(QueryEntry, this.Query);
     }
 
-    private void ConfigureFaultNode(XmlElement node)
+    public string ToAml()
     {
-      _faultNode = GetFaultNode(node);
-      _fault = (_factory ?? ElementFactory.Local).ElementFromXml(_faultNode);
-    }
-
-    internal static XmlElement GetFaultNode(XmlElement node)
-    {
-      if (node.LocalName == "Envelope" && (node.NamespaceURI == "http://schemas.xmlsoap.org/soap/envelope/" || string.IsNullOrEmpty(node.NamespaceURI)) && node.HasChildNodes)
-        node = node.ChildNodes.OfType<XmlElement>().First();
-      if (node.LocalName == "Body" && (node.NamespaceURI == "http://schemas.xmlsoap.org/soap/envelope/" || string.IsNullOrEmpty(node.NamespaceURI)) && node.HasChildNodes)
-        node = node.ChildNodes.OfType<XmlElement>().First();
-      if (node.LocalName == "Fault" && (node.NamespaceURI == "http://schemas.xmlsoap.org/soap/envelope/" || string.IsNullOrEmpty(node.NamespaceURI)) && node.HasChildNodes)
+      using (var writer = new System.IO.StringWriter())
+      using (var xml = XmlWriter.Create(writer, new XmlWriterSettings() { OmitXmlDeclaration = true }))
       {
-        return node;
+        ToAml(xml, new AmlWriterSettings());
+        xml.Flush();
+        return writer.ToString();
       }
-      throw new InvalidOperationException();
-    }
-    private static string GetFaultString(XmlNode node)
-    {
-      return node.ChildNodes.OfType<XmlElement>().Single(n => n.LocalName == "faultstring").InnerText;
     }
 
-    public string AsAmlString()
+    public void ToAml(XmlWriter writer, AmlWriterSettings settings)
     {
-      return _faultNode.Parents().Last().OuterXml;
-    }
-
-    public void AsAmlString(XmlWriter writer)
-    {
-      _faultNode.Parents().Last().WriteTo(writer);
+      writer.WriteStartElement("SOAP-ENV", "Envelope", "http://schemas.xmlsoap.org/soap/envelope/");
+      writer.WriteStartElement("SOAP-ENV", "Body", "http://schemas.xmlsoap.org/soap/envelope/");
+      writer.WriteStartElement("SOAP-ENV", "Fault", "http://schemas.xmlsoap.org/soap/envelope/");
+      writer.WriteAttributeString("xmlns", "af", null, "http://www.aras.com/InnovatorFault");
+      foreach (var elem in _fault.Elements())
+      {
+        elem.ToAml(writer, settings);
+      }
+      writer.WriteEndElement();
+      writer.WriteEndElement();
+      writer.WriteEndElement();
     }
 
     public IReadOnlyResult AsResult()
     {
-      return new Result(_factory, _faultNode);
+      return new Result(ElementFactory.Local) { Exception = this };
     }
 
     public override string ToString()
     {
-      var builder = new StringBuilder(base.ToString()).AppendLine().AppendLine();
-      var settings = new XmlWriterSettings();
-      settings.Indent = true;
-      settings.IndentChars = "  ";
-      settings.OmitXmlDeclaration = true;
-      using (var xml = XmlWriter.Create(builder, settings))
-      {
-        xml.WriteStartElement("Fault");
-        // Render the non-redundant information
-        foreach (var elem in _faultNode.ChildNodes.OfType<XmlElement>().Where(e => e.LocalName != "faultstring"))
-        {
-          elem.WriteTo(xml);
-        }
-        xml.WriteEndElement();
-      }
-      return builder.ToString();
+      return _fault.ToAml();
     }
   }
 }

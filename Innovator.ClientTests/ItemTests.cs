@@ -56,7 +56,7 @@ namespace Aras.Innovator.Tests
         )
       );
 
-      Assert.AreEqual("<Item type=\"Part\" action=\"get\"><item_number condition=\"like\">905-1954-*</item_number><Relationships><Item type=\"Part BOM\" action=\"get\" /></Relationships></Item>", item.ToString());
+      Assert.AreEqual("<Item action=\"get\" type=\"Part\"><item_number condition=\"like\">905-1954-*</item_number><Relationships><Item action=\"get\" type=\"Part BOM\" /></Relationships></Item>", item.ToString());
     }
 
     [TestMethod]
@@ -75,7 +75,7 @@ namespace Aras.Innovator.Tests
       item.Property("test2", "fr").Set("2");
       item.Property("test3", "fr").Set("3");
       item.Property("test3", "en").Set("3.en");
-      Assert.AreEqual("<Item type=\"Supplier\" action=\"get\" select=\"name\" language=\"en,fr\"><thing>All</thing><name xml:lang=\"fr\">Dell France</name><i18n:name xml:lang=\"en\" xmlns:i18n=\"http://www.aras.com/I18N\">Dell Computers</i18n:name><test1>1</test1><test2 xml:lang=\"fr\">2</test2><test3 xml:lang=\"fr\">3</test3><i18n:test3 xml:lang=\"en\" xmlns:i18n=\"http://www.aras.com/I18N\">3.en</i18n:test3></Item>",
+      Assert.AreEqual("<Item action=\"get\" language=\"en,fr\" select=\"name\" type=\"Supplier\"><name xml:lang=\"fr\">Dell France</name><i18n:name xml:lang=\"en\" xmlns:i18n=\"http://www.aras.com/I18N\">Dell Computers</i18n:name><test1>1</test1><test2 xml:lang=\"fr\">2</test2><test3 xml:lang=\"fr\">3</test3><i18n:test3 xml:lang=\"en\" xmlns:i18n=\"http://www.aras.com/I18N\">3.en</i18n:test3><thing>All</thing></Item>",
         item.ToAml());
     }
 

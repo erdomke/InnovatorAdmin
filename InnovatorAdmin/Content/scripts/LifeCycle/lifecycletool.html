@@ -1,0 +1,371 @@
+﻿<!DOCTYPE html>
+<!-- (c) Copyright by Aras Corporation, 2004-2013. -->
+<html>
+	<head>
+		<title></title>
+		<style type="text/css">
+			@import "../../javascript/dojo/resources/dojo.css";
+			@import "../../javascript/dijit/themes/claro/claro.css";
+			@import "../../javascript/include.aspx?classes=common.css";
+			@import "../../styles/default.css";
+
+			html,body{
+				overflow: hidden;
+				width: 100%;
+				height: 100%;
+				margin: 0px;
+				padding: 0px;
+			}
+			#borderContainer {
+				position: absolute; 
+				top: 0px; 
+				left: 0px; 
+				right: 0px; 
+				bottom: 0px; 
+				padding:4px;
+			}
+			#formsPanel {
+				position: absolute; 
+				top: 0px; 
+				left: 0px; 
+				right: 0px;
+				height: 200px; 
+				border-bottom: 1px solid #d4d4d4;
+			}
+			#lcFormPanel {
+				position: absolute; 
+				top: 0px; 
+				left: 0px; 
+				width: 230px; 
+				bottom:0px;
+			}
+			#tabsContainer {
+				position: absolute; 
+				overflow: hidden;
+				top: 0px; 
+				left: 0px; 
+				right: 0px; 
+				height: 30px;
+			}
+			#formsContainer {
+				position: absolute; 
+				top: 30px; 
+				left: 0px; 
+				right: 0px; 
+				bottom: 0px;
+				padding-left: 5px;
+			}
+			#editorPanel {
+				overflow: hidden; 
+				position: absolute; 
+				top: 202px; 
+				left: 0px; 
+				bottom: 0px; 
+				right: 0px;
+			}
+			#container {
+				position: absolute; 
+				top: 0px; 
+				left: 231px; 
+				bottom: 0px; 
+				right: 0px; 
+				border-left: 1px solid #d4d4d4;
+			}
+			.dijitTabPaneWrapper {
+				border-bottom: 0px !important;
+			}
+		</style>
+		<script type="text/javascript" src="../../javascript/include.aspx?classes=/dojo.js" data-dojo-config="baseUrl:'../../javascript/dojo'"></script>
+		<script type="text/javascript" src="../../javascript/QueryString.js"></script>
+		<script type="text/javascript" src="../../javascript/lctool_window.js"></script>
+	<script type="text/javascript">
+var menuFrame  = null;
+var isLifeCycleTool = true;
+var currLCID   = QueryString("id").toString();
+var currLCNode = top.currLCNode;
+top.item = currLCNode;
+var isEditMode;
+var currTabID = "";
+var performOnTabAction = true;
+
+//ready state flags
+var isBusy = true;
+var lcformFReady = false;
+var tabsFReady = false;
+var editorFReady = false;
+
+var statusId = top.aras.showStatusMessage("status", top.aras.getResource("", "lc.stage_n", "1"), '../images/Progress.gif');
+var access_id_const = top.aras.getRelationshipTypeId('Access');
+var lcstate_id_const = top.aras.getRelationshipTypeId('Life Cycle State');
+var lctransition_id_const = top.aras.getRelationshipTypeId('Life Cycle Transition');
+top.aras.browserHelper.hidePanels(window, ["locationbar"]);
+top.aras.clearStatusMessage(statusId);
+
+if (!top.aras.isDirtyEx(currLCNode))
+	currLCNode = top.aras.getItemById('Life Cycle Map', currLCID, 1, 'Life Cycle State|Life Cycle Transition');
+
+function getFrameWindow(frameId){
+	return document.getElementById(frameId).contentWindow;
+}
+
+var formsCache = null;
+function initFormsCache( defaultContainerId ){
+	formsCache = {};
+	formsCache.defaultMode = "view";
+	formsCache.defaultContainerId = defaultContainerId;
+	formsCache.cache = {};
+}
+initFormsCache("formsContainer");
+
+function getItemForm( itemTypeName, formMode ){
+	if(formsCache){
+		if (formsCache.cache.hasOwnProperty(itemTypeName))
+			return formsCache.cache[itemTypeName][formMode];
+	}
+
+	return undefined;
+}
+
+function hideAllItemForms( formContainer ){
+	var itemFormCache, 
+		form;
+
+	for(var itemTypeName in formsCache.cache){
+		itemFormCache = formsCache.cache[itemTypeName];
+
+		for(var modeName in itemFormCache){
+			form = itemFormCache[modeName];
+			if(form && form.containerElement === formContainer){ 
+				form.style.display = "none";
+			}
+		}
+	}
+}
+
+// returns first visible form in container
+function getVisibleItemForm( containerElement ){
+	var itemFormCache, 
+		form;
+
+	containerElement = containerElement || document.getElementById(formsCache.defaultContainerId);
+	for(var itemTypeName in formsCache.cache){
+		itemFormCache = formsCache.cache[itemTypeName];
+
+		for(var modeName in itemFormCache){
+			form = itemFormCache[modeName];
+			if(form && form.containerElement == containerElement && form.style.display !== "none"){ 
+				return form;
+			}
+		}
+	}
+	return null;
+}
+
+// adds form for itemTypeName in formMode to cache
+function addFormToCache( itemTypeName, formMode, form ){
+	if(itemTypeName && formMode){
+		if(!formsCache.cache.hasOwnProperty(itemTypeName))
+			formsCache.cache[itemTypeName] = {};
+
+		formsCache.cache[itemTypeName][formMode] = form;
+	}
+}
+
+// descriptionNode: xmlElement with item description, containerElement: domElement which form will be attached to
+function showItemForm( itemTypeName, formMode, descriptionNode, containerElement, userChangeHandler ){
+	if (formsCache){
+		var cachedForm = null;
+		itemTypeName = itemTypeName || "";
+		formMode = formMode || formsCache.defaultMode;
+		containerElement = containerElement || document.getElementById(formsCache.defaultContainerId);
+
+		if(itemTypeName){
+			cachedForm = getItemForm(itemTypeName, formMode);
+
+			if (!cachedForm){
+				var formId = itemTypeName + "_" + formMode;
+				var formSrc = "../blank.html";
+
+				cachedForm = document.createElement("iframe");
+				cachedForm.setAttribute("id", formId);
+				cachedForm.setAttribute("src", formSrc);
+				cachedForm.setAttribute("frameBorder", "0");
+				cachedForm.setAttribute("width", "100%");
+				cachedForm.setAttribute("height", "100%");
+				cachedForm.setAttribute("scrolling", "no");
+				cachedForm.style.position = "relative";
+
+				cachedForm.formContentLoaded = false;
+				cachedForm.itemTypeName = itemTypeName;
+				containerElement.appendChild(cachedForm);
+				cachedForm.containerElement = containerElement;
+				addFormToCache(itemTypeName, formMode, cachedForm);
+			}
+			// if user send description then fill form with item properties
+			if(descriptionNode){
+				if(cachedForm.formContentLoaded){
+					top.aras.uiPopulateFormWithItemEx(cachedForm.contentDocument, descriptionNode, "", formMode == "edit");
+				}else {
+					top.aras.uiShowItemInFrameEx(cachedForm.contentWindow, descriptionNode, formMode);
+					cachedForm.onload = function(){
+						top.ITEM_WINDOW.registerStandardShortcuts(this.contentWindow);
+						if (top.returnBlockerHelper) {
+							top.returnBlockerHelper.attachBlocker(this.contentWindow);
+						}
+
+						cachedForm.contentDocument.userChangeHandler = userChangeHandler;
+						cachedForm.contentDocument.documentElement.focus();
+						cachedForm.formContentLoaded = true;
+					};
+				}
+			}
+		}
+
+		hideAllItemForms( containerElement );
+		if (cachedForm){
+			cachedForm.style.display = "";
+		}
+
+		return cachedForm;
+	}
+}
+
+try{
+	isEditMode = (top.aras.isTempEx(currLCNode) || top.aras.isLockedByUser(currLCNode));
+	onload = function(){
+		menuFrame = (top.isTearOff ? top.tearOffMenuController : top.main.menu);
+		showItemForm("Life Cycle Map", isEditMode ? "edit" : "view", currLCNode, lcFormPanel);
+		setFlag("lcformFReady", true);
+		setupToolOnLoad();
+		createTabbar();
+	}
+}
+catch (excep){
+	top.aras.AlertError(top.aras.getResource("", "lifecycletool.internal_err_lctool_failed_initialize"), top.aras.getResource("", "lifecycletool.check_lcm"), top.aras.getResource("", "common.client_side_err"));  
+}
+
+// set editor mode (view/edit)
+function setMode(mode) {
+	var prevEditMode = isEditMode;
+	parent.isEditMode = isEditMode = (mode === "edit");
+	currLCNode = top.aras.getItemById("Life Cycle Map", currLCID, 1, "Life Cycle State|Life Cycle Transition");
+	top.item = currLCNode;
+
+	if (parent.setTitle){ 
+		parent.setTitle(isEditMode);
+	}
+
+	showItemForm("Life Cycle Map", isEditMode ? "edit" : "view", currLCNode, lcFormPanel);
+	refreshMenuState();
+	getFrameWindow("editor").populateWorkflow();
+}
+
+function setEditMode(){
+	setMode("edit");
+}
+
+function setViewMode(){
+	setMode("view");
+}
+
+function setFlag(flagName, state) {
+	window[flagName] = state;
+	isBusy = !(lcformFReady && tabsFReady && editorFReady);
+}
+
+function refreshMenuState(){
+	statusId = top.aras.showStatusMessage("status", top.aras.getResource("", "common.updating_menu"), '../images/Progress.gif');
+	var isTemp = top.aras.isTempEx(currLCNode);
+	with (menuFrame){
+		setControlEnabled('new', true);
+		setControlEnabled('edit', false);
+		setControlEnabled('view', false);
+		setControlEnabled('print', true);
+		setControlEnabled('lock', !isEditMode && !top.aras.isLocked(currLCNode));
+		setControlEnabled('delete', !isEditMode || isTemp);
+		setControlEnabled('save', isEditMode);
+		setControlEnabled('save_unlock_close', isEditMode);
+		setControlEnabled('unlock', (isEditMode || top.aras.getLoginName().search(/^admin$|^root$/)==0 && top.aras.isLocked(currLCNode)) && !isTemp);
+		setControlEnabled('undo', isEditMode && !isTemp);
+
+		if (menuFrame.populateAccessMenuLazyStart)
+			menuFrame.populateAccessMenuLazyStart(isEditMode);
+	}
+	top.aras.clearStatusMessage(statusId);
+	top.aras.showStatusMessage("status", top.aras.getResource("", "common.ready"), '');
+}
+
+function setupToolOnLoad(){
+	if (isBusy){
+		setTimeout(setupToolOnLoad, 10);
+		return;
+	}
+
+	refreshMenuState();
+	top.aras.setDefaultMessage("status", top.aras.getResource("", "common.ready"), '');
+	//register standart chortcuts
+	top.ITEM_WINDOW.registerStandardShortcuts(window, true);
+}
+
+	var tabbar;
+	function createTabbar() {
+		clientControlsFactory.createControl("Aras.Client.Controls.Experimental.SimpleTabbar", undefined, function(control) {
+			tabbar = control;
+			clientControlsFactory.on(tabbar, {
+				"onClick": onTab
+			});
+			document.getElementById("tabsContainer").appendChild(tabbar.domNode);
+			tabbar.startup();
+			initTabbar();
+		});
+	}
+
+	function initTabbar() {
+		var tabsRoot = top.aras.uiGenerateRelationshipsTabbar("Life Cycle Map", currLCID),
+			tabNodes = tabsRoot.selectNodes("/tabbar/tab"),
+			currentTab = null;
+
+		for(var i = tabNodes.length - 1; i >= 0; i--) {
+			currentTab = tabNodes[i];
+			tabbar.addTab(currentTab.getAttribute("id"), currentTab.getAttribute("label"));
+		}
+
+		currTabID = tabbar.GetSelectedTab();
+		setFlag("tabsFReady", true);
+	}
+
+	function onTab(tabID){
+		if (performOnTabAction) {
+			var editor = getFrameWindow("editor");
+			var isActivityTab = tabID == lcstate_id_const;
+
+			if(isActivityTab){
+				editor.showActivity(editor.lastSelectedActivityID);
+				editor.workflowApplet.nodes.select(editor.lastSelectedActivityID, true);
+			} 
+			else{
+				editor.showTransition(editor.lastSelectedTransID);
+				editor.workflowApplet.transitions.select(editor.lastSelectedTransID, true);
+			}
+		}
+
+		currTabID = tabID;
+		performOnTabAction = true;
+	}
+</script>
+</head>
+<body class="claro">
+	<div id="borderContainer">
+		<div id="formsPanel">
+			<div id="lcFormPanel"></div>
+			<div id="container">
+				<div id="tabsContainer"></div>
+				<div id="formsContainer"></div>
+			</div>
+		</div>
+		<div id="editorPanel">
+			<iframe id="editor" src="lifecycleEditor.html" frameborder="no" scrolling="no" marginwidth="0" marginheight="0" style="position:relative; width:100%; height:100%"></iframe>
+		</div>
+	</div>
+</body>
+</html>

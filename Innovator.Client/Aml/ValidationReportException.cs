@@ -10,30 +10,32 @@ namespace Innovator.Client
   [Serializable]
   public class ValidationReportException : ServerException
   {
-    internal ValidationReportException(ElementFactory factory, string message
+    internal ValidationReportException(string message
       , IReadOnlyItem item, string report)
-      : base(factory, message, 1001)
+      : base(message, 1001)
     {
       CreateDetailElement(item, report);
     }
-    internal ValidationReportException(ElementFactory factory, string message, Exception innerException
+    internal ValidationReportException(string message, Exception innerException
       , IReadOnlyItem item, string report)
-      : base(factory, message, 1001, innerException)
+      : base(message, 1001, innerException)
     {
       CreateDetailElement(item, report);
     }
     public ValidationReportException(SerializationInfo info, StreamingContext context)
       : base(info, context) { }
-    internal ValidationReportException(ElementFactory factory, XmlElement node) : base(factory, node) { }
+    internal ValidationReportException(Element fault) : base(fault) { }
 
-    private XmlElement CreateDetailElement(IReadOnlyItem item, string report)
+    private IElement CreateDetailElement(IReadOnlyItem item, string report)
     {
-      var detail = _faultNode.Elem("detail");
+      var detail = _fault.ElementByName("detail");
       if (item != null)
       {
-        detail.Elem("item").Attr("type", item.Type().Value).Attr("id", item.Id());
+        detail.Add(new AmlElement(_fault.AmlContext, "item"
+        , new Attribute("type", item.Type().Value)
+        , new Attribute("id", item.Id())));
       }
-      detail.Elem("error_resolution_report", report);
+      detail.Add(new AmlElement(_fault.AmlContext, "error_resolution_report", report));
       return detail;
     }
   }

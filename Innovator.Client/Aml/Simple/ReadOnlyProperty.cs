@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Innovator.Client
 {
-  class Property : Element, IProperty
+  class ReadOnlyProperty : Element, IReadOnlyProperty
   {
     private string _name;
     private IElement _parent;
@@ -13,7 +13,7 @@ namespace Innovator.Client
     public override string Name { get { return _name; } }
     public override IElement Parent
     {
-      get { return _parent ?? AmlElement.NullElem; }
+      get { return _parent; }
       set { _parent = value; }
     }
 
@@ -26,20 +26,11 @@ namespace Innovator.Client
       return _content;
     }
 
-    public Property(string name, params object[] content)
+    public ReadOnlyProperty(string name, params object[] content)
     {
       _name = name;
-      if (content.Length > 0)
-        Add(content);
+      Add(content);
     }
-    public Property(IElement parent, string name)
-    {
-      _name = name;
-      _parent = parent;
-    }
-
-    private static Property _nullProp = new Property(null) { ReadOnly = true };
-    public static Property NullProp { get { return _nullProp; } }
 
     public bool? AsBoolean()
     {
@@ -96,7 +87,7 @@ namespace Innovator.Client
       if (result.HasValue) return result.Value;
       return defaultValue;
     }
-    public IItem AsItem()
+    public IReadOnlyItem AsItem()
     {
       if (!this.Exists) return Item.NullItem;
       var item = _content as IItem;
@@ -149,33 +140,6 @@ namespace Innovator.Client
       if (!this.Exists)
         return defaultValue;
       return this.Value;
-    }
-
-    public void Set(object value)
-    {
-      AssertModifiable();
-      if (!Exists)
-      {
-        if (_parent == null)
-          throw new InvalidOperationException();
-        _parent.Add(this);
-      }
-
-      var isNull = this.IsNull();
-      if (value == null)
-      {
-        isNull.Set(true);
-      }
-      else
-      {
-        isNull.Remove();
-      }
-      _content = value;
-    }
-
-    IReadOnlyItem IReadOnlyProperty.AsItem()
-    {
-      return AsItem();
     }
   }
 }

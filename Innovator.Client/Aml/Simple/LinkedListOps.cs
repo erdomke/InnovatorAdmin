@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Innovator.Client.Aml.Simple
+namespace Innovator.Client
 {
   static class LinkedListOps
   {
@@ -14,7 +14,7 @@ namespace Innovator.Client.Aml.Simple
         newLink.Next = newLink;
         return newLink;
       }
-      if (string.Compare(newLink.Name, lastLink.Name) >= 0)
+      else if (string.Compare(newLink.Name, lastLink.Name) >= 0)
       {
         newLink.Next = lastLink.Next;
         lastLink.Next = newLink;
@@ -33,11 +33,12 @@ namespace Innovator.Client.Aml.Simple
           {
             newLink.Next = curr;
             prev.Next = newLink;
+            return lastLink;
           }
         }
         while (curr != lastLink);
 
-        return lastLink;
+        throw new InvalidOperationException();
       }
     }
     public static IEnumerable<T> Enumerate<T>(T lastLink) where T : class, ILink<T>
@@ -65,7 +66,7 @@ namespace Innovator.Client.Aml.Simple
         return curr;
 
       curr = curr.Next;
-      while (curr != lastLink && string.Compare(name, curr.Name) <= 0)
+      while (curr != lastLink && string.Compare(name, curr.Name) >= 0)
       {
         if (string.Equals(curr.Name, name))
           return curr;
@@ -87,7 +88,7 @@ namespace Innovator.Client.Aml.Simple
         if (string.Equals(curr.Name, name))
           yield return curr;
       }
-      while (curr != lastLink && string.Compare(name, curr.Name) <= 0);
+      while (curr != lastLink && string.Compare(name, curr.Name) >= 0);
     }
     public static T Remove<T>(T lastLink, T removeLink) where T : class, ILink<T>
     {

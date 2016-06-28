@@ -3,25 +3,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Innovator.Client.Aml.Simple
+namespace Innovator.Client
 {
-  class Attribute : IAttribute, ILink<Attribute>
+  class Attribute : IAttribute, ILinkedAnnotation
   {
     private Element _parent;
     private string _name;
     private object _content;
-    private Attribute _next;
+    private ILinkedAnnotation _next;
 
     public bool Exists { get { return _next != null; } }
     public string Name { get { return _name; } }
-    public Attribute Next
+    public ILinkedAnnotation Next
     {
       get { return _next; }
       set { _next = value; }
     }
     public string Value
     {
-      get { return _parent.AmlContext.LocalizationContext.Format(_content); }
+      get
+      {
+        return _parent == null
+          ? _content as string
+          : _parent.AmlContext.LocalizationContext.Format(_content);
+      }
       set { Set(value); }
     }
 
@@ -29,12 +34,23 @@ namespace Innovator.Client.Aml.Simple
     {
       _name = name;
     }
-    public Attribute(string name, Element parent)
+    public Attribute(string name, object value)
+    {
+      _name = name;
+      _content = value;
+    }
+    public Attribute(Element parent, string name)
     {
       _name = name;
       _parent = parent;
     }
-    public Attribute(IReadOnlyAttribute attr, Element parent)
+    public Attribute(Element parent, string name, object value)
+    {
+      _name = name;
+      _parent = parent;
+      _content = value;
+    }
+    public Attribute(Element parent, IReadOnlyAttribute attr)
     {
       _name = attr.Name;
       _content = attr.Value;
@@ -46,6 +62,8 @@ namespace Innovator.Client.Aml.Simple
 
     public void Set(object value)
     {
+      if (_parent != null && _parent.ReadOnly)
+        throw new InvalidOperationException("Cannot modify a read only element");
       if (!Exists)
         _parent.Add(this);
       _content = value;
@@ -53,8 +71,12 @@ namespace Innovator.Client.Aml.Simple
 
     public void Remove()
     {
-      if (Exists)
+      if (_parent != null)
+      {
+        if (_parent.ReadOnly)
+          throw new InvalidOperationException("Cannot modify a read only element");
         _parent.RemoveAttribute(this);
+      }
     }
 
     public bool? AsBoolean()
@@ -147,17 +169,25 @@ namespace Innovator.Client.Aml.Simple
       if (impl != null)
       {
         if (impl._parent == null || impl._parent == newParent)
+        {
+          impl._parent = newParent;
           return impl;
-        return new Attribute(impl, newParent);
+        }
+        return new Attribute(newParent, impl);
       }
 
       var attr = value as IReadOnlyAttribute;
       if (attr != null)
       {
-        return new Attribute(attr, newParent);
+        return new Attribute(newParent, attr);
       }
 
       return null;
+    }
+
+    public override string ToString()
+    {
+      return string.Format("{0}='{1}'", _name, _content);
     }
 
   }

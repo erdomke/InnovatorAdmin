@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Innovator.Client.Aml.Simple
+namespace Innovator.Client
 {
-  class Logical : GenericElement, ILogical
+  class Logical : AmlElement, ILogical
   {
-    public Logical(string name, IElement parent) : base(name, parent) { }
-    public Logical(IReadOnlyElement elem, IElement parent) : base(elem, parent) { }
+    public Logical(ElementFactory amlContext, string name, params object[] content) : base(amlContext, name, content) { }
+    public Logical(IElement parent, string name) : base(parent, name) { }
+    public Logical(IElement parent, IReadOnlyElement elem) : base(parent, elem) { }
   }
 }
