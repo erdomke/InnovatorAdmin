@@ -479,7 +479,65 @@ namespace Innovator.Client
       public IReadOnlyResult FromXml(XmlReader xml, string query, string database)
       {
         var writer = new ResultWriter(_factory, database, query);
-        writer.WriteNode(xml, true);
+
+        var num = (xml.NodeType == XmlNodeType.None) ? -1 : xml.Depth;
+        do
+        {
+          switch (xml.NodeType)
+          {
+            case XmlNodeType.Element:
+              writer.WriteStartElement(xml.Prefix, xml.LocalName, xml.NamespaceURI);
+              if (xml.MoveToFirstAttribute())
+              {
+                do
+                {
+                  writer.WriteStartAttribute(xml.Prefix, xml.LocalName, xml.NamespaceURI);
+                  while (xml.ReadAttributeValue())
+                  {
+                    if (xml.NodeType == XmlNodeType.EntityReference)
+                    {
+                      writer.WriteEntityRef(xml.Name);
+                    }
+                    else
+                    {
+                      writer.WriteString(xml.Value);
+                    }
+                  }
+                  writer.WriteEndAttribute();
+                }
+                while (xml.MoveToNextAttribute());
+              }
+              if (xml.IsEmptyElement)
+              {
+                writer.WriteEndElement();
+              }
+              break;
+            case XmlNodeType.Text:
+              writer.WriteString(xml.Value);
+              break;
+            case XmlNodeType.CDATA:
+              writer.WriteCData(xml.Value);
+              break;
+            case XmlNodeType.EntityReference:
+              writer.WriteEntityRef(xml.Name);
+              break;
+            case XmlNodeType.SignificantWhitespace:
+              writer.WriteWhitespace(xml.Value);
+              break;
+            case XmlNodeType.EndElement:
+              writer.WriteFullEndElement();
+              break;
+
+            //Just ignore the following
+            //case XmlNodeType.Whitespace:
+            //case XmlNodeType.ProcessingInstruction:
+            //case XmlNodeType.XmlDeclaration:
+            //case XmlNodeType.Comment:
+            //case XmlNodeType.DocumentType:
+          }
+        }
+        while (xml.Read() && (num < xml.Depth || (num == xml.Depth && xml.NodeType == XmlNodeType.EndElement)));
+
         return writer.Result;
       }
 

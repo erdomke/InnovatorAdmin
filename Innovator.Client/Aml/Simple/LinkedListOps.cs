@@ -14,31 +14,11 @@ namespace Innovator.Client
         newLink.Next = newLink;
         return newLink;
       }
-      else if (string.Compare(newLink.Name, lastLink.Name) >= 0)
+      else
       {
         newLink.Next = lastLink.Next;
         lastLink.Next = newLink;
         return newLink;
-      }
-      else
-      {
-        T prev;
-        var curr = lastLink;
-
-        do
-        {
-          prev = curr;
-          curr = curr.Next;
-          if (string.Compare(newLink.Name, curr.Name) < 0)
-          {
-            newLink.Next = curr;
-            prev.Next = newLink;
-            return lastLink;
-          }
-        }
-        while (curr != lastLink);
-
-        throw new InvalidOperationException();
       }
     }
     public static IEnumerable<T> Enumerate<T>(T lastLink) where T : class, ILink<T>
@@ -56,19 +36,17 @@ namespace Innovator.Client
     }
     public static T Find<T>(T lastLink, string name) where T : class, ILink<T>
     {
-      if (lastLink == null
-        || string.Compare(name, lastLink.Name) > 0
-        || string.Compare(name, lastLink.Next.Name) < 0)
+      if (lastLink == null)
         return null;
 
       var curr = lastLink;
-      if (string.Equals(curr.Name, name))
+      if (string.Equals(curr.Name, name, StringComparison.Ordinal))
         return curr;
 
       curr = curr.Next;
-      while (curr != lastLink && string.Compare(name, curr.Name) >= 0)
+      while (curr != lastLink)
       {
-        if (string.Equals(curr.Name, name))
+        if (string.Equals(curr.Name, name, StringComparison.Ordinal))
           return curr;
         curr = curr.Next;
       }
@@ -76,19 +54,17 @@ namespace Innovator.Client
     }
     public static IEnumerable<T> FindAll<T>(T lastLink, string name) where T : class, ILink<T>
     {
-      if (lastLink == null
-        || string.Compare(name, lastLink.Name) > 0
-        || string.Compare(name, lastLink.Next.Name) < 0)
+      if (lastLink == null)
         yield break;
 
       var curr = lastLink;
       do
       {
         curr = curr.Next;
-        if (string.Equals(curr.Name, name))
+        if (string.Equals(curr.Name, name, StringComparison.Ordinal))
           yield return curr;
       }
-      while (curr != lastLink && string.Compare(name, curr.Name) >= 0);
+      while (curr != lastLink);
     }
     public static T Remove<T>(T lastLink, T removeLink) where T : class, ILink<T>
     {

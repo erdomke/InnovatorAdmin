@@ -108,7 +108,7 @@ namespace Innovator.Client
           {
             prop = LinkedListOps.FindAll(elem, name)
               .OfType<IReadOnlyProperty>()
-              .FirstOrDefault(p => prop.Attribute("xml:lang").Value == AmlContext.LocalizationContext.LanguageCode);
+              .FirstOrDefault(p => p.Attribute("xml:lang").Value == AmlContext.LocalizationContext.LanguageCode);
 
           }
 

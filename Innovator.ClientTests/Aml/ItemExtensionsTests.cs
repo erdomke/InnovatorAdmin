@@ -33,8 +33,8 @@ namespace Innovator.Client.Tests
       Assert.AreEqual(@"<SOAP-ENV:Envelope xmlns:SOAP-ENV=""http://schemas.xmlsoap.org/soap/envelope/"">
   <SOAP-ENV:Body>
     <Result>
-      <Item id=""1234"" type=""Part"" />
-      <Item id=""4567"" type=""Part"" />
+      <Item type=""Part"" id=""1234"" />
+      <Item type=""Part"" id=""4567"" />
     </Result>
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>", res.ToXml().ToString());

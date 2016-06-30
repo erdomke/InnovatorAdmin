@@ -56,12 +56,12 @@ namespace Innovator.Client.Tests
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>";
       var exAml = ElementFactory.Local.FromXml(aml).Exception.ToAml();
-      var expected = @"<SOAP-ENV:Envelope xmlns:SOAP-ENV=""http://schemas.xmlsoap.org/soap/envelope/""><SOAP-ENV:Body><SOAP-ENV:Fault xmlns:af=""http://www.aras.com/InnovatorFault""><detail><af:legacy_detail>No items of type SavedSearch found.</af:legacy_detail><af:legacy_faultactor>   at System.Environment.GetStackTrace(Exception e, Boolean needFileInfo)</af:legacy_faultactor><af:legacy_faultstring>No items of type 'SavedSearch' found using the criteria:
+      var expected = @"<SOAP-ENV:Envelope xmlns:SOAP-ENV=""http://schemas.xmlsoap.org/soap/envelope/""><SOAP-ENV:Body><SOAP-ENV:Fault xmlns:af=""http://www.aras.com/InnovatorFault""><faultcode>0</faultcode><faultstring>No items of type SavedSearch found.</faultstring><detail><af:legacy_detail>No items of type SavedSearch found.</af:legacy_detail><af:legacy_faultstring>No items of type 'SavedSearch' found using the criteria:
 &lt;Item type=""SavedSearch"" action=""get""&gt;
   &lt;is_email_subscription&gt;1&lt;/is_email_subscription&gt;
   &lt;itname&gt;asdfasdfasdf&lt;/itname&gt;
 &lt;/Item&gt;
-</af:legacy_faultstring></detail><faultcode>0</faultcode><faultstring>No items of type SavedSearch found.</faultstring></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>";
+</af:legacy_faultstring><af:legacy_faultactor>   at System.Environment.GetStackTrace(Exception e, Boolean needFileInfo)</af:legacy_faultactor></detail></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>";
       Assert.AreEqual(expected, exAml);
     }
 

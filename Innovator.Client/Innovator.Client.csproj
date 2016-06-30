@@ -80,7 +80,7 @@
     <Compile Include="Aml\Model\WorkflowProcess.cs" />
     <Compile Include="Aml\ParameterSubstitution.cs" />
     <Compile Include="Aml\CommandAction.cs" />
-    <Compile Include="Aml\Simple\AmlWriter.cs" />
+    <Compile Include="Aml\Simple\ResultWriter.cs" />
     <Compile Include="Aml\Simple\Attribute.cs" />
     <Compile Include="Aml\Simple\Element.cs" />
     <Compile Include="Aml\Simple\AmlElement.cs" />
