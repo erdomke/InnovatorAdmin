@@ -135,7 +135,7 @@ namespace Innovator.Client
 
     IEnumerable<IReadOnlyAttribute> IReadOnlyElement.Attributes()
     {
-      return this.Attributes();
+      return this.Attributes().OfType<IReadOnlyAttribute>();
     }
 
     IEnumerable<IReadOnlyElement> IReadOnlyElement.Elements()

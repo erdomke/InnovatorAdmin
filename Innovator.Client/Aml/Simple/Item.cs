@@ -198,12 +198,12 @@ namespace Innovator.Client
 
     IEnumerable<IReadOnlyItem> IReadOnlyItem.Relationships()
     {
-      return Relationships();
+      return Relationships().OfType<IReadOnlyItem>();
     }
 
     IEnumerable<IReadOnlyItem> IReadOnlyItem.Relationships(string type)
     {
-      return Relationships(type);
+      return Relationships(type).OfType<IReadOnlyItem>();
     }
 
     public string Id()
