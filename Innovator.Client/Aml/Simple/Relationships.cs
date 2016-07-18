@@ -9,7 +9,8 @@ namespace Innovator.Client
 {
   class Relationships : ILinkedElement, IRelationships
   {
-    private ItemList _relList;
+    private ElementAttribute _attr;
+    private List<IReadOnlyItem> _relList;
     private ILinkedElement _next;
     private IElement _parent;
 
@@ -35,6 +36,20 @@ namespace Innovator.Client
       set { _parent = value; }
     }
     IReadOnlyElement IReadOnlyElement.Parent { get { return this.Parent; } }
+    public bool ReadOnly
+    {
+      get
+      {
+        return (_attr & ElementAttribute.ReadOnly) > 0;
+      }
+      set
+      {
+        if (value)
+          _attr = _attr | ElementAttribute.ReadOnly;
+        else
+          _attr = _attr & ~ElementAttribute.ReadOnly;
+      }
+    }
     public string Value { get { return null; } }
 
     public Relationships() { }
@@ -56,14 +71,12 @@ namespace Innovator.Client
       if (item == null)
         return this;
 
-      var typeName = item.TypeName();
-      var list = LinkedListOps.Find(_relList, typeName);
-      if (list == null)
-      {
-        list = new ItemList() { Name = typeName };
-        _relList = LinkedListOps.Add(_relList, list);
-      }
-      list.Add(item);
+      if (this.ReadOnly)
+        throw new InvalidOperationException();
+
+      if (_relList == null)
+        _relList = new List<IReadOnlyItem>();
+      _relList.Add(item);
       return this;
     }
 
@@ -79,12 +92,12 @@ namespace Innovator.Client
 
     public IEnumerable<IElement> Elements()
     {
-      return LinkedListOps.Enumerate(_relList).SelectMany(l => l.OfType<IElement>());
+      return _relList.OfType<IElement>();
     }
 
     public IEnumerable<IReadOnlyItem> ByType(string type)
     {
-      return LinkedListOps.Find(_relList, type);
+      return _relList.OfType<IReadOnlyItem>().Where(i => i.TypeName() == type);
     }
 
     public void Remove()
@@ -127,7 +140,7 @@ namespace Innovator.Client
 
     IEnumerable<IReadOnlyElement> IReadOnlyElement.Elements()
     {
-      return this.Elements();
+      return _relList.OfType<IReadOnlyElement>();
     }
   }
 }

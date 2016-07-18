@@ -25,6 +25,24 @@ namespace PerfTests
         itemTypeAml = reader.ReadToEnd();
       }
 
+      var item1 = ElementFactory.Local.FromXml(itemTypeAml, "asdf", null);
+      //using (var xml = System.Xml.XmlWriter.Create(@"C:\Users\eric.domke\Documents\Code\InnovatorAdmin\PerfTests\Out.xml",
+      //  new System.Xml.XmlWriterSettings()
+      //  {
+      //    OmitXmlDeclaration = true,
+      //    Indent = true,
+      //    IndentChars = "  "
+      //  }))
+      //{
+      //  item1.ToAml(xml);
+      //}
+      var item2 = new System.Xml.XmlDocument();
+      item2.LoadXml(itemTypeAml);
+      var item3 = XDocument.Parse(itemTypeAml);
+      Console.WriteLine("Done");
+      Console.ReadKey();
+      return;
+
       var readKey = ConsoleKey.A;
       while (readKey != ConsoleKey.Enter)
       {

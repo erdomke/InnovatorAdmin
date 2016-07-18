@@ -284,6 +284,7 @@
     <Compile Include="Editor\CompletionData\CompletionList.cs" />
     <Compile Include="Editor\CompletionData\CompletionListBox.cs" />
     <Compile Include="Editor\CompletionData\CompletionWindow.cs" />
+    <Compile Include="Ide\OutputModelClasses.cs" />
     <Compile Include="Merge\GitDiffDirectory.cs" />
     <Compile Include="Merge\GitMergeOperation.cs" />
     <Compile Include="Merge\GitRepo.cs" />

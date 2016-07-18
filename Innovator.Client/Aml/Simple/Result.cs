@@ -83,11 +83,11 @@ namespace Innovator.Client
       if (items == null)
         throw _amlContext.NoItemsFoundException("?", _query ?? "?").SetDetails(_database, _query);
       var item = items.Single(i => true, i => i < 1
-          ? NewNoItemsException()
-          : NewServerException("Multiple items found when only one was expected")) as IItem;
+          ? (Exception)NewNoItemsException()
+          : new InvalidOperationException("Multiple items were found when only one was expected.")) as IItem;
       if (item != null && (string.IsNullOrEmpty(type) || item.TypeName() == type))
         return item;
-      throw NewServerException("Found item of type '{0}' when expecting item of type '{1}'", item.Type().Value, type);
+      throw new InvalidOperationException(string.Format("An item of type '{0}' was found while an item of type '{1}' was expected.", item.Type().Value, type));
     }
 
     public IEnumerable<IReadOnlyItem> AssertItems()
@@ -185,14 +185,6 @@ namespace Innovator.Client
     {
       return (this.Exception as NoItemsFoundException) ??
         _amlContext.NoItemsFoundException("?", _query ?? "?").SetDetails(_database, _query);
-    }
-    private ServerException NewServerException(string message)
-    {
-      return _amlContext.ServerException(message).SetDetails(_database, _query);
-    }
-    private ServerException NewServerException(string format, params object[] args)
-    {
-      return NewServerException(string.Format(format, args));
     }
 
     public override string ToString()

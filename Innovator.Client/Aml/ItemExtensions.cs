@@ -24,6 +24,31 @@ namespace Innovator.Client
       return result;
     }
 
+    /// <summary>Return a single item cast as the specified type.  If that
+    /// is not possible, throw an appropriate exception (e.g. the exception
+    /// returned by the server where possible)</summary>
+    public static T AssertItem<T>(this IReadOnlyResult result)
+    {
+      var item = result.AssertItem();
+      if (item is T)
+        return (T)item;
+
+      var typeName = item.Type().HasValue() ? item.Type().Value : item.GetType().Name;
+      throw new InvalidOperationException(string.Format("An item of type '{0}' was found while an item of type '{1}' was expected.", typeName, typeof(T).Name));
+    }
+    /// <summary>Return an item cast as the specified type if that type of
+    /// item can be derived from the property.  Otherwise, an exception
+    /// is thrown</summary>
+    public static T AsItem<T>(this IReadOnlyProperty_Item prop)
+    {
+      var item = prop.AsItem();
+      if (item is T)
+        return (T)item;
+
+      var typeName = item.Type().HasValue() ? item.Type().Value : item.GetType().Name;
+      throw new InvalidOperationException(string.Format("An item of type '{0}' was found while an item of type '{1}' was expected.", typeName, typeof(T).Name));
+    }
+
     /// <summary>
     /// Converts an AML node into an AML string
     /// </summary>
@@ -171,7 +196,7 @@ namespace Innovator.Client
     /// Indicates that the property is neither null nor empty
     /// </summary>
     /// <remarks>If the property is empty but has <c>is_null='0'</c>, then this will return <c>true</c></remarks>
-    public static bool HasValue(this IReadOnlyProperty prop)
+    public static bool HasValue(this IReadOnlyProperty_Base prop)
     {
       return prop.Exists
         && (!string.IsNullOrEmpty(prop.Value)
@@ -187,22 +212,20 @@ namespace Innovator.Client
     public static void Lock(this IItemRef item, IConnection conn)
     {
       var result = conn.Lock(item.TypeName(), item.Id());
+
+      var elem = item as Element;
+      if (elem != null && elem.ReadOnly)
+        return;
+
       var editable = item as IItem;
       if (editable != null)
         editable.LockedById().Set(result.LockedById().Value);
     }
     public static LockStatusType LockStatus(this IReadOnlyItem item, IConnection conn)
     {
-      var id = item.LockedById().AsString(null);
-      if (id == null) return LockStatusType.NotLocked;
-      if (id == conn.UserId) return LockStatusType.LockedByUser;
+      if (!item.LockedById().HasValue()) return LockStatusType.NotLocked;
+      if (item.LockedById().Value == conn.UserId) return LockStatusType.LockedByUser;
       return LockStatusType.LockedByOther;
-    }
-    internal static IItem Mutable(this IReadOnlyItem item)
-    {
-      var result = item as IItem;
-      if (result == null) throw new NotImplementedException();
-      return result;
     }
     public static IElement Add(this IElement elem, params object[] content)
     {
@@ -240,6 +263,11 @@ namespace Innovator.Client
     public static void Unlock(this IItemRef item, IConnection conn)
     {
       conn.Unlock(item.TypeName(), item.Id());
+
+      var elem = item as Element;
+      if (elem != null && elem.ReadOnly)
+        return;
+
       var editable = item as IItem;
       if (editable != null)
         editable.LockedById().Remove();
@@ -487,6 +515,58 @@ namespace Innovator.Client
         }
       }
       return result;
+    }
+
+
+    /// <summary>
+    /// Retrieve the Workflow Process Path by name
+    /// </summary>
+    public static IReadOnlyItem Path(this Model.Activity act, IConnection conn, string name)
+    {
+      var path = act.Relationships("Workflow Process Path").FirstOrDefault(i => i.Property("name").Value == name);
+      if (path != null) return path;
+      return conn.ItemByQuery(new Command(@"<Item type='Workflow Process Path' action='get'>
+                                              <source_id>@0</source_id>
+                                              <name>@1</name>
+                                            </Item>", act.Id(), name));
+    }
+    /// <summary>
+    /// Perform a vote for a specified assignment and path
+    /// </summary>
+    public static IReadOnlyResult PerformVote(this Model.Activity act, IConnection conn, string assignmentId, string pathName,
+      string comment = null)
+    {
+      var path = act.Path(conn, pathName);
+      return conn.Apply(new Command(@"<AML>
+                                        <Item type='Activity' action='EvaluateActivityEx'>
+                                          <Activity>@0</Activity>
+                                          <ActivityAssignment>@1</ActivityAssignment>
+                                          <Paths>
+                                            <Path id='@2'>@3</Path>
+                                          </Paths>
+                                          <DelegateTo>0</DelegateTo>
+                                          <Tasks/>
+                                          <Variables/>
+                                          <Authentication mode=''/>
+                                          <Comments>@4</Comments>
+                                          <Complete>1</Complete>
+                                        </Item>
+                                      </AML>", act.Id(), assignmentId, path.Id(), pathName,
+                                             comment));
+    }
+    public static void SetDurationByDate(this Model.Activity act, IConnection conn, DateTime dueDate, int minDuration = 1,
+                                  int maxDuration = int.MaxValue)
+    {
+      var props = act.LazyMap(conn, i => new {
+        ActiveDate = i.Property("active_date").AsDateTime(DateTime.Now)
+      });
+      var duration = Math.Min(Math.Max((dueDate.Date - props.ActiveDate.Date).Days,
+                                      minDuration), maxDuration);
+      act.Edit(conn, conn.AmlContext.Property("expected_duration", duration)).AssertNoError();
+    }
+    public static void SetIsAuto(this Model.Activity act, IConnection conn, bool isAuto)
+    {
+      act.Edit(conn, conn.AmlContext.Property("is_auto", isAuto)).AssertNoError();
     }
   }
 }

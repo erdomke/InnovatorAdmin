@@ -9,10 +9,16 @@ namespace Innovator.Client
   {
     private ElementFactory _amlContext;
     private string _name;
+    private ILinkedElement _next;
     private IElement _parent;
 
     public override ElementFactory AmlContext { get { return _amlContext; } }
     public override string Name { get { return _name; } }
+    public override ILinkedElement Next
+    {
+      get { return _next; }
+      set { _next = value; }
+    }
     public override IElement Parent
     {
       get { return _parent ?? NullElem; }
@@ -41,6 +47,5 @@ namespace Innovator.Client
 
     private static AmlElement _nullElem = new AmlElement((ElementFactory)null, null);
     public static AmlElement NullElem { get { return _nullElem; } }
-
   }
 }

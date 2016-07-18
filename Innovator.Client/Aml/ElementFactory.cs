@@ -24,13 +24,8 @@ namespace Innovator.Client
   /// </example>
   public class ElementFactory
   {
-    private IAmlDeserializer _deserializer;
     private IServerContext _context;
-
-    internal IAmlDeserializer Deserializer
-    {
-      get { return _deserializer; }
-    }
+    private IItemFactory _itemFactory;
 
     /// <summary>
     /// Context for serializing/deserializing native types (e.g. <c>DateTime</c>, <c>double</c>, <c>boolean</c>, etc.)
@@ -40,18 +35,28 @@ namespace Innovator.Client
       get { return _context; }
     }
 
-    public ElementFactory(IServerContext context, IAmlDeserializer deserializer = null)
+    public IItemFactory ItemFactory
     {
-      _context = context;
-      var defaultDeserializer = new FactoryDeserializer(this);
-      if (deserializer != null)
-        deserializer.SetDefault(defaultDeserializer);
-      _deserializer = deserializer ?? defaultDeserializer;
+      get { return _itemFactory; }
     }
 
-    public string FormatAmlValue(object value)
+    public ElementFactory(IServerContext context, IItemFactory itemFactory = null)
     {
-      return _context.Format(value);
+      _context = context;
+      _itemFactory = itemFactory ?? new DefaultItemFactory();
+    }
+
+    /// <summary>
+    /// Formats an AML string by substituting the @0 style parameters with the
+    /// arguments specified.
+    /// </summary>
+    /// <param name="format">Query to format</param>
+    /// <param name="args">Arguments to substitute into the query</param>
+    public string FormatAml(string format, params object[] args)
+    {
+      var sub = new ParameterSubstitution();
+      sub.AddIndexedParameters(args);
+      return sub.Substitute(format, _context);
     }
 
     /// <summary>Return a result from an AML string</summary>
@@ -60,7 +65,7 @@ namespace Innovator.Client
       using (var strReader = new StringReader(xml))
       using (var xmlReader = XmlReader.Create(strReader))
       {
-        return _deserializer.FromXml(xmlReader);
+        return FromXml(xmlReader);
       }
     }
     /// <summary>Return a result from a stream</summary>
@@ -68,7 +73,7 @@ namespace Innovator.Client
     {
       using (var xmlReader = XmlReader.Create(xml))
       {
-        return _deserializer.FromXml(xmlReader);
+        return FromXml(xmlReader);
       }
     }
     /// <summary>Return a result from an AML text reader</summary>
@@ -76,13 +81,13 @@ namespace Innovator.Client
     {
       using (var xmlReader = XmlReader.Create(xml))
       {
-        return _deserializer.FromXml(xmlReader);
+        return FromXml(xmlReader);
       }
     }
     /// <summary>Return a result from an XML reader</summary>
     public IResult FromXml(XmlReader xml)
     {
-      return _deserializer.FromXml(xml);
+      return (IResult)FromXml(xml, null, null);
     }
     /// <summary>Return a result from an AML string indicating that it is the result of a query performed on a specific connection</summary>
     public IReadOnlyResult FromXml(string xml, string query, IConnection conn)
@@ -90,7 +95,7 @@ namespace Innovator.Client
       using (var strReader = new StringReader(xml))
       using (var xmlReader = XmlReader.Create(strReader))
       {
-        return _deserializer.FromXml(xmlReader, query, conn == null ? null : conn.Database);
+        return FromXml(xmlReader, query, conn == null ? null : conn.Database);
       }
     }
     /// <summary>Return a result from an AML stream indicating that it is the result of a query performed on a specific connection</summary>
@@ -98,8 +103,74 @@ namespace Innovator.Client
     {
       using (var xmlReader = XmlReader.Create(xml))
       {
-        return _deserializer.FromXml(xmlReader, query, conn == null ? null : conn.Database);
+        return FromXml(xmlReader, query, conn == null ? null : conn.Database);
       }
+    }
+    /// <summary>Return a result from an XmlReader indicating that it is the result of a query performed on a specific connection</summary>
+    public IReadOnlyResult FromXml(XmlReader xml, string query, string database)
+    {
+      var writer = new ResultWriter(this, database, query);
+
+      var num = (xml.NodeType == XmlNodeType.None) ? -1 : xml.Depth;
+      do
+      {
+        switch (xml.NodeType)
+        {
+          case XmlNodeType.Element:
+            writer.WriteStartElement(xml.Prefix, xml.LocalName, xml.NamespaceURI);
+            var empty = xml.IsEmptyElement;
+            if (xml.MoveToFirstAttribute())
+            {
+              do
+              {
+                writer.WriteStartAttribute(xml.Prefix, xml.LocalName, xml.NamespaceURI);
+                while (xml.ReadAttributeValue())
+                {
+                  if (xml.NodeType == XmlNodeType.EntityReference)
+                  {
+                    writer.WriteEntityRef(xml.Name);
+                  }
+                  else
+                  {
+                    writer.WriteString(xml.Value);
+                  }
+                }
+                writer.WriteEndAttribute();
+              }
+              while (xml.MoveToNextAttribute());
+            }
+            if (empty)
+            {
+              writer.WriteEndElement();
+            }
+            break;
+          case XmlNodeType.Text:
+            writer.WriteString(xml.Value);
+            break;
+          case XmlNodeType.CDATA:
+            writer.WriteCData(xml.Value);
+            break;
+          case XmlNodeType.EntityReference:
+            writer.WriteEntityRef(xml.Name);
+            break;
+          case XmlNodeType.SignificantWhitespace:
+            writer.WriteWhitespace(xml.Value);
+            break;
+          case XmlNodeType.EndElement:
+            writer.WriteFullEndElement();
+            break;
+
+            //Just ignore the following
+            //case XmlNodeType.Whitespace:
+            //case XmlNodeType.ProcessingInstruction:
+            //case XmlNodeType.XmlDeclaration:
+            //case XmlNodeType.Comment:
+            //case XmlNodeType.DocumentType:
+        }
+      }
+      while (xml.Read() && (num < xml.Depth || (num == xml.Depth && xml.NodeType == XmlNodeType.EndElement)));
+
+      return writer.Result;
     }
 
     /// <summary>Create a new action attribute tag</summary>
@@ -217,6 +288,19 @@ namespace Innovator.Client
     /// <summary>Create a new <c>Item</c> AML tag</summary>
     public IItem Item(params object[] content)
     {
+      var type = content
+        .OfType<IReadOnlyAttribute>()
+        .FirstOrDefault(a => a.Name == "type");
+      if (type != null)
+      {
+        var result = _itemFactory.NewItem(this, type.Value);
+        if (result != null)
+        {
+          result.Add(content);
+          return result;
+        }
+      }
+
       return new Item(this, content);
     }
     /// <summary>Create a new <c>keyed_name</c> property</summary>
@@ -461,90 +545,5 @@ namespace Innovator.Client
 
     /// <summary>Generate a new factory assuming the local time zone and culture</summary>
     public static readonly ElementFactory Local = new ElementFactory(new ServerContext());
-
-    private class FactoryDeserializer : IAmlDeserializer
-    {
-      private ElementFactory _factory;
-
-      public FactoryDeserializer(ElementFactory factory)
-      {
-        _factory = factory;
-      }
-
-      public IResult FromXml(XmlReader xml)
-      {
-        return (IResult)FromXml(xml, null, null);
-      }
-
-      public IReadOnlyResult FromXml(XmlReader xml, string query, string database)
-      {
-        var writer = new ResultWriter(_factory, database, query);
-
-        var num = (xml.NodeType == XmlNodeType.None) ? -1 : xml.Depth;
-        do
-        {
-          switch (xml.NodeType)
-          {
-            case XmlNodeType.Element:
-              writer.WriteStartElement(xml.Prefix, xml.LocalName, xml.NamespaceURI);
-              if (xml.MoveToFirstAttribute())
-              {
-                do
-                {
-                  writer.WriteStartAttribute(xml.Prefix, xml.LocalName, xml.NamespaceURI);
-                  while (xml.ReadAttributeValue())
-                  {
-                    if (xml.NodeType == XmlNodeType.EntityReference)
-                    {
-                      writer.WriteEntityRef(xml.Name);
-                    }
-                    else
-                    {
-                      writer.WriteString(xml.Value);
-                    }
-                  }
-                  writer.WriteEndAttribute();
-                }
-                while (xml.MoveToNextAttribute());
-              }
-              if (xml.IsEmptyElement)
-              {
-                writer.WriteEndElement();
-              }
-              break;
-            case XmlNodeType.Text:
-              writer.WriteString(xml.Value);
-              break;
-            case XmlNodeType.CDATA:
-              writer.WriteCData(xml.Value);
-              break;
-            case XmlNodeType.EntityReference:
-              writer.WriteEntityRef(xml.Name);
-              break;
-            case XmlNodeType.SignificantWhitespace:
-              writer.WriteWhitespace(xml.Value);
-              break;
-            case XmlNodeType.EndElement:
-              writer.WriteFullEndElement();
-              break;
-
-            //Just ignore the following
-            //case XmlNodeType.Whitespace:
-            //case XmlNodeType.ProcessingInstruction:
-            //case XmlNodeType.XmlDeclaration:
-            //case XmlNodeType.Comment:
-            //case XmlNodeType.DocumentType:
-          }
-        }
-        while (xml.Read() && (num < xml.Depth || (num == xml.Depth && xml.NodeType == XmlNodeType.EndElement)));
-
-        return writer.Result;
-      }
-
-      public void SetDefault(IAmlDeserializer defaultImpl)
-      {
-        // do nothing
-      }
-    }
   }
 }

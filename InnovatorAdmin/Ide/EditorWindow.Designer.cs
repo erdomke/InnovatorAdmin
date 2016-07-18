@@ -156,6 +156,7 @@
       this.pnlLeftTop = new System.Windows.Forms.Panel();
       this.pnlRightTop = new System.Windows.Forms.Panel();
       this.pnlConnectionShadow = new InnovatorAdmin.DropShadow();
+      this.lnkCreateModelFiles = new System.Windows.Forms.LinkLabel();
       this.tblMain.SuspendLayout();
       this.tblHeader.SuspendLayout();
       this.menuStrip.SuspendLayout();
@@ -1150,6 +1151,7 @@
       this.flowLayoutPanel2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+      this.flowLayoutPanel2.Controls.Add(this.lnkCreateModelFiles);
       this.flowLayoutPanel2.Controls.Add(this.lnkGitMergeHelper);
       this.flowLayoutPanel2.Controls.Add(this.lnkWriteMergeScripts);
       this.flowLayoutPanel2.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
@@ -1162,7 +1164,7 @@
       // lnkGitMergeHelper
       // 
       this.lnkGitMergeHelper.AutoSize = true;
-      this.lnkGitMergeHelper.Location = new System.Drawing.Point(3, 3);
+      this.lnkGitMergeHelper.Location = new System.Drawing.Point(3, 16);
       this.lnkGitMergeHelper.Margin = new System.Windows.Forms.Padding(3);
       this.lnkGitMergeHelper.Name = "lnkGitMergeHelper";
       this.lnkGitMergeHelper.Size = new System.Drawing.Size(95, 13);
@@ -1174,7 +1176,7 @@
       // lnkWriteMergeScripts
       // 
       this.lnkWriteMergeScripts.AutoSize = true;
-      this.lnkWriteMergeScripts.Location = new System.Drawing.Point(3, 22);
+      this.lnkWriteMergeScripts.Location = new System.Drawing.Point(3, 35);
       this.lnkWriteMergeScripts.Margin = new System.Windows.Forms.Padding(3);
       this.lnkWriteMergeScripts.Name = "lnkWriteMergeScripts";
       this.lnkWriteMergeScripts.Size = new System.Drawing.Size(200, 13);
@@ -1300,7 +1302,7 @@
       this.pgHtml.Location = new System.Drawing.Point(4, 25);
       this.pgHtml.Name = "pgHtml";
       this.pgHtml.Padding = new System.Windows.Forms.Padding(3);
-      this.pgHtml.Size = new System.Drawing.Size(758, 363);
+      this.pgHtml.Size = new System.Drawing.Size(758, 384);
       this.pgHtml.TabIndex = 2;
       this.pgHtml.Text = "Report";
       this.pgHtml.UseVisualStyleBackColor = true;
@@ -1311,7 +1313,7 @@
       this.browser.Location = new System.Drawing.Point(3, 3);
       this.browser.MinimumSize = new System.Drawing.Size(20, 20);
       this.browser.Name = "browser";
-      this.browser.Size = new System.Drawing.Size(752, 357);
+      this.browser.Size = new System.Drawing.Size(752, 378);
       this.browser.TabIndex = 0;
       // 
       // pgTableOutput
@@ -1320,7 +1322,7 @@
       this.pgTableOutput.Location = new System.Drawing.Point(4, 25);
       this.pgTableOutput.Margin = new System.Windows.Forms.Padding(0);
       this.pgTableOutput.Name = "pgTableOutput";
-      this.pgTableOutput.Size = new System.Drawing.Size(758, 363);
+      this.pgTableOutput.Size = new System.Drawing.Size(758, 384);
       this.pgTableOutput.TabIndex = 1;
       this.pgTableOutput.Text = "Table";
       this.pgTableOutput.UseVisualStyleBackColor = true;
@@ -1335,7 +1337,7 @@
       this.dgvItems.Location = new System.Drawing.Point(0, 0);
       this.dgvItems.Margin = new System.Windows.Forms.Padding(0);
       this.dgvItems.Name = "dgvItems";
-      this.dgvItems.Size = new System.Drawing.Size(758, 363);
+      this.dgvItems.Size = new System.Drawing.Size(758, 384);
       this.dgvItems.TabIndex = 0;
       this.dgvItems.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.Grid_MouseDoubleClick);
       // 
@@ -1582,6 +1584,17 @@
       this.pnlConnectionShadow.Size = new System.Drawing.Size(996, 4);
       this.pnlConnectionShadow.TabIndex = 17;
       // 
+      // lnkCreateModelFiles
+      // 
+      this.lnkCreateModelFiles.AutoSize = true;
+      this.lnkCreateModelFiles.Location = new System.Drawing.Point(3, 0);
+      this.lnkCreateModelFiles.Name = "lnkCreateModelFiles";
+      this.lnkCreateModelFiles.Size = new System.Drawing.Size(102, 13);
+      this.lnkCreateModelFiles.TabIndex = 2;
+      this.lnkCreateModelFiles.TabStop = true;
+      this.lnkCreateModelFiles.Text = "Create Model Files";
+      this.lnkCreateModelFiles.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkCreateModelFiles_LinkClicked);
+      // 
       // EditorWindow
       // 
       this.AcceptButton = this.btnOk;
@@ -1763,5 +1776,6 @@
     private System.Windows.Forms.LinkLabel lnkGitMergeHelper;
     private System.Windows.Forms.LinkLabel lnkWriteMergeScripts;
     private Controls.FlatButton btnCompare;
+    private System.Windows.Forms.LinkLabel lnkCreateModelFiles;
   }
 }

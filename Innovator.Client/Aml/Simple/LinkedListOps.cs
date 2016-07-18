@@ -68,7 +68,8 @@ namespace Innovator.Client
     }
     public static T Remove<T>(T lastLink, T removeLink) where T : class, ILink<T>
     {
-      if (lastLink == null || lastLink == removeLink)
+      if (lastLink == null
+        || (lastLink == removeLink && removeLink.Next == removeLink))
         return null;
 
       T prev;
@@ -80,7 +81,7 @@ namespace Innovator.Client
         if (curr == removeLink)
         {
           prev.Next = curr.Next;
-          return lastLink;
+          return curr == lastLink ? prev : lastLink;
         }
       }
       while (curr != lastLink);

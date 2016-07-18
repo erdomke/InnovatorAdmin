@@ -17,6 +17,7 @@ namespace Innovator.Client
     protected string _value;
     private bool _inElement;
     private IElementWriter _base;
+    private bool _readOnly;
 
     private Result _result;
     private Stack<string> _names;
@@ -26,6 +27,7 @@ namespace Innovator.Client
       _factory = factory;
       _result = new Result(factory, database, query);
       _names = new Stack<string>();
+      _readOnly = !string.IsNullOrEmpty(query);
     }
 
     public override WriteState WriteState
@@ -198,13 +200,13 @@ namespace Innovator.Client
           case "Item":
             if (_names.Count < 1 || _names.Peek() != "Message")
             {
-              _base = new ItemElementWriter(_factory);
+              _base = new ItemElementWriter(_factory) { ReadOnly = _readOnly };
               _base.Complete += OnComplete;
               _base.WriteStartElement(name);
             }
             break;
           case "SOAP-ENV:Fault":
-            _base = new AmlElementWriter(_factory);
+            _base = new AmlElementWriter(_factory) { ReadOnly = _readOnly };
             _base.Complete += OnComplete;
             _base.WriteStartElement(name);
             break;
@@ -310,6 +312,7 @@ namespace Innovator.Client
       private Stack<IElement> _stack;
       private IElement _result;
 
+      public bool ReadOnly { get; set; }
       public IElement Result { get { return _result; } }
 
       public ItemElementWriter(ElementFactory factory)
@@ -321,6 +324,24 @@ namespace Innovator.Client
       public void WriteEndAttribute(string name, string value)
       {
         var peek = _stack.Peek();
+        if (name == "type" && _factory.ItemFactory != null && peek is Item)
+        {
+          peek = _factory.ItemFactory.NewItem(_factory, value);
+          if (peek == null)
+          {
+            peek = _stack.Peek();
+          }
+          else
+          {
+            var old = _stack.Pop();
+            old.Remove();
+            peek.Add(old.Attributes());
+            if (ReadOnly)
+              ((Item)peek).SetFlag(ElementAttribute.FromDataStore);
+            PushElement(peek);
+          }
+        }
+
         switch (name)
         {
           case "id":
@@ -351,8 +372,62 @@ namespace Innovator.Client
       public void WriteEndElement(string value)
       {
         if (value != null)
-          _stack.Peek().Add(value);
-        _stack.Pop();
+        {
+          var peek = _stack.Peek();
+          peek.Add(value);
+          if (ReadOnly)
+          {
+            var item = peek.Parent as Item;
+            switch (peek.Name)
+            {
+              case "generation":
+                if (item != null && value == "1")
+                {
+                  item.SetFlag(ElementAttribute.ItemDefaultGeneration);
+                  peek.Remove();
+                }
+                break;
+              case "is_current":
+                if (item != null && value == "1")
+                {
+                  item.SetFlag(ElementAttribute.ItemDefaultIsCurrent);
+                  peek.Remove();
+                }
+                break;
+              case "is_released":
+                if (item != null && value == "0")
+                {
+                  item.SetFlag(ElementAttribute.ItemDefaultIsReleased);
+                  peek.Remove();
+                }
+                break;
+              case "major_rev":
+                if (item != null && value == "A")
+                {
+                  item.SetFlag(ElementAttribute.ItemDefaultMajorRev);
+                  peek.Remove();
+                }
+                break;
+              case "new_version":
+                if (item != null && value == "0")
+                {
+                  item.SetFlag(ElementAttribute.ItemDefaultNewVersion);
+                  peek.Remove();
+                }
+                break;
+              case "not_lockable":
+                if (item != null && value == "0")
+                {
+                  item.SetFlag(ElementAttribute.ItemDefaultNotLockable);
+                  peek.Remove();
+                }
+                break;
+            }
+          }
+        }
+        var elem = _stack.Pop() as Element;
+        if (elem != null)
+          elem.ReadOnly = ReadOnly;
         if (_stack.Count < 1)
           OnComplete(EventArgs.Empty);
       }
@@ -364,6 +439,8 @@ namespace Innovator.Client
         {
           case "Item":
             curr = new Item(_factory);
+            if (ReadOnly)
+              ((Item)curr).SetFlag(ElementAttribute.FromDataStore);
             break;
           case "Relationships":
             curr = new Relationships(_stack.Peek());
@@ -377,23 +454,28 @@ namespace Innovator.Client
             curr = new Property(_stack.Peek(), name);
             break;
         }
+        PushElement(curr);
+      }
+
+      private void PushElement(IElement element)
+      {
         if (_stack.Count > 0)
         {
           var elem = _stack.Peek() as Element;
           if (elem == null)
           {
-            _stack.Peek().Add(curr);
+            _stack.Peek().Add(element);
           }
           else
           {
-            elem.QuickAddElement((ILinkedElement)curr);
+            elem.QuickAddElement((ILinkedElement)element);
           }
         }
         else
         {
-          _result = curr;
+          _result = element;
         }
-        _stack.Push(curr);
+        _stack.Push(element);
       }
 
       protected virtual void OnComplete(EventArgs e)
@@ -402,30 +484,30 @@ namespace Innovator.Client
           Complete.Invoke(this, e);
       }
 
-      private Item Normalize(Item item)
-      {
-        var idProp = item.Property("id");
-        if (idProp.Exists && idProp.Value.IsGuid())
-        {
-          var typeAttr = item.Type();
-          var idTypeAttr = idProp.Type();
-          if (idTypeAttr.HasValue() && !typeAttr.HasValue())
-          {
-            typeAttr.Set(idTypeAttr.Value);
-          }
+      //private Item Normalize(Item item)
+      //{
+      //  var idProp = item.Property("id");
+      //  if (idProp.Exists && idProp.Value.IsGuid())
+      //  {
+      //    var typeAttr = item.Type();
+      //    var idTypeAttr = idProp.Type();
+      //    if (idTypeAttr.HasValue() && !typeAttr.HasValue())
+      //    {
+      //      typeAttr.Set(idTypeAttr.Value);
+      //    }
 
-          var keyedNameProp = item.KeyedName();
-          var idKeyedNameAttr = idProp.KeyedName();
-          if (idKeyedNameAttr.HasValue() && !keyedNameProp.HasValue())
-          {
-            keyedNameProp.Set(idKeyedNameAttr.Value);
-          }
+      //    var keyedNameProp = item.KeyedName();
+      //    var idKeyedNameAttr = idProp.KeyedName();
+      //    if (idKeyedNameAttr.HasValue() && !keyedNameProp.HasValue())
+      //    {
+      //      keyedNameProp.Set(idKeyedNameAttr.Value);
+      //    }
 
-          idProp.Remove();
-        }
+      //    idProp.Remove();
+      //  }
 
-        return item;
-      }
+      //  return item;
+      //}
     }
 
     private class AmlElementWriter : IElementWriter
@@ -436,6 +518,7 @@ namespace Innovator.Client
 
       public event EventHandler Complete;
 
+      public bool ReadOnly { get; set; }
       public Element Root { get { return _root; } }
 
       public AmlElementWriter(ElementFactory factory)
@@ -454,6 +537,7 @@ namespace Innovator.Client
         {
           _curr.Value = value;
         }
+        _curr.ReadOnly = ReadOnly;
         _curr = _curr.Parent as Element;
         if (_curr == null
           || (!_curr.Exists && _root != _curr))

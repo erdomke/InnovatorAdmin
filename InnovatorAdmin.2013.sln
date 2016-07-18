@@ -37,8 +37,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnovatorAdmin.Wpf", "Innov
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICSharpCode.AvalonEdit", "ICSharpCode.AvalonEdit\ICSharpCode.AvalonEdit.csproj", "{6C55B776-26D4-4DB3-A6AB-87E783B2F3D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Innovator.Client.ModelBuilder", "Innovator.Client.ModelBuilder\Innovator.Client.ModelBuilder.csproj", "{482C5564-F462-4C3C-877D-B6678A30F9B2}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerfTests", "PerfTests\PerfTests.csproj", "{34BAC306-54C2-4958-B8C5-154094CC7743}"
 EndProject
 Global
@@ -363,42 +361,6 @@ Global
 		{6C55B776-26D4-4DB3-A6AB-87E783B2F3D1}.Release|WithNRefactory.ActiveCfg = Release|WithNRefactory
 		{6C55B776-26D4-4DB3-A6AB-87E783B2F3D1}.Release|WithNRefactory.Build.0 = Release|WithNRefactory
 		{6C55B776-26D4-4DB3-A6AB-87E783B2F3D1}.Release|x86.ActiveCfg = Release|WithNRefactory
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Debug|Net35.ActiveCfg = Debug|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Debug|Net35.Build.0 = Debug|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Debug|Net40.ActiveCfg = Debug|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Debug|Net40.Build.0 = Debug|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Debug|WithNRefactory.ActiveCfg = Debug|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Debug|WithNRefactory.Build.0 = Debug|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Debug|x86.Build.0 = Debug|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release 3.5|Any CPU.ActiveCfg = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release 3.5|Any CPU.Build.0 = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release 3.5|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release 3.5|Mixed Platforms.Build.0 = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release 3.5|Net35.ActiveCfg = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release 3.5|Net35.Build.0 = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release 3.5|Net40.ActiveCfg = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release 3.5|Net40.Build.0 = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release 3.5|WithNRefactory.ActiveCfg = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release 3.5|WithNRefactory.Build.0 = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release 3.5|x86.ActiveCfg = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release 3.5|x86.Build.0 = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release|Net35.ActiveCfg = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release|Net35.Build.0 = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release|Net40.ActiveCfg = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release|Net40.Build.0 = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release|WithNRefactory.ActiveCfg = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release|WithNRefactory.Build.0 = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release|x86.ActiveCfg = Release|Any CPU
-		{482C5564-F462-4C3C-877D-B6678A30F9B2}.Release|x86.Build.0 = Release|Any CPU
 		{34BAC306-54C2-4958-B8C5-154094CC7743}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{34BAC306-54C2-4958-B8C5-154094CC7743}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34BAC306-54C2-4958-B8C5-154094CC7743}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

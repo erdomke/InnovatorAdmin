@@ -230,4 +230,16 @@ namespace Innovator.Client
       return this.Aml;
     }
   }
+
+
+  public class Test : Item
+  {
+    /// <summary>
+    /// Property asdfasdf
+    /// </summary>
+    public IReadOnlyProperty_Boolean BoolProp()
+    {
+      return Property("prop_name");
+    }
+  }
 }

@@ -1168,7 +1168,7 @@ namespace InnovatorAdmin
                               + g.Select(i => i.Item2).Distinct().Aggregate((p, c) => p + "," + c)
                               + "\" />");
       var resultItems = queries.SelectMany(q => _conn.Apply(q).Items())
-                               .ToDictionary(e => ItemReference.FromFullItem(e, false), e => e.ConfigId().AsString(""));
+                               .ToDictionary(e => ItemReference.FromFullItem(e, false), e => e.ConfigId().Value ?? "");
       result.VisitDescendantsAndSelf(e =>
       {
         string configId;

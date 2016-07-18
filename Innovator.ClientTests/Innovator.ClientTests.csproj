@@ -78,7 +78,6 @@
     <Compile Include="Connection\ConnectionExtensionsTests.cs" />
     <Compile Include="TestConnection.cs" />
     <Compile Include="Connection\DefaultHttpServiceTests.cs" />
-    <Compile Include="ItemTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UploadCommandTests.cs" />
   </ItemGroup>

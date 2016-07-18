@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Innovator.Client;
+using Innovator.Client.Model;
 
 namespace Innovator.Server
 {
@@ -49,7 +50,7 @@ namespace Innovator.Server
     public WorkflowContext(IServerConnection conn, IReadOnlyItem item)
     {
       _conn = conn;
-      _activity = new Activity(item);
+      _activity = item as Activity;
       _result = conn.AmlContext.Result();
       switch (item.Property("WorkflowEvent").Value)
       {

@@ -45,57 +45,57 @@ namespace Innovator.Client
       return this.Value;
     }
 
-    #region IReadOnlyValue
+    #region IReadOnlyProperty
 
-    bool? IReadOnlyValue.AsBoolean()
+    public bool? AsBoolean()
     {
       throw new NotSupportedException();
     }
-    bool IReadOnlyValue.AsBoolean(bool defaultValue)
+    public bool AsBoolean(bool defaultValue)
     {
       throw new NotSupportedException();
     }
-    DateTime? IReadOnlyValue.AsDateTime()
+    public DateTime? AsDateTime()
     {
       throw new NotSupportedException();
     }
-    DateTime IReadOnlyValue.AsDateTime(DateTime defaultValue)
+    public DateTime AsDateTime(DateTime defaultValue)
     {
       throw new NotSupportedException();
     }
-    DateTime? IReadOnlyValue.AsDateTimeUtc()
+    public DateTime? AsDateTimeUtc()
     {
       throw new NotSupportedException();
     }
-    DateTime IReadOnlyValue.AsDateTimeUtc(DateTime defaultValue)
+    public DateTime AsDateTimeUtc(DateTime defaultValue)
     {
       throw new NotSupportedException();
     }
-    double? IReadOnlyValue.AsDouble()
+    public double? AsDouble()
     {
       throw new NotSupportedException();
     }
-    double IReadOnlyValue.AsDouble(double defaultValue)
+    public double AsDouble(double defaultValue)
     {
       throw new NotSupportedException();
     }
-    int? IReadOnlyValue.AsInt()
+    public int? AsInt()
     {
       throw new NotSupportedException();
     }
-    int IReadOnlyValue.AsInt(int defaultValue)
+    public int AsInt(int defaultValue)
     {
       throw new NotSupportedException();
     }
-    IReadOnlyItem IReadOnlyProperty.AsItem()
+    public IReadOnlyItem AsItem()
     {
       return _parent as IReadOnlyItem;
     }
-    long? IReadOnlyValue.AsLong()
+    public long? AsLong()
     {
       throw new NotSupportedException();
     }
-    long IReadOnlyValue.AsLong(long defaultValue)
+    public long AsLong(long defaultValue)
     {
       throw new NotSupportedException();
     }

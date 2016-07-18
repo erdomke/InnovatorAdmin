@@ -726,10 +726,10 @@ end]]></sqlserver_body>
         while (j < cols.Length && cols[j].ColumnName.StartsWith(prefix))
         {
           await writer.WriteAttributeStringAsync(null, cols[j].ColumnName.Substring(prefix.Length), null
-            , factory.FormatAmlValue(_row[cols[j]]));
+            , factory.LocalizationContext.Format(_row[cols[j]]));
           j++;
         }
-        await writer.WriteStringAsync(factory.FormatAmlValue(_row[cols[i]]));
+        await writer.WriteStringAsync(factory.LocalizationContext.Format(_row[cols[i]]));
         await writer.WriteEndElementAsync();
         i += (j - i) - 1;
       }

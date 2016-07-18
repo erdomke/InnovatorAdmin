@@ -9,10 +9,9 @@ namespace Innovator.Client
 {
   public abstract class Element : IElement, ILinkedElement
   {
-    private ElementAttribute _attr;
+    protected ElementAttribute _attr;
     protected object _content;
     private ILinkedAnnotation _lastAttr;
-    internal protected ILinkedElement _next;
 
     public virtual ElementFactory AmlContext
     {
@@ -23,17 +22,9 @@ namespace Innovator.Client
         return null;
       }
     }
-    public virtual bool Exists { get { return _next != null; } }
+    public virtual bool Exists { get { return Next != null; } }
     public abstract string Name { get; }
-    public virtual ILinkedElement Next
-    {
-      get { return _next; }
-      set
-      {
-        if (!string.IsNullOrEmpty(Name))
-          _next = value;
-      }
-    }
+    public abstract ILinkedElement Next { get; set; }
     public abstract IElement Parent { get; set; }
     IReadOnlyElement IReadOnlyElement.Parent { get { return this.Parent; } }
     public string Value
@@ -42,6 +33,9 @@ namespace Innovator.Client
       {
         if (_content != null && AmlContext != null)
           return AmlContext.LocalizationContext.Format(_content);
+        var str = _content as string;
+        if (str != null)
+          return str;
         return null;
       }
       set { _content = value; }
@@ -185,7 +179,7 @@ namespace Innovator.Client
       return LinkedListOps.Enumerate(_lastAttr).OfType<IAttribute>();
     }
 
-    public IEnumerable<IElement> Elements()
+    public virtual IEnumerable<IElement> Elements()
     {
       return LinkedListOps.Enumerate(_content as ILinkedElement).OfType<IElement>();
     }
@@ -207,14 +201,14 @@ namespace Innovator.Client
       if (Exists)
       {
         var elem = this.Parent as Element;
-        if (elem != null)
+        if (elem != null && elem.Exists)
           elem.RemoveNode(this);
       }
     }
     internal void RemoveAttribute(Attribute attr)
     {
       AssertModifiable();
-      LinkedListOps.Remove(_lastAttr, attr);
+      _lastAttr = LinkedListOps.Remove(_lastAttr, attr);
     }
     public void RemoveAttributes()
     {
@@ -227,7 +221,7 @@ namespace Innovator.Client
       var lastElem = _content as ILinkedElement;
       if (lastElem == null)
         return;
-      LinkedListOps.Remove(lastElem, elem);
+      _content = LinkedListOps.Remove(lastElem, elem);
     }
     public void RemoveNodes()
     {
@@ -294,11 +288,11 @@ namespace Innovator.Client
       var elem = _content as ILinkedElement;
       if (elem == null)
       {
-        writer.WriteString(AmlContext.LocalizationContext.Format(_content));
+        writer.WriteString(this.Value);
       }
       else
       {
-        var elems = LinkedListOps.Enumerate(elem).ToArray();
+        var elems = Elements().ToArray();
         var item = elems.OfType<IReadOnlyItem>().FirstOrDefault();
         if (this is IReadOnlyProperty
           && !settings.ExpandPropertyItems
@@ -313,7 +307,7 @@ namespace Innovator.Client
         }
         else
         {
-          foreach (var e in elems.OfType<IAmlNode>())
+          foreach (var e in elems)
           {
             e.ToAml(writer, settings);
           }

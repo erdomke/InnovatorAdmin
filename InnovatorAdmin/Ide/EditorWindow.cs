@@ -2303,5 +2303,18 @@ namespace InnovatorAdmin
         Utils.HandleError(ex);
       }
     }
+
+    private async void lnkCreateModelFiles_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    {
+      try
+      {
+        var output = new OutputModelClasses(_proxy.ConnData.ArasLogin());
+        await output.Run();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
   }
 }

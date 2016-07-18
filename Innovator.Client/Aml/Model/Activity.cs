@@ -1,66 +1,142 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Innovator.Client;
+using System;
 
-namespace Innovator.Client
+namespace Innovator.Client.Model
 {
-  /// <summary>
-  /// Wrapper for items representing Activities
-  /// </summary>
-  public class Activity : ItemWrapper
+  ///<summary>Class for the item type Activity </summary>
+  public class Activity : Item
   {
-    public Activity(IReadOnlyItem item) : base(item) { }
-
-    /// <summary>
-    /// Retrieve the Workflow Process Path by name
-    /// </summary>
-    public IReadOnlyItem Path(IConnection conn, string name)
+    protected Activity() { }
+    public Activity(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    /// <summary>Retrieve the <c>active_date</c> property of the item</summary>
+    public IProperty_Date ActiveDate()
     {
-      var path = this.Relationships("Workflow Process Path").FirstOrDefault(i => i.Property("name").Value == name);
-      if (path != null) return path;
-      return conn.ItemByQuery(new Command(@"<Item type='Workflow Process Path' action='get'>
-                                              <source_id>@0</source_id>
-                                              <name>@1</name>
-                                            </Item>", this.Id(), name));
+      return this.Property("active_date");
     }
-    /// <summary>
-    /// Perform a vote for a specified assignment and path
-    /// </summary>
-    public IReadOnlyResult PerformVote(IConnection conn, string assignmentId, string pathName, 
-      string comment = null)
+    /// <summary>Retrieve the <c>can_delegate</c> property of the item</summary>
+    public IProperty_Boolean CanDelegate()
     {
-      var path = Path(conn, pathName);
-      return conn.Apply(new Command(@"<AML>
-                                        <Item type='Activity' action='EvaluateActivityEx'>
-                                          <Activity>@0</Activity>
-                                          <ActivityAssignment>@1</ActivityAssignment>
-                                          <Paths>
-                                            <Path id='@2'>@3</Path>
-                                          </Paths>
-                                          <DelegateTo>0</DelegateTo>
-                                          <Tasks/>
-                                          <Variables/>
-                                          <Authentication mode=''/>
-                                          <Comments>@4</Comments>
-                                          <Complete>1</Complete>
-                                        </Item>
-                                      </AML>", this.Id(), assignmentId, path.Id(), pathName,
-                                             comment));
+      return this.Property("can_delegate");
     }
-    public void SetDurationByDate(IConnection conn, DateTime dueDate, int minDuration = 1, 
-                                  int maxDuration = int.MaxValue)
+    /// <summary>Retrieve the <c>can_refuse</c> property of the item</summary>
+    public IProperty_Boolean CanRefuse()
     {
-      var props = this.LazyMap(conn, i => new { 
-        ActiveDate = i.Property("active_date").AsDateTime(DateTime.Now) 
-      });
-      var duration = Math.Min(Math.Max((dueDate.Date - props.ActiveDate.Date).Days, 
-                                      minDuration), maxDuration);
-      this.Edit(conn, conn.AmlContext.Property("expected_duration", duration)).AssertNoError();
+      return this.Property("can_refuse");
     }
-    public void SetIsAuto(IConnection conn, bool isAuto)
+    /// <summary>Retrieve the <c>cloned_as</c> property of the item</summary>
+    public IProperty_Item ClonedAs()
     {
-      this.Edit(conn, conn.AmlContext.Property("is_auto", isAuto)).AssertNoError();
+      return this.Property("cloned_as");
+    }
+    /// <summary>Retrieve the <c>closed_date</c> property of the item</summary>
+    public IProperty_Date ClosedDate()
+    {
+      return this.Property("closed_date");
+    }
+    /// <summary>Retrieve the <c>consolidate_ondelegate</c> property of the item</summary>
+    public IProperty_Boolean ConsolidateOndelegate()
+    {
+      return this.Property("consolidate_ondelegate");
+    }
+    /// <summary>Retrieve the <c>escalate_to</c> property of the item</summary>
+    public IProperty_Item EscalateTo()
+    {
+      return this.Property("escalate_to");
+    }
+    /// <summary>Retrieve the <c>expected_duration</c> property of the item</summary>
+    public IProperty_Number ExpectedDuration()
+    {
+      return this.Property("expected_duration");
+    }
+    /// <summary>Retrieve the <c>icon</c> property of the item</summary>
+    public IProperty_Text Icon()
+    {
+      return this.Property("icon");
+    }
+    /// <summary>Retrieve the <c>is_auto</c> property of the item</summary>
+    public IProperty_Boolean IsAuto()
+    {
+      return this.Property("is_auto");
+    }
+    /// <summary>Retrieve the <c>is_end</c> property of the item</summary>
+    public IProperty_Boolean IsEnd()
+    {
+      return this.Property("is_end");
+    }
+    /// <summary>Retrieve the <c>is_escalated</c> property of the item</summary>
+    public IProperty_Boolean IsEscalated()
+    {
+      return this.Property("is_escalated");
+    }
+    /// <summary>Retrieve the <c>is_start</c> property of the item</summary>
+    public IProperty_Boolean IsStart()
+    {
+      return this.Property("is_start");
+    }
+    /// <summary>Retrieve the <c>label</c> property of the item</summary>
+    public IProperty_Text Label()
+    {
+      return this.Property("label");
+    }
+    /// <summary>Retrieve the <c>message</c> property of the item</summary>
+    public IProperty_Text Message()
+    {
+      return this.Property("message");
+    }
+    /// <summary>Retrieve the <c>name</c> property of the item</summary>
+    public IProperty_Text NameProp()
+    {
+      return this.Property("name");
+    }
+    /// <summary>Retrieve the <c>priority</c> property of the item</summary>
+    public IProperty_Number Priority()
+    {
+      return this.Property("priority");
+    }
+    /// <summary>Retrieve the <c>reminder_count</c> property of the item</summary>
+    public IProperty_Number ReminderCount()
+    {
+      return this.Property("reminder_count");
+    }
+    /// <summary>Retrieve the <c>reminder_interval</c> property of the item</summary>
+    public IProperty_Number ReminderInterval()
+    {
+      return this.Property("reminder_interval");
+    }
+    /// <summary>Retrieve the <c>role</c> property of the item</summary>
+    public IProperty_Item Role()
+    {
+      return this.Property("role");
+    }
+    /// <summary>Retrieve the <c>subflow</c> property of the item</summary>
+    public IProperty_Item Subflow()
+    {
+      return this.Property("subflow");
+    }
+    /// <summary>Retrieve the <c>timeout_duration</c> property of the item</summary>
+    public IProperty_Number TimeoutDuration()
+    {
+      return this.Property("timeout_duration");
+    }
+    /// <summary>Retrieve the <c>wait_for_all_inputs</c> property of the item</summary>
+    public IProperty_Boolean WaitForAllInputs()
+    {
+      return this.Property("wait_for_all_inputs");
+    }
+    /// <summary>Retrieve the <c>wait_for_all_votes</c> property of the item</summary>
+    public IProperty_Boolean WaitForAllVotes()
+    {
+      return this.Property("wait_for_all_votes");
+    }
+    /// <summary>Retrieve the <c>x</c> property of the item</summary>
+    public IProperty_Number X()
+    {
+      return this.Property("x");
+    }
+    /// <summary>Retrieve the <c>y</c> property of the item</summary>
+    public IProperty_Number Y()
+    {
+      return this.Property("y");
     }
   }
 }

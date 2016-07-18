@@ -80,7 +80,7 @@ namespace InnovatorAdmin
         }
         else
         {
-          var node = elem.Property("id");
+          IReadOnlyProperty_Base node = elem.Property("id");
           if (node.Exists && node.KeyedName().Exists)
           {
             result.KeyedName = node.KeyedName().Value;

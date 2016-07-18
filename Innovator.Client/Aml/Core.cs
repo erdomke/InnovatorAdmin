@@ -113,17 +113,17 @@ namespace Innovator.Client
 
     #region "Item Properties"
     /// <summary>Retrieve the <c>classification</c> property of the item</summary>
-    public static IProperty Classification(this IItem parent)
+    public static IProperty_Text Classification(this IItem parent)
     {
       return parent.Property("classification");
     }
     /// <summary>Retrieve the <c>config_id</c> property of the item</summary>
-    public static IProperty ConfigId(this IItem parent)
+    public static IProperty_Item ConfigId(this IItem parent)
     {
       return parent.Property("config_id");
     }
     /// <summary>Retrieve the <c>created_by_id</c> property of the item</summary>
-    public static IProperty CreatedById(this IItem parent)
+    public static IProperty_Item CreatedById(this IItem parent)
     {
       return parent.Property("created_by_id");
     }
@@ -137,92 +137,97 @@ namespace Innovator.Client
     /// }
     /// </code>
     /// </example>
-    public static IProperty CreatedOn(this IItem parent)
+    public static IProperty_Date CreatedOn(this IItem parent)
     {
       return parent.Property("created_on");
     }
     /// <summary>Retrieve the <c>css</c> property of the item</summary>
-    public static IProperty Css(this IItem parent)
+    public static IProperty_Text Css(this IItem parent)
     {
       return parent.Property("css");
     }
     /// <summary>Retrieve the <c>current_state</c> property of the item</summary>
-    public static IProperty CurrentState(this IItem parent)
+    public static IProperty_Item CurrentState(this IItem parent)
     {
       return parent.Property("current_state");
     }
     /// <summary>Retrieve the <c>generation</c> property of the item</summary>
-    public static IProperty Generation(this IItem parent)
+    public static IProperty_Number Generation(this IItem parent)
     {
       return parent.Property("generation");
     }
+    /// <summary>Retrieve the <c>id</c> property of the item</summary>
+    public static IProperty_Item IdProp(this IItem parent)
+    {
+      return parent.Property("id");
+    }
     /// <summary>Retrieve the <c>is_current</c> property of the item</summary>
-    public static IProperty IsCurrent(this IItem parent)
+    public static IProperty_Boolean IsCurrent(this IItem parent)
     {
       return parent.Property("is_current");
     }
     /// <summary>Retrieve the <c>is_released</c> property of the item</summary>
-    public static IProperty IsReleased(this IItem parent)
+    public static IProperty_Boolean IsReleased(this IItem parent)
     {
       return parent.Property("is_released");
     }
     /// <summary>Retrieve the <c>keyed_name</c> property of the item</summary>
-    public static IProperty KeyedName(this IItem parent)
+    public static IProperty_Text KeyedName(this IItem parent)
     {
       return parent.Property("keyed_name");
     }
     /// <summary>Retrieve the <c>locked_by_id</c> property of the item</summary>
-    public static IProperty LockedById(this IItem parent)
+    public static IProperty_Item LockedById(this IItem parent)
     {
       return parent.Property("locked_by_id");
     }
     /// <summary>Retrieve the <c>major_rev</c> property of the item</summary>
-    public static IProperty MajorRev(this IItem parent)
+    public static IProperty_Text MajorRev(this IItem parent)
     {
       return parent.Property("major_rev");
     }
     /// <summary>Retrieve the <c>managed_by_id</c> property of the item</summary>
-    public static IProperty ManagedById(this IItem parent)
+    public static IProperty_Item ManagedById(this IItem parent)
     {
       return parent.Property("managed_by_id");
     }
     /// <summary>Retrieve the <c>minor_rev</c> property of the item</summary>
-    public static IProperty MinorRev(this IItem parent)
+    public static IProperty_Text MinorRev(this IItem parent)
     {
       return parent.Property("minor_rev");
     }
     /// <summary>Retrieve the <c>modified_by_id</c> property of the item</summary>
-    public static IProperty ModifiedById(this IItem parent)
+    public static IProperty_Item ModifiedById(this IItem parent)
     {
       return parent.Property("modified_by_id");
     }
     /// <summary>Retrieve the <c>modified_on</c> property of the item</summary>
-    public static IProperty ModifiedOn(this IItem parent)
+    public static IProperty_Date ModifiedOn(this IItem parent)
     {
       return parent.Property("modified_on");
     }
     /// <summary>Retrieve the <c>new_version</c> property of the item</summary>
-    public static IProperty NewVersion(this IItem parent)
+    public static IProperty_Boolean NewVersion(this IItem parent)
     {
       return parent.Property("new_version");
     }
     /// <summary>Retrieve the <c>not_lockable</c> property of the item</summary>
-    public static IProperty NotLockable(this IItem parent)
+    public static IProperty_Boolean NotLockable(this IItem parent)
     {
       return parent.Property("not_lockable");
     }
     /// <summary>Retrieve the <c>owned_by_id</c> property of the item</summary>
-    public static IProperty OwnedById(this IItem parent)
+    public static IProperty_Item OwnedById(this IItem parent)
     {
       return parent.Property("owned_by_id");
     }
     /// <summary>Retrieve the <c>permission_id</c> property of the item</summary>
-    public static IProperty PermissionId(this IItem parent)
+    public static IProperty_Item PermissionId(this IItem parent)
     {
       return parent.Property("permission_id");
     }
     /// <summary>Retrieve the <c>related_id</c> property of the item</summary>
-    public static IProperty RelatedId(this IItem parent)
+    public static IProperty_Item RelatedId(this IItem parent)
     {
       return parent.Property("related_id");
     }
@@ -232,12 +237,12 @@ namespace Innovator.Client
       return parent.Property("related_id").AsItem();
     }
     /// <summary>Retrieve the <c>state</c> property of the item</summary>
-    public static IProperty State(this IItem parent)
+    public static IProperty_Text State(this IItem parent)
     {
       return parent.Property("state");
     }
     /// <summary>Retrieve the <c>source_id</c> property of the item</summary>
-    public static IProperty SourceId(this IItem parent)
+    public static IProperty_Item SourceId(this IItem parent)
     {
       return parent.Property("source_id");
     }
@@ -255,22 +260,22 @@ namespace Innovator.Client
 
     #region "Read Only Property Attributes"
     /// <summary>Retrieve the <c>condition</c> attribute of the property</summary>
-    public static IReadOnlyAttribute Condition(this IReadOnlyProperty item)
+    public static IReadOnlyAttribute Condition(this IReadOnlyProperty_Base item)
     {
       return item.Attribute("condition");
     }
     /// <summary>Retrieve the <c>is_null</c> attribute of the property</summary>
-    public static IReadOnlyAttribute IsNull(this IReadOnlyProperty item)
+    public static IReadOnlyAttribute IsNull(this IReadOnlyProperty_Base item)
     {
       return item.Attribute("is_null");
     }
     /// <summary>Retrieve the <c>keyed_name</c> attribute of the property</summary>
-    public static IReadOnlyAttribute KeyedName(this IReadOnlyProperty item)
+    public static IReadOnlyAttribute KeyedName(this IReadOnlyProperty_Base item)
     {
       return item.Attribute("keyed_name");
     }
     /// <summary>Retrieve the <c>type</c> attribute of the property</summary>
-    public static IReadOnlyAttribute Type(this IReadOnlyProperty item)
+    public static IReadOnlyAttribute Type(this IReadOnlyProperty_Base item)
     {
       return item.Attribute("type");
     }
@@ -356,17 +361,17 @@ namespace Innovator.Client
 
     #region "Read Only Item Properties"
     /// <summary>Retrieve the <c>classification</c> property of the item</summary>
-    public static IReadOnlyProperty Classification(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Text Classification(this IReadOnlyItem parent)
     {
       return parent.Property("classification");
     }
     /// <summary>Retrieve the <c>config_id</c> property of the item</summary>
-    public static IReadOnlyProperty ConfigId(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item ConfigId(this IReadOnlyItem parent)
     {
       return parent.Property("config_id");
     }
     /// <summary>Retrieve the <c>created_by_id</c> property of the item</summary>
-    public static IReadOnlyProperty CreatedById(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item CreatedById(this IReadOnlyItem parent)
     {
       return parent.Property("created_by_id");
     }
@@ -380,92 +385,97 @@ namespace Innovator.Client
     /// }
     /// </code>
     /// </example>
-    public static IReadOnlyProperty CreatedOn(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Date CreatedOn(this IReadOnlyItem parent)
     {
       return parent.Property("created_on");
     }
     /// <summary>Retrieve the <c>css</c> property of the item</summary>
-    public static IReadOnlyProperty Css(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Text Css(this IReadOnlyItem parent)
     {
       return parent.Property("css");
     }
     /// <summary>Retrieve the <c>current_state</c> property of the item</summary>
-    public static IReadOnlyProperty CurrentState(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item CurrentState(this IReadOnlyItem parent)
     {
       return parent.Property("current_state");
     }
     /// <summary>Retrieve the <c>generation</c> property of the item</summary>
-    public static IReadOnlyProperty Generation(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Number Generation(this IReadOnlyItem parent)
     {
       return parent.Property("generation");
     }
+    /// <summary>Retrieve the <c>id</c> property of the item</summary>
+    public static IReadOnlyProperty_Item IdProp(this IReadOnlyItem parent)
+    {
+      return parent.Property("id");
+    }
     /// <summary>Retrieve the <c>is_current</c> property of the item</summary>
-    public static IReadOnlyProperty IsCurrent(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Boolean IsCurrent(this IReadOnlyItem parent)
     {
       return parent.Property("is_current");
     }
     /// <summary>Retrieve the <c>is_released</c> property of the item</summary>
-    public static IReadOnlyProperty IsReleased(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Boolean IsReleased(this IReadOnlyItem parent)
     {
       return parent.Property("is_released");
     }
     /// <summary>Retrieve the <c>keyed_name</c> property of the item</summary>
-    public static IReadOnlyProperty KeyedName(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Text KeyedName(this IReadOnlyItem parent)
     {
       return parent.Property("keyed_name");
     }
     /// <summary>Retrieve the <c>locked_by_id</c> property of the item</summary>
-    public static IReadOnlyProperty LockedById(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item LockedById(this IReadOnlyItem parent)
     {
       return parent.Property("locked_by_id");
     }
     /// <summary>Retrieve the <c>major_rev</c> property of the item</summary>
-    public static IReadOnlyProperty MajorRev(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Text MajorRev(this IReadOnlyItem parent)
     {
       return parent.Property("major_rev");
     }
     /// <summary>Retrieve the <c>managed_by_id</c> property of the item</summary>
-    public static IReadOnlyProperty ManagedById(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item ManagedById(this IReadOnlyItem parent)
     {
       return parent.Property("managed_by_id");
     }
     /// <summary>Retrieve the <c>minor_rev</c> property of the item</summary>
-    public static IReadOnlyProperty MinorRev(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Text MinorRev(this IReadOnlyItem parent)
     {
       return parent.Property("minor_rev");
     }
     /// <summary>Retrieve the <c>modified_by_id</c> property of the item</summary>
-    public static IReadOnlyProperty ModifiedById(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item ModifiedById(this IReadOnlyItem parent)
     {
       return parent.Property("modified_by_id");
     }
     /// <summary>Retrieve the <c>modified_on</c> property of the item</summary>
-    public static IReadOnlyProperty ModifiedOn(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Date ModifiedOn(this IReadOnlyItem parent)
     {
       return parent.Property("modified_on");
     }
     /// <summary>Retrieve the <c>new_version</c> property of the item</summary>
-    public static IReadOnlyProperty NewVersion(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Boolean NewVersion(this IReadOnlyItem parent)
     {
       return parent.Property("new_version");
     }
     /// <summary>Retrieve the <c>not_lockable</c> property of the item</summary>
-    public static IReadOnlyProperty NotLockable(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Boolean NotLockable(this IReadOnlyItem parent)
     {
       return parent.Property("not_lockable");
     }
     /// <summary>Retrieve the <c>owned_by_id</c> property of the item</summary>
-    public static IReadOnlyProperty OwnedById(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item OwnedById(this IReadOnlyItem parent)
     {
       return parent.Property("owned_by_id");
     }
     /// <summary>Retrieve the <c>permission_id</c> property of the item</summary>
-    public static IReadOnlyProperty PermissionId(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item PermissionId(this IReadOnlyItem parent)
     {
       return parent.Property("permission_id");
     }
     /// <summary>Retrieve the <c>related_id</c> property of the item</summary>
-    public static IReadOnlyProperty RelatedId(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item RelatedId(this IReadOnlyItem parent)
     {
       return parent.Property("related_id");
     }
@@ -475,12 +485,12 @@ namespace Innovator.Client
       return parent.Property("related_id").AsItem();
     }
     /// <summary>Retrieve the <c>state</c> property of the item</summary>
-    public static IReadOnlyProperty State(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Text State(this IReadOnlyItem parent)
     {
       return parent.Property("state");
     }
     /// <summary>Retrieve the <c>source_id</c> property of the item</summary>
-    public static IReadOnlyProperty SourceId(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item SourceId(this IReadOnlyItem parent)
     {
       return parent.Property("source_id");
     }

@@ -105,7 +105,7 @@ namespace Innovator.Client
         {
           case ServerType.Proxy:
             m.Endpoints.Base = new Uri(uri + "/");
-            var conn = new Connection.ProxyServerConnection(masterService, m.Endpoints, preferences.Deserializer);
+            var conn = new Connection.ProxyServerConnection(masterService, m.Endpoints, preferences.ItemFactory);
             conn.SessionPolicy = preferences.SessionPolicy;
             if (!string.IsNullOrEmpty(preferences.UserAgent))
               conn.DefaultSettings(req => req.UserAgent = preferences.UserAgent);
@@ -163,7 +163,7 @@ namespace Innovator.Client
 
     private static IRemoteConnection ArasConn(IHttpService arasService, string url, ConnectionPreferences preferences)
     {
-      var result = new Connection.ArasHttpConnection(arasService, url, preferences.Deserializer);
+      var result = new Connection.ArasHttpConnection(arasService, url, preferences.ItemFactory);
       if (!string.IsNullOrEmpty(preferences.Locale)
         || !string.IsNullOrEmpty(preferences.TimeZone)
         || !string.IsNullOrEmpty(preferences.UserAgent))

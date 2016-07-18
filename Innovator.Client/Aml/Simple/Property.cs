@@ -8,9 +8,15 @@ namespace Innovator.Client
   class Property : Element, IProperty
   {
     private string _name;
+    private ILinkedElement _next;
     private IElement _parent;
 
     public override string Name { get { return _name; } }
+    public override ILinkedElement Next
+    {
+      get { return _next; }
+      set { _next = value; }
+    }
     public override IElement Parent
     {
       get { return _parent ?? AmlElement.NullElem; }
@@ -38,8 +44,38 @@ namespace Innovator.Client
       _parent = parent;
     }
 
-    private static Property _nullProp = new Property(null) { ReadOnly = true };
+    private static Property _nullProp;
+    private static Property _defaultGeneration;
+    private static Property _defaultIsCurrent;
+    private static Property _defaultIsReleased;
+    private static Property _defaultMajorRev;
+    private static Property _defaultNewVersion;
+    private static Property _defaultNotLockable;
+
+    static Property()
+    {
+      _nullProp = new Property(null) { ReadOnly = true };
+      _defaultGeneration = new Property("generation", "1") { ReadOnly = true };
+      _defaultGeneration.Next = _defaultGeneration;
+      _defaultIsCurrent = new Property("is_current", "1") { ReadOnly = true };
+      _defaultIsCurrent.Next = _defaultIsCurrent;
+      _defaultIsReleased = new Property("is_released", "0") { ReadOnly = true };
+      _defaultIsReleased.Next = _defaultIsReleased;
+      _defaultMajorRev = new Property("major_rev", "A") { ReadOnly = true };
+      _defaultMajorRev.Next = _defaultMajorRev;
+      _defaultNewVersion = new Property("new_version", "0") { ReadOnly = true };
+      _defaultNewVersion.Next = _defaultNewVersion;
+      _defaultNotLockable = new Property("not_lockable", "0") { ReadOnly = true };
+      _defaultNotLockable.Next = _defaultNotLockable;
+    }
+
     public static Property NullProp { get { return _nullProp; } }
+    public static Property DefaultGeneration { get { return _defaultGeneration; } }
+    public static Property DefaultIsCurrent { get { return _defaultIsCurrent; } }
+    public static Property DefaultIsReleased { get { return _defaultIsReleased; } }
+    public static Property DefaultMajorRev { get { return _defaultMajorRev; } }
+    public static Property DefaultNewVersion { get { return _defaultNewVersion; } }
+    public static Property DefaultNotLockable { get { return _defaultNotLockable; } }
 
     public bool? AsBoolean()
     {
@@ -173,7 +209,7 @@ namespace Innovator.Client
       _content = value;
     }
 
-    IReadOnlyItem IReadOnlyProperty.AsItem()
+    IReadOnlyItem IReadOnlyProperty_Item.AsItem()
     {
       return AsItem();
     }
