@@ -60,13 +60,18 @@ namespace Innovator.Client.Connection
       var mapping = _mappings.First(m => m.Databases.Contains(credentials.Database));
       var netCred = credentials as INetCredentials;
       IPromise<ICredentials> credPromise;
-      if (mapping.Endpoints.Auths.Any() && netCred != null && _allowAuth)
+
+      var endpoint = credentials is WindowsCredentials
+        ? mapping.Endpoints.AuthWin.Concat(mapping.Endpoints.Auth).First()
+        : mapping.Endpoints.Auth.First();
+
+      if (netCred != null && _allowAuth && !string.IsNullOrEmpty(endpoint))
       {
         var http = Factory.DefaultService.Invoke();
         var promise = new Promise<ICredentials>();
         credPromise = promise;
 
-        http.Execute("GET", mapping.Endpoints.Auths.First(), new QueryString() { { "db", credentials.Database } }, netCred.Credentials, async, null)
+        http.Execute("GET", endpoint, new QueryString() { { "db", credentials.Database } }, netCred.Credentials, async, null)
           .Done(r =>
           {
             var res = r.AsXml().DescendantsAndSelf("Result").FirstOrDefault();
@@ -91,6 +96,10 @@ namespace Innovator.Client.Connection
             if (webEx != null && webEx.Response.StatusCode == HttpStatusCode.NotFound)
             {
               promise.Resolve(credentials);
+            }
+            else if (webEx != null && webEx.Response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+              promise.Reject(ElementFactory.Local.ServerException("Invalid username or password"));
             }
             else if (timeout != null)
             {

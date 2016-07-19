@@ -8,21 +8,23 @@ namespace Innovator.Client.Connection
 {
   internal class Endpoints
   {
-    private List<string> _auths = new List<string>();
-    private List<string> _databases = new List<string>();
-    private List<string> _download = new List<string>();
-    private List<string> _policyService = new List<string>();
-    private List<string> _query = new List<string>();
-    private List<string> _renewSession = new List<string>();
+    private string[] _auth;
+    private string[] _authWin;
+    private string[] _databases;
+    private string[] _download;
+    private string[] _policyService;
+    private string[] _query;
+    private string[] _renewSession;
 
     public Uri Base { get; set; }
 
-    public IList<string> Auths { get { return _auths; } }
-    public IList<string> Databases { get { return _databases; } }
-    public IList<string> Download { get { return _download; } }
-    public IList<string> PolicyService { get { return _policyService; } }
-    public IList<string> Query { get { return _query; } }
-    public IList<string> RenewSession { get { return _renewSession; } }
+    public IEnumerable<string> Auth { get { return _auth ?? Enumerable.Empty<string>(); } }
+    public IEnumerable<string> AuthWin { get { return _authWin ?? Enumerable.Empty<string>(); } }
+    public IEnumerable<string> Databases { get { return _databases ?? Enumerable.Empty<string>(); } }
+    public IEnumerable<string> Download { get { return _download ?? Enumerable.Empty<string>(); } }
+    public IEnumerable<string> PolicyService { get { return _policyService ?? Enumerable.Empty<string>(); } }
+    public IEnumerable<string> Query { get { return _query ?? Enumerable.Empty<string>(); } }
+    public IEnumerable<string> RenewSession { get { return _renewSession ?? Enumerable.Empty<string>(); } }
 
     public Endpoints() { }
     public Endpoints(XElement elem)
@@ -32,22 +34,25 @@ namespace Innovator.Client.Connection
         switch (endpoint.Attribute("action").Value)
         {
           case "Auth":
-            _auths = endpoint.Elements("uri").Select(e => e.Value).ToList();
+            _auth = endpoint.Elements("uri").Select(e => e.Value).ToArray();
+            break;
+          case "AuthWin":
+            _authWin = endpoint.Elements("uri").Select(e => e.Value).ToArray();
             break;
           case "Databases":
-            _databases = endpoint.Elements("uri").Select(e => e.Value).ToList();
+            _databases = endpoint.Elements("uri").Select(e => e.Value).ToArray();
             break;
           case "Download":
-            _download = endpoint.Elements("uri").Select(e => e.Value).ToList();
+            _download = endpoint.Elements("uri").Select(e => e.Value).ToArray();
             break;
           case "Query":
-            _query = endpoint.Elements("uri").Select(e => e.Value).ToList();
+            _query = endpoint.Elements("uri").Select(e => e.Value).ToArray();
             break;
           case "RenewSession":
-            _renewSession = endpoint.Elements("uri").Select(e => e.Value).ToList();
+            _renewSession = endpoint.Elements("uri").Select(e => e.Value).ToArray();
             break;
           case "VerificationService":
-            _policyService = endpoint.Elements("uri").Select(e => e.Value).ToList();
+            _policyService = endpoint.Elements("uri").Select(e => e.Value).ToArray();
             break;
         }
       }
