@@ -69,7 +69,17 @@ namespace Innovator.Client
     {
       var item = content as IReadOnlyItem;
       if (item == null)
+      {
+        var ienum = content as IEnumerable;
+        if (ienum != null)
+        {
+          foreach (var obj in ienum)
+          {
+            Add(obj);
+          }
+        }
         return this;
+      }
 
       if (this.ReadOnly)
         throw new InvalidOperationException();

@@ -36,6 +36,23 @@ namespace Innovator.Client.Tests
     }
 
     [TestMethod()]
+    public void RelationshipsTest()
+    {
+      var aml = ElementFactory.Local;
+      var query = aml.Item(aml.Type("Method"), aml.Action("GetMultiple"),
+        aml.Relationships(GetItems()));
+      Assert.AreEqual("<Item type=\"Method\" action=\"GetMultiple\"><Relationships><Item type=\"thing\" id=\"1234\" /><Item type=\"thing\" id=\"5678\" /><Item type=\"thing\" id=\"9012\" /></Relationships></Item>", query.ToAml());
+    }
+
+    private IEnumerable<IReadOnlyItem> GetItems()
+    {
+      var aml = ElementFactory.Local;
+      yield return aml.Item(aml.Type("thing"), aml.Id("1234"));
+      yield return aml.Item(aml.Type("thing"), aml.Id("5678"));
+      yield return aml.Item(aml.Type("thing"), aml.Id("9012"));
+    }
+
+    [TestMethod()]
     public void FormatAmlTest()
     {
       Assert.AreEqual("<Item><name>first &amp; second &gt; third</name><is_current>1</is_current><date>2015-01-01T00:00:00</date></Item>",
@@ -117,6 +134,14 @@ namespace Innovator.Client.Tests
       Assert.AreEqual("<sql>select '@0' \"@0\" from thing where stuff = N'test ''&gt;'' thing'</sql>",
         new Command("<sql>select '@0' \"@0\" from thing where stuff = @0</sql>",
           "test '>' thing").ToNormalizedAml(ElementFactory.Local.LocalizationContext));
+    }
+
+    [TestMethod()]
+    public void FormatAmlTest_WhereClause()
+    {
+      Assert.AreEqual(@"<Item type=""Method"" action=""Get Address Book"" where=""[user_id] = N'2D246C5838644C1C8FD34F8D2796E327'"" />",
+        new Command(@"<Item type='Method' action='Get Address Book' where=""[user_id] = @0""></Item>",
+        "2D246C5838644C1C8FD34F8D2796E327").ToNormalizedAml(ElementFactory.Local.LocalizationContext));
     }
 
     [TestMethod()]
