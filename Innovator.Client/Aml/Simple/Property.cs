@@ -80,7 +80,7 @@ namespace Innovator.Client
     public bool? AsBoolean()
     {
       if (!this.Exists) return null;
-      return (_parent?.AmlContext ?? ElementFactory.Local).LocalizationContext.AsBoolean(NeutralValue());
+      return (_parent == null ? ElementFactory.Local : _parent.AmlContext).LocalizationContext.AsBoolean(NeutralValue());
     }
     public bool AsBoolean(bool defaultValue)
     {
@@ -91,7 +91,7 @@ namespace Innovator.Client
     public DateTime? AsDateTime()
     {
       if (!this.Exists) return null;
-      return (_parent?.AmlContext ?? ElementFactory.Local).LocalizationContext.AsDateTime(NeutralValue());
+      return (_parent == null ? ElementFactory.Local : _parent.AmlContext).LocalizationContext.AsDateTime(NeutralValue());
     }
     public DateTime AsDateTime(DateTime defaultValue)
     {
@@ -102,7 +102,7 @@ namespace Innovator.Client
     public DateTime? AsDateTimeUtc()
     {
       if (!this.Exists) return null;
-      return (_parent?.AmlContext ?? ElementFactory.Local).LocalizationContext.AsDateTimeUtc(NeutralValue());
+      return (_parent == null ? ElementFactory.Local : _parent.AmlContext).LocalizationContext.AsDateTimeUtc(NeutralValue());
     }
     public DateTime AsDateTimeUtc(DateTime defaultValue)
     {
@@ -124,7 +124,7 @@ namespace Innovator.Client
     public int? AsInt()
     {
       if (!this.Exists) return null;
-      return (_parent?.AmlContext ?? ElementFactory.Local).LocalizationContext.AsInt(NeutralValue());
+      return (_parent == null ? ElementFactory.Local : _parent.AmlContext).LocalizationContext.AsInt(NeutralValue());
     }
     public int AsInt(int defaultValue)
     {
@@ -161,7 +161,7 @@ namespace Innovator.Client
     public long? AsLong()
     {
       if (!this.Exists) return null;
-      return (_parent?.AmlContext ?? ElementFactory.Local).LocalizationContext.AsLong(NeutralValue());
+      return (_parent == null ? ElementFactory.Local : _parent.AmlContext).LocalizationContext.AsLong(NeutralValue());
     }
     public long AsLong(long defaultValue)
     {
@@ -172,7 +172,7 @@ namespace Innovator.Client
     public double? AsDouble()
     {
       if (!this.Exists) return null;
-      return (_parent?.AmlContext ?? ElementFactory.Local).LocalizationContext.AsDouble(NeutralValue());
+      return (_parent == null ? ElementFactory.Local : _parent.AmlContext).LocalizationContext.AsDouble(NeutralValue());
     }
     public double AsDouble(double defaultValue)
     {
