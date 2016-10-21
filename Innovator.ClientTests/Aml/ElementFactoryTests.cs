@@ -53,6 +53,15 @@ namespace Innovator.Client.Tests
     }
 
     [TestMethod()]
+    public void FormatAmlTest_FullInClause()
+    {
+      var aml = ElementFactory.Local;
+      Assert.AreEqual(@"<Item type=""Part"" action=""get"" select=""id,config_id,keyed_name,state""><config_id condition=""in"">'1','2'</config_id></Item>", aml.FormatAml(@"<Item type='@0' action='get' select='id,config_id,keyed_name,state'>
+  <config_id condition='in'>@1</config_id>
+</Item>", "Part", "'1','2'"));
+    }
+
+    [TestMethod()]
     public void FormatAmlTest()
     {
       Assert.AreEqual("<Item><name>first &amp; second &gt; third</name><is_current>1</is_current><date>2015-01-01T00:00:00</date></Item>",
