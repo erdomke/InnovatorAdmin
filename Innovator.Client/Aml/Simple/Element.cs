@@ -318,8 +318,6 @@ namespace Innovator.Client
 
     IReadOnlyAttribute IReadOnlyElement.Attribute(string name)
     {
-      if (!Exists)
-        return Innovator.Client.Attribute.NullAttr;
       return (LinkedListOps.Find(_lastAttr, name) as IReadOnlyAttribute)
         ?? new Attribute(this, name);
     }

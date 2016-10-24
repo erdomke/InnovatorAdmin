@@ -35,7 +35,9 @@ namespace Innovator.Client
     public Property(string name, params object[] content)
     {
       _name = name;
-      if (content.Length > 0)
+      if (content == null)
+        this.IsNull().Set(true);
+      else if (content.Length > 0)
         Add(content);
     }
     public Property(IElement parent, string name)
@@ -187,6 +189,21 @@ namespace Innovator.Client
       return this.Value;
     }
 
+    public override IElement Add(object content)
+    {
+      var result = base.Add(content);
+      var isNull = this.IsNull();
+      if (_content == null || _content == DBNull.Value)
+      {
+        isNull.Set(true);
+      }
+      else
+      {
+        isNull.Remove();
+      }
+      return result;
+    }
+
     public void Set(object value)
     {
       AssertModifiable();
@@ -198,7 +215,7 @@ namespace Innovator.Client
       }
 
       var isNull = this.IsNull();
-      if (value == null)
+      if (value == null || value == DBNull.Value)
       {
         isNull.Set(true);
       }

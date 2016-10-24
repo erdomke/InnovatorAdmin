@@ -11,6 +11,14 @@ namespace Innovator.Client.Tests
   public class ItemTests
   {
     [TestMethod()]
+    public void NullPropertySetIsNullAttribute()
+    {
+      var aml = ElementFactory.Local;
+      var item = aml.Item(aml.Type("Stuff"), aml.Action("edit"), aml.Property("first", null), aml.Property("second", DBNull.Value), aml.Property("third", "stuff"));
+      Assert.AreEqual("<Item type=\"Stuff\" action=\"edit\"><first is_null=\"1\" /><second is_null=\"1\" /><third>stuff</third></Item>", item.ToAml());
+    }
+
+    [TestMethod()]
     public void PropertySetWithNullableData()
     {
       var aml = ElementFactory.Local;
