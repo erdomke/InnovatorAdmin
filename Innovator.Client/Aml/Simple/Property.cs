@@ -182,7 +182,7 @@ namespace Innovator.Client
     }
     public string AsString(string defaultValue)
     {
-      if (!this.Exists)
+      if (!this.Exists || Attribute("is_null").AsBoolean(false))
         return defaultValue;
       return this.Value;
     }

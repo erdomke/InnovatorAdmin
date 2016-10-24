@@ -36,5 +36,19 @@ namespace Innovator.Client.Tests
 
       Assert.AreEqual(true, item.IsCurrent().AsBoolean(false));
     }
+
+    [TestMethod()]
+    public void IsNullPropertyAsString()
+    {
+      var aml = ElementFactory.Local;
+      var item = aml.FromXml(@"<Item type='Life Cycle State' typeId='5EFB53D35BAE468B851CD388BEA46B30' id='E7A383494C724B338518A4DD1EB867FA'>
+  <id keyed_name='Superseded' type='Life Cycle State'>E7A383494C724B338518A4DD1EB867FA</id>
+  <keyed_name>Superseded</keyed_name>
+  <label is_null='1' />
+  <name>Superseded</name>
+</Item>").AssertItem();
+      Assert.AreEqual("Superseded", item.Property("name").AsString("stuff"));
+      Assert.AreEqual("Superseded", item.Property("label").AsString(item.Property("name").Value));
+    }
   }
 }
