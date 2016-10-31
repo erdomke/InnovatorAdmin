@@ -11,6 +11,15 @@ namespace Innovator.Client.Tests
   public class ItemTests
   {
     [TestMethod()]
+    public void RelationshipSerialization()
+    {
+      var aml = ElementFactory.Local;
+      var input = @"<Item type=""List"" typeId=""5736C479A8CB49BCA20138514C637266"" id=""D7D72BF68937462B947DAC6BE7E28322""><Relationships><Item type=""Value"" /></Relationships></Item>";
+      var item = aml.FromXml(input).AssertItem();
+      Assert.AreEqual(input, item.ToAml());
+    }
+
+    [TestMethod()]
     public void NullPropertySetIsNullAttribute()
     {
       var aml = ElementFactory.Local;

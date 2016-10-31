@@ -87,6 +87,9 @@ namespace Innovator.Client
       if (_relList == null)
         _relList = new List<IReadOnlyItem>();
       _relList.Add(item);
+      var iObj = item as Item;
+      if (iObj != null)
+        iObj.Parent = this;
       return this;
     }
 
@@ -126,6 +129,22 @@ namespace Innovator.Client
     public void RemoveNodes()
     {
       _relList = null;
+    }
+    internal void RemoveNode(IReadOnlyItem item)
+    {
+      _relList.Remove(item);
+      if (_relList.Count < 1)
+        _relList = null;
+    }
+    internal void Compress()
+    {
+      if (_relList != null)
+      {
+        if (_relList.Count < 1)
+          _relList = null;
+        else
+          _relList.TrimExcess();
+      }
     }
 
     public void ToAml(XmlWriter writer, AmlWriterSettings settings)

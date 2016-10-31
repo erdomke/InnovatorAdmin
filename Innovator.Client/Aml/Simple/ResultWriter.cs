@@ -425,9 +425,17 @@ namespace Innovator.Client
             }
           }
         }
-        var elem = _stack.Pop() as Element;
+
+        var iElem = _stack.Pop();
+
+        var elem = iElem as Element;
         if (elem != null)
           elem.ReadOnly = ReadOnly;
+
+        var rel = iElem as Relationships;
+        if (rel != null)
+          rel.Compress();
+
         if (_stack.Count < 1)
           OnComplete(EventArgs.Empty);
       }

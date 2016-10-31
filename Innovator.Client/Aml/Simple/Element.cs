@@ -202,7 +202,17 @@ namespace Innovator.Client
       {
         var elem = this.Parent as Element;
         if (elem != null && elem.Exists)
+        {
           elem.RemoveNode(this);
+        }
+        else
+        {
+          var rel = this.Parent as Relationships;
+          if (rel != null && this is IReadOnlyItem)
+          {
+            rel.RemoveNode((IReadOnlyItem)this);
+          }
+        }
       }
     }
     internal void RemoveAttribute(Attribute attr)

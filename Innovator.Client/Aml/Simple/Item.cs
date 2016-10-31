@@ -21,13 +21,14 @@ namespace Innovator.Client
   public class Item : Element, IItem
   {
     private ElementFactory _amlContext;
+    private IElement _parent = AmlElement.NullElem;
 
     public override ElementFactory AmlContext { get { return _amlContext; } }
     public override string Name { get { return "Item"; } }
     public override IElement Parent
     {
-      get { return AmlElement.NullElem; }
-      set { /* Do nothing */ }
+      get { return _parent; }
+      set { _parent = value ?? AmlElement.NullElem; }
     }
     public override ILinkedElement Next
     {
