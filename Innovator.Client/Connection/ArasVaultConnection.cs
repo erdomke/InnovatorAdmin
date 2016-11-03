@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Cache;
+using System.Net.Http;
 using System.Text;
 using System.Web;
 
@@ -105,7 +106,7 @@ namespace Innovator.Client.Connection
       }
     }
 
-    private IPromise<WebResponse> DownloadFileFromVault(IReadOnlyItem fileItem, Vault vault, bool async, Command request)
+    private IPromise<IHttpResponse> DownloadFileFromVault(IReadOnlyItem fileItem, Vault vault, bool async, Command request)
     {
       var url = vault.Url;
       if (string.IsNullOrEmpty(url)) return null;
@@ -116,7 +117,7 @@ namespace Innovator.Client.Connection
                 .WithAction(CommandAction.TransformVaultServerURL), async)
                 .Convert(s => s.AsString());
 
-      return urlPromise.Continue<string, WebResponse>(u =>
+      return urlPromise.Continue(u =>
       {
         if (u != vault.Url) vault.Url = u;
         var uri = new Uri(string.Format("{0}?dbName={1}&fileId={2}&fileName={3}&vaultId={4}",
@@ -124,41 +125,21 @@ namespace Innovator.Client.Connection
           HttpUtility.UrlEncode(fileItem.Property("filename").Value),
           vault.Id));
 
-        var req = (HttpWebRequest)System.Net.WebRequest.Create(uri);
-        req.CachePolicy = new RequestCachePolicy(RequestCacheLevel.NoCacheNoStore);
-        req.Credentials = CredentialCache.DefaultCredentials;
-        req.Method = "GET";
-        req.Proxy.Credentials = CredentialCache.DefaultCredentials;
-        req.Timeout = -1;
-
-        _conn.SetDefaultHeaders((k, v) => { req.Headers.Set(k, v); });
-        req.Headers.Set("VAULTID", vault.Id);
-
-        var result = new WebRequest(req, _conn.Compression);
+        var client = new HttpClient();
+        var req = new HttpRequest();
+        _conn.SetDefaultHeaders((k, v) => { req.SetHeader(k, v); });
+        req.SetHeader("VAULTID", vault.Id);
         foreach (var a in _conn.DefaultSettings)
         {
-          a.Invoke(result);
+          a.Invoke(req);
         }
-        if (request.Settings != null) request.Settings.Invoke(result);
-
-        return result.Execute(async);
+        if (request.Settings != null) request.Settings.Invoke(req);
+        return client.GetPromise(uri, async, req);
       });
     }
 
     public IPromise<Stream> Upload(UploadCommand upload, bool async)
     {
-      // Files need to be uploaded, so build the vault request
-
-      // Compile the headers and AML query into the appropriate content
-      var multiWriter = new MultiPartFormWriter(async, _conn.AmlContext.LocalizationContext);
-      multiWriter.AddFiles(upload);
-      _conn.SetDefaultHeaders(multiWriter.WriteFormField);
-      multiWriter.WriteFormField("SOAPACTION", upload.Action.ToString());
-      multiWriter.WriteFormField("VAULTID", upload.Vault.Id);
-      multiWriter.WriteFormField("XMLdata", "<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:i18n=\"http://www.aras.com/I18N\"><SOAP-ENV:Body><ApplyItem>" +
-                                upload.ToNormalizedAml(_conn.AmlContext.LocalizationContext) +
-                                "</ApplyItem></SOAP-ENV:Body></SOAP-ENV:Envelope>");
-
       // Transform the vault URL (as necessary)
       var urlPromise = upload.Vault.Url.IndexOf("$[") < 0 ?
         Promises.Resolved(upload.Vault.Url) :
@@ -171,88 +152,35 @@ namespace Innovator.Client.Connection
       {
         // Determine the authentication used by the vault
         if (u != upload.Vault.Url) upload.Vault.Url = u;
-        return CheckAuthentication(upload.Vault, async);
-      }).Continue(a =>
-      {
-        // Build the request to perform the upload
-        var hReq = (HttpWebRequest)System.Net.WebRequest.Create(upload.Vault.Url);
-        hReq.AllowWriteStreamBuffering = false;
-        hReq.Timeout = -1;
-        hReq.ReadWriteTimeout = 300000;
-        hReq.SendChunked = true;
-        hReq.Method = "POST";
-        hReq.KeepAlive = true;
-        hReq.ProtocolVersion = HttpVersion.Version11;
-        hReq.ContentType = multiWriter.ContentType;
-        hReq.ContentLength = multiWriter.GetLength();
-        hReq.CookieContainer = upload.Vault.Cookies;
 
-        switch (a)
+        // Compile the headers and AML query into the appropriate content
+        var content = new FormContent();
+        _conn.SetDefaultHeaders(content.Add);
+        content.Add("SOAPACTION", upload.Action.ToString());
+        content.Add("VAULTID", upload.Vault.Id);
+        content.Add("XMLdata", "<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:i18n=\"http://www.aras.com/I18N\"><SOAP-ENV:Body><ApplyItem>" +
+                                  upload.ToNormalizedAml(_conn.AmlContext.LocalizationContext) +
+                                  "</ApplyItem></SOAP-ENV:Body></SOAP-ENV:Envelope>");
+        foreach (var file in upload.Files)
         {
-          case AuthenticationSchemes.Negotiate:
-            hReq.PreAuthenticate = true;
-            hReq.UnsafeAuthenticatedConnectionSharing = true;
-            break;
-          case AuthenticationSchemes.Ntlm:
-            hReq.UnsafeAuthenticatedConnectionSharing = true;
-            break;
-          case AuthenticationSchemes.Basic:
-            hReq.PreAuthenticate = true;
-            break;
+          content.Add(file.AsContent(upload, _conn.AmlContext.LocalizationContext));
         }
+        content.Compression = _conn.Compression;
 
-        var req = new WebRequest(hReq, _conn.Compression);
+        var req = new HttpRequest() { Content = content };
         foreach (var ac in _conn.DefaultSettings)
         {
           ac.Invoke(req);
         }
         if (upload.Settings != null) upload.Settings.Invoke(req);
+        req.Headers.TransferEncodingChunked = true;
 
-        //hReq.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; MyIE2; .NET CLR 1.1.4322)";
-        req.SetContent(multiWriter.WriteToRequest);
-        return req.Execute(async);
+        var handler = new HttpClientHandler();
+        handler.CookieContainer = upload.Vault.Cookies;
+        var http = new HttpClient(handler);
+
+        return http.PostPromise(new Uri(upload.Vault.Url), async, req);
       }).Convert(r => r.AsStream);
-    }
-
-    private IPromise<AuthenticationSchemes> CheckAuthentication(Vault vault, bool async)
-    {
-      var result = new Promise<AuthenticationSchemes>();
-
-      if (vault.Authentication == AuthenticationSchemes.None && _conn.Version >= 11)
-      {
-        var hReq = (HttpWebRequest)System.Net.WebRequest.Create(vault.Url);
-        hReq.Credentials = null;
-        hReq.UnsafeAuthenticatedConnectionSharing = true;
-        hReq.Method = "HEAD";
-
-        var req = new WebRequest(hReq, CompressionType.none);
-        result.CancelTarget(
-          req.Execute(async)
-          .Progress((p, m) => result.Notify(p, m))
-          .Done(r =>
-          {
-            vault.Authentication = AuthenticationSchemes.Anonymous;
-            result.Resolve(vault.Authentication);
-          }).Fail(ex =>
-          {
-            var webEx = ex as HttpException;
-            if (webEx != null && webEx.Response.StatusCode == HttpStatusCode.Unauthorized)
-            {
-              vault.Authentication = req.CheckForNotAuthorized(webEx.Response);
-              result.Resolve(vault.Authentication);
-            }
-            else
-            {
-              result.Reject(ex);
-            }
-          }));
-      }
-      else
-      {
-        result.Resolve(AuthenticationSchemes.Anonymous);
-      }
-
-      return result;
     }
   }
 }

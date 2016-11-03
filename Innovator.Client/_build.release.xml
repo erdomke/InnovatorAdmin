@@ -53,8 +53,8 @@
       </ProjectToBuild45>
     </ItemGroup>
     <MSBuild Projects="@(ProjectToBuild3)" />
-    <MSBuild Projects="@(ProjectToBuild4)" />
-    <MSBuild Projects="@(ProjectToBuild45)" />
+    <!--<MSBuild Projects="@(ProjectToBuild4)" />
+    <MSBuild Projects="@(ProjectToBuild45)" />-->
   </Target>
   <Target Name="PackNuget">
     <Exec Command="..\.nuget\NuGet.exe Update -self" />
