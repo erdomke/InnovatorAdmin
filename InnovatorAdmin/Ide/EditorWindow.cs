@@ -19,6 +19,7 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Text;
 using System.ComponentModel;
+using System.Net.Http;
 
 namespace InnovatorAdmin
 {
@@ -42,7 +43,7 @@ namespace InnovatorAdmin
     private DateTime _start = DateTime.UtcNow;
     private string _uid;
     private bool _updateCheckComplete = false;
-    private IHttpService _webService = new DefaultHttpService();
+    private HttpClient _webService = new HttpClient();
     private ConnectionType _oldConnType = ConnectionType.Innovator;
 
     public bool AllowRun
@@ -1973,10 +1974,10 @@ namespace InnovatorAdmin
             var idx = reportUrlBase.IndexOf("/Client/") + 8;
             var relativeUrl = "../" + context.Request.Url.Path.Substring(idx);
             var absUrl = arasProxy.Connection.MapClientUrl(relativeUrl);
-            var pResp = _webService.Execute("GET", absUrl, null, null, false, null).Wait();
+            var pResp = _webService.GetAsync(absUrl).Result;
             var resp = new Response().WithStatusCode((int)pResp.StatusCode);
-            resp.ContentType = pResp.Headers["Content-Type"];
-            resp.Contents = s => pResp.AsStream.CopyTo(s);
+            resp.ContentType = pResp.Headers.GetValues("Content-Type").FirstOrDefault();
+            resp.Contents = s => pResp.Content.ReadAsStreamAsync().Result.CopyTo(s);
             return resp;
           }
         }

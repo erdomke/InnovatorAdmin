@@ -21,10 +21,6 @@ namespace Innovator.Client
     public HttpException(string message) : base(message) { }
     public HttpException(string message, Exception innerException) : base(message, innerException) { }
     public HttpException(SerializationInfo info, StreamingContext context) : base(info, context) { }
-    internal HttpException(WebException ex, HttpWebRequest req) : base(ex.Message, ex)
-    {
-      _resp = new WebResponse(req, (HttpWebResponse)ex.Response);
-    }
     internal HttpException(IHttpResponse resp) : base(resp.StatusCode.ToString())
     {
       _resp = resp;

@@ -27,31 +27,48 @@
     <DocumentationFile>bin\Debug\Innovator.Client.XML</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;NET4</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 3.5|AnyCPU'">
-    <OutputPath>bin\Release 3.5\</OutputPath>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'NET35|AnyCPU' ">
+    <OutputPath>bin\NET35\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'NET40|AnyCPU'">
+    <OutputPath>bin\NET40\</OutputPath>
+    <DefineConstants>TRACE;NET4</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>false</Prefer32Bit>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'NET45|AnyCPU' ">
+    <OutputPath>bin\NET45\</OutputPath>
+    <DefineConstants>TRACE;NET4;NET45</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>false</Prefer32Bit>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" Condition="$(Configuration) == 'Release' Or $(Configuration) == 'Debug'" />
+    <Reference Include="Microsoft.CSharp" Condition="$(Configuration) == 'NET45' Or $(Configuration) == 'NET40' Or $(Configuration) == 'Debug'" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Net.Http" Condition="$(Configuration) == 'NET45' Or $(Configuration) == 'Debug'" />
+    <Reference Include="System.Threading, Version=1.0.2856.102, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" Condition="$(Configuration) == 'NET35'">
+      <HintPath>..\packages\TaskParallelLibrary.1.0.2856.0\lib\Net35\System.Threading.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data" />
@@ -396,21 +413,22 @@
     <Compile Include="Connection\Db\DbParameter.cs" />
     <Compile Include="Connection\Db\DbParams.cs" />
     <Compile Include="Connection\Db\DbReader.cs" />
-    <Compile Include="Connection\DefaultHttpService.cs" />
     <Compile Include="Connection\DefaultVaultStrategy.cs" />
     <Compile Include="Connection\Endpoints.cs" />
+    <Compile Include="IO\HttpClientExtensions.cs" />
     <Compile Include="Connection\IArasConnection.cs" />
-    <Compile Include="Connection\IHttpService.cs" />
     <Compile Include="Connection\IVaultStrategy.cs" />
     <Compile Include="Connection\MappedConnection.cs" />
-    <Compile Include="Connection\MultiPartFormWriter.cs" />
     <Compile Include="Connection\ConnectionPool.cs" />
     <Compile Include="Connection\ServerMapping.cs" />
     <Compile Include="Credentials\ExplicitHashCredentials.cs" />
     <Compile Include="IAsyncConnection.cs" />
     <Compile Include="IAsyncScript.cs" />
     <Compile Include="INetCredentials.cs" />
-    <Compile Include="IO\SmartCompressionStream.cs" />
+    <Compile Include="IO\FormContent.cs" />
+    <Compile Include="IO\HttpRequest.cs" />
+    <Compile Include="IO\HttpResponse.cs" />
+    <Compile Include="IO\SimpleContent.cs" />
     <Compile Include="MemoryCache.cs" />
     <Compile Include="Connection\QueryString.cs" />
     <Compile Include="Credentials\AnonymousCredentials.cs" />
@@ -418,15 +436,11 @@
     <Compile Include="Credentials\WindowsCredentials.cs" />
     <Compile Include="ICredentials.cs" />
     <Compile Include="ITokenStore.cs" />
-    <Compile Include="IO\AsyncStreamWriter.cs" />
     <Compile Include="Connection\AuthenticationScheme.cs" />
     <Compile Include="Connection\ConnectionExtensions.cs" />
     <Compile Include="Connection\SessionPolicy.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="IO\HttpTimeoutException.cs" />
     <Compile Include="IO\IHttpRequest.cs" />
-    <Compile Include="IO\IStreamWriter.cs" />
-    <Compile Include="IO\SyncStreamWriter.cs" />
     <Compile Include="IO\NameValueDictionary.cs" />
     <Compile Include="IO\HttpException.cs" />
     <Compile Include="Promise\ICancelable.cs" />
@@ -437,7 +451,6 @@
     <Compile Include="Connection\Vault.cs" />
     <Compile Include="Factory.cs" />
     <Compile Include="IO\IHttpResponse.cs" />
-    <Compile Include="Connection\ProxyServerConnection.cs" />
     <Compile Include="Credentials\TokenCredentials.cs" />
     <Compile Include="Aml\Condition.cs" />
     <Compile Include="Aml\Core.cs" />
@@ -474,9 +487,6 @@
     <Compile Include="Server\ServerMethod\WorkflowEvent.cs" />
     <Compile Include="UnixDate.cs" />
     <Compile Include="UploadCommand.cs" />
-    <Compile Include="IO\WebPromise.cs" />
-    <Compile Include="IO\WebRequest.cs" />
-    <Compile Include="IO\WebResponse.cs" />
     <Compile Include="Security\SecureToken.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils.cs" />
@@ -484,7 +494,15 @@
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\HttpClientLibrary\HttpClientLibrary.csproj" Condition="$(Configuration) == 'NET40' Or $(Configuration) == 'NET35'">
+      <Project>{ad8909ad-9cce-4844-b784-2e953bedebe2}</Project>
+      <Name>HttpClientLibrary</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>

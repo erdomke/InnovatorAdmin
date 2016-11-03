@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
-#if NET4
 using System.Threading.Tasks;
-#endif
 
 namespace Innovator.Client
 {
@@ -192,7 +190,6 @@ namespace Innovator.Client
       return impl;
     }
 
-#if NET4
     /// <summary>
     /// Convert a promise to a .Net 4.0 Task for use with the <c>async</c>/<c>await</c> keywords
     /// </summary>
@@ -258,6 +255,20 @@ namespace Innovator.Client
       return result;
     }
 
+#if NET45
+    /// <summary>
+    /// Make it so that the user can directly <c>await</c> a promise
+    /// </summary>
+    public static System.Runtime.CompilerServices.TaskAwaiter<T> GetAwaiter<T>(this IPromise<T> promise)
+    {
+      return promise.ToTask().GetAwaiter();
+    }
+    public static System.Runtime.CompilerServices.ConfiguredTaskAwaitable<T> ConfigureAwait<T>(this IPromise<T> promise, bool continueOnCapturedContext)
+    {
+      return promise.ToTask().ConfigureAwait(continueOnCapturedContext);
+    }
+#endif
+
     private class CancelTarget : ICancelable
     {
       public CancellationTokenSource Source { get; set; }
@@ -267,7 +278,6 @@ namespace Innovator.Client
         Source.Cancel();
       }
     }
-#endif
 
     /// <summary>
     /// Block the current thread waiting for a promise to complete

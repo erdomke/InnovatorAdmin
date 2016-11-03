@@ -6,6 +6,7 @@ using Innovator.Client.Connection;
 using System.Xml;
 using System.Xml.Linq;
 using System.Net;
+using System.Net.Http;
 
 namespace Innovator.Client
 {
@@ -23,7 +24,7 @@ namespace Innovator.Client
   public static class Factory
   {
     private static MemoryCache<string, byte[]> _imageCache = new MemoryCache<string, byte[]>();
-    internal static Func<Connection.IHttpService> DefaultService { get; set; }
+    internal static Func<HttpClient> DefaultService { get; set; }
 
     internal static MemoryCache<string, byte[]> ImageCache
     {
@@ -32,7 +33,12 @@ namespace Innovator.Client
 
     static Factory()
     {
-      DefaultService = () => new Connection.DefaultHttpService();
+      DefaultService = () =>
+      {
+        var handler = new HttpClientHandler();
+        handler.CookieContainer = new CookieContainer();
+        return new HttpClient(handler);
+      };
     }
 
     /// <summary>
@@ -96,7 +102,7 @@ namespace Innovator.Client
       var configUrl = url + "/mapping.xml";
 
       var masterService = preferences.HttpService ?? DefaultService.Invoke();
-      var arasSerice = preferences.HttpService ?? new DefaultHttpService() { Compression = CompressionType.none };
+      var arasSerice = preferences.HttpService ?? DefaultService.Invoke();
       Func<ServerMapping, IRemoteConnection> connFactory = m =>
       {
         var uri = (m.Url ?? "").TrimEnd('/');
@@ -104,24 +110,18 @@ namespace Innovator.Client
         switch (m.Type)
         {
           case ServerType.Proxy:
-            m.Endpoints.Base = new Uri(uri + "/");
-            var conn = new Connection.ProxyServerConnection(masterService, m.Endpoints, preferences.ItemFactory);
-            conn.SessionPolicy = preferences.SessionPolicy;
-            if (!string.IsNullOrEmpty(preferences.UserAgent))
-              conn.DefaultSettings(req => req.UserAgent = preferences.UserAgent);
-            return conn;
+            throw new NotSupportedException();
           default:
             return ArasConn(arasSerice, uri, preferences);
         }
       };
 
       var result = new Promise<IRemoteConnection>();
-      result.CancelTarget(masterService.Execute("GET", configUrl, null, CredentialCache.DefaultCredentials
-                                          , async, request =>
-        {
-          request.UserAgent = preferences.UserAgent;
-          request.SetHeader("Accept", "text/xml");
-        }).Progress((p, m) => result.Notify(p, m))
+      var req = new HttpRequest();
+      req.UserAgent = preferences.UserAgent;
+      req.SetHeader("Accept", "text/xml");
+      result.CancelTarget(masterService.GetPromise(new Uri(configUrl), async, req)
+        .Progress((p, m) => result.Notify(p, m))
         .Done(r => {
           var data = r.AsString();
           if (string.IsNullOrEmpty(data))
@@ -161,7 +161,7 @@ namespace Innovator.Client
       return result;
     }
 
-    private static IRemoteConnection ArasConn(IHttpService arasService, string url, ConnectionPreferences preferences)
+    private static IRemoteConnection ArasConn(HttpClient arasService, string url, ConnectionPreferences preferences)
     {
       var result = new Connection.ArasHttpConnection(arasService, url, preferences.ItemFactory);
       if (!string.IsNullOrEmpty(preferences.Locale)

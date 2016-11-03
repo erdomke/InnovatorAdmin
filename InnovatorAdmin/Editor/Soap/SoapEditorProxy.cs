@@ -11,6 +11,7 @@ using System.Xml.Schema;
 using Innovator.Client;
 using ICSharpCode.AvalonEdit.Utils;
 using ICSharpCode.AvalonEdit.Document;
+using System.Net.Http;
 
 namespace InnovatorAdmin.Editor
 {
@@ -111,16 +112,25 @@ namespace InnovatorAdmin.Editor
 
     public Innovator.Client.IPromise<IResultObject> Process(ICommand request, bool async, Action<int, string> progressCallback)
     {
+      return ProcessAsync(request, async, progressCallback).ToPromise();
+    }
+
+    private async Task<IResultObject> ProcessAsync(ICommand request, bool async, Action<int, string> progressCallback)
+    {
       var soapCmd = request as SoapCommand;
       if (soapCmd == null)
         throw new InvalidOperationException("The request must be of type 'SoapCommand'");
 
-      var http = new Innovator.Client.Connection.DefaultHttpService();
-      return http.Execute("POST", _baseUrl, null, _cred, true, r =>
-      {
-        r.SetHeader("SOAPAction", "\"" + _actionUrls[soapCmd.Action] + "\"");
-        r.SetContent(w => w.Write(soapCmd.Query), "text/xml;charset=UTF-8");
-      }).Convert(r => (IResultObject)new SoapResult(r.AsStream));
+      var content = new StringContent(soapCmd.Query, Encoding.UTF8, "text/xml");
+      content.Headers.Add("SOAPAction", "\"" + _actionUrls[soapCmd.Action] + "\"");
+
+      var handler = new HttpClientHandler();
+      handler.Credentials = _cred;
+      handler.PreAuthenticate = true;
+      var http = new HttpClient(handler);
+      var resp = await http.PostAsync(_baseUrl, content);
+      var stream = await resp.Content.ReadAsStreamAsync();
+      return new SoapResult(stream);
     }
 
     private class SoapResult : IResultObject

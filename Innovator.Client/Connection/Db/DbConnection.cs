@@ -57,7 +57,7 @@ namespace Innovator.Client.Connection
 
     int IDbConnection.ConnectionTimeout
     {
-      get { return DefaultHttpService.DefaultTimeout; }
+      get { return HttpRequest.DefaultTimeout; }
     }
 
     IDbTransaction IDbConnection.BeginTransaction(IsolationLevel il)

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Innovator.Client.Connection
 {
@@ -67,11 +69,14 @@ namespace Innovator.Client.Connection
 
       if (netCred != null && _allowAuth && !string.IsNullOrEmpty(endpoint))
       {
-        var http = Factory.DefaultService.Invoke();
+        var handler = new HttpClientHandler();
+        handler.Credentials = netCred.Credentials;
+        handler.PreAuthenticate = true;
+        var http = new HttpClient(handler);
         var promise = new Promise<ICredentials>();
         credPromise = promise;
 
-        http.Execute("GET", endpoint, new QueryString() { { "db", credentials.Database } }, netCred.Credentials, async, null)
+        http.GetPromise(new Uri(endpoint + "?db=" + credentials.Database), async)
           .Done(r =>
           {
             var res = r.AsXml().DescendantsAndSelf("Result").FirstOrDefault();
@@ -92,7 +97,6 @@ namespace Innovator.Client.Connection
           {
             // Only hard fail for problems which aren't time outs and not found issues.
             var webEx = ex as HttpException;
-            var timeout = ex as HttpTimeoutException;
             if (webEx != null && webEx.Response.StatusCode == HttpStatusCode.NotFound)
             {
               promise.Resolve(credentials);
@@ -101,7 +105,7 @@ namespace Innovator.Client.Connection
             {
               promise.Reject(ElementFactory.Local.ServerException("Invalid username or password"));
             }
-            else if (timeout != null)
+            else if (ex is TaskCanceledException)
             {
               promise.Resolve(credentials);
             }

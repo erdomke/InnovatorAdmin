@@ -11,6 +11,7 @@ using System.Xml.Linq;
 using System.Web.Services.Description;
 using System.Xml;
 using System.Xml.Schema;
+using System.Net.Http;
 
 namespace InnovatorAdmin.Editor
 {
@@ -18,7 +19,7 @@ namespace InnovatorAdmin.Editor
   {
     private XNamespace ns = (XNamespace)"http://schemas.microsoft.com/sharepoint/soap/";
     private IEditorHelper _helper = new XmlEditorHelper();
-    private DefaultHttpService _http = new DefaultHttpService();
+    private HttpClient _http;
     private Connections.ConnectionData _connData;
     private System.Net.ICredentials _cred;
     private string _siteUrl;
@@ -44,6 +45,11 @@ namespace InnovatorAdmin.Editor
           _cred = new NetworkCredential(_connData.UserName, _connData.Password);
           break;
       }
+
+      var handler = new HttpClientHandler();
+      handler.Credentials = _cred;
+      handler.PreAuthenticate = true;
+      _http = new HttpClient(handler);
     }
 
     public async Task<IEditorProxy> Initialize()
@@ -55,11 +61,11 @@ namespace InnovatorAdmin.Editor
       var resp = XElement.Load(data);
       _siteUrl = resp.Descendants(ns + "strWeb").First().Value;
 
-      var listDataWsdl = _http.Execute("GET", _siteUrl + "/_vti_bin/lists.asmx?wsdl", null, _cred, true, null).ToTask();
-      var siteDataWsdl = _http.Execute("GET", _siteUrl + "/_vti_bin/sitedata.asmx?wsdl", null, _cred, true, null).ToTask();
+      var listDataWsdl = _http.GetStreamAsync(_siteUrl + "/_vti_bin/lists.asmx?wsdl");
+      var siteDataWsdl = _http.GetStreamAsync(_siteUrl + "/_vti_bin/sitedata.asmx?wsdl");
 
-      _wsdlLists = LoadWsdl((await listDataWsdl).AsStream);
-      _wsdlSiteData = LoadWsdl((await siteDataWsdl).AsStream);
+      _wsdlLists = LoadWsdl((await listDataWsdl));
+      _wsdlSiteData = LoadWsdl((await siteDataWsdl));
 
       _schemas = Editor.XmlSchemas.SchemasFromDescrip(_wsdlLists);
       return this;
@@ -172,20 +178,19 @@ namespace InnovatorAdmin.Editor
 
     private Stream CallWebService(string url, string soapAction, string payload)
     {
-      return _http.Execute("POST", url, null, _cred, false, r =>
-      {
-        r.SetHeader("SOAPAction", "\"" + soapAction + "\"");
-        r.SetContent(w => w.Write(payload), "text/xml;charset=UTF-8");
-      }).Wait().AsStream;
+      var content = new StringContent(payload, Encoding.UTF8, "text/xml");
+      content.Headers.Add("SOAPAction", "\"" + soapAction + "\"");
+
+      return _http.PostAsync(url, content).Result
+        .Content.ReadAsStreamAsync().Result;
     }
     private async Task<Stream> CallWebServiceAsync(string url, string soapAction, string payload)
     {
-      var resp = await _http.Execute("POST", url, null, _cred, true, r =>
-      {
-        r.SetHeader("SOAPAction", "\"" + soapAction + "\"");
-        r.SetContent(w => w.Write(payload), "text/xml;charset=UTF-8");
-      }).ToTask();
-      return resp.AsStream;
+      var content = new StringContent(payload, Encoding.UTF8, "text/xml");
+      content.Headers.Add("SOAPAction", "\"" + soapAction + "\"");
+
+      var resp = await _http.PostAsync(url, content);
+      return await resp.Content.ReadAsStreamAsync();
     }
 
     public void Dispose()

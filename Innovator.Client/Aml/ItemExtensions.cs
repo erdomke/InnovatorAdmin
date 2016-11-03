@@ -141,7 +141,7 @@ namespace Innovator.Client
         {
           return Promises.Resolved((Stream)new MemoryStream(data));
         }
-        return Factory.DefaultService.Invoke().Execute("GET", url, null, null, async, null).Convert(r => {
+        return Factory.DefaultService.Invoke().GetPromise(new Uri(url), async).Convert(r => {
           var buffer = new MemoryStream();
           r.AsStream.CopyTo(buffer);
           Factory.ImageCache.TryAdd(url, buffer.ToArray());

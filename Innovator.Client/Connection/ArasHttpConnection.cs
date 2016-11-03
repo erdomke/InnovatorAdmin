@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -12,7 +15,8 @@ namespace Innovator.Client.Connection
 {
   public class ArasHttpConnection : IRemoteConnection, IArasConnection
   {
-    private IHttpService _service;
+    private CompressionType _compression;
+    private HttpClient _service;
     private int _arasVersion;
     private ServerContext _context = new ServerContext();
     private ElementFactory _factory;
@@ -32,11 +36,10 @@ namespace Innovator.Client.Connection
     {
       get { return _factory; }
     }
-
     public CompressionType Compression
     {
-      get { return _service.Compression; }
-      set { _service.Compression = value; }
+      get { return _compression; }
+      set { _compression = value; }
     }
     public string Database
     {
@@ -59,7 +62,7 @@ namespace Innovator.Client.Connection
       get { return _arasVersion; }
     }
 
-    public ArasHttpConnection(IHttpService service, string innovatorServerUrl, IItemFactory itemFactory)
+    public ArasHttpConnection(HttpClient service, string innovatorServerUrl, IItemFactory itemFactory)
     {
       _service = service;
       this.Compression = CompressionType.none;
@@ -130,8 +133,8 @@ namespace Innovator.Client.Connection
 
     public IEnumerable<string> GetDatabases()
     {
-      var req = GetBasicRequest(new Uri(this._innovatorServerBaseUrl, "DBList.aspx"));
-      using (var reader = XmlReader.Create(req.Execute().AsStream))
+      var resp = _service.GetPromise(new Uri(this._innovatorServerBaseUrl, "DBList.aspx"), false).Wait();
+      using (var reader = XmlReader.Create(resp.AsStream))
       {
         while (reader.Read())
         {
@@ -310,33 +313,22 @@ namespace Innovator.Client.Connection
 
     private IPromise<IHttpResponse> UploadAml(Uri uri, string action, Command request, bool async)
     {
-      return _service.Execute("POST", uri.ToString(), null, CredentialCache.DefaultCredentials, async, req =>
+      var req = new HttpRequest()
       {
-        ((IArasConnection)this).SetDefaultHeaders((k, v) => { req.SetHeader(k, v); });
-
-        foreach (var a in _defaults)
+        Content = new SimpleContent("<?xml version=\"1.0\" encoding=\"utf-8\" ?>" + request.ToNormalizedAml(_factory.LocalizationContext), "text/xml")
         {
-          a.Invoke(req);
+          Compression = _compression
         }
-        if (request.Settings != null) request.Settings.Invoke(req);
-
-        if (!string.IsNullOrEmpty(action)) req.SetHeader("SOAPACTION", action);
-        req.SetContent(w => w.Write("<?xml version=\"1.0\" encoding=\"utf-8\" ?>" + request.ToNormalizedAml(_factory.LocalizationContext)).Close(), "text/xml");
-      });
-    }
-
-    private WebRequest GetBasicRequest(Uri uri)
-    {
-      var req = (HttpWebRequest)System.Net.WebRequest.Create(uri);
-      req.Credentials = CredentialCache.DefaultCredentials;
-      req.Proxy.Credentials = CredentialCache.DefaultCredentials;
-
-      var result = new WebRequest(req, this.Compression);
+      };
+      ((IArasConnection)this).SetDefaultHeaders((k, v) => { req.SetHeader(k, v); });
       foreach (var a in _defaults)
       {
-        a.Invoke(result);
+        a.Invoke(req);
       }
-      return result;
+      if (request.Settings != null) request.Settings.Invoke(req);
+      if (!string.IsNullOrEmpty(action)) req.SetHeader("SOAPACTION", action);
+
+      return _service.PostPromise(uri, async, req);
     }
 
     internal IPromise<string> GetResult(string action, string request, bool async)
@@ -413,7 +405,7 @@ namespace Innovator.Client.Connection
 
     public IPromise<IRemoteConnection> Clone(bool async)
     {
-      var newConn = new ArasHttpConnection(new DefaultHttpService() { Compression = CompressionType.none }, _innovatorServerUrl.ToString(), _factory.ItemFactory);
+      var newConn = new ArasHttpConnection(Factory.DefaultService.Invoke(), _innovatorServerUrl.ToString(), _factory.ItemFactory);
       newConn._defaults = this._defaults;
       return newConn.Login(_lastCredentials, async)
         .Convert(u => (IRemoteConnection)newConn);

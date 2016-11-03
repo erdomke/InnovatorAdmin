@@ -64,15 +64,7 @@ namespace Innovator.Client
             try
             {
               var res = conn.AmlContext.FromXml(r, query.Aml, conn);
-              var ex = res.Exception;
-              if (ex != null && (noItemsIsError || !(ex is NoItemsFoundException)))
-              {
-                result.Reject(ex);
-              }
-              else
-              {
-                result.Resolve(res);
-              }
+              result.Resolve(res);
             }
             catch (Exception ex)
             {

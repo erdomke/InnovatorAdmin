@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 
 namespace Innovator.Client
@@ -16,7 +17,7 @@ namespace Innovator.Client
     /// </summary>
     public bool AllowAuthPreCheck { get; set; }
     public ITokenStore CredentialStore { get; set; }
-    public Connection.IHttpService HttpService { get; set; }
+    public HttpClient HttpService { get; set; }
     public IItemFactory ItemFactory { get; set; }
     /// <summary>
     /// Locale to use when logging in

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Xml;
 
@@ -11,14 +13,12 @@ namespace Innovator.Client
   {
     private string _aml;
     private byte[] _data;
-    private byte[] _header;
     private string _id;
     private long _length;
     private string _path;
 
     public string Aml     { get { return _aml; } }
     public string Id      { get { return _id; } }
-    public byte[] Header  { get { return _header; } }
     public long Length    { get { return _length; } }
     public string Path    { get { return _path; } }
 
@@ -86,25 +86,24 @@ namespace Innovator.Client
       }
     }
 
-    public Stream GetStream(bool async)
+    public HttpContent AsContent(Command cmd, IServerContext context)
     {
+      HttpContent result;
       if (_data == null)
       {
-        return new FileStream(_path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, async);
+        result = new StreamContent(new FileStream(_path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096));
       }
       else
       {
-        return new MemoryStream(_data);
+        result = new ByteArrayContent(_data);
       }
-    }
 
-    public int SetHeader(string brline, Command cmd, IServerContext context)
-    {
       var id = _id[0] == '@' ? cmd.Substitute(_id, context) : _id;
       var path = _path[0] == '@' ? cmd.Substitute(_path, context) : _path;
-      _header = Encoding.UTF8.GetBytes(string.Format("{0}\r\nContent-Disposition: form-data; name=\"{1}\"; filename=\"{2}\"\r\n\r\n", brline, id, path));
-      return _header.Length;
+      result.Headers.Add("Content-Disposition", string.Format("form-data; name=\"{0}\"; filename=\"{1}\"", id, path));
+      return result;
     }
+
 
     public static string NormalizePath(string path)
     {

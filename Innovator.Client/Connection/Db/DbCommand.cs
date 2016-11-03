@@ -14,7 +14,7 @@ namespace Innovator.Client.Connection
     public DbCommand(DbConnection conn)
     {
       _conn = conn;
-      this.CommandTimeout = DefaultHttpService.DefaultTimeout;
+      this.CommandTimeout = HttpRequest.DefaultTimeout;
     }
 
     void IDbCommand.Cancel()

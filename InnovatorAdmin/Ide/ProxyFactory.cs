@@ -10,6 +10,7 @@ using System.Web.Services.Description;
 using System.IO;
 using System.Xml;
 using System.Xml.Schema;
+using System.Net.Http;
 
 namespace InnovatorAdmin
 {
@@ -38,12 +39,12 @@ namespace InnovatorAdmin
             return conn.ArasLogin(true)
               .Convert(c => (IEditorProxy)new Editor.ArasEditorProxy(c, conn));
           case ConnectionType.Soap:
-            var service = new Innovator.Client.Connection.DefaultHttpService();
-            return service.Execute("GET", conn.Url, null, null, true, null)
+            var http = new HttpClient();
+            return http.GetStreamAsync(conn.Url).ToPromise()
               .Convert(r =>
               {
                 ServiceDescription descrip;
-                using (var reader = new StreamReader(r.AsStream))
+                using (var reader = new StreamReader(r))
                 using (var xml = XmlReader.Create(reader))
                 {
                   descrip = ServiceDescription.Read(xml);
