@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Alias </summary>
-  public class Alias : Item
+  public class Alias : Item, INullRelationship<User>, IRelationship<Identity>
   {
     protected Alias() { }
     public Alias(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Alias() { Innovator.Client.Item.AddNullItem<Alias>(new Alias { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

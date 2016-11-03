@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type cmf_TabularViewColumn </summary>
-  public class cmf_TabularViewColumn : Item
+  public class cmf_TabularViewColumn : Item, INullRelationship<cmf_TabularView>
   {
     protected cmf_TabularViewColumn() { }
     public cmf_TabularViewColumn(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static cmf_TabularViewColumn() { Innovator.Client.Item.AddNullItem<cmf_TabularViewColumn>(new cmf_TabularViewColumn { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
@@ -19,7 +21,7 @@ namespace Innovator.Client.Model
       return this.Property("col_order");
     }
     /// <summary>Retrieve the <c>content_style</c> property of the item</summary>
-    public IProperty_Item ContentStyle()
+    public IProperty_Item<cmf_Style> ContentStyle()
     {
       return this.Property("content_style");
     }
@@ -29,12 +31,12 @@ namespace Innovator.Client.Model
       return this.Property("date_pattern");
     }
     /// <summary>Retrieve the <c>editor_data_source_list</c> property of the item</summary>
-    public IProperty_Item EditorDataSourceList()
+    public IProperty_Item<List> EditorDataSourceList()
     {
       return this.Property("editor_data_source_list");
     }
     /// <summary>Retrieve the <c>editor_data_source_method</c> property of the item</summary>
-    public IProperty_Item EditorDataSourceMethod()
+    public IProperty_Item<Method> EditorDataSourceMethod()
     {
       return this.Property("editor_data_source_method");
     }
@@ -69,7 +71,7 @@ namespace Innovator.Client.Model
       return this.Property("header");
     }
     /// <summary>Retrieve the <c>header_style</c> property of the item</summary>
-    public IProperty_Item HeaderStyle()
+    public IProperty_Item<cmf_Style> HeaderStyle()
     {
       return this.Property("header_style");
     }
@@ -79,7 +81,7 @@ namespace Innovator.Client.Model
       return this.Property("initial_width");
     }
     /// <summary>Retrieve the <c>property</c> property of the item</summary>
-    public IProperty_Item PropertyProp()
+    public IProperty_Item<cmf_PropertyType> PropertyProp()
     {
       return this.Property("property");
     }

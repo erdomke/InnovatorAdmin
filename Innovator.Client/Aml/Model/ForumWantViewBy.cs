@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type ForumWantViewBy </summary>
-  public class ForumWantViewBy : Item
+  public class ForumWantViewBy : Item, INullRelationship<Forum>
   {
     protected ForumWantViewBy() { }
     public ForumWantViewBy(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ForumWantViewBy() { Innovator.Client.Item.AddNullItem<ForumWantViewBy>(new ForumWantViewBy { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
@@ -19,7 +21,7 @@ namespace Innovator.Client.Model
       return this.Property("sort_order");
     }
     /// <summary>Retrieve the <c>want_view_id</c> property of the item</summary>
-    public IProperty_Item WantViewId()
+    public IProperty_Item<Identity> WantViewId()
     {
       return this.Property("want_view_id");
     }

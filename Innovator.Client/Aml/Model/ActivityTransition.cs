@@ -4,17 +4,19 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Activity Transition </summary>
-  public class ActivityTransition : Item
+  public class ActivityTransition : Item, INullRelationship<Activity>, IRelationship<LifeCycleTransition>
   {
     protected ActivityTransition() { }
     public ActivityTransition(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ActivityTransition() { Innovator.Client.Item.AddNullItem<ActivityTransition>(new ActivityTransition { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
       return this.Property("behavior");
     }
     /// <summary>Retrieve the <c>controlled_itemtype</c> property of the item</summary>
-    public IProperty_Item ControlledItemtype()
+    public IProperty_Item<ItemType> ControlledItemtype()
     {
       return this.Property("controlled_itemtype");
     }

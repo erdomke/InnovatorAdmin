@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected EMailMessage() { }
     public EMailMessage(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static EMailMessage() { Innovator.Client.Item.AddNullItem<EMailMessage>(new EMailMessage { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>body_html</c> property of the item</summary>
     public IProperty_Text BodyHtml()
     {
@@ -19,7 +21,7 @@ namespace Innovator.Client.Model
       return this.Property("body_plain");
     }
     /// <summary>Retrieve the <c>from_user</c> property of the item</summary>
-    public IProperty_Item FromUser()
+    public IProperty_Item<User> FromUser()
     {
       return this.Property("from_user");
     }

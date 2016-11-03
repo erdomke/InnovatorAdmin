@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type History </summary>
-  public class History : Item
+  public class History : Item, INullRelationship<HistoryContainer>
   {
     protected History() { }
     public History(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static History() { Innovator.Client.Item.AddNullItem<History>(new History { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>action</c> property of the item</summary>
     public IProperty_Text Action()
     {

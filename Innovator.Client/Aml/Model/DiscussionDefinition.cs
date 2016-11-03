@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected DiscussionDefinition() { }
     public DiscussionDefinition(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static DiscussionDefinition() { Innovator.Client.Item.AddNullItem<DiscussionDefinition>(new DiscussionDefinition { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>file_selection_depth</c> property of the item</summary>
     public IProperty_Number FileSelectionDepth()
     {

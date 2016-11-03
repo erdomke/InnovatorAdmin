@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Feed </summary>
-  public class Feed : Item
+  public class Feed : Item, INullRelationship<DiscussionDefinition>
   {
     protected Feed() { }
     public Feed(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Feed() { Innovator.Client.Item.AddNullItem<Feed>(new Feed { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

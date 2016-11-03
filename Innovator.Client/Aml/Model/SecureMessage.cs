@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type SecureMessage </summary>
-  public class SecureMessage : Item
+  public class SecureMessage : Item, INullRelationship<Board>
   {
     protected SecureMessage() { }
     public SecureMessage(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static SecureMessage() { Innovator.Client.Item.AddNullItem<SecureMessage>(new SecureMessage { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
@@ -24,7 +26,7 @@ namespace Innovator.Client.Model
       return this.Property("created_on_tick");
     }
     /// <summary>Retrieve the <c>disabled_by_id</c> property of the item</summary>
-    public IProperty_Item DisabledById()
+    public IProperty_Item<User> DisabledById()
     {
       return this.Property("disabled_by_id");
     }

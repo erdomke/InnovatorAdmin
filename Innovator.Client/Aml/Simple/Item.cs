@@ -5,25 +5,15 @@ using System.Text;
 
 namespace Innovator.Client
 {
-  internal class NullItem : Item
-  {
-    public override ILinkedElement Next
-    {
-      get { return null; }
-      set { /* Do nothing */ }
-    }
-
-    public NullItem() : base()
-    {
-      ReadOnly = true;
-    }
-  }
   public class Item : Element, IItem
   {
     private ElementFactory _amlContext;
     private IElement _parent = AmlElement.NullElem;
 
     public override ElementFactory AmlContext { get { return _amlContext; } }
+    /// <summary>
+    /// The tag name of the AML element
+    /// </summary>
     public override string Name { get { return "Item"; } }
     public override IElement Parent
     {
@@ -32,7 +22,7 @@ namespace Innovator.Client
     }
     public override ILinkedElement Next
     {
-      get { return this; }
+      get { return ((_attr & ElementAttribute.Null) > 0 ? null : this); }
       set { /* Do nothing */ }
     }
 
@@ -44,8 +34,22 @@ namespace Innovator.Client
         Add(content);
     }
 
-    private static Item _nullItem = new NullItem();
-    public static Item NullItem { get { return _nullItem; } }
+    private static Dictionary<Type, IReadOnlyItem> _nullItems = new Dictionary<Type, IReadOnlyItem>()
+    {
+      { typeof(Item), new Item(){ _attr = ElementAttribute.ReadOnly | ElementAttribute.Null } }
+    };
+
+    public static void AddNullItem<T>(T value) where T : IReadOnlyItem
+    {
+      _nullItems[typeof(T)] = value;
+    }
+    public static T GetNullItem<T>() where T : IReadOnlyItem
+    {
+      IReadOnlyItem result;
+      if (_nullItems.TryGetValue(typeof(T), out result))
+        return (T)result;
+      return default(T);
+    }
 
     internal Item SetFlag(ElementAttribute attr)
     {

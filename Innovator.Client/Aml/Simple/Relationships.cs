@@ -32,7 +32,7 @@ namespace Innovator.Client
     }
     public IElement Parent
     {
-      get { return _parent ?? Item.NullItem; }
+      get { return _parent ?? Item.GetNullItem<Item>(); }
       set { _parent = value; }
     }
     IReadOnlyElement IReadOnlyElement.Parent { get { return this.Parent; } }

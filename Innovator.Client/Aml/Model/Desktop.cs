@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Desktop </summary>
-  public class Desktop : Item
+  public class Desktop : Item, IRelationship<User>
   {
     protected Desktop() { }
     public Desktop(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Desktop() { Innovator.Client.Item.AddNullItem<Desktop>(new Desktop { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
@@ -24,7 +26,7 @@ namespace Innovator.Client.Model
       return this.Property("sort_order");
     }
     /// <summary>Retrieve the <c>source_type</c> property of the item</summary>
-    public IProperty_Item SourceType()
+    public IProperty_Item<ItemType> SourceType()
     {
       return this.Property("source_type");
     }

@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type PackageReferencedElement </summary>
-  public class PackageReferencedElement : Item
+  public class PackageReferencedElement : Item, INullRelationship<PackageDependsOn>
   {
     protected PackageReferencedElement() { }
     public PackageReferencedElement(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static PackageReferencedElement() { Innovator.Client.Item.AddNullItem<PackageReferencedElement>(new PackageReferencedElement { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

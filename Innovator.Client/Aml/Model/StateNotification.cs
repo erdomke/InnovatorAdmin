@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type State Notification </summary>
-  public class StateNotification : Item
+  public class StateNotification : Item, INullRelationship<LifeCycleState>, IRelationship<Identity>
   {
     protected StateNotification() { }
     public StateNotification(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static StateNotification() { Innovator.Client.Item.AddNullItem<StateNotification>(new StateNotification { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
@@ -19,7 +21,7 @@ namespace Innovator.Client.Model
       return this.Property("body");
     }
     /// <summary>Retrieve the <c>from_user</c> property of the item</summary>
-    public IProperty_Item FromUser()
+    public IProperty_Item<User> FromUser()
     {
       return this.Property("from_user");
     }

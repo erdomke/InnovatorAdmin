@@ -7,11 +7,11 @@ namespace Innovator.Client.Model
   public interface IInBasketTask : IItem
   {
     /// <summary>Retrieve the <c>assigned_to</c> property of the item</summary>
-    IProperty_Item AssignedTo();
+    IProperty_Item<Identity> AssignedTo();
     /// <summary>Retrieve the <c>container</c> property of the item</summary>
-    IProperty_Item Container();
+    IProperty_Item<IReadOnlyItem> Container();
     /// <summary>Retrieve the <c>container_type_id</c> property of the item</summary>
-    IProperty_Item ContainerTypeId();
+    IProperty_Item<ItemType> ContainerTypeId();
     /// <summary>Retrieve the <c>due_date</c> property of the item</summary>
     IProperty_Date DueDate();
     /// <summary>Retrieve the <c>icon</c> property of the item</summary>
@@ -19,9 +19,9 @@ namespace Innovator.Client.Model
     /// <summary>Retrieve the <c>instructions</c> property of the item</summary>
     IProperty_Text Instructions();
     /// <summary>Retrieve the <c>item</c> property of the item</summary>
-    IProperty_Item Item();
+    IProperty_Item<IReadOnlyItem> Item();
     /// <summary>Retrieve the <c>item_type_id</c> property of the item</summary>
-    IProperty_Item ItemTypeId();
+    IProperty_Item<ItemType> ItemTypeId();
     /// <summary>Retrieve the <c>language_code_filter</c> property of the item</summary>
     IProperty_Text LanguageCodeFilter();
     /// <summary>Retrieve the <c>my_assignment</c> property of the item</summary>

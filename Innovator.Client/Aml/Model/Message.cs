@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected Message() { }
     public Message(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Message() { Innovator.Client.Item.AddNullItem<Message>(new Message { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>acknowledge</c> property of the item</summary>
     public IProperty_Text Acknowledge()
     {
@@ -69,7 +71,7 @@ namespace Innovator.Client.Model
       return this.Property("show_ok_button");
     }
     /// <summary>Retrieve the <c>target</c> property of the item</summary>
-    public IProperty_Item Target()
+    public IProperty_Item<Identity> Target()
     {
       return this.Property("target");
     }

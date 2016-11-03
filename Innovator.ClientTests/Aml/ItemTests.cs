@@ -135,6 +135,154 @@ namespace Innovator.Client.Tests
     }
 
     [TestMethod()]
+    public void ModelItemProperties()
+    {
+      var itemAml2 = @"<SOAP-ENV:Envelope xmlns:SOAP-ENV=""http://schemas.xmlsoap.org/soap/envelope/"">
+  <SOAP-ENV:Body>
+    <Result>
+      <Item type=""ItemType"" typeId=""450906E86E304F55A34B3C0D65C097EA"" id=""F0834BBA6FB64394B78DF5BB725532DD"">
+        <created_by_id keyed_name=""_Super User"" type=""User"">AD30A6D8D3B642F5A2AFED1A4B02BEFA</created_by_id>
+        <modified_by_id is_null=""1"" />
+        <id keyed_name=""Report"" type=""ItemType"">F0834BBA6FB64394B78DF5BB725532DD</id>
+        <label xml:lang=""en"">Report</label>
+      </Item>
+    </Result>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>";
+      var item = ElementFactory.Local.FromXml(itemAml2, "some query", null).AssertItem();
+      var user = item.CreatedById().AsModel();
+      Assert.AreEqual("User", user.GetType().Name);
+      user = item.ModifiedById().AsModel();
+      Assert.AreEqual("User", user.GetType().Name);
+      Assert.AreEqual(false, user.Exists);
+      user = item.ModifiedById().AsModel().CreatedById().AsModel();
+      Assert.AreEqual("User", user.GetType().Name);
+      Assert.AreEqual(false, user.Exists);
+    }
+
+    [TestMethod]
+    public void ModelSourceRelated()
+    {
+      var itemAml = @"<SOAP-ENV:Envelope xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'>
+  <SOAP-ENV:Body>
+    <Result>
+      <Item type='Permission' typeId='C6A89FDE1294451497801DF78341B473' id='93AB06D37FC84328A314324DC45DB574'>
+        <config_id keyed_name='World Can Get' type='Permission'>93AB06D37FC84328A314324DC45DB574</config_id>
+        <created_by_id keyed_name='Super User' type='User'>AD30A6D8D3B642F5A2AFED1A4B02BEFA</created_by_id>
+        <created_on>2004-08-04T17:12:08</created_on>
+        <current_state keyed_name='Released' type='Life Cycle State' name='Released'>C363ABDADF8D485393BB89877DBDCFD0</current_state>
+        <generation>1</generation>
+        <id keyed_name='World Can Get' type='Permission'>93AB06D37FC84328A314324DC45DB574</id>
+        <is_current>1</is_current>
+        <is_private>0</is_private>
+        <is_released>1</is_released>
+        <keyed_name>World Can Get</keyed_name>
+        <major_rev>A</major_rev>
+        <modified_on>2004-08-04T17:12:10</modified_on>
+        <new_version>0</new_version>
+        <not_lockable>0</not_lockable>
+        <permission_id keyed_name='Permission' type='Permission'>BBBFCF1164514B7B92C8BCA944498142</permission_id>
+        <state>Released</state>
+        <name>World Can Get</name>
+        <Relationships>
+          <Item type='Access' typeId='AEFCD3D2DC1D4E3EA126D49D68041EB6' id='05D159C4EE034DD7B8C18678FD1AFB84'>
+            <behavior>float</behavior>
+            <can_change_access>0</can_change_access>
+            <can_delete>0</can_delete>
+            <can_discover>1</can_discover>
+            <can_get>1</can_get>
+            <can_update>0</can_update>
+            <config_id keyed_name='05D159C4EE034DD7B8C18678FD1AFB84' type='Access'>05D159C4EE034DD7B8C18678FD1AFB84</config_id>
+            <created_by_id keyed_name='Super User' type='User'>AD30A6D8D3B642F5A2AFED1A4B02BEFA</created_by_id>
+            <created_on>2004-08-04T17:12:09</created_on>
+            <generation>1</generation>
+            <is_current>1</is_current>
+            <is_released>0</is_released>
+            <keyed_name>05D159C4EE034DD7B8C18678FD1AFB84</keyed_name>
+            <major_rev>A</major_rev>
+            <new_version>0</new_version>
+            <not_lockable>0</not_lockable>
+            <permission_id keyed_name='Access' type='Permission'>D8D71D09802C475884D1AFE156AF92F3</permission_id>
+            <related_id keyed_name='World' type='Identity'>
+              <Item type='Identity' typeId='E582AB17663F4EF28460015B2BE9E094' id='A73B655731924CD0B027E4F4D5FCC0A9'>
+                <config_id keyed_name='World' type='Identity'>A73B655731924CD0B027E4F4D5FCC0A9</config_id>
+                <created_by_id keyed_name='Super User' type='User'>AD30A6D8D3B642F5A2AFED1A4B02BEFA</created_by_id>
+                <created_on>2002-04-24T09:46:11</created_on>
+                <current_state keyed_name='Released' type='Life Cycle State' name='Released'>C363ABDADF8D485393BB89877DBDCFD0</current_state>
+                <description>All users are automatically members of the World.</description>
+                <generation>1</generation>
+                <id keyed_name='World' type='Identity'>A73B655731924CD0B027E4F4D5FCC0A9</id>
+                <is_alias>0</is_alias>
+                <is_current>1</is_current>
+                <is_released>0</is_released>
+                <keyed_name>World</keyed_name>
+                <major_rev>A</major_rev>
+                <modified_by_id keyed_name='Super User' type='User'>AD30A6D8D3B642F5A2AFED1A4B02BEFA</modified_by_id>
+                <modified_on>2003-05-31T17:45:42</modified_on>
+                <new_version>0</new_version>
+                <not_lockable>0</not_lockable>
+                <permission_id keyed_name='9A7C03AFA5E5453AAAC94FDB9006720B' type='Permission'>9A7C03AFA5E5453AAAC94FDB9006720B</permission_id>
+                <state>Released</state>
+                <name>World</name>
+              </Item>
+            </related_id>
+            <show_permissions_warning>0</show_permissions_warning>
+            <sort_order>128</sort_order>
+            <source_id keyed_name='World Can Get' type='Permission'>93AB06D37FC84328A314324DC45DB574</source_id>
+            <id keyed_name='05D159C4EE034DD7B8C18678FD1AFB84' type='Access'>05D159C4EE034DD7B8C18678FD1AFB84</id>
+          </Item>
+          <Item type='Access' typeId='AEFCD3D2DC1D4E3EA126D49D68041EB6' id='3861311B4E1C4BE6877074CA6D67A583'>
+            <can_change_access>0</can_change_access>
+            <can_delete>1</can_delete>
+            <can_discover>1</can_discover>
+            <can_get>1</can_get>
+            <can_update>1</can_update>
+            <config_id keyed_name='3861311B4E1C4BE6877074CA6D67A583' type='Access'>3861311B4E1C4BE6877074CA6D67A583</config_id>
+            <created_by_id keyed_name='Super User' type='User'>AD30A6D8D3B642F5A2AFED1A4B02BEFA</created_by_id>
+            <created_on>2004-08-04T17:26:04</created_on>
+            <generation>1</generation>
+            <is_current>1</is_current>
+            <is_released>0</is_released>
+            <keyed_name>3861311B4E1C4BE6877074CA6D67A583</keyed_name>
+            <new_version>0</new_version>
+            <not_lockable>0</not_lockable>
+            <permission_id keyed_name='Access' type='Permission'>D8D71D09802C475884D1AFE156AF92F3</permission_id>
+            <related_id keyed_name='Administrators' type='Identity'>
+              <Item type='Identity' typeId='E582AB17663F4EF28460015B2BE9E094' id='2618D6F5A90949BAA7E920D1B04C7EE1'>
+                <config_id keyed_name='Administrators' type='Identity'>2618D6F5A90949BAA7E920D1B04C7EE1</config_id>
+                <created_by_id keyed_name='Super User' type='User'>AD30A6D8D3B642F5A2AFED1A4B02BEFA</created_by_id>
+                <created_on>2005-07-15T11:33:48</created_on>
+                <description>Users with access to system administrative aspects</description>
+                <generation>1</generation>
+                <id keyed_name='Administrators' type='Identity'>2618D6F5A90949BAA7E920D1B04C7EE1</id>
+                <is_alias>0</is_alias>
+                <is_current>1</is_current>
+                <is_released>0</is_released>
+                <keyed_name>Administrators</keyed_name>
+                <major_rev>A</major_rev>
+                <new_version>0</new_version>
+                <not_lockable>0</not_lockable>
+                <permission_id keyed_name='Identity' type='Permission'>761D6A3E3CA146138B47393D29FF6824</permission_id>
+                <name>Administrators</name>
+              </Item>
+            </related_id>
+            <show_permissions_warning>0</show_permissions_warning>
+            <source_id keyed_name='World Can Get' type='Permission'>93AB06D37FC84328A314324DC45DB574</source_id>
+            <id keyed_name='3861311B4E1C4BE6877074CA6D67A583' type='Access'>3861311B4E1C4BE6877074CA6D67A583</id>
+          </Item>
+        </Relationships>
+      </Item>
+    </Result>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>";
+      var item = ElementFactory.Local.FromXml(itemAml, "some query", null).AssertItem();
+      var access = item.Relationships().OfType<Model.Access>().First();
+      Assert.AreEqual("Permission", access.SourceModel().GetType().Name);
+      Assert.AreEqual("World Can Get", access.SourceModel().NameProp().Value);
+      Assert.AreEqual("All users are automatically members of the World.", access.RelatedModel().Description().Value);
+    }
+
+    [TestMethod()]
     public void TestItemCreation_Constructor()
     {
       var aml = ElementFactory.Local;

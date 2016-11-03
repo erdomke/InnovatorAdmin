@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type FileExchangeTxnState </summary>
-  public class FileExchangeTxnState : Item
+  public class FileExchangeTxnState : Item, INullRelationship<FileExchangeTxn>
   {
     protected FileExchangeTxnState() { }
     public FileExchangeTxnState(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static FileExchangeTxnState() { Innovator.Client.Item.AddNullItem<FileExchangeTxnState>(new FileExchangeTxnState { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

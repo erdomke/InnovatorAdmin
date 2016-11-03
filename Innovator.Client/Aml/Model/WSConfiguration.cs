@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected WSConfiguration() { }
     public WSConfiguration(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static WSConfiguration() { Innovator.Client.Item.AddNullItem<WSConfiguration>(new WSConfiguration { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>compat_mode</c> property of the item</summary>
     public IProperty_Boolean CompatMode()
     {

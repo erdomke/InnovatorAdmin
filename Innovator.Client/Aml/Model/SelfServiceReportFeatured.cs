@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type SelfServiceReportFeatured </summary>
-  public class SelfServiceReportFeatured : Item
+  public class SelfServiceReportFeatured : Item, INullRelationship<SelfServiceReportSettings>
   {
     protected SelfServiceReportFeatured() { }
     public SelfServiceReportFeatured(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static SelfServiceReportFeatured() { Innovator.Client.Item.AddNullItem<SelfServiceReportFeatured>(new SelfServiceReportFeatured { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>allow_excluded_properties</c> property of the item</summary>
     public IProperty_Boolean AllowExcludedProperties()
     {
@@ -34,7 +36,7 @@ namespace Innovator.Client.Model
       return this.Property("hide_advanced");
     }
     /// <summary>Retrieve the <c>identity_id</c> property of the item</summary>
-    public IProperty_Item IdentityId()
+    public IProperty_Item<Identity> IdentityId()
     {
       return this.Property("identity_id");
     }

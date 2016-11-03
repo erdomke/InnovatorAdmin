@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected Method() { }
     public Method(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Method() { Innovator.Client.Item.AddNullItem<Method>(new Method { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>comments</c> property of the item</summary>
     public IProperty_Text Comments()
     {
@@ -24,7 +26,7 @@ namespace Innovator.Client.Model
       return this.Property("effective_date");
     }
     /// <summary>Retrieve the <c>execution_allowed_to</c> property of the item</summary>
-    public IProperty_Item ExecutionAllowedTo()
+    public IProperty_Item<Identity> ExecutionAllowedTo()
     {
       return this.Property("execution_allowed_to");
     }

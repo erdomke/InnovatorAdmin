@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Workflow Map Path </summary>
-  public class WorkflowMapPath : Item
+  public class WorkflowMapPath : Item, INullRelationship<ActivityTemplate>
   {
     protected WorkflowMapPath() { }
     public WorkflowMapPath(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static WorkflowMapPath() { Innovator.Client.Item.AddNullItem<WorkflowMapPath>(new WorkflowMapPath { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>authentication</c> property of the item</summary>
     public IProperty_Text Authentication()
     {

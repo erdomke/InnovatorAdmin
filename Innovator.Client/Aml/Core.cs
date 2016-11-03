@@ -118,12 +118,12 @@ namespace Innovator.Client
       return parent.Property("classification");
     }
     /// <summary>Retrieve the <c>config_id</c> property of the item</summary>
-    public static IProperty_Item ConfigId(this IItem parent)
+    public static IProperty_Item<IItem> ConfigId(this IItem parent)
     {
       return parent.Property("config_id");
     }
     /// <summary>Retrieve the <c>created_by_id</c> property of the item</summary>
-    public static IProperty_Item CreatedById(this IItem parent)
+    public static IProperty_Item<Model.User> CreatedById(this IItem parent)
     {
       return parent.Property("created_by_id");
     }
@@ -147,7 +147,7 @@ namespace Innovator.Client
       return parent.Property("css");
     }
     /// <summary>Retrieve the <c>current_state</c> property of the item</summary>
-    public static IProperty_Item CurrentState(this IItem parent)
+    public static IProperty_Item<Model.LifeCycleState> CurrentState(this IItem parent)
     {
       return parent.Property("current_state");
     }
@@ -157,7 +157,7 @@ namespace Innovator.Client
       return parent.Property("generation");
     }
     /// <summary>Retrieve the <c>id</c> property of the item</summary>
-    public static IProperty_Item IdProp(this IItem parent)
+    public static IProperty_Item<IItem> IdProp(this IItem parent)
     {
       return parent.Property("id");
     }
@@ -177,7 +177,7 @@ namespace Innovator.Client
       return parent.Property("keyed_name");
     }
     /// <summary>Retrieve the <c>locked_by_id</c> property of the item</summary>
-    public static IProperty_Item LockedById(this IItem parent)
+    public static IProperty_Item<Model.User> LockedById(this IItem parent)
     {
       return parent.Property("locked_by_id");
     }
@@ -187,7 +187,7 @@ namespace Innovator.Client
       return parent.Property("major_rev");
     }
     /// <summary>Retrieve the <c>managed_by_id</c> property of the item</summary>
-    public static IProperty_Item ManagedById(this IItem parent)
+    public static IProperty_Item<Model.Identity> ManagedById(this IItem parent)
     {
       return parent.Property("managed_by_id");
     }
@@ -197,7 +197,7 @@ namespace Innovator.Client
       return parent.Property("minor_rev");
     }
     /// <summary>Retrieve the <c>modified_by_id</c> property of the item</summary>
-    public static IProperty_Item ModifiedById(this IItem parent)
+    public static IProperty_Item<Model.User> ModifiedById(this IItem parent)
     {
       return parent.Property("modified_by_id");
     }
@@ -217,17 +217,17 @@ namespace Innovator.Client
       return parent.Property("not_lockable");
     }
     /// <summary>Retrieve the <c>owned_by_id</c> property of the item</summary>
-    public static IProperty_Item OwnedById(this IItem parent)
+    public static IProperty_Item<Model.Identity> OwnedById(this IItem parent)
     {
       return parent.Property("owned_by_id");
     }
     /// <summary>Retrieve the <c>permission_id</c> property of the item</summary>
-    public static IProperty_Item PermissionId(this IItem parent)
+    public static IProperty_Item<Model.Permission> PermissionId(this IItem parent)
     {
       return parent.Property("permission_id");
     }
     /// <summary>Retrieve the <c>related_id</c> property of the item</summary>
-    public static IProperty_Item RelatedId(this IItem parent)
+    public static IProperty_Item<IItem> RelatedId(this IItem parent)
     {
       return parent.Property("related_id");
     }
@@ -242,7 +242,7 @@ namespace Innovator.Client
       return parent.Property("state");
     }
     /// <summary>Retrieve the <c>source_id</c> property of the item</summary>
-    public static IProperty_Item SourceId(this IItem parent)
+    public static IProperty_Item<IItem> SourceId(this IItem parent)
     {
       return parent.Property("source_id");
     }
@@ -366,12 +366,12 @@ namespace Innovator.Client
       return parent.Property("classification");
     }
     /// <summary>Retrieve the <c>config_id</c> property of the item</summary>
-    public static IReadOnlyProperty_Item ConfigId(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item<IReadOnlyItem> ConfigId(this IReadOnlyItem parent)
     {
       return parent.Property("config_id");
     }
     /// <summary>Retrieve the <c>created_by_id</c> property of the item</summary>
-    public static IReadOnlyProperty_Item CreatedById(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item<Model.User> CreatedById(this IReadOnlyItem parent)
     {
       return parent.Property("created_by_id");
     }
@@ -395,7 +395,7 @@ namespace Innovator.Client
       return parent.Property("css");
     }
     /// <summary>Retrieve the <c>current_state</c> property of the item</summary>
-    public static IReadOnlyProperty_Item CurrentState(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item<Model.LifeCycleState> CurrentState(this IReadOnlyItem parent)
     {
       return parent.Property("current_state");
     }
@@ -405,7 +405,7 @@ namespace Innovator.Client
       return parent.Property("generation");
     }
     /// <summary>Retrieve the <c>id</c> property of the item</summary>
-    public static IReadOnlyProperty_Item IdProp(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item<IReadOnlyItem> IdProp(this IReadOnlyItem parent)
     {
       return parent.Property("id");
     }
@@ -425,7 +425,7 @@ namespace Innovator.Client
       return parent.Property("keyed_name");
     }
     /// <summary>Retrieve the <c>locked_by_id</c> property of the item</summary>
-    public static IReadOnlyProperty_Item LockedById(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item<Model.User> LockedById(this IReadOnlyItem parent)
     {
       return parent.Property("locked_by_id");
     }
@@ -435,7 +435,7 @@ namespace Innovator.Client
       return parent.Property("major_rev");
     }
     /// <summary>Retrieve the <c>managed_by_id</c> property of the item</summary>
-    public static IReadOnlyProperty_Item ManagedById(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item<Model.Identity> ManagedById(this IReadOnlyItem parent)
     {
       return parent.Property("managed_by_id");
     }
@@ -445,7 +445,7 @@ namespace Innovator.Client
       return parent.Property("minor_rev");
     }
     /// <summary>Retrieve the <c>modified_by_id</c> property of the item</summary>
-    public static IReadOnlyProperty_Item ModifiedById(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item<Model.User> ModifiedById(this IReadOnlyItem parent)
     {
       return parent.Property("modified_by_id");
     }
@@ -465,17 +465,17 @@ namespace Innovator.Client
       return parent.Property("not_lockable");
     }
     /// <summary>Retrieve the <c>owned_by_id</c> property of the item</summary>
-    public static IReadOnlyProperty_Item OwnedById(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item<Model.Identity> OwnedById(this IReadOnlyItem parent)
     {
       return parent.Property("owned_by_id");
     }
     /// <summary>Retrieve the <c>permission_id</c> property of the item</summary>
-    public static IReadOnlyProperty_Item PermissionId(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item<Model.Permission> PermissionId(this IReadOnlyItem parent)
     {
       return parent.Property("permission_id");
     }
     /// <summary>Retrieve the <c>related_id</c> property of the item</summary>
-    public static IReadOnlyProperty_Item RelatedId(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item<IReadOnlyItem> RelatedId(this IReadOnlyItem parent)
     {
       return parent.Property("related_id");
     }
@@ -490,7 +490,7 @@ namespace Innovator.Client
       return parent.Property("state");
     }
     /// <summary>Retrieve the <c>source_id</c> property of the item</summary>
-    public static IReadOnlyProperty_Item SourceId(this IReadOnlyItem parent)
+    public static IReadOnlyProperty_Item<IReadOnlyItem> SourceId(this IReadOnlyItem parent)
     {
       return parent.Property("source_id");
     }

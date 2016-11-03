@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected Activity() { }
     public Activity(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Activity() { Innovator.Client.Item.AddNullItem<Activity>(new Activity { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>active_date</c> property of the item</summary>
     public IProperty_Date ActiveDate()
     {
@@ -24,7 +26,7 @@ namespace Innovator.Client.Model
       return this.Property("can_refuse");
     }
     /// <summary>Retrieve the <c>cloned_as</c> property of the item</summary>
-    public IProperty_Item ClonedAs()
+    public IProperty_Item<Activity> ClonedAs()
     {
       return this.Property("cloned_as");
     }
@@ -39,7 +41,7 @@ namespace Innovator.Client.Model
       return this.Property("consolidate_ondelegate");
     }
     /// <summary>Retrieve the <c>escalate_to</c> property of the item</summary>
-    public IProperty_Item EscalateTo()
+    public IProperty_Item<Identity> EscalateTo()
     {
       return this.Property("escalate_to");
     }
@@ -104,12 +106,12 @@ namespace Innovator.Client.Model
       return this.Property("reminder_interval");
     }
     /// <summary>Retrieve the <c>role</c> property of the item</summary>
-    public IProperty_Item Role()
+    public IProperty_Item<Identity> Role()
     {
       return this.Property("role");
     }
     /// <summary>Retrieve the <c>subflow</c> property of the item</summary>
-    public IProperty_Item Subflow()
+    public IProperty_Item<WorkflowMap> Subflow()
     {
       return this.Property("subflow");
     }

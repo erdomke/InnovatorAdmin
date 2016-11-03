@@ -8,13 +8,15 @@ namespace Innovator.Client.Model
   {
     protected Grid() { }
     public Grid(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Grid() { Innovator.Client.Item.AddNullItem<Grid>(new Grid { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>merge_path</c> property of the item</summary>
     public IProperty_Text MergePath()
     {
       return this.Property("merge_path");
     }
     /// <summary>Retrieve the <c>method</c> property of the item</summary>
-    public IProperty_Item Method()
+    public IProperty_Item<Method> Method()
     {
       return this.Property("method");
     }

@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Forum </summary>
-  public class Forum : Item
+  public class Forum : Item, ISSVCItems
   {
     protected Forum() { }
     public Forum(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Forum() { Innovator.Client.Item.AddNullItem<Forum>(new Forum { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>description</c> property of the item</summary>
     public IProperty_Text Description()
     {

@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type tp_LinkReference </summary>
-  public class tp_LinkReference : Item
+  public class tp_LinkReference : Item, INullRelationship<tp_Block>, IRelationship<tp_Block>
   {
     protected tp_LinkReference() { }
     public tp_LinkReference(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static tp_LinkReference() { Innovator.Client.Item.AddNullItem<tp_LinkReference>(new tp_LinkReference { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

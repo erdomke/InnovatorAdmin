@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected List() { }
     public List(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static List() { Innovator.Client.Item.AddNullItem<List>(new List { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>core</c> property of the item</summary>
     public IProperty_Boolean Core()
     {

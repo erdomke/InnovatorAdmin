@@ -12,7 +12,7 @@ namespace Innovator.Client.Tests
   [TestClass()]
   public class UploadCommandTests
   {
-    [TestMethod()]
+    /*[TestMethod()]
     public void AddFileQuery_DontModifyIfComplete()
     {
       var query = @"<AML>
@@ -104,6 +104,6 @@ namespace Innovator.Client.Tests
       Assert.AreEqual("1", located.Element("file_version").Value);
       Assert.AreEqual("67BBB9204FE84A8981ED8313049BA06C", located.Element("related_id").Value);
       Assert.AreEqual("EAD5E1CD373D483FBE1084455E810ECB", located.Element("source_id").Value);
-    }
+    }*/
   }
 }

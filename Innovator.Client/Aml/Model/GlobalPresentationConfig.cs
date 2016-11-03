@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected GlobalPresentationConfig() { }
     public GlobalPresentationConfig(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static GlobalPresentationConfig() { Innovator.Client.Item.AddNullItem<GlobalPresentationConfig>(new GlobalPresentationConfig { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>additional_data</c> property of the item</summary>
     public IProperty_Text AdditionalData()
     {
@@ -19,7 +21,7 @@ namespace Innovator.Client.Model
       return this.Property("client");
     }
     /// <summary>Retrieve the <c>presentation_id</c> property of the item</summary>
-    public IProperty_Item PresentationId()
+    public IProperty_Item<PresentationConfiguration> PresentationId()
     {
       return this.Property("presentation_id");
     }

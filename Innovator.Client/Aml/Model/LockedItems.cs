@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type LockedItems </summary>
-  public class LockedItems : Item
+  public class LockedItems : Item, IRelationship<User>
   {
     protected LockedItems() { }
     public LockedItems(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static LockedItems() { Innovator.Client.Item.AddNullItem<LockedItems>(new LockedItems { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
@@ -24,7 +26,7 @@ namespace Innovator.Client.Model
       return this.Property("sort_order");
     }
     /// <summary>Retrieve the <c>source_type</c> property of the item</summary>
-    public IProperty_Item SourceType()
+    public IProperty_Item<ItemType> SourceType()
     {
       return this.Property("source_type");
     }

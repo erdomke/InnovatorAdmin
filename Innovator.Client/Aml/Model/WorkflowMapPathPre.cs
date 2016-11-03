@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Workflow Map Path Pre </summary>
-  public class WorkflowMapPathPre : Item
+  public class WorkflowMapPathPre : Item, INullRelationship<WorkflowMapPath>, IRelationship<Method>
   {
     protected WorkflowMapPathPre() { }
     public WorkflowMapPathPre(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static WorkflowMapPathPre() { Innovator.Client.Item.AddNullItem<WorkflowMapPathPre>(new WorkflowMapPathPre { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

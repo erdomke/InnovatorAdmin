@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected DatabaseUpgrade() { }
     public DatabaseUpgrade(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static DatabaseUpgrade() { Innovator.Client.Item.AddNullItem<DatabaseUpgrade>(new DatabaseUpgrade { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>applied_on</c> property of the item</summary>
     public IProperty_Date AppliedOn()
     {

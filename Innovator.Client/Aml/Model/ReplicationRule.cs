@@ -4,17 +4,19 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type ReplicationRule </summary>
-  public class ReplicationRule : Item
+  public class ReplicationRule : Item, INullRelationship<Vault>, IRelationship<Identity>
   {
     protected ReplicationRule() { }
     public ReplicationRule(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ReplicationRule() { Innovator.Client.Item.AddNullItem<ReplicationRule>(new ReplicationRule { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
       return this.Property("behavior");
     }
     /// <summary>Retrieve the <c>do_replicate</c> property of the item</summary>
-    public IProperty_Item DoReplicate()
+    public IProperty_Item<Method> DoReplicate()
     {
       return this.Property("do_replicate");
     }

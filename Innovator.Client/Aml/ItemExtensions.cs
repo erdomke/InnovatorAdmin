@@ -27,23 +27,42 @@ namespace Innovator.Client
     /// <summary>Return a single item cast as the specified type.  If that
     /// is not possible, throw an appropriate exception (e.g. the exception
     /// returned by the server where possible)</summary>
-    public static T AssertItem<T>(this IReadOnlyResult result)
+    public static T AssertItem<T>(this IReadOnlyResult result) where T : IReadOnlyItem
     {
-      var item = result.AssertItem();
-      if (item is T)
-        return (T)item;
-
-      var typeName = item.Type().HasValue() ? item.Type().Value : item.GetType().Name;
-      throw new InvalidOperationException(string.Format("An item of type '{0}' was found while an item of type '{1}' was expected.", typeName, typeof(T).Name));
+      return CastModel<T>(result.AssertItem());
     }
+
     /// <summary>Return an item cast as the specified type if that type of
     /// item can be derived from the property.  Otherwise, an exception
     /// is thrown</summary>
-    public static T AsItem<T>(this IReadOnlyProperty_Item prop)
+    public static T AsModel<T>(this IReadOnlyProperty_Item<T> prop) where T : IReadOnlyItem
     {
-      var item = prop.AsItem();
+      return CastModel<T>(prop.AsItem());
+    }
+
+    /// <summary>Return an item cast as the specified type if that type of
+    /// item can be derived from the property.  Otherwise, an exception
+    /// is thrown</summary>
+    public static T RelatedModel<T>(this IRelationship<T> item) where T : IReadOnlyItem
+    {
+      return CastModel<T>(item.RelatedItem());
+    }
+
+    /// <summary>Return an item cast as the specified type if that type of
+    /// item can be derived from the property.  Otherwise, an exception
+    /// is thrown</summary>
+    public static T SourceModel<T>(this INullRelationship<T> item) where T : IReadOnlyItem
+    {
+      return CastModel<T>(item.SourceItem());
+    }
+
+    private static T CastModel<T>(IReadOnlyItem item) where T : IReadOnlyItem
+    {
       if (item is T)
         return (T)item;
+
+      if (!item.Exists)
+        return Item.GetNullItem<T>();
 
       var typeName = item.Type().HasValue() ? item.Type().Value : item.GetType().Name;
       throw new InvalidOperationException(string.Format("An item of type '{0}' was found while an item of type '{1}' was expected.", typeName, typeof(T).Name));
@@ -179,18 +198,51 @@ namespace Innovator.Client
     /// Returns either the first item from the enumerable or a 'null' item (where <c>Exists</c> is <c>false</c>)
     /// if there are no items
     /// </summary>
-    public static IReadOnlyItem FirstOrNullItem(this IEnumerable<IReadOnlyItem> items)
+    /// <param name="items">Items to search through</param>
+    public static IReadOnlyItem FirstOrNullItem<T>(this IEnumerable<T> items) where T : IReadOnlyItem
     {
-      return items.FirstOrDefault() ?? Item.NullItem;
+      if (items == null)
+        throw new ArgumentNullException("items");
+
+      var list = items as IList<T>;
+      if (list != null)
+      {
+        if (list.Count > 0)
+        {
+          return list[0];
+        }
+      }
+      else
+      {
+        using (var enumerator = items.GetEnumerator())
+        {
+          if (enumerator.MoveNext())
+          {
+            return enumerator.Current;
+          }
+        }
+      }
+      return Item.GetNullItem<T>();
     }
     /// <summary>
     /// Returns either the first matching item from the enumerable or a 'null' item (where <c>Exists</c> is <c>false</c>)
     /// if there are no items which match the predicate
     /// </summary>
+    /// <param name="items">Items to search through</param>
     /// <param name="predicate">Criteria to match</param>
-    public static IReadOnlyItem FirstOrNullItem(this IEnumerable<IReadOnlyItem> items, Func<IReadOnlyItem, bool> predicate)
+    public static T FirstOrNullItem<T>(this IEnumerable<T> items, Func<T, bool> predicate) where T : IReadOnlyItem
     {
-      return items.FirstOrDefault(predicate) ?? Item.NullItem;
+      if (items == null)
+        throw new ArgumentNullException("items");
+      if (predicate == null)
+        throw new ArgumentNullException("items");
+
+      foreach (var item in items)
+      {
+        if (predicate(item))
+          return item;
+      }
+      return Item.GetNullItem<T>();
     }
     /// <summary>
     /// Indicates that the property is neither null nor empty

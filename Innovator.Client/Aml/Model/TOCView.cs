@@ -4,17 +4,19 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type TOC View </summary>
-  public class TOCView : Item
+  public class TOCView : Item, INullRelationship<ItemType>, IRelationship<Identity>
   {
     protected TOCView() { }
     public TOCView(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static TOCView() { Innovator.Client.Item.AddNullItem<TOCView>(new TOCView { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
       return this.Property("behavior");
     }
     /// <summary>Retrieve the <c>form</c> property of the item</summary>
-    public IProperty_Item Form()
+    public IProperty_Item<Form> Form()
     {
       return this.Property("form");
     }

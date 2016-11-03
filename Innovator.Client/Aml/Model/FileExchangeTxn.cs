@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected FileExchangeTxn() { }
     public FileExchangeTxn(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static FileExchangeTxn() { Innovator.Client.Item.AddNullItem<FileExchangeTxn>(new FileExchangeTxn { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>comments</c> property of the item</summary>
     public IProperty_Text Comments()
     {
@@ -24,7 +26,7 @@ namespace Innovator.Client.Model
       return this.Property("error");
     }
     /// <summary>Retrieve the <c>package</c> property of the item</summary>
-    public IProperty_Item Package()
+    public IProperty_Item<FileExchangePackage> Package()
     {
       return this.Property("package");
     }

@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected FileExchangePackage() { }
     public FileExchangePackage(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static FileExchangePackage() { Innovator.Client.Item.AddNullItem<FileExchangePackage>(new FileExchangePackage { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>description</c> property of the item</summary>
     public IProperty_Text Description()
     {

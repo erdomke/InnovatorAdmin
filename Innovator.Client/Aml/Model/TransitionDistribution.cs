@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Transition Distribution </summary>
-  public class TransitionDistribution : Item
+  public class TransitionDistribution : Item, INullRelationship<TransitionEMail>, IRelationship<Identity>
   {
     protected TransitionDistribution() { }
     public TransitionDistribution(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static TransitionDistribution() { Innovator.Client.Item.AddNullItem<TransitionDistribution>(new TransitionDistribution { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

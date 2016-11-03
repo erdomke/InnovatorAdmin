@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type TOC Access </summary>
-  public class TOCAccess : Item
+  public class TOCAccess : Item, INullRelationship<ItemType>, IRelationship<Identity>
   {
     protected TOCAccess() { }
     public TOCAccess(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static TOCAccess() { Innovator.Client.Item.AddNullItem<TOCAccess>(new TOCAccess { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

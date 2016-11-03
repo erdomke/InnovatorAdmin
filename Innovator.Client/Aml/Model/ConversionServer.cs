@@ -8,8 +8,10 @@ namespace Innovator.Client.Model
   {
     protected ConversionServer() { }
     public ConversionServer(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ConversionServer() { Innovator.Client.Item.AddNullItem<ConversionServer>(new ConversionServer { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>impersonation_user_id</c> property of the item</summary>
-    public IProperty_Item ImpersonationUserId()
+    public IProperty_Item<User> ImpersonationUserId()
     {
       return this.Property("impersonation_user_id");
     }

@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected Report() { }
     public Report(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Report() { Innovator.Client.Item.AddNullItem<Report>(new Report { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>description</c> property of the item</summary>
     public IProperty_Text Description()
     {
@@ -24,7 +26,7 @@ namespace Innovator.Client.Model
       return this.Property("location");
     }
     /// <summary>Retrieve the <c>method</c> property of the item</summary>
-    public IProperty_Item Method()
+    public IProperty_Item<Method> Method()
     {
       return this.Property("method");
     }

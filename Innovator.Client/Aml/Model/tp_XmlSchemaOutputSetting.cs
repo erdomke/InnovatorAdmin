@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type tp_XmlSchemaOutputSetting </summary>
-  public class tp_XmlSchemaOutputSetting : Item
+  public class tp_XmlSchemaOutputSetting : Item, INullRelationship<tp_XmlSchema>
   {
     protected tp_XmlSchemaOutputSetting() { }
     public tp_XmlSchemaOutputSetting(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static tp_XmlSchemaOutputSetting() { Innovator.Client.Item.AddNullItem<tp_XmlSchemaOutputSetting>(new tp_XmlSchemaOutputSetting { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
@@ -34,7 +36,7 @@ namespace Innovator.Client.Model
       return this.Property("sort_order");
     }
     /// <summary>Retrieve the <c>stylesheet_id</c> property of the item</summary>
-    public IProperty_Item StylesheetId()
+    public IProperty_Item<tp_Stylesheet> StylesheetId()
     {
       return this.Property("stylesheet_id");
     }

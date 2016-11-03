@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected ConverterType() { }
     public ConverterType(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ConverterType() { Innovator.Client.Item.AddNullItem<ConverterType>(new ConverterType { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>name</c> property of the item</summary>
     public IProperty_Text NameProp()
     {

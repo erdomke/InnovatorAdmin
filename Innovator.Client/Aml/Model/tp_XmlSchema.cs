@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected tp_XmlSchema() { }
     public tp_XmlSchema(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static tp_XmlSchema() { Innovator.Client.Item.AddNullItem<tp_XmlSchema>(new tp_XmlSchema { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>content</c> property of the item</summary>
     public IProperty_Text Content()
     {

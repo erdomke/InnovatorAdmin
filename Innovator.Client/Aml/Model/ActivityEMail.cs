@@ -4,12 +4,14 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Activity EMail </summary>
-  public class ActivityEMail : Item
+  public class ActivityEMail : Item, INullRelationship<Activity>, IRelationship<EMailMessage>
   {
     protected ActivityEMail() { }
     public ActivityEMail(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ActivityEMail() { Innovator.Client.Item.AddNullItem<ActivityEMail>(new ActivityEMail { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>alternate_identity</c> property of the item</summary>
-    public IProperty_Item AlternateIdentity()
+    public IProperty_Item<Identity> AlternateIdentity()
     {
       return this.Property("alternate_identity");
     }

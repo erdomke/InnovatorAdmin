@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Grid Event </summary>
-  public class GridEvent : Item
+  public class GridEvent : Item, INullRelationship<Property>, IRelationship<Method>
   {
     protected GridEvent() { }
     public GridEvent(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static GridEvent() { Innovator.Client.Item.AddNullItem<GridEvent>(new GridEvent { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

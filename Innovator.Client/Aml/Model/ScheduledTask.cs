@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected ScheduledTask() { }
     public ScheduledTask(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ScheduledTask() { Innovator.Client.Item.AddNullItem<ScheduledTask>(new ScheduledTask { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>day_of_week</c> property of the item</summary>
     public IProperty_Text DayOfWeek()
     {
@@ -29,7 +31,7 @@ namespace Innovator.Client.Model
       return this.Property("label");
     }
     /// <summary>Retrieve the <c>run_as</c> property of the item</summary>
-    public IProperty_Item RunAs()
+    public IProperty_Item<User> RunAs()
     {
       return this.Property("run_as");
     }
@@ -44,7 +46,7 @@ namespace Innovator.Client.Model
       return this.Property("start_date");
     }
     /// <summary>Retrieve the <c>task</c> property of the item</summary>
-    public IProperty_Item Task()
+    public IProperty_Item<Method> Task()
     {
       return this.Property("task");
     }

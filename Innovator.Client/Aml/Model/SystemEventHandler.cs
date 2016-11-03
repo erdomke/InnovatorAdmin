@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type SystemEventHandler </summary>
-  public class SystemEventHandler : Item
+  public class SystemEventHandler : Item, INullRelationship<SystemEvent>, IRelationship<Method>
   {
     protected SystemEventHandler() { }
     public SystemEventHandler(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static SystemEventHandler() { Innovator.Client.Item.AddNullItem<SystemEventHandler>(new SystemEventHandler { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

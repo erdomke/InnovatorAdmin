@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type WSTypeAssociate </summary>
-  public class WSTypeAssociate : Item
+  public class WSTypeAssociate : Item, INullRelationship<WSType>, IRelationship<WSType>
   {
     protected WSTypeAssociate() { }
     public WSTypeAssociate(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static WSTypeAssociate() { Innovator.Client.Item.AddNullItem<WSTypeAssociate>(new WSTypeAssociate { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

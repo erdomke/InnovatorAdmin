@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type ForumSearch </summary>
-  public class ForumSearch : Item
+  public class ForumSearch : Item, INullRelationship<Forum>, IRelationship<SavedSearch>
   {
     protected ForumSearch() { }
     public ForumSearch(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ForumSearch() { Innovator.Client.Item.AddNullItem<ForumSearch>(new ForumSearch { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

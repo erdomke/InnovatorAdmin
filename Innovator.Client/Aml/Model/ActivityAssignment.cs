@@ -4,22 +4,24 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Activity Assignment </summary>
-  public class ActivityAssignment : Item
+  public class ActivityAssignment : Item, INullRelationship<Activity>, IRelationship<Identity>
   {
     protected ActivityAssignment() { }
     public ActivityAssignment(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ActivityAssignment() { Innovator.Client.Item.AddNullItem<ActivityAssignment>(new ActivityAssignment { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
       return this.Property("behavior");
     }
     /// <summary>Retrieve the <c>claimed_by</c> property of the item</summary>
-    public IProperty_Item ClaimedBy()
+    public IProperty_Item<Identity> ClaimedBy()
     {
       return this.Property("claimed_by");
     }
     /// <summary>Retrieve the <c>closed_by</c> property of the item</summary>
-    public IProperty_Item ClosedBy()
+    public IProperty_Item<User> ClosedBy()
     {
       return this.Property("closed_by");
     }
@@ -34,7 +36,7 @@ namespace Innovator.Client.Model
       return this.Property("comments");
     }
     /// <summary>Retrieve the <c>escalate_to</c> property of the item</summary>
-    public IProperty_Item EscalateTo()
+    public IProperty_Item<Identity> EscalateTo()
     {
       return this.Property("escalate_to");
     }

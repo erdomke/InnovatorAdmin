@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type SPField </summary>
-  public class SPField : Item
+  public class SPField : Item, INullRelationship<SPDocumentLibraryDefinition>
   {
     protected SPField() { }
     public SPField(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static SPField() { Innovator.Client.Item.AddNullItem<SPField>(new SPField { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

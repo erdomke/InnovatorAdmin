@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected Metric() { }
     public Metric(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Metric() { Innovator.Client.Item.AddNullItem<Metric>(new Metric { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>color</c> property of the item</summary>
     public IProperty_Text Color()
     {
@@ -29,7 +31,7 @@ namespace Innovator.Client.Model
       return this.Property("link");
     }
     /// <summary>Retrieve the <c>method</c> property of the item</summary>
-    public IProperty_Item Method()
+    public IProperty_Item<Method> Method()
     {
       return this.Property("method");
     }

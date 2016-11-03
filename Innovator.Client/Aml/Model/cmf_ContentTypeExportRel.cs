@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type cmf_ContentTypeExportRel </summary>
-  public class cmf_ContentTypeExportRel : Item
+  public class cmf_ContentTypeExportRel : Item, INullRelationship<cmf_ContentType>, IRelationship<cmf_ContentTypeExportSetting>
   {
     protected cmf_ContentTypeExportRel() { }
     public cmf_ContentTypeExportRel(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static cmf_ContentTypeExportRel() { Innovator.Client.Item.AddNullItem<cmf_ContentTypeExportRel>(new cmf_ContentTypeExportRel { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

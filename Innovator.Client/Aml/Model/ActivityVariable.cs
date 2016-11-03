@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Activity Variable </summary>
-  public class ActivityVariable : Item
+  public class ActivityVariable : Item, INullRelationship<Activity>
   {
     protected ActivityVariable() { }
     public ActivityVariable(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ActivityVariable() { Innovator.Client.Item.AddNullItem<ActivityVariable>(new ActivityVariable { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
@@ -54,7 +56,7 @@ namespace Innovator.Client.Model
       return this.Property("sort_order");
     }
     /// <summary>Retrieve the <c>source</c> property of the item</summary>
-    public IProperty_Item Source()
+    public IProperty_Item<List> Source()
     {
       return this.Property("source");
     }

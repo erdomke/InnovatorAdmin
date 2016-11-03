@@ -4,17 +4,19 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Life Cycle Transition </summary>
-  public class LifeCycleTransition : Item
+  public class LifeCycleTransition : Item, INullRelationship<LifeCycleMap>
   {
     protected LifeCycleTransition() { }
     public LifeCycleTransition(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static LifeCycleTransition() { Innovator.Client.Item.AddNullItem<LifeCycleTransition>(new LifeCycleTransition { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
       return this.Property("behavior");
     }
     /// <summary>Retrieve the <c>from_state</c> property of the item</summary>
-    public IProperty_Item FromState()
+    public IProperty_Item<LifeCycleState> FromState()
     {
       return this.Property("from_state");
     }
@@ -29,17 +31,17 @@ namespace Innovator.Client.Model
       return this.Property("label");
     }
     /// <summary>Retrieve the <c>post_action</c> property of the item</summary>
-    public IProperty_Item PostAction()
+    public IProperty_Item<Method> PostAction()
     {
       return this.Property("post_action");
     }
     /// <summary>Retrieve the <c>pre_action</c> property of the item</summary>
-    public IProperty_Item PreAction()
+    public IProperty_Item<Method> PreAction()
     {
       return this.Property("pre_action");
     }
     /// <summary>Retrieve the <c>role</c> property of the item</summary>
-    public IProperty_Item Role()
+    public IProperty_Item<Identity> Role()
     {
       return this.Property("role");
     }
@@ -54,7 +56,7 @@ namespace Innovator.Client.Model
       return this.Property("sort_order");
     }
     /// <summary>Retrieve the <c>to_state</c> property of the item</summary>
-    public IProperty_Item ToState()
+    public IProperty_Item<LifeCycleState> ToState()
     {
       return this.Property("to_state");
     }

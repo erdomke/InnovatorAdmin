@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Team Identity </summary>
-  public class TeamIdentity : Item
+  public class TeamIdentity : Item, INullRelationship<Team>, IRelationship<Identity>
   {
     protected TeamIdentity() { }
     public TeamIdentity(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static TeamIdentity() { Innovator.Client.Item.AddNullItem<TeamIdentity>(new TeamIdentity { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
@@ -19,7 +21,7 @@ namespace Innovator.Client.Model
       return this.Property("sort_order");
     }
     /// <summary>Retrieve the <c>team_role</c> property of the item</summary>
-    public IProperty_Item TeamRole()
+    public IProperty_Item<Identity> TeamRole()
     {
       return this.Property("team_role");
     }

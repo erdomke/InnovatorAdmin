@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Can Add </summary>
-  public class CanAdd : Item
+  public class CanAdd : Item, INullRelationship<ItemType>, IRelationship<Identity>
   {
     protected CanAdd() { }
     public CanAdd(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static CanAdd() { Innovator.Client.Item.AddNullItem<CanAdd>(new CanAdd { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

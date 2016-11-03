@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Allowed Workflow </summary>
-  public class AllowedWorkflow : Item
+  public class AllowedWorkflow : Item, INullRelationship<ItemType>, IRelationship<WorkflowMap>
   {
     protected AllowedWorkflow() { }
     public AllowedWorkflow(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static AllowedWorkflow() { Innovator.Client.Item.AddNullItem<AllowedWorkflow>(new AllowedWorkflow { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

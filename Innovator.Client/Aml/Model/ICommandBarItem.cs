@@ -11,6 +11,6 @@ namespace Innovator.Client.Model
     /// <summary>Retrieve the <c>name</c> property of the item</summary>
     IProperty_Text NameProp();
     /// <summary>Retrieve the <c>on_init_handler</c> property of the item</summary>
-    IProperty_Item OnInitHandler();
+    IProperty_Item<Method> OnInitHandler();
   }
 }

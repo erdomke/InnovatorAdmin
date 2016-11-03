@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Grid Column </summary>
-  public class GridColumn : Item
+  public class GridColumn : Item, INullRelationship<Grid>
   {
     protected GridColumn() { }
     public GridColumn(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static GridColumn() { Innovator.Client.Item.AddNullItem<GridColumn>(new GridColumn { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>align</c> property of the item</summary>
     public IProperty_Text Align()
     {
@@ -34,7 +36,7 @@ namespace Innovator.Client.Model
       return this.Property("property");
     }
     /// <summary>Retrieve the <c>select_method</c> property of the item</summary>
-    public IProperty_Item SelectMethod()
+    public IProperty_Item<Method> SelectMethod()
     {
       return this.Property("select_method");
     }
@@ -54,7 +56,7 @@ namespace Innovator.Client.Model
       return this.Property("sort_order");
     }
     /// <summary>Retrieve the <c>source_form</c> property of the item</summary>
-    public IProperty_Item SourceForm()
+    public IProperty_Item<Form> SourceForm()
     {
       return this.Property("source_form");
     }

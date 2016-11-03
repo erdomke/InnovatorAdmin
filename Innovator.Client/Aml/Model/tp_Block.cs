@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected tp_Block() { }
     public tp_Block(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static tp_Block() { Innovator.Client.Item.AddNullItem<tp_Block>(new tp_Block { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>condition</c> property of the item</summary>
     public IProperty_Text Condition()
     {
@@ -54,7 +56,7 @@ namespace Innovator.Client.Model
       return this.Property("superseded_date");
     }
     /// <summary>Retrieve the <c>xml_schema</c> property of the item</summary>
-    public IProperty_Item XmlSchema()
+    public IProperty_Item<tp_XmlSchema> XmlSchema()
     {
       return this.Property("xml_schema");
     }

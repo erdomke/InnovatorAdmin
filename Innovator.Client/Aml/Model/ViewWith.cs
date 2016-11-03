@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type View With </summary>
-  public class ViewWith : Item
+  public class ViewWith : Item, INullRelationship<FileType>, IRelationship<Viewer>
   {
     protected ViewWith() { }
     public ViewWith(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ViewWith() { Innovator.Client.Item.AddNullItem<ViewWith>(new ViewWith { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>application</c> property of the item</summary>
     public IProperty_Text Application()
     {

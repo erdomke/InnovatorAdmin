@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected ConversionTask() { }
     public ConversionTask(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ConversionTask() { Innovator.Client.Item.AddNullItem<ConversionTask>(new ConversionTask { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>error</c> property of the item</summary>
     public IProperty_Text Error()
     {
@@ -19,7 +21,7 @@ namespace Innovator.Client.Model
       return this.Property("file_id");
     }
     /// <summary>Retrieve the <c>file_type</c> property of the item</summary>
-    public IProperty_Item FileType()
+    public IProperty_Item<FileType> FileType()
     {
       return this.Property("file_type");
     }
@@ -29,7 +31,7 @@ namespace Innovator.Client.Model
       return this.Property("finished_on");
     }
     /// <summary>Retrieve the <c>rule_id</c> property of the item</summary>
-    public IProperty_Item RuleId()
+    public IProperty_Item<ConversionRule> RuleId()
     {
       return this.Property("rule_id");
     }

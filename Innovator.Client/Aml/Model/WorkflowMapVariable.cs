@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Workflow Map Variable </summary>
-  public class WorkflowMapVariable : Item
+  public class WorkflowMapVariable : Item, INullRelationship<WorkflowMap>
   {
     protected WorkflowMapVariable() { }
     public WorkflowMapVariable(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static WorkflowMapVariable() { Innovator.Client.Item.AddNullItem<WorkflowMapVariable>(new WorkflowMapVariable { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
@@ -39,7 +41,7 @@ namespace Innovator.Client.Model
       return this.Property("sort_order");
     }
     /// <summary>Retrieve the <c>source</c> property of the item</summary>
-    public IProperty_Item Source()
+    public IProperty_Item<List> Source()
     {
       return this.Property("source");
     }

@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type ConversionRuleFileType </summary>
-  public class ConversionRuleFileType : Item
+  public class ConversionRuleFileType : Item, INullRelationship<ConversionRule>, IRelationship<FileType>
   {
     protected ConversionRuleFileType() { }
     public ConversionRuleFileType(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ConversionRuleFileType() { Innovator.Client.Item.AddNullItem<ConversionRuleFileType>(new ConversionRuleFileType { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

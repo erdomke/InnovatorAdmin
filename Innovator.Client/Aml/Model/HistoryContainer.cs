@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected HistoryContainer() { }
     public HistoryContainer(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static HistoryContainer() { Innovator.Client.Item.AddNullItem<HistoryContainer>(new HistoryContainer { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>item_config_id</c> property of the item</summary>
     public IProperty_Text ItemConfigId()
     {
@@ -19,7 +21,7 @@ namespace Innovator.Client.Model
       return this.Property("item_keyed_name");
     }
     /// <summary>Retrieve the <c>itemtype_id</c> property of the item</summary>
-    public IProperty_Item ItemtypeId()
+    public IProperty_Item<ItemType> ItemtypeId()
     {
       return this.Property("itemtype_id");
     }

@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Exclusion </summary>
-  public class Exclusion : Item
+  public class Exclusion : Item, INullRelationship<RelationshipType>, IRelationship<RelationshipType>
   {
     protected Exclusion() { }
     public Exclusion(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Exclusion() { Innovator.Client.Item.AddNullItem<Exclusion>(new Exclusion { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

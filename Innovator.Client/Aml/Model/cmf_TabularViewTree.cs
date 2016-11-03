@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type cmf_TabularViewTree </summary>
-  public class cmf_TabularViewTree : Item
+  public class cmf_TabularViewTree : Item, INullRelationship<cmf_TabularView>
   {
     protected cmf_TabularViewTree() { }
     public cmf_TabularViewTree(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static cmf_TabularViewTree() { Innovator.Client.Item.AddNullItem<cmf_TabularViewTree>(new cmf_TabularViewTree { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
@@ -19,7 +21,7 @@ namespace Innovator.Client.Model
       return this.Property("document_element_icon");
     }
     /// <summary>Retrieve the <c>element_type</c> property of the item</summary>
-    public IProperty_Item ElementType()
+    public IProperty_Item<cmf_ElementType> ElementType()
     {
       return this.Property("element_type");
     }

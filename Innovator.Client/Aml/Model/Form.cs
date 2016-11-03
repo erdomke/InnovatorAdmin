@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected Form() { }
     public Form(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Form() { Innovator.Client.Item.AddNullItem<Form>(new Form { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>category_form</c> property of the item</summary>
     public IProperty_Boolean CategoryForm()
     {

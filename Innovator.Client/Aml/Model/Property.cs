@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Property </summary>
-  public class Property : Item
+  public class Property : Item, INullRelationship<ItemType>
   {
     protected Property() { }
     public Property(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Property() { Innovator.Client.Item.AddNullItem<Property>(new Property { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
@@ -34,7 +36,7 @@ namespace Innovator.Client.Model
       return this.Property("column_width");
     }
     /// <summary>Retrieve the <c>data_source</c> property of the item</summary>
-    public IProperty_Item DataSource()
+    public IProperty_Item<ItemType> DataSource()
     {
       return this.Property("data_source");
     }
@@ -54,7 +56,7 @@ namespace Innovator.Client.Model
       return this.Property("default_value");
     }
     /// <summary>Retrieve the <c>foreign_property</c> property of the item</summary>
-    public IProperty_Item ForeignProperty()
+    public IProperty_Item<Property> ForeignProperty()
     {
       return this.Property("foreign_property");
     }

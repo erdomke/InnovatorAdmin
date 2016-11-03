@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type ConversionTaskEventHandler </summary>
-  public class ConversionTaskEventHandler : Item
+  public class ConversionTaskEventHandler : Item, INullRelationship<ConversionTask>, IRelationship<Method>
   {
     protected ConversionTaskEventHandler() { }
     public ConversionTaskEventHandler(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ConversionTaskEventHandler() { Innovator.Client.Item.AddNullItem<ConversionTaskEventHandler>(new ConversionTaskEventHandler { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Frameset </summary>
-  public class Frameset : Item
+  public class Frameset : Item, INullRelationship<Form>
   {
     protected Frameset() { }
     public Frameset(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Frameset() { Innovator.Client.Item.AddNullItem<Frameset>(new Frameset { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

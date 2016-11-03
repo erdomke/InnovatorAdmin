@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Field </summary>
-  public class Field : Item
+  public class Field : Item, INullRelationship<Body>
   {
     protected Field() { }
     public Field(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Field() { Innovator.Client.Item.AddNullItem<Field>(new Field { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
@@ -139,7 +141,7 @@ namespace Innovator.Client.Model
       return this.Property("positioning");
     }
     /// <summary>Retrieve the <c>propertytype_id</c> property of the item</summary>
-    public IProperty_Item PropertytypeId()
+    public IProperty_Item<Property> PropertytypeId()
     {
       return this.Property("propertytype_id");
     }

@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Search Criteria </summary>
-  public class SearchCriteria : Item
+  public class SearchCriteria : Item, INullRelationship<Search>
   {
     protected SearchCriteria() { }
     public SearchCriteria(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static SearchCriteria() { Innovator.Client.Item.AddNullItem<SearchCriteria>(new SearchCriteria { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

@@ -8,13 +8,15 @@ namespace Innovator.Client.Model
   {
     protected HistorySecureMessage() { }
     public HistorySecureMessage(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static HistorySecureMessage() { Innovator.Client.Item.AddNullItem<HistorySecureMessage>(new HistorySecureMessage { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>comments</c> property of the item</summary>
     public IProperty_Text Comments()
     {
       return this.Property("comments");
     }
     /// <summary>Retrieve the <c>disabled_by_id</c> property of the item</summary>
-    public IProperty_Item DisabledById()
+    public IProperty_Item<User> DisabledById()
     {
       return this.Property("disabled_by_id");
     }

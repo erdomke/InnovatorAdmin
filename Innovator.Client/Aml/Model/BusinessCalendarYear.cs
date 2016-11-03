@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected BusinessCalendarYear() { }
     public BusinessCalendarYear(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static BusinessCalendarYear() { Innovator.Client.Item.AddNullItem<BusinessCalendarYear>(new BusinessCalendarYear { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>weekend_days_off</c> property of the item</summary>
     public IProperty_Boolean WeekendDaysOff()
     {

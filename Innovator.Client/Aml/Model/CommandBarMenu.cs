@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected CommandBarMenu() { }
     public CommandBarMenu(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static CommandBarMenu() { Innovator.Client.Item.AddNullItem<CommandBarMenu>(new CommandBarMenu { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>additional_data</c> property of the item</summary>
     public IProperty_Text AdditionalData()
     {
@@ -24,17 +26,17 @@ namespace Innovator.Client.Model
       return this.Property("name");
     }
     /// <summary>Retrieve the <c>on_click_handler</c> property of the item</summary>
-    public IProperty_Item OnClickHandler()
+    public IProperty_Item<Method> OnClickHandler()
     {
       return this.Property("on_click_handler");
     }
     /// <summary>Retrieve the <c>on_init_handler</c> property of the item</summary>
-    public IProperty_Item OnInitHandler()
+    public IProperty_Item<Method> OnInitHandler()
     {
       return this.Property("on_init_handler");
     }
     /// <summary>Retrieve the <c>parent_menu</c> property of the item</summary>
-    public IProperty_Item ParentMenu()
+    public IProperty_Item<CommandBarMenu> ParentMenu()
     {
       return this.Property("parent_menu");
     }

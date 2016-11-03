@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type cmf_ExportToExcelViewConfig </summary>
-  public class cmf_ExportToExcelViewConfig : Item
+  public class cmf_ExportToExcelViewConfig : Item, INullRelationship<cmf_ContentTypeExportToExcel>
   {
     protected cmf_ExportToExcelViewConfig() { }
     public cmf_ExportToExcelViewConfig(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static cmf_ExportToExcelViewConfig() { Innovator.Client.Item.AddNullItem<cmf_ExportToExcelViewConfig>(new cmf_ExportToExcelViewConfig { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
@@ -29,7 +31,7 @@ namespace Innovator.Client.Model
       return this.Property("starting_row_number");
     }
     /// <summary>Retrieve the <c>tabular_view</c> property of the item</summary>
-    public IProperty_Item TabularView()
+    public IProperty_Item<cmf_TabularView> TabularView()
     {
       return this.Property("tabular_view");
     }

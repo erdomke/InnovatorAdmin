@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type ConversionTaskHandlerError </summary>
-  public class ConversionTaskHandlerError : Item
+  public class ConversionTaskHandlerError : Item, INullRelationship<ConversionTaskEventHandler>
   {
     protected ConversionTaskHandlerError() { }
     public ConversionTaskHandlerError(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ConversionTaskHandlerError() { Innovator.Client.Item.AddNullItem<ConversionTaskHandlerError>(new ConversionTaskHandlerError { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>attempt_number</c> property of the item</summary>
     public IProperty_Number AttemptNumber()
     {

@@ -23,7 +23,7 @@ namespace Innovator.Client
       get { return _next; }
       set { _next = value; }
     }
-    public IReadOnlyElement Parent { get { return _parent ?? Item.NullItem; } }
+    public IReadOnlyElement Parent { get { return _parent ?? Item.GetNullItem<Item>(); } }
     public string Value { get { return _value.ToArasId(); } }
 
     public IdAnnotation(IReadOnlyElement parent, Guid value)

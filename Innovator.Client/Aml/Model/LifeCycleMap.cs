@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected LifeCycleMap() { }
     public LifeCycleMap(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static LifeCycleMap() { Innovator.Client.Item.AddNullItem<LifeCycleMap>(new LifeCycleMap { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>description</c> property of the item</summary>
     public IProperty_Text Description()
     {
@@ -24,7 +26,7 @@ namespace Innovator.Client.Model
       return this.Property("name");
     }
     /// <summary>Retrieve the <c>start_state</c> property of the item</summary>
-    public IProperty_Item StartState()
+    public IProperty_Item<LifeCycleState> StartState()
     {
       return this.Property("start_state");
     }

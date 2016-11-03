@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected File() { }
     public File(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static File() { Innovator.Client.Item.AddNullItem<File>(new File { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>checkedout_path</c> property of the item</summary>
     public IProperty_Text CheckedoutPath()
     {
@@ -29,7 +31,7 @@ namespace Innovator.Client.Model
       return this.Property("file_size");
     }
     /// <summary>Retrieve the <c>file_type</c> property of the item</summary>
-    public IProperty_Item FileType()
+    public IProperty_Item<FileType> FileType()
     {
       return this.Property("file_type");
     }

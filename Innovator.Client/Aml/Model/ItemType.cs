@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected ItemType() { }
     public ItemType(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ItemType() { Innovator.Client.Item.AddNullItem<ItemType>(new ItemType { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>allow_private_permission</c> property of the item</summary>
     public IProperty_Boolean AllowPrivatePermission()
     {
@@ -54,7 +56,7 @@ namespace Innovator.Client.Model
       return this.Property("enforce_discovery");
     }
     /// <summary>Retrieve the <c>help_item</c> property of the item</summary>
-    public IProperty_Item HelpItem()
+    public IProperty_Item<Help> HelpItem()
     {
       return this.Property("help_item");
     }
@@ -69,7 +71,7 @@ namespace Innovator.Client.Model
       return this.Property("hide_where_used");
     }
     /// <summary>Retrieve the <c>history_template</c> property of the item</summary>
-    public IProperty_Item HistoryTemplate()
+    public IProperty_Item<HistoryTemplate> HistoryTemplate()
     {
       return this.Property("history_template");
     }
@@ -139,7 +141,7 @@ namespace Innovator.Client.Model
       return this.Property("open_icon");
     }
     /// <summary>Retrieve the <c>revisions</c> property of the item</summary>
-    public IProperty_Item Revisions()
+    public IProperty_Item<Revision> Revisions()
     {
       return this.Property("revisions");
     }

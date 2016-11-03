@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Core_GlobalLayout </summary>
-  public class Core_GlobalLayout : Item
+  public class Core_GlobalLayout : Item, INullRelationship<Preference>
   {
     protected Core_GlobalLayout() { }
     public Core_GlobalLayout(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Core_GlobalLayout() { Innovator.Client.Item.AddNullItem<Core_GlobalLayout>(new Core_GlobalLayout { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

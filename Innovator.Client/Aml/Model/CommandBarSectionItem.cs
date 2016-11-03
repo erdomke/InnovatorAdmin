@@ -4,17 +4,19 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type CommandBarSectionItem </summary>
-  public class CommandBarSectionItem : Item
+  public class CommandBarSectionItem : Item, INullRelationship<CommandBarSection>, IRelationship<CommandBarItem>
   {
     protected CommandBarSectionItem() { }
     public CommandBarSectionItem(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static CommandBarSectionItem() { Innovator.Client.Item.AddNullItem<CommandBarSectionItem>(new CommandBarSectionItem { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>action</c> property of the item</summary>
     public IProperty_Text Action()
     {
       return this.Property("action");
     }
     /// <summary>Retrieve the <c>alternate</c> property of the item</summary>
-    public IProperty_Item Alternate()
+    public IProperty_Item<CommandBarItem> Alternate()
     {
       return this.Property("alternate");
     }
@@ -29,7 +31,7 @@ namespace Innovator.Client.Model
       return this.Property("item_classification");
     }
     /// <summary>Retrieve the <c>role</c> property of the item</summary>
-    public IProperty_Item Role()
+    public IProperty_Item<Identity> Role()
     {
       return this.Property("role");
     }

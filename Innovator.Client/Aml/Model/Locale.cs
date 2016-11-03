@@ -8,13 +8,15 @@ namespace Innovator.Client.Model
   {
     protected Locale() { }
     public Locale(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Locale() { Innovator.Client.Item.AddNullItem<Locale>(new Locale { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>code</c> property of the item</summary>
     public IProperty_Text Code()
     {
       return this.Property("code");
     }
     /// <summary>Retrieve the <c>language</c> property of the item</summary>
-    public IProperty_Item Language()
+    public IProperty_Item<Language> Language()
     {
       return this.Property("language");
     }

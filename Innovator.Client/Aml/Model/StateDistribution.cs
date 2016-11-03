@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type State Distribution </summary>
-  public class StateDistribution : Item
+  public class StateDistribution : Item, INullRelationship<StateEMail>, IRelationship<Identity>
   {
     protected StateDistribution() { }
     public StateDistribution(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static StateDistribution() { Innovator.Client.Item.AddNullItem<StateDistribution>(new StateDistribution { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

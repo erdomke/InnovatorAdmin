@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected Revision() { }
     public Revision(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Revision() { Innovator.Client.Item.AddNullItem<Revision>(new Revision { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>label</c> property of the item</summary>
     public IProperty_Text Label()
     {

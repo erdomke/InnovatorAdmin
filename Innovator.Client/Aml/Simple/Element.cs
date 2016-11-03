@@ -23,6 +23,9 @@ namespace Innovator.Client
       }
     }
     public virtual bool Exists { get { return Next != null; } }
+    /// <summary>
+    /// The tag name of the AML element
+    /// </summary>
     public abstract string Name { get; }
     public abstract ILinkedElement Next { get; set; }
     public abstract IElement Parent { get; set; }

@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected FileType() { }
     public FileType(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static FileType() { Innovator.Client.Item.AddNullItem<FileType>(new FileType { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>description</c> property of the item</summary>
     public IProperty_Text Description()
     {

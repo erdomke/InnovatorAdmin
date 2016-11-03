@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type ReadPriority </summary>
-  public class ReadPriority : Item
+  public class ReadPriority : Item, INullRelationship<User>, IRelationship<Vault>
   {
     protected ReadPriority() { }
     public ReadPriority(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ReadPriority() { Innovator.Client.Item.AddNullItem<ReadPriority>(new ReadPriority { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

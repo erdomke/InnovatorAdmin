@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type cmf_ElementBinding </summary>
-  public class cmf_ElementBinding : Item
+  public class cmf_ElementBinding : Item, INullRelationship<cmf_ElementType>
   {
     protected cmf_ElementBinding() { }
     public cmf_ElementBinding(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static cmf_ElementBinding() { Innovator.Client.Item.AddNullItem<cmf_ElementBinding>(new cmf_ElementBinding { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
@@ -24,17 +26,17 @@ namespace Innovator.Client.Model
       return this.Property("new_row_mode");
     }
     /// <summary>Retrieve the <c>on_after_pick</c> property of the item</summary>
-    public IProperty_Item OnAfterPick()
+    public IProperty_Item<Method> OnAfterPick()
     {
       return this.Property("on_after_pick");
     }
     /// <summary>Retrieve the <c>on_apply_binding</c> property of the item</summary>
-    public IProperty_Item OnApplyBinding()
+    public IProperty_Item<Method> OnApplyBinding()
     {
       return this.Property("on_apply_binding");
     }
     /// <summary>Retrieve the <c>on_create_reference</c> property of the item</summary>
-    public IProperty_Item OnCreateReference()
+    public IProperty_Item<Method> OnCreateReference()
     {
       return this.Property("on_create_reference");
     }
@@ -44,7 +46,7 @@ namespace Innovator.Client.Model
       return this.Property("reference_required");
     }
     /// <summary>Retrieve the <c>reference_type</c> property of the item</summary>
-    public IProperty_Item ReferenceType()
+    public IProperty_Item<ItemType> ReferenceType()
     {
       return this.Property("reference_type");
     }
@@ -59,7 +61,7 @@ namespace Innovator.Client.Model
       return this.Property("sort_order");
     }
     /// <summary>Retrieve the <c>structure_mapping_method</c> property of the item</summary>
-    public IProperty_Item StructureMappingMethod()
+    public IProperty_Item<Method> StructureMappingMethod()
     {
       return this.Property("structure_mapping_method");
     }

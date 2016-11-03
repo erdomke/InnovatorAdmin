@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected Language() { }
     public Language(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Language() { Innovator.Client.Item.AddNullItem<Language>(new Language { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>code</c> property of the item</summary>
     public IProperty_Text Code()
     {

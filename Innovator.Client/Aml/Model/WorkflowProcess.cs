@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected WorkflowProcess() { }
     public WorkflowProcess(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static WorkflowProcess() { Innovator.Client.Item.AddNullItem<WorkflowProcess>(new WorkflowProcess { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>active_date</c> property of the item</summary>
     public IProperty_Date ActiveDate()
     {
@@ -19,7 +21,7 @@ namespace Innovator.Client.Model
       return this.Property("closed_date");
     }
     /// <summary>Retrieve the <c>copied_from</c> property of the item</summary>
-    public IProperty_Item CopiedFrom()
+    public IProperty_Item<WorkflowMap> CopiedFrom()
     {
       return this.Property("copied_from");
     }
@@ -84,12 +86,12 @@ namespace Innovator.Client.Model
       return this.Property("node_size");
     }
     /// <summary>Retrieve the <c>process_owner</c> property of the item</summary>
-    public IProperty_Item ProcessOwner()
+    public IProperty_Item<Identity> ProcessOwner()
     {
       return this.Property("process_owner");
     }
     /// <summary>Retrieve the <c>sub_of</c> property of the item</summary>
-    public IProperty_Item SubOf()
+    public IProperty_Item<Activity> SubOf()
     {
       return this.Property("sub_of");
     }

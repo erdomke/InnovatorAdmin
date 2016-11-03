@@ -20,18 +20,20 @@ namespace InnovatorAdmin
 
     public async Task Run()
     {
-      var itemTypes = (await _conn.ApplyAsync(@"<Item type='ItemType' action='get' select='id,implementation_type'>
+      var itemTypes = (await _conn.ApplyAsync(@"<Item type='ItemType' action='get' select='id,implementation_type,is_relationship'>
   <Relationships>
     <Item type='Property' action='get' select='name,data_source,data_type,foreign_property(data_type)'>
-      <name condition='not in'>'classification','config_id','created_by_id','created_on','css','current_state','generation','id','is_current','is_released','itemtype','keyed_name','locked_by_id','major_rev','managed_by_id','minor_rev','modified_by_id','modified_on','new_version','not_lockable','owned_by_id','permission_id','related_id','source_id','state','team_id'</name>
+      <name condition='not in'>'classification','config_id','created_by_id','created_on','css','current_state','generation','is_current','is_released','itemtype','keyed_name','locked_by_id','major_rev','managed_by_id','minor_rev','modified_by_id','modified_on','new_version','not_lockable','owned_by_id','permission_id','state','team_id'</name>
     </Item>
     <Item type='Morphae' action='get' select='related_id' related_expand='0' />
   </Relationships>
-</Item>", true, false).ToTask()).Items();
+</Item>", true, false).ToTask()).Items().OfType<Innovator.Client.Model.ItemType>();
+      var polymorphicIds = new HashSet<string>();
       var links = new NameValueCollection();
 
-      foreach (var itemType in itemTypes.Where(i => i.Property("implementation_type").Value == "polymorphic"))
+      foreach (var itemType in itemTypes.Where(i => i.ImplementationType().Value == "polymorphic"))
       {
+        polymorphicIds.Add(itemType.Id());
         var itemTypeLabel = "I" + itemType.IdProp().KeyedName().Value.Replace(" ", "");
         using (var writer = new StreamWriter(@"C:\Users\eric.domke\Documents\Models\" + itemTypeLabel + ".cs"))
         {
@@ -48,15 +50,18 @@ namespace Innovator.Client.Model
           await writer.WriteAsync(@" : IItem
   {
 ");
-          foreach (var prop in itemType.Relationships("Property"))
+          foreach (var prop in itemType
+            .Relationships()
+            .OfType<Innovator.Client.Model.Property>()
+            .Where(p => p.NameProp().Value != "source_id" && p.NameProp().Value != "related_id" && p.NameProp().Value != "id"))
           {
             await writer.WriteAsync("    /// <summary>Retrieve the <c>");
-            await writer.WriteAsync(prop.Property("name").Value);
+            await writer.WriteAsync(prop.NameProp().Value);
             await writer.WriteAsync("</c> property of the item</summary>\r\n");
             await writer.WriteAsync("    IProperty_");
             await writer.WriteAsync(PropType(prop));
             await writer.WriteAsync(" ");
-            await writer.WriteAsync(GetPropName(prop.Property("name").Value, itemTypeLabel.Substring(1)));
+            await writer.WriteAsync(GetPropName(prop.NameProp().Value, itemTypeLabel.Substring(1)));
             await writer.WriteLineAsync(@"();");
           }
           await writer.WriteAsync(@"  }
@@ -90,6 +95,24 @@ namespace Innovator.Client.Model
             await writer.WriteAsync(@", ");
             await writer.WriteAsync(links.GetValues(itemType.Id()).GroupConcat(", "));
           }
+          if (itemType.IsRelationship().AsBoolean(false))
+          {
+            var source = itemType.Relationships().OfType<Innovator.Client.Model.Property>().Single(p => p.NameProp().Value == "source_id");
+            if (source.DataSource().KeyedName().HasValue())
+            {
+              await writer.WriteAsync(@", INullRelationship<");
+              await writer.WriteAsync((polymorphicIds.Contains(source.DataSource().Value) ? "I" : "") + source.DataSource().KeyedName().Value.Replace(" ", ""));
+              await writer.WriteAsync(@">");
+            }
+
+            var related = itemType.Relationships().OfType<Innovator.Client.Model.Property>().Single(p => p.NameProp().Value == "related_id");
+            if (related.DataSource().KeyedName().HasValue())
+            {
+              await writer.WriteAsync(@", IRelationship<");
+              await writer.WriteAsync((polymorphicIds.Contains(source.DataSource().Value) ? "I" : "") + related.DataSource().KeyedName().Value.Replace(" ", ""));
+              await writer.WriteAsync(@">");
+            }
+          }
           await writer.WriteAsync(@"
   {
     protected ");
@@ -98,20 +121,32 @@ namespace Innovator.Client.Model
     public ");
           await writer.WriteAsync(itemTypeLabel);
           await writer.WriteAsync(@"(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ");
+          await writer.WriteAsync(itemTypeLabel);
+          await writer.WriteAsync("() { Innovator.Client.Item.AddNullItem<");
+          await writer.WriteAsync(itemTypeLabel);
+          await writer.WriteAsync(">(new ");
+          await writer.WriteAsync(itemTypeLabel);
+          await writer.WriteAsync(@" { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
 ");
-          foreach (var prop in itemType.Relationships("Property"))
+
+          foreach (var prop in itemType
+            .Relationships()
+            .OfType<Innovator.Client.Model.Property>()
+            .Where(p => p.NameProp().Value != "source_id" && p.NameProp().Value != "related_id" && p.NameProp().Value != "id"))
           {
             await writer.WriteAsync("    /// <summary>Retrieve the <c>");
-            await writer.WriteAsync(prop.Property("name").Value);
+            await writer.WriteAsync(prop.NameProp().Value);
             await writer.WriteAsync("</c> property of the item</summary>\r\n");
             await writer.WriteAsync("    public IProperty_");
             await writer.WriteAsync(PropType(prop));
             await writer.WriteAsync(" ");
-            await writer.WriteAsync(GetPropName(prop.Property("name").Value, itemTypeLabel));
+            await writer.WriteAsync(GetPropName(prop.NameProp().Value, itemTypeLabel));
             await writer.WriteAsync(@"()
     {
       return this.Property(""");
-            await writer.WriteAsync(prop.Property("name").Value);
+            await writer.WriteAsync(prop.NameProp().Value);
             await writer.WriteAsync(@""");
     }
 ");
@@ -122,11 +157,11 @@ namespace Innovator.Client.Model
       }
     }
 
-    private string PropType(IReadOnlyItem prop)
+    private string PropType(Innovator.Client.Model.Property prop)
     {
-      var dataType = prop.Property("data_type").Value;
-      if (dataType == "foreign" && prop.Property("foreign_property").HasValue())
-        dataType = prop.Property("foreign_property").AsItem().Property("data_type").Value;
+      var dataType = prop.DataType().Value;
+      if (dataType == "foreign" && prop.ForeignProperty().HasValue())
+        dataType = prop.ForeignProperty().AsModel().DataType().Value;
       switch (dataType)
       {
         case "boolean":
@@ -138,7 +173,9 @@ namespace Innovator.Client.Model
         case "decimal":
           return "Number";
         case "item":
-          return "Item";
+          if (prop.DataSource().KeyedName().Exists)
+            return "Item<" + prop.DataSource().KeyedName().Value.Replace(" ", "") + ">";
+          return "Item<IReadOnlyItem>";
         default:
           return "Text";
       }

@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected SavedSearch() { }
     public SavedSearch(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static SavedSearch() { Innovator.Client.Item.AddNullItem<SavedSearch>(new SavedSearch { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>auto_saved</c> property of the item</summary>
     public IProperty_Boolean AutoSaved()
     {
@@ -34,7 +36,7 @@ namespace Innovator.Client.Model
       return this.Property("location");
     }
     /// <summary>Retrieve the <c>search_mode</c> property of the item</summary>
-    public IProperty_Item SearchMode()
+    public IProperty_Item<SearchMode> SearchMode()
     {
       return this.Property("search_mode");
     }

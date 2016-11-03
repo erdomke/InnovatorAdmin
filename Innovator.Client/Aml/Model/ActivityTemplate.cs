@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected ActivityTemplate() { }
     public ActivityTemplate(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ActivityTemplate() { Innovator.Client.Item.AddNullItem<ActivityTemplate>(new ActivityTemplate { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>can_delegate</c> property of the item</summary>
     public IProperty_Boolean CanDelegate()
     {
@@ -24,7 +26,7 @@ namespace Innovator.Client.Model
       return this.Property("consolidate_ondelegate");
     }
     /// <summary>Retrieve the <c>escalate_to</c> property of the item</summary>
-    public IProperty_Item EscalateTo()
+    public IProperty_Item<Identity> EscalateTo()
     {
       return this.Property("escalate_to");
     }
@@ -84,12 +86,12 @@ namespace Innovator.Client.Model
       return this.Property("reminder_interval");
     }
     /// <summary>Retrieve the <c>role</c> property of the item</summary>
-    public IProperty_Item Role()
+    public IProperty_Item<Identity> Role()
     {
       return this.Property("role");
     }
     /// <summary>Retrieve the <c>subflow</c> property of the item</summary>
-    public IProperty_Item Subflow()
+    public IProperty_Item<WorkflowMap> Subflow()
     {
       return this.Property("subflow");
     }

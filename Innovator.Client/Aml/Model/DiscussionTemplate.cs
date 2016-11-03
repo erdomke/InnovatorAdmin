@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type DiscussionTemplate </summary>
-  public class DiscussionTemplate : Item
+  public class DiscussionTemplate : Item, INullRelationship<ItemType>
   {
     protected DiscussionTemplate() { }
     public DiscussionTemplate(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static DiscussionTemplate() { Innovator.Client.Item.AddNullItem<DiscussionTemplate>(new DiscussionTemplate { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Value </summary>
-  public class Value : Item
+  public class Value : Item, INullRelationship<List>
   {
     protected Value() { }
     public Value(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Value() { Innovator.Client.Item.AddNullItem<Value>(new Value { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

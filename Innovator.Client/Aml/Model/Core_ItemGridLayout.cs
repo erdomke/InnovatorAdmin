@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Core_ItemGridLayout </summary>
-  public class Core_ItemGridLayout : Item
+  public class Core_ItemGridLayout : Item, INullRelationship<Preference>
   {
     protected Core_ItemGridLayout() { }
     public Core_ItemGridLayout(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Core_ItemGridLayout() { Innovator.Client.Item.AddNullItem<Core_ItemGridLayout>(new Core_ItemGridLayout { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

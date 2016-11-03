@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Inherited Server Events </summary>
-  public class InheritedServerEvents : Item
+  public class InheritedServerEvents : Item, INullRelationship<ItemType>
   {
     protected InheritedServerEvents() { }
     public InheritedServerEvents(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static InheritedServerEvents() { Innovator.Client.Item.AddNullItem<InheritedServerEvents>(new InheritedServerEvents { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

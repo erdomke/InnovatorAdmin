@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected ReplicationTxn() { }
     public ReplicationTxn(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ReplicationTxn() { Innovator.Client.Item.AddNullItem<ReplicationTxn>(new ReplicationTxn { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>end_time</c> property of the item</summary>
     public IProperty_Date EndTime()
     {
@@ -29,7 +31,7 @@ namespace Innovator.Client.Model
       return this.Property("file_id");
     }
     /// <summary>Retrieve the <c>from_vault</c> property of the item</summary>
-    public IProperty_Item FromVault()
+    public IProperty_Item<Vault> FromVault()
     {
       return this.Property("from_vault");
     }
@@ -39,7 +41,7 @@ namespace Innovator.Client.Model
       return this.Property("not_before");
     }
     /// <summary>Retrieve the <c>replication_rule</c> property of the item</summary>
-    public IProperty_Item ReplicationRule()
+    public IProperty_Item<ReplicationRule> ReplicationRule()
     {
       return this.Property("replication_rule");
     }
@@ -54,12 +56,12 @@ namespace Innovator.Client.Model
       return this.Property("start_time");
     }
     /// <summary>Retrieve the <c>to_vault</c> property of the item</summary>
-    public IProperty_Item ToVault()
+    public IProperty_Item<Vault> ToVault()
     {
       return this.Property("to_vault");
     }
     /// <summary>Retrieve the <c>user_id</c> property of the item</summary>
-    public IProperty_Item UserId()
+    public IProperty_Item<User> UserId()
     {
       return this.Property("user_id");
     }

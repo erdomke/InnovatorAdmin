@@ -4,17 +4,19 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Activity Template Assignment </summary>
-  public class ActivityTemplateAssignment : Item
+  public class ActivityTemplateAssignment : Item, INullRelationship<ActivityTemplate>, IRelationship<Identity>
   {
     protected ActivityTemplateAssignment() { }
     public ActivityTemplateAssignment(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ActivityTemplateAssignment() { Innovator.Client.Item.AddNullItem<ActivityTemplateAssignment>(new ActivityTemplateAssignment { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
       return this.Property("behavior");
     }
     /// <summary>Retrieve the <c>escalate_to</c> property of the item</summary>
-    public IProperty_Item EscalateTo()
+    public IProperty_Item<Identity> EscalateTo()
     {
       return this.Property("escalate_to");
     }

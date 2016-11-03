@@ -4,17 +4,19 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type cmf_DocumentLifeCycleState </summary>
-  public class cmf_DocumentLifeCycleState : Item
+  public class cmf_DocumentLifeCycleState : Item, INullRelationship<cmf_ContentType>
   {
     protected cmf_DocumentLifeCycleState() { }
     public cmf_DocumentLifeCycleState(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static cmf_DocumentLifeCycleState() { Innovator.Client.Item.AddNullItem<cmf_DocumentLifeCycleState>(new cmf_DocumentLifeCycleState { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
       return this.Property("behavior");
     }
     /// <summary>Retrieve the <c>life_cycle_state_id</c> property of the item</summary>
-    public IProperty_Item LifeCycleStateId()
+    public IProperty_Item<LifeCycleState> LifeCycleStateId()
     {
       return this.Property("life_cycle_state_id");
     }

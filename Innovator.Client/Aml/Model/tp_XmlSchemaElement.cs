@@ -4,17 +4,19 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type tp_XmlSchemaElement </summary>
-  public class tp_XmlSchemaElement : Item
+  public class tp_XmlSchemaElement : Item, INullRelationship<tp_XmlSchema>
   {
     protected tp_XmlSchemaElement() { }
     public tp_XmlSchemaElement(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static tp_XmlSchemaElement() { Innovator.Client.Item.AddNullItem<tp_XmlSchemaElement>(new tp_XmlSchemaElement { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
       return this.Property("behavior");
     }
     /// <summary>Retrieve the <c>content_generator</c> property of the item</summary>
-    public IProperty_Item ContentGenerator()
+    public IProperty_Item<Method> ContentGenerator()
     {
       return this.Property("content_generator");
     }
@@ -34,7 +36,7 @@ namespace Innovator.Client.Model
       return this.Property("name");
     }
     /// <summary>Retrieve the <c>renderer</c> property of the item</summary>
-    public IProperty_Item Renderer()
+    public IProperty_Item<Method> Renderer()
     {
       return this.Property("renderer");
     }

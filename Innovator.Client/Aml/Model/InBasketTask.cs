@@ -8,18 +8,20 @@ namespace Innovator.Client.Model
   {
     protected InBasketTask() { }
     public InBasketTask(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static InBasketTask() { Innovator.Client.Item.AddNullItem<InBasketTask>(new InBasketTask { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>assigned_to</c> property of the item</summary>
-    public IProperty_Item AssignedTo()
+    public IProperty_Item<Identity> AssignedTo()
     {
       return this.Property("assigned_to");
     }
     /// <summary>Retrieve the <c>container</c> property of the item</summary>
-    public IProperty_Item Container()
+    public IProperty_Item<IReadOnlyItem> Container()
     {
       return this.Property("container");
     }
     /// <summary>Retrieve the <c>container_type_id</c> property of the item</summary>
-    public IProperty_Item ContainerTypeId()
+    public IProperty_Item<ItemType> ContainerTypeId()
     {
       return this.Property("container_type_id");
     }
@@ -39,12 +41,12 @@ namespace Innovator.Client.Model
       return this.Property("instructions");
     }
     /// <summary>Retrieve the <c>item</c> property of the item</summary>
-    public IProperty_Item Item()
+    public IProperty_Item<IReadOnlyItem> Item()
     {
       return this.Property("item");
     }
     /// <summary>Retrieve the <c>item_type_id</c> property of the item</summary>
-    public IProperty_Item ItemTypeId()
+    public IProperty_Item<ItemType> ItemTypeId()
     {
       return this.Property("item_type_id");
     }

@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Business Calendar Exception </summary>
-  public class BusinessCalendarException : Item
+  public class BusinessCalendarException : Item, INullRelationship<BusinessCalendarYear>
   {
     protected BusinessCalendarException() { }
     public BusinessCalendarException(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static BusinessCalendarException() { Innovator.Client.Item.AddNullItem<BusinessCalendarException>(new BusinessCalendarException { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

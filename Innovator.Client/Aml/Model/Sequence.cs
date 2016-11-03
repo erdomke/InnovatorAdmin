@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected Sequence() { }
     public Sequence(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Sequence() { Innovator.Client.Item.AddNullItem<Sequence>(new Sequence { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>current_value</c> property of the item</summary>
     public IProperty_Number CurrentValue()
     {

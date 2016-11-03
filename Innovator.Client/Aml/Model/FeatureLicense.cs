@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected FeatureLicense() { }
     public FeatureLicense(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static FeatureLicense() { Innovator.Client.Item.AddNullItem<FeatureLicense>(new FeatureLicense { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>activation_key</c> property of the item</summary>
     public IProperty_Text ActivationKey()
     {
@@ -19,7 +21,7 @@ namespace Innovator.Client.Model
       return this.Property("additional_license_data");
     }
     /// <summary>Retrieve the <c>available_to</c> property of the item</summary>
-    public IProperty_Item AvailableTo()
+    public IProperty_Item<Identity> AvailableTo()
     {
       return this.Property("available_to");
     }

@@ -4,17 +4,19 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Life Cycle State </summary>
-  public class LifeCycleState : Item
+  public class LifeCycleState : Item, INullRelationship<LifeCycleMap>
   {
     protected LifeCycleState() { }
     public LifeCycleState(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static LifeCycleState() { Innovator.Client.Item.AddNullItem<LifeCycleState>(new LifeCycleState { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
       return this.Property("behavior");
     }
     /// <summary>Retrieve the <c>history_template</c> property of the item</summary>
-    public IProperty_Item HistoryTemplate()
+    public IProperty_Item<HistoryTemplate> HistoryTemplate()
     {
       return this.Property("history_template");
     }
@@ -54,12 +56,12 @@ namespace Innovator.Client.Model
       return this.Property("sort_order");
     }
     /// <summary>Retrieve the <c>state_permission_id</c> property of the item</summary>
-    public IProperty_Item StatePermissionId()
+    public IProperty_Item<Permission> StatePermissionId()
     {
       return this.Property("state_permission_id");
     }
     /// <summary>Retrieve the <c>workflow</c> property of the item</summary>
-    public IProperty_Item Workflow()
+    public IProperty_Item<WorkflowMap> Workflow()
     {
       return this.Property("workflow");
     }

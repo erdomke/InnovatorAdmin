@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected SelfServiceReportHelp() { }
     public SelfServiceReportHelp(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static SelfServiceReportHelp() { Innovator.Client.Item.AddNullItem<SelfServiceReportHelp>(new SelfServiceReportHelp { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>context_key</c> property of the item</summary>
     public IProperty_Text ContextKey()
     {

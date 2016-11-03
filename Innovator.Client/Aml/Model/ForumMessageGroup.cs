@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type ForumMessageGroup </summary>
-  public class ForumMessageGroup : Item
+  public class ForumMessageGroup : Item, INullRelationship<Forum>
   {
     protected ForumMessageGroup() { }
     public ForumMessageGroup(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ForumMessageGroup() { Innovator.Client.Item.AddNullItem<ForumMessageGroup>(new ForumMessageGroup { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>aml</c> property of the item</summary>
     public IProperty_Text Aml()
     {

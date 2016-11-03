@@ -136,7 +136,7 @@ namespace Innovator.Client
     }
     public IItem AsItem()
     {
-      if (!this.Exists) return Item.NullItem;
+      if (!this.Exists) return Item.GetNullItem<Item>();
       var item = _content as IItem;
       var typeAttr = Attribute("type");
       if (item == null && IsGuid() && typeAttr.Exists)
@@ -154,7 +154,7 @@ namespace Innovator.Client
           item.Add(aml.IdProp(aml.Type(typeAttr.Value), AsGuid()));
         }
       }
-      return item ?? Item.NullItem;
+      return item ?? Item.GetNullItem<Item>();
     }
     private bool IsGuid()
     {
@@ -226,7 +226,7 @@ namespace Innovator.Client
       _content = value;
     }
 
-    IReadOnlyItem IReadOnlyProperty_Item.AsItem()
+    IReadOnlyItem IReadOnlyProperty_Item<IReadOnlyItem>.AsItem()
     {
       return AsItem();
     }

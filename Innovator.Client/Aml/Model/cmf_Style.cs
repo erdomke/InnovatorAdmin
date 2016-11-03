@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected cmf_Style() { }
     public cmf_Style(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static cmf_Style() { Innovator.Client.Item.AddNullItem<cmf_Style>(new cmf_Style { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>background_color</c> property of the item</summary>
     public IProperty_Text BackgroundColor()
     {

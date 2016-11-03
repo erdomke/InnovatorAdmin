@@ -8,8 +8,10 @@ namespace Innovator.Client.Model
   {
     protected cmf_ContentType() { }
     public cmf_ContentType(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static cmf_ContentType() { Innovator.Client.Item.AddNullItem<cmf_ContentType>(new cmf_ContentType { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>linked_item_type</c> property of the item</summary>
-    public IProperty_Item LinkedItemType()
+    public IProperty_Item<ItemType> LinkedItemType()
     {
       return this.Property("linked_item_type");
     }

@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type cmf_ContentTypeGridLayout </summary>
-  public class cmf_ContentTypeGridLayout : Item
+  public class cmf_ContentTypeGridLayout : Item, INullRelationship<Preference>
   {
     protected cmf_ContentTypeGridLayout() { }
     public cmf_ContentTypeGridLayout(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static cmf_ContentTypeGridLayout() { Innovator.Client.Item.AddNullItem<cmf_ContentTypeGridLayout>(new cmf_ContentTypeGridLayout { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

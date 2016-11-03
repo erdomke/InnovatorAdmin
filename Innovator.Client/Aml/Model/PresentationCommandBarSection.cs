@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type PresentationCommandBarSection </summary>
-  public class PresentationCommandBarSection : Item
+  public class PresentationCommandBarSection : Item, INullRelationship<PresentationConfiguration>, IRelationship<CommandBarSection>
   {
     protected PresentationCommandBarSection() { }
     public PresentationCommandBarSection(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static PresentationCommandBarSection() { Innovator.Client.Item.AddNullItem<PresentationCommandBarSection>(new PresentationCommandBarSection { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
@@ -19,7 +21,7 @@ namespace Innovator.Client.Model
       return this.Property("item_classification");
     }
     /// <summary>Retrieve the <c>role</c> property of the item</summary>
-    public IProperty_Item Role()
+    public IProperty_Item<Identity> Role()
     {
       return this.Property("role");
     }

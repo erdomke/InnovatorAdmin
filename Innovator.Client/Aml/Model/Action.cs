@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected Action() { }
     public Action(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Action() { Innovator.Client.Item.AddNullItem<Action>(new Action { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>body</c> property of the item</summary>
     public IProperty_Text Body()
     {
@@ -29,7 +31,7 @@ namespace Innovator.Client.Model
       return this.Property("location");
     }
     /// <summary>Retrieve the <c>method</c> property of the item</summary>
-    public IProperty_Item Method()
+    public IProperty_Item<Method> Method()
     {
       return this.Property("method");
     }
@@ -39,7 +41,7 @@ namespace Innovator.Client.Model
       return this.Property("name");
     }
     /// <summary>Retrieve the <c>on_complete</c> property of the item</summary>
-    public IProperty_Item OnComplete()
+    public IProperty_Item<Method> OnComplete()
     {
       return this.Property("on_complete");
     }

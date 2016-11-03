@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type SSVC_Preferences </summary>
-  public class SSVC_Preferences : Item
+  public class SSVC_Preferences : Item, INullRelationship<Preference>
   {
     protected SSVC_Preferences() { }
     public SSVC_Preferences(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static SSVC_Preferences() { Innovator.Client.Item.AddNullItem<SSVC_Preferences>(new SSVC_Preferences { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

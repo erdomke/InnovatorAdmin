@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type View </summary>
-  public class View : Item
+  public class View : Item, INullRelationship<ItemType>, IRelationship<Form>
   {
     protected View() { }
     public View(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static View() { Innovator.Client.Item.AddNullItem<View>(new View { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {
@@ -34,12 +36,12 @@ namespace Innovator.Client.Model
       return this.Property("label");
     }
     /// <summary>Retrieve the <c>method</c> property of the item</summary>
-    public IProperty_Item Method()
+    public IProperty_Item<Method> Method()
     {
       return this.Property("method");
     }
     /// <summary>Retrieve the <c>role</c> property of the item</summary>
-    public IProperty_Item Role()
+    public IProperty_Item<Identity> Role()
     {
       return this.Property("role");
     }

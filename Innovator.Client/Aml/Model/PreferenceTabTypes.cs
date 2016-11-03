@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type PreferenceTabTypes </summary>
-  public class PreferenceTabTypes : Item
+  public class PreferenceTabTypes : Item, INullRelationship<PreferenceTypes>
   {
     protected PreferenceTabTypes() { }
     public PreferenceTabTypes(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static PreferenceTabTypes() { Innovator.Client.Item.AddNullItem<PreferenceTabTypes>(new PreferenceTabTypes { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

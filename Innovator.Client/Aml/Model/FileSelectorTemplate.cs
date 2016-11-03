@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type FileSelectorTemplate </summary>
-  public class FileSelectorTemplate : Item
+  public class FileSelectorTemplate : Item, INullRelationship<FeedTemplate>
   {
     protected FileSelectorTemplate() { }
     public FileSelectorTemplate(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static FileSelectorTemplate() { Innovator.Client.Item.AddNullItem<FileSelectorTemplate>(new FileSelectorTemplate { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

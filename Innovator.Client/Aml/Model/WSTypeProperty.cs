@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type WSTypeProperty </summary>
-  public class WSTypeProperty : Item
+  public class WSTypeProperty : Item, INullRelationship<WSType>
   {
     protected WSTypeProperty() { }
     public WSTypeProperty(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static WSTypeProperty() { Innovator.Client.Item.AddNullItem<WSTypeProperty>(new WSTypeProperty { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>alias</c> property of the item</summary>
     public IProperty_Text Alias()
     {

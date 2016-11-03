@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected Search() { }
     public Search(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static Search() { Innovator.Client.Item.AddNullItem<Search>(new Search { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>interactive</c> property of the item</summary>
     public IProperty_Boolean Interactive()
     {
@@ -24,7 +26,7 @@ namespace Innovator.Client.Model
       return this.Property("name");
     }
     /// <summary>Retrieve the <c>search_itemtype</c> property of the item</summary>
-    public IProperty_Item SearchItemtype()
+    public IProperty_Item<ItemType> SearchItemtype()
     {
       return this.Property("search_itemtype");
     }

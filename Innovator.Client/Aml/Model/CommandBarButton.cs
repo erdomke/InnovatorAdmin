@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected CommandBarButton() { }
     public CommandBarButton(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static CommandBarButton() { Innovator.Client.Item.AddNullItem<CommandBarButton>(new CommandBarButton { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>additional_data</c> property of the item</summary>
     public IProperty_Text AdditionalData()
     {
@@ -29,12 +31,12 @@ namespace Innovator.Client.Model
       return this.Property("name");
     }
     /// <summary>Retrieve the <c>on_click_handler</c> property of the item</summary>
-    public IProperty_Item OnClickHandler()
+    public IProperty_Item<Method> OnClickHandler()
     {
       return this.Property("on_click_handler");
     }
     /// <summary>Retrieve the <c>on_init_handler</c> property of the item</summary>
-    public IProperty_Item OnInitHandler()
+    public IProperty_Item<Method> OnInitHandler()
     {
       return this.Property("on_init_handler");
     }

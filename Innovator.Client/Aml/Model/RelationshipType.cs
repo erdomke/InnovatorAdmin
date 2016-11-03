@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type RelationshipType </summary>
-  public class RelationshipType : Item
+  public class RelationshipType : Item, INullRelationship<ItemType>, IRelationship<ItemType>
   {
     protected RelationshipType() { }
     public RelationshipType(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static RelationshipType() { Innovator.Client.Item.AddNullItem<RelationshipType>(new RelationshipType { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>auto_search</c> property of the item</summary>
     public IProperty_Boolean AutoSearch()
     {
@@ -49,7 +51,7 @@ namespace Innovator.Client.Model
       return this.Property("grid_view");
     }
     /// <summary>Retrieve the <c>help_item</c> property of the item</summary>
-    public IProperty_Item HelpItem()
+    public IProperty_Item<Help> HelpItem()
     {
       return this.Property("help_item");
     }
@@ -114,7 +116,7 @@ namespace Innovator.Client.Model
       return this.Property("related_option");
     }
     /// <summary>Retrieve the <c>relationship_id</c> property of the item</summary>
-    public IProperty_Item RelationshipId()
+    public IProperty_Item<ItemType> RelationshipId()
     {
       return this.Property("relationship_id");
     }

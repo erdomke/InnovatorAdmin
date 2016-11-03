@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Activity Template Task </summary>
-  public class ActivityTemplateTask : Item
+  public class ActivityTemplateTask : Item, INullRelationship<ActivityTemplate>
   {
     protected ActivityTemplateTask() { }
     public ActivityTemplateTask(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ActivityTemplateTask() { Innovator.Client.Item.AddNullItem<ActivityTemplateTask>(new ActivityTemplateTask { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

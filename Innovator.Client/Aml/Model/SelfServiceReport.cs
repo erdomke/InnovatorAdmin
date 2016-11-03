@@ -4,12 +4,14 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type SelfServiceReport </summary>
-  public class SelfServiceReport : Item
+  public class SelfServiceReport : Item, IFileContainerItems
   {
     protected SelfServiceReport() { }
     public SelfServiceReport(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static SelfServiceReport() { Innovator.Client.Item.AddNullItem<SelfServiceReport>(new SelfServiceReport { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>base_item_type</c> property of the item</summary>
-    public IProperty_Item BaseItemType()
+    public IProperty_Item<ItemType> BaseItemType()
     {
       return this.Property("base_item_type");
     }
@@ -49,7 +51,7 @@ namespace Innovator.Client.Model
       return this.Property("name");
     }
     /// <summary>Retrieve the <c>thumbnail</c> property of the item</summary>
-    public IProperty_Item Thumbnail()
+    public IProperty_Item<File> Thumbnail()
     {
       return this.Property("thumbnail");
     }

@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected User() { }
     public User(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static User() { Innovator.Client.Item.AddNullItem<User>(new User { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>cell</c> property of the item</summary>
     public IProperty_Text Cell()
     {
@@ -19,7 +21,7 @@ namespace Innovator.Client.Model
       return this.Property("company_name");
     }
     /// <summary>Retrieve the <c>default_vault</c> property of the item</summary>
-    public IProperty_Item DefaultVault()
+    public IProperty_Item<Vault> DefaultVault()
     {
       return this.Property("default_vault");
     }
@@ -79,7 +81,7 @@ namespace Innovator.Client.Model
       return this.Property("mail_stop");
     }
     /// <summary>Retrieve the <c>manager</c> property of the item</summary>
-    public IProperty_Item Manager()
+    public IProperty_Item<User> Manager()
     {
       return this.Property("manager");
     }

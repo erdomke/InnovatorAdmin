@@ -75,7 +75,7 @@ namespace Innovator.Client
   /// <summary>
   /// Property of type item
   /// </summary>
-  public interface IReadOnlyProperty_Item : IReadOnlyProperty_Base
+  public interface IReadOnlyProperty_Item<in T> : IReadOnlyProperty_Base
   {
     /// <summary>Value converted to a nullable Guid.
     /// If the value cannot be converted, an exception is thrown</summary>
@@ -104,7 +104,7 @@ namespace Innovator.Client
   public interface IReadOnlyProperty
     : IReadOnlyProperty_Boolean
     , IReadOnlyProperty_Date
-    , IReadOnlyProperty_Item
+    , IReadOnlyProperty_Item<IReadOnlyItem>
     , IReadOnlyProperty_Number
     , IReadOnlyProperty_Text
   {
@@ -142,13 +142,14 @@ namespace Innovator.Client
   /// <summary>
   /// Property of type item
   /// </summary>
-  public interface IProperty_Item    : IReadOnlyProperty_Item, IProperty_Base
+  public interface IProperty_Item<in T>    : IReadOnlyProperty_Item<T>, IProperty_Base
   {
     /// <summary>Value converted to a read-only item.
     /// If the value cannot be converted, a 'null' item (where the
     /// <c>Exists</c> property returns <c>false</c>) is returned</summary>
     new IItem AsItem();
   }
+
   /// <summary>
   /// Property of type integer, decimal, float, etc.
   /// </summary>
@@ -164,7 +165,7 @@ namespace Innovator.Client
   public interface IProperty
     : IProperty_Boolean
     , IProperty_Date
-    , IProperty_Item
+    , IProperty_Item<IReadOnlyItem>
     , IProperty_Number
     , IProperty_Text
     , IReadOnlyProperty

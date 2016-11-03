@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected WorkflowMap() { }
     public WorkflowMap(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static WorkflowMap() { Innovator.Client.Item.AddNullItem<WorkflowMap>(new WorkflowMap { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>comments</c> property of the item</summary>
     public IProperty_Text Comments()
     {
@@ -74,7 +76,7 @@ namespace Innovator.Client.Model
       return this.Property("node_size");
     }
     /// <summary>Retrieve the <c>process_owner</c> property of the item</summary>
-    public IProperty_Item ProcessOwner()
+    public IProperty_Item<Identity> ProcessOwner()
     {
       return this.Property("process_owner");
     }

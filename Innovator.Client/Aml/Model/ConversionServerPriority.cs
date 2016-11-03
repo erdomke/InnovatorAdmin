@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type ConversionServerPriority </summary>
-  public class ConversionServerPriority : Item
+  public class ConversionServerPriority : Item, INullRelationship<Vault>, IRelationship<ConversionServer>
   {
     protected ConversionServerPriority() { }
     public ConversionServerPriority(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static ConversionServerPriority() { Innovator.Client.Item.AddNullItem<ConversionServerPriority>(new ConversionServerPriority { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

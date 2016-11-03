@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type Hide Related In </summary>
-  public class HideRelatedIn : Item
+  public class HideRelatedIn : Item, INullRelationship<RelationshipType>
   {
     protected HideRelatedIn() { }
     public HideRelatedIn(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static HideRelatedIn() { Innovator.Client.Item.AddNullItem<HideRelatedIn>(new HideRelatedIn { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

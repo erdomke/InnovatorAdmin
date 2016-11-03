@@ -4,10 +4,12 @@ using System;
 namespace Innovator.Client.Model
 {
   ///<summary>Class for the item type FileGroup File </summary>
-  public class FileGroupFile : Item
+  public class FileGroupFile : Item, IFileContainerItems, INullRelationship<FileGroup>, IRelationship<File>
   {
     protected FileGroupFile() { }
     public FileGroupFile(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static FileGroupFile() { Innovator.Client.Item.AddNullItem<FileGroupFile>(new FileGroupFile { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
     {

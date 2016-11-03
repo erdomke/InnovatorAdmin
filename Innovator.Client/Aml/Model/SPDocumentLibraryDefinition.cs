@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected SPDocumentLibraryDefinition() { }
     public SPDocumentLibraryDefinition(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static SPDocumentLibraryDefinition() { Innovator.Client.Item.AddNullItem<SPDocumentLibraryDefinition>(new SPDocumentLibraryDefinition { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>authentication_type</c> property of the item</summary>
     public IProperty_Text AuthenticationType()
     {

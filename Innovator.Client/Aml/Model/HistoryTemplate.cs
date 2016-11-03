@@ -8,6 +8,8 @@ namespace Innovator.Client.Model
   {
     protected HistoryTemplate() { }
     public HistoryTemplate(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
+    static HistoryTemplate() { Innovator.Client.Item.AddNullItem<HistoryTemplate>(new HistoryTemplate { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+
     /// <summary>Retrieve the <c>name</c> property of the item</summary>
     public IProperty_Text NameProp()
     {
