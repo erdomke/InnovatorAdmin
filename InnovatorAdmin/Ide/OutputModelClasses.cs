@@ -20,7 +20,7 @@ namespace InnovatorAdmin
 
     public async Task Run()
     {
-      var itemTypes = (await _conn.ApplyAsync(@"<Item type='ItemType' action='get' select='id,implementation_type,is_relationship'>
+      var itemTypes = (await _conn.ApplyAsync(@"<Item type='ItemType' action='get' select='id,implementation_type,is_relationship,is_versionable'>
   <Relationships>
     <Item type='Property' action='get' select='name,data_source,data_type,foreign_property(data_type)'>
       <name condition='not in'>'classification','config_id','created_by_id','created_on','css','current_state','generation','is_current','is_released','itemtype','keyed_name','locked_by_id','major_rev','managed_by_id','minor_rev','modified_by_id','modified_on','new_version','not_lockable','owned_by_id','permission_id','state','team_id'</name>
@@ -28,6 +28,7 @@ namespace InnovatorAdmin
     <Item type='Morphae' action='get' select='related_id' related_expand='0' />
   </Relationships>
 </Item>", true, false).ToTask()).Items().OfType<Innovator.Client.Model.ItemType>();
+      var dict = itemTypes.ToDictionary(i => i.Id());
       var polymorphicIds = new HashSet<string>();
       var links = new NameValueCollection();
 
@@ -50,16 +51,22 @@ namespace Innovator.Client.Model
           await writer.WriteAsync(@" : IItem
   {
 ");
+          var versionable = itemType.Relationships("Morphae").All(m => dict[m.RelatedId().Value].IsVersionable().AsBoolean(false));
+
           foreach (var prop in itemType
             .Relationships()
             .OfType<Innovator.Client.Model.Property>()
             .Where(p => p.NameProp().Value != "source_id" && p.NameProp().Value != "related_id" && p.NameProp().Value != "id"))
           {
+            if (!versionable
+              && (prop.NameProp().Value == "effective_date" || prop.NameProp().Value == "release_date" || prop.NameProp().Value == "superseded_date"))
+              continue;
+
             await writer.WriteAsync("    /// <summary>Retrieve the <c>");
             await writer.WriteAsync(prop.NameProp().Value);
             await writer.WriteAsync("</c> property of the item</summary>\r\n");
             await writer.WriteAsync("    IProperty_");
-            await writer.WriteAsync(PropType(prop));
+            await writer.WriteAsync(PropType(prop, polymorphicIds));
             await writer.WriteAsync(" ");
             await writer.WriteAsync(GetPropName(prop.NameProp().Value, itemTypeLabel.Substring(1)));
             await writer.WriteLineAsync(@"();");
@@ -140,7 +147,7 @@ namespace Innovator.Client.Model
             await writer.WriteAsync(prop.NameProp().Value);
             await writer.WriteAsync("</c> property of the item</summary>\r\n");
             await writer.WriteAsync("    public IProperty_");
-            await writer.WriteAsync(PropType(prop));
+            await writer.WriteAsync(PropType(prop, polymorphicIds));
             await writer.WriteAsync(" ");
             await writer.WriteAsync(GetPropName(prop.NameProp().Value, itemTypeLabel));
             await writer.WriteAsync(@"()
@@ -157,11 +164,14 @@ namespace Innovator.Client.Model
       }
     }
 
-    private string PropType(Innovator.Client.Model.Property prop)
+    private string PropType(Innovator.Client.Model.Property prop, HashSet<string> polymorphicIds)
     {
       var dataType = prop.DataType().Value;
       if (dataType == "foreign" && prop.ForeignProperty().HasValue())
-        dataType = prop.ForeignProperty().AsModel().DataType().Value;
+      {
+        prop = prop.ForeignProperty().AsModel();
+        dataType = prop.DataType().Value;
+      }
       switch (dataType)
       {
         case "boolean":
@@ -174,7 +184,9 @@ namespace Innovator.Client.Model
           return "Number";
         case "item":
           if (prop.DataSource().KeyedName().Exists)
-            return "Item<" + prop.DataSource().KeyedName().Value.Replace(" ", "") + ">";
+            return "Item<"
+              + (polymorphicIds.Contains(prop.DataSource().Value) ? "I" : "")
+              + prop.DataSource().KeyedName().Value.Replace(" ", "") + ">";
           return "Item<IReadOnlyItem>";
         default:
           return "Text";

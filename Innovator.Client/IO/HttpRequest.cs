@@ -29,7 +29,7 @@ namespace Innovator.Client
     {
       if (Headers.Contains(name))
         Headers.Remove(name);
-      Headers.Add(name, value);
+      Headers.TryAddWithoutValidation(name, value);
     }
   }
 }
