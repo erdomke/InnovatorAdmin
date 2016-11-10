@@ -271,7 +271,7 @@ namespace Innovator.Client
       {
         var range = ((StaticDateTimeRange)value).ToTimeZone(_timeZone);
         if (range.StartDate.HasValue && range.EndDate.HasValue)
-          return stringRenderer(range.StartDate.Value.ToString("s") + " AND " + range.EndDate.Value.ToString("s"));
+          return stringRenderer(range.StartDate.Value.ToString("s") + " and " + range.EndDate.Value.ToString("s"));
         else if (range.StartDate.HasValue)
           return stringRenderer(range.StartDate.Value.ToString("s"));
         else if (range.EndDate.HasValue)
@@ -282,7 +282,7 @@ namespace Innovator.Client
       {
         var range = ((DynamicDateTimeRange)value).ToStatic(_timeZone);
         if (range.StartDate.HasValue && range.EndDate.HasValue)
-          return stringRenderer(range.StartDate.Value.ToString("s") + " AND " + range.EndDate.Value.ToString("s"));
+          return stringRenderer(range.StartDate.Value.ToString("s") + " and " + range.EndDate.Value.ToString("s"));
         else if (range.StartDate.HasValue)
           return stringRenderer(range.StartDate.Value.ToString("s"));
         else if (range.EndDate.HasValue)

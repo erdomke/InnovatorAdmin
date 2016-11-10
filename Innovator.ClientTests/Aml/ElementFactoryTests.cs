@@ -165,7 +165,7 @@ namespace Innovator.Client.Tests
     public void FormatAmlTest_DynamicDate()
     {
       DynamicDateTimeRange._clock = () => DateTimeOffset.FromFileTime(131109073341417792);
-      Assert.AreEqual("<Item action=\"get\" type=\"Part\"><created_on origDateRange=\"Dynamic|Month|-1|Month|-1\" condition=\"between\">2016-05-01T00:00:00 AND 2016-05-31T23:59:59</created_on></Item>",
+      Assert.AreEqual("<Item action=\"get\" type=\"Part\"><created_on origDateRange=\"Dynamic|Month|-1|Month|-1\" condition=\"between\">2016-05-01T00:00:00 and 2016-05-31T23:59:59</created_on></Item>",
         new Command("<Item action='get' type='Part'><created_on origDateRange='Dynamic|Month|-1|Month|-1'>random query</created_on></Item>")
           .ToNormalizedAml(ElementFactory.Local.LocalizationContext));
     }
