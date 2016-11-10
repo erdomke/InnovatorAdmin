@@ -8,18 +8,18 @@ namespace Innovator.Client
   public class DynamicDateTimeRange
   {
     public DateMagnitude EndMagnitude { get; set; }
-    public int EndOffset { get; set; }
+    public int? EndOffset { get; set; }
     public DayOfWeek FirstDayOfWeek { get; set; }
     public DateMagnitude StartMagnitude { get; set; }
-    public int StartOffset { get; set; }
+    public int? StartOffset { get; set; }
 
     public DynamicDateTimeRange()
     {
       this.EndMagnitude = DateMagnitude.Year;
-      this.EndOffset = 1000;
+      this.EndOffset = null;
       this.FirstDayOfWeek = DayOfWeek.Sunday;
       this.StartMagnitude = DateMagnitude.Year;
-      this.StartOffset = -1000;
+      this.StartOffset = null;
     }
 
     public string Serialize()
@@ -62,9 +62,17 @@ namespace Innovator.Client
       {
         var result = new DynamicDateTimeRange();
         result.StartMagnitude = (DateMagnitude)Enum.Parse(typeof(DateMagnitude), parts[0]);
-        result.StartOffset = int.Parse(parts[1]);
+        result.StartOffset = string.IsNullOrEmpty(parts[1]) ? (int?)null : int.Parse(parts[1]);
+        if (result.StartMagnitude == DateMagnitude.Year
+          && result.StartOffset.HasValue
+          && Math.Abs(result.StartOffset.Value) > 900)
+          result.StartOffset = null;
         result.EndMagnitude = (DateMagnitude)Enum.Parse(typeof(DateMagnitude), parts[2]);
-        result.EndOffset = int.Parse(parts[3]);
+        result.EndOffset = string.IsNullOrEmpty(parts[1]) ? (int?)null : int.Parse(parts[3]);
+        if (result.EndMagnitude == DateMagnitude.Year
+          && result.EndOffset.HasValue
+          && Math.Abs(result.EndOffset.Value) > 900)
+          result.EndOffset = null;
         result.FirstDayOfWeek = (DayOfWeek)Enum.Parse(typeof(DayOfWeek), parts[4]);
         range = result;
         return true;
@@ -73,8 +81,12 @@ namespace Innovator.Client
       catch (OverflowException) { return false; }
     }
 
-    internal static DateTime GetDateFromDynamic(DateMagnitude magnitude, int offset, bool isEndDate, DateTimeOffset todaysDate, DayOfWeek weekStart, TimeZoneInfo timeZone)
+    internal static DateTime? GetDateFromDynamic(DateMagnitude magnitude, int? offsetValue, bool isEndDate
+      , DateTimeOffset todaysDate, DayOfWeek weekStart, TimeZoneInfo timeZone)
     {
+      if (!offsetValue.HasValue)
+        return null;
+      var offset = offsetValue.Value;
       var localToday = TimeZoneInfo.ConvertTime(todaysDate, timeZone);
       DateTimeOffset result;
 
@@ -123,7 +135,7 @@ namespace Innovator.Client
           }
           break;
         case DateMagnitude.Year:
-          result = new DateTimeOffset(todaysDate.Year, 1, 1, 0, 0, 0, localToday.Offset).AddYears(offset * 3);
+          result = new DateTimeOffset(todaysDate.Year, 1, 1, 0, 0, 0, localToday.Offset).AddYears(offset);
           break;
         default:
           result = todaysDate.AddDays(offset);

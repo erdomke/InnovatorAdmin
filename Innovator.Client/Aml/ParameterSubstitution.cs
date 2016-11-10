@@ -74,19 +74,20 @@ namespace Innovator.Client
         using (var writer = new StringWriter(builder))
         using (var xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings() { OmitXmlDeclaration = true }))
         {
-          string condition = null;
+          Parameter condition = null;
           DynamicDateTimeRange dateRange = null;
           var hasItem = false;
           var tagNames = new List<string>();
           string tagName;
           Parameter param;
+          var attrs = new List<Parameter>();
 
           while (xmlReader.Read())
           {
             switch (xmlReader.NodeType)
             {
               case XmlNodeType.CDATA:
-                param = RenderValue(condition, xmlReader.Value);
+                param = RenderValue((string)condition, xmlReader.Value);
                 if (param.IsRaw)
                   throw new InvalidOperationException("Can't have a raw parameter in a CDATA section");
                 xmlWriter.WriteCData(param.Value);
@@ -101,22 +102,48 @@ namespace Innovator.Client
                 tagName = xmlReader.LocalName;
 
                 var isEmpty = xmlReader.IsEmptyElement;
+
+                attrs.Clear();
                 for (i = 0; i < xmlReader.AttributeCount; i++)
                 {
                   xmlReader.MoveToAttribute(i);
                   param = RenderValue(xmlReader.LocalName, xmlReader.Value);
+                  param.ContextName = xmlReader.LocalName;
+                  param.Prefix = xmlReader.Prefix;
+                  param.NsUri = xmlReader.NamespaceURI;
                   if (param.IsRaw)
                     throw new InvalidOperationException("Can't have a raw parameter in an attribute");
-                  xmlWriter.WriteAttributeString(xmlReader.Prefix, xmlReader.LocalName
-                    , xmlReader.NamespaceURI, param.Value);
+                  attrs.Add(param);
                   if (xmlReader.LocalName == "condition")
                   {
-                    condition = xmlReader.Value;
+                    condition = param;
                   }
                   else if (xmlReader.LocalName == "origDateRange" && !DynamicDateTimeRange.TryDeserialize(xmlReader.Value, out dateRange))
                   {
                     dateRange = null;
                   }
+                }
+
+                // Deal with date ranges
+                if (dateRange != null)
+                {
+                  if (condition == null)
+                  {
+                    condition = new Parameter() { ContextName = "condition", Value = "between" };
+                    attrs.Add(condition);
+                  }
+
+                  if (dateRange.StartOffset.HasValue && !dateRange.EndOffset.HasValue)
+                    condition.Value = "ge";
+                  else if (!dateRange.StartOffset.HasValue && dateRange.EndOffset.HasValue)
+                    condition.Value = "le";
+                  else if (dateRange.StartOffset.HasValue && dateRange.EndOffset.HasValue)
+                    condition.Value = "between";
+                }
+
+                foreach (var attr in attrs)
+                {
+                  xmlWriter.WriteAttributeString(attr.Prefix, attr.ContextName, attr.NsUri, attr.Value);
                 }
 
                 switch (tagName)
@@ -143,12 +170,13 @@ namespace Innovator.Client
               case XmlNodeType.EndElement:
                 xmlWriter.WriteEndElement();
                 tagNames.RemoveAt(tagNames.Count - 1);
+                condition = null;
                 break;
               case XmlNodeType.SignificantWhitespace:
                 xmlWriter.WriteWhitespace(xmlReader.Value);
                 break;
               case XmlNodeType.Text:
-                param = RenderValue(condition, dateRange == null ? xmlReader.Value : _context.Format(dateRange));
+                param = RenderValue((string)condition, dateRange == null ? xmlReader.Value : _context.Format(dateRange));
                 if (param.IsRaw)
                 {
                   xmlWriter.WriteRaw(param.Value);
@@ -425,14 +453,28 @@ namespace Innovator.Client
 
     private class Parameter
     {
-      public string Name { get; set; }
+      public string ContextName { get; set; }
       public bool IsRaw { get; set; }
+      public string Name { get; set; }
+      public string NsUri { get; set; }
+      public string Prefix { get; set; }
       public string Value { get; set; }
 
       public Parameter WithValue(string value)
       {
         this.Value = value;
         return this;
+      }
+
+      public static implicit operator Parameter(string value)
+      {
+        return new Parameter() { Value = value };
+      }
+      public static explicit operator string(Parameter value)
+      {
+        if (value == null)
+          return null;
+        return value.Value;
       }
     }
   }

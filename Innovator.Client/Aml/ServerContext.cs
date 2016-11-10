@@ -270,12 +270,24 @@ namespace Innovator.Client
       else if (value is StaticDateTimeRange)
       {
         var range = ((StaticDateTimeRange)value).ToTimeZone(_timeZone);
-        return stringRenderer(range.StartDate.ToString("s") + " AND " + range.EndDate.ToString("s"));
+        if (range.StartDate.HasValue && range.EndDate.HasValue)
+          return stringRenderer(range.StartDate.Value.ToString("s") + " AND " + range.EndDate.Value.ToString("s"));
+        else if (range.StartDate.HasValue)
+          return stringRenderer(range.StartDate.Value.ToString("s"));
+        else if (range.EndDate.HasValue)
+          return stringRenderer(range.EndDate.Value.ToString("s"));
+        return "";
       }
       else if (value is DynamicDateTimeRange)
       {
         var range = ((DynamicDateTimeRange)value).ToStatic(_timeZone);
-        return stringRenderer(range.StartDate.ToString("s") + " AND " + range.EndDate.ToString("s"));
+        if (range.StartDate.HasValue && range.EndDate.HasValue)
+          return stringRenderer(range.StartDate.Value.ToString("s") + " AND " + range.EndDate.Value.ToString("s"));
+        else if (range.StartDate.HasValue)
+          return stringRenderer(range.StartDate.Value.ToString("s"));
+        else if (range.EndDate.HasValue)
+          return stringRenderer(range.EndDate.Value.ToString("s"));
+        return "";
       }
       else if (value is IReadOnlyItem)
       {

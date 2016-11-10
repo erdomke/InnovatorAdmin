@@ -7,8 +7,8 @@ namespace Innovator.Client
 {
   public class StaticDateTimeRange
   {
-    public DateTime EndDate { get; set; }
-    public DateTime StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    public DateTime? StartDate { get; set; }
     public TimeZoneInfo TimeZone { get; set; }
 
     public StaticDateTimeRange()
@@ -22,8 +22,8 @@ namespace Innovator.Client
     {
       if (timeZone == this.TimeZone) return this;
       var result = new StaticDateTimeRange();
-      result.EndDate = TimeZoneInfo.ConvertTime(this.EndDate, this.TimeZone, timeZone);
-      result.StartDate = TimeZoneInfo.ConvertTime(this.StartDate, this.TimeZone, timeZone);
+      result.EndDate = EndDate.HasValue ? TimeZoneInfo.ConvertTime(EndDate.Value, this.TimeZone, timeZone) : (DateTime?)null;
+      result.StartDate = StartDate.HasValue ? TimeZoneInfo.ConvertTime(StartDate.Value, this.TimeZone, timeZone) : (DateTime?)null;
       result.TimeZone = timeZone;
       return result;
     }
