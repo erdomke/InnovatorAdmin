@@ -446,11 +446,9 @@
     <Compile Include="Promise\PooledPromise.cs" />
     <Compile Include="Promise\PromiseResult.cs" />
     <Compile Include="IServerContext.cs" />
-    <Compile Include="Connection\InitializeSessionToken.cs" />
     <Compile Include="Connection\Vault.cs" />
     <Compile Include="Factory.cs" />
     <Compile Include="IO\IHttpResponse.cs" />
-    <Compile Include="Credentials\TokenCredentials.cs" />
     <Compile Include="Aml\Condition.cs" />
     <Compile Include="Aml\Core.cs" />
     <Compile Include="Aml\ElementFactory.cs" />
