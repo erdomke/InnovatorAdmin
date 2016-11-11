@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected TOCView() { }
     public TOCView(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static TOCView() { Innovator.Client.Item.AddNullItem<TOCView>(new TOCView { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static TOCView() { Innovator.Client.Item.AddNullItem<TOCView>(new TOCView { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected cmf_ExportToExcelViewConfig() { }
     public cmf_ExportToExcelViewConfig(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static cmf_ExportToExcelViewConfig() { Innovator.Client.Item.AddNullItem<cmf_ExportToExcelViewConfig>(new cmf_ExportToExcelViewConfig { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static cmf_ExportToExcelViewConfig() { Innovator.Client.Item.AddNullItem<cmf_ExportToExcelViewConfig>(new cmf_ExportToExcelViewConfig { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

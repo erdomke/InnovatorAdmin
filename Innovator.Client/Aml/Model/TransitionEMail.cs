@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected TransitionEMail() { }
     public TransitionEMail(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static TransitionEMail() { Innovator.Client.Item.AddNullItem<TransitionEMail>(new TransitionEMail { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static TransitionEMail() { Innovator.Client.Item.AddNullItem<TransitionEMail>(new TransitionEMail { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

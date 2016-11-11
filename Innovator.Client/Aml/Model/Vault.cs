@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected Vault() { }
     public Vault(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static Vault() { Innovator.Client.Item.AddNullItem<Vault>(new Vault { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static Vault() { Innovator.Client.Item.AddNullItem<Vault>(new Vault { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>label</c> property of the item</summary>
     public IProperty_Text Label()

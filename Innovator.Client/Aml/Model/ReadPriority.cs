@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ReadPriority() { }
     public ReadPriority(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ReadPriority() { Innovator.Client.Item.AddNullItem<ReadPriority>(new ReadPriority { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ReadPriority() { Innovator.Client.Item.AddNullItem<ReadPriority>(new ReadPriority { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

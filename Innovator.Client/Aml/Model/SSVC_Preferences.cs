@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected SSVC_Preferences() { }
     public SSVC_Preferences(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static SSVC_Preferences() { Innovator.Client.Item.AddNullItem<SSVC_Preferences>(new SSVC_Preferences { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static SSVC_Preferences() { Innovator.Client.Item.AddNullItem<SSVC_Preferences>(new SSVC_Preferences { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

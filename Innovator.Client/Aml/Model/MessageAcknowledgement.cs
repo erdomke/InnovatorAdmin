@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected MessageAcknowledgement() { }
     public MessageAcknowledgement(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static MessageAcknowledgement() { Innovator.Client.Item.AddNullItem<MessageAcknowledgement>(new MessageAcknowledgement { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static MessageAcknowledgement() { Innovator.Client.Item.AddNullItem<MessageAcknowledgement>(new MessageAcknowledgement { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

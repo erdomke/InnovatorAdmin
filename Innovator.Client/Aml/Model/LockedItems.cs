@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected LockedItems() { }
     public LockedItems(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static LockedItems() { Innovator.Client.Item.AddNullItem<LockedItems>(new LockedItems { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static LockedItems() { Innovator.Client.Item.AddNullItem<LockedItems>(new LockedItems { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

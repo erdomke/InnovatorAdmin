@@ -12,8 +12,7 @@ namespace Innovator.Server
     private IServerConnection _conn;
     private IReadOnlyItem _existing;
     private bool _existingLoaded;
-    public IResult _result;
-
+    private IResult _result;
 
     public IItem Item
     {

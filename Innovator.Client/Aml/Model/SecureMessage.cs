@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected SecureMessage() { }
     public SecureMessage(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static SecureMessage() { Innovator.Client.Item.AddNullItem<SecureMessage>(new SecureMessage { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static SecureMessage() { Innovator.Client.Item.AddNullItem<SecureMessage>(new SecureMessage { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

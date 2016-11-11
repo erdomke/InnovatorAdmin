@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected Dashboard() { }
     public Dashboard(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static Dashboard() { Innovator.Client.Item.AddNullItem<Dashboard>(new Dashboard { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static Dashboard() { Innovator.Client.Item.AddNullItem<Dashboard>(new Dashboard { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>background_style</c> property of the item</summary>
     public IProperty_Text BackgroundStyle()

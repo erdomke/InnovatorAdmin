@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected BusinessCalendarException() { }
     public BusinessCalendarException(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static BusinessCalendarException() { Innovator.Client.Item.AddNullItem<BusinessCalendarException>(new BusinessCalendarException { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static BusinessCalendarException() { Innovator.Client.Item.AddNullItem<BusinessCalendarException>(new BusinessCalendarException { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

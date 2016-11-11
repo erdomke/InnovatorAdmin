@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected LifeCycleTransition() { }
     public LifeCycleTransition(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static LifeCycleTransition() { Innovator.Client.Item.AddNullItem<LifeCycleTransition>(new LifeCycleTransition { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static LifeCycleTransition() { Innovator.Client.Item.AddNullItem<LifeCycleTransition>(new LifeCycleTransition { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

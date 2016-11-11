@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected RelationshipGridEvent() { }
     public RelationshipGridEvent(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static RelationshipGridEvent() { Innovator.Client.Item.AddNullItem<RelationshipGridEvent>(new RelationshipGridEvent { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static RelationshipGridEvent() { Innovator.Client.Item.AddNullItem<RelationshipGridEvent>(new RelationshipGridEvent { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected Method() { }
     public Method(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static Method() { Innovator.Client.Item.AddNullItem<Method>(new Method { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static Method() { Innovator.Client.Item.AddNullItem<Method>(new Method { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>comments</c> property of the item</summary>
     public IProperty_Text Comments()

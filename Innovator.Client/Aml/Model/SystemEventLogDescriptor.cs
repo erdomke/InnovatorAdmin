@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected SystemEventLogDescriptor() { }
     public SystemEventLogDescriptor(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static SystemEventLogDescriptor() { Innovator.Client.Item.AddNullItem<SystemEventLogDescriptor>(new SystemEventLogDescriptor { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static SystemEventLogDescriptor() { Innovator.Client.Item.AddNullItem<SystemEventLogDescriptor>(new SystemEventLogDescriptor { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>log_level</c> property of the item</summary>
     public IProperty_Number LogLevel()

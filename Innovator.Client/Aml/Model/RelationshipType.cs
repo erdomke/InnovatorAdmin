@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected RelationshipType() { }
     public RelationshipType(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static RelationshipType() { Innovator.Client.Item.AddNullItem<RelationshipType>(new RelationshipType { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static RelationshipType() { Innovator.Client.Item.AddNullItem<RelationshipType>(new RelationshipType { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>auto_search</c> property of the item</summary>
     public IProperty_Boolean AutoSearch()

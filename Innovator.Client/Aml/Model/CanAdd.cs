@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected CanAdd() { }
     public CanAdd(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static CanAdd() { Innovator.Client.Item.AddNullItem<CanAdd>(new CanAdd { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static CanAdd() { Innovator.Client.Item.AddNullItem<CanAdd>(new CanAdd { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

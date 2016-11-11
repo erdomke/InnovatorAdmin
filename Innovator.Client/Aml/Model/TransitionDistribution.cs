@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected TransitionDistribution() { }
     public TransitionDistribution(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static TransitionDistribution() { Innovator.Client.Item.AddNullItem<TransitionDistribution>(new TransitionDistribution { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static TransitionDistribution() { Innovator.Client.Item.AddNullItem<TransitionDistribution>(new TransitionDistribution { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

@@ -402,7 +402,6 @@
     <Compile Include="Aml\SubSelect.cs" />
     <Compile Include="Aml\ValidationException.cs" />
     <Compile Include="Aml\ValidationReportException.cs" />
-    <Compile Include="Aml\XmlFormatter.cs" />
     <Compile Include="AssemblyInfo.Version.cs" />
     <Compile Include="ConnectionPreferences.cs" />
     <Compile Include="Connection\ArasVaultConnection.cs" />

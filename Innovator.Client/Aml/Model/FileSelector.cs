@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected FileSelector() { }
     public FileSelector(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static FileSelector() { Innovator.Client.Item.AddNullItem<FileSelector>(new FileSelector { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static FileSelector() { Innovator.Client.Item.AddNullItem<FileSelector>(new FileSelector { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

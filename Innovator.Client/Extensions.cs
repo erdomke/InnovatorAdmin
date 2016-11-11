@@ -18,10 +18,10 @@ namespace Innovator.Client
     public static string Checksum(this FileInfo fileInfo)
     {
       if (!File.Exists(fileInfo.FullName))
-        throw new ArgumentException("The spcecified file doesn't exist.", "fileName");
+        throw new ArgumentException("The spcecified file doesn't exist.", "fileInfo");
 
       if (Directory.Exists(fileInfo.FullName))
-        throw new ArgumentException("The specified path is a directory and not a file.", "fileName");
+        throw new ArgumentException("The specified path is a directory and not a file.", "fileInfo");
 
       using (var fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
       {

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected SearchCriteria() { }
     public SearchCriteria(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static SearchCriteria() { Innovator.Client.Item.AddNullItem<SearchCriteria>(new SearchCriteria { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static SearchCriteria() { Innovator.Client.Item.AddNullItem<SearchCriteria>(new SearchCriteria { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected MetricValue() { }
     public MetricValue(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static MetricValue() { Innovator.Client.Item.AddNullItem<MetricValue>(new MetricValue { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static MetricValue() { Innovator.Client.Item.AddNullItem<MetricValue>(new MetricValue { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

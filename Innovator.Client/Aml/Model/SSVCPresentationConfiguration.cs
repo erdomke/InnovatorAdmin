@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected SSVCPresentationConfiguration() { }
     public SSVCPresentationConfiguration(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static SSVCPresentationConfiguration() { Innovator.Client.Item.AddNullItem<SSVCPresentationConfiguration>(new SSVCPresentationConfiguration { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static SSVCPresentationConfiguration() { Innovator.Client.Item.AddNullItem<SSVCPresentationConfiguration>(new SSVCPresentationConfiguration { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>discussion_panel_behavior</c> property of the item</summary>
     public IProperty_Text DiscussionPanelBehavior()

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected WSTypeProperty() { }
     public WSTypeProperty(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static WSTypeProperty() { Innovator.Client.Item.AddNullItem<WSTypeProperty>(new WSTypeProperty { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static WSTypeProperty() { Innovator.Client.Item.AddNullItem<WSTypeProperty>(new WSTypeProperty { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>alias</c> property of the item</summary>
     public IProperty_Text Alias()

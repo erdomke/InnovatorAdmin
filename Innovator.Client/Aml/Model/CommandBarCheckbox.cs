@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected CommandBarCheckbox() { }
     public CommandBarCheckbox(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static CommandBarCheckbox() { Innovator.Client.Item.AddNullItem<CommandBarCheckbox>(new CommandBarCheckbox { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static CommandBarCheckbox() { Innovator.Client.Item.AddNullItem<CommandBarCheckbox>(new CommandBarCheckbox { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>additional_data</c> property of the item</summary>
     public IProperty_Text AdditionalData()

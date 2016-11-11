@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ConfigurableGridEvent() { }
     public ConfigurableGridEvent(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ConfigurableGridEvent() { Innovator.Client.Item.AddNullItem<ConfigurableGridEvent>(new ConfigurableGridEvent { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ConfigurableGridEvent() { Innovator.Client.Item.AddNullItem<ConfigurableGridEvent>(new ConfigurableGridEvent { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected HideIn() { }
     public HideIn(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static HideIn() { Innovator.Client.Item.AddNullItem<HideIn>(new HideIn { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static HideIn() { Innovator.Client.Item.AddNullItem<HideIn>(new HideIn { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

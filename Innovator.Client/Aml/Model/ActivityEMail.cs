@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ActivityEMail() { }
     public ActivityEMail(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ActivityEMail() { Innovator.Client.Item.AddNullItem<ActivityEMail>(new ActivityEMail { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ActivityEMail() { Innovator.Client.Item.AddNullItem<ActivityEMail>(new ActivityEMail { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>alternate_identity</c> property of the item</summary>
     public IProperty_Item<Identity> AlternateIdentity()

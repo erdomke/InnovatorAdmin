@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected SelfServiceReport() { }
     public SelfServiceReport(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static SelfServiceReport() { Innovator.Client.Item.AddNullItem<SelfServiceReport>(new SelfServiceReport { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static SelfServiceReport() { Innovator.Client.Item.AddNullItem<SelfServiceReport>(new SelfServiceReport { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>base_item_type</c> property of the item</summary>
     public IProperty_Item<ItemType> BaseItemType()

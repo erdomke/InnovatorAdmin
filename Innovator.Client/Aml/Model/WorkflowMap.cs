@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected WorkflowMap() { }
     public WorkflowMap(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static WorkflowMap() { Innovator.Client.Item.AddNullItem<WorkflowMap>(new WorkflowMap { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static WorkflowMap() { Innovator.Client.Item.AddNullItem<WorkflowMap>(new WorkflowMap { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>comments</c> property of the item</summary>
     public IProperty_Text Comments()

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected OldPassword() { }
     public OldPassword(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static OldPassword() { Innovator.Client.Item.AddNullItem<OldPassword>(new OldPassword { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static OldPassword() { Innovator.Client.Item.AddNullItem<OldPassword>(new OldPassword { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

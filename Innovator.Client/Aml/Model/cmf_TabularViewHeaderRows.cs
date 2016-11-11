@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected cmf_TabularViewHeaderRows() { }
     public cmf_TabularViewHeaderRows(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static cmf_TabularViewHeaderRows() { Innovator.Client.Item.AddNullItem<cmf_TabularViewHeaderRows>(new cmf_TabularViewHeaderRows { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static cmf_TabularViewHeaderRows() { Innovator.Client.Item.AddNullItem<cmf_TabularViewHeaderRows>(new cmf_TabularViewHeaderRows { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

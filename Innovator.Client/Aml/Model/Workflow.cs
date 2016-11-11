@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected Workflow() { }
     public Workflow(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static Workflow() { Innovator.Client.Item.AddNullItem<Workflow>(new Workflow { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static Workflow() { Innovator.Client.Item.AddNullItem<Workflow>(new Workflow { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

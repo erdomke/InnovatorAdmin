@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected HideRelatedIn() { }
     public HideRelatedIn(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static HideRelatedIn() { Innovator.Client.Item.AddNullItem<HideRelatedIn>(new HideRelatedIn { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static HideRelatedIn() { Innovator.Client.Item.AddNullItem<HideRelatedIn>(new HideRelatedIn { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

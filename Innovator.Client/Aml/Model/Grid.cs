@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected Grid() { }
     public Grid(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static Grid() { Innovator.Client.Item.AddNullItem<Grid>(new Grid { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static Grid() { Innovator.Client.Item.AddNullItem<Grid>(new Grid { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>merge_path</c> property of the item</summary>
     public IProperty_Text MergePath()

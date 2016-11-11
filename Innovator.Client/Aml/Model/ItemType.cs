@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ItemType() { }
     public ItemType(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ItemType() { Innovator.Client.Item.AddNullItem<ItemType>(new ItemType { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ItemType() { Innovator.Client.Item.AddNullItem<ItemType>(new ItemType { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>allow_private_permission</c> property of the item</summary>
     public IProperty_Boolean AllowPrivatePermission()

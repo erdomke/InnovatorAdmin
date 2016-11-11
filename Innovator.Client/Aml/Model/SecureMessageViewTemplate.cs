@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected SecureMessageViewTemplate() { }
     public SecureMessageViewTemplate(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static SecureMessageViewTemplate() { Innovator.Client.Item.AddNullItem<SecureMessageViewTemplate>(new SecureMessageViewTemplate { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static SecureMessageViewTemplate() { Innovator.Client.Item.AddNullItem<SecureMessageViewTemplate>(new SecureMessageViewTemplate { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>style</c> property of the item</summary>
     public IProperty_Text Style()

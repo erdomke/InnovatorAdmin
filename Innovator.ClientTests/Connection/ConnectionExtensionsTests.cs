@@ -27,5 +27,29 @@ namespace Innovator.Client.Tests
       Assert.AreEqual("Another Company", result.KeyedName);
       Assert.AreEqual(null, result.Empty);
     }
+
+    [TestMethod()]
+    public void ApplySqlTest()
+    {
+      var req = new Command(@"select c.id cad_id, c.VIEWABLE_FILE id, f.FILENAME
+from innovator.CAD c
+inner join innovator.[FILE] f
+on f.ID = c.VIEWABLE_FILE
+where (
+  isnull(c.VIEWABLE_FILE, '') <> isnull(c.VIEWABLE_Watermark, '')
+)
+and c.state = @0", "Preliminary");
+      var conn = new TestConnection();
+      var result = conn.ApplySql(req);
+      var aml = req.ToNormalizedAml(conn.AmlContext.LocalizationContext);
+      Assert.AreEqual(@"<sql>select c.id cad_id, c.VIEWABLE_FILE id, f.FILENAME
+from innovator.CAD c
+inner join innovator.[FILE] f
+on f.ID = c.VIEWABLE_FILE
+where (
+  isnull(c.VIEWABLE_FILE, '') &lt;&gt; isnull(c.VIEWABLE_Watermark, '')
+)
+and c.state = N'Preliminary'</sql>", aml);
+    }
   }
 }

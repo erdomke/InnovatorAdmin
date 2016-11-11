@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected Core_RelGridLayout() { }
     public Core_RelGridLayout(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static Core_RelGridLayout() { Innovator.Client.Item.AddNullItem<Core_RelGridLayout>(new Core_RelGridLayout { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static Core_RelGridLayout() { Innovator.Client.Item.AddNullItem<Core_RelGridLayout>(new Core_RelGridLayout { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

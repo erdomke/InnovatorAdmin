@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ScheduledTask() { }
     public ScheduledTask(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ScheduledTask() { Innovator.Client.Item.AddNullItem<ScheduledTask>(new ScheduledTask { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ScheduledTask() { Innovator.Client.Item.AddNullItem<ScheduledTask>(new ScheduledTask { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>day_of_week</c> property of the item</summary>
     public IProperty_Text DayOfWeek()

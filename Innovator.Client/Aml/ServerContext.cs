@@ -41,7 +41,7 @@ namespace Innovator.Client
       this.TimeZone = timeZoneName;
       _culture = CultureInfo.InvariantCulture;
     }
-    public ServerContext(SerializationInfo info, StreamingContext context)
+    private ServerContext(SerializationInfo info, StreamingContext context)
     {
       this.DefaultLanguageCode = info.GetString("default_language_code");
       this.DefaultLanguageSuffix = info.GetString("default_language_suffix");

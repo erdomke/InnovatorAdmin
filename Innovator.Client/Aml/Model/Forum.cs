@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected Forum() { }
     public Forum(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static Forum() { Innovator.Client.Item.AddNullItem<Forum>(new Forum { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static Forum() { Innovator.Client.Item.AddNullItem<Forum>(new Forum { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>description</c> property of the item</summary>
     public IProperty_Text Description()

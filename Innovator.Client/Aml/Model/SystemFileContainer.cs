@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected SystemFileContainer() { }
     public SystemFileContainer(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static SystemFileContainer() { Innovator.Client.Item.AddNullItem<SystemFileContainer>(new SystemFileContainer { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static SystemFileContainer() { Innovator.Client.Item.AddNullItem<SystemFileContainer>(new SystemFileContainer { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>description</c> property of the item</summary>
     public IProperty_Text Description()

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected SearchMode() { }
     public SearchMode(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static SearchMode() { Innovator.Client.Item.AddNullItem<SearchMode>(new SearchMode { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static SearchMode() { Innovator.Client.Item.AddNullItem<SearchMode>(new SearchMode { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>is_active</c> property of the item</summary>
     public IProperty_Boolean IsActive()

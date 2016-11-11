@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected tp_ItemReference() { }
     public tp_ItemReference(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static tp_ItemReference() { Innovator.Client.Item.AddNullItem<tp_ItemReference>(new tp_ItemReference { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static tp_ItemReference() { Innovator.Client.Item.AddNullItem<tp_ItemReference>(new tp_ItemReference { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

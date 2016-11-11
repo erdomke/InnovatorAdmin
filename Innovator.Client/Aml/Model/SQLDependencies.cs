@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected SQLDependencies() { }
     public SQLDependencies(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static SQLDependencies() { Innovator.Client.Item.AddNullItem<SQLDependencies>(new SQLDependencies { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static SQLDependencies() { Innovator.Client.Item.AddNullItem<SQLDependencies>(new SQLDependencies { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

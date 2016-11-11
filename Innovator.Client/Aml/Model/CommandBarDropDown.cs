@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected CommandBarDropDown() { }
     public CommandBarDropDown(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static CommandBarDropDown() { Innovator.Client.Item.AddNullItem<CommandBarDropDown>(new CommandBarDropDown { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static CommandBarDropDown() { Innovator.Client.Item.AddNullItem<CommandBarDropDown>(new CommandBarDropDown { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>additional_data</c> property of the item</summary>
     public IProperty_Text AdditionalData()

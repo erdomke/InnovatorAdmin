@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected Chart() { }
     public Chart(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static Chart() { Innovator.Client.Item.AddNullItem<Chart>(new Chart { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static Chart() { Innovator.Client.Item.AddNullItem<Chart>(new Chart { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>background_style</c> property of the item</summary>
     public IProperty_Text BackgroundStyle()

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ReplicationTxn() { }
     public ReplicationTxn(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ReplicationTxn() { Innovator.Client.Item.AddNullItem<ReplicationTxn>(new ReplicationTxn { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ReplicationTxn() { Innovator.Client.Item.AddNullItem<ReplicationTxn>(new ReplicationTxn { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>end_time</c> property of the item</summary>
     public IProperty_Date EndTime()

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected HistorySecureMessage() { }
     public HistorySecureMessage(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static HistorySecureMessage() { Innovator.Client.Item.AddNullItem<HistorySecureMessage>(new HistorySecureMessage { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static HistorySecureMessage() { Innovator.Client.Item.AddNullItem<HistorySecureMessage>(new HistorySecureMessage { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>comments</c> property of the item</summary>
     public IProperty_Text Comments()

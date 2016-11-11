@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ServiceProvider() { }
     public ServiceProvider(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ServiceProvider() { Innovator.Client.Item.AddNullItem<ServiceProvider>(new ServiceProvider { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ServiceProvider() { Innovator.Client.Item.AddNullItem<ServiceProvider>(new ServiceProvider { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>active</c> property of the item</summary>
     public IProperty_Boolean Active()

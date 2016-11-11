@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected FileGroup() { }
     public FileGroup(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static FileGroup() { Innovator.Client.Item.AddNullItem<FileGroup>(new FileGroup { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static FileGroup() { Innovator.Client.Item.AddNullItem<FileGroup>(new FileGroup { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
   }
 }

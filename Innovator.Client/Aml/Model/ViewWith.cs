@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ViewWith() { }
     public ViewWith(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ViewWith() { Innovator.Client.Item.AddNullItem<ViewWith>(new ViewWith { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ViewWith() { Innovator.Client.Item.AddNullItem<ViewWith>(new ViewWith { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>application</c> property of the item</summary>
     public IProperty_Text Application()

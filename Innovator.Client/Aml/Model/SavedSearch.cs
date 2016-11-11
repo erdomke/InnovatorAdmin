@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected SavedSearch() { }
     public SavedSearch(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static SavedSearch() { Innovator.Client.Item.AddNullItem<SavedSearch>(new SavedSearch { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static SavedSearch() { Innovator.Client.Item.AddNullItem<SavedSearch>(new SavedSearch { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>auto_saved</c> property of the item</summary>
     public IProperty_Boolean AutoSaved()

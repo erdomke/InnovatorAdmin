@@ -186,7 +186,7 @@ namespace Innovator.Client.Connection
             _httpUsername = res.Element("user").Value;
             var pwd = res.Element("password").Value;
             if (pwd.IsNullOrWhiteSpace())
-              throw new Exception("Failed to authenticate with Innovator server '" + _innovatorServerUrl + "'. Original error: " + _httpUsername);
+              throw new ArgumentException("Failed to authenticate with Innovator server '" + _innovatorServerUrl + "'. Original error: " + _httpUsername, "credentials");
             var needHash = res.Element("hash").Value;
             if (string.Equals(needHash.Trim(), "false", StringComparison.OrdinalIgnoreCase))
             {

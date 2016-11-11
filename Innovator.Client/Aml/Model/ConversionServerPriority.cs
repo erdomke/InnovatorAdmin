@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ConversionServerPriority() { }
     public ConversionServerPriority(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ConversionServerPriority() { Innovator.Client.Item.AddNullItem<ConversionServerPriority>(new ConversionServerPriority { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ConversionServerPriority() { Innovator.Client.Item.AddNullItem<ConversionServerPriority>(new ConversionServerPriority { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

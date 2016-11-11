@@ -22,7 +22,7 @@ namespace Innovator.Client
     }
     public override ILinkedElement Next
     {
-      get { return ((_attr & ElementAttribute.Null) > 0 ? null : this); }
+      get { return ((_attr & ElementAttributes.Null) > 0 ? null : this); }
       set { /* Do nothing */ }
     }
 
@@ -36,7 +36,7 @@ namespace Innovator.Client
 
     private static Dictionary<Type, IReadOnlyItem> _nullItems = new Dictionary<Type, IReadOnlyItem>()
     {
-      { typeof(Item), new Item(){ _attr = ElementAttribute.ReadOnly | ElementAttribute.Null } }
+      { typeof(Item), new Item(){ _attr = ElementAttributes.ReadOnly | ElementAttributes.Null } }
     };
 
     public static void AddNullItem<T>(T value) where T : IReadOnlyItem
@@ -51,7 +51,7 @@ namespace Innovator.Client
       return default(T);
     }
 
-    internal Item SetFlag(ElementAttribute attr)
+    internal Item SetFlag(ElementAttributes attr)
     {
       _attr |= attr;
       return this;
@@ -112,23 +112,23 @@ namespace Innovator.Client
 
     public override IEnumerable<IElement> Elements()
     {
-      if ((_attr & ElementAttribute.ItemDefaultAny) != 0)
+      if ((_attr & ElementAttributes.ItemDefaultAny) != 0)
         return GetDefaultProperties().Concat(base.Elements());
       return base.Elements();
     }
     private IEnumerable<IElement> GetDefaultProperties()
     {
-      if ((_attr & ElementAttribute.ItemDefaultGeneration) != 0)
+      if ((_attr & ElementAttributes.ItemDefaultGeneration) != 0)
         yield return Client.Property.DefaultGeneration;
-      if ((_attr & ElementAttribute.ItemDefaultIsCurrent) != 0)
+      if ((_attr & ElementAttributes.ItemDefaultIsCurrent) != 0)
         yield return Client.Property.DefaultIsCurrent;
-      if ((_attr & ElementAttribute.ItemDefaultIsReleased) != 0)
+      if ((_attr & ElementAttributes.ItemDefaultIsReleased) != 0)
         yield return Client.Property.DefaultIsReleased;
-      if ((_attr & ElementAttribute.ItemDefaultMajorRev) != 0)
+      if ((_attr & ElementAttributes.ItemDefaultMajorRev) != 0)
         yield return Client.Property.DefaultMajorRev;
-      if ((_attr & ElementAttribute.ItemDefaultNewVersion) != 0)
+      if ((_attr & ElementAttributes.ItemDefaultNewVersion) != 0)
         yield return Client.Property.DefaultNewVersion;
-      if ((_attr & ElementAttribute.ItemDefaultNotLockable) != 0)
+      if ((_attr & ElementAttributes.ItemDefaultNotLockable) != 0)
         yield return Client.Property.DefaultNotLockable;
     }
 
@@ -157,17 +157,17 @@ namespace Innovator.Client
             return prop;
         }
 
-        if (name == "generation" && (_attr & ElementAttribute.ItemDefaultGeneration) > 0)
+        if (name == "generation" && (_attr & ElementAttributes.ItemDefaultGeneration) > 0)
           return Client.Property.DefaultGeneration;
-        if (name == "is_current" && (_attr & ElementAttribute.ItemDefaultIsCurrent) > 0)
+        if (name == "is_current" && (_attr & ElementAttributes.ItemDefaultIsCurrent) > 0)
           return Client.Property.DefaultIsCurrent;
-        if (name == "is_released" && (_attr & ElementAttribute.ItemDefaultIsReleased) > 0)
+        if (name == "is_released" && (_attr & ElementAttributes.ItemDefaultIsReleased) > 0)
           return Client.Property.DefaultIsReleased;
-        if (name == "major_rev" && (_attr & ElementAttribute.ItemDefaultMajorRev) > 0)
+        if (name == "major_rev" && (_attr & ElementAttributes.ItemDefaultMajorRev) > 0)
           return Client.Property.DefaultMajorRev;
-        if (name == "new_version" && (_attr & ElementAttribute.ItemDefaultNewVersion) > 0)
+        if (name == "new_version" && (_attr & ElementAttributes.ItemDefaultNewVersion) > 0)
           return Client.Property.DefaultNewVersion;
-        if (name == "not_lockable" && (_attr & ElementAttribute.ItemDefaultNotLockable) > 0)
+        if (name == "not_lockable" && (_attr & ElementAttributes.ItemDefaultNotLockable) > 0)
           return Client.Property.DefaultNotLockable;
         return new Property(this, name);
       }

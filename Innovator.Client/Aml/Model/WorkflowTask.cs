@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected WorkflowTask() { }
     public WorkflowTask(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static WorkflowTask() { Innovator.Client.Item.AddNullItem<WorkflowTask>(new WorkflowTask { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static WorkflowTask() { Innovator.Client.Item.AddNullItem<WorkflowTask>(new WorkflowTask { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>assigned_to</c> property of the item</summary>
     public IProperty_Item<Identity> AssignedTo()

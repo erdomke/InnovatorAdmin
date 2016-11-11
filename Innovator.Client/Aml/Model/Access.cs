@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected Access() { }
     public Access(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static Access() { Innovator.Client.Item.AddNullItem<Access>(new Access { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static Access() { Innovator.Client.Item.AddNullItem<Access>(new Access { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

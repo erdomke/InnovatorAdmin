@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected FileExchangeTxnState() { }
     public FileExchangeTxnState(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static FileExchangeTxnState() { Innovator.Client.Item.AddNullItem<FileExchangeTxnState>(new FileExchangeTxnState { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static FileExchangeTxnState() { Innovator.Client.Item.AddNullItem<FileExchangeTxnState>(new FileExchangeTxnState { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

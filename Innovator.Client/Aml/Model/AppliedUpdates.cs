@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected AppliedUpdates() { }
     public AppliedUpdates(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static AppliedUpdates() { Innovator.Client.Item.AddNullItem<AppliedUpdates>(new AppliedUpdates { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static AppliedUpdates() { Innovator.Client.Item.AddNullItem<AppliedUpdates>(new AppliedUpdates { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>date_applied</c> property of the item</summary>
     public IProperty_Date DateApplied()

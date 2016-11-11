@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected tp_Image() { }
     public tp_Image(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static tp_Image() { Innovator.Client.Item.AddNullItem<tp_Image>(new tp_Image { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static tp_Image() { Innovator.Client.Item.AddNullItem<tp_Image>(new tp_Image { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>effective_date</c> property of the item</summary>
     public IProperty_Date EffectiveDate()

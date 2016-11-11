@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected Preference() { }
     public Preference(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static Preference() { Innovator.Client.Item.AddNullItem<Preference>(new Preference { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static Preference() { Innovator.Client.Item.AddNullItem<Preference>(new Preference { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>identity_id</c> property of the item</summary>
     public IProperty_Item<Identity> IdentityId()

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected WorkflowProcess() { }
     public WorkflowProcess(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static WorkflowProcess() { Innovator.Client.Item.AddNullItem<WorkflowProcess>(new WorkflowProcess { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static WorkflowProcess() { Innovator.Client.Item.AddNullItem<WorkflowProcess>(new WorkflowProcess { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>active_date</c> property of the item</summary>
     public IProperty_Date ActiveDate()

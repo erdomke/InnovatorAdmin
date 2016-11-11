@@ -337,7 +337,7 @@ namespace Innovator.Client
             old.Remove();
             peek.Add(old.Attributes());
             if (ReadOnly)
-              ((Item)peek).SetFlag(ElementAttribute.FromDataStore);
+              ((Item)peek).SetFlag(ElementAttributes.FromDataStore);
             PushElement(peek);
           }
         }
@@ -383,42 +383,42 @@ namespace Innovator.Client
               case "generation":
                 if (item != null && value == "1")
                 {
-                  item.SetFlag(ElementAttribute.ItemDefaultGeneration);
+                  item.SetFlag(ElementAttributes.ItemDefaultGeneration);
                   peek.Remove();
                 }
                 break;
               case "is_current":
                 if (item != null && value == "1")
                 {
-                  item.SetFlag(ElementAttribute.ItemDefaultIsCurrent);
+                  item.SetFlag(ElementAttributes.ItemDefaultIsCurrent);
                   peek.Remove();
                 }
                 break;
               case "is_released":
                 if (item != null && value == "0")
                 {
-                  item.SetFlag(ElementAttribute.ItemDefaultIsReleased);
+                  item.SetFlag(ElementAttributes.ItemDefaultIsReleased);
                   peek.Remove();
                 }
                 break;
               case "major_rev":
                 if (item != null && value == "A")
                 {
-                  item.SetFlag(ElementAttribute.ItemDefaultMajorRev);
+                  item.SetFlag(ElementAttributes.ItemDefaultMajorRev);
                   peek.Remove();
                 }
                 break;
               case "new_version":
                 if (item != null && value == "0")
                 {
-                  item.SetFlag(ElementAttribute.ItemDefaultNewVersion);
+                  item.SetFlag(ElementAttributes.ItemDefaultNewVersion);
                   peek.Remove();
                 }
                 break;
               case "not_lockable":
                 if (item != null && value == "0")
                 {
-                  item.SetFlag(ElementAttribute.ItemDefaultNotLockable);
+                  item.SetFlag(ElementAttributes.ItemDefaultNotLockable);
                   peek.Remove();
                 }
                 break;
@@ -448,7 +448,7 @@ namespace Innovator.Client
           case "Item":
             curr = new Item(_factory);
             if (ReadOnly)
-              ((Item)curr).SetFlag(ElementAttribute.FromDataStore);
+              ((Item)curr).SetFlag(ElementAttributes.FromDataStore);
             break;
           case "Relationships":
             curr = new Relationships(_stack.Peek());

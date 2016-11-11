@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ITPresentationConfiguration() { }
     public ITPresentationConfiguration(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ITPresentationConfiguration() { Innovator.Client.Item.AddNullItem<ITPresentationConfiguration>(new ITPresentationConfiguration { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ITPresentationConfiguration() { Innovator.Client.Item.AddNullItem<ITPresentationConfiguration>(new ITPresentationConfiguration { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

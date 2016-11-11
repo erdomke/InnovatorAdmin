@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected cmf_ContentTypeExportSetting() { }
     public cmf_ContentTypeExportSetting(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static cmf_ContentTypeExportSetting() { Innovator.Client.Item.AddNullItem<cmf_ContentTypeExportSetting>(new cmf_ContentTypeExportSetting { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static cmf_ContentTypeExportSetting() { Innovator.Client.Item.AddNullItem<cmf_ContentTypeExportSetting>(new cmf_ContentTypeExportSetting { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
   }
 }

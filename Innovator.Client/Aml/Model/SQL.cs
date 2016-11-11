@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected SQL() { }
     public SQL(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static SQL() { Innovator.Client.Item.AddNullItem<SQL>(new SQL { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static SQL() { Innovator.Client.Item.AddNullItem<SQL>(new SQL { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>execution_count</c> property of the item</summary>
     public IProperty_Number ExecutionCount()

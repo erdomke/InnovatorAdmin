@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected SecureMessageAudio() { }
     public SecureMessageAudio(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static SecureMessageAudio() { Innovator.Client.Item.AddNullItem<SecureMessageAudio>(new SecureMessageAudio { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static SecureMessageAudio() { Innovator.Client.Item.AddNullItem<SecureMessageAudio>(new SecureMessageAudio { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

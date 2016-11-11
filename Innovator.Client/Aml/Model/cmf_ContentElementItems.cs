@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected cmf_ContentElementItems() { }
     public cmf_ContentElementItems(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static cmf_ContentElementItems() { Innovator.Client.Item.AddNullItem<cmf_ContentElementItems>(new cmf_ContentElementItems { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static cmf_ContentElementItems() { Innovator.Client.Item.AddNullItem<cmf_ContentElementItems>(new cmf_ContentElementItems { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
   }
 }

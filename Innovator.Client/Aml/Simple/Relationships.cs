@@ -9,7 +9,7 @@ namespace Innovator.Client
 {
   class Relationships : ILinkedElement, IRelationships
   {
-    private ElementAttribute _attr;
+    private ElementAttributes _attr;
     private List<IReadOnlyItem> _relList;
     private ILinkedElement _next;
     private IElement _parent;
@@ -40,14 +40,14 @@ namespace Innovator.Client
     {
       get
       {
-        return (_attr & ElementAttribute.ReadOnly) > 0;
+        return (_attr & ElementAttributes.ReadOnly) > 0;
       }
       set
       {
         if (value)
-          _attr = _attr | ElementAttribute.ReadOnly;
+          _attr = _attr | ElementAttributes.ReadOnly;
         else
-          _attr = _attr & ~ElementAttribute.ReadOnly;
+          _attr = _attr & ~ElementAttributes.ReadOnly;
       }
     }
     public string Value { get { return null; } }

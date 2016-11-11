@@ -43,7 +43,7 @@ namespace Innovator.Client
     {
       DynamicDateTimeRange result;
       if (!TryDeserialize(value, out result))
-        throw new ArgumentException();
+        throw new ArgumentException("value");
       return result;
     }
 

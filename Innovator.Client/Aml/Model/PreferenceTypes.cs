@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected PreferenceTypes() { }
     public PreferenceTypes(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static PreferenceTypes() { Innovator.Client.Item.AddNullItem<PreferenceTypes>(new PreferenceTypes { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static PreferenceTypes() { Innovator.Client.Item.AddNullItem<PreferenceTypes>(new PreferenceTypes { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
   }
 }

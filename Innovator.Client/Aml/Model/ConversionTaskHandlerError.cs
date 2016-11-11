@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ConversionTaskHandlerError() { }
     public ConversionTaskHandlerError(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ConversionTaskHandlerError() { Innovator.Client.Item.AddNullItem<ConversionTaskHandlerError>(new ConversionTaskHandlerError { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ConversionTaskHandlerError() { Innovator.Client.Item.AddNullItem<ConversionTaskHandlerError>(new ConversionTaskHandlerError { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>attempt_number</c> property of the item</summary>
     public IProperty_Number AttemptNumber()

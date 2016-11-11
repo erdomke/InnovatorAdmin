@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ForumMessageGroup() { }
     public ForumMessageGroup(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ForumMessageGroup() { Innovator.Client.Item.AddNullItem<ForumMessageGroup>(new ForumMessageGroup { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ForumMessageGroup() { Innovator.Client.Item.AddNullItem<ForumMessageGroup>(new ForumMessageGroup { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>aml</c> property of the item</summary>
     public IProperty_Text Aml()

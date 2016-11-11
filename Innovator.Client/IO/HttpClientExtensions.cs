@@ -53,7 +53,7 @@ namespace Innovator.Client
       return result;
     }
 
-    private class TimeoutSource
+    private class TimeoutSource : IDisposable
     {
       private CancellationTokenSource _source = new CancellationTokenSource();
       private Timer _timer;
@@ -90,6 +90,15 @@ namespace Innovator.Client
           source._source.Cancel();
         }
         catch (ObjectDisposedException) { }
+      }
+
+      public void Dispose()
+      {
+        if (_source != null)
+        {
+          _source.Dispose();
+          _source = null;
+        }
       }
     }
   }

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected Variable() { }
     public Variable(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static Variable() { Innovator.Client.Item.AddNullItem<Variable>(new Variable { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static Variable() { Innovator.Client.Item.AddNullItem<Variable>(new Variable { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>default_value</c> property of the item</summary>
     public IProperty_Text DefaultValue()

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected WSTypeAction() { }
     public WSTypeAction(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static WSTypeAction() { Innovator.Client.Item.AddNullItem<WSTypeAction>(new WSTypeAction { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static WSTypeAction() { Innovator.Client.Item.AddNullItem<WSTypeAction>(new WSTypeAction { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

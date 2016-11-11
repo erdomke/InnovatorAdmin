@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected CommandBarSeparator() { }
     public CommandBarSeparator(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static CommandBarSeparator() { Innovator.Client.Item.AddNullItem<CommandBarSeparator>(new CommandBarSeparator { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static CommandBarSeparator() { Innovator.Client.Item.AddNullItem<CommandBarSeparator>(new CommandBarSeparator { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>additional_data</c> property of the item</summary>
     public IProperty_Text AdditionalData()

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected PackageGroup() { }
     public PackageGroup(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static PackageGroup() { Innovator.Client.Item.AddNullItem<PackageGroup>(new PackageGroup { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static PackageGroup() { Innovator.Client.Item.AddNullItem<PackageGroup>(new PackageGroup { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

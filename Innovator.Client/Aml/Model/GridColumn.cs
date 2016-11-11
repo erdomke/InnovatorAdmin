@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected GridColumn() { }
     public GridColumn(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static GridColumn() { Innovator.Client.Item.AddNullItem<GridColumn>(new GridColumn { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static GridColumn() { Innovator.Client.Item.AddNullItem<GridColumn>(new GridColumn { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>align</c> property of the item</summary>
     public IProperty_Text Align()

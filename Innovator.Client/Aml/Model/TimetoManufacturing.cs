@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected TimetoManufacturing() { }
     public TimetoManufacturing(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static TimetoManufacturing() { Innovator.Client.Item.AddNullItem<TimetoManufacturing>(new TimetoManufacturing { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static TimetoManufacturing() { Innovator.Client.Item.AddNullItem<TimetoManufacturing>(new TimetoManufacturing { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
   }
 }

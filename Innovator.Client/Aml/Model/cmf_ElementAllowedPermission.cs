@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected cmf_ElementAllowedPermission() { }
     public cmf_ElementAllowedPermission(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static cmf_ElementAllowedPermission() { Innovator.Client.Item.AddNullItem<cmf_ElementAllowedPermission>(new cmf_ElementAllowedPermission { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static cmf_ElementAllowedPermission() { Innovator.Client.Item.AddNullItem<cmf_ElementAllowedPermission>(new cmf_ElementAllowedPermission { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

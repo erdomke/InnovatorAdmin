@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected EMailMessage() { }
     public EMailMessage(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static EMailMessage() { Innovator.Client.Item.AddNullItem<EMailMessage>(new EMailMessage { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static EMailMessage() { Innovator.Client.Item.AddNullItem<EMailMessage>(new EMailMessage { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>body_html</c> property of the item</summary>
     public IProperty_Text BodyHtml()

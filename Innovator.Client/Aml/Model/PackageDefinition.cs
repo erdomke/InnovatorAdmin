@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected PackageDefinition() { }
     public PackageDefinition(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static PackageDefinition() { Innovator.Client.Item.AddNullItem<PackageDefinition>(new PackageDefinition { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static PackageDefinition() { Innovator.Client.Item.AddNullItem<PackageDefinition>(new PackageDefinition { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>name</c> property of the item</summary>
     public IProperty_Text NameProp()

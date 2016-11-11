@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected cmf_DocumentLifeCycleState() { }
     public cmf_DocumentLifeCycleState(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static cmf_DocumentLifeCycleState() { Innovator.Client.Item.AddNullItem<cmf_DocumentLifeCycleState>(new cmf_DocumentLifeCycleState { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static cmf_DocumentLifeCycleState() { Innovator.Client.Item.AddNullItem<cmf_DocumentLifeCycleState>(new cmf_DocumentLifeCycleState { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

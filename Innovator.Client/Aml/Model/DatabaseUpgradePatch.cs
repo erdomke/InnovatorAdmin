@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected DatabaseUpgradePatch() { }
     public DatabaseUpgradePatch(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static DatabaseUpgradePatch() { Innovator.Client.Item.AddNullItem<DatabaseUpgradePatch>(new DatabaseUpgradePatch { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static DatabaseUpgradePatch() { Innovator.Client.Item.AddNullItem<DatabaseUpgradePatch>(new DatabaseUpgradePatch { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

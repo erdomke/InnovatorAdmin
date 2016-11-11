@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected HelpSeeAlso() { }
     public HelpSeeAlso(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static HelpSeeAlso() { Innovator.Client.Item.AddNullItem<HelpSeeAlso>(new HelpSeeAlso { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static HelpSeeAlso() { Innovator.Client.Item.AddNullItem<HelpSeeAlso>(new HelpSeeAlso { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

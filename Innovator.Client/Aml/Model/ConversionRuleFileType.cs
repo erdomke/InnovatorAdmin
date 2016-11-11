@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ConversionRuleFileType() { }
     public ConversionRuleFileType(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ConversionRuleFileType() { Innovator.Client.Item.AddNullItem<ConversionRuleFileType>(new ConversionRuleFileType { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ConversionRuleFileType() { Innovator.Client.Item.AddNullItem<ConversionRuleFileType>(new ConversionRuleFileType { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

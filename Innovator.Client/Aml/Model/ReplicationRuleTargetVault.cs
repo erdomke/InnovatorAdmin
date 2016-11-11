@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ReplicationRuleTargetVault() { }
     public ReplicationRuleTargetVault(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ReplicationRuleTargetVault() { Innovator.Client.Item.AddNullItem<ReplicationRuleTargetVault>(new ReplicationRuleTargetVault { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ReplicationRuleTargetVault() { Innovator.Client.Item.AddNullItem<ReplicationRuleTargetVault>(new ReplicationRuleTargetVault { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

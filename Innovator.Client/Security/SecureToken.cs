@@ -15,7 +15,7 @@ namespace Innovator.Client
   /// <summary>
   /// http://web.archive.org/web/20090928112609/http://dotnet.org.za/markn/archive/2008/10/04/handling-passwords.aspx
   /// </summary>
-  public sealed class SecureToken
+  public sealed class SecureToken : IDisposable
   {
     private SecureString _encrypted;
 
@@ -269,6 +269,11 @@ namespace Innovator.Client
     public override string ToString()
     {
       return new string('*', _encrypted.Length);
+    }
+
+    public void Dispose()
+    {
+      _encrypted.Dispose();
     }
 
     public static implicit operator SecureString(SecureToken val)

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected Help() { }
     public Help(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static Help() { Innovator.Client.Item.AddNullItem<Help>(new Help { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static Help() { Innovator.Client.Item.AddNullItem<Help>(new Help { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>content</c> property of the item</summary>
     public IProperty_Text Content()

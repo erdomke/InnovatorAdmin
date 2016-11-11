@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected File() { }
     public File(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static File() { Innovator.Client.Item.AddNullItem<File>(new File { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static File() { Innovator.Client.Item.AddNullItem<File>(new File { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>checkedout_path</c> property of the item</summary>
     public IProperty_Text CheckedoutPath()

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected cmf_ContentTypeGridLayout() { }
     public cmf_ContentTypeGridLayout(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static cmf_ContentTypeGridLayout() { Innovator.Client.Item.AddNullItem<cmf_ContentTypeGridLayout>(new cmf_ContentTypeGridLayout { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static cmf_ContentTypeGridLayout() { Innovator.Client.Item.AddNullItem<cmf_ContentTypeGridLayout>(new cmf_ContentTypeGridLayout { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

@@ -54,7 +54,7 @@ namespace Innovator.Client.Connection
         {
           // Get the correct vault for the file
           var vault = GetReadVaultForFile(o.Result1, o.Result2);
-          if (vault == null) throw new ApplicationException("Vault location of the file is unknown");
+          if (vault == null) throw new InvalidOperationException("Vault location of the file is unknown");
 
           // Download the file
           return DownloadFileFromVault(o.Result1, vault, async, request);

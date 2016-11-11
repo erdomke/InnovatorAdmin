@@ -94,7 +94,7 @@ namespace Innovator.Client
       }
       if (!sql.Aml.TrimStart().StartsWith("<"))
       {
-        sql.Aml = "<sql>" + sql.Aml + "</sql>";
+        sql.Aml = "<sql>" + ServerContext.XmlEscape(sql.Aml) + "</sql>";
       }
       return conn.Apply(sql.WithAction(CommandAction.ApplySQL));
     }
@@ -109,7 +109,7 @@ namespace Innovator.Client
     {
       if (!sql.Aml.TrimStart().StartsWith("<"))
       {
-        sql.Aml = "<sql>" + sql.Aml + "</sql>";
+        sql.Aml = "<sql>" + ServerContext.XmlEscape(sql.Aml) + "</sql>";
       }
       return conn.ApplyAsync(sql.WithAction(CommandAction.ApplySQL), async, true);
     }
@@ -268,7 +268,7 @@ namespace Innovator.Client
     }
     public static IReadOnlyResult Promote(this IConnection conn, string itemTypeName, string id, string newState, string comments = null)
     {
-      if (newState.IsNullOrWhiteSpace()) throw new ArgumentException("State must be a non-empty string to run a promotion.", "state");
+      if (newState.IsNullOrWhiteSpace()) throw new ArgumentException("State must be a non-empty string to run a promotion.", "newState");
       var aml = conn.AmlContext;
       var promoteItem = aml.Item(aml.Action("promoteItem"),
         aml.Type(itemTypeName),

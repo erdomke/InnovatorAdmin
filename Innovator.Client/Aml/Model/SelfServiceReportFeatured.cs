@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected SelfServiceReportFeatured() { }
     public SelfServiceReportFeatured(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static SelfServiceReportFeatured() { Innovator.Client.Item.AddNullItem<SelfServiceReportFeatured>(new SelfServiceReportFeatured { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static SelfServiceReportFeatured() { Innovator.Client.Item.AddNullItem<SelfServiceReportFeatured>(new SelfServiceReportFeatured { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>allow_excluded_properties</c> property of the item</summary>
     public IProperty_Boolean AllowExcludedProperties()

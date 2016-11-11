@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected FileContainerLocator() { }
     public FileContainerLocator(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static FileContainerLocator() { Innovator.Client.Item.AddNullItem<FileContainerLocator>(new FileContainerLocator { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static FileContainerLocator() { Innovator.Client.Item.AddNullItem<FileContainerLocator>(new FileContainerLocator { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>container_id</c> property of the item</summary>
     public IProperty_Item<FileContainerItems> ContainerId()

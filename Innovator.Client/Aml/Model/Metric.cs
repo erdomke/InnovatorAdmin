@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected Metric() { }
     public Metric(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static Metric() { Innovator.Client.Item.AddNullItem<Metric>(new Metric { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static Metric() { Innovator.Client.Item.AddNullItem<Metric>(new Metric { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>color</c> property of the item</summary>
     public IProperty_Text Color()

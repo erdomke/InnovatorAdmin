@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected InBasketTask() { }
     public InBasketTask(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static InBasketTask() { Innovator.Client.Item.AddNullItem<InBasketTask>(new InBasketTask { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static InBasketTask() { Innovator.Client.Item.AddNullItem<InBasketTask>(new InBasketTask { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>assigned_to</c> property of the item</summary>
     public IProperty_Item<Identity> AssignedTo()

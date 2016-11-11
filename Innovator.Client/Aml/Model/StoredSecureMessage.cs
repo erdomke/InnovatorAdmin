@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected StoredSecureMessage() { }
     public StoredSecureMessage(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static StoredSecureMessage() { Innovator.Client.Item.AddNullItem<StoredSecureMessage>(new StoredSecureMessage { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static StoredSecureMessage() { Innovator.Client.Item.AddNullItem<StoredSecureMessage>(new StoredSecureMessage { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

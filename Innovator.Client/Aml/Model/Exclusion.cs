@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected Exclusion() { }
     public Exclusion(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static Exclusion() { Innovator.Client.Item.AddNullItem<Exclusion>(new Exclusion { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static Exclusion() { Innovator.Client.Item.AddNullItem<Exclusion>(new Exclusion { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected SecureMessageVideo() { }
     public SecureMessageVideo(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static SecureMessageVideo() { Innovator.Client.Item.AddNullItem<SecureMessageVideo>(new SecureMessageVideo { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static SecureMessageVideo() { Innovator.Client.Item.AddNullItem<SecureMessageVideo>(new SecureMessageVideo { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

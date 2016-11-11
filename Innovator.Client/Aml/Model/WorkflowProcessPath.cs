@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected WorkflowProcessPath() { }
     public WorkflowProcessPath(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static WorkflowProcessPath() { Innovator.Client.Item.AddNullItem<WorkflowProcessPath>(new WorkflowProcessPath { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static WorkflowProcessPath() { Innovator.Client.Item.AddNullItem<WorkflowProcessPath>(new WorkflowProcessPath { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>authentication</c> property of the item</summary>
     public IProperty_Text Authentication()

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected Activity() { }
     public Activity(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static Activity() { Innovator.Client.Item.AddNullItem<Activity>(new Activity { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static Activity() { Innovator.Client.Item.AddNullItem<Activity>(new Activity { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>active_date</c> property of the item</summary>
     public IProperty_Date ActiveDate()

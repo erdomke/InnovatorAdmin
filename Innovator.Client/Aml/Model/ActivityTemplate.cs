@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ActivityTemplate() { }
     public ActivityTemplate(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ActivityTemplate() { Innovator.Client.Item.AddNullItem<ActivityTemplate>(new ActivityTemplate { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ActivityTemplate() { Innovator.Client.Item.AddNullItem<ActivityTemplate>(new ActivityTemplate { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>can_delegate</c> property of the item</summary>
     public IProperty_Boolean CanDelegate()

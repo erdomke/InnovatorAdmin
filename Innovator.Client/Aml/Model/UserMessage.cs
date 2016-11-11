@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected UserMessage() { }
     public UserMessage(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static UserMessage() { Innovator.Client.Item.AddNullItem<UserMessage>(new UserMessage { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static UserMessage() { Innovator.Client.Item.AddNullItem<UserMessage>(new UserMessage { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>custom</c> property of the item</summary>
     public IProperty_Boolean Custom()

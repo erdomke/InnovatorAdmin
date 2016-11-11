@@ -9,7 +9,7 @@ namespace Innovator.Client
 {
   public abstract class Element : IElement, ILinkedElement
   {
-    protected ElementAttribute _attr;
+    protected ElementAttributes _attr;
     protected object _content;
     private ILinkedAnnotation _lastAttr;
 
@@ -47,24 +47,24 @@ namespace Innovator.Client
     public bool ReadOnly
     {
       get { return string.IsNullOrEmpty(Name)
-          || (_attr & ElementAttribute.ReadOnly) > 0; }
+          || (_attr & ElementAttributes.ReadOnly) > 0; }
       set
       {
         if (value)
-          _attr = _attr | ElementAttribute.ReadOnly;
+          _attr = _attr | ElementAttributes.ReadOnly;
         else
-          _attr = _attr & ~ElementAttribute.ReadOnly;
+          _attr = _attr & ~ElementAttributes.ReadOnly;
       }
     }
     protected bool FromDataStore
     {
-      get { return (_attr & ElementAttribute.FromDataStore) > 0; }
+      get { return (_attr & ElementAttributes.FromDataStore) > 0; }
       set
       {
         if (value)
-          _attr = _attr | ElementAttribute.FromDataStore;
+          _attr = _attr | ElementAttributes.FromDataStore;
         else
-          _attr = _attr & ~ElementAttribute.FromDataStore;
+          _attr = _attr & ~ElementAttributes.FromDataStore;
       }
     }
 

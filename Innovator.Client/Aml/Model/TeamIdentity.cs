@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected TeamIdentity() { }
     public TeamIdentity(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static TeamIdentity() { Innovator.Client.Item.AddNullItem<TeamIdentity>(new TeamIdentity { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static TeamIdentity() { Innovator.Client.Item.AddNullItem<TeamIdentity>(new TeamIdentity { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

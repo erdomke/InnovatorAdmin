@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ForumMustViewBy() { }
     public ForumMustViewBy(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ForumMustViewBy() { Innovator.Client.Item.AddNullItem<ForumMustViewBy>(new ForumMustViewBy { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ForumMustViewBy() { Innovator.Client.Item.AddNullItem<ForumMustViewBy>(new ForumMustViewBy { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected Alias() { }
     public Alias(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static Alias() { Innovator.Client.Item.AddNullItem<Alias>(new Alias { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static Alias() { Innovator.Client.Item.AddNullItem<Alias>(new Alias { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

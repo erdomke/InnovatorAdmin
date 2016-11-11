@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected DiscussionTemplateView() { }
     public DiscussionTemplateView(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static DiscussionTemplateView() { Innovator.Client.Item.AddNullItem<DiscussionTemplateView>(new DiscussionTemplateView { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static DiscussionTemplateView() { Innovator.Client.Item.AddNullItem<DiscussionTemplateView>(new DiscussionTemplateView { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

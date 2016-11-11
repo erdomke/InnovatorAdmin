@@ -9,7 +9,7 @@ namespace Innovator.Client
   /// Attributes stored in AML elements for compact memory usage
   /// </summary>
   [Flags]
-  public enum ElementAttribute
+  public enum ElementAttributes
   {
     /// <summary>
     /// Indicates that the element represents a null element

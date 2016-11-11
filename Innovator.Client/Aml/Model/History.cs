@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected History() { }
     public History(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static History() { Innovator.Client.Item.AddNullItem<History>(new History { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static History() { Innovator.Client.Item.AddNullItem<History>(new History { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>action</c> property of the item</summary>
     public IProperty_Text Action()

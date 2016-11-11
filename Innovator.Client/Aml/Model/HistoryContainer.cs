@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected HistoryContainer() { }
     public HistoryContainer(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static HistoryContainer() { Innovator.Client.Item.AddNullItem<HistoryContainer>(new HistoryContainer { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static HistoryContainer() { Innovator.Client.Item.AddNullItem<HistoryContainer>(new HistoryContainer { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>item_config_id</c> property of the item</summary>
     public IProperty_Text ItemConfigId()

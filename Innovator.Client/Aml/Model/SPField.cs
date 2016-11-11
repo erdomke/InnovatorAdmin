@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected SPField() { }
     public SPField(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static SPField() { Innovator.Client.Item.AddNullItem<SPField>(new SPField { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static SPField() { Innovator.Client.Item.AddNullItem<SPField>(new SPField { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

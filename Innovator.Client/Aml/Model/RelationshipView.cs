@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected RelationshipView() { }
     public RelationshipView(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static RelationshipView() { Innovator.Client.Item.AddNullItem<RelationshipView>(new RelationshipView { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static RelationshipView() { Innovator.Client.Item.AddNullItem<RelationshipView>(new RelationshipView { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

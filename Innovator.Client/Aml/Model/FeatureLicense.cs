@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected FeatureLicense() { }
     public FeatureLicense(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static FeatureLicense() { Innovator.Client.Item.AddNullItem<FeatureLicense>(new FeatureLicense { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static FeatureLicense() { Innovator.Client.Item.AddNullItem<FeatureLicense>(new FeatureLicense { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>activation_key</c> property of the item</summary>
     public IProperty_Text ActivationKey()

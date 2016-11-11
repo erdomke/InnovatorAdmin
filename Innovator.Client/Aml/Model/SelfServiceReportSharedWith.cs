@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected SelfServiceReportSharedWith() { }
     public SelfServiceReportSharedWith(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static SelfServiceReportSharedWith() { Innovator.Client.Item.AddNullItem<SelfServiceReportSharedWith>(new SelfServiceReportSharedWith { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static SelfServiceReportSharedWith() { Innovator.Client.Item.AddNullItem<SelfServiceReportSharedWith>(new SelfServiceReportSharedWith { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>access_rights</c> property of the item</summary>
     public IProperty_Text AccessRights()

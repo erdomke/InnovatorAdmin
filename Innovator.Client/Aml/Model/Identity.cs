@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected Identity() { }
     public Identity(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static Identity() { Innovator.Client.Item.AddNullItem<Identity>(new Identity { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static Identity() { Innovator.Client.Item.AddNullItem<Identity>(new Identity { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>description</c> property of the item</summary>
     public IProperty_Text Description()

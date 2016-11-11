@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ActivityTemplateTransition() { }
     public ActivityTemplateTransition(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ActivityTemplateTransition() { Innovator.Client.Item.AddNullItem<ActivityTemplateTransition>(new ActivityTemplateTransition { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ActivityTemplateTransition() { Innovator.Client.Item.AddNullItem<ActivityTemplateTransition>(new ActivityTemplateTransition { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

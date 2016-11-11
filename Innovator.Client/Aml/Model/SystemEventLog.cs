@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected SystemEventLog() { }
     public SystemEventLog(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static SystemEventLog() { Innovator.Client.Item.AddNullItem<SystemEventLog>(new SystemEventLog { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static SystemEventLog() { Innovator.Client.Item.AddNullItem<SystemEventLog>(new SystemEventLog { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>comment_text</c> property of the item</summary>
     public IProperty_Text CommentText()

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected RunReportByUser() { }
     public RunReportByUser(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static RunReportByUser() { Innovator.Client.Item.AddNullItem<RunReportByUser>(new RunReportByUser { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static RunReportByUser() { Innovator.Client.Item.AddNullItem<RunReportByUser>(new RunReportByUser { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

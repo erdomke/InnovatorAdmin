@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ForumSharedWith() { }
     public ForumSharedWith(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ForumSharedWith() { Innovator.Client.Item.AddNullItem<ForumSharedWith>(new ForumSharedWith { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ForumSharedWith() { Innovator.Client.Item.AddNullItem<ForumSharedWith>(new ForumSharedWith { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

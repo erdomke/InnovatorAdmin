@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected tp_ImageReference() { }
     public tp_ImageReference(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static tp_ImageReference() { Innovator.Client.Item.AddNullItem<tp_ImageReference>(new tp_ImageReference { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static tp_ImageReference() { Innovator.Client.Item.AddNullItem<tp_ImageReference>(new tp_ImageReference { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

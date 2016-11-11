@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected Morphae() { }
     public Morphae(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static Morphae() { Innovator.Client.Item.AddNullItem<Morphae>(new Morphae { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static Morphae() { Innovator.Client.Item.AddNullItem<Morphae>(new Morphae { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

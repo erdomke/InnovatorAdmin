@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected HistoryTemplateWhereUsed() { }
     public HistoryTemplateWhereUsed(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static HistoryTemplateWhereUsed() { Innovator.Client.Item.AddNullItem<HistoryTemplateWhereUsed>(new HistoryTemplateWhereUsed { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static HistoryTemplateWhereUsed() { Innovator.Client.Item.AddNullItem<HistoryTemplateWhereUsed>(new HistoryTemplateWhereUsed { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

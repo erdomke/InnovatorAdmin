@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected FilterValue() { }
     public FilterValue(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static FilterValue() { Innovator.Client.Item.AddNullItem<FilterValue>(new FilterValue { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static FilterValue() { Innovator.Client.Item.AddNullItem<FilterValue>(new FilterValue { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected StateNotification() { }
     public StateNotification(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static StateNotification() { Innovator.Client.Item.AddNullItem<StateNotification>(new StateNotification { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static StateNotification() { Innovator.Client.Item.AddNullItem<StateNotification>(new StateNotification { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()

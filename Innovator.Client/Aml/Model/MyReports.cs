@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected MyReports() { }
     public MyReports(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static MyReports() { Innovator.Client.Item.AddNullItem<MyReports>(new MyReports { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static MyReports() { Innovator.Client.Item.AddNullItem<MyReports>(new MyReports { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
   }
 }

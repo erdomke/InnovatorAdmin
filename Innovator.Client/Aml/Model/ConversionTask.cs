@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ConversionTask() { }
     public ConversionTask(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ConversionTask() { Innovator.Client.Item.AddNullItem<ConversionTask>(new ConversionTask { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ConversionTask() { Innovator.Client.Item.AddNullItem<ConversionTask>(new ConversionTask { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>error</c> property of the item</summary>
     public IProperty_Text Error()

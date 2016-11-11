@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected tp_Block() { }
     public tp_Block(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static tp_Block() { Innovator.Client.Item.AddNullItem<tp_Block>(new tp_Block { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static tp_Block() { Innovator.Client.Item.AddNullItem<tp_Block>(new tp_Block { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>condition</c> property of the item</summary>
     public IProperty_Text Condition()

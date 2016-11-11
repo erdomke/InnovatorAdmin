@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected CommandBarMenu() { }
     public CommandBarMenu(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static CommandBarMenu() { Innovator.Client.Item.AddNullItem<CommandBarMenu>(new CommandBarMenu { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static CommandBarMenu() { Innovator.Client.Item.AddNullItem<CommandBarMenu>(new CommandBarMenu { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>additional_data</c> property of the item</summary>
     public IProperty_Text AdditionalData()

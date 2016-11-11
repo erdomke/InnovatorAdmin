@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected ConversionRuleEventHandler() { }
     public ConversionRuleEventHandler(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static ConversionRuleEventHandler() { Innovator.Client.Item.AddNullItem<ConversionRuleEventHandler>(new ConversionRuleEventHandler { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static ConversionRuleEventHandler() { Innovator.Client.Item.AddNullItem<ConversionRuleEventHandler>(new ConversionRuleEventHandler { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
     /// <summary>Retrieve the <c>behavior</c> property of the item</summary>
     public IProperty_Text Behavior()
