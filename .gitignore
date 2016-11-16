@@ -30,6 +30,7 @@ bld/
 #NUNIT
 *.VisualState.xml
 TestResult.xml
+$RANDOM_SEED$
 
 # Build Results of an ATL Project
 [Dd]ebugPS/

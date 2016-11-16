@@ -14,6 +14,12 @@ namespace Innovator.Client
     Sql
   }
 
+  public enum ParameterStyle
+  {
+    Sql,
+    CSharp
+  }
+
   /// <summary>
   /// Class for substituting @-prefixed parameters with their values
   /// </summary>
@@ -30,9 +36,11 @@ namespace Innovator.Client
     public ParameterSubstitutionMode Mode { get; set; }
     public int ParamCount { get { return _parameters.Count; } }
     public Action<string> ParameterAccessListener { get; set; }
+    public ParameterStyle Style { get; set; }
 
     public ParameterSubstitution()
     {
+      this.Style = ParameterStyle.Sql;
       this.Mode = ParameterSubstitutionMode.Aml;
     }
 
@@ -299,20 +307,37 @@ namespace Innovator.Client
     private bool TryFillParameter(string value, Parameter param)
     {
       if (value == null || value.Length < 2) return false;
-      if (value[0] != '@') return false;
+      if (this.Style == ParameterStyle.Sql)
+      {
+        if (value[0] != '@') return false;
 
-      var end = value.Length;
-      if (value[value.Length - 1] == '!')
-      {
-        param.IsRaw = true;
-        end--;
+        var end = value.Length;
+        if (value[value.Length - 1] == '!')
+        {
+          param.IsRaw = true;
+          end--;
+        }
+        for (var i = 1; i < end; i++)
+        {
+          if (!char.IsLetterOrDigit(value[i]) && value[i] != '_') return false;
+        }
+        param.Name = value.Substring(1, end - 1);
+        return true;
       }
-      for (var i = 1; i < end; i++)
+      else
       {
-        if (!char.IsLetterOrDigit(value[i]) && value[i] != '_') return false;
+        if (value[0] != '{' || value[value.Length - 1] != '}') return false;
+        var end = value.Length - 1;
+        var i = value.IndexOf(':');
+        if (i > 0)
+          end = i;
+        int index;
+        if (!int.TryParse(value.Substring(1, end - 1), out index))
+          return false;
+
+        param.Name = index.ToString();
+        return true;
       }
-      param.Name = value.Substring(1, end - 1);
-      return true;
     }
 
     private string RenderSqlEnum(object value, bool quoteStrings, Func<object, string> format)

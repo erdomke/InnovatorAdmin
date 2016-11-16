@@ -8,7 +8,7 @@ namespace Innovator.Client.Model
   {
     protected SSVCItems() { }
     public SSVCItems(ElementFactory amlContext, params object[] content) : base(amlContext, content) { }
-    static SSVCItems() { Innovator.Client.Item.AddNullItem<SSVCItems>(new SSVCItems { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+    static SSVCItems() { Innovator.Client.Item.AddNullItem<SSVCItems>(new SSVCItems { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
   }
 }

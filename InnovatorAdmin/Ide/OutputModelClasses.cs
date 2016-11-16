@@ -134,7 +134,7 @@ namespace Innovator.Client.Model
           await writer.WriteAsync(itemTypeLabel);
           await writer.WriteAsync(">(new ");
           await writer.WriteAsync(itemTypeLabel);
-          await writer.WriteAsync(@" { _attr = ElementAttribute.ReadOnly | ElementAttribute.Null }); }
+          await writer.WriteAsync(@" { _attr = ElementAttributes.ReadOnly | ElementAttributes.Null }); }
 
 ");
 

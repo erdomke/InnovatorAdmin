@@ -18,9 +18,11 @@
     <OutDir35>..\publish\$(ProjectName)\lib\net35</OutDir35>
     <OutDir40>..\publish\$(ProjectName)\lib\net40</OutDir40>
     <OutDir45>..\publish\$(ProjectName)\lib\net45</OutDir45>
+    <OutDir46>..\publish\$(ProjectName)\lib\net46</OutDir46>
     <ObjDir35>obj\net35</ObjDir35>
     <ObjDir40>obj\net40</ObjDir40>
     <ObjDir45>obj\net45</ObjDir45>
+    <ObjDir46>obj\net46</ObjDir46>
     <AssemInfo><![CDATA[using System.Reflection%3B
 
 [assembly: AssemblyVersion("$(BuildVersion)")]
@@ -51,10 +53,15 @@
         <Properties>OutputPath=$(OutDir45);IntermediateOutputPath=$(ObjDir45)\;TargetFrameworkVersion=v4.5;Configuration=NET45</Properties>
         <SGenToolPath>C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\sgen.exe</SGenToolPath>
       </ProjectToBuild45>
+      <ProjectToBuild46 Include="Innovator.Client.csproj">
+        <Properties>OutputPath=$(OutDir46);IntermediateOutputPath=$(ObjDir46)\;TargetFrameworkVersion=v4.6;Configuration=NET46</Properties>
+        <SGenToolPath>C:\Program Files (x86)\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\sgen.exe</SGenToolPath>
+      </ProjectToBuild46>
     </ItemGroup>
     <MSBuild Projects="@(ProjectToBuild3)" />
     <MSBuild Projects="@(ProjectToBuild4)" />
     <MSBuild Projects="@(ProjectToBuild45)" />
+    <MSBuild Projects="@(ProjectToBuild46)" />
   </Target>
   <Target Name="PackNuget">
     <Exec Command="..\.nuget\NuGet.exe Update -self" />

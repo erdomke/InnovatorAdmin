@@ -122,6 +122,7 @@ namespace Innovator.Client
       this.Aml = "<AML>" + aml.GroupConcat("", i => i.ToAml()) + "</AML>";
       this.Action = CommandAction.ApplyAML;
     }
+
     /// <summary>
     /// Specify the SOAP action to use with the AML
     /// </summary>
@@ -211,6 +212,29 @@ namespace Innovator.Client
     {
       return new Command() { Aml = aml.OuterXml };
     }
+
+
+#if NET46
+    /// <summary>
+    /// Create a command from an interpolated string
+    /// </summary>
+    /// <param name="formatted">Interpolated string to convert to a command</param>
+    public Command(FormattableString formatted)
+    {
+      this.WithAml(formatted.Format, formatted.GetArguments());
+      _sub.Style = ParameterStyle.CSharp;
+    }
+
+    /// <summary>
+    /// Create a command from an interpolated string
+    /// </summary>
+    /// <param name="formatted">Interpolated string to convert to a command</param>
+    public static implicit operator Command(FormattableString formatted)
+    {
+      return new Command(formatted);
+    }
+#endif
+
 
     /// <summary>
     /// Perform parameter substitutions and return the resulting AML

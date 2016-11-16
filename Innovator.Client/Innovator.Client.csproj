@@ -60,11 +60,22 @@
     <Prefer32Bit>false</Prefer32Bit>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'NET46|AnyCPU'">
+    <OutputPath>bin\NET46\</OutputPath>
+    <DefineConstants>TRACE;NET4;NET45;NET46</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" Condition="$(Configuration) == 'NET45' Or $(Configuration) == 'NET40' Or $(Configuration) == 'Debug'" />
+    <Reference Include="Microsoft.CSharp" Condition="$(Configuration) == 'NET46' Or $(Configuration) == 'NET45' Or $(Configuration) == 'NET40' Or $(Configuration) == 'Debug'" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Net.Http" Condition="$(Configuration) == 'NET45' Or $(Configuration) == 'Debug'" />
+    <Reference Include="System.Net.Http" Condition="$(Configuration) == 'NET46' Or $(Configuration) == 'NET45' Or $(Configuration) == 'Debug'" />
     <Reference Include="System.Threading, Version=1.0.2856.102, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" Condition="$(Configuration) == 'NET35'">
       <HintPath>..\packages\TaskParallelLibrary.1.0.2856.0\lib\Net35\System.Threading.dll</HintPath>
       <Private>True</Private>
@@ -322,6 +333,7 @@
     <Compile Include="Aml\Model\SPField.cs" />
     <Compile Include="Aml\Model\SQL.cs" />
     <Compile Include="Aml\Model\SQLDependencies.cs" />
+    <Compile Include="Aml\Model\SSVCItems.cs" />
     <Compile Include="Aml\Model\SSVCPresentationConfiguration.cs" />
     <Compile Include="Aml\Model\SSVC_Preferences.cs" />
     <Compile Include="Aml\Model\StateDistribution.cs" />
