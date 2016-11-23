@@ -28,6 +28,7 @@ namespace Innovator.Client
       if (task.IsCanceled)
       {
         factory.SetCanceled();
+        //factory.SetException(new HttpTimeoutException());
       }
       else if (task.IsFaulted)
       {

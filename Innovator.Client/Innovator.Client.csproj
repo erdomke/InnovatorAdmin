@@ -439,6 +439,7 @@
     <Compile Include="IO\FormContent.cs" />
     <Compile Include="IO\HttpRequest.cs" />
     <Compile Include="IO\HttpResponse.cs" />
+    <Compile Include="IO\HttpTimeoutException.cs" />
     <Compile Include="IO\SimpleContent.cs" />
     <Compile Include="MemoryCache.cs" />
     <Compile Include="Connection\QueryString.cs" />

@@ -10,6 +10,32 @@ namespace Innovator.Client
 {
   internal static class HttpClientExtensions
   {
+    private static IPromise<T> ToHttpPromise<T>(this Task<T> task, TimeoutSource timeout)
+    {
+      var result = new Promise<T>();
+      result.CancelTarget(timeout);
+      task
+        .ContinueWith(t =>
+        {
+          if (t.IsFaulted)
+          {
+            Exception ex = t.Exception;
+            if (ex != null && ex.InnerException != null)
+              ex = ex.InnerException;
+            result.Reject(ex);
+          }
+          else if (t.IsCanceled)
+          {
+            result.Reject(new HttpTimeoutException(string.Format("A response was not received after waiting for {0:m' minutes, 's' seconds'}", TimeSpan.FromMilliseconds(timeout.TimeoutDelay))));
+          }
+          else
+          {
+            result.Resolve(t.Result);
+          }
+        });
+      return result;
+    }
+
     public static IPromise<IHttpResponse> PostPromise(this HttpClient service, Uri uri, bool async, HttpRequest req)
     {
       var hReq = req as IHttpRequest;
@@ -22,7 +48,7 @@ namespace Innovator.Client
       var result = service.SendAsync(req, timeout.Source.Token)
         .ContinueWith((Func<Task<HttpResponseMessage>, Task<IHttpResponse>>)HttpResponse.Create, TaskScheduler.Default)
         .Unwrap()
-        .ToPromise(timeout.Source);
+        .ToHttpPromise(timeout);
       if (!async)
         result.Wait();
       return result;
@@ -47,21 +73,25 @@ namespace Innovator.Client
       var result = respTask
         .ContinueWith((Func<Task<HttpResponseMessage>, Task<IHttpResponse>>)HttpResponse.Create, TaskScheduler.Default)
         .Unwrap()
-        .ToPromise(timeout.Source);
+        .ToHttpPromise(timeout);
       if (!async)
         result.Wait();
       return result;
     }
 
-    private class TimeoutSource : IDisposable
+    private class TimeoutSource : IDisposable, ICancelable
     {
       private CancellationTokenSource _source = new CancellationTokenSource();
       private Timer _timer;
+      private int _timeoutDelay;
 
       public CancellationTokenSource Source { get { return _source; } }
+      public int TimeoutDelay { get { return _timeoutDelay; } }
 
       public void CancelAfter(int millisecondsDelay)
       {
+        _timeoutDelay = millisecondsDelay;
+
         if (_source.IsCancellationRequested)
           return;
 
@@ -99,6 +129,11 @@ namespace Innovator.Client
           _source.Dispose();
           _source = null;
         }
+      }
+
+      public void Cancel()
+      {
+        _source.Cancel();
       }
     }
   }

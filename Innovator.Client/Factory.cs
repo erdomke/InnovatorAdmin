@@ -37,7 +37,7 @@ namespace Innovator.Client
       {
         var handler = new HttpClientHandler();
         handler.CookieContainer = new CookieContainer();
-        return new HttpClient(handler);
+        return new HttpClient(handler) { Timeout = TimeSpan.FromMinutes(20) };
       };
     }
 
