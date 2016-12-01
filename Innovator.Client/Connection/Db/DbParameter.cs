@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if DBDATA
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -31,3 +32,4 @@ namespace Innovator.Client.Connection
     DataRowVersion IDataParameter.SourceVersion { get; set; }
   }
 }
+#endif

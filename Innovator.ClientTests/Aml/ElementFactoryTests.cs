@@ -69,7 +69,7 @@ namespace Innovator.Client.Tests
           "first & second > third", true, new DateTime(2015, 1, 1)).ToNormalizedAml(ElementFactory.Local.LocalizationContext));
     }
 
-    [TestMethod()]
+    /*[TestMethod()]
     public void FormatAmlTest_NamedParam()
     {
       Assert.AreEqual("<Item><name>first &amp; second &gt; third</name><is_current>1</is_current><date>2015-01-01T00:00:00</date></Item>",
@@ -79,7 +79,7 @@ namespace Innovator.Client.Tests
             {"bool", true},
             {"dateTime", new DateTime(2015, 1, 1)}
           }).ToNormalizedAml(ElementFactory.Local.LocalizationContext));
-    }
+    }*/
 
     [TestMethod()]
     public void FormatAmlTest_EmptyXmlElement()

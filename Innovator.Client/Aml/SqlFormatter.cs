@@ -59,11 +59,11 @@ namespace Innovator.Client
       }
       else
       {
-        return "N'" + Render(arg, 
-          n => n.ToString(formatString, CultureInfo.InvariantCulture), 
+        return "N'" + Render(arg,
+          n => n.ToString(formatString, CultureInfo.InvariantCulture),
           s => SqlEscape(arg, formatString)) + "'";
       }
-      
+
     }
 
     private static string SqlEscape(object obj, string format)
@@ -89,8 +89,8 @@ namespace Innovator.Client
 
     internal string Format(object arg)
     {
-      return Render(arg, 
-          n => n.ToString(null, CultureInfo.InvariantCulture), 
+      return Render(arg,
+          n => n.ToString(null, CultureInfo.InvariantCulture),
           s => SqlEscape(arg, null));
     }
 
@@ -162,7 +162,7 @@ namespace Innovator.Client
       var converted = value;
       if (value.Kind != DateTimeKind.Utc)
       {
-        converted = TimeZoneInfo.ConvertTime(value, TimeZoneInfo.Local, TimeZoneInfo.Utc);
+        converted = TimeZoneData.ConvertTime(value, TimeZoneData.Local, TimeZoneData.Utc);
       }
       return converted.ToString("s");
     }

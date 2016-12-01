@@ -704,7 +704,7 @@ namespace InnovatorAdmin
       ReportProgress(4, "Searching for data...");
 
       var promises = queryItems.Select(q => (Func<IPromise>)(
-          () => _conn.Process(q, true)
+          () => _conn.Process(q.OuterXml, true)
             .Convert(s => {
               return (IEnumerable<XmlElement>)(Items(result, s, itemDic).ToArray());
             })

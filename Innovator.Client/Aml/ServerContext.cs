@@ -1,46 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+#if DBDATA
+using System.Data.SqlTypes;
+#endif
+#if SERIALIZATION
 using System.Runtime.Serialization;
+#endif
 using System.Text;
 
 namespace Innovator.Client
 {
+#if SERIALIZATION
   [Serializable]
+#endif
   public sealed class ServerContext : IServerContext
   {
-    private CultureInfo _culture;
-    private TimeZoneInfo _timeZone;
+    private TimeZoneData _timeZone;
 
     public string DefaultLanguageCode { get; set; }
     public string DefaultLanguageSuffix { get; set; }
     public string LanguageCode { get; set; }
     public string LanguageSuffix { get; set; }
-    public string Locale
-    {
-      get { return _culture.Name; }
-      set { _culture = CultureInfo.GetCultureInfo(value ?? ""); }
-    }
+    public string Locale { get; set; }
     public string TimeZone
     {
       get { return _timeZone.Id; }
-      set { _timeZone = TimeZoneInfo.FindSystemTimeZoneById(value); }
+      set { _timeZone = TimeZoneData.ById(value); }
     }
 
     public ServerContext()
     {
-      _timeZone = TimeZoneInfo.Local;
-      _culture = CultureInfo.InvariantCulture;
+      _timeZone = TimeZoneData.Local;
       this.LanguageCode = CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
     }
     public ServerContext(string timeZoneName)
     {
       this.TimeZone = timeZoneName;
-      _culture = CultureInfo.InvariantCulture;
     }
+
+#if SERIALIZATION
     private ServerContext(SerializationInfo info, StreamingContext context)
     {
       this.DefaultLanguageCode = info.GetString("default_language_code");
@@ -60,6 +61,7 @@ namespace Innovator.Client
       info.AddValue("locale", this.Locale);
       info.AddValue("time_zone", this.TimeZone);
     }
+#endif
 
     /// <summary>
     /// Coerse an <c>object</c> to a <c>bool?</c>.  Handles <c>bool</c> or <c>string</c> values
@@ -99,7 +101,7 @@ namespace Innovator.Client
       {
         result = (DateTime)value;
         if (result.Kind == DateTimeKind.Utc)
-          return TimeZoneInfo.ConvertTime(result, TimeZoneInfo.Utc, TimeZoneInfo.Local);
+          return TimeZoneData.ConvertTime(result, TimeZoneData.Utc, TimeZoneData.Local);
         return result;
       }
       else
@@ -108,11 +110,11 @@ namespace Innovator.Client
           throw new InvalidCastException();
         if ((string)value == "") return null;
 
-        result = DateTime.Parse((string)value, _culture, DateTimeStyles.AssumeLocal);
+        result = DateTime.Parse((string)value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal);
         if (_timeZone.Equals(TimeZoneInfo.Local)) return result;
       }
       result = DateTime.SpecifyKind(result, DateTimeKind.Unspecified);
-      result = TimeZoneInfo.ConvertTime(result, _timeZone, TimeZoneInfo.Local);
+      result = TimeZoneData.ConvertTime(result, _timeZone, TimeZoneData.Local);
       return result;
     }
     /// <summary>
@@ -126,7 +128,7 @@ namespace Innovator.Client
       {
         result = (DateTime)value;
         if (result.Kind == DateTimeKind.Local)
-          return TimeZoneInfo.ConvertTime(result, TimeZoneInfo.Local, TimeZoneInfo.Utc);
+          return TimeZoneData.ConvertTime(result, TimeZoneData.Local, TimeZoneData.Utc);
         return result;
       }
       else
@@ -135,15 +137,15 @@ namespace Innovator.Client
           throw new InvalidCastException();
         if ((string)value == "") return null;
 
-        result = DateTime.Parse((string)value, _culture, DateTimeStyles.AssumeLocal);
-        if (_timeZone == TimeZoneInfo.Utc)
+        result = DateTime.Parse((string)value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal);
+        if (_timeZone == TimeZoneData.Utc)
         {
           result = DateTime.SpecifyKind(result, DateTimeKind.Utc);
           return result;
         }
       }
       result = DateTime.SpecifyKind(result, DateTimeKind.Unspecified);
-      result = TimeZoneInfo.ConvertTime(result, _timeZone, TimeZoneInfo.Utc);
+      result = TimeZoneData.ConvertTime(result, _timeZone, TimeZoneData.Utc);
       return result;
     }
     /// <summary>
@@ -202,7 +204,11 @@ namespace Innovator.Client
     private string Format(object value, Func<IFormattable, string> numberRenderer, Func<object, string> stringRenderer)
     {
       IFormattable number;
-      if (value == null || value == DBNull.Value)
+      if (value == null
+#if DBDATA
+        || value == DBNull.Value
+#endif
+      )
       {
         return null;
       }
@@ -304,17 +310,19 @@ namespace Innovator.Client
       var converted = value;
       if (value.Kind == DateTimeKind.Utc)
       {
-        if (_timeZone != TimeZoneInfo.Utc)
+        if (_timeZone != TimeZoneData.Utc)
         {
-          converted = TimeZoneInfo.ConvertTime(value, TimeZoneInfo.Utc, _timeZone);
+          converted = TimeZoneData.ConvertTime(value, TimeZoneData.Utc, _timeZone);
         }
       }
-      else if (_timeZone != TimeZoneInfo.Local) // Assume local
+      else if (_timeZone != TimeZoneData.Local) // Assume local
       {
-        converted = TimeZoneInfo.ConvertTime(value, TimeZoneInfo.Local, _timeZone);
+        converted = TimeZoneData.ConvertTime(value, TimeZoneData.Local, _timeZone);
       }
+#if DBDATA
       if (converted < SqlDateTime.MinValue.Value
         || converted > SqlDateTime.MaxValue.Value) return null;
+#endif
       return converted.ToString("s");
     }
 
@@ -363,8 +371,10 @@ namespace Innovator.Client
       if (!string.IsNullOrEmpty(format) && formattable != null)
         return formattable.ToString(format, CultureInfo.InvariantCulture);
 
+#if XMLLEGACY
       var node = obj as System.Xml.XmlNode;
       if (node != null) return node.OuterXml;
+#endif
 
       return obj.ToString();
     }

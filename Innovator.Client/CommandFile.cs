@@ -24,16 +24,24 @@ namespace Innovator.Client
 
     public CommandFile(string id, string path, string vaultId, bool isNew = true)
     {
+#if FILEIO
       _id = id;
       _path = NormalizePath(path);
       if (!File.Exists(_path)) throw new IOException("File " + _path + " does not exist");
       _aml = GetFileItem(id, path, vaultId, isNew);
       _length = new FileInfo(_path).Length;
+#else
+      throw new NotSupportedException();
+#endif
     }
     public CommandFile(string id, string path, Stream data, string vaultId, bool isNew = true)
     {
       _id = id;
+#if FILEIO
       _path = NormalizePath(path);
+#else
+      _path = path;
+#endif
 
       if (data.CanSeek) data.Position = 0;
       _data = new byte[data.Length];
@@ -89,6 +97,7 @@ namespace Innovator.Client
     public HttpContent AsContent(Command cmd, IServerContext context)
     {
       HttpContent result;
+#if FILEIO
       if (_data == null)
       {
         result = new StreamContent(new FileStream(_path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096));
@@ -97,6 +106,9 @@ namespace Innovator.Client
       {
         result = new ByteArrayContent(_data);
       }
+#else
+      result = new ByteArrayContent(_data);
+#endif
 
       var id = _id[0] == '@' ? cmd.Substitute(_id, context) : _id;
       var path = _path[0] == '@' ? cmd.Substitute(_path, context) : _path;
@@ -104,10 +116,11 @@ namespace Innovator.Client
       return result;
     }
 
-
+#if FILEIO
     public static string NormalizePath(string path)
     {
       return System.IO.Path.GetFullPath(Environment.ExpandEnvironmentVariables(path));
     }
+#endif
   }
 }

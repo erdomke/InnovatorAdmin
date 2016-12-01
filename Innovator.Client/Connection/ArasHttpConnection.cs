@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -378,10 +377,7 @@ namespace Innovator.Client.Connection
 
     private static string CalcMd5(ref byte[] value)
     {
-      using (var md5Provider = new MD5CryptoServiceProvider())
-      {
-        return md5Provider.ComputeHash(value).HexString();
-      }
+      return MD5.ComputeHash(value);
     }
 
     public override bool Equals(object obj)

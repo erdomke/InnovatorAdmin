@@ -82,7 +82,6 @@ namespace Innovator.Client
     private class TimeoutSource : IDisposable, ICancelable
     {
       private CancellationTokenSource _source = new CancellationTokenSource();
-      private Timer _timer;
       private int _timeoutDelay;
 
       public CancellationTokenSource Source { get { return _source; } }
@@ -92,6 +91,9 @@ namespace Innovator.Client
       {
         _timeoutDelay = millisecondsDelay;
 
+#if TASKS
+        _source.CancelAfter(millisecondsDelay);
+#else
         if (_source.IsCancellationRequested)
           return;
 
@@ -108,8 +110,11 @@ namespace Innovator.Client
           this._timer.Change(millisecondsDelay, -1);
         }
         catch (ObjectDisposedException) { }
+#endif
       }
 
+#if !TASKS
+      private Timer _timer;
       private static readonly TimerCallback _timerCallback = new TimerCallback(TimerCallbackLogic);
 
       private static void TimerCallbackLogic(object obj)
@@ -121,6 +126,7 @@ namespace Innovator.Client
         }
         catch (ObjectDisposedException) { }
       }
+#endif
 
       public void Dispose()
       {

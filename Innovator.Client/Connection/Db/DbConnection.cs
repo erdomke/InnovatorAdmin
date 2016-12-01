@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if DBDATA
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -34,7 +35,7 @@ namespace Innovator.Client.Connection
       get { return ConnectionState.Open; }
     }
 
-    #region "Implementation"
+#region "Implementation"
     IDbCommand IDbConnection.CreateCommand()
     {
       return new DbCommand(this);
@@ -77,7 +78,7 @@ namespace Innovator.Client.Connection
       get { return _conn.Database; }
       set { throw new NotSupportedException(); }
     }
-    #endregion
+#endregion
 
     private Dictionary<string, Properties> _typeInfo = new Dictionary<string,Properties>();
     internal Properties GetTypeInfo(string name)
@@ -266,3 +267,4 @@ namespace Innovator.Client.Connection
     }
   }
 }
+#endif

@@ -1,0 +1,41 @@
+{
+  "version": "1.0.0.0",
+  "title": "HttpClientLibrary",
+  "description": "Polyfill for HttpClient in .Net 3.5 and .Net 4.0",
+  "language": "en-US",
+  "authors": [ "Eric Domke" ],
+  "packOptions": {
+    "projectUrl": "http://erdomke.github.io/InnovatorAdmin/",
+    "tags": [ "httpclient" ],
+    "repository": {
+      "type": "git",
+      "url": "git://github.com/erdomke/InnovatorAdmin"
+    }
+  },
+  "supports": {},
+  "runtime": { "win":{}},
+  "frameworks": {
+    "net35": {
+      "buildOptions": {},
+      "dependencies": {
+        "TaskParallelLibrary": "1.0.2856.0"
+      },
+      "frameworkAssemblies": {
+        "System.Core": "",
+        "System.Data": "",
+        "System.Xml": "",
+        "System.Xml.Linq": ""
+      }
+    },
+    "net40": {
+      "buildOptions": {},
+      "frameworkAssemblies": {
+        "Microsoft.CSharp": "",
+        "System.Core": "",
+        "System.Data": "",
+        "System.Xml": "",
+        "System.Xml.Linq": ""
+      }
+    }
+  }
+}

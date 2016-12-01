@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+#if SERIALIZATION
 using System.Runtime.Serialization;
+#endif
 using System.Text;
 using System.Xml;
 
 namespace Innovator.Client
 {
+#if SERIALIZATION
   [Serializable]
+#endif
   public class ServerException : Exception, IAmlNode
   {
     private const string FaultNodeEntry = "``FaultNode";
@@ -35,6 +39,7 @@ namespace Innovator.Client
     internal ServerException(string message, Exception innerException)
       : this(message, 1, innerException) { }
 
+#if SERIALIZATION
     public ServerException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
       var result = ElementFactory.Local.FromXml(info.GetString(FaultNodeEntry));
@@ -42,6 +47,7 @@ namespace Innovator.Client
       _database = info.GetString(DatabaseEntry);
       _query = info.GetString(QueryEntry);
     }
+#endif
     public ServerException(Element fault) : base(fault.ElementByName("faultstring").Value ?? "An unexpected error occurred")
     {
       _fault = fault;
@@ -71,6 +77,7 @@ namespace Innovator.Client
       _fault = aml.Element("SOAP-ENV:Fault", aml.Element("faultcode", code), aml.Element("faultstring", message)) as Element;
     }
 
+#if SERIALIZATION
     public override void GetObjectData(SerializationInfo info, StreamingContext context)
     {
       base.GetObjectData(info, context);
@@ -88,6 +95,7 @@ namespace Innovator.Client
       info.AddValue(DatabaseEntry, this.Database);
       info.AddValue(QueryEntry, this.Query);
     }
+#endif
 
     public string ToAml()
     {

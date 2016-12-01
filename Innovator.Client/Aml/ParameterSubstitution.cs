@@ -388,7 +388,11 @@ namespace Innovator.Client
         if (TryGetParamValue(p, out value))
         {
           IFormattable num;
-          if (value == null || value == DBNull.Value)
+          if (value == null
+#if DBDATA
+            || value == DBNull.Value
+#endif
+          )
           {
             return "null";
           }

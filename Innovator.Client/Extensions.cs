@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Linq;
 
@@ -15,6 +14,7 @@ namespace Innovator.Client
       return token == null || token.Length < 1;
     }
 
+#if FILEIO && MD5
     public static string Checksum(this FileInfo fileInfo)
     {
       if (!File.Exists(fileInfo.FullName))
@@ -24,16 +24,12 @@ namespace Innovator.Client
         throw new ArgumentException("The specified path is a directory and not a file.", "fileInfo");
 
       using (var fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+      using (var mD = System.Security.Cryptography.MD5.Create())
       {
-        using (var bufferedStream = new BufferedStream(fileStream, 32768))
-        {
-          using (var mD = MD5.Create())
-          {
-            return mD.ComputeHash(bufferedStream).HexString();
-          }
-        }
+        return mD.ComputeHash(fileStream).HexString();
       }
     }
+#endif
 
     public static string HexString(this byte[] value, int offset = 0, int length = -1)
     {
@@ -76,12 +72,14 @@ namespace Innovator.Client
 
     internal static void Rethrow(this Exception ex)
     {
+#if REFLECTION
       if (!string.IsNullOrEmpty(ex.StackTrace))
       {
         typeof(Exception).GetMethod("PrepForRemoting",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
             .Invoke(ex, new object[0]);
       }
+#endif
       throw ex;
     }
 

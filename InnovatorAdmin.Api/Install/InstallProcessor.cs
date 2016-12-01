@@ -143,7 +143,7 @@ namespace InnovatorAdmin
 
                 // If the item exists, get the id for use in the relationships
                 // If the item doesn't exist, make sure the id = config_id for the add
-                items = _conn.Apply(newQuery).Items();
+                items = _conn.Apply(newQuery.OuterXml).Items();
                 string sourceId = items.Any() ? items.First().Attribute("id").Value : configId;
                 newQuery = query.Clone() as XmlElement;
                 newQuery.SetAttribute("id", sourceId);
@@ -174,7 +174,7 @@ namespace InnovatorAdmin
                     newQuery.SetAttribute("where", whereClause);
                     newQuery.SetAttribute("action", "get");
 
-                    items = _conn.Apply(newQuery).Items();
+                    items = _conn.Apply(newQuery.OuterXml).Items();
                     if (items.Any())
                     {
                       rel.RemoveAttribute("id");
@@ -184,7 +184,7 @@ namespace InnovatorAdmin
                   }
                 }
               }
-              items = _conn.Apply(query).AssertItems();
+              items = _conn.Apply(query.OuterXml).AssertItems();
               if (line.Type == InstallType.Create) line.InstalledId = items.First().Attribute("id").Value;
 
               // Execute any sql scripts

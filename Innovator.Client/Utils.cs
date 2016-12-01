@@ -97,9 +97,7 @@ namespace Innovator.Client
 
     public static bool EnumTryParse<TEnum>(string value, bool ignoreCase, out TEnum result) where TEnum : struct
     {
-#if NET4
-      return Enum.TryParse<TEnum>(value, ignoreCase, out result);
-#else
+#if NET35
       try
       {
         result = (TEnum)Enum.Parse(typeof(TEnum), value, ignoreCase);
@@ -115,10 +113,12 @@ namespace Innovator.Client
         result = default(TEnum);
         return false;
       }
+#else
+      return Enum.TryParse<TEnum>(value, ignoreCase, out result);
 #endif
     }
 
-#if !NET4
+#if NET35
     public static void CopyTo(this Stream input, Stream output)
     {
       byte[] buffer = new byte[4096];
@@ -130,7 +130,7 @@ namespace Innovator.Client
     }
 #endif
 
-#if !NET4
+#if NET35
     /// <summary>
     /// Used for fixing a bug with cookie domain handling
     /// </summary>
@@ -163,6 +163,7 @@ namespace Innovator.Client
       return !(input is MemoryStream);
     }
 
+#if FILEIO
     public static void Save(this Stream input, string path)
     {
       using (var fs = new FileStream(path, FileMode.Create, FileAccess.Write))
@@ -170,6 +171,7 @@ namespace Innovator.Client
         input.CopyTo(fs);
       }
     }
+#endif
 
     public static IPromise<T> AsyncInvoke<T>(Func<T> method)
     {

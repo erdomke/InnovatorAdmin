@@ -38,10 +38,12 @@ namespace Innovator.Client
       }
     }
 
+#if XMLLEGACY
     public override void Close()
     {
       throw new NotImplementedException();
     }
+#endif
 
     public override void Flush()
     {

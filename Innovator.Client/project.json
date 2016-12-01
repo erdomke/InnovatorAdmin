@@ -1,0 +1,160 @@
+{
+  "version": "2016.12.01.1047",
+  "title": "Innovator.Client",
+  "description": "Client library for communicating with Aras Innovator",
+  "language": "en-US",
+  "authors": [ "Eric Domke" ],
+  "packOptions": {
+    "projectUrl": "http://erdomke.github.io/InnovatorAdmin/",
+    "tags": [ "aras", "innovator" ],
+    "repository": {
+      "type": "git",
+      "url": "git://github.com/erdomke/InnovatorAdmin"
+    }
+  },
+  "supports": {},
+  "frameworks": {
+    "net35": {
+      "buildOptions": {
+        "allowUnsafe": true,
+        "define": [
+          "SERIALIZATION",
+          "DBDATA",
+          "XMLLEGACY",
+          "TIMEZONEINFO",
+          "FILEIO",
+          "SECURESTRING",
+          "REFLECTION",
+          "MD5",
+          "SLEEP",
+          "NET35"
+        ]
+      },
+      "frameworkAssemblies": {
+        "System.Core": "",
+        "System.Data": "",
+        "System.Web": "",
+        "System.Xml": "",
+        "System.Xml.Linq": ""
+      },
+      "dependencies": {
+        "HttpClientPolyfill": {"target": "project", "version": "1.0.0-*"},
+        "TaskParallelLibrary": "1.0.2856.0"
+      }
+    },
+    "net40": {
+      "buildOptions": {
+        "allowUnsafe": true,
+        "define": [
+          "SERIALIZATION",
+          "DBDATA",
+          "XMLLEGACY",
+          "TIMEZONEINFO",
+          "FILEIO",
+          "SECURECRED",
+          "SECURESTRING",
+          "REFLECTION",
+          "MD5",
+          "SLEEP"
+        ]
+      },
+      "frameworkAssemblies": {
+        "Microsoft.CSharp": "",
+        "System.Core": "",
+        "System.Data": "",
+        "System.Web": "",
+        "System.Xml": "",
+        "System.Xml.Linq": ""
+      },
+      "dependencies": {
+        "HttpClientPolyfill": {"target": "project", "version": "1.0.0-*"}
+      }
+    },
+    "net45": {
+      "buildOptions": {
+        "allowUnsafe": true,
+        "define": [
+          "SERIALIZATION",
+          "DYNAMIC",
+          "DBDATA",
+          "XMLLEGACY",
+          "TIMEZONEINFO",
+          "FILEIO",
+          "SECURECRED",
+          "SECURESTRING",
+          "REFLECTION",
+          "TASKS",
+          "MD5",
+          "SLEEP"
+        ]
+      },
+      "frameworkAssemblies": {
+        "Microsoft.CSharp": "",
+        "System.Core": "",
+        "System.Data": "",
+        "System.Net.Http": "",
+        "System.Web": "",
+        "System.Xml": "",
+        "System.Xml.Linq": ""
+      }
+    },
+    "net46": {
+      "buildOptions": {
+        "allowUnsafe": true,
+        "define": [
+          "SERIALIZATION",
+          "DYNAMIC",
+          "DBDATA",
+          "XMLLEGACY",
+          "TIMEZONEINFO",
+          "FILEIO",
+          "SECURECRED",
+          "SECURESTRING",
+          "REFLECTION",
+          "TASKS",
+          "MD5",
+          "SLEEP",
+          "INTERPOLATEDSTR"
+        ]
+      },
+      "frameworkAssemblies": {
+        "Microsoft.CSharp": "",
+        "System.Core": "",
+        "System.Data": "",
+        "System.Net.Http": "",
+        "System.Web": "",
+        "System.Xml": "",
+        "System.Xml.Linq": ""
+      }
+    },
+    "netstandard1.1": 
+    {
+      "buildOptions": {
+        "define": [
+          "TASKS"
+        ]
+      },
+      "dependencies": {
+        "NETStandard.Library": "1.6.0",
+        "Microsoft.NETCore.Portable.Compatibility": "1.0.1",
+        "NodaTime": "2.0.0-alpha20160729"
+      }
+    },
+    "netstandard1.3": 
+    {
+      "buildOptions": {
+        "define": [
+          "TIMEZONEINFO",
+          "INTERPOLATEDSTR",
+          "FILEIO",
+          "TASKS",
+          "MD5"
+        ]
+      },
+      "dependencies": {
+        "NETStandard.Library": "1.6.0",
+        "Microsoft.NETCore.Portable.Compatibility": "1.0.1"
+      }
+    }
+  }
+}

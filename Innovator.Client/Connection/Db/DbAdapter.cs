@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if DBDATA
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -61,7 +62,7 @@ namespace Innovator.Client.Connection
       return count;
     }
 
-    #region Implementation
+#region Implementation
     DataTable[] IDataAdapter.FillSchema(DataSet dataSet, SchemaType schemaType)
     {
       throw new NotSupportedException();
@@ -85,7 +86,7 @@ namespace Innovator.Client.Connection
     {
       throw new NotSupportedException();
     }
-    
+
     public IDbCommand DeleteCommand { get; set; }
 
     public IDbCommand InsertCommand { get; set; }
@@ -94,6 +95,7 @@ namespace Innovator.Client.Connection
 
     public IDbCommand UpdateCommand { get; set; }
 
-    #endregion
+#endregion
   }
 }
+#endif

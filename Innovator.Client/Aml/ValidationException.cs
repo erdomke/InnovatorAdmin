@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+#if SERIALIZATION
 using System.Runtime.Serialization;
+#endif
 using System.Text;
 using System.Xml;
 
 namespace Innovator.Client
 {
+#if SERIALIZATION
   [Serializable]
+#endif
   public class ValidationException : ServerException
   {
     internal ValidationException(string message
@@ -22,8 +26,10 @@ namespace Innovator.Client
     {
       CreateDetailElement(item, properties);
     }
+#if SERIALIZATION
     public ValidationException(SerializationInfo info, StreamingContext context)
       : base(info, context) { }
+#endif
     internal ValidationException(Element fault) : base(fault) { }
 
     private IElement CreateDetailElement(IReadOnlyItem item, params string[] properties)

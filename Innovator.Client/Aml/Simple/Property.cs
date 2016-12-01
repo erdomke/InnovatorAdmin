@@ -193,7 +193,11 @@ namespace Innovator.Client
     {
       var result = base.Add(content);
       var isNull = this.IsNull();
-      if (_content == null || _content == DBNull.Value)
+      if (_content == null
+#if DBDATA
+        || _content == DBNull.Value
+#endif
+      )
       {
         isNull.Set(true);
       }
@@ -215,7 +219,11 @@ namespace Innovator.Client
       }
 
       var isNull = this.IsNull();
-      if (value == null || value == DBNull.Value)
+      if (value == null
+#if DBDATA
+        || value == DBNull.Value
+#endif
+      )
       {
         isNull.Set(true);
       }

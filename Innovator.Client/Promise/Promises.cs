@@ -255,7 +255,7 @@ namespace Innovator.Client
       return result;
     }
 
-#if NET45
+#if TASKS
     /// <summary>
     /// Make it so that the user can directly <c>await</c> a promise
     /// </summary>
@@ -304,10 +304,14 @@ namespace Innovator.Client
       if (promise.IsRejected || promise.IsResolved) return true;
 
       int num = PlatformHelper.IsSingleProcessor ? 1 : 10;
+#if !SLEEP
+      var wait = new SpinWait();
+#endif
       for (int i = 0; i < num; i++)
       {
         if (promise.IsRejected || promise.IsResolved) return true;
 
+#if SLEEP
         if (i == num / 2)
         {
           Thread.Sleep(0);
@@ -316,6 +320,9 @@ namespace Innovator.Client
         {
           Thread.SpinWait(PlatformHelper.ProcessorCount * (4 << i));
         }
+#else
+        wait.SpinOnce();
+#endif
       }
       return promise.IsRejected || promise.IsResolved;
     }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Text;
 
@@ -113,10 +112,12 @@ namespace Innovator.Client
       }
       return conn.ApplyAsync(sql.WithAction(CommandAction.ApplySQL), async, true);
     }
+#if DBDATA
     public static Connection.DbConnection AsDb(this IConnection conn)
     {
       return new Connection.DbConnection(conn);
     }
+#endif
 
     /// <summary>
     /// Retrieve an item based on its type and ID

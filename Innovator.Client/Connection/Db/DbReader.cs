@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if DBDATA
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace Innovator.Client.Connection
     {
       _conn = conn;
       _items = items.ToList();
-      
+
       _type = items.Select(i => i.Type().Value).FirstOrDefault();
       _count = _items.Count;
       GetMetadata();
@@ -102,7 +103,7 @@ namespace Innovator.Client.Connection
           }
         }
       }
-      
+
       _fields = new List<string>(props);
       _fields.Sort((x, y) => {
         var xParts = x.Split('/');
@@ -331,3 +332,4 @@ namespace Innovator.Client.Connection
     }
   }
 }
+#endif

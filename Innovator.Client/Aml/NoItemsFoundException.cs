@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+#if SERIALIZATION
 using System.Runtime.Serialization;
+#endif
 using System.Text;
 using System.Xml;
 
 namespace Innovator.Client
 {
+#if SERIALIZATION
   [Serializable]
+#endif
   public class NoItemsFoundException : ServerException
   {
     internal NoItemsFoundException(string type, string query)
@@ -28,8 +32,10 @@ namespace Innovator.Client
       CreateDetailElement();
     }
     internal NoItemsFoundException(Element fault) : base(fault) { }
+#if SERIALIZATION
     public NoItemsFoundException(SerializationInfo info, StreamingContext context)
       : base(info, context) { }
+#endif
 
     private IElement CreateDetailElement()
     {

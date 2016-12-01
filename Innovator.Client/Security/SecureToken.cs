@@ -1,8 +1,8 @@
-﻿using System;
+﻿#if SECURESTRING
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security;
-using System.Web;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -19,10 +19,21 @@ namespace Innovator.Client
   {
     private SecureString _encrypted;
 
+    public SecureString Token { get { return _encrypted; } }
     public delegate TR FuncRef<T1, TR>(ref T1 value);
 
     public int Length { get { return _encrypted.Length; } }
-    public SecureString Token { get { return _encrypted; } }
+
+
+    public SecureToken(ArraySegment<byte> unencrypted)
+    {
+      var array = unencrypted.Array;
+      FromBytes(ref array, unencrypted.Offset, unencrypted.Count);
+    }
+    public SecureToken(ref byte[] unencrypted, int start, int length)
+    {
+      FromBytes(ref unencrypted, start, length);
+    }
 
     private SecureToken(SecureString encrypted)
     {
@@ -42,15 +53,6 @@ namespace Innovator.Client
       {
         _encrypted.MakeReadOnly();
       }
-    }
-    public SecureToken(ArraySegment<byte> unencrypted)
-    {
-      var array = unencrypted.Array;
-      FromBytes(ref array, unencrypted.Offset, unencrypted.Count);
-    }
-    public SecureToken(ref byte[] unencrypted, int start, int length)
-    {
-      FromBytes(ref unencrypted, start, length);
     }
     public SecureToken(Stream data)
     {
@@ -280,13 +282,13 @@ namespace Innovator.Client
     {
       return val == null ? null : val._encrypted;
     }
-    public static implicit operator SecureToken(string val)
-    {
-      return new SecureToken(ref val);
-    }
     public static implicit operator SecureToken(SecureString val)
     {
       return new SecureToken(val);
+    }
+    public static implicit operator SecureToken(string val)
+    {
+      return new SecureToken(ref val);
     }
     public static implicit operator SecureToken(ArraySegment<byte> val)
     {
@@ -298,3 +300,4 @@ namespace Innovator.Client
     }
   }
 }
+#endif

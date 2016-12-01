@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if DBDATA
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -67,7 +68,7 @@ namespace Innovator.Client.Connection
       return _params.GetEnumerator();
     }
 
-    #region Implementation
+#region Implementation
     int IList.Add(object value)
     {
       this.Add((IDbDataParameter)value);
@@ -136,7 +137,7 @@ namespace Innovator.Client.Connection
     {
       get { return null; }
     }
-    #endregion
+#endregion
 
     System.Collections.IEnumerator IEnumerable.GetEnumerator()
     {
@@ -144,3 +145,4 @@ namespace Innovator.Client.Connection
     }
   }
 }
+#endif

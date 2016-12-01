@@ -96,6 +96,7 @@ namespace Innovator.Client
       this.WithAml(query, args);
     }
 
+#if DBDATA
     /// <summary>
     /// Replaces SQL Server style style AML parameters (used as attribute and element values) with the corresponding arguments.
     /// Property type conversion and XML formatting is performed
@@ -111,6 +112,8 @@ namespace Innovator.Client
         _sub.AddParameter(param.ParameterName, param.Value);
       }
     }
+#endif
+
     public Command(IAmlNode aml) : this(aml.ToAml())
     {
       var elem = aml as IReadOnlyElement;
@@ -205,6 +208,7 @@ namespace Innovator.Client
     {
       return new Command() { Aml = aml.ToString() };
     }
+#if XMLLEGACY
     /// <summary>
     /// Implicitly convert XML elements to commands as needed
     /// </summary>
@@ -212,9 +216,10 @@ namespace Innovator.Client
     {
       return new Command() { Aml = aml.OuterXml };
     }
+#endif
 
 
-#if NET46
+#if INTERPOLATEDSTR
     /// <summary>
     /// Create a command from an interpolated string
     /// </summary>

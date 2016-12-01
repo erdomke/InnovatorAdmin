@@ -29,7 +29,7 @@ namespace Innovator.Client
         + this.FirstDayOfWeek.ToString();
     }
 
-    public StaticDateTimeRange ToStatic(TimeZoneInfo timeZone)
+    public StaticDateTimeRange ToStatic(TimeZoneData timeZone)
     {
       var result = new StaticDateTimeRange();
       var now = _clock.Invoke();
@@ -82,12 +82,12 @@ namespace Innovator.Client
     }
 
     internal static DateTime? GetDateFromDynamic(DateMagnitude magnitude, int? offsetValue, bool isEndDate
-      , DateTimeOffset todaysDate, DayOfWeek weekStart, TimeZoneInfo timeZone)
+      , DateTimeOffset todaysDate, DayOfWeek weekStart, TimeZoneData timeZone)
     {
       if (!offsetValue.HasValue)
         return null;
       var offset = offsetValue.Value;
-      var localToday = TimeZoneInfo.ConvertTime(todaysDate, timeZone);
+      var localToday = TimeZoneData.ConvertTime(todaysDate, timeZone);
       DateTimeOffset result;
 
       if (isEndDate) offset++;

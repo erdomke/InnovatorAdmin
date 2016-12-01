@@ -3,7 +3,12 @@ using System.Runtime.Serialization;
 
 namespace Innovator.Client
 {
-  public interface IServerContext : ISerializable, IFormatProvider, ICustomFormatter
+  public interface IServerContext :
+#if SERIALIZATION
+    ISerializable,
+#endif
+    IFormatProvider
+    , ICustomFormatter
   {
     string DefaultLanguageCode { get; }
     string DefaultLanguageSuffix { get; }

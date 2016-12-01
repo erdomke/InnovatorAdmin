@@ -15,7 +15,7 @@ namespace Innovator.Client
     private SecureToken _password;
     private string _username;
 
-#if NET4
+#if SECURECRED
     /// <summary>
     /// An <see cref="System.Net.ICredentials"/> instance with the same user name and password
     /// </summary>

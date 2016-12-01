@@ -22,7 +22,7 @@ namespace Innovator.Client
       return _type;
     }
 
-#if NET4
+#if DYNAMIC
     public ItemRef(dynamic value)
     {
       _id = value.Id;

@@ -21,7 +21,7 @@ namespace Innovator.Client
 
     public HttpRequest() : base()
     {
-      this.Version = HttpVersion.Version11;
+      this.Version = new Version(1, 1);
       this.Timeout = HttpRequest.DefaultTimeout;
     }
 

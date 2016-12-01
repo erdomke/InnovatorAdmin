@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Cache;
 using System.Net.Http;
 using System.Text;
-using System.Web;
 
 namespace Innovator.Client.Connection
 {
@@ -122,7 +120,7 @@ namespace Innovator.Client.Connection
         if (u != vault.Url) vault.Url = u;
         var uri = new Uri(string.Format("{0}?dbName={1}&fileId={2}&fileName={3}&vaultId={4}",
           u, _conn.Database, fileItem.Id(),
-          HttpUtility.UrlEncode(fileItem.Property("filename").Value),
+          Uri.EscapeDataString(fileItem.Property("filename").Value),
           vault.Id));
 
         var client = new HttpClient();

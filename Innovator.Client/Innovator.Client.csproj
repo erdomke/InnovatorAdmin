@@ -1,95 +1,52 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D909EF15-81AA-4119-AB5A-1636CA8C08FC}</ProjectGuid>
+    <ProjectGuid>{ED45C66C-9224-4962-8D68-A0607D5B5B67}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Innovator.Client</RootNamespace>
     <AssemblyName>Innovator.Client</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;NET4</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;TASKS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DocumentationFile>bin\Debug\Innovator.Client.XML</DocumentationFile>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'NET35|AnyCPU' ">
-    <OutputPath>bin\NET35\</OutputPath>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>false</Prefer32Bit>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'NET40|AnyCPU'">
-    <OutputPath>bin\NET40\</OutputPath>
-    <DefineConstants>TRACE;NET4</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>false</Prefer32Bit>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'NET45|AnyCPU' ">
-    <OutputPath>bin\NET45\</OutputPath>
-    <DefineConstants>TRACE;NET4;NET45</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>false</Prefer32Bit>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'NET46|AnyCPU'">
-    <OutputPath>bin\NET46\</OutputPath>
-    <DefineConstants>TRACE;NET4;NET45;NET46</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" Condition="$(Configuration) == 'NET46' Or $(Configuration) == 'NET45' Or $(Configuration) == 'NET40' Or $(Configuration) == 'Debug'" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Net.Http" Condition="$(Configuration) == 'NET46' Or $(Configuration) == 'NET45' Or $(Configuration) == 'Debug'" />
-    <Reference Include="System.Threading, Version=1.0.2856.102, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" Condition="$(Configuration) == 'NET35'">
-      <HintPath>..\packages\TaskParallelLibrary.1.0.2856.0\lib\Net35\System.Threading.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Web" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <!-- A reference to the entire .NET Framework is automatically included -->
+    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Aml\AmlWriterSettings.cs" />
+    <Compile Include="Aml\CommandAction.cs" />
+    <Compile Include="Aml\Condition.cs" />
+    <Compile Include="Aml\Core.cs" />
     <Compile Include="Aml\DateMagnitude.cs" />
     <Compile Include="Aml\DefaultItemFactory.cs" />
     <Compile Include="Aml\DynamicDateTimeRange.cs" />
+    <Compile Include="Aml\ElementFactory.cs" />
     <Compile Include="Aml\IAmlNode.cs" />
     <Compile Include="Aml\IAttribute.cs" />
     <Compile Include="Aml\IElement.cs" />
@@ -102,6 +59,7 @@
     <Compile Include="Aml\IResult.cs" />
     <Compile Include="Aml\ItemExtensions.cs" />
     <Compile Include="Aml\ItemRef.cs" />
+    <Compile Include="Aml\ItemWrapper.cs" />
     <Compile Include="Aml\JsonFormatter.cs" />
     <Compile Include="Aml\LockStatusType.cs" />
     <Compile Include="Aml\LoggedOutException.cs" />
@@ -368,7 +326,6 @@
     <Compile Include="Aml\Model\Value.cs" />
     <Compile Include="Aml\Model\Variable.cs" />
     <Compile Include="Aml\Model\Vault.cs" />
-    <Compile Include="Aml\ItemWrapper.cs" />
     <Compile Include="Aml\Model\View.cs" />
     <Compile Include="Aml\Model\Viewer.cs" />
     <Compile Include="Aml\Model\ViewWith.cs" />
@@ -391,12 +348,14 @@
     <Compile Include="Aml\Model\WSTypeAction.cs" />
     <Compile Include="Aml\Model\WSTypeAssociate.cs" />
     <Compile Include="Aml\Model\WSTypeProperty.cs" />
+    <Compile Include="Aml\NoItemsFoundException.cs" />
     <Compile Include="Aml\ParameterSubstitution.cs" />
-    <Compile Include="Aml\CommandAction.cs" />
-    <Compile Include="Aml\Simple\ResultWriter.cs" />
+    <Compile Include="Aml\QueryType.cs" />
+    <Compile Include="Aml\ServerContext.cs" />
+    <Compile Include="Aml\ServerException.cs" />
+    <Compile Include="Aml\Simple\AmlElement.cs" />
     <Compile Include="Aml\Simple\Attribute.cs" />
     <Compile Include="Aml\Simple\Element.cs" />
-    <Compile Include="Aml\Simple\AmlElement.cs" />
     <Compile Include="Aml\Simple\ElementAttribute.cs" />
     <Compile Include="Aml\Simple\IdAnnotation.cs" />
     <Compile Include="Aml\Simple\ILink.cs" />
@@ -408,16 +367,25 @@
     <Compile Include="Aml\Simple\Property.cs" />
     <Compile Include="Aml\Simple\Relationships.cs" />
     <Compile Include="Aml\Simple\Result.cs" />
+    <Compile Include="Aml\Simple\ResultWriter.cs" />
     <Compile Include="Aml\SqlBatchWriter.cs" />
     <Compile Include="Aml\SqlFormatter.cs" />
     <Compile Include="Aml\StaticDateTimeRange.cs" />
     <Compile Include="Aml\SubSelect.cs" />
+    <Compile Include="Aml\TimeZoneData.cs" />
     <Compile Include="Aml\ValidationException.cs" />
     <Compile Include="Aml\ValidationReportException.cs" />
+    <Compile Include="Aml\XmlUtils.cs" />
     <Compile Include="AssemblyInfo.Version.cs" />
+    <Compile Include="Command.cs" />
+    <Compile Include="CommandFile.cs" />
     <Compile Include="ConnectionPreferences.cs" />
+    <Compile Include="Connection\ArasHttpConnection.cs" />
     <Compile Include="Connection\ArasVaultConnection.cs" />
+    <Compile Include="Connection\AuthenticationScheme.cs" />
     <Compile Include="Connection\CacheVaultStrategy.cs" />
+    <Compile Include="Connection\ConnectionExtensions.cs" />
+    <Compile Include="Connection\ConnectionPool.cs" />
     <Compile Include="Connection\Db\DbAdapter.cs" />
     <Compile Include="Connection\Db\DbCommand.cs" />
     <Compile Include="Connection\Db\DbConnection.cs" />
@@ -426,61 +394,47 @@
     <Compile Include="Connection\Db\DbReader.cs" />
     <Compile Include="Connection\DefaultVaultStrategy.cs" />
     <Compile Include="Connection\Endpoints.cs" />
-    <Compile Include="IO\HttpClientExtensions.cs" />
     <Compile Include="Connection\IArasConnection.cs" />
     <Compile Include="Connection\IVaultStrategy.cs" />
     <Compile Include="Connection\MappedConnection.cs" />
-    <Compile Include="Connection\ConnectionPool.cs" />
     <Compile Include="Connection\ServerMapping.cs" />
+    <Compile Include="Connection\SessionPolicy.cs" />
+    <Compile Include="Connection\Vault.cs" />
+    <Compile Include="Credentials\AnonymousCredentials.cs" />
+    <Compile Include="Credentials\ExplicitCredentials.cs" />
     <Compile Include="Credentials\ExplicitHashCredentials.cs" />
+    <Compile Include="Credentials\WindowsCredentials.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="Factory.cs" />
     <Compile Include="IAsyncConnection.cs" />
     <Compile Include="IAsyncScript.cs" />
+    <Compile Include="IConnection.cs" />
+    <Compile Include="ICredentials.cs" />
     <Compile Include="INetCredentials.cs" />
+    <Compile Include="IO\CompressionType.cs" />
     <Compile Include="IO\FormContent.cs" />
+    <Compile Include="IO\HttpClientExtensions.cs" />
+    <Compile Include="IO\HttpException.cs" />
     <Compile Include="IO\HttpRequest.cs" />
     <Compile Include="IO\HttpResponse.cs" />
     <Compile Include="IO\HttpTimeoutException.cs" />
-    <Compile Include="IO\SimpleContent.cs" />
-    <Compile Include="MemoryCache.cs" />
-    <Compile Include="Connection\QueryString.cs" />
-    <Compile Include="Credentials\AnonymousCredentials.cs" />
-    <Compile Include="Credentials\ExplicitCredentials.cs" />
-    <Compile Include="Credentials\WindowsCredentials.cs" />
-    <Compile Include="ICredentials.cs" />
-    <Compile Include="ITokenStore.cs" />
-    <Compile Include="Connection\AuthenticationScheme.cs" />
-    <Compile Include="Connection\ConnectionExtensions.cs" />
-    <Compile Include="Connection\SessionPolicy.cs" />
-    <Compile Include="Extensions.cs" />
     <Compile Include="IO\IHttpRequest.cs" />
-    <Compile Include="IO\NameValueDictionary.cs" />
-    <Compile Include="IO\HttpException.cs" />
-    <Compile Include="Promise\ICancelable.cs" />
-    <Compile Include="Promise\PooledPromise.cs" />
-    <Compile Include="Promise\PromiseResult.cs" />
-    <Compile Include="IServerContext.cs" />
-    <Compile Include="Connection\Vault.cs" />
-    <Compile Include="Factory.cs" />
     <Compile Include="IO\IHttpResponse.cs" />
-    <Compile Include="Aml\Condition.cs" />
-    <Compile Include="Aml\Core.cs" />
-    <Compile Include="Aml\ElementFactory.cs" />
-    <Compile Include="Aml\NoItemsFoundException.cs" />
-    <Compile Include="Aml\QueryType.cs" />
-    <Compile Include="Aml\ServerContext.cs" />
-    <Compile Include="Aml\ServerException.cs" />
-    <Compile Include="Aml\XmlUtils.cs" />
-    <Compile Include="Aml\XPathCache.cs" />
-    <Compile Include="IO\CompressionType.cs" />
-    <Compile Include="Connection\ArasHttpConnection.cs" />
-    <Compile Include="Promise\Promises.cs" />
+    <Compile Include="IO\SimpleContent.cs" />
     <Compile Include="IRemoteConnection.cs" />
+    <Compile Include="IServerContext.cs" />
+    <Compile Include="ITokenStore.cs" />
+    <Compile Include="MemoryCache.cs" />
+    <Compile Include="Promise\ICancelable.cs" />
     <Compile Include="Promise\IPromise.cs" />
-    <Compile Include="IConnection.cs" />
+    <Compile Include="Promise\PooledPromise.cs" />
     <Compile Include="Promise\Promise.cs" />
-    <Compile Include="Command.cs" />
-    <Compile Include="CommandFile.cs" />
-    <Compile Include="Security\AsymmetricEncryptor.cs" />
+    <Compile Include="Promise\PromiseResult.cs" />
+    <Compile Include="Promise\Promises.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Security\Md5.cs" />
+    <Compile Include="Security\SecureToken.cs" />
+    <Compile Include="Security\SecureToken.Portable.cs" />
     <Compile Include="Server\Extensions.cs" />
     <Compile Include="Server\IServerCache.cs" />
     <Compile Include="Server\IServerConnection.cs" />
@@ -495,36 +449,11 @@
     <Compile Include="Server\ServerMethod\VoteContext.cs" />
     <Compile Include="Server\ServerMethod\WorkflowContext.cs" />
     <Compile Include="Server\ServerMethod\WorkflowEvent.cs" />
-    <Compile Include="UnixDate.cs" />
     <Compile Include="UploadCommand.cs" />
-    <Compile Include="Security\SecureToken.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\HttpClientLibrary\HttpClientLibrary.csproj" Condition="$(Configuration) == 'NET40' Or $(Configuration) == 'NET35'">
-      <Project>{ad8909ad-9cce-4844-b784-2e953bedebe2}</Project>
-      <Name>HttpClientLibrary</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-  </PropertyGroup>
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
+  <ItemGroup />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
