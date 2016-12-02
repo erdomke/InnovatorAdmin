@@ -7,6 +7,17 @@
 .EXAMPLE
   exec { svn info $repository_trunk } "Error executing SVN. Please verify SVN command-line client is installed"
 #>
+
+$version = [System.DateTime]::Now.ToString("yyyy.MM.dd.hhmm")
+
+$assyInfo = "using System.Reflection;`r`n`r`n[assembly: AssemblyVersion(""$version"")]`r`n[assembly: AssemblyFileVersion(""$version"")]"
+
+$assyInfo | Out-File Innovator.Client\AssemblyInfo.Version.cs
+
+(Get-Content Innovator.Client/project.json) `
+    -replace '"version": "\d{4}\.\d{2}\.\d{2}\.\d{4}",', """version"": ""$version""," |
+  Out-File Innovator.Client/project.json
+
 function Exec  
 {
     [CmdletBinding()]

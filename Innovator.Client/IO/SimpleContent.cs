@@ -11,12 +11,13 @@ using System.Threading.Tasks;
 
 namespace Innovator.Client
 {
-  internal class SimpleContent : StreamContent
+  internal class SimpleContent : StreamContent, ISyncContent
   {
     private const int CompressedCutoff = 1400;
 
     private CompressionType _compression;
     private bool _forceCompressionOff;
+    private Stream _stream;
 
     public CompressionType Compression
     {
@@ -30,18 +31,22 @@ namespace Innovator.Client
       }
     }
 
-    public SimpleContent(Stream content, string mediaType) : base(content)
+    public SimpleContent(Stream content, string mediaType) : this(content)
     {
       if (!string.IsNullOrEmpty(mediaType))
         Headers.ContentType = new MediaTypeHeaderValue(mediaType);
       _forceCompressionOff = DisableCompression(mediaType);
     }
-    public SimpleContent(string content, string mediaType) : base(new MemoryStream(Encoding.UTF8.GetBytes(content)))
+    public SimpleContent(string content, string mediaType) : this(new MemoryStream(Encoding.UTF8.GetBytes(content)))
     {
       var header = new MediaTypeHeaderValue((mediaType == null) ? "text/plain" : mediaType);
       header.CharSet = Encoding.UTF8.WebName;
       Headers.ContentType = header;
       _forceCompressionOff = DisableCompression(mediaType);
+    }
+    private SimpleContent(Stream stream) : base (stream)
+    {
+      _stream = stream;
     }
 
     protected override bool TryComputeLength(out long length)
@@ -51,6 +56,36 @@ namespace Innovator.Client
 
       length = -1;
       return false;
+    }
+
+
+    public void SerializeToStream(Stream stream)
+    {
+      if (Compression == CompressionType.none || _forceCompressionOff)
+      {
+        _stream.CopyTo(stream);
+      }
+      else
+      {
+        Stream compressedStream = null;
+        if (Compression == CompressionType.gzip)
+        {
+          compressedStream = new GZipStream(stream, CompressionMode.Compress, leaveOpen: true);
+        }
+        else if (Compression == CompressionType.deflate)
+        {
+          compressedStream = new DeflateStream(stream, CompressionMode.Compress, leaveOpen: true);
+        }
+        else
+        {
+          throw new NotSupportedException();
+        }
+
+        using (compressedStream)
+        {
+          _stream.CopyTo(compressedStream);
+        }
+      }
     }
 
     protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)

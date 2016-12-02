@@ -44,6 +44,7 @@ namespace Innovator.Client
 
       req.RequestUri = uri;
       req.Method = HttpMethod.Post;
+      req.Async = async;
 
       var result = service.SendAsync(req, timeout.Source.Token)
         .ContinueWith((Func<Task<HttpResponseMessage>, Task<IHttpResponse>>)HttpResponse.Create, TaskScheduler.Default)
@@ -60,16 +61,12 @@ namespace Innovator.Client
 
       Task<HttpResponseMessage> respTask;
       if (req == null)
-      {
-        respTask = service.GetAsync(uri, timeout.Source.Token);
-      }
-      else
-      {
-        req.RequestUri = uri;
-        req.Method = HttpMethod.Get;
-        respTask = service.SendAsync(req, timeout.Source.Token);
-      }
-
+        req = new HttpRequest();
+      req.RequestUri = uri;
+      req.Method = HttpMethod.Get;
+      req.Async = async;
+      respTask = service.SendAsync(req, timeout.Source.Token);
+      
       var result = respTask
         .ContinueWith((Func<Task<HttpResponseMessage>, Task<IHttpResponse>>)HttpResponse.Create, TaskScheduler.Default)
         .Unwrap()

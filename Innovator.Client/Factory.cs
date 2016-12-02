@@ -35,7 +35,7 @@ namespace Innovator.Client
     {
       DefaultService = () =>
       {
-        var handler = new HttpClientHandler();
+        var handler = new SyncClientHandler();
         handler.CookieContainer = new CookieContainer();
         return new HttpClient(handler) { Timeout = TimeSpan.FromMinutes(20) };
       };

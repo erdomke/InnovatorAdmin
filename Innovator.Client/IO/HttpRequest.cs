@@ -12,6 +12,7 @@ namespace Innovator.Client
   {
     public const int DefaultTimeout = 100000;
 
+    public bool Async { get; set; }
     public int Timeout { get; set; }
     public string UserAgent
     {
@@ -21,6 +22,7 @@ namespace Innovator.Client
 
     public HttpRequest() : base()
     {
+      this.Async = true;
       this.Version = new Version(1, 1);
       this.Timeout = HttpRequest.DefaultTimeout;
     }
@@ -30,6 +32,11 @@ namespace Innovator.Client
       if (Headers.Contains(name))
         Headers.Remove(name);
       Headers.TryAddWithoutValidation(name, value);
+    }
+
+    private void Test()
+    {
+
     }
   }
 }

@@ -69,7 +69,7 @@ namespace Innovator.Client.Connection
 
       if (netCred != null && _allowAuth && !string.IsNullOrEmpty(endpoint))
       {
-        var handler = new HttpClientHandler();
+        var handler = new SyncClientHandler();
         handler.Credentials = netCred.Credentials;
         handler.PreAuthenticate = true;
         var http = new HttpClient(handler);

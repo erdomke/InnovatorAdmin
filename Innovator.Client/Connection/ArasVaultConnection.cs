@@ -173,7 +173,7 @@ namespace Innovator.Client.Connection
         if (upload.Settings != null) upload.Settings.Invoke(req);
         req.Headers.TransferEncodingChunked = true;
 
-        var handler = new HttpClientHandler();
+        var handler = new SyncClientHandler();
         handler.CookieContainer = upload.Vault.Cookies;
         var http = new HttpClient(handler);
 
