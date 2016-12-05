@@ -72,7 +72,7 @@ namespace Innovator.Client.Connection
         var handler = new SyncClientHandler();
         handler.Credentials = netCred.Credentials;
         handler.PreAuthenticate = true;
-        var http = new HttpClient(handler);
+        var http = new SyncHttpClient(handler);
         var promise = new Promise<ICredentials>();
         credPromise = promise;
 

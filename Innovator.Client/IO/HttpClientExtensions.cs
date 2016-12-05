@@ -38,13 +38,17 @@ namespace Innovator.Client
 
     public static IPromise<IHttpResponse> PostPromise(this HttpClient service, Uri uri, bool async, HttpRequest req)
     {
-      var hReq = req as IHttpRequest;
-      var timeout = new TimeoutSource();
-      timeout.CancelAfter(hReq == null ? HttpRequest.DefaultTimeout : hReq.Timeout);
-
       req.RequestUri = uri;
       req.Method = HttpMethod.Post;
       req.Async = async;
+
+#if HTTPSYNC
+      if (!async && req.Content is ISyncContent && service is SyncHttpClient)
+        return SendSync((SyncHttpClient)service, req);
+#endif
+
+      var timeout = new TimeoutSource();
+      timeout.CancelAfter(req == null ? HttpRequest.DefaultTimeout : req.Timeout);
 
       var result = service.SendAsync(req, timeout.Source.Token)
         .ContinueWith((Func<Task<HttpResponseMessage>, Task<IHttpResponse>>)HttpResponse.Create, TaskScheduler.Default)
@@ -54,19 +58,24 @@ namespace Innovator.Client
         result.Wait();
       return result;
     }
+
     public static IPromise<IHttpResponse> GetPromise(this HttpClient service, Uri uri, bool async, HttpRequest req = null)
     {
-      var timeout = new TimeoutSource();
-      timeout.CancelAfter(req == null ? HttpRequest.DefaultTimeout : req.Timeout);
-
-      Task<HttpResponseMessage> respTask;
       if (req == null)
         req = new HttpRequest();
       req.RequestUri = uri;
       req.Method = HttpMethod.Get;
       req.Async = async;
-      respTask = service.SendAsync(req, timeout.Source.Token);
-      
+
+#if HTTPSYNC
+      if (!async && service is SyncHttpClient)
+        return SendSync((SyncHttpClient)service, req);
+#endif
+
+      var timeout = new TimeoutSource();
+      timeout.CancelAfter(req == null ? HttpRequest.DefaultTimeout : req.Timeout);
+      var respTask = service.SendAsync(req, timeout.Source.Token);
+
       var result = respTask
         .ContinueWith((Func<Task<HttpResponseMessage>, Task<IHttpResponse>>)HttpResponse.Create, TaskScheduler.Default)
         .Unwrap()
@@ -75,6 +84,31 @@ namespace Innovator.Client
         result.Wait();
       return result;
     }
+
+#if HTTPSYNC
+    private static IPromise<IHttpResponse> SendSync(SyncHttpClient service, HttpRequest req)
+    {
+      try
+      {
+        return Promises.Resolved((IHttpResponse)service.Send(req));
+      }
+      catch (System.Net.WebException webex)
+      {
+        switch (webex.Status)
+        {
+          case System.Net.WebExceptionStatus.RequestCanceled:
+          case System.Net.WebExceptionStatus.Timeout:
+            return Promises.Rejected<IHttpResponse>(new HttpTimeoutException(string.Format("A response was not received after waiting for {0:m' minutes, 's' seconds'}", TimeSpan.FromMilliseconds(req.Timeout))));
+          default:
+            return Promises.Rejected<IHttpResponse>(webex);
+        }
+      }
+      catch (Exception ex)
+      {
+        return Promises.Rejected<IHttpResponse>(ex);
+      }
+    }
+#endif
 
     private class TimeoutSource : IDisposable, ICancelable
     {

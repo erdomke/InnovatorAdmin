@@ -33,10 +33,5 @@ namespace Innovator.Client
         Headers.Remove(name);
       Headers.TryAddWithoutValidation(name, value);
     }
-
-    private void Test()
-    {
-
-    }
   }
 }

@@ -123,7 +123,7 @@ namespace Innovator.Client.Connection
           Uri.EscapeDataString(fileItem.Property("filename").Value),
           vault.Id));
 
-        var client = new HttpClient();
+        var client = new SyncHttpClient();
         var req = new HttpRequest();
         _conn.SetDefaultHeaders((k, v) => { req.SetHeader(k, v); });
         req.SetHeader("VAULTID", vault.Id);
@@ -175,7 +175,7 @@ namespace Innovator.Client.Connection
 
         var handler = new SyncClientHandler();
         handler.CookieContainer = upload.Vault.Cookies;
-        var http = new HttpClient(handler);
+        var http = new SyncHttpClient(handler);
 
         return http.PostPromise(new Uri(upload.Vault.Url), async, req);
       }).Convert(r => r.AsStream);

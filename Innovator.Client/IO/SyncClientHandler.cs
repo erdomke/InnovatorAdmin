@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace Innovator.Client
 {
-  public class SyncClientHandler : HttpClientHandler
+  internal class SyncClientHandler : HttpClientHandler
   {
-    #if HTTPSYNC
+#if HTTPSYNC
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
       var req = request as HttpRequest;
@@ -20,37 +20,59 @@ namespace Innovator.Client
         return base.SendAsync(request, cancellationToken);
 
       var factory = new TaskCompletionSource<HttpResponseMessage>();
-      var st = System.Diagnostics.Stopwatch.StartNew();
       try
       {
-        var wReq = CreateAndPrepareWebRequest(request);
-        wReq.Timeout = req.Timeout;
-        var syncContent = req.Content as ISyncContent;
-        if (syncContent != null)
+        factory.SetResult(Send(req));
+      }
+      catch (WebException webex)
+      {
+        switch (webex.Status)
         {
-          syncContent.SerializeToStream(wReq.GetRequestStream());
+          case WebExceptionStatus.RequestCanceled:
+          case WebExceptionStatus.Timeout:
+            factory.SetCanceled();
+            break;
+          default:
+            factory.SetException(webex);
+            break;
         }
-
-        factory.SetResult(CreateResponseMessage((HttpWebResponse)wReq.GetResponse(), request));
       }
       catch (Exception ex)
       {
-        if (st.ElapsedMilliseconds >= req.Timeout)
-          factory.SetCanceled();
-        else
-          factory.SetException(ex);
+        factory.SetException(ex);
       }
 
       return factory.Task;
     }
 
-    private HttpResponseMessage CreateResponseMessage(HttpWebResponse webResponse, HttpRequestMessage request)
+    public HttpResponseMsg Send(HttpRequest request)
     {
-      var httpResponseMessage = new HttpResponseMessage(webResponse.StatusCode);
+      var wReq = CreateAndPrepareWebRequest(request);
+      wReq.Timeout = request.Timeout;
+      var syncContent = request.Content as ISyncContent;
+      if (syncContent != null)
+      {
+        syncContent.SerializeToStream(wReq.GetRequestStream());
+      }
+
+      return CreateResponseMessage((HttpWebResponse)wReq.GetResponse(), request);
+    }
+
+    private HttpResponseMsg CreateResponseMessage(HttpWebResponse webResponse, HttpRequestMessage request)
+    {
+      var httpResponseMessage = new HttpResponseMsg(webResponse.StatusCode);
       httpResponseMessage.ReasonPhrase = webResponse.StatusDescription;
       httpResponseMessage.Version = webResponse.ProtocolVersion;
       httpResponseMessage.RequestMessage = request;
-      httpResponseMessage.Content = new StreamContent(webResponse.GetResponseStream());
+
+      var content = new System.IO.MemoryStream();
+      using (var stream = webResponse.GetResponseStream())
+      {
+        stream.CopyTo(content);
+      }
+      content.Position = 0;
+
+      httpResponseMessage.Content = new ResponseContent(content);
       request.RequestUri = webResponse.ResponseUri;
       WebHeaderCollection headers = webResponse.Headers;
       HttpContentHeaders headers2 = httpResponseMessage.Content.Headers;
@@ -72,7 +94,7 @@ namespace Innovator.Client
           }
         }
       }
-
+      webResponse.Close();
       return httpResponseMessage;
     }
 
@@ -158,7 +180,8 @@ namespace Innovator.Client
       if (expectContinue.HasValue)
       {
         var servicePoint = webRequest.ServicePoint;
-        servicePoint.Expect100Continue = expectContinue.Value;
+        if (servicePoint != null)
+          servicePoint.Expect100Continue = expectContinue.Value;
       }
     }
 
@@ -176,12 +199,10 @@ namespace Innovator.Client
       {
         string host = origin.Host;
         if (host != null)
-        {
           webRequest.Host = host;
-        }
       }
-
       #endif
+
       if (hasExpect)
       {
         var headerValue = origin.Expect.ToString();
@@ -224,42 +245,41 @@ namespace Innovator.Client
         {
           case "accept":
             webRequest.Accept = kvp.Value.First();
-          break;
+            break;
           case "connection":
           case "expect":
           case "host":
           case "transfer-encoding":
-          // Do nothing
+            // Do nothing
             break;
           case "content-length":
             webRequest.ContentLength = long.Parse(kvp.Value.First());
-          break;
+            break;
           case "content-type":
             webRequest.ContentType = kvp.Value.First();
-          break;
+            break;
           case "if-modified-since":
             webRequest.IfModifiedSince = DateTime.Parse(kvp.Value.First());
-          break;
+            break;
           case "media-type":
             webRequest.MediaType = kvp.Value.First();
-          break;
+            break;
           case "referer":
             webRequest.Referer = kvp.Value.First();
-          break;
+            break;
           case "user-agent":
             webRequest.UserAgent = kvp.Value.First();
-          break;
+            break;
           default:
             foreach (var value in kvp.Value)
-          {
-            webRequest.Headers.Add(kvp.Key, value);
-          }
-
-          break;
+            {
+              webRequest.Headers.Add(kvp.Key, value);
+            }
+            break;
         }
       }
     }
 
-    #endif
+#endif
   }
 }

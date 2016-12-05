@@ -416,6 +416,8 @@
     <Compile Include="IO\CompressionType.cs" />
     <Compile Include="IO\FormContent.cs" />
     <Compile Include="IO\HttpClientExtensions.cs" />
+    <Compile Include="IO\HttpResponseMsg.cs" />
+    <Compile Include="IO\ResponseContent.cs" />
     <Compile Include="IO\SyncClientHandler.cs" />
     <Compile Include="IO\HttpException.cs" />
     <Compile Include="IO\HttpRequest.cs" />
@@ -425,6 +427,7 @@
     <Compile Include="IO\IHttpResponse.cs" />
     <Compile Include="IO\ISyncContent.cs" />
     <Compile Include="IO\SimpleContent.cs" />
+    <Compile Include="IO\SyncHttpClient.cs" />
     <Compile Include="IRemoteConnection.cs" />
     <Compile Include="IServerContext.cs" />
     <Compile Include="ITokenStore.cs" />

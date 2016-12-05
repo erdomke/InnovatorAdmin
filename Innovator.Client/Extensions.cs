@@ -72,14 +72,17 @@ namespace Innovator.Client
 
     internal static void Rethrow(this Exception ex)
     {
-#if REFLECTION
       if (!string.IsNullOrEmpty(ex.StackTrace))
       {
+#if REFLECTION
         typeof(Exception).GetMethod("PrepForRemoting",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
             .Invoke(ex, new object[0]);
-      }
+        throw ex;
+#else
+        ex.Source = ex.StackTrace;
 #endif
+      }
       throw ex;
     }
 
