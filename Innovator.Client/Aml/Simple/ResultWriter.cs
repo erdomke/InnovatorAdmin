@@ -340,6 +340,7 @@ namespace Innovator.Client
             peek.Add(old.Attributes());
             if (ReadOnly)
               ((Item)peek).SetFlag(ElementAttributes.FromDataStore);
+            ((Item)peek).Parent = _stack.Count > 0 ? _stack.Peek() : null;
             PushElement(peek);
           }
         }
@@ -347,7 +348,7 @@ namespace Innovator.Client
         switch (name)
         {
           case "id":
-            if (peek is Item && value.IsGuid())
+            if (peek is Item && value.IsGuid() && ReadOnly)
               AddAttribute(new IdAnnotation(peek, new Guid(value)));
             else
               AddAttribute(new Attribute(peek as Element, name, value));
@@ -433,11 +434,7 @@ namespace Innovator.Client
         var elem = iElem as Element;
         if (elem != null)
           elem.ReadOnly = ReadOnly;
-
-        var rel = iElem as Relationships;
-        if (rel != null)
-          rel.Compress();
-
+        
         if (_stack.Count < 1)
           OnComplete(EventArgs.Empty);
       }
@@ -448,7 +445,7 @@ namespace Innovator.Client
         switch (name)
         {
           case "Item":
-            curr = new Item(_factory);
+            curr = new Item(_factory) { Parent = _stack.Count > 0 ? _stack.Peek() : null };
             if (ReadOnly)
               ((Item)curr).SetFlag(ElementAttributes.FromDataStore);
             break;

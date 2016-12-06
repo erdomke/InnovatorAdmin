@@ -11,6 +11,7 @@ namespace Innovator.Client
     private IElement _parent = AmlElement.NullElem;
 
     public override ElementFactory AmlContext { get { return _amlContext; } }
+    public override bool Exists { get { return (_attr & ElementAttributes.Null) == 0; } }
     /// <summary>
     /// The tag name of the AML element
     /// </summary>
@@ -20,11 +21,8 @@ namespace Innovator.Client
       get { return _parent; }
       set { _parent = value ?? AmlElement.NullElem; }
     }
-    public override ILinkedElement Next
-    {
-      get { return ((_attr & ElementAttributes.Null) > 0 ? null : this); }
-      set { /* Do nothing */ }
-    }
+    public override ILinkedElement Next { get; set; }
+
 
     protected Item() { }
     public Item(ElementFactory amlContext, params object[] content)

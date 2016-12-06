@@ -13,7 +13,7 @@
     }
   },
   "supports": {},
-  "runtime": { "win":{}},
+  "runtimes": { "win":{}},
   "frameworks": {
     "net35": {
       "buildOptions": {},

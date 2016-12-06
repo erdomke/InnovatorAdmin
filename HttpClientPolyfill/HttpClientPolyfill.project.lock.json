@@ -12,6 +12,17 @@
           "lib/Net35/System.Threading.dll": {}
         }
       }
+    },
+    ".NETFramework,Version=v3.5/win": {
+      "TaskParallelLibrary/1.0.2856": {
+        "type": "package",
+        "compile": {
+          "lib/Net35/System.Threading.dll": {}
+        },
+        "runtime": {
+          "lib/Net35/System.Threading.dll": {}
+        }
+      }
     }
   },
   "libraries": {

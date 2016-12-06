@@ -20,6 +20,15 @@ namespace Innovator.Client.Tests
     }
 
     [TestMethod()]
+    public void ElementAdd()
+    {
+      var aml = ElementFactory.Local;
+      var query = aml.Aml(aml.Item(aml.Type("stuff")));
+      query.Add(aml.Item(aml.Type("important")));
+      Assert.AreEqual("<AML><Item type=\"stuff\" /><Item type=\"important\" /></AML>", query.ToAml());
+    }
+
+    [TestMethod()]
     public void SubSelect_EnsurePath()
     {
       var subSelect = new SubSelect();

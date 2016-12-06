@@ -19,6 +19,7 @@ namespace Innovator.Client.Tests
       Assert.AreEqual(input, item.ToAml());
     }
 
+#if NETFULL
     [TestMethod()]
     public void NullPropertySetIsNullAttribute()
     {
@@ -26,6 +27,15 @@ namespace Innovator.Client.Tests
       var item = aml.Item(aml.Type("Stuff"), aml.Action("edit"), aml.Property("first", null), aml.Property("second", DBNull.Value), aml.Property("third", "stuff"));
       Assert.AreEqual("<Item type=\"Stuff\" action=\"edit\"><first is_null=\"1\" /><second is_null=\"1\" /><third>stuff</third></Item>", item.ToAml());
     }
+#else
+    [TestMethod()]
+    public void NullPropertySetIsNullAttribute()
+    {
+      var aml = ElementFactory.Local;
+      var item = aml.Item(aml.Type("Stuff"), aml.Action("edit"), aml.Property("first", null), aml.Property("second", null), aml.Property("third", "stuff"));
+      Assert.AreEqual("<Item type=\"Stuff\" action=\"edit\"><first is_null=\"1\" /><second is_null=\"1\" /><third>stuff</third></Item>", item.ToAml());
+    }
+#endif
 
     [TestMethod()]
     public void PropertySetWithNullableData()

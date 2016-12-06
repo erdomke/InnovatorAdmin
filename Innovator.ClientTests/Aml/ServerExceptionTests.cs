@@ -13,6 +13,7 @@ namespace Innovator.Client.Tests
   [TestClass()]
   public class ServerExceptionTests
   {
+#if NETFULL
     [TestMethod()]
     public void VerifySerialization()
     {
@@ -33,6 +34,7 @@ namespace Innovator.Client.Tests
       ex = SerializeException<ServerException>(ex);
       Assert.AreEqual(expected, ex.ToString());
     }
+#endif
 
     [TestMethod()]
     public void ExceptionToAml()
