@@ -341,7 +341,7 @@ namespace Innovator.Client.Tests
     [TestMethod]
     public void LanguageHandling()
     {
-      var aml = new ElementFactory(new ServerContext() { LanguageCode = "fr" });
+      var aml = new ElementFactory(new ServerContext(false) { LanguageCode = "fr" });
       var item = aml.FromXml("<Item type='Supplier' action='get' select='name' language='en,fr'><thing>All</thing><name xml:lang='fr'>Dell France</name><i18n:name xml:lang='en' xmlns:i18n='http://www.aras.com/I18N'>Dell Computers</i18n:name></Item>").AssertItem();
       Assert.AreEqual("All", item.Property("thing").Value);
       Assert.AreEqual("All", item.Property("thing", "en").Value);

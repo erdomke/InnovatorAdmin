@@ -31,9 +31,9 @@ namespace Innovator.Client
       set { _timeZone = TimeZoneData.ById(value); }
     }
 
-    public ServerContext()
+    public ServerContext(bool utc)
     {
-      _timeZone = TimeZoneData.Local;
+      _timeZone = utc ? TimeZoneData.Utc : TimeZoneData.Local;
       this.LanguageCode = CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
     }
     public ServerContext(string timeZoneName)

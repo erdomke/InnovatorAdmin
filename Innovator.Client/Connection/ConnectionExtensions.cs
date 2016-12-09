@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace Innovator.Client
 {
@@ -33,6 +34,8 @@ namespace Innovator.Client
           query.WithParam(i.ToString(), parameters[i]);
         }
       }
+      if (query.Action == CommandAction.ApplySQL)
+        return ElementFactory.Utc.FromXml(conn.Process(query), query.Aml, conn);
       return conn.AmlContext.FromXml(conn.Process(query), query.Aml, conn);
     }
     /// <summary>
@@ -46,6 +49,26 @@ namespace Innovator.Client
     /// <returns>A read-only result</returns>
     public static IPromise<IReadOnlyResult> ApplyAsync(this IAsyncConnection conn, Command query, bool async, bool noItemsIsError, params object[] parameters)
     {
+      return ApplyAsyncInt(conn, query, default(CancellationToken), parameters);
+    }
+
+#if TASKS
+    /// <summary>
+    /// Get the result of executing the specified AML query
+    /// </summary>
+    /// <param name="conn">Connection to execute the query on</param>
+    /// <param name="query">Query to be performed.  If parameters are specified, they will be substituted into the query</param>
+    /// <param name="ct">A <see cref="CancellationToken"/> used to cancel the asynchronous operation</param>
+    /// <param name="parameters">Parameters to be injected into the query</param>
+    /// <returns>A read-only result</returns>
+    public static IPromise<IReadOnlyResult> ApplyAsync(this IAsyncConnection conn, Command query, CancellationToken ct, params object[] parameters)
+    {
+      return ApplyAsyncInt(conn, query, ct, parameters);
+    }
+#endif
+
+    private static IPromise<IReadOnlyResult> ApplyAsyncInt(this IAsyncConnection conn, Command query, CancellationToken ct, params object[] parameters)
+    {
       var result = new Promise<IReadOnlyResult>();
       if (parameters != null)
       {
@@ -55,15 +78,25 @@ namespace Innovator.Client
         }
       }
 
+      ct.Register(() => result.Cancel());
+
       result.CancelTarget(
-        conn.Process(query, async)
+        conn.Process(query, true)
         .Progress((p, m) => result.Notify(p, m))
         .Done(r =>
           {
             try
             {
-              var res = conn.AmlContext.FromXml(r, query.Aml, conn);
-              result.Resolve(res);
+              if (query.Action == CommandAction.ApplySQL)
+              {
+                var res = ElementFactory.Utc.FromXml(conn.Process(query), query.Aml, conn);
+                result.Resolve(res);
+              }
+              else
+              {
+                var res = conn.AmlContext.FromXml(r, query.Aml, conn);
+                result.Resolve(res);
+              }
             }
             catch (Exception ex)
             {

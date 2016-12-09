@@ -17,7 +17,7 @@ namespace Innovator.Client.Connection
     private CompressionType _compression;
     private HttpClient _service;
     private int _arasVersion;
-    private ServerContext _context = new ServerContext();
+    private ServerContext _context = new ServerContext(false);
     private ElementFactory _factory;
     private string _httpDatabase;
     private string _httpPassword;
@@ -242,7 +242,7 @@ namespace Innovator.Client.Connection
                     _userId = elem.Value;
                     break;
                   case "i18nsessioncontext":
-                    var context = new ServerContext();
+                    var context = new ServerContext(false);
                     _context.DefaultLanguageCode = elem.Element("default_language_code").Value;
                     _context.DefaultLanguageSuffix = elem.Element("default_language_suffix").Value;
                     _context.LanguageCode = elem.Element("language_code").Value;

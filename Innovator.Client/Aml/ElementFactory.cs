@@ -542,7 +542,13 @@ namespace Innovator.Client
       return Guid.NewGuid().ToString("N").ToUpperInvariant();
     }
 
-    /// <summary>Generate a new factory assuming the local time zone and culture</summary>
-    public static readonly ElementFactory Local = new ElementFactory(new ServerContext());
+    private static readonly ElementFactory _local = new ElementFactory(new ServerContext(false));
+    private static readonly ElementFactory _utc = new ElementFactory(new ServerContext(true));
+
+    /// <summary>Return an <see cref="ElementFactory"/> using the local time zone and culture</summary>
+    public static ElementFactory Local { get { return _local; } }
+
+    /// <summary>Return an <see cref="ElementFactory"/> using the UTC time zone and current culture</summary>
+    public static ElementFactory Utc { get { return _utc; } }
   }
 }
