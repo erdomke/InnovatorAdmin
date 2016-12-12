@@ -145,6 +145,25 @@ namespace Innovator.Client
       }
       return conn.ApplyAsync(sql.WithAction(CommandAction.ApplySQL), async, true);
     }
+
+#if TASKS
+    /// <summary>
+    /// Get the result of executing the specified SQL query
+    /// </summary>
+    /// <param name="conn">Connection to execute the query on</param>
+    /// <param name="sql">SQL query to be performed.  If parameters are specified, they will be substituted into the query</param>
+    /// <param name="ct">A <see cref="CancellationToken"/> used to cancel the asynchronous operation</param>
+    /// <returns>A read-only result</returns>
+    public static IPromise<IReadOnlyResult> ApplySql(this IAsyncConnection conn, Command sql, CancellationToken ct)
+    {
+      if (!sql.Aml.TrimStart().StartsWith("<"))
+      {
+        sql.Aml = "<sql>" + ServerContext.XmlEscape(sql.Aml) + "</sql>";
+      }
+      return conn.ApplyAsync(sql.WithAction(CommandAction.ApplySQL), ct);
+    }
+#endif
+
 #if DBDATA
     public static Connection.DbConnection AsDb(this IConnection conn)
     {

@@ -84,7 +84,6 @@ namespace Innovator.Client
         {
           Parameter condition = null;
           DynamicDateTimeRange dateRange = null;
-          var hasItem = false;
           var tagNames = new List<string>();
           string tagName;
           Parameter param;
@@ -157,12 +156,11 @@ namespace Innovator.Client
                 switch (tagName)
                 {
                   case "Item":
-                    hasItem = true;
                     if (!tagNames.Any(n => n == "Item")) _itemCount++;
                     break;
                   case "sql":
                   case "SQL":
-                    if (!hasItem) condition = "sql";
+                    condition = "sql";
                     break;
                 }
 

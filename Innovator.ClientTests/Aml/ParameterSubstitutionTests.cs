@@ -36,5 +36,14 @@ namespace Innovator.Client.Tests
         new Command((FormattableString)$"<Item><name>{name}</name><is_current>{isCurrent}</is_current><date>{date:yyyy-MM-dd}</date></Item>").ToNormalizedAml(ElementFactory.Local.LocalizationContext));
     }
 #endif
+
+    [TestMethod()]
+    public void SubstituteSqlProperty()
+    {
+      var aml = @"<Item type='Method' action='ApplySelect'>
+  <sql><![CDATA[select @0, @1]]></sql>
+</Item>";
+      Assert.AreEqual(@"<Item type=""Method"" action=""ApplySelect""><sql><![CDATA[select N'test', 2]]></sql></Item>", new Command(aml, "test", 2).ToNormalizedAml(ElementFactory.Local.LocalizationContext));
+    }
   }
 }
