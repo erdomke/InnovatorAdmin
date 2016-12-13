@@ -18,6 +18,7 @@ namespace Innovator.Client
 #endif
   public sealed class ServerContext : IServerContext
   {
+    private const string DoubleFixedPoint = "0.###################################################################################################################################################################################################################################################################################################################################################";
     private TimeZoneData _timeZone;
 
     public string DefaultLanguageCode { get; set; }
@@ -64,7 +65,8 @@ namespace Innovator.Client
 #endif
 
     /// <summary>
-    /// Coerse an <c>object</c> to a <c>bool?</c>.  Handles <c>bool</c> or <c>string</c> values
+    /// Coerse an <see cref="object"/> to a <see cref="bool?"/>.
+    /// Handles <see cref="bool"/> or <see cref="string"/> values
     /// </summary>
     public bool? AsBoolean(object value)
     {
@@ -91,7 +93,8 @@ namespace Innovator.Client
       }
     }
     /// <summary>
-    /// Coerse an <c>object</c> to a <c>DateTime?</c> in the local timezone.  Handles <c>DateTime</c> or <c>string</c> values
+    /// Coerse an <see cref="object"/> to a <see cref="DateTime?"/> in the local timezone.
+    /// Handles <see cref="DateTime"/> or <see cref="string"/> values
     /// </summary>
     public DateTime? AsDateTime(object value)
     {
@@ -118,7 +121,19 @@ namespace Innovator.Client
       return result;
     }
     /// <summary>
-    /// Coerse an <c>object</c> to a <c>DateTime?</c> in the UTC timezone.  Handles <c>DateTime</c> or <c>string</c> values
+    /// Coerse an <see cref="object"/> to a <see cref="DateTime?"/> in the local timezone.
+    /// Handles <see cref="DateTime"/> or <see cref="string"/> values
+    /// </summary>
+    public DateTimeOffset? AsDateTimeOffset(object value)
+    {
+      var date = AsDateTime(value);
+      if (!date.HasValue)
+        return null;
+      return new DateTimeOffset(date.Value, _timeZone.GetUtcOffset(date.Value));
+    }
+    /// <summary>
+    /// Coerse an <see cref="object"/> to a <see cref="DateTime?"/> in the UTC timezone.
+    /// Handles <see cref="DateTime"/> or <see cref="string"/> values
     /// </summary>
     public DateTime? AsDateTimeUtc(object value)
     {
@@ -199,7 +214,9 @@ namespace Innovator.Client
 
     public string Format(object value)
     {
-      return Format(value, n => n.ToString(null, CultureInfo.InvariantCulture), s => s.ToString());
+      return Format(value
+        , n => n.ToString(DoubleFixedPoint, CultureInfo.InvariantCulture).TrimEnd('0')
+        , s => s.ToString());
     }
     private string Format(object value, Func<IFormattable, string> numberRenderer, Func<object, string> stringRenderer)
     {
@@ -395,7 +412,7 @@ namespace Innovator.Client
       }
       else if (value is float || value is double || value is decimal)
       {
-        number = Convert.ToDecimal(value);
+        number = (IFormattable)value;
         return true;
       }
       number = null;

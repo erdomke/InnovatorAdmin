@@ -89,7 +89,7 @@ namespace Innovator.Client
             {
               if (query.Action == CommandAction.ApplySQL)
               {
-                var res = ElementFactory.Utc.FromXml(conn.Process(query), query.Aml, conn);
+                var res = ElementFactory.Utc.FromXml(r, query.Aml, conn);
                 result.Resolve(res);
               }
               else
@@ -143,7 +143,7 @@ namespace Innovator.Client
       {
         sql.Aml = "<sql>" + ServerContext.XmlEscape(sql.Aml) + "</sql>";
       }
-      return conn.ApplyAsync(sql.WithAction(CommandAction.ApplySQL), async, true);
+      return ApplyAsyncInt(conn, sql.WithAction(CommandAction.ApplySQL), default(CancellationToken));
     }
 
 #if TASKS
@@ -160,7 +160,7 @@ namespace Innovator.Client
       {
         sql.Aml = "<sql>" + ServerContext.XmlEscape(sql.Aml) + "</sql>";
       }
-      return conn.ApplyAsync(sql.WithAction(CommandAction.ApplySQL), ct);
+      return ApplyAsyncInt(conn, sql.WithAction(CommandAction.ApplySQL), ct);
     }
 #endif
 

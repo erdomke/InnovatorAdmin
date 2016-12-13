@@ -211,7 +211,7 @@ namespace Innovator.Client
 
     public string Id()
     {
-      return ((IReadOnlyElement)this).Attribute("id").Value;
+      return ((IReadOnlyElement)this).Attribute("id").Value ?? this.IdProp().Value;
     }
 
     public virtual string TypeName()

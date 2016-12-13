@@ -11,10 +11,10 @@ namespace Innovator.Client
   /// </summary>
   public interface IReadOnlyProperty_Boolean : IReadOnlyProperty_Base
   {
-    /// <summary>Value converted to a nullable boolean.
+    /// <summary>Value converted to a nullable <see cref="bool"/>.
     /// If the value cannot be converted, an exception is thrown</summary>
     bool? AsBoolean();
-    /// <summary>Value converted to a boolean using the default value if null.
+    /// <summary>Value converted to a <see cref="bool"/> using the default value if null.
     /// If the value cannot be converted, an exception is thrown</summary>
     bool AsBoolean(bool defaultValue);
   }
@@ -24,10 +24,10 @@ namespace Innovator.Client
   /// </summary>
   public interface IReadOnlyProperty_Date : IReadOnlyProperty_Base
   {
-    /// <summary>Value converted to a nullable DateTime in the local timezone.
+    /// <summary>Value converted to a nullable <see cref="DateTime"/> in the local timezone.
     /// If the value cannot be converted, an exception is thrown</summary>
     DateTime? AsDateTime();
-    /// <summary>Value converted to a DateTime in the local timezone using the default value if null.
+    /// <summary>Value converted to a <see cref="DateTime"/> in the local timezone using the default value if null.
     /// If the value cannot be converted, an exception is thrown</summary>
     /// <example>
     /// <code lang="C#">
@@ -39,12 +39,18 @@ namespace Innovator.Client
     /// </code>
     /// </example>
     DateTime AsDateTime(DateTime defaultValue);
-    /// <summary>Value converted to a nullable DateTime in the UTC timezone.
+    /// <summary>Value converted to a nullable <see cref="DateTime"/> in the UTC timezone.
     /// If the value cannot be converted, an exception is thrown</summary>
     DateTime? AsDateTimeUtc();
-    /// <summary>Value converted to a DateTime in the UTC timezone using the default value if null.
+    /// <summary>Value converted to a <see cref="DateTime"/> in the UTC timezone using the default value if null.
     /// If the value cannot be converted, an exception is thrown</summary>
     DateTime AsDateTimeUtc(DateTime defaultValue);
+    /// <summary>Value converted to a nullable <see cref="DateTimeOffset"/>.
+    /// If the value cannot be converted, an exception is thrown</summary>
+    DateTimeOffset? AsDateTimeOffset();
+    /// <summary>Value converted to a <see cref="DateTimeOffset"/> using the default value if null.
+    /// If the value cannot be converted, an exception is thrown</summary>
+    DateTimeOffset AsDateTimeOffset(DateTimeOffset defaultValue);
   }
 
   /// <summary>
@@ -52,22 +58,22 @@ namespace Innovator.Client
   /// </summary>
   public interface IReadOnlyProperty_Number : IReadOnlyProperty_Base
   {
-    /// <summary>Value converted to a nullable double.
+    /// <summary>Value converted to a nullable <see cref="double"/>.
     /// If the value cannot be converted, an exception is thrown</summary>
     double? AsDouble();
-    /// <summary>Value converted to a double using the default value if null.
+    /// <summary>Value converted to a <see cref="double"/> using the default value if null.
     /// If the value cannot be converted, an exception is thrown</summary>
     double AsDouble(double defaultValue);
-    /// <summary>Value converted to a nullable int.
+    /// <summary>Value converted to a nullable <see cref="int"/>.
     /// If the value cannot be converted, an exception is thrown</summary>
     int? AsInt();
-    /// <summary>Value converted to a int using the default value if null.
+    /// <summary>Value converted to a <see cref="int"/> using the default value if null.
     /// If the value cannot be converted, an exception is thrown</summary>
     int AsInt(int defaultValue);
-    /// <summary>Value converted to a nullable long.
+    /// <summary>Value converted to a nullable <see cref="long"/>.
     /// If the value cannot be converted, an exception is thrown</summary>
     long? AsLong();
-    /// <summary>Value converted to a long using the default value if null.
+    /// <summary>Value converted to a <see cref="long"/> using the default value if null.
     /// If the value cannot be converted, an exception is thrown</summary>
     long AsLong(long defaultValue);
   }
@@ -77,10 +83,10 @@ namespace Innovator.Client
   /// </summary>
   public interface IReadOnlyProperty_Item<in T> : IReadOnlyProperty_Base
   {
-    /// <summary>Value converted to a nullable Guid.
+    /// <summary>Value converted to a nullable <see cref="Guid"/>.
     /// If the value cannot be converted, an exception is thrown</summary>
     Guid? AsGuid();
-    /// <summary>Value converted to a Guid using the default value if null.
+    /// <summary>Value converted to a <see cref="Guid"/> using the default value if null.
     /// If the value cannot be converted, an exception is thrown</summary>
     Guid AsGuid(Guid defaultValue);
     /// <summary>Value converted to a read-only item.
@@ -94,7 +100,7 @@ namespace Innovator.Client
   /// </summary>
   public interface IReadOnlyProperty_Text : IReadOnlyProperty_Base
   {
-    /// <summary>Value converted to a string using the default value if null.</summary>
+    /// <summary>Value converted to a <see cref="string"/> using the default value if null.</summary>
     string AsString(string defaultValue);
   }
 

@@ -23,7 +23,7 @@ namespace Innovator.Client
     {
       get
       {
-        return _parent == null
+        return _parent == null || _parent.AmlContext == null
           ? _content as string
           : _parent.AmlContext.LocalizationContext.Format(_content);
       }

@@ -63,6 +63,14 @@ namespace Innovator.Client
     {
       throw new NotSupportedException();
     }
+    public DateTimeOffset? AsDateTimeOffset()
+    {
+      throw new NotSupportedException();
+    }
+    public DateTimeOffset AsDateTimeOffset(DateTimeOffset defaultValue)
+    {
+      throw new NotSupportedException();
+    }
     public DateTime? AsDateTimeUtc()
     {
       throw new NotSupportedException();

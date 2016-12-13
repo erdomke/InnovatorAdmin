@@ -19,6 +19,7 @@ namespace Innovator.Client
 
     bool? AsBoolean(object value);
     DateTime? AsDateTime(object value);
+    DateTimeOffset? AsDateTimeOffset(object value);
     DateTime? AsDateTimeUtc(object value);
     decimal? AsDecimal(object value);
     double? AsDouble(object value);

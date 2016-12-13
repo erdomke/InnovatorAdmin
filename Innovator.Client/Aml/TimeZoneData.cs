@@ -28,6 +28,11 @@ namespace Innovator.Client
       get { return _timeZone.Id; }
     }
 
+    public TimeSpan GetUtcOffset(DateTime dateTime)
+    {
+      return _timeZone.GetUtcOffset(dateTime);
+    }
+
     public override int GetHashCode()
     {
       return _timeZone.GetHashCode();
@@ -70,6 +75,12 @@ namespace Innovator.Client
         _timeZone = DateTimeZoneProviders.Tzdb[WindowsTzToIana(value)],
         _id = value
       };
+    }
+
+    public TimeSpan GetUtcOffset(DateTime dateTime)
+    {
+      var zoned = LocalDateTime.FromDateTime(dateTime).InZoneLeniently(_timeZone);
+      return TimeSpan.FromMilliseconds(_timeZone.GetUtcOffset(zoned.ToInstant()).Milliseconds);
     }
 
     public override int GetHashCode()

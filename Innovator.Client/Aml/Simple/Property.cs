@@ -101,6 +101,17 @@ namespace Innovator.Client
       if (result.HasValue) return result.Value;
       return defaultValue;
     }
+    public DateTimeOffset? AsDateTimeOffset()
+    {
+      if (!this.Exists) return null;
+      return (_parent == null ? ElementFactory.Local : _parent.AmlContext).LocalizationContext.AsDateTimeOffset(NeutralValue());
+    }
+    public DateTimeOffset AsDateTimeOffset(DateTimeOffset defaultValue)
+    {
+      var result = AsDateTimeOffset();
+      if (result.HasValue) return result.Value;
+      return defaultValue;
+    }
     public DateTime? AsDateTimeUtc()
     {
       if (!this.Exists) return null;

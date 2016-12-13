@@ -432,6 +432,16 @@ namespace Innovator.Client
         return _prop.AsDateTime(defaultValue);
       }
 
+      public DateTimeOffset? AsDateTimeOffset()
+      {
+        return _prop.AsDateTimeOffset();
+      }
+
+      public DateTimeOffset AsDateTimeOffset(DateTimeOffset defaultValue)
+      {
+        return _prop.AsDateTimeOffset(defaultValue);
+      }
+
       public DateTime? AsDateTimeUtc()
       {
         return _prop.AsDateTimeUtc();

@@ -379,5 +379,21 @@ namespace Innovator.Client.Tests
       var result = ElementFactory.Local.FromXml(aml);
       Assert.AreEqual(1, result.Items().Count());
     }
+
+    [TestMethod]
+    public void VerifyIdMethod()
+    {
+      var aml = @"<SOAP-ENV:Envelope xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'><SOAP-ENV:Body><Result><Item><classification>Miscellaneous</classification><id>9370ECBC57DD416A9465F69F1281DB74</id><keyed_name>heart-1239269 (DOC-171531)</keyed_name></Item></Result><Message><Item id='F7584539F93F4F7F83A6EBF54072E6E4' type='File'><filename>f7584539f93f4f7f83a6ebf54072e6e4.jpg</filename></Item><event name='ids_modified' value='9370ECBC57DD416A9465F69F1281DB74|F7584539F93F4F7F83A6EBF54072E6E4|98F667F9CAB04528843D6D20738C46E6|527C835794B842A8B16E054E35B54F61' /></Message></SOAP-ENV:Body></SOAP-ENV:Envelope>";
+      var result = ElementFactory.Local.FromXml(aml);
+      Assert.AreEqual("9370ECBC57DD416A9465F69F1281DB74", result.AssertItem().Id());
+    }
+
+    [TestMethod]
+    public void AttributeValueOnNullItem()
+    {
+      var aml = @"<SOAP-ENV:Envelope xmlns:SOAP-ENV='http://schemas.xmlsoap.org/soap/envelope/'><SOAP-ENV:Body><Result><Item><classification>Miscellaneous</classification><id>9370ECBC57DD416A9465F69F1281DB74</id><keyed_name>heart-1239269 (DOC-171531)</keyed_name></Item></Result><Message><Item id='F7584539F93F4F7F83A6EBF54072E6E4' type='File'><filename>f7584539f93f4f7f83a6ebf54072e6e4.jpg</filename></Item><event name='ids_modified' value='9370ECBC57DD416A9465F69F1281DB74|F7584539F93F4F7F83A6EBF54072E6E4|98F667F9CAB04528843D6D20738C46E6|527C835794B842A8B16E054E35B54F61' /></Message></SOAP-ENV:Body></SOAP-ENV:Envelope>";
+      var result = ElementFactory.Local.FromXml(aml);
+      Assert.AreEqual(null, result.AssertItem().CreatedById().AsItem().Type().Value);
+    }
   }
 }
