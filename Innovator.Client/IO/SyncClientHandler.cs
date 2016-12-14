@@ -24,18 +24,9 @@ namespace Innovator.Client
       {
         factory.SetResult(Send(req));
       }
-      catch (WebException webex)
+      catch (HttpTimeoutException)
       {
-        switch (webex.Status)
-        {
-          case WebExceptionStatus.RequestCanceled:
-          case WebExceptionStatus.Timeout:
-            factory.SetCanceled();
-            break;
-          default:
-            factory.SetException(webex);
-            break;
-        }
+        factory.SetCanceled();
       }
       catch (Exception ex)
       {
@@ -55,7 +46,22 @@ namespace Innovator.Client
         syncContent.SerializeToStream(wReq.GetRequestStream());
       }
 
-      return CreateResponseMessage((HttpWebResponse)wReq.GetResponse(), request);
+      try
+      {
+        return CreateResponseMessage((HttpWebResponse)wReq.GetResponse(), request);
+      }
+      catch (WebException webex)
+      {
+        switch (webex.Status)
+        {
+          case WebExceptionStatus.RequestCanceled:
+          case WebExceptionStatus.Timeout:
+            throw new HttpTimeoutException(string.Format("A response was not received after waiting for {0:m' minutes, 's' seconds'}", TimeSpan.FromMilliseconds(request.Timeout)), webex);
+          default:
+            var resp = CreateResponseMessage((HttpWebResponse)webex.Response, request);
+            throw new HttpException(resp);
+        }
+      }
     }
 
     private HttpResponseMsg CreateResponseMessage(HttpWebResponse webResponse, HttpRequestMessage request)
