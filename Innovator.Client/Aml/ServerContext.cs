@@ -215,7 +215,7 @@ namespace Innovator.Client
     public string Format(object value)
     {
       return Format(value
-        , n => n.ToString(DoubleFixedPoint, CultureInfo.InvariantCulture).TrimEnd('0')
+        , n => n.ToString(DoubleFixedPoint, CultureInfo.InvariantCulture)
         , s => s.ToString());
     }
     private string Format(object value, Func<IFormattable, string> numberRenderer, Func<object, string> stringRenderer)

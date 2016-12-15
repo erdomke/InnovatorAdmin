@@ -11,34 +11,9 @@
         "runtime": {
           "lib/Net35/System.Threading.dll": {}
         }
-      },
-      "HttpClientPolyfill/1.0.0": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v3.5",
-        "dependencies": {
-          "TaskParallelLibrary": "1.0.2856"
-        },
-        "frameworkAssemblies": [
-          "System.Core",
-          "System.Data",
-          "System.Xml",
-          "System.Xml.Linq"
-        ]
       }
     },
-    ".NETFramework,Version=v4.0": {
-      "HttpClientPolyfill/1.0.0": {
-        "type": "project",
-        "framework": ".NETFramework,Version=v4.0",
-        "frameworkAssemblies": [
-          "Microsoft.CSharp",
-          "System.Core",
-          "System.Data",
-          "System.Xml",
-          "System.Xml.Linq"
-        ]
-      }
-    },
+    ".NETFramework,Version=v4.0": {},
     ".NETFramework,Version=v4.5": {},
     ".NETFramework,Version=v4.6": {},
     ".NETStandard,Version=v1.1": {
@@ -4332,10 +4307,6 @@
         "lib/Net35/System.Threading.xml",
         "lib/Net35/redist.txt"
       ]
-    },
-    "HttpClientPolyfill/1.0.0": {
-      "type": "project",
-      "path": "../HttpClientPolyfill/project.json"
     }
   },
   "projectFileDependencyGroups": {

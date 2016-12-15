@@ -50,6 +50,16 @@ namespace Innovator.Client.Tests
     }
 
     [TestMethod()]
+    public void PropertySetWithNumber()
+    {
+      var aml = ElementFactory.Local;
+      var item = aml.Item(aml.Type("Stuff"), aml.Action("edit"));
+      item.Property("some_val").Set(1000);
+      item.Property("some_val_2").Set(0.00000000000000000000000000000000000000000000064879);
+      Assert.AreEqual("<Item type=\"Stuff\" action=\"edit\"><some_val>1000</some_val><some_val_2>0.00000000000000000000000000000000000000000000064879</some_val_2></Item>", item.ToAml());
+    }
+
+    [TestMethod()]
     public void UtcDateConversion()
     {
       var aml = ElementFactory.Local;
