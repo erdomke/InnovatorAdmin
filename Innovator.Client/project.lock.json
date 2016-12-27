@@ -3,6 +3,18 @@
   "version": 2,
   "targets": {
     ".NETFramework,Version=v3.5": {
+      "HttpClientPolyfill/1.0.0.5": {
+        "type": "package",
+        "dependencies": {
+          "TaskParallelLibrary": "1.0.2856"
+        },
+        "compile": {
+          "lib/net35/HttpClientPolyfill.dll": {}
+        },
+        "runtime": {
+          "lib/net35/HttpClientPolyfill.dll": {}
+        }
+      },
       "TaskParallelLibrary/1.0.2856": {
         "type": "package",
         "compile": {
@@ -13,7 +25,17 @@
         }
       }
     },
-    ".NETFramework,Version=v4.0": {},
+    ".NETFramework,Version=v4.0": {
+      "HttpClientPolyfill/1.0.0.5": {
+        "type": "package",
+        "compile": {
+          "lib/net40/HttpClientPolyfill.dll": {}
+        },
+        "runtime": {
+          "lib/net40/HttpClientPolyfill.dll": {}
+        }
+      }
+    },
     ".NETFramework,Version=v4.5": {},
     ".NETFramework,Version=v4.6": {},
     ".NETStandard,Version=v1.1": {
@@ -1345,6 +1367,19 @@
     }
   },
   "libraries": {
+    "HttpClientPolyfill/1.0.0.5": {
+      "sha512": "yqVJ9T7yug2jfaZCH9n2oXcFVLSfdhGofj2aWrv2qvz1uKV329GY3Dgt+LaSDiU9clG9Av7gBQDxkm5O3RnHbA==",
+      "type": "package",
+      "path": "HttpClientPolyfill/1.0.0.5",
+      "files": [
+        "HttpClientPolyfill.1.0.0.5.nupkg.sha512",
+        "HttpClientPolyfill.nuspec",
+        "lib/net35/HttpClientPolyfill.dll",
+        "lib/net35/HttpClientPolyfill.pdb",
+        "lib/net40/HttpClientPolyfill.dll",
+        "lib/net40/HttpClientPolyfill.pdb"
+      ]
+    },
     "Microsoft.NETCore.Jit/1.0.2": {
       "sha512": "Ok2vWofa6X8WD9vc4pfLHwvJz1/B6t3gOAoZcjrjrQf7lQOlNIuZIZtLn3wnWX28DuQGpPJkRlBxFj7Z5txNqw==",
       "type": "package",
@@ -4312,7 +4347,7 @@
   "projectFileDependencyGroups": {
     "": [],
     ".NETFramework,Version=v3.5": [
-      "HttpClientPolyfill >= 1.0.0-*",
+      "HttpClientPolyfill >= 1.0.0.5",
       "System.Core",
       "System.Data",
       "System.Web",
@@ -4321,7 +4356,7 @@
       "TaskParallelLibrary >= 1.0.2856"
     ],
     ".NETFramework,Version=v4.0": [
-      "HttpClientPolyfill >= 1.0.0-*",
+      "HttpClientPolyfill >= 1.0.0.5",
       "Microsoft.CSharp",
       "System.Core",
       "System.Data",
