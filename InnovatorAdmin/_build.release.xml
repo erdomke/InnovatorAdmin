@@ -65,7 +65,7 @@
       <SquirrelPath Include="..\packages\squirrel.windows.*\tools\Squirrel.exe" />
       <NuPkgPath Include="$(ProjectName).*.nupkg" />
     </ItemGroup>
-    <Exec Command="..\.nuget\NuGet.exe Push @(NuPkgPath)" />
+    <Exec Command="..\.nuget\NuGet.exe Push @(NuPkgPath) -Source https://www.nuget.org/" />
     <Exec Command="@(SquirrelPath) --releasify=@(NuPkgPath) --no-msi" />
   </Target>
 </Project>

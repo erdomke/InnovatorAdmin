@@ -5,7 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using Pipes;
+//using Pipes;
 
 namespace InnovatorAdmin.Controls
 {
@@ -90,13 +90,8 @@ namespace InnovatorAdmin.Controls
       }
       else if (!string.IsNullOrEmpty(Clipboard.GetText()))
       {
-        var reader = new Pipes.IO.StringTextSource(Clipboard.GetText().TrimEnd('\r', '\n'))
-          .Pipe(new Pipes.Data.DelimitedTextLineReader());
-        reader.AddDelim('\t');
-        reader.FieldEnclosingChar = '"';
-        reader.EnclosingCharEscape = '"';
-
-        var lines = reader.ToArray();
+        var text = Clipboard.GetText().TrimEnd('\r', '\n').Replace("\r\n", "\n").Replace('\r', '\n');
+        var lines = text.Split('\n').Select(l => l.Split('\t').ToArray()).ToArray();
         var clipRows = lines.Length;
         string[] fields = null;
         DataGridViewCell cell;

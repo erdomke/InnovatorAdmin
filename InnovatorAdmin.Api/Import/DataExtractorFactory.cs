@@ -16,8 +16,8 @@ namespace InnovatorAdmin
       {
         case ImportType.Files:
           return new FolderExtractor(paths);
-        case ImportType.DataFile:
-          return new ExcelExtractor(paths.Single());
+        //case ImportType.DataFile:
+        //  return new ExcelExtractor(paths.Single());
         default:
           throw new NotImplementedException();
       }
