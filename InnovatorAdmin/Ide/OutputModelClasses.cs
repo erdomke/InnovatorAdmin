@@ -12,6 +12,8 @@ namespace InnovatorAdmin
   public class OutputModelClasses
   {
     private IAsyncConnection _conn;
+    private string _baseDir = @"C:\Users\eric.domke\Documents\Models\";
+    private string _companyName = "Gentex";
 
     public OutputModelClasses(IAsyncConnection conn)
     {
@@ -28,15 +30,34 @@ namespace InnovatorAdmin
     <Item type='Morphae' action='get' select='related_id' related_expand='0' />
   </Relationships>
 </Item>", true, false).ToTask()).Items().OfType<Innovator.Client.Model.ItemType>();
+
+      var defaultFactory = new Innovator.Client.DefaultItemFactory();
+      itemTypes = itemTypes.Where(i => defaultFactory.NewItem(_conn.AmlContext, i.IdProp().KeyedName().Value) == null).ToArray();
+
       var dict = itemTypes.ToDictionary(i => i.Id());
       var polymorphicIds = new HashSet<string>();
       var links = new NameValueCollection();
+
+      var files = new List<string>() { "AssemblyInfo.Version.cs" };
+      var directories = new string[]
+      {
+        Path.Combine(_baseDir, "Innovator.Client." + _companyName),
+        Path.Combine(_baseDir, "Innovator.Client." + _companyName + "/Properties")
+      };
+
+      foreach (var dir in directories)
+      {
+        if (!Directory.Exists(dir))
+          Directory.CreateDirectory(dir);
+      }
+
 
       foreach (var itemType in itemTypes.Where(i => i.ImplementationType().Value == "polymorphic"))
       {
         polymorphicIds.Add(itemType.Id());
         var itemTypeLabel = "I" + itemType.IdProp().KeyedName().Value.Replace(" ", "");
-        using (var writer = new StreamWriter(@"C:\Users\eric.domke\Documents\Models\" + itemTypeLabel + ".cs"))
+        files.Add(itemTypeLabel + ".cs");
+        using (var writer = new StreamWriter(Path.Combine(_baseDir, "Innovator.Client." + _companyName + "/" + itemTypeLabel + ".cs")))
         {
           await writer.WriteAsync(@"using Innovator.Client;
 using System;
@@ -84,7 +105,8 @@ namespace Innovator.Client.Model
       foreach (var itemType in itemTypes)
       {
         var itemTypeLabel = itemType.IdProp().KeyedName().Value.Replace(" ", "");
-        using (var writer = new StreamWriter(@"C:\Users\eric.domke\Documents\Models\" + itemTypeLabel + ".cs"))
+        files.Add(itemTypeLabel + ".cs");
+        using (var writer = new StreamWriter(Path.Combine(_baseDir, "Innovator.Client." + _companyName + "/" + itemTypeLabel + ".cs")))
         {
           await writer.WriteAsync(@"using Innovator.Client;
 using System;
@@ -161,6 +183,269 @@ namespace Innovator.Client.Model
           await writer.WriteAsync(@"  }
 }");
         }
+      }
+
+      files.Add("CorporateItemFactory.cs");
+      using (var writer = new StreamWriter(Path.Combine(_baseDir, "Innovator.Client." + _companyName + "/" + "CorporateItemFactory.cs")))
+      {
+        await writer.WriteAsync(@"using Innovator.Client;
+using Innovator.Client.Model;
+
+namespace Innovator.Client.Model
+{
+  public class CorporateItemFactory : IItemFactory
+  {
+    private static ElementFactory _local = new ElementFactory(new ServerContext(false), new CorporateItemFactory());
+    public static ElementFactory Local { get { return _local; } }
+
+    private static IReadOnlyItem _nullItem = new IReadOnlyItem[] { }.FirstOrNullItem();
+    public static IReadOnlyItem NullItem { get { return _nullItem; } }
+
+    private IItemFactory _default = new DefaultItemFactory();
+
+    public Item NewItem(ElementFactory factory, string type)
+    {
+      switch (type)
+      {
+");
+        foreach (var itemType in itemTypes)
+        {
+          var itemTypeLabel = itemType.IdProp().KeyedName().Value.Replace(" ", "");
+          await writer.WriteAsync("        case \"");
+          await writer.WriteAsync(itemType.IdProp().KeyedName().Value);
+          await writer.WriteAsync("\": return new ");
+          await writer.WriteAsync(itemTypeLabel);
+          await writer.WriteAsync("(factory);");
+          await writer.WriteLineAsync();
+        }
+        await writer.WriteAsync(@"      }
+
+      return _default.NewItem(factory, type);
+    }
+  }
+}");
+      }
+
+      using (var writer = new StreamWriter(Path.Combine(_baseDir, "Innovator.Client." + _companyName + "/Innovator.Client." + _companyName + ".csproj")))
+      {
+        await writer.WriteAsync(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<Project ToolsVersion=""14.0"" DefaultTargets=""Build"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+  <Import Project=""$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"" Condition=""Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"" />
+  <PropertyGroup>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <Configuration Condition="" '$(Configuration)' == '' "">Debug</Configuration>
+    <Platform Condition="" '$(Platform)' == '' "">AnyCPU</Platform>
+    <ProjectGuid>{779753D2-6514-4A32-B180-D13B4FA61CB3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Innovator.Client." + _companyName + @"</RootNamespace>
+    <AssemblyName>Innovator.Client." + _companyName + @"</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- A reference to the entire .NET Framework is automatically included -->
+    <None Include=""project.json"" />
+  </ItemGroup>
+  <ItemGroup>
+");
+        files.Sort();
+        foreach (var file in files)
+        {
+          await writer.WriteAsync("    <Compile Include=\"");
+          await writer.WriteAsync(file);
+          await writer.WriteAsync("\" />");
+          await writer.WriteLineAsync();
+        }
+        await writer.WriteAsync(@"  </ItemGroup>
+  <Import Project=""$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets"" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name=""BeforeBuild"">
+  </Target>
+  <Target Name=""AfterBuild"">
+  </Target>
+  -->
+</Project>");
+      }
+
+      using (var writer = new StreamWriter(Path.Combine(_baseDir, "Innovator.Client." + _companyName + "/Properties/AssemblyInfo.cs")))
+      {
+        await writer.WriteAsync(@"using System.Resources;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle(""Innovator.Client.");
+        await writer.WriteAsync(_companyName);
+        await writer.WriteAsync(@""")]
+[assembly: AssemblyDescription(""Client models for an Aras Innovator installation"")]
+[assembly: AssemblyConfiguration("""")]
+[assembly: AssemblyCompany("""")]
+[assembly: AssemblyProduct(""Innovator.Client.");
+        await writer.WriteAsync(_companyName);
+        await writer.WriteAsync(@""")]
+[assembly: AssemblyCopyright(""Copyright © 2017"")]
+[assembly: AssemblyTrademark("""")]
+[assembly: AssemblyCulture("""")]
+[assembly: NeutralResourcesLanguage(""en"")]");
+      }
+
+      using (var writer = new StreamWriter(Path.Combine(_baseDir, "Innovator.Client." + _companyName + "/AssemblyInfo.Version.cs")))
+      {
+        await writer.WriteAsync(@"using System.Reflection;
+
+[assembly: AssemblyVersion(""1.0.6213.30600"")]
+[assembly: AssemblyFileVersion(""1.0.6213.30600"")]
+");
+      }
+
+      var projJson = @"{
+  ""version"": ""1.0.6213.30600"",
+  ""title"": ""Innovator.Client.Corporate"",
+  ""supports"": {},
+  ""frameworks"": {
+    ""net35"": {
+      ""dependencies"": {
+        ""Innovator.Client"": ""2017.1.3.420""
+      }
+    },
+    ""net40"": {
+      ""dependencies"": {
+        ""Innovator.Client"": ""2017.1.3.420""
+      }
+    },
+    ""net45"": {
+      ""dependencies"": {
+        ""Innovator.Client"": ""2017.1.3.420""
+      }
+    },
+    ""netstandard1.1"":
+    {
+      ""dependencies"": {
+        ""Microsoft.NETCore.Portable.Compatibility"": ""1.0.1"",
+        ""NETStandard.Library"": ""1.6.0"",
+        ""Innovator.Client"": ""2017.1.3.420""
+      }
+    },
+    ""netstandard1.3"":
+    {
+      ""dependencies"": {
+        ""Microsoft.NETCore.Portable.Compatibility"": ""1.0.1"",
+        ""NETStandard.Library"": ""1.6.0"",
+        ""Innovator.Client"": ""2017.1.3.420""
+      }
+    }
+  }
+}".Replace("Innovator.Client.Corporate", "Innovator.Client." + _companyName);
+      using (var writer = new StreamWriter(Path.Combine(_baseDir, "Innovator.Client." + _companyName + "/project.json")))
+      {
+        await writer.WriteAsync(projJson);
+      }
+
+      var build = @"<#
+.SYNOPSIS
+  This is a helper function that runs a scriptblock and checks the PS variable $lastexitcode
+  to see if an error occcured. If an error is detected then an exception is thrown.
+  This function allows you to run command-line programs without having to
+  explicitly check the $lastexitcode variable.
+.EXAMPLE
+  exec { svn info $repository_trunk } ""Error executing SVN. Please verify SVN command-line client is installed""
+#>
+
+$epoch = Get-Date -Date ""2000-01-01 00:00:00Z""
+$epoch = $epoch.ToUniversalTime()
+$now = [System.DateTime]::UtcNow
+$span = NEW-TIMESPAN -Start $epoch -End $now
+$days = [int]$span.TotalDays
+$span = NEW-TIMESPAN -Start $now.Date -End $now
+$seconds = [int]($span.TotalSeconds / 2)
+
+$version = ""1.0.$days.$seconds""
+
+$assyInfo = ""using System.Reflection;`r`n`r`n[assembly: AssemblyVersion(""""$version"""")]`r`n[assembly: AssemblyFileVersion(""""$version"""")]""
+
+$assyInfo | Out-File Innovator.Client.Corporate\AssemblyInfo.Version.cs
+
+(Get-Content Innovator.Client.Corporate/project.json) `
+    -replace '""version"": ""\d+\.\d+\.\d+\.\d+"",', """"""version"""": """"$version"""","" |
+  Out-File Innovator.Client.Corporate/project.json
+
+function Exec
+{
+    [CmdletBinding()]
+    param(
+        [Parameter(Position=0,Mandatory=1)][scriptblock]$cmd,
+        [Parameter(Position=1,Mandatory=0)][string]$errorMessage = ($msgs.error_bad_command -f $cmd)
+    )
+    & $cmd
+    if ($lastexitcode -ne 0) {
+        throw (""Exec: "" + $errorMessage)
+    }
+}
+
+exec { & dotnet restore }
+exec { & dotnet pack Innovator.Client.Corporate/project.json -c Release -o .\artifacts --version-suffix=$version }  ".Replace("Innovator.Client.Corporate", "Innovator.Client." + _companyName);
+      using (var writer = new StreamWriter(Path.Combine(_baseDir, "build.ps1")))
+      {
+        await writer.WriteAsync(build);
+      }
+
+      using (var writer = new StreamWriter(Path.Combine(_baseDir, "Innovator.Client." + _companyName + ".sln")))
+      {
+        await writer.WriteAsync(@"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""Innovator.Client.");
+        await writer.WriteAsync(_companyName);
+        await writer.WriteAsync(@""", ""Innovator.Client.");
+        await writer.WriteAsync(_companyName);
+        await writer.WriteAsync(@"\Innovator.Client.");
+        await writer.WriteAsync(_companyName);
+        await writer.WriteAsync(@".csproj"", ""{779753D2-6514-4A32-B180-D13B4FA61CB3}""
+EndProject
+Global
+  GlobalSection(SolutionConfigurationPlatforms) = preSolution
+    Debug|Any CPU = Debug|Any CPU
+    Release|Any CPU = Release|Any CPU
+  EndGlobalSection
+  GlobalSection(ProjectConfigurationPlatforms) = postSolution
+    {779753D2-6514-4A32-B180-D13B4FA61CB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    {779753D2-6514-4A32-B180-D13B4FA61CB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    {779753D2-6514-4A32-B180-D13B4FA61CB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+    {779753D2-6514-4A32-B180-D13B4FA61CB3}.Release|Any CPU.Build.0 = Release|Any CPU
+  EndGlobalSection
+  GlobalSection(SolutionProperties) = preSolution
+    HideSolutionNode = FALSE
+  EndGlobalSection
+EndGlobal
+");
       }
     }
 
