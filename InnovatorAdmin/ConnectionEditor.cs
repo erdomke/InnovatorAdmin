@@ -369,7 +369,7 @@ namespace InnovatorAdmin
     {
       try
       {
-        SetAuthentication(Authentication.Explicit);
+        SetAuthentication(Connections.Authentication.Explicit);
       }
       catch (Exception ex)
       {
@@ -381,7 +381,7 @@ namespace InnovatorAdmin
     {
       try
       {
-        SetAuthentication(Authentication.Windows);
+        SetAuthentication(Connections.Authentication.Windows);
       }
       catch (Exception ex)
       {
@@ -393,7 +393,7 @@ namespace InnovatorAdmin
     {
       try
       {
-        SetAuthentication(Authentication.Anonymous);
+        SetAuthentication(Connections.Authentication.Anonymous);
       }
       catch (Exception ex)
       {
@@ -401,7 +401,7 @@ namespace InnovatorAdmin
       }
     }
 
-    private void SetAuthentication(Authentication value)
+    private void SetAuthentication(Connections.Authentication value)
     {
       if (_programChangingCheck) return;
 
@@ -414,17 +414,17 @@ namespace InnovatorAdmin
         chkWindows.Checked = false;
         switch (value)
         {
-          case Authentication.Anonymous:
+          case Connections.Authentication.Anonymous:
             chkAnonymous.Checked = true;
             break;
-          case Authentication.Windows:
+          case Connections.Authentication.Windows:
             chkWindows.Checked = true;
             break;
           default:
             chkPassword.Checked = true;
             break;
         }
-        txtUser.Enabled = (value == Authentication.Explicit);
+        txtUser.Enabled = (value == Connections.Authentication.Explicit);
         txtPassword.Enabled = txtUser.Enabled;
       }
       finally

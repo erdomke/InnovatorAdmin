@@ -35,7 +35,8 @@ namespace InnovatorAdmin.Testing
       if (string.IsNullOrEmpty(db))
         db = context.Connection.Database;
 
-      var prefs = new ConnectionPreferences() { UserAgent = "InnovatorAdmin UnitTest" };
+      var prefs = new ConnectionPreferences();
+      prefs.Headers.UserAgent = "InnovatorAdmin UnitTest";
       var conn = await Factory.GetConnection(url, prefs, true).ToTask();
       ICredentials cred;
       switch (this.Type)

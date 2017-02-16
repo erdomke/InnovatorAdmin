@@ -37,9 +37,9 @@ namespace InnovatorAdmin
       {
         switch (credentials.Authentication)
         {
-          case Authentication.Anonymous:
+          case Connections.Authentication.Anonymous:
             return new AnonymousCredentials(credentials.Database);
-          case Authentication.Windows:
+          case Connections.Authentication.Windows:
             return new WindowsCredentials(credentials.Database);
           default:
             return new ExplicitCredentials(credentials.Database, credentials.UserName, credentials.Password);
@@ -50,13 +50,14 @@ namespace InnovatorAdmin
     public static IPromise<IAsyncConnection> ArasLogin(this ConnectionData credentials, bool async)
     {
       var cred = credentials.ArasCredentials();
-      var prefs = new ConnectionPreferences() { UserAgent = "InnovatorAdmin v" + Assembly.GetExecutingAssembly().GetName().Version.ToString() };
+      var prefs = new ConnectionPreferences();
+      prefs.Headers.UserAgent = "InnovatorAdmin v" + Assembly.GetExecutingAssembly().GetName().Version.ToString();
       var localePref = credentials.Params.FirstOrDefault(p => p.Name == "LOCALE");
       var tzPref = credentials.Params.FirstOrDefault(p => p.Name == "TIMEZONE_NAME");
       if (localePref != null)
-        prefs.Locale = localePref.Value;
+        prefs.Headers.Locale = localePref.Value;
       if (tzPref != null)
-        prefs.TimeZone = tzPref.Value;
+        prefs.Headers.TimeZone = tzPref.Value;
 
       return Factory.GetConnection(credentials.Url
         , prefs, async)
