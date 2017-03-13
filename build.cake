@@ -78,7 +78,7 @@ Task("NuGet-Pack")
   DeleteFiles("./publish/InnovatorAdmin/lib/net45/ICSharpCode.SharpZipLib*");
   DeleteFiles("./publish/InnovatorAdmin/lib/net45/Innovator.Client*");
   DeleteFiles("./publish/InnovatorAdmin/lib/net45/Innovator.Client*");
-  DeleteDirectory("./publish/InnovatorAdmin/lib/net45/NativeBinaries",true);
+  DeleteDirectory("./publish/InnovatorAdmin/lib/net45/lib",true);
   var nuGetPackSettings = new NuGetPackSettings {
     Id = "InnovatorAdmin",
     Version = version,
