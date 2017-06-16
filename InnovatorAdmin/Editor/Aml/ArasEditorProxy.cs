@@ -47,7 +47,6 @@ namespace InnovatorAdmin.Editor
             "EvaluateActivity",
             "ExecuteEscalations",
             "ExecuteReminders",
-            "ExportItemType",
             "GenerateNewGUID",
             "GenerateNewGUIDEx",
             "GenerateParametersGrid",
@@ -178,6 +177,7 @@ namespace InnovatorAdmin.Editor
         yield return "LoadCache";
         yield return "ResetServerCache";
         yield return "SaveCache";
+        yield return "ExportItemType";
       }
       if (version <= 0 || version >= 10)
       {

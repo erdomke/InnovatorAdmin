@@ -356,7 +356,9 @@ namespace InnovatorAdmin
       }
       else
       {
-        if (elem != _elem && elem.LocalName == "Item" && elem.HasAttribute("type") && elem.HasAttribute("id"))
+        if (elem != _elem && elem.LocalName == "Item"
+          && elem.HasAttribute("type") && elem.HasAttribute("id")
+          && elem.Attribute("action", "") != "edit")
         {
           _definitions.Add(ItemReference.FromFullItem(elem, elem.Attribute("type") == "ItemType"));
         }

@@ -65,20 +65,20 @@ Task("NuGet-Pack")
   .Does(() =>
 {
   DeleteFiles("./artifacts/*.nupkg");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/Squirrel*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/Splat*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/ObjectListView*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/NuGet*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/Nancy*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/Mvp.Xml*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/Mono.Cecil*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/Microsoft.*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/LibGit*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/DeltaCompression*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/ICSharpCode.SharpZipLib*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/Innovator.Client*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/Innovator.Client*");
-  DeleteDirectory("./publish/InnovatorAdmin/lib/net45/lib",true);
+  //DeleteFiles("./publish/InnovatorAdmin/lib/net45/Squirrel*");
+  //DeleteFiles("./publish/InnovatorAdmin/lib/net45/Splat*");
+  //DeleteFiles("./publish/InnovatorAdmin/lib/net45/ObjectListView*");
+  //DeleteFiles("./publish/InnovatorAdmin/lib/net45/NuGet*");
+  //DeleteFiles("./publish/InnovatorAdmin/lib/net45/Nancy*");
+  //DeleteFiles("./publish/InnovatorAdmin/lib/net45/Mvp.Xml*");
+  //DeleteFiles("./publish/InnovatorAdmin/lib/net45/Mono.Cecil*");
+  //DeleteFiles("./publish/InnovatorAdmin/lib/net45/Microsoft.*");
+  //DeleteFiles("./publish/InnovatorAdmin/lib/net45/LibGit*");
+  //DeleteFiles("./publish/InnovatorAdmin/lib/net45/DeltaCompression*");
+  //DeleteFiles("./publish/InnovatorAdmin/lib/net45/ICSharpCode.SharpZipLib*");
+  //DeleteFiles("./publish/InnovatorAdmin/lib/net45/Innovator.Client*");
+  //DeleteFiles("./publish/InnovatorAdmin/lib/net45/Innovator.Client*");
+  //DeleteDirectory("./publish/InnovatorAdmin/lib/net45/lib",true);
   var nuGetPackSettings = new NuGetPackSettings {
     Id = "InnovatorAdmin",
     Version = version,

@@ -20,8 +20,8 @@ namespace InnovatorAdmin
     }
     bool IEquatable<ItemProperty>.Equals(ItemProperty other)
     {
-      return Utils.StringEquals(this.ItemType, other.ItemType)
-        && Utils.StringEquals(this.Property, other.Property);
+      return string.Equals(this.ItemType, other.ItemType)
+        && string.Equals(this.Property, other.Property);
     }
     public override int GetHashCode()
     {

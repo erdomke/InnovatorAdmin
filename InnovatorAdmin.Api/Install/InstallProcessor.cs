@@ -61,7 +61,7 @@ namespace InnovatorAdmin
       _log.Length = 0;
       _script = script;
       _lines = (_script.DependencySorted
-        ? _script.Lines
+        ? (_script.Lines ?? Enumerable.Empty<InstallItem>())
         : (await ExportProcessor.SortByDependencies(script.Lines, _conn))
           .Where(l => l.Type != InstallType.DependencyCheck)
       ).Where(l => l.Script != null && l.Type != InstallType.Warning).ToList();

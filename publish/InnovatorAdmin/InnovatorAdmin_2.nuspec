@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>InnovatorAdmin</id>
+    <version>2016.12.28.843</version>
+    <authors>eric.domke</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Application for administrating an Aras Innovator instance</description>
+    <dependencies>
+      <dependency id="Innovator.Client" version="2017.03.13.0300" />
+      <dependency id="LibGit2Sharp" version="0.23.1" />
+      <dependency id="Mvp.Xml" version="2.3.0" />
+      <dependency id="Nancy" version="1.4.3" />
+      <dependency id="Nancy.Hosting.Self" version="1.4.1" />
+      <dependency id="ObjectListView.Official" version="2.9.1" />
+      <dependency id="squirrel.windows" version="1.5.2" />
+      <dependency id="Windows7APICodePack-Shell" version="1.1.0" />
+    </dependencies>
+  </metadata>
+</package>

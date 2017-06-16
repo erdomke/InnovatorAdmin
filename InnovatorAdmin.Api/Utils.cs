@@ -25,26 +25,6 @@ namespace InnovatorAdmin
       return builder.Append(value);
     }
 
-    public static bool StringEquals(string x, string y)
-    {
-      return StringEquals(x, y, StringComparison.CurrentCulture);
-    }
-    public static bool StringEquals(string x, string y, StringComparison compare)
-    {
-      if (string.IsNullOrEmpty(x) && string.IsNullOrEmpty(y))
-      {
-        return true;
-      }
-      else if (string.IsNullOrEmpty(x) || string.IsNullOrEmpty(y))
-      {
-        return false;
-      }
-      else
-      {
-        return string.Compare(x, y, compare) == 0;
-      }
-    }
-
     public static IEnumerable<T> DependencySort<T>(this IEnumerable<T> source, Func<T, IEnumerable<T>> dependencies, bool throwOnCycle = false)
     {
       IList<T> cycle = new List<T>();

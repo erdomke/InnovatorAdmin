@@ -346,7 +346,7 @@ namespace InnovatorAdmin
     {
       int loops = 0;
       var state = CycleState.ResolvedCycle;
-      var results = items;
+      var results = items ?? Enumerable.Empty<InstallItem>();
       var metadata = ArasMetadataProvider.Cached(conn);
       await metadata.ReloadTask();
       var analyzer = new DependencyAnalyzer(metadata);

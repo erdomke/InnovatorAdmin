@@ -331,6 +331,20 @@ namespace InnovatorAdmin.Editor
           case XmlState.AttributeValue:
             if (path.Last().LocalName == "Item")
             {
+              //private enum RelActionType
+              //{
+              //  add,
+              //  delete,
+              //  purge,
+              //  update,
+              //  create,
+              //  edit,
+              //  merge,
+              //  get,
+              //  skip,
+              //  exclude
+              //}
+
               ItemType itemType;
               switch (attrName)
               {
@@ -351,7 +365,6 @@ namespace InnovatorAdmin.Editor
                     , "edit"
                     , "EmailItem"
                     , "EvaluateActivity"
-                    , "exportItemType"
                     , "get"
                     , "getAffectedItems"
                     , "getItemAllVersions"
@@ -390,10 +403,12 @@ namespace InnovatorAdmin.Editor
                   var methods = (IEnumerable<string>)baseMethods;
                   if (version < 10)
                     methods = methods.Concat(Enumerable.Repeat("checkImportedItemType", 1));
+                  if (version < 11)
+                    methods = methods.Concat(Enumerable.Repeat("exportItemType", 1));
                   if (version < 0 || version >= 10)
                     methods = methods.Concat(Enumerable.Repeat("VaultServerEvent", 1));
                   if (version < 0 || version >= 11)
-                    methods = methods.Concat(Enumerable.Repeat("GetInheritedServerEvents", 1));
+                    methods = methods.Concat(new string[] { "GetInheritedServerEvents", "getHistoryItems"});
 
                   items = _metadata.MethodNames.Select(m => (ICompletionData)new AttributeValueCompletionData() {
                     Text = m,
@@ -404,7 +419,7 @@ namespace InnovatorAdmin.Editor
                   }));
                   break;
                 case "access_type":
-                  items = AttributeValues("can_add", "can_delete", "can_get", "can_update");
+                  items = AttributeValues("can_add", "can_delete", "can_get", "can_update", "can_discover", "can_change_access");
                   break;
                 case "doGetItem":
                 case "version":
@@ -1240,7 +1255,7 @@ namespace InnovatorAdmin.Editor
         }
         else if (p.Name == "state" && !string.IsNullOrEmpty(lastItem.Type))
         {
-          var states = await _metadata.ItemTypeStates(itemType).ToTask();
+          var states = await _metadata.ItemTypeStates(itemType);
           return states.GetCompletions<BasicCompletionData>();
         }
         else

@@ -10,6 +10,7 @@ namespace InnovatorAdmin
   public class ItemReference : IComparable<ItemReference>, IComparable, IEquatable<ItemReference>, ICloneable
   {
     private string _unique;
+    private string _baseUnique;
     private string _type;
 
     public string KeyedName { get; set; }
@@ -23,7 +24,12 @@ namespace InnovatorAdmin
     public string Unique
     {
       get { return _unique; }
-      set { _unique = value; }
+      set
+      {
+        _unique = value;
+        if (_unique.IndexOf("[config_id] = '") > 0)
+          _baseUnique = _unique.Substring(_unique.Length - 33, 32);
+      }
     }
 
     // Used with exporting
@@ -65,11 +71,11 @@ namespace InnovatorAdmin
       result.Type = elem.Type().Value;
       if (elem.Attribute("id").Exists)
       {
-        result._unique = elem.Attribute("id").Value;
+        result.Unique = elem.Attribute("id").Value;
       }
       else if (elem.Attribute("where").Exists)
       {
-        result._unique = elem.Attribute("where").Value;
+        result.Unique = elem.Attribute("where").Value;
       }
       if (getKeyedName)
       {
@@ -121,11 +127,11 @@ namespace InnovatorAdmin
       result.Type = elem.Attributes["type"].Value;
       if (elem.HasAttribute("id"))
       {
-        result._unique = elem.Attributes["id"].Value;
+        result.Unique = elem.Attributes["id"].Value;
       }
       else if (elem.HasAttribute("where"))
       {
-        result._unique = elem.Attributes["where"].Value;
+        result.Unique = elem.Attributes["where"].Value;
       }
       if (getKeyedName)
       {
@@ -195,14 +201,14 @@ namespace InnovatorAdmin
 
     bool IEquatable<ItemReference>.Equals(ItemReference itemRef)
     {
-      return Utils.StringEquals(this.Unique, itemRef.Unique, StringComparison.OrdinalIgnoreCase)
-        && Utils.StringEquals(this.Type, itemRef.Type, StringComparison.OrdinalIgnoreCase);
+      return string.Equals(_baseUnique ?? _unique, itemRef._baseUnique ?? itemRef._unique, StringComparison.OrdinalIgnoreCase)
+        && string.Equals(this.Type, itemRef.Type, StringComparison.OrdinalIgnoreCase);
     }
 
     public override int GetHashCode()
     {
-      return (this.Unique.ToUpperInvariant() ?? "").GetHashCode()
-        ^ (this.Type.ToUpperInvariant() ?? "").GetHashCode();
+      return (_baseUnique ?? _unique ?? "").ToUpperInvariant().GetHashCode()
+        ^ (this.Type ?? "").ToUpperInvariant().GetHashCode();
     }
 
     public override string ToString()
@@ -229,6 +235,7 @@ namespace InnovatorAdmin
       result.Origin = this.Origin;
       result._type = this._type;
       result._unique = this._unique;
+      result._baseUnique = this._baseUnique;
       return result;
     }
 

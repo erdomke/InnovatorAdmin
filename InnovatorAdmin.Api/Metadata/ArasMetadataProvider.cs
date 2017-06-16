@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Innovator.Client;
+using Innovator.Client.Model;
 using System.Xml;
 
 namespace InnovatorAdmin
@@ -166,20 +167,27 @@ namespace InnovatorAdmin
         });
     }
 
-    public IPromise<IEnumerable<string>> ItemTypeStates(ItemType itemtype)
+    public async Task<IEnumerable<string>> ItemTypeStates(ItemType itemtype)
     {
       if (itemtype.States != null)
-        return Promises.Resolved(itemtype.States);
+        return itemtype.States;
 
-      return _conn.ApplyAsync(@"<Item type='Life Cycle State' action='get' select='name'>
-          <source_id condition='in'>(select related_id from innovator.[ItemType_Life_Cycle] where source_id = @0)</source_id>
-        </Item>", true, false, itemtype.Id)
-        .Convert(r =>
-        {
-          var states = r.Items().Select(i => i.Property("name").Value).ToArray();
-          itemtype.States = states;
-          return (IEnumerable<string>)states;
-        });
+      var result = await _conn.ApplyAsync(@"<Item type='ItemType Life Cycle' action='get' select='related_id'>
+  <related_id>
+    <Item type='Life Cycle Map' action='get' select='id'>
+      <Relationships>
+        <Item action='get' type='Life Cycle State' select='name'>
+        </Item>
+      </Relationships>
+    </Item>
+  </related_id>
+  <source_id>@0</source_id>
+</Item>", true, false, itemtype.Id);
+      var states = result.Items()
+        .SelectMany(i => i.RelatedItem().Relationships().OfType<LifeCycleState>())
+        .Select(i => i.NameProp().Value).ToArray();
+      itemtype.States = states;
+      return states;
     }
 
     public IEnumerable<IListValue> ServerReports(string typeName)
@@ -188,21 +196,23 @@ namespace InnovatorAdmin
       if (_serverReports.TryGetValue(typeName, out result))
         return result;
 
-      var items = _conn.Apply(@"<Item type='Report' action='get' select='name,label'>
-                      <id condition='in'>
-                        (select related_id
-                        from innovator.[Item_Report] ir
-                        inner join innovator.[ItemType] it
-                        on it.id = ir.source_id
-                        where it.name = @0)
-                      </id>
-                      <location>server</location>
-                      <type>item</type>
-                    </Item>", typeName).Items();
+      var items = _conn.Apply(@"<Item type='Item Report' action='get' select='related_id(name,label)'>
+  <related_id>
+    <Item type='Report' action='get'>
+      <location>server</location>
+      <type>item</type>
+    </Item>
+  </related_id>
+  <source_id>
+    <Item type='ItemType' action='get'>
+      <name>@0</name>
+    </Item>
+  </source_id>
+</Item>", typeName).Items();
       result = items.Select(r => new ListValue()
       {
-        Label = r.Property("label").Value,
-        Value = r.Property("name").Value
+        Label = r.RelatedItem().Property("label").Value,
+        Value = r.RelatedItem().Property("name").Value
       }).ToArray();
       _serverReports[typeName] = result;
       return result;
@@ -214,21 +224,23 @@ namespace InnovatorAdmin
       if (_serverActions.TryGetValue(typeName, out result))
         return result;
 
-      var items = _conn.Apply(@"<Item type='Action' action='get' select='label,method(name)'>
-                                  <id condition='in'>
-                                    (select related_id
-                                    from innovator.[Item_Action] ia
-                                    inner join innovator.[ItemType] it
-                                    on it.id = ia.source_id
-                                    where it.name = @0)
-                                  </id>
-                                  <location>server</location>
-                                  <type>item</type>
-                                </Item>", typeName).Items();
+      var items = _conn.Apply(@"<Item type='Item Action' action='get' select='related_id(label,method(name))'>
+  <related_id>
+    <Item type='Action' action='get'>
+      <location>server</location>
+      <type>item</type>
+    </Item>
+  </related_id>
+  <source_id>
+    <Item type='ItemType' action='get'>
+      <name>@0</name>
+    </Item>
+  </source_id>
+</Item>", typeName).Items();
       result = items.Select(r => new ListValue()
       {
-        Label = r.Property("label").Value,
-        Value = r.Property("method").AsItem().Property("name").Value
+        Label = r.RelatedItem().Property("label").Value,
+        Value = r.RelatedItem().Property("method").AsItem().Property("name").Value
       }).ToArray();
       _serverActions[typeName] = result;
       return result;
@@ -268,13 +280,9 @@ namespace InnovatorAdmin
     {
       var itemTypes = _conn.ApplyAsync(@"<Item type='ItemType' action='get' select='is_versionable,is_dependent,implementation_type,core,name,label'></Item>", true, true).ToTask();
       var relTypes = _conn.ApplyAsync(@"<Item action='get' type='RelationshipType' related_expand='0' select='related_id,source_id,relationship_id,name,label' />", true, true).ToTask();
-      var sortedTypes = _conn.ApplyAsync(@"<Item type='ItemType' action='get' select='id,name'>
-                                      <id condition='in'>
-                                        (select source_id
-                                        from innovator.[PROPERTY] p
-                                        where p.ORDER_BY is not null)
-                                      </id>
-                                    </Item>", true, false).ToTask();
+      var sortedProperties = _conn.ApplyAsync(@"<Item type='Property' action='get' select='source_id'>
+  <order_by condition='is not null'></order_by>
+</Item>", true, false).ToTask();
       var floatProps = _conn.ApplyAsync(@"<Item type='Property' action='get' select='source_id,item_behavior,name' related_expand='0'>
                                       <data_type>item</data_type>
                                       <data_source>
@@ -331,10 +339,10 @@ namespace InnovatorAdmin
       }
 
       // Sorted Types
-      r = await sortedTypes;
-      foreach (var itemType in r.Items())
+      r = await sortedProperties;
+      foreach (var prop in r.Items())
       {
-        if (_itemTypesByName.TryGetValue(itemType.Property("name").Value, out result))
+        if (_itemTypesByName.TryGetValue(prop.SourceId().Attribute("name").Value, out result))
         {
           result.IsSorted = true;
         }
@@ -361,25 +369,23 @@ namespace InnovatorAdmin
                                     </Item>", true, true).ToTask();
       var sqls = _conn.ApplyAsync(@"<Item type='SQL' action='get' select='id,name,type'></Item>", true, false).ToTask();
       var customProps = _conn.ApplyAsync(@"<Item type='Property' action='get' select='name,source_id(id,name)'>
-                                          <id condition='in'>(SELECT p.id
-                                        from innovator.PROPERTY p
-                                        inner join innovator.ITEMTYPE it
-                                        on p.SOURCE_ID = it.id
-                                        where p.CREATED_BY_ID &lt;&gt; 'AD30A6D8D3B642F5A2AFED1A4B02BEFA'
-                                        and it.CORE = 1
-                                        and it.CREATED_BY_ID = 'AD30A6D8D3B642F5A2AFED1A4B02BEFA')</id>
+                                          <created_by_id condition='ne'>AD30A6D8D3B642F5A2AFED1A4B02BEFA</created_by_id>
+                                          <source_id>
+                                            <Item type='ItemType' action='get'>
+                                              <core>1</core>
+                                              <created_by_id>AD30A6D8D3B642F5A2AFED1A4B02BEFA</created_by_id>
+                                            </Item>
+                                          </source_id>
                                         </Item>", true, false).ToTask();
-      var polyLists = _conn.ApplyAsync(@"<Item type='List' action='get' select='id'>
-                                      <id condition='in'>(select l.id
-                                        from innovator.LIST l
-                                        inner join innovator.PROPERTY p
-                                        on l.id = p.DATA_SOURCE
-                                        and p.name = 'itemtype'
-                                        inner join innovator.ITEMTYPE it
-                                        on it.id = p.SOURCE_ID
-                                        and it.IMPLEMENTATION_TYPE = 'polymorphic')
-                                      </id>
-                                    </Item>", true, false).ToTask();
+      var polyLists = _conn.ApplyAsync(@"<Item type='Property' action='get' select='data_source(id)'>
+                                          <name>itemtype</name>
+                                          <data_type>list</data_type>
+                                          <source_id>
+                                            <Item type='ItemType' action='get'>
+                                              <implementation_type>polymorphic</implementation_type>
+                                            </Item>
+                                          </source_id>
+                                        </Item>", true, false).ToTask();
       var sequences = _conn.ApplyAsync(@"<Item type='Sequence' action='get' select='name'></Item>", true, false).ToTask();
 
       _methods = (await methods).Items().Select(i =>
@@ -426,7 +432,12 @@ namespace InnovatorAdmin
         };
       }
 
-      _polyItemLists = (await polyLists).Items().Select(i => ItemReference.FromFullItem(i, true)).ToArray();
+      _polyItemLists = (await polyLists).Items()
+        .OfType<Innovator.Client.Model.Property>()
+        .Select(i => new ItemReference("List", i.DataSource().Value)
+        {
+          KeyedName = i.DataSource().KeyedName().Value
+        }).ToArray();
 
       _sequences = (await sequences).Items().Select(i => ItemReference.FromFullItem(i, true)).ToArray();
 
