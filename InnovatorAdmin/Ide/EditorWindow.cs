@@ -305,6 +305,8 @@ namespace InnovatorAdmin
           dialog.ShowDialog();
         }
       });
+      _commands.Add<Control>(horizontalSplitToolStripMenuItem, null, c => splitViewHorizontally());
+      _commands.Add<Control>(verticalSplitToolStripMenuItem, null, c => splitViewVertically());
     }
 
     protected override void OnSizeChanged(EventArgs e)
@@ -2316,6 +2318,18 @@ namespace InnovatorAdmin
       {
         Utils.HandleError(ex);
       }
+    }
+
+    private void splitViewHorizontally()
+    {
+      splitEditors.Orientation = Orientation.Horizontal;
+      splitEditors.SplitterDistance = splitEditors.Size.Height / 2;
+    }
+
+    private void splitViewVertically()
+    {
+      splitEditors.Orientation = Orientation.Vertical;
+      splitEditors.SplitterDistance = splitEditors.Size.Width / 2;
     }
   }
 }

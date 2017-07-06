@@ -92,8 +92,11 @@
       this.mniFindPrevious = new System.Windows.Forms.ToolStripMenuItem();
       this.mniReplace = new System.Windows.Forms.ToolStripMenuItem();
       this.mniGoTo = new System.Windows.Forms.ToolStripMenuItem();
-      this.toolStripDropDownButton3 = new System.Windows.Forms.ToolStripDropDownButton();
+      this.toolStripDropDownButton2 = new System.Windows.Forms.ToolStripDropDownButton();
       this.mniPreferences = new System.Windows.Forms.ToolStripMenuItem();
+      this.toolStripDropDownView = new System.Windows.Forms.ToolStripDropDownButton();
+      this.horizontalSplitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.verticalSplitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.exploreButton = new System.Windows.Forms.ToolStripButton();
       this.btnSubmit = new System.Windows.Forms.ToolStripSplitButton();
       this.mniRunAll = new System.Windows.Forms.ToolStripMenuItem();
@@ -123,6 +126,7 @@
       this.pgTools = new System.Windows.Forms.TabPage();
       this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
       this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
+      this.lnkCreateModelFiles = new System.Windows.Forms.LinkLabel();
       this.lnkGitMergeHelper = new System.Windows.Forms.LinkLabel();
       this.lnkWriteMergeScripts = new System.Windows.Forms.LinkLabel();
       this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
@@ -156,7 +160,6 @@
       this.pnlLeftTop = new System.Windows.Forms.Panel();
       this.pnlRightTop = new System.Windows.Forms.Panel();
       this.pnlConnectionShadow = new InnovatorAdmin.DropShadow();
-      this.lnkCreateModelFiles = new System.Windows.Forms.LinkLabel();
       this.tblMain.SuspendLayout();
       this.tblHeader.SuspendLayout();
       this.menuStrip.SuspendLayout();
@@ -302,7 +305,8 @@
             this.mniFile,
             this.toolStripDropDownButton1,
             this.toolStripDropDownButton4,
-            this.toolStripDropDownButton3,
+            this.toolStripDropDownButton2,
+            this.toolStripDropDownView,
             this.exploreButton,
             this.btnSubmit});
       this.menuStrip.Location = new System.Drawing.Point(69, 21);
@@ -746,23 +750,48 @@
       this.mniGoTo.Size = new System.Drawing.Size(196, 22);
       this.mniGoTo.Text = "Go To...";
       // 
-      // toolStripDropDownButton3
+      // toolStripDropDownButton2
       // 
-      this.toolStripDropDownButton3.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-      this.toolStripDropDownButton3.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+      this.toolStripDropDownButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+      this.toolStripDropDownButton2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniPreferences});
-      this.toolStripDropDownButton3.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton3.Image")));
-      this.toolStripDropDownButton3.ImageTransparentColor = System.Drawing.Color.Magenta;
-      this.toolStripDropDownButton3.Name = "toolStripDropDownButton3";
-      this.toolStripDropDownButton3.ShowDropDownArrow = false;
-      this.toolStripDropDownButton3.Size = new System.Drawing.Size(39, 22);
-      this.toolStripDropDownButton3.Text = "&Tools";
+      this.toolStripDropDownButton2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton2.Image")));
+      this.toolStripDropDownButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
+      this.toolStripDropDownButton2.Name = "toolStripDropDownButton2";
+      this.toolStripDropDownButton2.ShowDropDownArrow = false;
+      this.toolStripDropDownButton2.Size = new System.Drawing.Size(39, 22);
+      this.toolStripDropDownButton2.Text = "&Tools";
       // 
       // mniPreferences
       // 
       this.mniPreferences.Name = "mniPreferences";
       this.mniPreferences.Size = new System.Drawing.Size(144, 22);
       this.mniPreferences.Text = "Preferences...";
+      // 
+      // toolStripDropDownView
+      // 
+      this.toolStripDropDownView.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+      this.toolStripDropDownView.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.horizontalSplitToolStripMenuItem,
+            this.verticalSplitToolStripMenuItem});
+      this.toolStripDropDownView.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownView.Image")));
+      this.toolStripDropDownView.ImageTransparentColor = System.Drawing.Color.Magenta;
+      this.toolStripDropDownView.Name = "toolStripDropDownView";
+      this.toolStripDropDownView.ShowDropDownArrow = false;
+      this.toolStripDropDownView.Size = new System.Drawing.Size(36, 22);
+      this.toolStripDropDownView.Text = "&View";
+      // 
+      // horizontalSplitToolStripMenuItem
+      // 
+      this.horizontalSplitToolStripMenuItem.Name = "horizontalSplitToolStripMenuItem";
+      this.horizontalSplitToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+      this.horizontalSplitToolStripMenuItem.Text = "Horizontal Split";
+      // 
+      // verticalSplitToolStripMenuItem
+      // 
+      this.verticalSplitToolStripMenuItem.Name = "verticalSplitToolStripMenuItem";
+      this.verticalSplitToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+      this.verticalSplitToolStripMenuItem.Text = "Vertical Split";
       // 
       // exploreButton
       // 
@@ -980,8 +1009,6 @@
             this.colDescription});
       this.treeItems.Cursor = System.Windows.Forms.Cursors.Default;
       this.treeItems.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.treeItems.HighlightBackgroundColor = System.Drawing.Color.Empty;
-      this.treeItems.HighlightForegroundColor = System.Drawing.Color.Empty;
       this.treeItems.Location = new System.Drawing.Point(0, 36);
       this.treeItems.Margin = new System.Windows.Forms.Padding(0);
       this.treeItems.Name = "treeItems";
@@ -1160,6 +1187,17 @@
       this.flowLayoutPanel2.Name = "flowLayoutPanel2";
       this.flowLayoutPanel2.Size = new System.Drawing.Size(722, 84);
       this.flowLayoutPanel2.TabIndex = 5;
+      // 
+      // lnkCreateModelFiles
+      // 
+      this.lnkCreateModelFiles.AutoSize = true;
+      this.lnkCreateModelFiles.Location = new System.Drawing.Point(3, 0);
+      this.lnkCreateModelFiles.Name = "lnkCreateModelFiles";
+      this.lnkCreateModelFiles.Size = new System.Drawing.Size(102, 13);
+      this.lnkCreateModelFiles.TabIndex = 2;
+      this.lnkCreateModelFiles.TabStop = true;
+      this.lnkCreateModelFiles.Text = "Create Model Files";
+      this.lnkCreateModelFiles.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkCreateModelFiles_LinkClicked);
       // 
       // lnkGitMergeHelper
       // 
@@ -1584,17 +1622,6 @@
       this.pnlConnectionShadow.Size = new System.Drawing.Size(996, 4);
       this.pnlConnectionShadow.TabIndex = 17;
       // 
-      // lnkCreateModelFiles
-      // 
-      this.lnkCreateModelFiles.AutoSize = true;
-      this.lnkCreateModelFiles.Location = new System.Drawing.Point(3, 0);
-      this.lnkCreateModelFiles.Name = "lnkCreateModelFiles";
-      this.lnkCreateModelFiles.Size = new System.Drawing.Size(102, 13);
-      this.lnkCreateModelFiles.TabIndex = 2;
-      this.lnkCreateModelFiles.TabStop = true;
-      this.lnkCreateModelFiles.Text = "Create Model Files";
-      this.lnkCreateModelFiles.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkCreateModelFiles_LinkClicked);
-      // 
       // EditorWindow
       // 
       this.AcceptButton = this.btnOk;
@@ -1704,7 +1731,7 @@
     private System.Windows.Forms.ToolStripMenuItem mniEntityToXml;
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
     private Controls.FlatButton btnPanelToggle;
-    private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton3;
+    private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownView;
     private System.Windows.Forms.ToolStripMenuItem mniUndo;
     private System.Windows.Forms.ToolStripMenuItem mniRedo;
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
@@ -1764,7 +1791,7 @@
     private System.Windows.Forms.ToolStripMenuItem mniSave;
     private System.Windows.Forms.Label lblClock;
     private System.Windows.Forms.ToolStripMenuItem mniSaveAs;
-    private System.Windows.Forms.ToolStripMenuItem mniPreferences;
+    private System.Windows.Forms.ToolStripMenuItem horizontalSplitToolStripMenuItem;
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
     private System.Windows.Forms.ToolStripMenuItem mniBase64Encode;
     private System.Windows.Forms.ToolStripMenuItem mniBase64Decode;
@@ -1777,5 +1804,8 @@
     private System.Windows.Forms.LinkLabel lnkWriteMergeScripts;
     private Controls.FlatButton btnCompare;
     private System.Windows.Forms.LinkLabel lnkCreateModelFiles;
+    private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton2;
+    private System.Windows.Forms.ToolStripMenuItem mniPreferences;
+    private System.Windows.Forms.ToolStripMenuItem verticalSplitToolStripMenuItem;
   }
 }
