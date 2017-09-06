@@ -11,6 +11,8 @@ namespace InnovatorAdmin.Controls
 {
   public class DataGrid : DataGridView
   {
+    DataGridViewSelectedCellCollection selected;
+
     public DataGrid()
     {
       this.BackgroundColor = System.Drawing.Color.White;
@@ -67,6 +69,13 @@ namespace InnovatorAdmin.Controls
       Utils.HandleError(e.Exception);
     }
 
+    protected override void OnCellMouseDown(DataGridViewCellMouseEventArgs e)
+    {
+      selected = this.SelectedCells;
+
+      base.OnCellMouseDown(e);
+    }
+
     public IEnumerable<DataGridViewRow> GetSelectedRows()
     {
       var rows = this.SelectedRows.OfType<DataGridViewRow>();
@@ -77,6 +86,30 @@ namespace InnovatorAdmin.Controls
       return rows;
     }
 
+    protected override void OnCurrentCellDirtyStateChanged(EventArgs e)
+    {
+      DataGridView dgv = (DataGridView)this;
+      DataGridViewCell cell = dgv.CurrentCell;
+      if (cell.RowIndex >= 0 && cell.ColumnIndex == 1) // My checkbox column
+      {
+        List<DataGridViewRow> rowCollection = new List<DataGridViewRow>();
+
+      foreach(DataGridViewCell c1 in selected)
+      {
+        rowCollection.Add(dgv.Rows[c1.RowIndex]);
+      }
+
+        // If checkbox value changed, copy it's value to all selectedrows
+        bool checkvalue = false;
+        if (dgv.Rows[cell.RowIndex].Cells[cell.ColumnIndex].EditedFormattedValue != null && dgv.Rows[cell.RowIndex].Cells[cell.ColumnIndex].EditedFormattedValue.Equals(true))
+          checkvalue = true;
+
+        for (int i = 0; i < rowCollection.Count; i++)
+          rowCollection[i].Cells[cell.ColumnIndex].Value = checkvalue;
+      }
+
+      dgv.CommitEdit(DataGridViewDataErrorContexts.Commit);
+    }
     public override DataObject GetClipboardContent()
     {
       return base.GetClipboardContent();
