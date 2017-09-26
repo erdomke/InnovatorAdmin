@@ -1369,6 +1369,7 @@
       // 
       this.dgvItems.BackgroundColor = System.Drawing.Color.White;
       this.dgvItems.BorderStyle = System.Windows.Forms.BorderStyle.None;
+      this.dgvItems.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
       this.dgvItems.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
       this.dgvItems.ContextMenuStrip = this.conTable;
       this.dgvItems.Dock = System.Windows.Forms.DockStyle.Fill;
