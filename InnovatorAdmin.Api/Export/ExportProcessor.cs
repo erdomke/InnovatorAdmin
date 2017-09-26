@@ -1,13 +1,12 @@
-﻿using System;
+using Innovator.Client;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Xsl;
-using System.IO;
-using System.Diagnostics;
-using Innovator.Client;
-using System.Threading.Tasks;
 
 namespace InnovatorAdmin
 {
@@ -203,9 +202,11 @@ namespace InnovatorAdmin
 
         //RemoveRelatedItems(result, items);
         //CleanUpSystemProps(result.DocumentElement.Elements(), items, false);
+        RemoveCmfGeneratedTypes(result);
         FixPolyItemReferences(result);
         FloatVersionableRefs(result);
         var doc = TransformResults(ref result);
+        SetDoGetItemForCmf(doc);
         NormalizeClassStructure(doc);
         FixFormFieldsPointingToSystemProperties(doc);
         ExpandSystemIdentities(doc);
@@ -381,7 +382,7 @@ namespace InnovatorAdmin
           switch (item.Type)
           {
             case "Life Cycle State":
-              yield return new ItemReference("Life Cycle Map", "[Life_Cycle_Map].[id] in (select source_id from [innovator].[Life_Cycle_State] where id = '" + item.Unique +"')");
+              yield return new ItemReference("Life Cycle Map", "[Life_Cycle_Map].[id] in (select source_id from [innovator].[Life_Cycle_State] where id = '" + item.Unique + "')");
               break;
             case "Life Cycle Transition":
               yield return new ItemReference("Life Cycle Map", "[Life_Cycle_Map].[id] in (select source_id from [innovator].[Life_Cycle_Transition] where id = '" + item.Unique + "')");
@@ -705,7 +706,8 @@ namespace InnovatorAdmin
 
       var promises = queryItems.Select(q => (Func<IPromise>)(
           () => _conn.Process(q.OuterXml, true)
-            .Convert(s => {
+            .Convert(s =>
+            {
               return (IEnumerable<XmlElement>)(Items(result, s, itemDic).ToArray());
             })
           )
@@ -735,7 +737,7 @@ namespace InnovatorAdmin
       settings.NameTable = doc.NameTable ?? new NameTable();
       using (var reader = XmlReader.Create(stream, settings))
       {
-        while(!reader.EOF)
+        while (!reader.EOF)
         {
           if (reader.NodeType == XmlNodeType.Element && reader.LocalName == "Item")
           {
@@ -871,14 +873,15 @@ namespace InnovatorAdmin
           if (itemType.Relationships.Any(r => !r.IsFederated))
           {
             relQuery = (from r in itemType.Relationships
-                         where !r.IsFederated
-                         select string.Format("<Item type=\"{0}\" action=\"get\" />", r.Name))
+                        where !r.IsFederated
+                        select string.Format("<Item type=\"{0}\" action=\"get\" />", r.Name))
                         .Aggregate((p, c) => p + c);
             item.InnerXml = "<Relationships>" + relQuery + "</Relationships>";
           }
         }
       }
     }
+
     /// <summary>
     /// Move all foreign properties to a script.  This is because the other properties must be created first before these can
     /// be added.
@@ -1690,11 +1693,38 @@ namespace InnovatorAdmin
     }
 
     /// <summary>
+    /// Set <c>doGetItem="0"</c> for cmf_ContentType elements
+    /// </summary>
+    private void SetDoGetItemForCmf(XmlDocument doc)
+    {
+      var elements = doc.Descendants(e => e.Attribute("type", "") == "cmf_ContentType")
+        .ToArray();
+      foreach (var elem in elements)
+      {
+        elem.Attr("doGetItem", "0");
+      }
+    }
+
+    /// <summary>
+    /// The CMF generated types will get recreated by Aras.  Don't export them here.
+    /// </summary>
+    private void RemoveCmfGeneratedTypes(XmlDocument doc)
+    {
+      var elements = doc.Descendants(e => e.LocalName == "generated_type"
+        && (e.Parent().Attribute("type", "") == "cmf_ElementType" || e.Parent().Attribute("type", "") == "cmf_PropertyType"))
+        .ToArray();
+      foreach (var elem in elements)
+      {
+        elem.Detatch();
+      }
+    }
+
+    /// <summary>
     /// Remove empty &lt;Relationship/&gt; tags that weren't dealt with by the xslt template
     /// </summary>
     private void RemoveEmptyRelationshipTags(XmlDocument doc)
     {
-      var elements = doc.Descendants(e => e.LocalName == "Relationships" && e.IsEmpty).ToList();
+      var elements = doc.Descendants(e => e.LocalName == "Relationships" && e.IsEmpty).ToArray();
       foreach (var elem in elements)
       {
         elem.Detatch();
@@ -1762,7 +1792,11 @@ namespace InnovatorAdmin
       {
         parents = elem.Parents().Where(e => e.LocalName == "Item").Skip(1).ToList();
         levels = 1;
-        if (parents.Any() && itemDict.TryGetValue(ItemReference.FromFullItem(parents.Last(), false), out itemRefOpts))
+
+        if (parents.Any(e => e.Attribute("type", "").StartsWith("cmf_", StringComparison.OrdinalIgnoreCase)))
+          continue;
+
+        if (parents.Count > 0 && itemDict.TryGetValue(ItemReference.FromFullItem(parents.Last(), false), out itemRefOpts))
         {
           levels = Math.Min(itemRefOpts.Levels, 1);
         }
@@ -1975,6 +2009,10 @@ namespace InnovatorAdmin
       <Item type='cmf_PropertyType' action='get'>
         <Relationships>
           <Item type='cmf_ComputedProperty' action='get'>
+            <Relationships>
+              <Item action='get' type='cmf_ComputedPropertyDependency' related_expand='0'>
+              </Item>
+            </Relationships>
           </Item>
           <Item type='cmf_PropertyAllowedPermission' action='get'>
           </Item>
