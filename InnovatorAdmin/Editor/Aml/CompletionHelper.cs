@@ -1,16 +1,13 @@
-﻿using InnovatorAdmin;
 using ICSharpCode.AvalonEdit.CodeCompletion;
+using ICSharpCode.AvalonEdit.Document;
 using Innovator.Client;
+using InnovatorAdmin;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Xml;
 using System.Threading.Tasks;
-using System.Windows.Documents;
 using System.Windows.Media;
-using ICSharpCode.AvalonEdit.Document;
+using System.Xml;
 
 namespace InnovatorAdmin.Editor
 {
@@ -110,7 +107,7 @@ namespace InnovatorAdmin.Editor
               attrName = null;
               value = null;
               existingAttributes.Clear();
-              for (var i = 0; i < reader.AttributeCount; i++ )
+              for (var i = 0; i < reader.AttributeCount; i++)
               {
                 reader.MoveToAttribute(i);
                 existingAttributes.Add(reader.LocalName);
@@ -271,6 +268,7 @@ namespace InnovatorAdmin.Editor
                     { "action"
                       , "config_path"
                       , "doGetItem"
+                      , "do_skipOnAfterAdd"
                       , "id"
                       , "idlist"
                       , "isCriteria"
@@ -311,7 +309,7 @@ namespace InnovatorAdmin.Editor
                 break;
               default:
                 items = Attributes(notExisting, "condition", "is_null");
-                items = items.Concat(new [] {
+                items = items.Concat(new[] {
                   new BasicCompletionData() { Text = "between", Action = () => "condition='between'", Image = Icons.EnumValue16.Wpf },
                   new BasicCompletionData() { Text = "eq", Action = () => "condition='eq'", Content = "eq (=, Equals)", Image = Icons.EnumValue16.Wpf },
                   new BasicCompletionData() { Text = "ge", Action = () => "condition='ge'", Content = "ge (>=, Greather than or equal to)", Image = Icons.EnumValue16.Wpf },
@@ -408,12 +406,14 @@ namespace InnovatorAdmin.Editor
                   if (version < 0 || version >= 10)
                     methods = methods.Concat(Enumerable.Repeat("VaultServerEvent", 1));
                   if (version < 0 || version >= 11)
-                    methods = methods.Concat(new string[] { "GetInheritedServerEvents", "getHistoryItems"});
+                    methods = methods.Concat(new string[] { "GetInheritedServerEvents", "getHistoryItems" });
 
-                  items = _metadata.MethodNames.Select(m => (ICompletionData)new AttributeValueCompletionData() {
+                  items = _metadata.MethodNames.Select(m => (ICompletionData)new AttributeValueCompletionData()
+                  {
                     Text = m,
                     Image = Icons.Method16.Wpf
-                  }).Concat(methods.Select(m => (ICompletionData)new AttributeValueCompletionData() {
+                  }).Concat(methods.Select(m => (ICompletionData)new AttributeValueCompletionData()
+                  {
                     Text = m,
                     Image = Icons.MethodFriend16.Wpf
                   }));
@@ -422,6 +422,7 @@ namespace InnovatorAdmin.Editor
                   items = AttributeValues("can_add", "can_delete", "can_get", "can_update", "can_discover", "can_change_access");
                   break;
                 case "doGetItem":
+                case "do_skipOnAfterAdd":
                 case "version":
                 case "isCriteria":
                 case "related_expand":
@@ -869,7 +870,8 @@ namespace InnovatorAdmin.Editor
         });
       }
 
-      return new CompletionContext() {
+      return new CompletionContext()
+      {
         Items = FilterAndSort(items.Concat(appendItems), filter),
         Overlap = (filter ?? "").Length
       };
@@ -1067,7 +1069,8 @@ namespace InnovatorAdmin.Editor
         if (p.Type == PropertyType.item && p.Restrictions.Any())
         {
           var completions = p.Restrictions
-            .Select(type => (ICompletionData)new BasicCompletionData() {
+            .Select(type => (ICompletionData)new BasicCompletionData()
+            {
               Text = (state != XmlState.Tag ? "<" : "") + "Item type='" + type + "'",
               Image = Icons.XmlTag16.Wpf
             });
@@ -1168,7 +1171,8 @@ namespace InnovatorAdmin.Editor
 
           var hash = new HashSet<string>(values.Select(v => v.Value), StringComparer.CurrentCultureIgnoreCase);
           return values
-            .Select(v => new BasicCompletionData() {
+            .Select(v => new BasicCompletionData()
+            {
               Text = v.Value,
               Image = Icons.EnumValue16.Wpf
             })
@@ -1200,7 +1204,7 @@ namespace InnovatorAdmin.Editor
               output[o] = char.ToLowerInvariant(itemValue[i]);
               o++;
             }
-            else if (o == 0 || output[o-1] != '_')
+            else if (o == 0 || output[o - 1] != '_')
             {
               output[o] = '_';
               o++;
@@ -1441,7 +1445,8 @@ namespace InnovatorAdmin.Editor
           case XmlNodeType.Element:
             if (!r.IsEmptyElement)
             {
-              path.Add(new AmlNode() {
+              path.Add(new AmlNode()
+              {
                 LocalName = r.LocalName
               });
               isOpenTag = true;
@@ -1509,7 +1514,7 @@ namespace InnovatorAdmin.Editor
 
     private class AmlNode
     {
-      private Dictionary<string, string> _values = new Dictionary<string,string>();
+      private Dictionary<string, string> _values = new Dictionary<string, string>();
 
       public int Offset { get; set; }
       public string LocalName { get; set; }
@@ -1552,7 +1557,8 @@ namespace InnovatorAdmin.Editor
     private class SelectPropertyFactory : PropertyCompletionFactory
     {
       public SelectPropertyFactory(ArasMetadataProvider metadata, ItemType itemType) :
-        base(metadata, itemType) { }
+        base(metadata, itemType)
+      { }
 
       protected override BasicCompletionData CreateCompletion()
       {
@@ -1563,7 +1569,8 @@ namespace InnovatorAdmin.Editor
     private class OrderByPropertyFactory : PropertyCompletionFactory
     {
       public OrderByPropertyFactory(ArasMetadataProvider metadata, ItemType itemType) :
-        base(metadata, itemType) { }
+        base(metadata, itemType)
+      { }
 
       protected override BasicCompletionData CreateCompletion()
       {
