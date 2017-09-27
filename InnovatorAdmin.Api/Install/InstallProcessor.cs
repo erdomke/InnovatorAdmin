@@ -127,7 +127,7 @@ namespace InnovatorAdmin
               // If the original item uses a where clause or is versionable or the target item is versionable
 
               if ((query.Attribute("action") == "merge" || query.Attribute("action") == "edit") && TryGetConfigId(query, out configId)
-                 && (query.Attribute("where") != null || (_itemTypes.TryGetValue(query.Attribute("type").ToLowerInvariant(), out itemType)) && itemType.IsVersionable ))
+                 && (query.Attribute("where") != null || (_itemTypes.TryGetValue(query.Attribute("type").ToLowerInvariant(), out itemType)) && itemType.IsVersionable))
               {
                 newQuery = query.Clone() as XmlElement;
                 newQuery.InnerXml = "";
@@ -154,7 +154,8 @@ namespace InnovatorAdmin
                 string relatedId;
                 string whereClause;
                 // Check relationships and match based on source_id and related_id where necessary
-                foreach (var rel in query.ElementsByXPath("Relationships/Item[related_id]").ToList())
+                var rels = query.ElementsByXPath("Relationships/Item[related_id]").ToArray();
+                foreach (var rel in rels)
                 {
                   if (rel.Element("related_id").Element("Item") == null)
                   {
@@ -175,11 +176,15 @@ namespace InnovatorAdmin
                     newQuery.SetAttribute("action", "get");
 
                     items = _conn.Apply(newQuery.OuterXml).Items();
+                    rel.RemoveAttribute("id");
                     if (items.Any())
                     {
-                      rel.RemoveAttribute("id");
                       rel.SetAttribute("where", whereClause);
                       rel.SetAttribute("action", "edit");
+                    }
+                    else
+                    {
+                      rel.SetAttribute("action", "add");
                     }
                   }
                 }
