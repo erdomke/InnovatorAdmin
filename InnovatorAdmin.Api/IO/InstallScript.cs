@@ -1,13 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Xml;
 
 namespace InnovatorAdmin
 {
   public class InstallScript : IDiffDirectory
   {
     private List<Version> _supportedVersions = new List<Version>();
+    private string _title;
 
     public bool AddPackage { get; set; }
     public DateTime? Created { get; set; }
@@ -18,7 +17,11 @@ namespace InnovatorAdmin
     public IEnumerable<InstallItem> Lines { get; set; }
     public DateTime? Modified { get; set; }
     public List<Version> SupportedVersions { get { return _supportedVersions; } }
-    public string Title { get; set; }
+    public string Title
+    {
+      get { return _title; }
+      set { _title = Utils.CleanFileName(value); }
+    }
     public string Version { get; set; }
     public Uri Website { get; set; }
     public bool DependencySorted { get; set; }
