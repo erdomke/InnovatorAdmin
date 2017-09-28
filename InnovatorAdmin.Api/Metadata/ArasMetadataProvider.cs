@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Innovator.Client;
 using Innovator.Client.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace InnovatorAdmin
@@ -13,7 +12,7 @@ namespace InnovatorAdmin
   {
     private IAsyncConnection _conn;
     private Dictionary<ItemProperty, ItemReference> _customProps
-      = new Dictionary<ItemProperty,ItemReference>();
+      = new Dictionary<ItemProperty, ItemReference>();
     private Dictionary<string, ItemType> _itemTypesByName
       = new Dictionary<string, ItemType>(StringComparer.OrdinalIgnoreCase);
     private Dictionary<string, ItemType> _itemTypesById;
@@ -24,11 +23,13 @@ namespace InnovatorAdmin
     private Dictionary<string, Sql> _sql;
     private Dictionary<string, ItemReference> _systemIdentities;
     private Dictionary<string, IEnumerable<ListValue>> _listValues
-      = new Dictionary<string,IEnumerable<ListValue>>();
+      = new Dictionary<string, IEnumerable<ListValue>>();
     private Dictionary<string, IEnumerable<IListValue>> _serverReports
       = new Dictionary<string, IEnumerable<IListValue>>();
     private Dictionary<string, IEnumerable<IListValue>> _serverActions
       = new Dictionary<string, IEnumerable<IListValue>>();
+    private HashSet<string> _cmfGeneratedTypes = new HashSet<string>();
+    private Dictionary<string, ItemReference> _cmfLinkedTypes = new Dictionary<string, ItemReference>();
 
     /// <summary>
     /// Enumerable of methods where core = 1
@@ -79,6 +80,16 @@ namespace InnovatorAdmin
     {
       get { return _systemIdentities.Values; }
     }
+
+    /// <summary>
+    /// Hashset of all CMF-generated ItemType IDs
+    /// </summary>
+    public HashSet<string> CmfGeneratedTypes => _cmfGeneratedTypes;
+
+    /// <summary>
+    /// Dictionary of all ItemTypes linked from contentTypes
+    /// </summary>
+    public Dictionary<string, ItemReference> CmfLinkedTypes => _cmfLinkedTypes;
 
     /// <summary>
     /// Gets a reference to a system identity given the ID (if the ID matches a system identity;
@@ -155,7 +166,8 @@ namespace InnovatorAdmin
 
       return _conn.ApplyAsync("<Item type='List' action='get' id='@0' select='id'><Relationships><Item type='Value' action='get' select='label,value' /><Item type='Filter Value' action='get' select='label,value' /></Relationships></Item>"
         , true, false, id)
-        .Convert(r => {
+        .Convert(r =>
+        {
           var values = (IEnumerable<ListValue>)r.AssertItem().Relationships()
             .Select(i => new ListValue()
             {
@@ -387,6 +399,18 @@ namespace InnovatorAdmin
                                           </source_id>
                                         </Item>", true, false).ToTask();
       var sequences = _conn.ApplyAsync(@"<Item type='Sequence' action='get' select='name'></Item>", true, false).ToTask();
+      var elementTypes = _conn.ApplyAsync(@"<Item action='get' type='cmf_ElementType' select='generated_type'>
+                                                <Relationships>
+                                                  <Item action='get' type='cmf_PropertyType' select='generated_type'>
+                                                  </Item>
+                                                </Relationships>
+                                              </Item>", true, false).ToTask();
+      var contentTypes = _conn.ApplyAsync(@"<Item action='get' type='cmf_ContentType' select='linked_item_type'>
+                                              <linked_item_type>
+                                                <Item type='ItemType' action='get'>
+                                                </Item>
+                                              </linked_item_type>
+                                            </Item>", true, false).ToTask();
 
       _methods = (await methods).Items().Select(i =>
       {
@@ -440,6 +464,15 @@ namespace InnovatorAdmin
         }).ToArray();
 
       _sequences = (await sequences).Items().Select(i => ItemReference.FromFullItem(i, true)).ToArray();
+
+      _cmfGeneratedTypes = new HashSet<string>((await elementTypes).Items().SelectMany(x =>
+      {
+        var relations = x.Relationships().Select(y => y.Property("generated_type").Value).ToList();
+        relations.Add(x.Property("generated_type").Value);
+        return relations;
+      }));
+
+      _cmfLinkedTypes = (await contentTypes).Items().ToDictionary(x => x.Property("linked_item_type").Value, y => ItemReference.FromFullItem(y, true));
 
       return true;
     }
@@ -589,7 +622,7 @@ namespace InnovatorAdmin
         newProp.DataSource = prop.Property("data_source").Value;
         if (newProp.Type == PropertyType.item && newProp.Name == "data_source" && type.Name == "Property")
         {
-          newProp.Restrictions.AddRange(new string [] { "ItemType", "List", "Property" } );
+          newProp.Restrictions.AddRange(new string[] { "ItemType", "List", "Property" });
         }
         else if (newProp.Type == PropertyType.item && prop.Property("data_source").Attribute("name").HasValue())
         {

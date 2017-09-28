@@ -189,6 +189,7 @@ namespace InnovatorAdmin
 
         FixFederatedRelationships(outputDoc.DocumentElement);
         var result = ExecuteExportQuery(ref outputDoc, items);
+        RemoveCmfGeneratedTypes(result);
 
         // Add warnings for embedded relationships
         var warnings = new HashSet<ItemReference>();
@@ -200,9 +201,20 @@ namespace InnovatorAdmin
           warnings.Add(warning);
         }
 
+        //Add warnings for cmf linked itemtypes
+        foreach (var item in result.ElementsByXPath("/Result/Item[@type='ItemType']"))
+        {
+          var id = item.Attribute("id", "");
+          if (_metadata.CmfLinkedTypes.TryGetValue(id, out var reference))
+          {
+            warning = reference.Clone();
+            warning.KeyedName = "* Possible missing ContentType: " + warning.KeyedName;
+            warnings.Add(warning);
+          }
+        }
+
         //RemoveRelatedItems(result, items);
         //CleanUpSystemProps(result.DocumentElement.Elements(), items, false);
-        RemoveCmfGeneratedTypes(result);
         FixPolyItemReferences(result);
         FloatVersionableRefs(result);
         var doc = TransformResults(ref result);
@@ -1717,6 +1729,17 @@ namespace InnovatorAdmin
       {
         elem.Detatch();
       }
+
+      elements = doc.Descendants(e => e.Attribute("type", "") == "RelationshipType"
+        && e.Elements(x => x.LocalName == "relationship_id"
+        && x.Attribute("type", "") == "ItemType"
+        && _metadata.CmfGeneratedTypes.Contains(x.InnerText)).Any()
+      ).ToArray();
+
+      foreach (var elem in elements)
+      {
+        elem.Detatch();
+      }
     }
 
     /// <summary>
@@ -1993,10 +2016,26 @@ namespace InnovatorAdmin
           levels = 3;
           break;
         case "cmf_ContentType":
-          queryElem.InnerXml = @"<Relationships>
+          queryElem.InnerXml = @"<linked_item_type>
+  <Item type='ItemType' action='get'>
+  </Item>
+</linked_item_type>
+<Relationships>
   <Item type='cmf_ContentTypeView' action='get'>
   </Item>
   <Item type='cmf_ElementType' action='get'>
+    <generated_type>
+      <Item action='get' type='ItemType'>
+        <Relationships>
+          <Item action='get' type='Allowed Permission'>
+          </Item>
+          <Item action='get' type='Server Event'>
+          </Item>
+          <Item action='get' type='Can Add'>
+          </Item>
+        </Relationships>
+      </Item>
+    </generated_type>
     <Relationships>
       <Item type='cmf_ElementAllowedPermission' action='get'>
       </Item>
@@ -2007,6 +2046,18 @@ namespace InnovatorAdmin
         </Relationships>
       </Item>
       <Item type='cmf_PropertyType' action='get'>
+        <generated_type>
+          <Item action='get' type='ItemType'>
+            <Relationships>
+              <Item action='get' type='Allowed Permission'>
+              </Item>
+              <Item action='get' type='Server Event'>
+              </Item>
+              <Item action='get' type='Can Add'>
+              </Item>
+            </Relationships>
+          </Item>
+        </generated_type>
         <Relationships>
           <Item type='cmf_ComputedProperty' action='get'>
             <Relationships>
