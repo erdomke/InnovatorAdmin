@@ -463,7 +463,7 @@ namespace InnovatorAdmin
     {
       foreach (var node in doc.SelectNodes("//*[@_is_dependency = '1']").OfType<XmlElement>())
       {
-        node.Detatch();
+        node.Detach();
       }
     }
 
@@ -518,7 +518,7 @@ namespace InnovatorAdmin
                 {
                   if (cleanAll)
                   {
-                    prop.Detatch();
+                    prop.Detach();
                   }
                   else
                   {
@@ -527,7 +527,7 @@ namespace InnovatorAdmin
                 }
                 else
                 {
-                  prop.Detatch();
+                  prop.Detach();
                 }
                 break;
               case "behavior":
@@ -537,7 +537,7 @@ namespace InnovatorAdmin
                   {
                     if (cleanAll)
                     {
-                      prop.Detatch();
+                      prop.Detach();
                     }
                     else
                     {
@@ -546,7 +546,7 @@ namespace InnovatorAdmin
                   }
                   else
                   {
-                    prop.Detatch();
+                    prop.Detach();
                   }
                 }
                 break;
@@ -555,7 +555,7 @@ namespace InnovatorAdmin
                 {
                   if (cleanAll)
                   {
-                    prop.Detatch();
+                    prop.Detach();
                   }
                   else
                   {
@@ -564,7 +564,7 @@ namespace InnovatorAdmin
                 }
                 else
                 {
-                  prop.Detatch();
+                  prop.Detach();
                 }
                 break;
               case "created_by_id":
@@ -575,7 +575,7 @@ namespace InnovatorAdmin
                 {
                   if (cleanAll)
                   {
-                    prop.Detatch();
+                    prop.Detach();
                   }
                   else
                   {
@@ -584,7 +584,7 @@ namespace InnovatorAdmin
                 }
                 else
                 {
-                  prop.Detatch();
+                  prop.Detach();
                 }
                 break;
               case "major_rev":
@@ -593,7 +593,7 @@ namespace InnovatorAdmin
                 {
                   if (cleanAll)
                   {
-                    prop.Detatch();
+                    prop.Detach();
                   }
                   else
                   {
@@ -602,7 +602,7 @@ namespace InnovatorAdmin
                 }
                 else
                 {
-                  prop.Detatch();
+                  prop.Detach();
                 }
                 break;
             }
@@ -822,7 +822,7 @@ namespace InnovatorAdmin
       }
     }
     /// <summary>
-    /// Fix cyclical workflow-itemtype references by creating an edit script
+    /// Fix cyclical ContentType references by creating an edit script
     /// </summary>
     private void FixCyclicalContentTypeTabularViewRefs(XmlDocument doc)
     {
@@ -914,7 +914,7 @@ namespace InnovatorAdmin
 
         foreach (var foreignProp in itemType.ElementsByXPath(".//Relationships/Item[@type = 'Property' and data_type = 'foreign']").ToList())
         {
-          foreignProp.Detatch();
+          foreignProp.Detach();
           fix.AppendChild(foreignProp);
         }
       }
@@ -998,7 +998,7 @@ namespace InnovatorAdmin
           tempDoc.LoadXml(propData);
 
           propType.AppendChild(propType.OwnerDocument.ImportNode(tempDoc.DocumentElement, true));
-          propType.Detatch();
+          propType.Detach();
           parentItem = field.Parents().Last(e => e.LocalName == "Item");
           script = parentItem.OwnerDocument.CreateElement("Item")
             .Attr("type", field.Attribute("type"))
@@ -1240,14 +1240,14 @@ namespace InnovatorAdmin
               var parentTag = refs[0].Parents().Last(e => e.LocalName == "Item").Parent();
               foreach (var child in relTag.Elements().ToList())
               {
-                child.Detatch();
+                child.Detach();
                 parentTag.AppendChild(child);
                 var sourceId = (XmlElement)child.AppendChild(child.OwnerDocument.CreateElement("source_id"));
                 sourceId.SetAttribute("type", relTag.Parent().Attribute("type"));
                 sourceId.SetAttribute("keyed_name", relTag.Parent().Attribute("_keyed_name"));
                 sourceId.InnerText = relTag.Parent().Attribute("id");
               }
-              relTag.Detatch();
+              relTag.Detach();
               cycleState = CycleState.ResolvedCycle;
               return Enumerable.Empty<InstallItem>();
             }
@@ -1614,7 +1614,7 @@ namespace InnovatorAdmin
             formRef.InnerXml = form.OuterXml;
             foreach (var relTag in formRef.Elements("Item").Elements("Relationships").ToList())
             {
-              relTag.Detatch();
+              relTag.Detach();
             }
           }
         }
@@ -1631,7 +1631,7 @@ namespace InnovatorAdmin
               formRef.InnerXml = form.OuterXml;
               foreach (var relTag in formRef.Elements("Item").Elements("Relationships").ToList())
               {
-                relTag.Detatch();
+                relTag.Detach();
               }
             }
 
@@ -1722,23 +1722,38 @@ namespace InnovatorAdmin
     /// </summary>
     private void RemoveCmfGeneratedTypes(XmlDocument doc)
     {
-      var elements = doc.Descendants(e => e.LocalName == "generated_type"
+      foreach (var contentType in doc.ElementsByXPath("/Result/Item[@type='cmf_ContentType']"))
+      {
+        var generatedTypeProps = contentType.Descendants(e => e.LocalName == "generated_type"
         && (e.Parent().Attribute("type", "") == "cmf_ElementType" || e.Parent().Attribute("type", "") == "cmf_PropertyType"))
         .ToArray();
-      foreach (var elem in elements)
-      {
-        elem.Detatch();
+        foreach (var generatedTypeProp in generatedTypeProps)
+        {
+          var itemType = generatedTypeProp.Elements().Single();
+          var parentItem = generatedTypeProp.Parents().Last(e => e.LocalName == "Item");
+          itemType.Attr("action", "merge");
+          itemType.Attr("where", "[ItemType].name = '" + itemType.Element("name").InnerText + "'");
+          itemType.RemoveAttribute("id");
+          itemType.Element("id").Detach();
+          itemType.Attr("_cmf_generated", "1");
+          var referenceElement = itemType.Elem("___cmf_content_type_ref___").Attr("type", parentItem.Attribute("type"));
+          referenceElement.InnerText = parentItem.Attribute("id");
+
+          itemType.Detach();
+          parentItem.ParentNode.InsertAfter(itemType, parentItem);
+          generatedTypeProp.Detach();
+        }
       }
 
-      elements = doc.Descendants(e => e.Attribute("type", "") == "RelationshipType"
+      var elems = doc.Descendants(e => e.Attribute("type", "") == "RelationshipType"
         && e.Elements(x => x.LocalName == "relationship_id"
         && x.Attribute("type", "") == "ItemType"
         && _metadata.CmfGeneratedTypes.Contains(x.InnerText)).Any()
       ).ToArray();
 
-      foreach (var elem in elements)
+      foreach (var elem in elems)
       {
-        elem.Detatch();
+        elem.Detach();
       }
     }
 
@@ -1750,7 +1765,7 @@ namespace InnovatorAdmin
       var elements = doc.Descendants(e => e.LocalName == "Relationships" && e.IsEmpty).ToArray();
       foreach (var elem in elements)
       {
-        elem.Detatch();
+        elem.Detach();
       }
     }
 
@@ -1781,7 +1796,7 @@ namespace InnovatorAdmin
         .ToArray();
         foreach (var child in children)
         {
-          child.Element.Detatch();
+          child.Element.Detach();
         }
         foreach (var child in children)
         {
@@ -1816,7 +1831,8 @@ namespace InnovatorAdmin
         parents = elem.Parents().Where(e => e.LocalName == "Item").Skip(1).ToList();
         levels = 1;
 
-        if (parents.Any(e => e.Attribute("type", "").StartsWith("cmf_", StringComparison.OrdinalIgnoreCase)))
+        if (parents.Any(e => e.Attribute("type", "").StartsWith("cmf_", StringComparison.OrdinalIgnoreCase))
+          && !parents.Any(e => e.Attribute("type", "") == "ItemType"))
           continue;
 
         if (parents.Count > 0 && itemDict.TryGetValue(ItemReference.FromFullItem(parents.Last(), false), out itemRefOpts))
@@ -2016,11 +2032,7 @@ namespace InnovatorAdmin
           levels = 3;
           break;
         case "cmf_ContentType":
-          queryElem.InnerXml = @"<linked_item_type>
-  <Item type='ItemType' action='get'>
-  </Item>
-</linked_item_type>
-<Relationships>
+          queryElem.InnerXml = @"<Relationships>
   <Item type='cmf_ContentTypeView' action='get'>
   </Item>
   <Item type='cmf_ElementType' action='get'>

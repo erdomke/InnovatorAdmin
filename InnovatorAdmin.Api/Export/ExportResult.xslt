@@ -24,6 +24,8 @@
       <xsl:copy-of select="@_sql_script"/>
       <xsl:copy-of select="@_float"/>
       <xsl:copy-of select="@id"/>
+      <xsl:copy-of select="@where"/>
+      <xsl:copy-of select="@_cmf_generated"/>
       <xsl:attribute name="_keyed_name">
         <xsl:value-of select="id/@keyed_name"/>
       </xsl:attribute>
@@ -98,6 +100,7 @@
     <xsl:copy>
       <xsl:copy-of select="@type"/>
       <xsl:copy-of select="@id"/>
+      <xsl:copy-of select="@where"/>
       <xsl:copy-of select="@_sql_script"/>
       <xsl:copy-of select="@_float"/>
       <xsl:attribute name="action">merge</xsl:attribute>

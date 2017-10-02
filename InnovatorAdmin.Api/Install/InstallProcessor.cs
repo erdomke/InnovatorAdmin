@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Innovator.Client;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Xml;
-using Innovator.Client;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace InnovatorAdmin
 {
@@ -127,7 +127,8 @@ namespace InnovatorAdmin
               // If the original item uses a where clause or is versionable or the target item is versionable
 
               if ((query.Attribute("action") == "merge" || query.Attribute("action") == "edit") && TryGetConfigId(query, out configId)
-                 && (query.Attribute("where") != null || (_itemTypes.TryGetValue(query.Attribute("type").ToLowerInvariant(), out itemType)) && itemType.IsVersionable ))
+                 && (query.Attribute("where") != null || (_itemTypes.TryGetValue(query.Attribute("type").ToLowerInvariant(), out itemType))
+                 && itemType.IsVersionable))
               {
                 newQuery = query.Clone() as XmlElement;
                 newQuery.InnerXml = "";
@@ -184,6 +185,45 @@ namespace InnovatorAdmin
                   }
                 }
               }
+
+              //Fix Relationships on cmf generated ItemTypes
+              if ((query.Attribute("action") == "merge" || query.Attribute("action") == "edit")
+                && query.Attribute("_cmf_generated") != null && query.Attribute("where") != null)
+              {
+                var sourceItem = _conn.Apply($"<Item action='get' type='ItemType'><name>{query.Element("name").InnerText}</name></Item>").AssertItem();
+                var sourceId = sourceItem.Id();
+                var queryClone = query.Clone() as XmlElement;
+                queryClone.SetAttribute("id", sourceId);
+                queryClone.RemoveAttribute("where");
+                query = queryClone;
+
+                string relatedId = "";
+                string whereClause;
+                foreach (var rel in query.ElementsByXPath("Relationships/Item[related_id]").ToList())
+                {
+                  if (rel.Element("related_id").Element("Item") == null)
+                  {
+                    relatedId = rel.Element("related_id").InnerText;
+                  }
+                  else
+                  {
+                    var relatedQuery = rel.Element("related_id").Element("Item");
+                    relatedQuery.Attr("action", "get");
+                    relatedId = _conn.Apply(relatedQuery).AssertItem().Id();
+                    rel.Element("related_id").InnerText = relatedId;
+                  }
+                  whereClause = string.Format("[{0}].[source_id]='{1}' and [{0}].[related_id]='{2}'"
+                    , rel.Attribute("type", "").Replace(' ', '_'), sourceId, relatedId);
+
+                  if (!string.IsNullOrEmpty(relatedId))
+                  {
+                    rel.RemoveAttribute("id");
+                    rel.SetAttribute("where", whereClause);
+                    rel.SetAttribute("action", "merge");
+                  }
+                }
+              }
+
               items = _conn.Apply(query.OuterXml).AssertItems();
               if (line.Type == InstallType.Create) line.InstalledId = items.First().Attribute("id").Value;
 

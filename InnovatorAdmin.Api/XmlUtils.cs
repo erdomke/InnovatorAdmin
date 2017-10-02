@@ -1,8 +1,7 @@
-﻿using Mvp.Xml.Common.XPath;
+using Mvp.Xml.Common.XPath;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml;
 
 namespace InnovatorAdmin
@@ -47,7 +46,7 @@ namespace InnovatorAdmin
       elem.SetAttribute(localName, value);
       return elem;
     }
-    public static void Detatch(this XmlNode node)
+    public static void Detach(this XmlNode node)
     {
       if (node != null && node.ParentNode != null)
       {

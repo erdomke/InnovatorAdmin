@@ -105,7 +105,7 @@ namespace InnovatorAdmin
           }
           else
           {
-            node.Detatch();
+            node.Detach();
           }
         }
       }
@@ -141,7 +141,7 @@ namespace InnovatorAdmin
           }
           else
           {
-            node.Detatch();
+            node.Detach();
           }
         }
       }
