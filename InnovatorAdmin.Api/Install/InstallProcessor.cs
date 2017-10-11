@@ -155,7 +155,8 @@ namespace InnovatorAdmin
                 string relatedId;
                 string whereClause;
                 // Check relationships and match based on source_id and related_id where necessary
-                foreach (var rel in query.ElementsByXPath("Relationships/Item[related_id]").ToList())
+                var rels = query.ElementsByXPath("Relationships/Item[related_id]").ToArray();
+                foreach (var rel in rels)
                 {
                   if (rel.Element("related_id").Element("Item") == null)
                   {
@@ -176,11 +177,15 @@ namespace InnovatorAdmin
                     newQuery.SetAttribute("action", "get");
 
                     items = _conn.Apply(newQuery.OuterXml).Items();
+                    rel.RemoveAttribute("id");
                     if (items.Any())
                     {
-                      rel.RemoveAttribute("id");
                       rel.SetAttribute("where", whereClause);
                       rel.SetAttribute("action", "edit");
+                    }
+                    else
+                    {
+                      rel.SetAttribute("action", "add");
                     }
                   }
                 }
