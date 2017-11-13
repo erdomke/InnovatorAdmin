@@ -1516,6 +1516,45 @@ namespace InnovatorAdmin
         }
       }
     }
+    #region Copy Actions
+
+    private void mniTableCopyWithoutHeader_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        var grid = tbcOutputView.SelectedTab.Controls.OfType<DataGridView>().Single();
+        DataGridViewClipboardCopyMode oldMode = grid.ClipboardCopyMode;
+        grid.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
+        Clipboard.SetDataObject(grid.GetClipboardContent());
+        grid.ClipboardCopyMode = oldMode;
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void mniTableCopyWithHeader_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        var grid = tbcOutputView.SelectedTab.Controls.OfType<DataGridView>().Single();
+        DataGridViewClipboardCopyMode oldMode = grid.ClipboardCopyMode;
+        bool oldHeaders = grid.RowHeadersVisible;
+        grid.RowHeadersVisible = false;
+        grid.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+        Clipboard.SetDataObject(grid.GetClipboardContent());
+        grid.ClipboardCopyMode = oldMode;
+        grid.RowHeadersVisible = oldHeaders;
+
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    #endregion
 
     #region Table Handling
 
@@ -2057,6 +2096,9 @@ namespace InnovatorAdmin
           conTable.Items.Add(new ToolStripSeparator());
         conTable.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
           this.mniColumns,
+          new ToolStripSeparator(),
+          this.mniTableCopyActions,
+          new ToolStripSeparator(),
           this.mniSaveTableEdits,
           this.mniScriptEdits,
           this.mniResetChanges});
