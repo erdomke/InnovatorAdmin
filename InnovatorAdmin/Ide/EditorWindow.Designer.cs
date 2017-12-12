@@ -146,6 +146,9 @@
       this.mniTableEditsToClipboard = new System.Windows.Forms.ToolStripMenuItem();
       this.mniTableEditsToFile = new System.Windows.Forms.ToolStripMenuItem();
       this.mniTableEditsToQueryEditor = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniTableCopyActions = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniTableCopyWithoutHeader = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniTableCopyWithHeader = new System.Windows.Forms.ToolStripMenuItem();
       this.mniResetChanges = new System.Windows.Forms.ToolStripMenuItem();
       this.btnOk = new InnovatorAdmin.Controls.FlatButton();
       this.btnCancel = new InnovatorAdmin.Controls.FlatButton();
@@ -1369,7 +1372,6 @@
       // 
       this.dgvItems.BackgroundColor = System.Drawing.Color.White;
       this.dgvItems.BorderStyle = System.Windows.Forms.BorderStyle.None;
-      this.dgvItems.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
       this.dgvItems.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
       this.dgvItems.ContextMenuStrip = this.conTable;
       this.dgvItems.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -1387,6 +1389,7 @@
             this.mniColumns,
             this.mniSaveTableEdits,
             this.mniScriptEdits,
+            this.mniTableCopyActions,
             this.mniResetChanges});
       this.conTable.Name = "conTable";
       this.conTable.Size = new System.Drawing.Size(152, 92);
@@ -1398,12 +1401,40 @@
       this.mniColumns.Size = new System.Drawing.Size(151, 22);
       this.mniColumns.Text = "Columns...";
       this.mniColumns.Click += new System.EventHandler(this.mniColumns_Click);
+
+      // 
+      // mniTableCopyActions
+      // 
+      this.mniTableCopyActions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mniTableCopyWithoutHeader,
+            this.mniTableCopyWithHeader});
+      this.mniTableCopyActions.Name = "mniTableCopyActions";
+      this.mniTableCopyActions.Size = new System.Drawing.Size(151, 22);
+      this.mniTableCopyActions.Text = "Copy ...";
+
+      // 
+      // mniTableCopyWithoutHeader
+      // 
+      this.mniTableCopyWithoutHeader.Name = "mniTableCopyWithoutHeader";
+      this.mniTableCopyWithoutHeader.Size = new System.Drawing.Size(140, 22);
+      this.mniTableCopyWithoutHeader.Text = "Without Header";
+      this.mniTableCopyWithoutHeader.ShortcutKeyDisplayString = "Ctrl+C";
+      this.mniTableCopyWithoutHeader.Click += new System.EventHandler(this.mniTableCopyWithoutHeader_Click);
+
+      // 
+      // mniTableCopyWithHeader
+      // 
+      this.mniTableCopyWithHeader.Name = "mniTableCopyWithHeader";
+      this.mniTableCopyWithHeader.Size = new System.Drawing.Size(140, 22);
+      this.mniTableCopyWithHeader.Text = "With Header";
+      this.mniTableCopyWithHeader.Click += new System.EventHandler(this.mniTableCopyWithHeader_Click);
+
       // 
       // mniSaveTableEdits
       // 
       this.mniSaveTableEdits.Name = "mniSaveTableEdits";
       this.mniSaveTableEdits.Size = new System.Drawing.Size(151, 22);
-      this.mniSaveTableEdits.Text = "Save";
+      this.mniSaveTableEdits.Text = "Save Edits";
       this.mniSaveTableEdits.Click += new System.EventHandler(this.mniSave_Click);
       // 
       // mniScriptEdits
@@ -1414,7 +1445,7 @@
             this.mniTableEditsToQueryEditor});
       this.mniScriptEdits.Name = "mniScriptEdits";
       this.mniScriptEdits.Size = new System.Drawing.Size(151, 22);
-      this.mniScriptEdits.Text = "Save To";
+      this.mniScriptEdits.Text = "Save Edits To";
       // 
       // mniTableEditsToClipboard
       // 
@@ -1686,6 +1717,9 @@
     private System.Windows.Forms.ContextMenuStrip conTable;
     private System.Windows.Forms.ToolStripMenuItem mniScriptEdits;
     private System.Windows.Forms.ToolStripMenuItem mniTableEditsToQueryEditor;
+    private System.Windows.Forms.ToolStripMenuItem mniTableCopyActions;
+    private System.Windows.Forms.ToolStripMenuItem mniTableCopyWithHeader;
+    private System.Windows.Forms.ToolStripMenuItem mniTableCopyWithoutHeader;
     private System.Windows.Forms.ToolStripMenuItem mniTableEditsToClipboard;
     private System.Windows.Forms.ToolStripMenuItem mniTableEditsToFile;
     private System.Windows.Forms.ToolStripMenuItem mniResetChanges;
