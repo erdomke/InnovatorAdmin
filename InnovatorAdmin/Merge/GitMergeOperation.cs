@@ -11,12 +11,12 @@ namespace InnovatorAdmin
 {
   public class GitMergeOperation : IMergeOperation
   {
-    private Repository _repo;
-    private IEnumerable<FileCompare> _compares;
-    private Commit _localCommit;
-    private Commit _remoteCommit;
-    private Commit _baseCommit;
-    private string _path;
+    private readonly Repository _repo;
+    private readonly IEnumerable<FileCompare> _compares;
+    private readonly Commit _localCommit;
+    private readonly Commit _remoteCommit;
+    private readonly Commit _baseCommit;
+    private readonly string _path;
 
     public GitMergeOperation(Repository repo, string localBranch, string remoteBranch)
     {
@@ -137,7 +137,7 @@ namespace InnovatorAdmin
     {
       var entry = commit.Tree[path];
       if (entry == null || entry.TargetType != TreeEntryTargetType.Blob)
-        throw new ArgumentException("Invalid path");
+        return new MemoryStream(new byte[] { });
       var blob = (Blob)entry.Target;
       return blob.GetContentStream();
     }

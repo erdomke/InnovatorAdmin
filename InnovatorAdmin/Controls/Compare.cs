@@ -144,20 +144,13 @@ namespace InnovatorAdmin.Controls
         });
       });
 
-      var items = (from d in docs
-                  where d.Item1.DocumentElement != null
-                  select InstallItem.FromScript(GetFirstItem(d.Item1.DocumentElement), d.Item2))
-                  .ToArray();
+      var items = docs
+        .Where(d => d.Item1.DocumentElement != null)
+        .SelectMany(d => XmlUtils.RootItems(d.Item1.DocumentElement)
+          .Select(i => InstallItem.FromScript(i, d.Item2)))
+        .ToArray();
       _wizard.InstallScript = new InstallScript() { Lines = items };
       _wizard.GoToStep(new ExportOptions());
-    }
-
-    private XmlElement GetFirstItem(XmlElement elem)
-    {
-      var curr = elem;
-      while (curr != null && curr.LocalName != "Item")
-        curr = curr.ChildNodes.OfType<XmlElement>().FirstOrDefault();
-      return curr ?? elem;
     }
   }
 }

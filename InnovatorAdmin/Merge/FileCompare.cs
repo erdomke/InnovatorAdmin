@@ -79,7 +79,7 @@ namespace InnovatorAdmin
       }
     }
 
-    private static Dictionary<int, MergeStatus> _status = new Dictionary<int, MergeStatus>()
+    private static readonly Dictionary<int, MergeStatus> _status = new Dictionary<int, MergeStatus>()
     {
       {(int)FileStatus.DoesntExist + ((int)FileStatus.DoesntExist << 2) + ((int)FileStatus.Unchanged << 4), MergeStatus.TakeRemote},
       {(int)FileStatus.DoesntExist + ((int)FileStatus.DoesntExist << 2) + ((int)FileStatus.Modified << 4), MergeStatus.TakeRemote},

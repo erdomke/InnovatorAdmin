@@ -9,12 +9,12 @@ using System.Xml;
 
 namespace InnovatorAdmin
 {
-  public class ArasMetadataProvider
+  public class ArasMetadataProvider : IArasMetadataProvider
   {
-    private IAsyncConnection _conn;
-    private Dictionary<ItemProperty, ItemReference> _customProps
-      = new Dictionary<ItemProperty,ItemReference>();
-    private Dictionary<string, ItemType> _itemTypesByName
+    private readonly IAsyncConnection _conn;
+    private readonly Dictionary<ItemProperty, ItemReference> _customProps
+      = new Dictionary<ItemProperty, ItemReference>();
+    private readonly Dictionary<string, ItemType> _itemTypesByName
       = new Dictionary<string, ItemType>(StringComparer.OrdinalIgnoreCase);
     private Dictionary<string, ItemType> _itemTypesById;
     private Task<bool[]> _metadataComplete;
@@ -23,11 +23,11 @@ namespace InnovatorAdmin
     private IEnumerable<ItemReference> _sequences = Enumerable.Empty<ItemReference>();
     private Dictionary<string, Sql> _sql;
     private Dictionary<string, ItemReference> _systemIdentities;
-    private Dictionary<string, IEnumerable<ListValue>> _listValues
-      = new Dictionary<string,IEnumerable<ListValue>>();
-    private Dictionary<string, IEnumerable<IListValue>> _serverReports
+    private readonly Dictionary<string, IEnumerable<ListValue>> _listValues
+      = new Dictionary<string, IEnumerable<ListValue>>();
+    private readonly Dictionary<string, IEnumerable<IListValue>> _serverReports
       = new Dictionary<string, IEnumerable<IListValue>>();
-    private Dictionary<string, IEnumerable<IListValue>> _serverActions
+    private readonly Dictionary<string, IEnumerable<IListValue>> _serverActions
       = new Dictionary<string, IEnumerable<IListValue>>();
 
     /// <summary>
@@ -155,7 +155,8 @@ namespace InnovatorAdmin
 
       return _conn.ApplyAsync("<Item type='List' action='get' id='@0' select='id'><Relationships><Item type='Value' action='get' select='label,value' /><Item type='Filter Value' action='get' select='label,value' /></Relationships></Item>"
         , true, false, id)
-        .Convert(r => {
+        .Convert(r =>
+        {
           var values = (IEnumerable<ListValue>)r.AssertItem().Relationships()
             .Select(i => new ListValue()
             {
@@ -278,8 +279,8 @@ namespace InnovatorAdmin
 
     private async Task<bool> ReloadItemTypeMetadata()
     {
-      var itemTypes = _conn.ApplyAsync(@"<Item type='ItemType' action='get' select='is_versionable,is_dependent,implementation_type,core,name,label'></Item>", true, true).ToTask();
-      var relTypes = _conn.ApplyAsync(@"<Item action='get' type='RelationshipType' related_expand='0' select='related_id,source_id,relationship_id,name,label' />", true, true).ToTask();
+      var itemTypes = _conn.ApplyAsync("<Item type='ItemType' action='get' select='is_versionable,is_dependent,implementation_type,core,name,label'></Item>", true, true).ToTask();
+      var relTypes = _conn.ApplyAsync("<Item action='get' type='RelationshipType' related_expand='0' select='related_id,source_id,relationship_id,name,label' />", true, true).ToTask();
       var sortedProperties = _conn.ApplyAsync(@"<Item type='Property' action='get' select='source_id'>
   <order_by condition='is not null'></order_by>
 </Item>", true, false).ToTask();
@@ -300,16 +301,18 @@ namespace InnovatorAdmin
 
       foreach (var itemTypeData in r.Items())
       {
-        result = new ItemType();
-        result.Id = itemTypeData.Id();
-        result.IsCore = itemTypeData.Property("core").AsBoolean(false);
-        result.IsDependent = itemTypeData.Property("is_dependent").AsBoolean(false);
-        result.IsFederated = itemTypeData.Property("implementation_type").Value == "federated";
-        result.IsPolymorphic = itemTypeData.Property("implementation_type").Value == "polymorphic";
-        result.IsVersionable = itemTypeData.Property("is_versionable").AsBoolean(false);
-        result.Label = itemTypeData.Property("label").Value;
-        result.Name = itemTypeData.Property("name").Value;
-        result.Reference = ItemReference.FromFullItem(itemTypeData, true);
+        result = new ItemType()
+        {
+          Id = itemTypeData.Id(),
+          IsCore = itemTypeData.Property("core").AsBoolean(false),
+          IsDependent = itemTypeData.Property("is_dependent").AsBoolean(false),
+          IsFederated = itemTypeData.Property("implementation_type").Value == "federated",
+          IsPolymorphic = itemTypeData.Property("implementation_type").Value == "polymorphic",
+          IsVersionable = itemTypeData.Property("is_versionable").AsBoolean(false),
+          Label = itemTypeData.Property("label").Value,
+          Name = itemTypeData.Property("name").Value,
+          Reference = ItemReference.FromFullItem(itemTypeData, true)
+        };
         _itemTypesByName[result.Name] = result;
       }
 
@@ -363,11 +366,11 @@ namespace InnovatorAdmin
 
     private async Task<bool> ReloadSecondaryMetadata()
     {
-      var methods = _conn.ApplyAsync(@"<Item type='Method' action='get' select='config_id,core,name'></Item>", true, false).ToTask();
+      var methods = _conn.ApplyAsync("<Item type='Method' action='get' select='config_id,core,name'></Item>", true, false).ToTask();
       var sysIdents = _conn.ApplyAsync(@"<Item type='Identity' action='get' select='id,name'>
                                       <name condition='in'>'World', 'Creator', 'Owner', 'Manager', 'Innovator Admin', 'Super User'</name>
                                     </Item>", true, true).ToTask();
-      var sqls = _conn.ApplyAsync(@"<Item type='SQL' action='get' select='id,name,type'></Item>", true, false).ToTask();
+      var sqls = _conn.ApplyAsync("<Item type='SQL' action='get' select='id,name,type'></Item>", true, false).ToTask();
       var customProps = _conn.ApplyAsync(@"<Item type='Property' action='get' select='name,source_id(id,name)'>
                                           <created_by_id condition='ne'>AD30A6D8D3B642F5A2AFED1A4B02BEFA</created_by_id>
                                           <source_id>
@@ -386,7 +389,7 @@ namespace InnovatorAdmin
                                             </Item>
                                           </source_id>
                                         </Item>", true, false).ToTask();
-      var sequences = _conn.ApplyAsync(@"<Item type='Sequence' action='get' select='name'></Item>", true, false).ToTask();
+      var sequences = _conn.ApplyAsync("<Item type='Sequence' action='get' select='name'></Item>", true, false).ToTask();
 
       _methods = (await methods).Items().Select(i =>
       {
@@ -589,7 +592,7 @@ namespace InnovatorAdmin
         newProp.DataSource = prop.Property("data_source").Value;
         if (newProp.Type == PropertyType.item && newProp.Name == "data_source" && type.Name == "Property")
         {
-          newProp.Restrictions.AddRange(new string [] { "ItemType", "List", "Property" } );
+          newProp.Restrictions.AddRange(new string[] { "ItemType", "List", "Property" });
         }
         else if (newProp.Type == PropertyType.item && prop.Property("data_source").Attribute("name").HasValue())
         {

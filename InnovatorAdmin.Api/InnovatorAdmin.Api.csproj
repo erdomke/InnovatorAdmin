@@ -49,9 +49,8 @@
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Innovator.Client, Version=2017.6.14.1919, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Innovator.Client.2017.6.14.1919\lib\net45\Innovator.Client.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="innovator.client, Version=2017.10.17.1534, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Innovator.Client.2017.10.17.1534\lib\net45\innovator.client.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualBasic" />
@@ -80,6 +79,8 @@
     <Compile Include="Merge\FileSysDiffDirectory.cs" />
     <Compile Include="Merge\IDiffDirectory.cs" />
     <Compile Include="Merge\IDiffFile.cs" />
+    <Compile Include="Merge\MergeProcessor.cs" />
+    <Compile Include="Merge\TextDiff.cs" />
     <Compile Include="Metadata\ArasMetadataProvider.cs" />
     <Compile Include="Connection\IProgressCallback.cs" />
     <Compile Include="DependencyAnalyzer.cs" />
@@ -111,10 +112,12 @@
     <Compile Include="IProgressReporter.cs" />
     <Compile Include="ItemProperty.cs" />
     <Compile Include="ItemReference.cs" />
+    <Compile Include="Metadata\IArasMetadataProvider.cs" />
     <Compile Include="Metadata\IListValue.cs" />
     <Compile Include="Metadata\ItemType.cs" />
     <Compile Include="Metadata\ListValue.cs" />
     <Compile Include="Metadata\Method.cs" />
+    <Compile Include="Metadata\PackageMetadataProvider.cs" />
     <Compile Include="Metadata\Property.cs" />
     <Compile Include="Metadata\PropertyType.cs" />
     <Compile Include="Metadata\PropertyVisibility.cs" />
@@ -161,6 +164,7 @@
     <Compile Include="Utils.cs" />
     <Compile Include="XmlNodeWriter.cs" />
     <Compile Include="XmlUtils.cs" />
+    <Compile Include="XmlValueReader.cs" />
     <Compile Include="Xslt\ArasXsltExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

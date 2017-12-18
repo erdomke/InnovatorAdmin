@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace InnovatorAdmin
 {
-  public abstract class InnovatorPackage: IDisposable
+  public abstract class InnovatorPackage : IDisposable
   {
     private List<string> _paths = new List<string>();
 
@@ -82,10 +82,12 @@ namespace InnovatorAdmin
       var existingPaths = new HashSet<string>();
 
       // Record the import order
-      var settings = new XmlWriterSettings();
-      settings.OmitXmlDeclaration = true;
-      settings.Indent = true;
-      settings.IndentChars = "  ";
+      var settings = new XmlWriterSettings()
+      {
+        OmitXmlDeclaration = true,
+        Indent = true,
+        IndentChars = "  "
+      };
       using (var manifestStream = GetNewStream(null))
       {
         using (var manifestWriter = XmlWriter.Create(manifestStream, settings))

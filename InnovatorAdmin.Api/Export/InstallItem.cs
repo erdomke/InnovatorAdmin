@@ -16,13 +16,9 @@ namespace InnovatorAdmin
     private XmlElement _elem;
     private ItemReference _itemRef;
     private string _name;
-    private InstallType _type;
 
     internal IEnumerable<ItemReference> CoreDependencies { get { return _dependencies; } }
-    public InstallType Type {
-      get { return _type; }
-      set { _type = value; }
-    }
+    public InstallType Type { get; set; }
     public ItemReference Reference { get { return _itemRef; } }
     public string InstalledId { get; set; }
     public string Name
@@ -31,7 +27,7 @@ namespace InnovatorAdmin
       {
         if (_name == null)
         {
-          switch (_type)
+          switch (Type)
           {
             case InstallType.Create:
               return "Install of " + this.Reference.ToString();
@@ -127,7 +123,7 @@ namespace InnovatorAdmin
 
       if (elem.HasAttribute("_dependency_check"))
       {
-        result._type = InstallType.DependencyCheck;
+        result.Type = InstallType.DependencyCheck;
       }
       else if (elem.HasAttribute("action"))
       {
@@ -136,7 +132,7 @@ namespace InnovatorAdmin
           case "add":
           case "merge":
           case "create":
-            result._type = InstallType.Create;
+            result.Type = InstallType.Create;
             break;
           case "ActivateActivity":
           case "AddItem":
@@ -186,23 +182,26 @@ namespace InnovatorAdmin
           case "version":
             if ((elem.Attributes["type"].Value != "Form" && elem.Attributes["type"].Value != "View")
               || elem.Attributes["action"].Value != "delete")
+            {
               result._dependencies = Enumerable.Repeat(result._itemRef, 1);
-            result._itemRef = new ItemReference(ScriptType, result._itemRef.ToString() + " " + Utils.GetChecksum(Encoding.UTF8.GetBytes(elem.OuterXml)))
+            }
+
+            result._itemRef = new ItemReference(ScriptType, result._itemRef + " " + Utils.GetChecksum(Encoding.UTF8.GetBytes(elem.OuterXml)))
             {
               KeyedName = RenderAttributes(elem)
             };
-            result._type = InstallType.Script;
+            result.Type = InstallType.Script;
             break;
           default:
             result._dependencies = Enumerable.Repeat(new ItemReference("Method", "[Method].[name] = '" + elem.Attributes["action"].Value + "'")
             {
               KeyedName = elem.Attributes["action"].Value
             }, 1);
-            result._itemRef = new ItemReference(ScriptType, result._itemRef.ToString() + " " + Utils.GetChecksum(Encoding.UTF8.GetBytes(elem.OuterXml)))
+            result._itemRef = new ItemReference(ScriptType, result._itemRef + " " + Utils.GetChecksum(Encoding.UTF8.GetBytes(elem.OuterXml)))
             {
               KeyedName = RenderAttributes(elem)
             };
-            result._type = InstallType.Script;
+            result.Type = InstallType.Script;
             break;
         }
       }
@@ -213,7 +212,7 @@ namespace InnovatorAdmin
         {
           result._itemRef.KeyedName = RenderAttributes(elem);
         }
-        result._type = InstallType.Script;
+        result.Type = InstallType.Script;
       }
       return result;
     }
@@ -234,7 +233,7 @@ namespace InnovatorAdmin
       result._elem.SetAttribute("action", "get");
       result._elem.SetAttribute("_dependency_check", "1");
       result._elem.SetAttribute("_keyed_name", result._itemRef.KeyedName);
-      result._type = InstallType.DependencyCheck;
+      result.Type = InstallType.DependencyCheck;
       return result;
     }
     public static InstallItem FromWarning(ItemReference itemRef, string warning)
@@ -242,7 +241,7 @@ namespace InnovatorAdmin
       var result = new InstallItem();
       result._itemRef = itemRef;
       result._name = warning;
-      result._type = InstallType.Warning;
+      result.Type = InstallType.Warning;
       return result;
     }
 
@@ -316,6 +315,7 @@ namespace InnovatorAdmin
         newPath = folder + "\\" + Utils.CleanFileName((line.Reference.KeyedName ?? "") + "_" + line.Reference.Unique) + extension;
       return newPath;
     }
+
     public static void CleanKeyedNames(this IEnumerable<InstallItem> lines)
     {
       var existing = lines.Where(l => l.Type == InstallType.Create)
