@@ -19,7 +19,8 @@ namespace InnovatorAdmin
     private InstallType _type;
 
     internal IEnumerable<ItemReference> CoreDependencies { get { return _dependencies; } }
-    public InstallType Type {
+    public InstallType Type
+    {
       get { return _type; }
       set { _type = value; }
     }
@@ -318,8 +319,13 @@ namespace InnovatorAdmin
     }
     public static void CleanKeyedNames(this IEnumerable<InstallItem> lines)
     {
-      var existing = lines.Where(l => l.Type == InstallType.Create)
-        .ToDictionary(l => l.Reference.Unique);
+      var groups = lines.Where(l => l.Type == InstallType.Create)
+        .GroupBy(l => l.Reference.Unique);
+      var duplicates = groups.Where(g => g.Skip(1).Any()).ToArray();
+      if (duplicates.Length > 0)
+        throw new InvalidOperationException("The package has duplicate entries for the following items: " + duplicates.GroupConcat(", ", g => g.Key));
+      var existing = groups
+        .ToDictionary(g => g.Key, g => g.First());
       InstallItem item;
       foreach (var line in lines.Where(l => l.Type == InstallType.Script))
       {
