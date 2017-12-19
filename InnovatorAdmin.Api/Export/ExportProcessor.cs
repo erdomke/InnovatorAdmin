@@ -190,6 +190,8 @@ namespace InnovatorAdmin
         FixFederatedRelationships(outputDoc.DocumentElement);
         var result = ExecuteExportQuery(ref outputDoc, items);
         RemoveCmfGeneratedTypes(result);
+        FixCmfComputedPropDependencies(result);
+        FixCmfTabularViewMissingWarning(result);
 
         // Add warnings for embedded relationships
         var warnings = new HashSet<ItemReference>();
@@ -1736,6 +1738,7 @@ namespace InnovatorAdmin
           itemType.RemoveAttribute("id");
           itemType.Element("id").Detach();
           itemType.Attr("_cmf_generated", "1");
+          itemType.Attr("keyed_name", generatedTypeProp.Attribute("keyed_name", ""));
           var referenceElement = itemType.Elem("___cmf_content_type_ref___").Attr("type", parentItem.Attribute("type"));
           referenceElement.InnerText = parentItem.Attribute("id");
 
@@ -1754,6 +1757,45 @@ namespace InnovatorAdmin
       foreach (var elem in elems)
       {
         elem.Detach();
+      }
+    }
+
+    /// <summary>
+    /// The CMF computed property dependencies are dependent on inter-item properties. Extract and insert them later.
+    /// </summary>
+    private void FixCmfComputedPropDependencies(XmlDocument doc)
+    {
+      foreach (var contentType in doc.ElementsByXPath("/Result/Item[@type='cmf_ContentType']"))
+      {
+        var computedDependencies = contentType.Descendants(e => e.LocalName == "Item" && e.Attribute("type", "") == "cmf_ComputedPropertyDependency")
+          .ToArray();
+        foreach (var computedDep in computedDependencies)
+        {
+          var parentItem = computedDep.Parents().Last(e => e.LocalName == "Item");
+          computedDep.Attr("action", "merge");
+          computedDep.Detach();
+          parentItem.ParentNode.InsertAfter(computedDep, parentItem);
+        }
+      }
+    }
+
+    /// <summary>
+    /// The CMF TabularView Item is expanded by default, need to replace with only related_id. This will allow processor to notice possible missing items.
+    /// </summary>
+    private void FixCmfTabularViewMissingWarning(XmlDocument doc)
+    {
+      foreach (var contentType in doc.ElementsByXPath("/Result/Item[@type='cmf_ContentType']"))
+      {
+        var relatedBaseViews = contentType.Descendants(e => e.LocalName == "related_id" && e.Parent().Attribute("type", "") == "cmf_ContentTypeView"
+        && (e.Attribute("type", "") == "cmf_BaseView" || e.Attribute("type", "") == "cmf_TabularView"))
+          .ToArray();
+        foreach (var relatedBaseView in relatedBaseViews)
+        {
+          var tabularView = relatedBaseView.Element("Item");
+          relatedBaseView.InnerText = tabularView.Attribute("id", "");
+          relatedBaseView.Attr("type", tabularView.Attribute("type", ""));
+          tabularView.Detach();
+        }
       }
     }
 
