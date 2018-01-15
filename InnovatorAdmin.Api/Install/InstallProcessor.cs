@@ -228,8 +228,9 @@ namespace InnovatorAdmin
                   }
                 }
               }
-
-              items = _conn.Apply(query.OuterXml).AssertItems();
+              var cmd = new Command(query.OuterXml);
+              cmd.Settings = x => x.Timeout = 300000;
+              items = _conn.Apply(cmd).AssertItems();
               if (line.Type == InstallType.Create) line.InstalledId = items.First().Attribute("id").Value;
 
               // Execute any sql scripts

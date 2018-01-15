@@ -259,6 +259,14 @@ namespace InnovatorAdmin
       {
         this.OnActionComplete(new ActionCompleteEventArgs() { Exception = ex });
       }
+#if DEBUG
+      // This is useful for debugging and making sure duplicate items are not present
+      var grps = script.Lines.Where(l => l.Type == InstallType.Create)
+        .GroupBy(l => l.Reference.Unique);
+      var duplicates = grps.Where(g => g.Skip(1).Any()).ToArray();
+      if (duplicates.Length > 0)
+        throw new InvalidOperationException("The package has duplicate entries for the following items: " + duplicates.GroupConcat(", ", g => g.Key));
+#endif
     }
 
     /// <summary>
@@ -1765,16 +1773,23 @@ namespace InnovatorAdmin
     /// </summary>
     private void FixCmfComputedPropDependencies(XmlDocument doc)
     {
+      var existingComputedDeps = doc.ElementsByXPath("/Result/Item[@type='cmf_ComputedPropertyDependency']").Select(x => x.Attribute("id", "")).ToList();
       foreach (var contentType in doc.ElementsByXPath("/Result/Item[@type='cmf_ContentType']"))
       {
         var computedDependencies = contentType.Descendants(e => e.LocalName == "Item" && e.Attribute("type", "") == "cmf_ComputedPropertyDependency")
           .ToArray();
         foreach (var computedDep in computedDependencies)
         {
+          var computedDepID = computedDep.Attribute("id", "");
+          if (existingComputedDeps.Contains(computedDepID))
+          {
+            continue;
+          }
           var parentItem = computedDep.Parents().Last(e => e.LocalName == "Item");
           computedDep.Attr("action", "merge");
           computedDep.Detach();
           parentItem.ParentNode.InsertAfter(computedDep, parentItem);
+          existingComputedDeps.Add(computedDepID);
         }
       }
     }

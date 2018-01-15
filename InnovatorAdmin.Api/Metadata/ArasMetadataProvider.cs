@@ -465,15 +465,21 @@ namespace InnovatorAdmin
 
       _sequences = (await sequences).Items().Select(i => ItemReference.FromFullItem(i, true)).ToArray();
 
-      _cmfGeneratedTypes = new HashSet<string>((await elementTypes).Items().SelectMany(x =>
+      try
       {
-        var relations = x.Relationships().Select(y => y.Property("generated_type").Value).ToList();
-        relations.Add(x.Property("generated_type").Value);
-        return relations;
-      }));
+        _cmfGeneratedTypes = new HashSet<string>((await elementTypes).Items().SelectMany(x =>
+        {
+          var relations = x.Relationships().Select(y => y.Property("generated_type").Value).ToList();
+          relations.Add(x.Property("generated_type").Value);
+          return relations;
+        }));
 
-      _cmfLinkedTypes = (await contentTypes).Items().ToDictionary(x => x.Property("linked_item_type").Value, y => ItemReference.FromFullItem(y, true));
-
+        _cmfLinkedTypes = (await contentTypes).Items().ToDictionary(x => x.Property("linked_item_type").Value, y => ItemReference.FromFullItem(y, true));
+      }
+      catch (ServerException)
+      {
+        //TODO: Do something when cmf types don't exist
+      }
       return true;
     }
 
