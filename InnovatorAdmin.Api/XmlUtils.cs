@@ -1,6 +1,7 @@
 using Mvp.Xml.Common.XPath;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml;
 
@@ -8,6 +9,20 @@ namespace InnovatorAdmin
 {
   public static class XmlUtils
   {
+    public static string RemoveComments(string xml)
+    {
+      using (var reader = new StringReader(xml))
+      using (var xReader = XmlReader.Create(reader, new XmlReaderSettings()
+      {
+        IgnoreComments = true
+      }))
+      {
+        var doc = new XmlDocument();
+        doc.Load(xReader);
+        return doc.OuterXml;
+      }
+    }
+
     public static XmlDocument NewDoc(this XmlNode node)
     {
       var doc = (node as XmlDocument) ?? node.OwnerDocument;

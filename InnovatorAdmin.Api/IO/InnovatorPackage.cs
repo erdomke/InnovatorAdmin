@@ -246,7 +246,7 @@ namespace InnovatorAdmin
           {
             dataFile = xsltElem.Parent().Element("report_query", "<Result><Item></Item></Result>");
           }
-          dataFile = RemoveComments(dataFile);
+          dataFile = XmlUtils.RemoveComments(dataFile);
 
           writer.WriteLine(xslt);
         }
@@ -258,19 +258,6 @@ namespace InnovatorAdmin
       }
     }
 
-    private string RemoveComments(string xml)
-    {
-      using (var reader = new StringReader(xml))
-      using (var xReader = XmlReader.Create(reader, new XmlReaderSettings()
-      {
-        IgnoreComments = true
-      }))
-      {
-        var doc = new XmlDocument();
-        doc.Load(reader);
-        return doc.OuterXml;
-      }
-    }
     #endregion
 
     protected abstract Stream GetExistingStream(string path);
