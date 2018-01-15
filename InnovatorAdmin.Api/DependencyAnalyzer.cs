@@ -11,21 +11,21 @@ namespace InnovatorAdmin
   {
     //// Persistent variables between scans
     // Pointer from a child reference to the master reference that defines it
-    private Dictionary<ItemReference, ItemReference> _allDefinitions = new Dictionary<ItemReference,ItemReference>();
+    private readonly Dictionary<ItemReference, ItemReference> _allDefinitions = new Dictionary<ItemReference, ItemReference>();
     // Pointer from a child reference to the XML data and master reference where the child is referenced
-    private Dictionary<ItemReference, References> _allDependencies = new Dictionary<ItemReference, References>();
+    private readonly Dictionary<ItemReference, References> _allDependencies = new Dictionary<ItemReference, References>();
     // All the dependencies for a given item based on the reference
-    private Dictionary<ItemReference, HashSet<ItemReference>> _allItemDependencies = new Dictionary<ItemReference, HashSet<ItemReference>>();
+    private readonly Dictionary<ItemReference, HashSet<ItemReference>> _allItemDependencies = new Dictionary<ItemReference, HashSet<ItemReference>>();
 
     private const string ItemTypeByNameWhere = "[ItemType].[name] = '";
 
     //// Temporary variables only used within a set of scans
-    private HashSet<ItemReference> _definitions = new HashSet<ItemReference>();
-    private HashSet<ItemReference> _dependencies = new HashSet<ItemReference>();
-    private ArasMetadataProvider _metadata;
+    private readonly HashSet<ItemReference> _definitions = new HashSet<ItemReference>();
+    private readonly HashSet<ItemReference> _dependencies = new HashSet<ItemReference>();
+    private readonly IArasMetadataProvider _metadata;
     private XmlElement _elem;
 
-    public DependencyAnalyzer(ArasMetadataProvider metadata)
+    public DependencyAnalyzer(IArasMetadataProvider metadata)
     {
       _metadata = metadata;
     }
@@ -36,6 +36,7 @@ namespace InnovatorAdmin
       _allDependencies.Clear();
       _allItemDependencies.Clear();
     }
+
     public void Reset(IEnumerable<ItemReference> refsToKeep)
     {
       if (refsToKeep.Any())
@@ -218,6 +219,7 @@ namespace InnovatorAdmin
       _dependencies.Clear();
       _definitions.Clear();
     }
+
     public void CleanDependencies()
     {
       ItemReference topDefn;
@@ -315,7 +317,7 @@ namespace InnovatorAdmin
       {
         // Property data source dependencies
         var parent = elem.ParentNode as XmlElement;
-        if (parent != null && parent.LocalName == "Item" && parent.Attribute("type") == "Property")
+        if (parent?.LocalName == "Item" && parent.Attribute("type") == "Property")
         {
           var keyedName = elem.Attribute("keyed_name");
           var itemtype = _metadata.ItemTypes.FirstOrDefault(i => i.Reference.Unique == elem.Parent().Parent().Parent().Attribute("id") && i.IsPolymorphic);
@@ -425,14 +427,17 @@ namespace InnovatorAdmin
       {
         return _contexts.Select(c => c.Context);
       }
+
       public IEnumerable<XmlNode> GetReferences()
       {
         return _contexts.Select(c => c.Reference);
       }
+
       public IEnumerable<XmlNode> GetReferencesByMaster(ItemReference masterRef)
       {
-        return (from c in _contexts where c.MasterRef.Equals(masterRef) select c.Reference);
+        return from c in _contexts where c.MasterRef.Equals(masterRef) select c.Reference;
       }
+
       public void RemoveByMaster(ItemReference masterRef)
       {
         var i = 0;
@@ -448,6 +453,7 @@ namespace InnovatorAdmin
           }
         }
       }
+
       public void RemoveAllButMasterList(HashSet<ItemReference> masterRefsToKeep)
       {
         var i = 0;

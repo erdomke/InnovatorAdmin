@@ -254,7 +254,8 @@ namespace InnovatorAdmin
       _commands.Add<Editor.FullEditor>(mniBlockComment, e => e.Modifiers == (Keys.Control | Keys.Shift) && e.KeyCode == Keys.Q, BlockComment);
       _commands.Add<Editor.FullEditor>(mniBlockUncomment, null, BlockUncomment);
       _commands.Add<Editor.FullEditor>(mniInsertNewGuid, null, c => c.ReplaceSelectionSegments(t => Guid.NewGuid().ToString("N").ToUpperInvariant()));
-      _commands.Add<Editor.FullEditor>(mniXmlToEntity, null, c => c.ReplaceSelectionSegments(t => {
+      _commands.Add<Editor.FullEditor>(mniXmlToEntity, null, c => c.ReplaceSelectionSegments(t =>
+      {
         try
         {
           var sb = new System.Text.StringBuilder();
@@ -275,7 +276,8 @@ namespace InnovatorAdmin
           return t.Replace("<", "&lt;").Replace(">", "&gt;").Replace("&", "&amp;");
         }
       }));
-      _commands.Add<Editor.FullEditor>(mniEntityToXml, null, c => c.ReplaceSelectionSegments(t => {
+      _commands.Add<Editor.FullEditor>(mniEntityToXml, null, c => c.ReplaceSelectionSegments(t =>
+      {
         try
         {
           var xml = "<a>" + t + "</a>";
@@ -904,7 +906,8 @@ namespace InnovatorAdmin
       if (string.IsNullOrWhiteSpace(editor.Helper.LineComment))
         return;
 
-      ActOnSelectedLines(editor, start => {
+      ActOnSelectedLines(editor, start =>
+      {
         var length = editor.Helper.LineComment.Length;
         if (start + length < editor.Document.TextLength
           && editor.Document.GetText(start, length) == editor.Helper.LineComment)
@@ -1516,6 +1519,45 @@ namespace InnovatorAdmin
         }
       }
     }
+    #region Copy Actions
+
+    private void mniTableCopyWithoutHeader_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        var grid = tbcOutputView.SelectedTab.Controls.OfType<DataGridView>().Single();
+        DataGridViewClipboardCopyMode oldMode = grid.ClipboardCopyMode;
+        grid.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
+        Clipboard.SetDataObject(grid.GetClipboardContent());
+        grid.ClipboardCopyMode = oldMode;
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void mniTableCopyWithHeader_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        var grid = tbcOutputView.SelectedTab.Controls.OfType<DataGridView>().Single();
+        DataGridViewClipboardCopyMode oldMode = grid.ClipboardCopyMode;
+        bool oldHeaders = grid.RowHeadersVisible;
+        grid.RowHeadersVisible = false;
+        grid.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+        Clipboard.SetDataObject(grid.GetClipboardContent());
+        grid.ClipboardCopyMode = oldMode;
+        grid.RowHeadersVisible = oldHeaders;
+
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    #endregion
 
     #region Table Handling
 
@@ -2057,6 +2099,9 @@ namespace InnovatorAdmin
           conTable.Items.Add(new ToolStripSeparator());
         conTable.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
           this.mniColumns,
+          new ToolStripSeparator(),
+          this.mniTableCopyActions,
+          new ToolStripSeparator(),
           this.mniSaveTableEdits,
           this.mniScriptEdits,
           this.mniResetChanges});
@@ -2149,7 +2194,8 @@ namespace InnovatorAdmin
     private void OpenFile(FullEditor control, string path)
     {
       lblProgress.Text = "Opening file...";
-      control.OpenFile(path).ContinueWith(t => {
+      control.OpenFile(path).ContinueWith(t =>
+      {
         if (t.IsCanceled)
           lblProgress.Text = "";
         else if (t.IsFaulted)
@@ -2267,9 +2313,17 @@ namespace InnovatorAdmin
             var initDir = repo.GetDirectory(settings.InitCommit);
             var destDir = repo.GetDirectory(settings.DestCommit);
 
+            var manifestPath = Path.Combine(settings.SaveDirectory, "MergeScript.innpkg");
+            var pkg = new InnovatorPackageFolder(manifestPath);
             ProgressDialog.Display(this, d =>
             {
-              initDir.WriteAmlMergeScripts(destDir, settings.SaveDirectory, d.SetProgress);
+              var processor = new MergeProcessor()
+              {
+                SortDependencies = true
+              };
+              processor.ProgressChanged += (s, ev) => d.SetProgress(ev.Progress);
+              var script = processor.Merge(initDir, destDir);
+              pkg.Write(script);
             });
           }
         }

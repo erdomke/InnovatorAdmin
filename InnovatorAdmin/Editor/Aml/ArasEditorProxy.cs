@@ -342,7 +342,7 @@ namespace InnovatorAdmin.Editor
             }
             else if (!t.IsCanceled && !_cts.IsCancellationRequested)
             {
-              lock(_lock)
+              lock (_lock)
               {
                 _writer.WriteEndElement();
                 _writer.Flush();
@@ -452,7 +452,7 @@ namespace InnovatorAdmin.Editor
           }, _cts.Token));
 
           if (_cts.IsCancellationRequested)
-             return;
+            return;
         }
 
         // won't get here until all urls have been put into tasks
@@ -677,12 +677,13 @@ namespace InnovatorAdmin.Editor
         var elemIds = new List<string>();
         string value;
 
-        var settings = new XmlWriterSettings();
-        settings.OmitXmlDeclaration = true;
-        settings.Indent = true;
-        settings.IndentChars = "  ";
-        settings.CheckCharacters = true;
-
+        var settings = new XmlWriterSettings()
+        {
+          OmitXmlDeclaration = true,
+          Indent = true,
+          IndentChars = "  ",
+          CheckCharacters = true
+        };
         var types = new HashSet<string>();
 
         using (var reader = XmlReader.Create(xmlContent))
@@ -726,42 +727,54 @@ namespace InnovatorAdmin.Editor
                 }
                 break;
               case XmlNodeType.Text:
-                if (elemIds.EndsWith("Action", "item_query")
-                  || elemIds.EndsWith("EMail Message", "body_html")
-                  || elemIds.EndsWith("EMail Message", "body_plain")
+                var textReader = canReadValueChunk
+                    ? (TextReader)new XmlValueReader(reader)
+                    : new StringReader(reader.Value);
+
+                var formatXml = elemIds.EndsWith("Action", "item_query")
                   || elemIds.EndsWith("EMail Message", "query_string")
                   || elemIds.EndsWith("Grid", "query")
-                  || elemIds.EndsWith("Method", "method_code")
                   || elemIds.EndsWith("Report", "report_query")
                   || elemIds.EndsWith("Report", "xsl_stylesheet")
                   || elemIds.EndsWith("SavedSearch", "criteria")
-                  || elemIds.EndsWith("SQL", "sqlserver_body")
                   || elemIds.EndsWith("ItemType", "class_structure")
-                  )
+                  || (elemIds.Last() != "Result" && textReader.Peek() == '<' && (textReader as XmlValueReader)?.ReadLength > 1028);
+                var useCData = elemIds.EndsWith("EMail Message", "body_html")
+                  || elemIds.EndsWith("EMail Message", "body_plain")
+                  || elemIds.EndsWith("Method", "method_code")
+                  || elemIds.EndsWith("SQL", "sqlserver_body");
+
+                if (formatXml)
                 {
-                  xmlWriter.WriteCData(reader.Value);
+                  var w = new StringWriter();
+                  using (var r = XmlReader.Create(textReader))
+                  using (var xml = XmlWriter.Create(w, settings))
+                  {
+                    xml.WriteNode(r, false);
+                  }
+                  xmlWriter.WriteCData(w.ToString());
                 }
-                else if (canReadValueChunk && elemIds.Last() != "Result")
+                else if (useCData)
                 {
-                  if (writeNodeBuffer == null)
-                  {
-                    writeNodeBuffer = new char[1024];
-                  }
-                  int count;
-                  while ((count = reader.ReadValueChunk(writeNodeBuffer, 0, 1024)) > 0)
-                  {
-                    xmlWriter.WriteChars(writeNodeBuffer, 0, count);
-                  }
+                  xmlWriter.WriteCData(textReader.ReadToEnd());
+                }
+                else if (elemIds.Last() == "Result" && textReader.Peek() == '<')
+                {
+                  _html = textReader.ReadToEnd();
+                  _preferredMode = OutputType.Html;
+                  xmlWriter.WriteString(_html);
                 }
                 else
                 {
-                  value = reader.Value;
-                  if (elemIds.Last() == "Result" && value.Trim().StartsWith("<"))
+                  if (writeNodeBuffer == null)
                   {
-                    _html = value;
-                    _preferredMode = OutputType.Html;
+                    writeNodeBuffer = new char[4096];
                   }
-                  xmlWriter.WriteString(value);
+                  int count;
+                  while ((count = textReader.Read(writeNodeBuffer, 0, writeNodeBuffer.Length)) > 0)
+                  {
+                    xmlWriter.WriteChars(writeNodeBuffer, 0, count);
+                  }
                 }
                 break;
               case XmlNodeType.CDATA:
@@ -791,7 +804,7 @@ namespace InnovatorAdmin.Editor
           }
 
           xmlWriter.Flush();
-          itemCount = levels.FirstOrDefault(i => i > 0);
+          itemCount = Array.Find(levels, i => i > 0);
           writer.Flush();
         }
 
@@ -830,7 +843,7 @@ namespace InnovatorAdmin.Editor
     private class InnovatorCommand : ICommand
     {
       private Command _internal = new Command();
-      private Dictionary<string, object> _params = new Dictionary<string,object>();
+      private Dictionary<string, object> _params = new Dictionary<string, object>();
 
       public Command Internal
       {
@@ -978,7 +991,8 @@ namespace InnovatorAdmin.Editor
             HasChildren = item.Relationships("Tree Node Child").Any(),
             Children = item.Relationships().Select(r => ProcessTreeNode(r.RelatedItem())),
             ScriptGetter = () => Enumerable.Repeat(
-              new EditorScript() {
+              new EditorScript()
+              {
                 Name = item.Property("label").Value,
                 Action = "ApplyItem",
                 Script = _conn.Apply("<Item type='SavedSearch' action='get' select='criteria' id='@0' />", item.Property("saved_search_id").Value)
@@ -1086,7 +1100,8 @@ namespace InnovatorAdmin.Editor
       {
         Name = "List " + (itemType.Label ?? itemType.Name),
         Action = "ApplyItem",
-        ScriptGetter = async () => {
+        ScriptGetter = async () =>
+        {
           var it = (await _conn.ApplyAsync(@"<Item type='ItemType' action='get' select='default_page_size'>
                                       <name>@0</name>
                                       <Relationships>
@@ -1798,6 +1813,118 @@ order by 1
   <Item type='SSVCPresentationConfiguration' action='get' select='config_id'></Item>
   <Item type='SystemFileContainer' action='get' select='config_id'></Item>
   <Item type='Team' action='get' select='config_id'></Item>
+  <Item type='tp_XmlSchema' action='get' select='config_id'></Item>
+  <Item type='UserMessage' action='get' select='config_id'></Item>
+  <Item type='Variable' action='get' select='config_id'></Item>
+  <Item type='Vault' action='get' select='config_id'></Item>
+  <Item type='Viewer' action='get' select='config_id'></Item>
+  <Item type='Workflow Map' action='get' select='config_id'></Item>
+</AML>"
+      },new EditorScript() {
+        Name = "11.0sp9 Metadata Export",
+        Action = "ApplyAML",
+        Script = @"<!-- Derived using the SQL below:
+select '<Item type=''' + name + ''' action=''get'' select=''config_id''>'
+  + case when name = 'Identity' then '<or><is_alias>0</is_alias><id condition=''in''>''DBA5D86402BF43D5976854B8B48FCDD1'',''E73F43AD85CD4A95951776D57A4D517B''</id></or>' else '' end
+  + '</Item>' AML
+from innovator.[ITEMTYPE]
+where INSTANCE_DATA in (
+  SELECT ta.name TableName
+  FROM sys.tables ta
+  INNER JOIN sys.partitions pa
+  ON pa.OBJECT_ID = ta.OBJECT_ID
+  INNER JOIN sys.schemas sc
+  ON ta.schema_id = sc.schema_id
+  WHERE ta.is_ms_shipped = 0
+    AND pa.index_id IN (1,0)
+    and ta.name in (select it.instance_data from innovator.ItemType it)
+    and not ta.name in (select it.INSTANCE_DATA
+      from innovator.[RELATIONSHIPTYPE] rt
+      inner join innovator.[ITEMTYPE] it
+      on it.id = rt.RELATIONSHIP_ID)
+    and not ta.name in (
+        'ACTIVITY2'
+      , 'ACTIVITY_TEMPLATE'
+      , 'APPLIED_UPDATES'
+      , 'APQP_CAUSE_CATALOG'
+      , 'APQP_DETECTION_CATALOG'
+      , 'APQP_EFFECT_CATALOG'
+      , 'APQP_FAILURE_MODE_CATALOG'
+      , 'APQP_MEASUREMENT_TECHNIQUE'
+      , 'APQP_OCCURRENCE_CATALOG'
+      , 'APQP_SEVERITY_CATALOG'
+      , 'BUSINESS_CALENDAR_YEAR'
+      , 'CAD'
+      , 'DATABASEUPGRADE'
+      , 'DESIGN_QUALITY_DOCUMENT'
+      , 'FILE'
+      , 'FILECONTAINERLOCATOR'
+      , 'HISTORY_CONTAINER'
+      , 'MPROCESS_PLANNER'
+      , 'PACKAGEDEFINITION'
+      , 'PART'
+      , 'PREFERENCE'
+      , 'PROJECT'
+      , 'PROJECT_TEMPLATE'
+      , 'SAVEDSEARCH'
+      , 'USER'
+      , 'WBS_ELEMENT'
+      , 'TEAM')
+  GROUP BY sc.name,ta.name
+  having SUM(pa.rows) <> 0)
+order by 1
+;
+-->
+
+<AML>
+  <Item type='Action' action='get' select='config_id'></Item>
+  <Item type='Chart' action='get' select='config_id'></Item>
+  <Item type='cmf_ContentType' action='get' select='config_id'></Item>
+  <Item type='cmf_Style' action='get' select='config_id'></Item>
+  <Item type='cmf_TabularView' action='get' select='config_id'></Item>
+  <Item type='cmf_TabularViewHeaderRow' action='get' select='config_id'></Item>
+  <Item type='CommandBarButton' action='get' select='config_id'></Item>
+  <Item type='CommandBarDropDown' action='get' select='config_id'></Item>
+  <Item type='CommandBarEdit' action='get' select='config_id'></Item>
+  <Item type='CommandBarMenu' action='get' select='config_id'></Item>
+  <Item type='CommandBarMenuButton' action='get' select='config_id'></Item>
+  <Item type='CommandBarMenuCheckbox' action='get' select='config_id'></Item>
+  <Item type='CommandBarMenuSeparator' action='get' select='config_id'></Item>
+  <Item type='CommandBarSection' action='get' select='config_id'></Item>
+  <Item type='CommandBarSeparator' action='get' select='config_id'></Item>
+  <Item type='CommandBarShortcut' action='get' select='config_id'></Item>
+  <Item type='ConversionRule' action='get' select='config_id'></Item>
+  <Item type='ConversionServer' action='get' select='config_id'></Item>
+  <Item type='ConverterType' action='get' select='config_id'></Item>
+  <Item type='Dashboard' action='get' select='config_id'></Item>
+  <Item type='EMail Message' action='get' select='config_id'></Item>
+  <Item type='FileType' action='get' select='config_id'></Item>
+  <Item type='Form' action='get' select='config_id'></Item>
+  <Item type='GlobalPresentationConfig' action='get' select='config_id'></Item>
+  <Item type='Grid' action='get' select='config_id'></Item>
+  <Item type='History Action' action='get' select='config_id'></Item>
+  <Item type='History Template' action='get' select='config_id'></Item>
+  <Item type='Identity' action='get' select='config_id'><or><is_alias>0</is_alias><id condition='in'>'DBA5D86402BF43D5976854B8B48FCDD1','E73F43AD85CD4A95951776D57A4D517B'</id></or></Item>
+  <Item type='ItemType' action='get' select='config_id'></Item>
+  <Item type='Language' action='get' select='config_id'></Item>
+  <Item type='Life Cycle Map' action='get' select='config_id'></Item>
+  <Item type='List' action='get' select='config_id'></Item>
+  <Item type='Locale' action='get' select='config_id'></Item>
+  <Item type='Measurement Unit' action='get' select='config_id'></Item>
+  <Item type='Method' action='get' select='config_id'></Item>
+  <Item type='Metric' action='get' select='config_id'></Item>
+  <Item type='Permission' action='get' select='config_id'></Item>
+  <Item type='PreferenceTypes' action='get' select='config_id'></Item>
+  <Item type='PresentationConfiguration' action='get' select='config_id'></Item>
+  <Item type='Report' action='get' select='config_id'></Item>
+  <Item type='Revision' action='get' select='config_id'></Item>
+  <Item type='SearchMode' action='get' select='config_id'></Item>
+  <Item type='SecureMessageViewTemplate' action='get' select='config_id'></Item>
+  <Item type='SelfServiceReportHelp' action='get' select='config_id'></Item>
+  <Item type='Sequence' action='get' select='config_id'></Item>
+  <Item type='SQL' action='get' select='config_id'></Item>
+  <Item type='SSVCPresentationConfiguration' action='get' select='config_id'></Item>
+  <Item type='SystemFileContainer' action='get' select='config_id'></Item>
   <Item type='tp_XmlSchema' action='get' select='config_id'></Item>
   <Item type='UserMessage' action='get' select='config_id'></Item>
   <Item type='Variable' action='get' select='config_id'></Item>

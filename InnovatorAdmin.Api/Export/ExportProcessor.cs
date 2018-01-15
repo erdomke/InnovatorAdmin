@@ -1,4 +1,4 @@
-using Innovator.Client;
+﻿using Innovator.Client;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,10 +20,10 @@ namespace InnovatorAdmin
       ResolvedCycle
     }
 
-    private int _arasVersion;
-    private IAsyncConnection _conn;
-    private DependencyAnalyzer _dependAnalyzer;
-    private ArasMetadataProvider _metadata;
+    private readonly int _arasVersion;
+    private readonly IAsyncConnection _conn;
+    private readonly DependencyAnalyzer _dependAnalyzer;
+    private readonly ArasMetadataProvider _metadata;
     XslCompiledTransform _resultTransform;
     public event EventHandler<ActionCompleteEventArgs> ActionComplete;
     public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
@@ -51,7 +51,7 @@ namespace InnovatorAdmin
       , bool checkDependencies = true)
     {
       ReportProgress(0, "Loading system data");
-      await _metadata.ReloadTask();
+      await _metadata.ReloadTask().ConfigureAwait(false);
 
       // On each scan, reload everything from the database.  Even if this might degrade
       // performance, it is much more reliable
@@ -145,7 +145,7 @@ namespace InnovatorAdmin
               typeItems.Where(i => !i.Unique.IsGuid()).Select(i => i.Unique).Aggregate((p, c) => p + " or " + c));
           }
 
-          queryElem.SetAttribute("where", "(" + whereClause.ToString() + @") and not [List].[id] in (
+          queryElem.SetAttribute("where", "(" + whereClause + @") and not [List].[id] in (
             select l.id
             from innovator.LIST l
             inner join innovator.PROPERTY p
@@ -227,7 +227,7 @@ namespace InnovatorAdmin
         RemoveVersionableRelIds(doc);
         //TODO: Replace references to poly item lists
 
-        await Export(script, doc, warnings, checkDependencies);
+        await Export(script, doc, warnings, checkDependencies).ConfigureAwait(false);
         CleanUpSystemProps(doc.DocumentElement.Elements(), items.ToDictionary(i => i), true);
         ConvertFloatProps(doc);
         RemoveKeyedNameAttributes(doc.DocumentElement);
@@ -277,10 +277,10 @@ namespace InnovatorAdmin
     {
       try
       {
-        await _metadata.ReloadTask();
+        await _metadata.ReloadTask().ConfigureAwait(false);
         FixPolyItemReferences(doc);
         FixPolyItemListReferences(doc);
-        await FixForeignPropertyReferences(doc);
+        await FixForeignPropertyReferences(doc).ConfigureAwait(false);
         FixForeignPropertyDependencies(doc);
         FixCyclicalWorkflowLifeCycleRefs(doc);
         FixCyclicalWorkflowItemTypeRefs(doc);
@@ -345,7 +345,7 @@ namespace InnovatorAdmin
         }
 
 
-        if (warnings == null) warnings = new HashSet<ItemReference>();
+        warnings = warnings ?? new HashSet<ItemReference>();
         warnings.ExceptWith(results.Select(r => r.Reference));
 
         script.Lines = warnings.Select(w => InstallItem.FromWarning(w, w.KeyedName))
@@ -365,13 +365,11 @@ namespace InnovatorAdmin
       }
     }
 
-    public static async Task<IEnumerable<InstallItem>> SortByDependencies(IEnumerable<InstallItem> items, IAsyncConnection conn)
+    public static IEnumerable<InstallItem> SortByDependencies(IEnumerable<InstallItem> items, IArasMetadataProvider metadata)
     {
       int loops = 0;
       var state = CycleState.ResolvedCycle;
       var results = items ?? Enumerable.Empty<InstallItem>();
-      var metadata = ArasMetadataProvider.Cached(conn);
-      await metadata.ReloadTask();
       var analyzer = new DependencyAnalyzer(metadata);
       while (loops < 10 && state == CycleState.ResolvedCycle)
       {
@@ -388,7 +386,26 @@ namespace InnovatorAdmin
         loops++;
       }
 
+      results = results
+        .Where(i => !IsDelete(i))
+        .Concat(results
+          .Where(IsDelete)
+          .OrderByDescending(i => DefaultInstallOrder(i.Reference))
+        ).ToArray();
+
       return results;
+    }
+
+    private static bool IsDelete(InstallItem item)
+    {
+      return item.Type == InstallType.Script && item.Name.Split(' ').Contains("Delete");
+    }
+
+    public static async Task<IEnumerable<InstallItem>> SortByDependencies(IEnumerable<InstallItem> items, IAsyncConnection conn)
+    {
+      var metadata = ArasMetadataProvider.Cached(conn);
+      await metadata.ReloadTask().ConfigureAwait(false);
+      return SortByDependencies(items, metadata);
     }
 
     /// <summary>
@@ -1225,12 +1242,16 @@ namespace InnovatorAdmin
       sorted = initialSort.DependencySort<ItemReference>(d =>
       {
         IEnumerable<InstallItem> res = null;
-        if (lookup.TryGetValue(d, out res)) return res.SelectMany(r =>
+        if (lookup.TryGetValue(d, out res))
         {
-          var ii = r as InstallItem;
-          if (ii == null) return Enumerable.Empty<ItemReference>();
-          return dependAnalyzer.GetDependencies(ii.Reference);
-        });
+          return res.SelectMany(r =>
+          {
+            var ii = r as InstallItem;
+            if (ii == null) return Enumerable.Empty<ItemReference>();
+            return dependAnalyzer.GetDependencies(ii.Reference);
+          });
+        }
+
         return Enumerable.Empty<ItemReference>();
       }, ref cycle, false);
 
@@ -1847,6 +1868,36 @@ namespace InnovatorAdmin
           SortKey = e.HasAttribute("id") && e.HasAttribute("type")
             && unsortedTypes.Contains(e.Attribute("type"))
             ? e.Attribute("id") : i.ToString("D5")
+        })
+        .OrderBy(e => e.Type)
+        .ThenBy(e => e.SortKey)
+        .ToArray();
+        foreach (var child in children)
+        {
+          child.Element.Detach();
+        }
+        foreach (var child in children)
+        {
+          elem.AppendChild(child.Element);
+        }
+      }
+
+      // Sort list values by the text of the value instead of the sort order to ease merging
+      var sortByValueTypes = new HashSet<string>(new string[] { "Value", "Filter Value" });
+      elements = doc.Descendants(e =>
+        e.LocalName == "Relationships"
+        && e.Elements().HasMultiple(c => c.HasAttribute("id")
+          && c.HasAttribute("type")
+          && sortByValueTypes.Contains(c.Attribute("type")))).ToList();
+      foreach (var elem in elements)
+      {
+        var children = elem.Elements().Select((e, i) => new
+        {
+          Element = e,
+          Type = e.Attribute("type"),
+          SortKey = e.HasAttribute("id") && e.HasAttribute("type")
+            && sortByValueTypes.Contains(e.Attribute("type"))
+            ? (e.Element("value", null) ?? e.Attribute("id")) : i.ToString("D5")
         })
         .OrderBy(e => e.Type)
         .ThenBy(e => e.SortKey)

@@ -43,18 +43,21 @@ namespace InnovatorAdmin
 
     public static XElement GetMergeScript(Stream start, Stream dest)
     {
-      var startStream = Seekable(start);
-      var destStream = Seekable(dest);
-      if (start == null || startStream.Length < 1)
+      var startElem = Utils.LoadXml(start);
+      if (start == null)
         return new XElement("AML");
 
-      var startElem = XElement.Load(startStream);
-      var result = new XElement(startElem.Name);
+      var destElem = Utils.LoadXml(dest);
+      return GetMergeScript(startElem, destElem);
+    }
 
-      // Create deletes
-      if (dest == null || destStream.Length < 1)
+    public static XElement GetMergeScript(XElement start, XElement dest)
+    {
+      var result = new XElement(start.Name);
+
+      if (dest == null)
       {
-        var itemTag = startElem.DescendantsAndSelf().First(e => e.Name.LocalName == "Item");
+        var itemTag = start.DescendantsAndSelf().First(e => e.Name.LocalName == "Item");
         var items = itemTag.Parent.Elements("Item").Where(e => e.Attribute("action") != null
           && (e.Attribute("action").Value == "merge" || e.Attribute("action").Value == "add"
             || e.Attribute("action").Value == "create"));
@@ -63,24 +66,15 @@ namespace InnovatorAdmin
         {
           newItem = new XElement(item.Name, item.Attributes().Where(IsAttributeToCopy));
           newItem.SetAttributeValue("action", "delete");
+          result.Add(newItem);
         }
         return result;
       }
 
       // Create merges/deletes as necessary
-      var destElem = XElement.Load(dest);
-      GetMergeScript(startElem, destElem, result);
+      GetMergeScript(start, dest, result);
       foreach (var elem in result.DescendantsAndSelf())
         elem.RemoveAnnotations<ElementKey>();
-      return result;
-    }
-
-    private static Stream Seekable(Stream input)
-    {
-      if (input == null || input.CanSeek)
-        return input;
-      var result = new MemoryStream();
-      input.CopyTo(result);
       return result;
     }
 
@@ -182,7 +176,7 @@ namespace InnovatorAdmin
     private static XElement EnsurePath(XElement path, XElement result)
     {
       var pathList = path.ParentsAndSelf().Reverse().ToArray();
-      if (!pathList.Any())
+      if (pathList.Length == 0)
         throw new ArgumentException();
       var curr = result;
       if (curr.Name != pathList[0].Name)
@@ -214,6 +208,8 @@ namespace InnovatorAdmin
         case "idlist":
         case "type":
         case XmlFlags.Attr_ConfigId:
+        case XmlFlags.Attr_IsScript:
+        case XmlFlags.Attr_ScriptType:
         case "_keyed_name":
           return true;
         case "action":

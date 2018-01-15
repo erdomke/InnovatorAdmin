@@ -10,13 +10,13 @@ namespace InnovatorAdmin
 {
   public class InstallProcessor : IProgressReporter
   {
-    private IAsyncConnection _conn;
+    private readonly IAsyncConnection _conn;
     private int _currLine;
     private InstallScript _script;
     private List<InstallItem> _lines;
-    private StringBuilder _log = new StringBuilder();
+    private readonly StringBuilder _log = new StringBuilder();
     private Dictionary<string, ItemType> _itemTypes;
-    private ExportProcessor _exportTools;
+    private readonly ExportProcessor _exportTools;
 
     public event EventHandler<ActionCompleteEventArgs> ActionComplete;
     public event EventHandler<RecoverableErrorEventArgs> ErrorRaised;
@@ -50,8 +50,10 @@ namespace InnovatorAdmin
         }
       }
 
-      var result = new InstallScript();
-      result.Title = name;
+      var result = new InstallScript()
+      {
+        Title = name
+      };
       await _exportTools.Export(result, doc).ConfigureAwait(false);
       return result;
     }
@@ -62,7 +64,7 @@ namespace InnovatorAdmin
       _script = script;
       _lines = (_script.DependencySorted
         ? (_script.Lines ?? Enumerable.Empty<InstallItem>())
-        : (await ExportProcessor.SortByDependencies(script.Lines, _conn))
+        : (await ExportProcessor.SortByDependencies(script.Lines, _conn).ConfigureAwait(false))
           .Where(l => l.Type != InstallType.DependencyCheck)
       ).Where(l => l.Script != null && l.Type != InstallType.Warning).ToList();
       _currLine = -1;
@@ -73,10 +75,12 @@ namespace InnovatorAdmin
       _currLine = 0;
       InstallLines();
     }
+
     public void Continue()
     {
       InstallLines();
     }
+
     public void SkipAndContinue()
     {
       _currLine++;
@@ -250,26 +254,38 @@ namespace InnovatorAdmin
               _log.AppendLine(ex.ToAml());
               _log.AppendLine(" for query ");
               _log.AppendLine(ex.Query);
-              args = new RecoverableErrorEventArgs() { Exception = ex };
-              if (line.Type == InstallType.DependencyCheck && ex.FaultCode == "0")
+
+              if (ex.Message.Trim() == "No items of type ? found."
+                && (query.Attribute("action") == "delete" || query.Attribute("action") == "purge"))
               {
-                args.Message = "Unable to find required dependency " + line.Reference.Type + ": " + line.Reference.KeyedName;
+                // Ignore errors with trying to delete something that isn't there.
+                _log.Append(DateTime.Now.ToString("s")).AppendLine(": Skipping install step");
+                cont = false;
+                break;
               }
-              OnErrorRaised(args);
-              switch (args.RecoveryOption)
+              else
               {
-                case RecoveryOption.Abort:
-                  _log.Append(DateTime.Now.ToString("s")).AppendLine(": Install aborted.");
-                  throw;
-                case RecoveryOption.Retry:
-                  query = args.NewQuery ?? query;
-                  _log.Append(DateTime.Now.ToString("s")).AppendLine(": Retrying install step with query:");
-                  _log.AppendLine(query.OuterXml);
-                  break;
-                case RecoveryOption.Skip:
-                  _log.Append(DateTime.Now.ToString("s")).AppendLine(": Skipping install step.");
-                  cont = false;
-                  break;
+                args = new RecoverableErrorEventArgs() { Exception = ex };
+                if (line.Type == InstallType.DependencyCheck && ex.FaultCode == "0")
+                {
+                  args.Message = "Unable to find required dependency " + line.Reference.Type + ": " + line.Reference.KeyedName;
+                }
+                OnErrorRaised(args);
+                switch (args.RecoveryOption)
+                {
+                  case RecoveryOption.Abort:
+                    _log.Append(DateTime.Now.ToString("s")).AppendLine(": Install aborted.");
+                    throw;
+                  case RecoveryOption.Retry:
+                    query = args.NewQuery ?? query;
+                    _log.Append(DateTime.Now.ToString("s")).AppendLine(": Retrying install step with query:");
+                    _log.AppendLine(query.OuterXml);
+                    break;
+                  case RecoveryOption.Skip:
+                    _log.Append(DateTime.Now.ToString("s")).AppendLine(": Skipping install step.");
+                    cont = false;
+                    break;
+                }
               }
             }
           }

@@ -176,7 +176,7 @@ namespace InnovatorAdmin
       var ds = new DataSet();
       string mainType = null;
       string mainId = null;
-      var selectedCols = SubSelect.FromString(select);
+      var selectedCols = SelectNode.FromString(select);
 
       List<IReadOnlyItem> items;
       try

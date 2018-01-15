@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace InnovatorAdmin
 {
-  public abstract class InnovatorPackage: IDisposable
+  public abstract class InnovatorPackage : IDisposable
   {
     private List<string> _paths = new List<string>();
 
@@ -82,10 +82,12 @@ namespace InnovatorAdmin
       var existingPaths = new HashSet<string>();
 
       // Record the import order
-      var settings = new XmlWriterSettings();
-      settings.OmitXmlDeclaration = true;
-      settings.Indent = true;
-      settings.IndentChars = "  ";
+      var settings = new XmlWriterSettings()
+      {
+        OmitXmlDeclaration = true,
+        Indent = true,
+        IndentChars = "  "
+      };
       using (var manifestStream = GetNewStream(null))
       {
         using (var manifestWriter = XmlWriter.Create(manifestStream, settings))
@@ -244,6 +246,7 @@ namespace InnovatorAdmin
           {
             dataFile = xsltElem.Parent().Element("report_query", "<Result><Item></Item></Result>");
           }
+          dataFile = RemoveComments(dataFile);
 
           writer.WriteLine(xslt);
         }
@@ -252,6 +255,20 @@ namespace InnovatorAdmin
       using (var writer = new StreamWriter(GetNewStream(path + ".xml")))
       {
         writer.Write(dataFile);
+      }
+    }
+
+    private string RemoveComments(string xml)
+    {
+      using (var reader = new StringReader(xml))
+      using (var xReader = XmlReader.Create(reader, new XmlReaderSettings()
+      {
+        IgnoreComments = true
+      }))
+      {
+        var doc = new XmlDocument();
+        doc.Load(reader);
+        return doc.OuterXml;
       }
     }
     #endregion

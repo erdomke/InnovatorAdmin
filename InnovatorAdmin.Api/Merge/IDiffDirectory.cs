@@ -57,7 +57,7 @@ namespace InnovatorAdmin
       return result;
     }
 
-    public static void WriteAmlMergeScripts(this IDiffDirectory baseDir, IDiffDirectory compareDir
+    public static PackageMetadataProvider WriteAmlMergeScripts(this IDiffDirectory baseDir, IDiffDirectory compareDir
       , Func<string, int, XmlWriter> callback = null)
     {
       Func<IDiffFile, IComparable> keyGetter = i => i.Path;
@@ -65,22 +65,22 @@ namespace InnovatorAdmin
       var comparePaths = compareDir.GetFiles().OrderBy(keyGetter).ToArray();
       var completed = 0;
       var total = basePaths.Length + comparePaths.Length;
-
       var result = new List<FileDiff>();
+      var metadata = new PackageMetadataProvider();
 
       basePaths.MergeSorted(comparePaths, keyGetter, (i, b, c) =>
       {
         try
         {
-          var path = (b ?? c).Path;
-          if (path.EndsWith(".xslt.xml"))
+          var path = (c ?? b).Path;
+          if (path.EndsWith(".xslt.xml") || path.EndsWith(".innpkg"))
             return;
 
           completed++;
           switch (i)
           {
             case -1: // Delete
-              using (var baseStream = ReadFile(b, p => basePaths.FirstOrDefault(f => f.Path == p)))
+              using (var baseStream = ReadFile(b, p => Array.Find(basePaths, f => f.Path == p)))
               using (var writer = callback(path, completed * 100 / total))
               {
                 var elem = AmlDiff.GetMergeScript(baseStream, null);
@@ -92,16 +92,21 @@ namespace InnovatorAdmin
               using (var baseStream = c.OpenRead())
               using (var writer = callback(path, completed * 100 / total))
               {
-                XElement.Load(baseStream).WriteTo(writer);
+                var elem = XElement.Load(baseStream);
+                elem.WriteTo(writer);
+                metadata.Add(elem);
               }
               break;
             default: // Edit
               total--;
-              using (var baseStream = ReadFile(b, p => basePaths.FirstOrDefault(f => f.Path == p)))
-              using (var compareStream = ReadFile(c, p => comparePaths.FirstOrDefault(f => f.Path == p)))
+              using (var baseStream = ReadFile(b, p => Array.Find(basePaths, f => f.Path == p)))
+              using (var compareStream = ReadFile(c, p => Array.Find(comparePaths, f => f.Path == p)))
               using (var writer = callback(path, completed * 100 / total))
               {
-                var elem = AmlDiff.GetMergeScript(baseStream, compareStream);
+                var baseElem = Utils.LoadXml(baseStream);
+                var compareElem = Utils.LoadXml(compareStream);
+                metadata.Add(compareElem);
+                var elem = AmlDiff.GetMergeScript(baseElem, compareElem);
                 if (elem.Elements().Any())
                   elem.WriteTo(writer);
               }
@@ -113,6 +118,8 @@ namespace InnovatorAdmin
           throw new XmlException(string.Format("{0} ({1}, {2}, {3})", ex.Message, i, b.Path, c.Path), ex);
         }
       });
+
+      return metadata;
     }
 
     public static void WriteAmlMergeScripts(this IDiffDirectory baseDir, IDiffDirectory compareDir
@@ -120,16 +127,18 @@ namespace InnovatorAdmin
     {
       WriteAmlMergeScripts(baseDir, compareDir, (path, progress) =>
       {
-        if (progressCallback != null) progressCallback(progress);
+        progressCallback?.Invoke(progress);
 
         var savePath = Path.Combine(outputDirectory, path);
         Directory.CreateDirectory(Path.GetDirectoryName(savePath));
 
-        var settings = new XmlWriterSettings();
-        settings.OmitXmlDeclaration = true;
-        settings.Indent = true;
-        settings.IndentChars = "  ";
-        var stream = new FileStream(path, FileMode.Create, FileAccess.Write);
+        var settings = new XmlWriterSettings()
+        {
+          OmitXmlDeclaration = true,
+          Indent = true,
+          IndentChars = "  "
+        };
+        var stream = new FileStream(savePath, FileMode.Create, FileAccess.Write);
         return XmlWriter.Create(stream, settings);
       });
     }
