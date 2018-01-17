@@ -11,15 +11,23 @@ namespace InnovatorAdmin
   {
     public static string RemoveComments(string xml)
     {
-      using (var reader = new StringReader(xml))
-      using (var xReader = XmlReader.Create(reader, new XmlReaderSettings()
+      if (string.IsNullOrEmpty(xml)) { return ""; }
+      try
       {
-        IgnoreComments = true
-      }))
+        using (var reader = new StringReader(xml))
+        using (var xReader = XmlReader.Create(reader, new XmlReaderSettings()
+        {
+          IgnoreComments = true
+        }))
+        {
+          var doc = new XmlDocument();
+          doc.Load(xReader);
+          return doc.OuterXml;
+        }
+      }
+      catch (XmlException)
       {
-        var doc = new XmlDocument();
-        doc.Load(xReader);
-        return doc.OuterXml;
+        return xml;
       }
     }
 
