@@ -99,7 +99,7 @@ namespace InnovatorAdmin
       foreach (var item in sysPropEdit)
       {
         var parent = item.Parent();
-        item.Detatch();
+        item.Detach();
         CleanUp(parent);
       }
     }
@@ -119,7 +119,7 @@ namespace InnovatorAdmin
       foreach (var item in conflictingDeletesToRemove)
       {
         var parent = item.Parent();
-        item.Detatch();
+        item.Detach();
         CleanUp(parent);
       }
     }
@@ -129,7 +129,7 @@ namespace InnovatorAdmin
       if (node.Parent() is XmlElement && !node.Elements().Any())
       {
         var parent = node.Parent();
-        node.Detatch();
+        node.Detach();
         CleanUp(parent);
       }
     }
