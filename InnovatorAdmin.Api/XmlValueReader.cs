@@ -56,7 +56,7 @@ namespace InnovatorAdmin
 
     private void FillBuffer(int preferred = int.MaxValue)
     {
-      if (_length == 0 || _idx < _length - 1)
+      if (_length == 0 || _idx < _length)
         return;
 
       _idx = 0;
