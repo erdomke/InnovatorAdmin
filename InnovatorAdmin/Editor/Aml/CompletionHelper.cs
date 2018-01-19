@@ -264,31 +264,84 @@ namespace InnovatorAdmin.Editor
                   case "":
                     break;
                   default:
-                    var attributes = new List<string>
-                    { "action"
-                      , "config_path"
+                    var attributes = new HashSet<string>
+                    {
+                      "action"
                       , "doGetItem"
-                      , "do_skipOnAfterAdd"
                       , "id"
                       , "idlist"
-                      , "isCriteria"
-                      , "language"
-                      , "levels"
-                      , "maxRecords"
-                      , "page"
-                      , "pagesize"
-                      , "orderBy"
-                      , "queryDate"
-                      , "queryType"
-                      , "related_expand"
-                      , "select"
                       , "serverEvents"
                       , "type"
                       , "typeId"
-                      , "version"
-                      , "where"};
-                    if (path.Last().Action == "getPermissions")
-                      attributes.Add("access_type");
+                      , "where"
+                    };
+
+                    switch (path.Last().Action)
+                    {
+                      case "copy":
+                        attributes.UnionWith(new string[]
+                        {
+                          "do_add",
+                          "do_lock"
+                        });
+                        break;
+                      case "copyAsIs":
+                      case "copyAsNew":
+                        attributes.UnionWith(new string[]
+                        {
+                          "do_lock",
+                          "lock_related",
+                          "useInputProperties",
+                        });
+                        break;
+                      case "create":
+                      case "get":
+                      case "getItemAllVersions":
+                      case "GetItemConfig":
+                      case "getItemLastVersion":
+                      case "getItemRelationships":
+                      case "GetItemRepeatConfig":
+                      case "recache":
+                        attributes.UnionWith(new string[]
+                        {
+                          "config_path"
+                          , "expand"
+                          , "isCriteria"
+                          , "language"
+                          , "levels"
+                          , "maxRecords"
+                          , "page"
+                          , "pagesize"
+                          , "orderBy"
+                          , "queryDate"
+                          , "queryType"
+                          , "relas_only"
+                          , "related_expand"
+                          , "returnMode"
+                          , "select"
+                          , "stdProps"
+                        });
+                        if (path.Last().Action == "create")
+                          attributes.Add("do_skipOnAfterAdd");
+                        break;
+                      case "getPermissions":
+                        attributes.Add("access_type");
+                        break;
+                      case "add":
+                      case "AddItem":
+                        attributes.Add("do_skipOnAfterAdd");
+                        break;
+                      case "edit":
+                      case "update":
+                        attributes.Add("version");
+                        attributes.Add("unlock");
+                        break;
+                      case "merge":
+                        attributes.Add("do_skipOnAfterAdd");
+                        attributes.Add("version");
+                        attributes.Add("unlock");
+                        break;
+                    }
 
                     if (path.Count >= 3
                       && path[path.Count - 2].LocalName == "Relationships"
@@ -365,6 +418,7 @@ namespace InnovatorAdmin.Editor
                     , "EvaluateActivity"
                     , "get"
                     , "getAffectedItems"
+                    , "GetInheritedServerEvents"
                     , "getItemAllVersions"
                     , "GetItemConfig"
                     , "getItemLastVersion"
@@ -421,12 +475,20 @@ namespace InnovatorAdmin.Editor
                 case "access_type":
                   items = AttributeValues("can_add", "can_delete", "can_get", "can_update", "can_discover", "can_change_access");
                   break;
+                case "expand":
                 case "doGetItem":
+                case "do_add":
+                case "do_lock":
                 case "do_skipOnAfterAdd":
-                case "version":
                 case "isCriteria":
+                case "lock_related":
+                case "relas_only":
                 case "related_expand":
                 case "serverEvents":
+                case "stdProps":
+                case "unlock":
+                case "useInputProperties":
+                case "version":
                   items = new ICompletionData[] {
                     new AttributeValueCompletionData() {
                       Text = "0",
@@ -504,6 +566,9 @@ namespace InnovatorAdmin.Editor
                   break;
                 case "queryType":
                   items = AttributeValues("Effective", "Latest", "Released");
+                  break;
+                case "returnMode":
+                  items = AttributeValues("itemsOnly", "countOnly");
                   break;
                 case "orderBy":
                   if (!string.IsNullOrEmpty(path.Last().Type)
