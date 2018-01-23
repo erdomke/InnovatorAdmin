@@ -1753,10 +1753,9 @@ namespace InnovatorAdmin
     /// </summary>
     private void RemoveCmfGeneratedTypes(XmlDocument doc)
     {
-      foreach (var contentType in doc.ElementsByXPath("/Result/Item[@type='cmf_ContentType']"))
+      foreach (var element in doc.Descendants(x => x.Attribute("type", "") == "cmf_ElementType" || x.Attribute("type", "") == "cmf_PropertyType"))
       {
-        var generatedTypeProps = contentType.Descendants(e => e.LocalName == "generated_type"
-        && (e.Parent().Attribute("type", "") == "cmf_ElementType" || e.Parent().Attribute("type", "") == "cmf_PropertyType"))
+        var generatedTypeProps = element.Descendants(e => e.LocalName == "generated_type")
         .ToArray();
         foreach (var generatedTypeProp in generatedTypeProps)
         {
@@ -1768,6 +1767,7 @@ namespace InnovatorAdmin
           itemType.Element("id").Detach();
           itemType.Attr("_cmf_generated", "1");
           itemType.Attr("keyed_name", generatedTypeProp.Attribute("keyed_name", ""));
+          // The following referenceElement is for dependency sorting
           var referenceElement = itemType.Elem("___cmf_content_type_ref___").Attr("type", parentItem.Attribute("type"));
           referenceElement.InnerText = parentItem.Attribute("id");
 
@@ -2217,6 +2217,90 @@ namespace InnovatorAdmin
     </related_id>
   </Item>
   <Item type='cmf_TabularViewTree' action='get'>
+  </Item>
+</Relationships>";
+          levels = 0;
+          break;
+        case "cmf_ElementType":
+          queryElem.InnerXml = @"
+<generated_type>
+  <Item action='get' type='ItemType'>
+    <Relationships>
+      <Item action='get' type='Allowed Permission'>
+      </Item>
+      <Item action='get' type='Server Event'>
+      </Item>
+      <Item action='get' type='Can Add'>
+      </Item>
+    </Relationships>
+  </Item>
+</generated_type>
+<Relationships>
+  <Item type='cmf_ElementAllowedPermission' action='get'>
+  </Item>
+  <Item type='cmf_ElementBinding' action='get'>
+    <Relationships>
+      <Item type='cmf_PropertyBinding' action='get'>
+      </Item>
+    </Relationships>
+  </Item>
+  <Item type='cmf_PropertyType' action='get'>
+    <generated_type>
+      <Item action='get' type='ItemType'>
+        <Relationships>
+          <Item action='get' type='Allowed Permission'>
+          </Item>
+          <Item action='get' type='Server Event'>
+          </Item>
+          <Item action='get' type='Can Add'>
+          </Item>
+        </Relationships>
+      </Item>
+    </generated_type>
+    <Relationships>
+      <Item type='cmf_ComputedProperty' action='get'>
+        <Relationships>
+          <Item action='get' type='cmf_ComputedPropertyDependency' related_expand='0'>
+          </Item>
+        </Relationships>
+      </Item>
+      <Item type='cmf_PropertyAllowedPermission' action='get'>
+      </Item>
+    </Relationships>
+  </Item>
+</Relationships>";
+          levels = 0;
+          break;
+        case "cmf_PropertyType":
+          queryElem.InnerXml = @"
+<generated_type>
+  <Item action='get' type='ItemType'>
+    <Relationships>
+      <Item action='get' type='Allowed Permission'>
+      </Item>
+      <Item action='get' type='Server Event'>
+      </Item>
+      <Item action='get' type='Can Add'>
+      </Item>
+    </Relationships>
+  </Item>
+</generated_type>
+<Relationships>
+  <Item type='cmf_ComputedProperty' action='get'>
+    <Relationships>
+      <Item action='get' type='cmf_ComputedPropertyDependency' related_expand='0'>
+      </Item>
+    </Relationships>
+  </Item>
+  <Item type='cmf_PropertyAllowedPermission' action='get'>
+  </Item>
+</Relationships>";
+          levels = 0;
+          break;
+        case "cmf_TabularViewColumn":
+          queryElem.InnerXml = @"
+<Relationships>
+  <Item action='get' type='cmf_AdditionalPropertyType'>
   </Item>
 </Relationships>";
           levels = 0;
