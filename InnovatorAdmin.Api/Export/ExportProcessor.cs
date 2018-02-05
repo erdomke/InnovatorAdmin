@@ -38,10 +38,7 @@ namespace InnovatorAdmin
       _metadata = ArasMetadataProvider.Cached(conn);
       _metadata.Reset();
       _dependAnalyzer = new DependencyAnalyzer(_metadata);
-      _arasVersion = new Version(9, 3);
-      var arasConn = conn as Innovator.Client.Connection.IArasConnection;
-      if (arasConn != null)
-        _arasVersion = arasConn.Version;
+      _arasVersion = (conn as Innovator.Client.Connection.IArasConnection)?.Version ?? new Version(9, 3);
     }
 
     /// <summary>

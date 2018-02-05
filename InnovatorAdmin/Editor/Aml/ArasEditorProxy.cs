@@ -158,7 +158,7 @@ namespace InnovatorAdmin.Editor
     {
       _helper = new Editor.AmlEditorHelper();
       var arasConn = _conn as Innovator.Client.Connection.IArasConnection;
-      _actions = GetActions(arasConn == null ? -1 : arasConn.Version.Major).OrderBy(a => a).ToArray();
+      _actions = GetActions(arasConn?.Version?.Major ?? -1).OrderBy(a => a).ToArray();
     }
 
     private IEnumerable<string> GetActions(int version)
