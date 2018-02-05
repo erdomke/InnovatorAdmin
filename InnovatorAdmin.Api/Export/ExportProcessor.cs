@@ -20,7 +20,7 @@ namespace InnovatorAdmin
       ResolvedCycle
     }
 
-    private readonly int _arasVersion;
+    private readonly Version _arasVersion;
     private readonly IAsyncConnection _conn;
     private readonly DependencyAnalyzer _dependAnalyzer;
     private readonly ArasMetadataProvider _metadata;
@@ -38,7 +38,7 @@ namespace InnovatorAdmin
       _metadata = ArasMetadataProvider.Cached(conn);
       _metadata.Reset();
       _dependAnalyzer = new DependencyAnalyzer(_metadata);
-      _arasVersion = 9;
+      _arasVersion = new Version(9, 3);
       var arasConn = conn as Innovator.Client.Connection.IArasConnection;
       if (arasConn != null)
         _arasVersion = arasConn.Version;
@@ -1972,7 +1972,7 @@ namespace InnovatorAdmin
         case "ItemType":
           //queryElem.SetAttribute("levels", "2");
           //queryElem.SetAttribute("config_path", "Property|RelationshipType|View|Server Event|Item Action|ItemType Life Cycle|Allowed Workflow|TOC Access|TOC View|Client Event|Can Add|Allowed Permission|Item Report|Morphae");
-          if (_arasVersion < 11)
+          if (_arasVersion.Major < 11)
           {
             queryElem.InnerXml = @"<Relationships>
   <Item type='Property' action='get' levels='1'>

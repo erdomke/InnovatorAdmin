@@ -6,5 +6,18 @@
     <authors>eric.domke</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Application for administrating an Aras Innovator instance</description>
+    <dependencies>
+      <group>
+        <dependency id="Innovator.Client" version="2018.1.31.2240" exclude="Build,Analyzers" />
+        <dependency id="LibGit2Sharp" version="0.24.0" exclude="Build,Analyzers" />
+        <dependency id="Mvp.Xml" version="2.3.0" exclude="Build,Analyzers" />
+        <dependency id="Nancy" version="1.4.4" exclude="Build,Analyzers" />
+        <dependency id="Nancy.Hosting.Self" version="1.4.1" exclude="Build,Analyzers" />
+        <dependency id="ObjectListView.Official" version="2.9.1" exclude="Build,Analyzers" />
+        <dependency id="squirrel.windows" version="1.7.8" exclude="Build,Analyzers" />
+        <dependency id="Windows7APICodePack-Core" version="1.1.0.0" exclude="Build,Analyzers" />
+        <dependency id="Windows7APICodePack-Shell" version="1.1.0.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
   </metadata>
 </package>

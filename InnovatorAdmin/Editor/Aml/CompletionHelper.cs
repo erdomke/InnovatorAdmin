@@ -450,7 +450,7 @@ namespace InnovatorAdmin.Editor
                     , "version"};
 
                   var aras = _conn as Innovator.Client.Connection.IArasConnection;
-                  var version = aras == null ? -1 : aras.Version;
+                  var version = aras == null ? -1 : aras.Version.Major;
 
                   var methods = (IEnumerable<string>)baseMethods;
                   if (version < 10)
