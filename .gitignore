@@ -18,6 +18,10 @@ build/
 bld/
 [Bb]in/
 [Oo]bj/
+_site/
+_exported_templates/
+api/*.yml
+tools/
 
 # Roslyn cache directories
 *.ide/
@@ -233,3 +237,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 *.old
+api/.manifest
