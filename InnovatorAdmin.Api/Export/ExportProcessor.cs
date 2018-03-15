@@ -1801,6 +1801,7 @@ namespace InnovatorAdmin
           var computedDepID = computedDep.Attribute("id", "");
           if (existingComputedDeps.Contains(computedDepID))
           {
+            computedDep.Detach();
             continue;
           }
           var parentItem = computedDep.Parents().Last(e => e.LocalName == "Item");
