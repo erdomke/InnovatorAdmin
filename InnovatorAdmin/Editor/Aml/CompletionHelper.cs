@@ -586,23 +586,47 @@ namespace InnovatorAdmin.Editor
                   if (!string.IsNullOrEmpty(path.Last().Type)
                     && _metadata.ItemTypeByName(path.Last().Type, out itemType))
                   {
+                    var orig = value;
                     string partial;
                     var selectPath = SelectPath(value, out partial);
                     value = partial;
 
-                    var it = await RecurseProperties(itemType, selectPath);
-                    if (it != null)
-                      items = await new SelectPropertyFactory(_metadata, it).GetPromise().ToTask();
-
-                    if (selectPath.LastOrDefault()?.StartsWith("xp-") == true)
+                    if (orig.EndsWith("["))
                     {
-                      items = (items ?? Enumerable.Empty<ICompletionData>()).Concat(new ICompletionData[]
+                      items = new ICompletionData[]
                       {
-                        new BasicCompletionData("$value") { Image = Icons.Property16.Wpf },
-                        new BasicCompletionData("@defined_as") { Image = Icons.Property16.Wpf },
-                        new BasicCompletionData("@explicit") { Image = Icons.Property16.Wpf },
-                        new BasicCompletionData("@permission_id") { Image = Icons.Property16.Wpf },
-                      });
+                        new BasicCompletionData("is_not_null()]") { Image = Icons.Method16.Wpf },
+                      };
+                    }
+                    else
+                    {
+                      var it = await RecurseProperties(itemType, selectPath);
+                      if (it != null)
+                      {
+                        items = await new SelectPropertyFactory(_metadata, it).GetPromise().ToTask();
+                        items = items.Concat(new ICompletionData[]
+                        {
+                          new BasicCompletionData("*") { Image = Icons.Property16.Wpf },
+                        });
+                        if (it.Properties.Values.Any(p => p.Name.StartsWith("xp-")))
+                        {
+                          items = items.Concat(new ICompletionData[]
+                          {
+                            new BasicCompletionData("xp-*") { Image = Icons.Property16.Wpf },
+                          });
+                        }
+                      }
+
+                      if (selectPath.LastOrDefault()?.StartsWith("xp-") == true)
+                      {
+                        items = (items ?? Enumerable.Empty<ICompletionData>()).Concat(new ICompletionData[]
+                        {
+                          new BasicCompletionData("$value") { Image = Icons.Property16.Wpf },
+                          new BasicCompletionData("@defined_as") { Image = Icons.Property16.Wpf },
+                          new BasicCompletionData("@explicit") { Image = Icons.Property16.Wpf },
+                          new BasicCompletionData("@permission_id") { Image = Icons.Property16.Wpf },
+                        });
+                      }
                     }
                   }
                   break;
@@ -1292,23 +1316,13 @@ namespace InnovatorAdmin.Editor
           && lastItem.Values.TryGetValue("label", out itemValue)
           && IsUpdateAction(lastItem.Action))
         {
-          var output = new char[itemValue.Length];
-          var o = 0;
-          for (var i = 0; i < itemValue.Length; i++)
-          {
-            if (char.IsLetterOrDigit(itemValue[i]))
-            {
-              output[o] = char.ToLowerInvariant(itemValue[i]);
-              o++;
-            }
-            else if (o == 0 || output[o - 1] != '_')
-            {
-              output[o] = '_';
-              o++;
-            }
-          }
-          if (output[o - 1] == '_') o--;
-          return Enumerable.Repeat(new string(output, 0, Math.Min(o, 32)), 1).GetCompletions<BasicCompletionData>();
+          return Enumerable.Repeat(PropNameFromLabel(itemValue), 1).GetCompletions<BasicCompletionData>();
+        }
+        else if (p.Name == "name" && itemType.Name == "xPropertyDefinition"
+          && lastItem.Values.TryGetValue("label", out itemValue)
+          && IsUpdateAction(lastItem.Action))
+        {
+          return Enumerable.Repeat("xp-" + PropNameFromLabel(itemValue), 1).GetCompletions<BasicCompletionData>();
         }
         else if ((itemType.Name == "Value" || itemType.Name == "Filter Value")
           && ((p.Name == "value" && lastItem.Values.TryGetValue("label", out itemValue))
@@ -1364,6 +1378,27 @@ namespace InnovatorAdmin.Editor
           return Enumerable.Empty<ICompletionData>();
         }
       }
+    }
+
+    private string PropNameFromLabel(string label)
+    {
+      var output = new char[label.Length];
+      var o = 0;
+      for (var i = 0; i < label.Length; i++)
+      {
+        if (char.IsLetterOrDigit(label[i]))
+        {
+          output[o] = char.ToLowerInvariant(label[i]);
+          o++;
+        }
+        else if (o == 0 || output[o - 1] != '_')
+        {
+          output[o] = '_';
+          o++;
+        }
+      }
+      if (output[o - 1] == '_') o--;
+      return new string(output, 0, Math.Min(o, 32));
     }
 
     private bool IsUpdateAction(string action)
@@ -1583,7 +1618,7 @@ namespace InnovatorAdmin.Editor
     private static List<string> SelectPath(string selectStr, out string partial)
     {
       partial = null;
-      var lastOperator = selectStr.LastIndexOfAny(new[] { ')', '(', ',', '|' });
+      var lastOperator = selectStr.LastIndexOfAny(new[] { ')', '(', ',', '|', '[', ']' });
       if (lastOperator < selectStr.Length - 1)
       {
         partial = selectStr.Substring(lastOperator + 1).Trim();

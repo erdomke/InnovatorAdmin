@@ -92,11 +92,19 @@
       this.mniFindPrevious = new System.Windows.Forms.ToolStripMenuItem();
       this.mniReplace = new System.Windows.Forms.ToolStripMenuItem();
       this.mniGoTo = new System.Windows.Forms.ToolStripMenuItem();
-      this.toolStripDropDownButton2 = new System.Windows.Forms.ToolStripDropDownButton();
-      this.mniPreferences = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripDropDownView = new System.Windows.Forms.ToolStripDropDownButton();
       this.horizontalSplitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.verticalSplitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.toolStripDropDownButton2 = new System.Windows.Forms.ToolStripDropDownButton();
+      this.mniInstall = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniCreate = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniCompare = new System.Windows.Forms.ToolStripMenuItem();
+      this.otherToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniGitMergeHelper = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniCreateModelFiles = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniMergeScripts = new System.Windows.Forms.ToolStripMenuItem();
+      this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
+      this.mniPreferences = new System.Windows.Forms.ToolStripMenuItem();
       this.exploreButton = new System.Windows.Forms.ToolStripButton();
       this.btnSubmit = new System.Windows.Forms.ToolStripSplitButton();
       this.mniRunAll = new System.Windows.Forms.ToolStripMenuItem();
@@ -124,11 +132,6 @@
       this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
       this.tbcOutputView = new InnovatorAdmin.Controls.FlatTabControl();
       this.pgTools = new System.Windows.Forms.TabPage();
-      this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
-      this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
-      this.lnkCreateModelFiles = new System.Windows.Forms.LinkLabel();
-      this.lnkGitMergeHelper = new System.Windows.Forms.LinkLabel();
-      this.lnkWriteMergeScripts = new System.Windows.Forms.LinkLabel();
       this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
       this.btnInstall = new InnovatorAdmin.Controls.FlatButton();
       this.btnCreate = new InnovatorAdmin.Controls.FlatButton();
@@ -182,8 +185,6 @@
       this.tableLayoutPanel2.SuspendLayout();
       this.tbcOutputView.SuspendLayout();
       this.pgTools.SuspendLayout();
-      this.tableLayoutPanel6.SuspendLayout();
-      this.flowLayoutPanel2.SuspendLayout();
       this.flowLayoutPanel1.SuspendLayout();
       this.pgTextOutput.SuspendLayout();
       this.pgHtml.SuspendLayout();
@@ -308,8 +309,8 @@
             this.mniFile,
             this.toolStripDropDownButton1,
             this.toolStripDropDownButton4,
-            this.toolStripDropDownButton2,
             this.toolStripDropDownView,
+            this.toolStripDropDownButton2,
             this.exploreButton,
             this.btnSubmit});
       this.menuStrip.Location = new System.Drawing.Point(69, 21);
@@ -753,24 +754,6 @@
       this.mniGoTo.Size = new System.Drawing.Size(196, 22);
       this.mniGoTo.Text = "Go To...";
       // 
-      // toolStripDropDownButton2
-      // 
-      this.toolStripDropDownButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-      this.toolStripDropDownButton2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mniPreferences});
-      this.toolStripDropDownButton2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton2.Image")));
-      this.toolStripDropDownButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
-      this.toolStripDropDownButton2.Name = "toolStripDropDownButton2";
-      this.toolStripDropDownButton2.ShowDropDownArrow = false;
-      this.toolStripDropDownButton2.Size = new System.Drawing.Size(39, 22);
-      this.toolStripDropDownButton2.Text = "&Tools";
-      // 
-      // mniPreferences
-      // 
-      this.mniPreferences.Name = "mniPreferences";
-      this.mniPreferences.Size = new System.Drawing.Size(144, 22);
-      this.mniPreferences.Text = "Preferences...";
-      // 
       // toolStripDropDownView
       // 
       this.toolStripDropDownView.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
@@ -795,6 +778,86 @@
       this.verticalSplitToolStripMenuItem.Name = "verticalSplitToolStripMenuItem";
       this.verticalSplitToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
       this.verticalSplitToolStripMenuItem.Text = "Vertical Split";
+      // 
+      // toolStripDropDownButton2
+      // 
+      this.toolStripDropDownButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+      this.toolStripDropDownButton2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mniInstall,
+            this.mniCreate,
+            this.mniCompare,
+            this.otherToolStripMenuItem,
+            this.toolStripSeparator9,
+            this.mniPreferences});
+      this.toolStripDropDownButton2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton2.Image")));
+      this.toolStripDropDownButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
+      this.toolStripDropDownButton2.Name = "toolStripDropDownButton2";
+      this.toolStripDropDownButton2.ShowDropDownArrow = false;
+      this.toolStripDropDownButton2.Size = new System.Drawing.Size(39, 22);
+      this.toolStripDropDownButton2.Text = "&Tools";
+      // 
+      // mniInstall
+      // 
+      this.mniInstall.Name = "mniInstall";
+      this.mniInstall.Size = new System.Drawing.Size(175, 22);
+      this.mniInstall.Text = "Install Package";
+      this.mniInstall.Click += new System.EventHandler(this.mniInstall_Click);
+      // 
+      // mniCreate
+      // 
+      this.mniCreate.Name = "mniCreate";
+      this.mniCreate.Size = new System.Drawing.Size(175, 22);
+      this.mniCreate.Text = "Create Package";
+      this.mniCreate.Click += new System.EventHandler(this.mniCreate_Click);
+      // 
+      // mniCompare
+      // 
+      this.mniCompare.Name = "mniCompare";
+      this.mniCompare.Size = new System.Drawing.Size(175, 22);
+      this.mniCompare.Text = "Compare Packages";
+      this.mniCompare.Click += new System.EventHandler(this.mniCompare_Click);
+      // 
+      // otherToolStripMenuItem
+      // 
+      this.otherToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mniGitMergeHelper,
+            this.mniCreateModelFiles,
+            this.mniMergeScripts});
+      this.otherToolStripMenuItem.Name = "otherToolStripMenuItem";
+      this.otherToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+      this.otherToolStripMenuItem.Text = "Other";
+      // 
+      // mniGitMergeHelper
+      // 
+      this.mniGitMergeHelper.Name = "mniGitMergeHelper";
+      this.mniGitMergeHelper.Size = new System.Drawing.Size(276, 22);
+      this.mniGitMergeHelper.Text = "Git AML Merge Helper";
+      this.mniGitMergeHelper.Click += new System.EventHandler(this.mniGitMergeHelper_Click);
+      // 
+      // mniCreateModelFiles
+      // 
+      this.mniCreateModelFiles.Name = "mniCreateModelFiles";
+      this.mniCreateModelFiles.Size = new System.Drawing.Size(276, 22);
+      this.mniCreateModelFiles.Text = "Innovator.Client Model Generator";
+      this.mniCreateModelFiles.Click += new System.EventHandler(this.mniCreateModelFiles_Click);
+      // 
+      // mniMergeScripts
+      // 
+      this.mniMergeScripts.Name = "mniMergeScripts";
+      this.mniMergeScripts.Size = new System.Drawing.Size(276, 22);
+      this.mniMergeScripts.Text = "Write Merge Scripts from Git Commits";
+      this.mniMergeScripts.Click += new System.EventHandler(this.mniMergeScripts_Click);
+      // 
+      // toolStripSeparator9
+      // 
+      this.toolStripSeparator9.Name = "toolStripSeparator9";
+      this.toolStripSeparator9.Size = new System.Drawing.Size(172, 6);
+      // 
+      // mniPreferences
+      // 
+      this.mniPreferences.Name = "mniPreferences";
+      this.mniPreferences.Size = new System.Drawing.Size(175, 22);
+      this.mniPreferences.Text = "Preferences...";
       // 
       // exploreButton
       // 
@@ -1152,7 +1215,7 @@
       // 
       // pgTools
       // 
-      this.pgTools.Controls.Add(this.tableLayoutPanel6);
+      this.pgTools.Controls.Add(this.flowLayoutPanel1);
       this.pgTools.Location = new System.Drawing.Point(4, 25);
       this.pgTools.Name = "pgTools";
       this.pgTools.Padding = new System.Windows.Forms.Padding(3);
@@ -1161,84 +1224,17 @@
       this.pgTools.Text = "Tools";
       this.pgTools.UseVisualStyleBackColor = true;
       // 
-      // tableLayoutPanel6
-      // 
-      this.tableLayoutPanel6.ColumnCount = 1;
-      this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-      this.tableLayoutPanel6.Controls.Add(this.flowLayoutPanel2, 0, 1);
-      this.tableLayoutPanel6.Controls.Add(this.flowLayoutPanel1, 0, 0);
-      this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 3);
-      this.tableLayoutPanel6.Name = "tableLayoutPanel6";
-      this.tableLayoutPanel6.RowCount = 2;
-      this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70F));
-      this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30F));
-      this.tableLayoutPanel6.Size = new System.Drawing.Size(752, 378);
-      this.tableLayoutPanel6.TabIndex = 5;
-      // 
-      // flowLayoutPanel2
-      // 
-      this.flowLayoutPanel2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-      this.flowLayoutPanel2.Controls.Add(this.lnkCreateModelFiles);
-      this.flowLayoutPanel2.Controls.Add(this.lnkGitMergeHelper);
-      this.flowLayoutPanel2.Controls.Add(this.lnkWriteMergeScripts);
-      this.flowLayoutPanel2.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-      this.flowLayoutPanel2.Location = new System.Drawing.Point(15, 279);
-      this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(15);
-      this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-      this.flowLayoutPanel2.Size = new System.Drawing.Size(722, 84);
-      this.flowLayoutPanel2.TabIndex = 5;
-      // 
-      // lnkCreateModelFiles
-      // 
-      this.lnkCreateModelFiles.AutoSize = true;
-      this.lnkCreateModelFiles.Location = new System.Drawing.Point(3, 0);
-      this.lnkCreateModelFiles.Name = "lnkCreateModelFiles";
-      this.lnkCreateModelFiles.Size = new System.Drawing.Size(102, 13);
-      this.lnkCreateModelFiles.TabIndex = 2;
-      this.lnkCreateModelFiles.TabStop = true;
-      this.lnkCreateModelFiles.Text = "Create Model Files";
-      this.lnkCreateModelFiles.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkCreateModelFiles_LinkClicked);
-      // 
-      // lnkGitMergeHelper
-      // 
-      this.lnkGitMergeHelper.AutoSize = true;
-      this.lnkGitMergeHelper.Location = new System.Drawing.Point(3, 16);
-      this.lnkGitMergeHelper.Margin = new System.Windows.Forms.Padding(3);
-      this.lnkGitMergeHelper.Name = "lnkGitMergeHelper";
-      this.lnkGitMergeHelper.Size = new System.Drawing.Size(95, 13);
-      this.lnkGitMergeHelper.TabIndex = 0;
-      this.lnkGitMergeHelper.TabStop = true;
-      this.lnkGitMergeHelper.Text = "Git Merge Helper";
-      this.lnkGitMergeHelper.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkGitMergeHelper_LinkClicked);
-      // 
-      // lnkWriteMergeScripts
-      // 
-      this.lnkWriteMergeScripts.AutoSize = true;
-      this.lnkWriteMergeScripts.Location = new System.Drawing.Point(3, 35);
-      this.lnkWriteMergeScripts.Margin = new System.Windows.Forms.Padding(3);
-      this.lnkWriteMergeScripts.Name = "lnkWriteMergeScripts";
-      this.lnkWriteMergeScripts.Size = new System.Drawing.Size(200, 13);
-      this.lnkWriteMergeScripts.TabIndex = 1;
-      this.lnkWriteMergeScripts.TabStop = true;
-      this.lnkWriteMergeScripts.Text = "Write Merge Scripts from Git Commits";
-      this.lnkWriteMergeScripts.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkWriteMergeScripts_LinkClicked);
-      // 
       // flowLayoutPanel1
       // 
-      this.flowLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
       this.flowLayoutPanel1.Controls.Add(this.btnInstall);
       this.flowLayoutPanel1.Controls.Add(this.btnCreate);
       this.flowLayoutPanel1.Controls.Add(this.btnCompare);
-      this.flowLayoutPanel1.Location = new System.Drawing.Point(15, 15);
+      this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
       this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(15);
       this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-      this.flowLayoutPanel1.Size = new System.Drawing.Size(722, 234);
-      this.flowLayoutPanel1.TabIndex = 4;
+      this.flowLayoutPanel1.Size = new System.Drawing.Size(752, 378);
+      this.flowLayoutPanel1.TabIndex = 5;
       // 
       // btnInstall
       // 
@@ -1392,7 +1388,7 @@
             this.mniTableCopyActions,
             this.mniResetChanges});
       this.conTable.Name = "conTable";
-      this.conTable.Size = new System.Drawing.Size(152, 92);
+      this.conTable.Size = new System.Drawing.Size(152, 114);
       this.conTable.Opening += new System.ComponentModel.CancelEventHandler(this.conTable_Opening);
       // 
       // mniColumns
@@ -1401,34 +1397,6 @@
       this.mniColumns.Size = new System.Drawing.Size(151, 22);
       this.mniColumns.Text = "Columns...";
       this.mniColumns.Click += new System.EventHandler(this.mniColumns_Click);
-
-      // 
-      // mniTableCopyActions
-      // 
-      this.mniTableCopyActions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mniTableCopyWithoutHeader,
-            this.mniTableCopyWithHeader});
-      this.mniTableCopyActions.Name = "mniTableCopyActions";
-      this.mniTableCopyActions.Size = new System.Drawing.Size(151, 22);
-      this.mniTableCopyActions.Text = "Copy ...";
-
-      // 
-      // mniTableCopyWithoutHeader
-      // 
-      this.mniTableCopyWithoutHeader.Name = "mniTableCopyWithoutHeader";
-      this.mniTableCopyWithoutHeader.Size = new System.Drawing.Size(140, 22);
-      this.mniTableCopyWithoutHeader.Text = "Without Header";
-      this.mniTableCopyWithoutHeader.ShortcutKeyDisplayString = "Ctrl+C";
-      this.mniTableCopyWithoutHeader.Click += new System.EventHandler(this.mniTableCopyWithoutHeader_Click);
-
-      // 
-      // mniTableCopyWithHeader
-      // 
-      this.mniTableCopyWithHeader.Name = "mniTableCopyWithHeader";
-      this.mniTableCopyWithHeader.Size = new System.Drawing.Size(140, 22);
-      this.mniTableCopyWithHeader.Text = "With Header";
-      this.mniTableCopyWithHeader.Click += new System.EventHandler(this.mniTableCopyWithHeader_Click);
-
       // 
       // mniSaveTableEdits
       // 
@@ -1467,6 +1435,30 @@
       this.mniTableEditsToQueryEditor.Size = new System.Drawing.Size(140, 22);
       this.mniTableEditsToQueryEditor.Text = "Query Editor";
       this.mniTableEditsToQueryEditor.Click += new System.EventHandler(this.mniTableEditsToQueryEditor_Click);
+      // 
+      // mniTableCopyActions
+      // 
+      this.mniTableCopyActions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mniTableCopyWithoutHeader,
+            this.mniTableCopyWithHeader});
+      this.mniTableCopyActions.Name = "mniTableCopyActions";
+      this.mniTableCopyActions.Size = new System.Drawing.Size(151, 22);
+      this.mniTableCopyActions.Text = "Copy ...";
+      // 
+      // mniTableCopyWithoutHeader
+      // 
+      this.mniTableCopyWithoutHeader.Name = "mniTableCopyWithoutHeader";
+      this.mniTableCopyWithoutHeader.ShortcutKeyDisplayString = "Ctrl+C";
+      this.mniTableCopyWithoutHeader.Size = new System.Drawing.Size(200, 22);
+      this.mniTableCopyWithoutHeader.Text = "Without Header";
+      this.mniTableCopyWithoutHeader.Click += new System.EventHandler(this.mniTableCopyWithoutHeader_Click);
+      // 
+      // mniTableCopyWithHeader
+      // 
+      this.mniTableCopyWithHeader.Name = "mniTableCopyWithHeader";
+      this.mniTableCopyWithHeader.Size = new System.Drawing.Size(200, 22);
+      this.mniTableCopyWithHeader.Text = "With Header";
+      this.mniTableCopyWithHeader.Click += new System.EventHandler(this.mniTableCopyWithHeader_Click);
       // 
       // mniResetChanges
       // 
@@ -1693,9 +1685,6 @@
       this.tableLayoutPanel2.ResumeLayout(false);
       this.tbcOutputView.ResumeLayout(false);
       this.pgTools.ResumeLayout(false);
-      this.tableLayoutPanel6.ResumeLayout(false);
-      this.flowLayoutPanel2.ResumeLayout(false);
-      this.flowLayoutPanel2.PerformLayout();
       this.flowLayoutPanel1.ResumeLayout(false);
       this.flowLayoutPanel1.PerformLayout();
       this.pgTextOutput.ResumeLayout(false);
@@ -1783,10 +1772,6 @@
     private System.Windows.Forms.Label lblSelection;
     private System.Windows.Forms.TabPage pgHtml;
     private System.Windows.Forms.TabPage pgTools;
-    private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
-    private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
-    private Controls.FlatButton btnInstall;
-    private Controls.FlatButton btnCreate;
     private System.Windows.Forms.ToolStripMenuItem mniColumns;
     private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton4;
     private System.Windows.Forms.ToolStripMenuItem mniFind;
@@ -1834,13 +1819,20 @@
     private System.Windows.Forms.ProgressBar progQuery;
     private System.Windows.Forms.ToolStripMenuItem mniNewDocument;
     private System.Windows.Forms.ToolStripSeparator mniRecentDocsStart;
-    private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
-    private System.Windows.Forms.LinkLabel lnkGitMergeHelper;
-    private System.Windows.Forms.LinkLabel lnkWriteMergeScripts;
-    private Controls.FlatButton btnCompare;
-    private System.Windows.Forms.LinkLabel lnkCreateModelFiles;
     private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton2;
     private System.Windows.Forms.ToolStripMenuItem mniPreferences;
     private System.Windows.Forms.ToolStripMenuItem verticalSplitToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem mniInstall;
+    private System.Windows.Forms.ToolStripMenuItem mniCreate;
+    private System.Windows.Forms.ToolStripMenuItem mniCompare;
+    private System.Windows.Forms.ToolStripMenuItem otherToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem mniGitMergeHelper;
+    private System.Windows.Forms.ToolStripMenuItem mniCreateModelFiles;
+    private System.Windows.Forms.ToolStripMenuItem mniMergeScripts;
+    private System.Windows.Forms.ToolStripSeparator toolStripSeparator9;
+    private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+    private Controls.FlatButton btnInstall;
+    private Controls.FlatButton btnCreate;
+    private Controls.FlatButton btnCompare;
   }
 }

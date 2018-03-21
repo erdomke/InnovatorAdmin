@@ -1924,6 +1924,16 @@ namespace InnovatorAdmin
 
     private void btnInstall_Click(object sender, EventArgs e)
     {
+      InstallCommand();
+    }
+
+    private void mniInstall_Click(object sender, EventArgs e)
+    {
+      InstallCommand();
+    }
+
+    private void InstallCommand()
+    {
       try
       {
         var main = new Main();
@@ -1938,6 +1948,16 @@ namespace InnovatorAdmin
 
     private void btnCreate_Click(object sender, EventArgs e)
     {
+      CreateCommand();
+    }
+
+    private void mniCreate_Click(object sender, EventArgs e)
+    {
+      CreateCommand();
+    }
+
+    private void CreateCommand()
+    {
       try
       {
         var main = new Main();
@@ -1951,6 +1971,37 @@ namespace InnovatorAdmin
       {
         Utils.HandleError(ex);
       }
+    }
+
+
+    private void btnCompare_Click(object sender, EventArgs e)
+    {
+      CompareCommand();
+    }
+
+    private void mniCompare_Click(object sender, EventArgs e)
+    {
+      CompareCommand();
+    }
+
+    private void CompareCommand()
+    {
+      try
+      {
+        var main = new Main();
+        var compareSel = new CompareSelect();
+        main.GoToStep(compareSel);
+        main.Show();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private async void lnkCreateModelFiles_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    {
+
     }
 
     private void mniColumns_Click(object sender, EventArgs e)
@@ -2263,6 +2314,52 @@ namespace InnovatorAdmin
 
     private void lnkGitMergeHelper_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
     {
+
+    }
+
+    private class MergeSettings
+    {
+      [DisplayName("Continue Last Merge")]
+      public bool ContinueLast { get; set; }
+      [DisplayName("Git Repository Path"), ParamControl(typeof(Editor.FilePathControl))]
+      public string RepoPath { get; set; }
+      [DisplayName("Local Branch Name")]
+      public string LocalBranch { get; set; }
+      [DisplayName("Remote Branch Name")]
+      public string RemoteBranch { get; set; }
+    }
+
+    private void lnkWriteMergeScripts_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    {
+
+    }
+
+    private class ScriptWriterSettings
+    {
+      [DisplayName("Git Repository Path"), ParamControl(typeof(Editor.FilePathControl))]
+      public string RepoPath { get; set; }
+      [DisplayName("Initial Commit")]
+      public string InitCommit { get; set; }
+      [DisplayName("Destination Commit")]
+      public string DestCommit { get; set; }
+      [DisplayName("Script Save Directory"), ParamControl(typeof(Editor.FilePathControl))]
+      public string SaveDirectory { get; set; }
+    }
+
+    private void splitViewHorizontally()
+    {
+      splitEditors.Orientation = Orientation.Horizontal;
+      splitEditors.SplitterDistance = splitEditors.Size.Height / 2;
+    }
+
+    private void splitViewVertically()
+    {
+      splitEditors.Orientation = Orientation.Vertical;
+      splitEditors.SplitterDistance = splitEditors.Size.Width / 2;
+    }
+
+    private void mniGitMergeHelper_Click(object sender, EventArgs e)
+    {
       try
       {
         using (var dialog = new Dialog.ConfigDialog<MergeSettings>())
@@ -2287,19 +2384,20 @@ namespace InnovatorAdmin
       }
     }
 
-    private class MergeSettings
+    private async void mniCreateModelFiles_Click(object sender, EventArgs e)
     {
-      [DisplayName("Continue Last Merge")]
-      public bool ContinueLast { get; set; }
-      [DisplayName("Git Repository Path"), ParamControl(typeof(Editor.FilePathControl))]
-      public string RepoPath { get; set; }
-      [DisplayName("Local Branch Name")]
-      public string LocalBranch { get; set; }
-      [DisplayName("Remote Branch Name")]
-      public string RemoteBranch { get; set; }
+      try
+      {
+        var output = new OutputModelClasses(_proxy.ConnData.ArasLogin());
+        await output.Run();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
     }
 
-    private void lnkWriteMergeScripts_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    private void mniMergeScripts_Click(object sender, EventArgs e)
     {
       try
       {
@@ -2332,58 +2430,6 @@ namespace InnovatorAdmin
       {
         Utils.HandleError(ex);
       }
-    }
-
-    private class ScriptWriterSettings
-    {
-      [DisplayName("Git Repository Path"), ParamControl(typeof(Editor.FilePathControl))]
-      public string RepoPath { get; set; }
-      [DisplayName("Initial Commit")]
-      public string InitCommit { get; set; }
-      [DisplayName("Destination Commit")]
-      public string DestCommit { get; set; }
-      [DisplayName("Script Save Directory"), ParamControl(typeof(Editor.FilePathControl))]
-      public string SaveDirectory { get; set; }
-    }
-
-    private void btnCompare_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        var main = new Main();
-        var compareSel = new CompareSelect();
-        main.GoToStep(compareSel);
-        main.Show();
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private async void lnkCreateModelFiles_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-    {
-      try
-      {
-        var output = new OutputModelClasses(_proxy.ConnData.ArasLogin());
-        await output.Run();
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private void splitViewHorizontally()
-    {
-      splitEditors.Orientation = Orientation.Horizontal;
-      splitEditors.SplitterDistance = splitEditors.Size.Height / 2;
-    }
-
-    private void splitViewVertically()
-    {
-      splitEditors.Orientation = Orientation.Vertical;
-      splitEditors.SplitterDistance = splitEditors.Size.Width / 2;
     }
   }
 }
