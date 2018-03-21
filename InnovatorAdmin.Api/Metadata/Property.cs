@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Innovator.Client;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -89,5 +90,40 @@ namespace InnovatorAdmin
       get { return this.Name; }
     }
 
+    internal static Property FromItem(IReadOnlyItem prop, ItemType type)
+    {
+      var newProp = new Property(prop.Property("name").Value);
+      newProp.Id = prop.Id();
+      newProp.Label = prop.Property("label").Value;
+      newProp.SetType(prop.Property("data_type").Value);
+      newProp.Precision = prop.Property("prec").AsInt(-1);
+      newProp.Scale = prop.Property("scale").AsInt(-1);
+      newProp.StoredLength = prop.Property("stored_length").AsInt(-1);
+      var foreign = prop.Property("foreign_property").AsItem();
+      if (foreign.Exists)
+      {
+        newProp.ForeignLinkPropName = prop.Property("data_source").KeyedName().Value;
+        newProp.ForeignPropName = foreign.Property("name").Value;
+        newProp.ForeignTypeName = foreign.SourceId().KeyedName().Value;
+      }
+      newProp.DataSource = prop.Property("data_source").Value;
+      if (newProp.Type == PropertyType.item && newProp.Name == "data_source" && type.Name == "Property")
+      {
+        newProp.Restrictions.AddRange(new string[] { "ItemType", "List", "Property" });
+      }
+      else if (newProp.Type == PropertyType.item && prop.Property("data_source").Attribute("name").HasValue())
+      {
+        newProp.Restrictions.Add(prop.Property("data_source").Attribute("name").Value);
+      }
+      newProp.Visibility =
+        (prop.Property("is_hidden").AsBoolean(false) ? PropertyVisibility.None : PropertyVisibility.MainGrid)
+        | (prop.Property("is_hidden2").AsBoolean(false) ? PropertyVisibility.None : PropertyVisibility.RelationshipGrid);
+      newProp.SortOrder = prop.Property("sort_order").AsInt(int.MaxValue);
+      newProp.ColumnWidth = prop.Property("column_width").AsInt(100);
+      newProp.IsRequired = prop.Property("is_required").AsBoolean(false);
+      newProp.ReadOnly = prop.Property("readonly").AsBoolean(false);
+
+      return newProp;
+    }
   }
 }

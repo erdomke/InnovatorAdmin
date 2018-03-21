@@ -374,6 +374,8 @@ namespace InnovatorAdmin.Editor
                   new BasicCompletionData() { Text = "lt", Action = () => "condition='lt'", Content = "lt (<, Less than)", Image = Icons.EnumValue16.Wpf },
                   new BasicCompletionData() { Text = "ne", Action = () => "condition='ne'", Content = "ne (<>, !=, Not Equals)", Image = Icons.EnumValue16.Wpf }
                 });
+                if (path.Last().LocalName.StartsWith("xp-"))
+                  items = items.Concat(Attributes(notExisting, "set", "permission_id", "explicit"));
                 break;
             }
 
@@ -589,8 +591,19 @@ namespace InnovatorAdmin.Editor
                     value = partial;
 
                     var it = await RecurseProperties(itemType, selectPath);
+                    if (it != null)
+                      items = await new SelectPropertyFactory(_metadata, it).GetPromise().ToTask();
 
-                    items = await new SelectPropertyFactory(_metadata, it).GetPromise().ToTask();
+                    if (selectPath.LastOrDefault()?.StartsWith("xp-") == true)
+                    {
+                      items = (items ?? Enumerable.Empty<ICompletionData>()).Concat(new ICompletionData[]
+                      {
+                        new BasicCompletionData("$value") { Image = Icons.Property16.Wpf },
+                        new BasicCompletionData("@defined_as") { Image = Icons.Property16.Wpf },
+                        new BasicCompletionData("@explicit") { Image = Icons.Property16.Wpf },
+                        new BasicCompletionData("@permission_id") { Image = Icons.Property16.Wpf },
+                      });
+                    }
                   }
                   break;
                 case "type":
@@ -696,9 +709,28 @@ namespace InnovatorAdmin.Editor
                     new AttributeValueCompletionData() { Text = "not in", Image = Icons.EnumValue16.Wpf },
                     new AttributeValueCompletionData() { Text = "not like", Image = Icons.EnumValue16.Wpf }
                   };
+                  if (path.Last().LocalName.StartsWith("xp-"))
+                  {
+                    items = items.Concat(new ICompletionData[]
+                    {
+                      new AttributeValueCompletionData() { Text = "is defined", Image = Icons.EnumValue16.Wpf },
+                      new AttributeValueCompletionData() { Text = "is not defined", Image = Icons.EnumValue16.Wpf },
+                    });
+                  }
                   break;
+                case "explicit":
                 case "is_null":
                   items = AttributeValues("0", "1");
+                  break;
+                case "set":
+                  items = new ICompletionData[] {
+                    new BasicCompletionData("value") { Image = Icons.Property16.Wpf },
+                    new BasicCompletionData("explicit") { Image = Icons.Property16.Wpf },
+                    new BasicCompletionData("permission_id") { Image = Icons.Property16.Wpf },
+                  };
+                  var idx = value.LastIndexOf('|');
+                  if (idx >= 0)
+                    value = value.Substring(idx + 1);
                   break;
               }
             }
@@ -1476,7 +1508,7 @@ namespace InnovatorAdmin.Editor
           }
           else
           {
-            return itemType;
+            return null;
           }
         }
         catch (Exception ex)
@@ -1548,32 +1580,37 @@ namespace InnovatorAdmin.Editor
     }
 
 
-    private List<string> SelectPath(string selectStr, out string partial)
+    private static List<string> SelectPath(string selectStr, out string partial)
     {
       partial = null;
-      var lastOperator = -1;
-      var path = new List<string>();
-
-      for (var i = 0; i < selectStr.Length; i++)
-      {
-        if (selectStr[i] == '(' || selectStr[i] == ')' || selectStr[i] == ',')
-        {
-          switch (selectStr[i])
-          {
-            case '(':
-              path.Add(selectStr.Substring(lastOperator + 1, i - lastOperator - 1).Trim());
-              break;
-            case ')':
-              path.RemoveAt(path.Count - 1);
-              break;
-          }
-          lastOperator = i;
-        }
-      }
+      var lastOperator = selectStr.LastIndexOfAny(new[] { ')', '(', ',', '|' });
       if (lastOperator < selectStr.Length - 1)
       {
         partial = selectStr.Substring(lastOperator + 1).Trim();
       }
+      var node = SelectNode.FromString(selectStr);
+
+      var path = new List<string>();
+      var curr = node.LastOrDefault();
+      while (curr != null)
+      {
+        if (!string.IsNullOrEmpty(curr.Name))
+          path.Add(curr.Name);
+        curr = curr.LastOrDefault();
+      }
+
+      var itemsToKeep = 0;
+      for (var i = 0; i < selectStr.Length; i++)
+      {
+        if (selectStr[i] == '(')
+          itemsToKeep++;
+        else if (selectStr[i] == ')')
+          itemsToKeep--;
+      }
+
+      while (path.Count > itemsToKeep)
+        path.RemoveAt(path.Count - 1);
+
       return path;
     }
 

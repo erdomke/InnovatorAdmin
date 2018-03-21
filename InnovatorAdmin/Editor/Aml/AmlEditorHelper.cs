@@ -37,6 +37,7 @@ namespace InnovatorAdmin.Editor
           case "(":
           case ".":
           case "!":
+          case "|":
             _sql.CurrentTextArea = control.Editor.TextArea;
             ShowCompletions(control)
               .Done(data =>
@@ -103,7 +104,8 @@ namespace InnovatorAdmin.Editor
         return this.GetCompletions(control.Document, control.Editor.CaretOffset, this.SoapAction)
           .ToPromise()
           .UiPromise(control)
-          .Convert(data => {
+          .Convert(data =>
+          {
             if (length != control.Editor.Document.TextLength
               || caret != control.Editor.CaretOffset)
             {
@@ -111,7 +113,7 @@ namespace InnovatorAdmin.Editor
               return null;
             }
 
-            if (data.Items.Any())
+            if (data?.Items.Any() == true)
             {
               var items = data.Items.ToArray();
               var contextItems = items.OfType<IContextCompletions>();

@@ -566,13 +566,62 @@ namespace InnovatorAdmin
       if (_conn == null || itemType.Properties.Count > 0)
         return Promises.Resolved<IEnumerable<Property>>(itemType.Properties.Values);
 
-      return _conn.ApplyAsync("<AML><Item action=\"get\" type=\"ItemType\" select=\"name\"><name>@0</name><Relationships><Item action=\"get\" type=\"Property\" select=\"name,label,data_type,data_source,stored_length,prec,scale,foreign_property(name,source_id),is_hidden,is_hidden2,sort_order,default_value,column_width,is_required,readonly\" /></Relationships></Item></AML>"
-        , true, true, itemType.Name)
+      var xPropQuery = default(string);
+      if (_itemTypesById.ContainsKey("A253DB1415194344AEFB5E6A2029AB3A"))
+      {
+        xPropQuery = @"<Item type='ItemType_xPropertyDefinition' action='get' select='related_id(name,label,data_type,data_source,stored_length,prec,scale,default_value,column_width,is_required,readonly)'></Item>";
+      }
+
+      var aml = $@"<AML>
+  <Item action='get' type='ItemType' select='name'>
+    <name>@0</name>
+    <Relationships>
+      <Item action='get' type='Property' select='name,label,data_type,data_source,stored_length,prec,scale,foreign_property(name,source_id),is_hidden,is_hidden2,sort_order,default_value,column_width,is_required,readonly' />
+      {xPropQuery}
+    </Relationships>
+  </Item>
+</AML>";
+
+      var promise = _conn.ApplyAsync(aml, true, true, itemType.Name)
         .Convert(r =>
         {
           LoadProperties(itemType, r.AssertItem());
           return (IEnumerable<Property>)itemType.Properties.Values;
         }).Fail(ex => System.Diagnostics.Debug.Print("PROPLOAD: " + ex.ToString()));
+
+      if (!string.IsNullOrEmpty(xPropQuery))
+      {
+        promise = promise.Continue(p =>
+        {
+          return _conn.ApplyAsync(@"<Item type='xClassificationTree' action='get' select='id'>
+  <Relationships>
+    <Item type='xClassificationTree_ItemType' action='get' select='id'>
+      <related_id>@0</related_id>
+    </Item>
+    <Item action='get' type='xClass' select='id'>
+      <Relationships>
+        <Item action='get' type='xClass_xPropertyDefinition' select='related_id(name,label,data_type,data_source,stored_length,prec,scale,default_value,column_width,is_required,readonly)'>
+          <is_current>1</is_current>
+        </Item>
+      </Relationships>
+    </Item>
+  </Relationships>
+</Item>", true, false, itemType.Id);
+        }).Convert(r =>
+        {
+          foreach (var prop in r.Items()
+            .SelectMany(i => i.Relationships("xClass"))
+            .SelectMany(i => i.Relationships("xClass_xPropertyDefinition"))
+            .Select(i => i.RelatedItem()))
+          {
+            var newProp = Property.FromItem(prop, itemType);
+            itemType.Properties[newProp.Name] = newProp;
+          }
+          return (IEnumerable<Property>)itemType.Properties.Values;
+        }).Fail(ex => System.Diagnostics.Debug.Print("PROPLOAD: " + ex.ToString()));
+      }
+
+      return promise;
     }
     /// <summary>
     /// Gets a promise to return information about property of a given Item Type and name
@@ -609,44 +658,12 @@ namespace InnovatorAdmin
     /// <param name="itemTypeMeta">The properties.</param>
     private void LoadProperties(ItemType type, IReadOnlyItem itemTypeMeta)
     {
-      var props = itemTypeMeta.Relationships("Property");
-      Property newProp = null;
+      var props = itemTypeMeta.Relationships("Property")
+        .Concat(itemTypeMeta.Relationships("ItemType_xPropertyDefinition").Select(i => i.RelatedItem()));
       foreach (var prop in props)
       {
-        newProp = new Property(prop.Property("name").Value);
-        newProp.Id = prop.Id();
-        newProp.Label = prop.Property("label").Value;
-        newProp.SetType(prop.Property("data_type").Value);
-        newProp.Precision = prop.Property("prec").AsInt(-1);
-        newProp.Scale = prop.Property("scale").AsInt(-1);
-        newProp.StoredLength = prop.Property("stored_length").AsInt(-1);
-        var foreign = prop.Property("foreign_property").AsItem();
-        if (foreign.Exists)
-        {
-          newProp.ForeignLinkPropName = prop.Property("data_source").KeyedName().Value;
-          newProp.ForeignPropName = foreign.Property("name").Value;
-          newProp.ForeignTypeName = foreign.SourceId().KeyedName().Value;
-        }
-        newProp.DataSource = prop.Property("data_source").Value;
-        if (newProp.Type == PropertyType.item && newProp.Name == "data_source" && type.Name == "Property")
-        {
-          newProp.Restrictions.AddRange(new string[] { "ItemType", "List", "Property" });
-        }
-        else if (newProp.Type == PropertyType.item && prop.Property("data_source").Attribute("name").HasValue())
-        {
-          newProp.Restrictions.Add(prop.Property("data_source").Attribute("name").Value);
-        }
-        newProp.Visibility =
-          (prop.Property("is_hidden").AsBoolean(false) ? PropertyVisibility.None : PropertyVisibility.MainGrid)
-          | (prop.Property("is_hidden2").AsBoolean(false) ? PropertyVisibility.None : PropertyVisibility.RelationshipGrid);
-        newProp.SortOrder = prop.Property("sort_order").AsInt(int.MaxValue);
-        newProp.ColumnWidth = prop.Property("column_width").AsInt(100);
-        newProp.IsRequired = prop.Property("is_required").AsBoolean(false);
-        newProp.ReadOnly = prop.Property("readonly").AsBoolean(false);
-
-        //default_value,column_width,is_required,readonly
-
-        type.Properties.Add(newProp.Name, newProp);
+        var newProp = Property.FromItem(prop, type);
+        type.Properties[newProp.Name] = newProp;
       }
     }
 
