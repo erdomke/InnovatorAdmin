@@ -233,7 +233,7 @@ namespace InnovatorAdmin
                 }
               }
               var cmd = new Command(query.OuterXml);
-              cmd.Settings = x => x.Timeout = 300000;
+              cmd.Settings = x => x.Timeout = TimeSpan.FromMinutes(5);
               items = _conn.Apply(cmd).AssertItems();
               if (line.Type == InstallType.Create) line.InstalledId = items.First().Attribute("id").Value;
 

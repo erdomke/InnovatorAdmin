@@ -8,7 +8,7 @@
     <description>Application for administrating an Aras Innovator instance</description>
     <dependencies>
       <group>
-        <dependency id="Innovator.Client" version="2018.1.31.2240" exclude="Build,Analyzers" />
+        <dependency id="Innovator.Client" version="2018.3.28.2022" exclude="Build,Analyzers" />
         <dependency id="LibGit2Sharp" version="0.24.0" exclude="Build,Analyzers" />
         <dependency id="Mvp.Xml" version="2.3.0" exclude="Build,Analyzers" />
         <dependency id="Nancy" version="1.4.4" exclude="Build,Analyzers" />

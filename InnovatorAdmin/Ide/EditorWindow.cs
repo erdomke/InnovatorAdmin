@@ -611,7 +611,7 @@ namespace InnovatorAdmin
         {
           req.SetHeader(param.Name, param.Value);
         }
-        req.Timeout = _proxy.ConnData.Timeout;
+        req.Timeout = TimeSpan.FromMilliseconds(_proxy.ConnData.Timeout);
       }
     }
 
