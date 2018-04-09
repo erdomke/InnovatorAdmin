@@ -1,3 +1,5 @@
+#tool "Squirrel.Windows" 
+#addin Cake.Squirrel
 #addin "Cake.FileHelpers"
 
 //////////////////////////////////////////////////////////////////////
@@ -24,8 +26,19 @@ Task("Patch-Version")
   .Does(() =>
 {
   version = DateTime.Now.ToString("yyyy.MM.dd.HHmm");
+  
+  if (!string.Equals(target, "Default", StringComparison.OrdinalIgnoreCase))
+  {
+    var now = DateTime.UtcNow;
+    version = string.Format("{0:yy}.{1:d3}.{2}"
+, now
+, now.DayOfYear
+, (int)((DateTime.UtcNow - DateTime.UtcNow.Date).TotalSeconds / 2));  
+  }
+  Information("Version: " + version);
+  
   var content = string.Format(@"using System.Reflection;
-
+  
 [assembly: AssemblyVersion(""{0}"")]
 [assembly: AssemblyFileVersion(""{0}"")]", version);
   FileWriteText("./InnovatorAdmin/AssemblyInfo.Version.cs", content);
@@ -91,12 +104,49 @@ Task("NuGet-Pack")
   NuGetPack("./publish/InnovatorAdmin/InnovatorAdmin.nuspec", nuGetPackSettings);
 });
 
+Task("Release-NuGet-Pack")
+  .IsDependentOn("Build")
+  .Does(() =>
+{
+  DeleteFiles("./artifacts/*.nupkg");
+  DeleteFiles("./publish/InnovatorAdmin/lib/net45/*.xml");
+  DeleteFiles("./publish/InnovatorAdmin/lib/net45/*.pdb");
+  DeleteDirectory("./publish/InnovatorAdmin/lib/net45/lib",true);
+  var nuGetPackSettings = new NuGetPackSettings {
+    Id = "InnovatorAdmin",
+    Version = version,
+    Authors = new [] {"eric.domke"},
+    Description = "A tool for managing Aras Innovator installations focusing on improving the import/export experience.",
+    RequireLicenseAcceptance = false,
+    OutputDirectory = "./artifacts"
+  };
+  NuGetPack("./publish/InnovatorAdmin/InnovatorAdmin.Squirrel.nuspec", nuGetPackSettings);
+});
+
+Task("Squirrel-Release")
+.IsDependentOn("Release-NuGet-Pack")
+  .Does(() =>
+{
+  Information("Version: " + version);
+  var file = GetFiles("./artifacts/InnovatorAdmin*.nupkg").First();
+  Information(file);
+  Squirrel(file, new SquirrelSettings() {
+    NoMsi = true,
+    PackagesDirectory = "./artifacts/",
+    ReleaseDirectory = "./Releases/"
+  });
+});
+
+
 //////////////////////////////////////////////////////////////////////
 // TASK TARGETS
 //////////////////////////////////////////////////////////////////////
 
 Task("Default")
     .IsDependentOn("NuGet-Pack");
+    
+Task("Release")
+    .IsDependentOn("Squirrel-Release");
 
 //////////////////////////////////////////////////////////////////////
 // EXECUTION
