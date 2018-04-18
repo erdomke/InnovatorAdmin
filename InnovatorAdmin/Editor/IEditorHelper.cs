@@ -24,7 +24,7 @@ namespace InnovatorAdmin.Editor
     void HandleTextEntered(EditorWinForm control, string insertText);
     string GetCurrentQuery(ITextSource text, int offset);
     IPromise<CompletionContext> ShowCompletions(EditorWinForm control);
-    IEnumerable<IEditorScript> GetScripts(ITextSource text, int offset);
+    IEnumerable<IEditorScript> GetScripts(ITextSource text, int offset, bool readOnly);
     IEnumerable<IEditorScript> GetScripts(IEnumerable<DataRow> rows, string column);
   }
 }

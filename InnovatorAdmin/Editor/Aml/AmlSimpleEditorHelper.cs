@@ -1,6 +1,8 @@
 ﻿using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Highlighting;
 using Innovator.Client;
+using Innovator.Client.Model;
+using Innovator.Client.QueryModel;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -44,7 +46,7 @@ namespace InnovatorAdmin.Editor
       return _highlighter;
     }
 
-    public override IEnumerable<IEditorScript> GetScripts(ICSharpCode.AvalonEdit.Document.ITextSource text, int offset)
+    public override IEnumerable<IEditorScript> GetScripts(ITextSource text, int offset, bool readOnly)
     {
       var item = GetCurrentItem(text, offset);
       if (item != null)
@@ -55,21 +57,54 @@ namespace InnovatorAdmin.Editor
           ConnData = _connData,
           Items = new[] { item }
         };
-        return generator.GetScripts().Concat(Enumerable.Repeat(new EditorScriptExecute() {
-          Name = "Transform: Criteria to Where Clause",
-          Execute = () =>
+
+        var extras = new List<IEditorScript>();
+        if (!readOnly)
+        {
+          extras.Add(new EditorScriptExecute()
           {
-            var doc = text as IDocument;
-            if (doc != null)
+            Name = "Transform: Criteria to Where Clause",
+            Execute = () =>
             {
-              var segment = GetCurrentQuerySegment(text, offset);
-              var elem = XElement.Load(text.CreateReader(segment.Offset, segment.Length));
-              AmlTransforms.CriteriaToWhereClause(elem);
-              doc.Replace(segment.Offset, segment.Length, elem.ToString());
+              var doc = text as IDocument;
+              if (doc != null)
+              {
+                try
+                {
+                  var segment = GetCurrentQuerySegment(text, offset);
+                  var queryItem = _conn.AmlContext.FromXml(text.CreateReader(segment.Offset, segment.Length)).AssertItem();
+                  queryItem.QueryType().Set("ignore");
+                  queryItem.Where().Remove();
+                  var settings = new SqlSettings(_conn)
+                  {
+                    RenderOption = AmlSqlRenderOption.WhereClause
+                  };
+
+                  var elem = XElement.Load(text.CreateReader(segment.Offset, segment.Length));
+                  var whereClause = elem.Attribute("where")?.Value ?? "";
+                  if (whereClause != "")
+                    whereClause += " and ";
+                  whereClause += queryItem.ToQueryItem().ToSql(settings);
+                  elem.SetAttributeValue("where", whereClause);
+
+                  foreach (var child in elem.Elements().ToArray())
+                  {
+                    child.Remove();
+                  }
+
+                  doc.Replace(segment.Offset, segment.Length, elem.ToString());
+                }
+                catch (Exception)
+                {
+                  // Do nothing
+                }
+              }
+              return Task.FromResult(true);
             }
-            return Task.FromResult(true);
-          }
-        }, 1));
+          });
+        }
+
+        return generator.GetScripts().Concat(extras);
       }
       return Enumerable.Empty<IEditorScript>();
     }
@@ -94,9 +129,6 @@ namespace InnovatorAdmin.Editor
 
       XmlUtils.ProcessFragment(text, (r, o, st) =>
       {
-        if (o > offset)
-          return false;
-
         switch (r.NodeType)
         {
           case XmlNodeType.Element:
@@ -138,7 +170,7 @@ namespace InnovatorAdmin.Editor
           case XmlNodeType.EndElement:
             if (r.LocalName == "Item")
             {
-              if (offset < (o + 6))
+              if (offset < (o + 6) && result.Count == 1)
                 return false;
               result.Pop();
             }
@@ -156,26 +188,30 @@ namespace InnovatorAdmin.Editor
       return null;
     }
 
-
-    private class EditorItemData : IItemData
+    private class SqlSettings : IAmlSqlWriterSettings
     {
-      private Dictionary<string, string> _propertyData =
-        new Dictionary<string, string>();
+      private IAsyncConnection _conn;
 
-      public string Type { get; set; }
-      public string Id { get; set; }
-      public string Action { get; set; }
-
-      public object Property(string name)
+      public SqlSettings(IAsyncConnection conn)
       {
-        string result;
-        if (_propertyData.TryGetValue(name, out result))
-          return result;
-        return null;
+        _conn = conn;
       }
-      internal void Property(string name, string value)
+
+      public string IdentityList => string.Empty;
+
+      public AmlSqlPermissionOption PermissionOption { get; set; }
+
+      public AmlSqlRenderOption RenderOption { get; set; }
+
+      public string UserId => _conn.UserId;
+
+      public IDictionary<string, IPropertyDefinition> GetProperties(string itemType)
       {
-        _propertyData[name] = value;
+        var meta = ArasMetadataProvider.Cached(_conn);
+        var type = meta.ItemTypeByName(itemType);
+        return meta.GetProperties(type).Wait()
+          .Select(p => p.ToItem(_conn.AmlContext))
+          .ToDictionary(p => p.NameProp().Value);
       }
     }
   }

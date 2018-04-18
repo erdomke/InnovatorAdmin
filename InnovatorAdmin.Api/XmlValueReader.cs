@@ -63,5 +63,14 @@ namespace InnovatorAdmin
       _length = _reader.ReadValueChunk(_buffer, 0, Math.Min(preferred, _buffer.Length));
       _readLength += _length;
     }
+
+    public string ReadBufferToEnd()
+    {
+      if (_length <= 0)
+        return "";
+
+      _idx = 0;
+      return ReadToEnd();
+    }
   }
 }

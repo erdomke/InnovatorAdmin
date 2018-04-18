@@ -47,7 +47,8 @@ namespace InnovatorAdmin.Editor
     public event EventHandler<SelectionChangedEventArgs> SelectionChanged;
 
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public IEditorHelper Helper {
+    public IEditorHelper Helper
+    {
       get { return _extEditor.Helper; }
       set { _extEditor.Helper = value; }
     }
@@ -190,7 +191,7 @@ namespace InnovatorAdmin.Editor
 
         if (Helper != null)
           EditorScript.BuildMenu(conMenu.Items
-            , Helper.GetScripts(Document, Editor.CaretOffset)
+            , Helper.GetScripts(Document, Editor.CaretOffset, Editor.IsReadOnly)
             , (script) =>
             {
               var ide = this.FindForm() as EditorWindow;
@@ -199,7 +200,7 @@ namespace InnovatorAdmin.Editor
               return Task.FromResult(false);
             });
 
-        OnMouseDown(new MouseEventArgs(System.Windows.Forms.MouseButtons.Right, e.ClickCount, pt.X, pt.Y, 0));
+        OnMouseDown(new MouseEventArgs(MouseButtons.Right, e.ClickCount, pt.X, pt.Y, 0));
       }
       catch (Exception ex)
       {
@@ -739,7 +740,7 @@ namespace InnovatorAdmin.Editor
         }
 
         if (!_allowEnter &&
-          ( e.Key == System.Windows.Input.Key.Enter
+          (e.Key == System.Windows.Input.Key.Enter
           || e.Key == System.Windows.Input.Key.End
           || e.Key == System.Windows.Input.Key.Home))
         {

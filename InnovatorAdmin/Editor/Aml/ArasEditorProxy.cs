@@ -682,7 +682,8 @@ namespace InnovatorAdmin.Editor
           OmitXmlDeclaration = true,
           Indent = true,
           IndentChars = "  ",
-          CheckCharacters = true
+          CheckCharacters = true,
+          ConformanceLevel = ConformanceLevel.Fragment
         };
         var types = new HashSet<string>();
 
@@ -738,21 +739,39 @@ namespace InnovatorAdmin.Editor
                   || elemIds.EndsWith("Report", "xsl_stylesheet")
                   || elemIds.EndsWith("SavedSearch", "criteria")
                   || elemIds.EndsWith("ItemType", "class_structure")
-                  || (elemIds.Last() != "Result" && textReader.Peek() == '<' && (textReader as XmlValueReader)?.ReadLength > 1028);
+                  || elemIds.EndsWith("qry_QueryReference", "filter_xml")
+                  || elemIds.EndsWith("qry_QueryItem", "filter_xml")
+                  || elemIds.EndsWith("mp_MacCondition", "condition_xml");
                 var useCData = elemIds.EndsWith("EMail Message", "body_html")
                   || elemIds.EndsWith("EMail Message", "body_plain")
                   || elemIds.EndsWith("Method", "method_code")
-                  || elemIds.EndsWith("SQL", "sqlserver_body");
+                  || elemIds.EndsWith("SQL", "sqlserver_body")
+                  || (elemIds.Last() != "Result" && textReader.Peek() == '<' && (textReader as XmlValueReader)?.ReadLength > 1028);
 
                 if (formatXml)
                 {
-                  var w = new StringWriter();
-                  using (var r = XmlReader.Create(textReader))
-                  using (var xml = XmlWriter.Create(w, settings))
+                  try
                   {
-                    xml.WriteNode(r, false);
+                    var w = new StringWriter();
+                    using (var r = XmlReader.Create(textReader, new XmlReaderSettings()
+                    {
+                      ConformanceLevel = ConformanceLevel.Fragment
+                    }))
+                    using (var xml = XmlWriter.Create(w, settings))
+                    {
+                      xml.WriteNode(r, false);
+                      xml.Flush();
+                      w.Flush();
+                    }
+                    xmlWriter.WriteCData(w.ToString());
                   }
-                  xmlWriter.WriteCData(w.ToString());
+                  catch (XmlException)
+                  {
+                    var textValue = reader.Value;
+                    if (string.IsNullOrEmpty(textValue))
+                      textValue = (textReader as XmlValueReader)?.ReadBufferToEnd();
+                    xmlWriter.WriteCData(textValue);
+                  }
                 }
                 else if (useCData)
                 {

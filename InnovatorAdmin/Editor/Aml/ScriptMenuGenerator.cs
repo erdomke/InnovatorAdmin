@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace InnovatorAdmin.Editor
 {
@@ -156,6 +157,21 @@ namespace InnovatorAdmin.Editor
         {
           yield return ArasEditorProxy.ItemTypeAddScript(Conn, itemType);
         }
+
+        if (item is EditorItemData data)
+        {
+          yield return new EditorScript()
+          {
+            Name = "Clone as New",
+            Action = "ApplyItem",
+            ScriptGetter = () =>
+            {
+              var aml = data.ToItem(Conn.AmlContext).CloneAsNew().ToAml();
+              return Task.FromResult(XElement.Parse(aml).ToString());
+            }
+          };
+        }
+
         yield return new EditorScript()
         {
           Name = "------"

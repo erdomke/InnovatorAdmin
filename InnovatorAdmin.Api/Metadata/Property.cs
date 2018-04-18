@@ -1,4 +1,5 @@
 ﻿using Innovator.Client;
+using Innovator.Client.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -88,6 +89,28 @@ namespace InnovatorAdmin
     string IListValue.Value
     {
       get { return this.Name; }
+    }
+
+    public IPropertyDefinition ToItem(ElementFactory aml)
+    {
+      var item = aml.Item(aml.Type(Name.StartsWith("xp-") ? "xPropertyDefinition" : "Property"), aml.Id(Id)
+        , aml.Property("name", Name)
+        , aml.Property("label", Label)
+        , aml.Property("data_type", TypeName)
+        , aml.Property("data_source", DataSource)
+        , aml.Property("is_required", IsRequired)
+        , aml.Property("readonly", ReadOnly)
+        , aml.Property("column_width", ColumnWidth)
+      );
+      if (Precision >= 0)
+        item.Property("prec").Set(Precision);
+      if (Scale >= 0)
+        item.Property("scale").Set(Scale);
+      if (StoredLength >= 0)
+        item.Property("stored_length").Set(StoredLength);
+      if (SortOrder < int.MaxValue)
+        item.Property("sort_order").Set(SortOrder);
+      return (IPropertyDefinition)item;
     }
 
     internal static Property FromItem(IReadOnlyItem prop, ItemType type)
