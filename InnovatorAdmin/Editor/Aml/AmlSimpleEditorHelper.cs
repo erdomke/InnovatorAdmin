@@ -94,7 +94,7 @@ namespace InnovatorAdmin.Editor
 
                   doc.Replace(segment.Offset, segment.Length, elem.ToString());
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                   // Do nothing
                 }

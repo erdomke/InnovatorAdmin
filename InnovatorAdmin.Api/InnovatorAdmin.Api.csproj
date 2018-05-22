@@ -122,6 +122,13 @@
     <Compile Include="Metadata\PropertyType.cs" />
     <Compile Include="Metadata\PropertyVisibility.cs" />
     <Compile Include="Metadata\Sql.cs" />
+    <Compile Include="Plugin\IPluginContext.cs" />
+    <Compile Include="Plugin\IPluginMethod.cs" />
+    <Compile Include="Plugin\IPluginResult.cs" />
+    <Compile Include="Plugin\MethodRunner.cs" />
+    <Compile Include="Plugin\PluginConnection.cs" />
+    <Compile Include="Plugin\PluginItemContext.cs" />
+    <Compile Include="Plugin\PluginResult.cs" />
     <Compile Include="ProgressChangedEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RecoverableErrorEventArgs.cs" />

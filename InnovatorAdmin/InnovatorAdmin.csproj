@@ -725,6 +725,10 @@
       <Project>{7C397623-C59E-4DB2-8879-8A3385DABCD9}</Project>
       <Name>InnovatorAdmin.Api</Name>
     </ProjectReference>
+    <ProjectReference Include="..\InnovatorAdmin.Plugins\InnovatorAdmin.Plugins.csproj">
+      <Project>{80d1aec1-c225-44d0-809f-c5b8081e9f1c}</Project>
+      <Name>InnovatorAdmin.Plugins</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Editor\xslt.xsd">

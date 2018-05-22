@@ -183,14 +183,14 @@ namespace InnovatorAdmin.Editor
           case "GetAssignedTasks":
             items = Elements("params");
             break;
-          case ArasEditorProxy.UnitTestAction:
-            items = Elements("TestSuite");
-            break;
           case "RebuildKeyedName":
             items = Elements("ItemTypes");
             break;
           default:
-            items = Elements("Item");
+            if (soapAction == ArasEditorProxy.UnitTestAction)
+              items = Elements("TestSuite");
+            else
+              items = Elements("Item");
             break;
         }
       }

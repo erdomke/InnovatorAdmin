@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICSharpCode.AvalonEdit", "I
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnovatorAdmin.Powershell", "InnovatorAdmin.Powershell\InnovatorAdmin.Powershell.csproj", "{40037744-18A2-4C8F-BFE2-0F164059D52C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnovatorAdmin.Plugins", "InnovatorAdmin.Plugins\InnovatorAdmin.Plugins.csproj", "{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -144,6 +146,30 @@ Global
 		{40037744-18A2-4C8F-BFE2-0F164059D52C}.Release|WithNRefactory.Build.0 = Release|Any CPU
 		{40037744-18A2-4C8F-BFE2-0F164059D52C}.Release|x86.ActiveCfg = Release|Any CPU
 		{40037744-18A2-4C8F-BFE2-0F164059D52C}.Release|x86.Build.0 = Release|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Debug|Net35.ActiveCfg = Debug|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Debug|Net35.Build.0 = Debug|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Debug|Net40.ActiveCfg = Debug|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Debug|Net40.Build.0 = Debug|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Debug|WithNRefactory.ActiveCfg = Debug|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Debug|WithNRefactory.Build.0 = Debug|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Debug|x86.Build.0 = Debug|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Release|Net35.ActiveCfg = Release|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Release|Net35.Build.0 = Release|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Release|Net40.ActiveCfg = Release|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Release|Net40.Build.0 = Release|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Release|WithNRefactory.ActiveCfg = Release|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Release|WithNRefactory.Build.0 = Release|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Release|x86.ActiveCfg = Release|Any CPU
+		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

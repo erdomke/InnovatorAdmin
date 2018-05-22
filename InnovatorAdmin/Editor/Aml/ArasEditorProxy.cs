@@ -12,12 +12,15 @@ using InnovatorAdmin.Testing;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Threading;
+using InnovatorAdmin.Plugin;
+using System.Linq.Expressions;
 
 namespace InnovatorAdmin.Editor
 {
   public class ArasEditorProxy : IEditorProxy
   {
-    public const string UnitTestAction = "> Run Unit Tests";
+    public static string UnitTestAction;
+    private static Dictionary<string, Func<IPluginMethod>> _pluginFactory;
 
     #region "Default Actions"
     private static readonly string[] _baseActions = new string[] {
@@ -114,9 +117,6 @@ namespace InnovatorAdmin.Editor
     #endregion
 
     private string[] _actions;
-    private IAsyncConnection _conn;
-    private Connections.ConnectionData _connData;
-    private string _name;
     private Editor.AmlEditorHelper _helper;
 
     public string Action
@@ -124,40 +124,48 @@ namespace InnovatorAdmin.Editor
       get { return _helper.SoapAction; }
       set { _helper.SoapAction = value; }
     }
-    public Connections.ConnectionData ConnData
-    {
-      get { return _connData; }
-    }
-    public IAsyncConnection Connection
-    {
-      get { return _conn; }
-    }
-    public string Name
-    {
-      get { return _name; }
-    }
+
+    public Connections.ConnectionData ConnData { get; }
+
+    public IAsyncConnection Connection { get; }
+
+    public string Name { get; }
 
 
     public ArasEditorProxy(IAsyncConnection conn, string name)
     {
-      _conn = conn;
+      Connection = conn;
       Initialize();
-      _helper.InitializeConnection(_conn, null);
-      _name = name;
+      _helper.InitializeConnection(Connection, null);
+      Name = name;
     }
+
     public ArasEditorProxy(IAsyncConnection conn, Connections.ConnectionData connData)
     {
-      _conn = conn;
+      Connection = conn;
       Initialize();
-      _connData = connData;
-      _helper.InitializeConnection(_conn, _connData);
-      _name = connData.ConnectionName;
+      ConnData = connData;
+      _helper.InitializeConnection(Connection, ConnData);
+      Name = connData.ConnectionName;
     }
 
     private void Initialize()
     {
+      if (_pluginFactory == null)
+      {
+        UnitTestAction = "Plugin/" + typeof(RunUnitTests).Name;
+        _pluginFactory = AppDomain.CurrentDomain.GetAssemblies()
+          .SelectMany(a => a.GetTypes())
+          .Where(t => typeof(IPluginMethod).IsAssignableFrom(t)
+            && t.GetConstructors().Any(c => c.GetParameters().Length == 0))
+          .ToDictionary(p => "Plugin/" + p.Name
+            , p => Expression.Lambda<Func<IPluginMethod>>(
+                Expression.New(p.GetConstructor(Type.EmptyTypes))
+              ).Compile());
+      }
+
       _helper = new Editor.AmlEditorHelper();
-      var arasConn = _conn as Innovator.Client.Connection.IArasConnection;
+      var arasConn = Connection as Innovator.Client.Connection.IArasConnection;
       _actions = GetActions(arasConn?.Version?.Major ?? -1).OrderBy(a => a).ToArray();
     }
 
@@ -191,7 +199,9 @@ namespace InnovatorAdmin.Editor
         yield return "VaultApplyAml";
         yield return "VaultApplyItem";
       }
-      yield return UnitTestAction;
+
+      foreach (var plugin in _pluginFactory.Keys)
+        yield return plugin;
     }
 
     public virtual IEnumerable<string> GetActions()
@@ -199,36 +209,43 @@ namespace InnovatorAdmin.Editor
       return _actions;
     }
 
-    private async Task<IResultObject> ProcessTestSuite(string commands, Action<int, string> progressCallback)
+    private async Task<IResultObject> ProcessPlugin(IPluginMethod method, string commands, Action<int, string> progressCallback)
     {
-      TestSuite suite;
-      using (var reader = new StringReader(commands))
+      var context = new PluginContext(new PluginConnection(Connection, commands)
+        , progressCallback
+        , ConnectionManager.Current.Library.Connections
+            .Select(c => c.ArasCredentials())
+            .Where(c => c != null));
+
+      try
       {
-        suite = TestSerializer.ReadTestSuite(reader);
+        var result = await method.Execute(context).ConfigureAwait(false);
+        var xmlReader = (result as PluginResult)?.CreateReader();
+        if (xmlReader != null)
+          return new ResultObject(xmlReader, Connection, "");
+        else
+          return new ResultObject(result.Write, result.Count, Connection);
       }
-      var context = new TestContext(_conn);
-      foreach (var cred in ConnectionManager.Current.Library.Connections
-                            .Select(c => c.ArasCredentials())
-                            .Where(c => c != null))
+      catch (ServerException ex)
       {
-        context.CredentialStore.Add(cred);
+        return new ResultObject(ex.CreateReader(), Connection, "");
       }
-      context.ProgressCallback = progressCallback;
-      await suite.Run(context);
-      return new ResultObject(suite, _conn);
+      catch (Exception ex)
+      {
+        return new ResultObject(Connection.AmlContext.ServerException(ex, true).CreateReader(), Connection, "");
+      }
     }
 
     public virtual IPromise<IResultObject> Process(ICommand request, bool async, Action<int, string> progressCallback)
     {
-      var innCmd = request as InnovatorCommand;
-      if (innCmd == null)
+      if (!(request is InnovatorCommand innCmd))
         throw new NotSupportedException("Cannot run commands created by a different proxy");
 
       var cmd = innCmd.Internal;
 
       // Process Unit Tests separately
-      if (cmd.ActionString == UnitTestAction)
-        return ProcessTestSuite(cmd.Aml, progressCallback).ToPromise();
+      if (_pluginFactory.TryGetValue(cmd.ActionString, out var pluginInit))
+        return ProcessPlugin(pluginInit(), cmd.Aml, progressCallback).ToPromise();
 
       var elem = XElement.Parse(cmd.Aml);
       var firstItem = elem.DescendantsAndSelf("Item").FirstOrDefault();
@@ -274,7 +291,7 @@ namespace InnovatorAdmin.Editor
 
       Func<Stream, IResultObject> getResult = s =>
       {
-        var result = new ResultObject(s, _conn, select);
+        var result = new ResultObject(s, Connection, select);
         if (cmd.Action == CommandAction.ApplySQL)
           result.PreferredMode = OutputType.Table;
         return (IResultObject)result;
@@ -291,7 +308,7 @@ namespace InnovatorAdmin.Editor
       }
       else
       {
-        var remote = _conn as IRemoteConnection;
+        var remote = Connection as IRemoteConnection;
         if (remote == null)
           return Promises.Rejected<IResultObject>(new Exception("Connection must be an IRemoteConnection to use batch processing"));
         return new DataPromise(queries, innCmd.ConcurrentCount, remote
@@ -474,7 +491,7 @@ namespace InnovatorAdmin.Editor
                   && e.Attributes("action").Any(p => !string.IsNullOrEmpty(p.Value)));
       if (files.Any())
       {
-        var upload = _conn.CreateUploadCommand();
+        var upload = Connection.CreateUploadCommand();
         upload.AddFileQuery(orig.Aml);
         upload.WithAction(orig.ActionString);
         foreach (var param in parameters)
@@ -513,6 +530,7 @@ namespace InnovatorAdmin.Editor
     {
       return elem.Name.LocalName == "Item" || elem.Name.LocalName == "sql" || elem.Name.LocalName == "SQL";
     }
+
     private XElement ConcatQueries(IEnumerable<XElement> elements)
     {
       if (elements == null || !elements.Any())
@@ -539,12 +557,12 @@ namespace InnovatorAdmin.Editor
 
     protected virtual IPromise<Stream> ProcessCommand(Command cmd, bool async)
     {
-      return _conn.Process(cmd, async);
+      return Connection.Process(cmd, async);
     }
 
     public virtual IEditorProxy Clone()
     {
-      return new ArasEditorProxy(_conn, _connData);
+      return new ArasEditorProxy(Connection, ConnData);
     }
 
     public ICommand NewCommand()
@@ -569,7 +587,7 @@ namespace InnovatorAdmin.Editor
       var fileCmd = GetCommand(queries[0], cmd, innCmd.Parameters, true);
       var fileData = await ProcessCommand(fileCmd, async).ToTask();
       fileCmd.Action = CommandAction.ApplyItem;
-      var metadata = _conn.AmlContext.FromXml(await ProcessCommand(fileCmd, async).ToTask(), fileCmd.Aml, _conn).AssertItem();
+      var metadata = Connection.AmlContext.FromXml(await ProcessCommand(fileCmd, async).ToTask(), fileCmd.Aml, Connection).AssertItem();
       var fileName = metadata.Property("filename").Value;
       var path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + "\\" + fileName);
       Directory.CreateDirectory(Path.GetDirectoryName(path));
@@ -608,39 +626,42 @@ namespace InnovatorAdmin.Editor
 
     private class ResultObject : IResultObject
     {
-      private ITextSource _text;
-      private int _count;
+      private readonly ITextSource _text;
+      private readonly int _count;
       private DataSet _dataSet;
-      private int _amlLength;
+      private readonly int _amlLength;
       private string _title;
-      private IAsyncConnection _conn;
+      private readonly IAsyncConnection _conn;
       private OutputType _preferredMode = OutputType.Text;
       private string _html;
-      private string _select;
+      private readonly string _select;
 
       public int ItemCount
       {
         get { return _count; }
       }
 
-      public ResultObject(TestSuite suite, IAsyncConnection conn)
+      public ResultObject(Action<TextWriter> writer, int count, IAsyncConnection conn)
       {
         var rope = new Rope<char>();
-        using (var writer = new Editor.RopeWriter(rope))
+        using (var textWriter = new Editor.RopeWriter(rope))
         {
-          suite.Write(writer);
+          writer(textWriter);
         }
         _amlLength = rope.Length;
-        _count = suite.Tests.Count;
+        _count = count;
         _conn = conn;
         _text = new RopeTextSource(rope);
         _dataSet = new DataSet();
       }
+
       public ResultObject(Stream aml, IAsyncConnection conn, string select)
+        : this(XmlReader.Create(aml), conn, select) { }
+
+      public ResultObject(XmlReader reader, IAsyncConnection conn, string select)
       {
         _conn = conn;
         var rope = new Rope<char>();
-        using (var reader = new StreamReader(aml))
         using (var writer = new Editor.RopeWriter(rope))
         {
           IndentXml(reader, writer, out _count);
@@ -669,7 +690,7 @@ namespace InnovatorAdmin.Editor
 
 
 
-      private void IndentXml(TextReader xmlContent, TextWriter writer, out int itemCount)
+      private void IndentXml(XmlReader reader, TextWriter writer, out int itemCount)
       {
         itemCount = 0;
         char[] writeNodeBuffer = null;
@@ -687,7 +708,6 @@ namespace InnovatorAdmin.Editor
         };
         var types = new HashSet<string>();
 
-        using (var reader = XmlReader.Create(xmlContent))
         using (var xmlWriter = XmlWriter.Create(writer, settings))
         {
           bool canReadValueChunk = reader.CanReadValueChunk;
@@ -910,7 +930,7 @@ namespace InnovatorAdmin.Editor
 
     public void Dispose()
     {
-      var remote = _conn as IRemoteConnection;
+      var remote = Connection as IRemoteConnection;
       if (remote != null)
         remote.Logout(true, true);
     }
@@ -919,9 +939,9 @@ namespace InnovatorAdmin.Editor
 
     public IPromise<IEnumerable<IEditorTreeNode>> GetNodes()
     {
-      return Promises.All(_conn.ApplyAsync(new Command("<Item/>").WithAction(CommandAction.GetMainTreeItems)
+      return Promises.All(Connection.ApplyAsync(new Command("<Item/>").WithAction(CommandAction.GetMainTreeItems)
           , true, false),
-          _conn.ApplyAsync(@"<Item type='ItemType' action='get'>
+          Connection.ApplyAsync(@"<Item type='ItemType' action='get'>
                               <name>ItemType</name>
                               <Relationships>
                                 <Item type='Item Report' action='get'>
@@ -929,7 +949,7 @@ namespace InnovatorAdmin.Editor
                                 </Item>
                               </Relationships>
                             </Item>", true, false),
-          ArasMetadataProvider.Cached(_conn).ReloadPromise())
+          ArasMetadataProvider.Cached(Connection).ReloadPromise())
         .Convert(r =>
         {
           _itemTypeReportNames = ((IReadOnlyResult)r[1]).AssertItem().Relationships()
@@ -980,7 +1000,7 @@ namespace InnovatorAdmin.Editor
         Name = "Item Types",
         Image = Icons.FolderSpecial16,
         HasChildren = true,
-        Children = ArasMetadataProvider.Cached(_conn).ItemTypes
+        Children = ArasMetadataProvider.Cached(Connection).ItemTypes
           .Where(i => !i.IsRelationship)
           .Select(ItemTypeNode)
           .OrderBy(n => n.Name)
@@ -990,7 +1010,7 @@ namespace InnovatorAdmin.Editor
         Name = "Relationship Types",
         Image = Icons.FolderSpecial16,
         HasChildren = true,
-        Children = ArasMetadataProvider.Cached(_conn).ItemTypes
+        Children = ArasMetadataProvider.Cached(Connection).ItemTypes
           .Where(i => i.IsRelationship)
           .Select(ItemTypeNode)
           .OrderBy(n => n.Name)
@@ -1014,7 +1034,7 @@ namespace InnovatorAdmin.Editor
               {
                 Name = item.Property("label").Value,
                 Action = "ApplyItem",
-                Script = _conn.Apply("<Item type='SavedSearch' action='get' select='criteria' id='@0' />", item.Property("saved_search_id").Value)
+                Script = Connection.Apply("<Item type='SavedSearch' action='get' select='criteria' id='@0' />", item.Property("saved_search_id").Value)
                   .AssertItem().Property("criteria").Value
               }, 1)
           };
@@ -1025,7 +1045,7 @@ namespace InnovatorAdmin.Editor
             Image = Icons.Class16,
             Description = "ItemType: " + item.Property("name").Value,
             HasChildren = true,
-            ScriptGetter = () => ItemTypeScripts(ArasMetadataProvider.Cached(_conn).ItemTypeById(item.Property("itemtype_id").Value)),
+            ScriptGetter = () => ItemTypeScripts(ArasMetadataProvider.Cached(Connection).ItemTypeById(item.Property("itemtype_id").Value)),
             Children = ItemTypeChildren(item.Property("itemtype_id").Value)
             .Concat(item.Relationships().Select(r => ProcessTreeNode(r.RelatedItem())))
           };
@@ -1048,7 +1068,7 @@ namespace InnovatorAdmin.Editor
           Name = "Properties",
           Image = Icons.Folder16,
           HasChildren = true,
-          ChildGetter = () => ArasMetadataProvider.Cached(_conn)
+          ChildGetter = () => ArasMetadataProvider.Cached(Connection)
             .GetPropertiesByTypeId(typeId).Wait()
             .Select(p => new EditorTreeNode()
             {
@@ -1056,13 +1076,13 @@ namespace InnovatorAdmin.Editor
               Image = Icons.Property16,
               HasChildren = p.Type == PropertyType.item && p.Restrictions.Any()
                 && p.Name != "id" && p.Name != "config_id",
-              ChildGetter = () => ItemTypeChildren(ArasMetadataProvider.Cached(_conn).ItemTypeByName(p.Restrictions.First()).Id),
+              ChildGetter = () => ItemTypeChildren(ArasMetadataProvider.Cached(Connection).ItemTypeByName(p.Restrictions.First()).Id),
               Description = GetPropertyDescription(p)
             })
             .OrderBy(n => n.Name)
         }
       };
-      var rels = ArasMetadataProvider.Cached(_conn).ItemTypeById(typeId).Relationships;
+      var rels = ArasMetadataProvider.Cached(Connection).ItemTypeById(typeId).Relationships;
       if (rels.Any())
       {
         result.Add(new EditorTreeNode()
@@ -1070,7 +1090,7 @@ namespace InnovatorAdmin.Editor
           Name = "Relationships",
           Image = Icons.Folder16,
           HasChildren = true,
-          ChildGetter = () => ArasMetadataProvider.Cached(_conn)
+          ChildGetter = () => ArasMetadataProvider.Cached(Connection)
             .ItemTypeById(typeId).Relationships
             .Select(ItemTypeNode)
             .OrderBy(n => n.Name)
@@ -1121,7 +1141,7 @@ namespace InnovatorAdmin.Editor
         Action = "ApplyItem",
         ScriptGetter = async () =>
         {
-          var it = (await _conn.ApplyAsync(@"<Item type='ItemType' action='get' select='default_page_size'>
+          var it = (await Connection.ApplyAsync(@"<Item type='ItemType' action='get' select='default_page_size'>
                                       <name>@0</name>
                                       <Relationships>
                                         <Item type='Property' action='get' select='default_search'>
@@ -1147,7 +1167,7 @@ namespace InnovatorAdmin.Editor
         AutoRun = true,
         PreferredOutput = OutputType.Table
       };
-      yield return ItemTypeAddScript(_conn, itemType);
+      yield return ItemTypeAddScript(Connection, itemType);
       yield return new EditorScript()
       {
         Name = "--------------------------"
@@ -1177,7 +1197,7 @@ namespace InnovatorAdmin.Editor
 
     private async Task<string> SqlSelect(ItemType itemType)
     {
-      var metadata = ArasMetadataProvider.Cached(_conn);
+      var metadata = ArasMetadataProvider.Cached(Connection);
       var props = await metadata
         .GetProperties(itemType).ToTask();
 
