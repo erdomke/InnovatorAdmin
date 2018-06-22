@@ -77,14 +77,14 @@ namespace InnovatorAdmin.Editor
                   queryItem.Where().Remove();
                   var settings = new SqlSettings(_conn)
                   {
-                    RenderOption = AmlSqlRenderOption.WhereClause
+                    RenderOption = SqlRenderOption.WhereClause
                   };
 
                   var elem = XElement.Load(text.CreateReader(segment.Offset, segment.Length));
                   var whereClause = elem.Attribute("where")?.Value ?? "";
                   if (whereClause != "")
                     whereClause += " and ";
-                  whereClause += queryItem.ToQueryItem().ToSql(settings);
+                  whereClause += queryItem.ToQueryItem().ToArasSql(settings);
                   elem.SetAttributeValue("where", whereClause);
 
                   foreach (var child in elem.Elements().ToArray())
@@ -201,7 +201,7 @@ namespace InnovatorAdmin.Editor
 
       public AmlSqlPermissionOption PermissionOption { get; set; }
 
-      public AmlSqlRenderOption RenderOption { get; set; }
+      public SqlRenderOption RenderOption { get; set; }
 
       public string UserId => _conn.UserId;
 

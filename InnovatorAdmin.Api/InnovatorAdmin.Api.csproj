@@ -49,8 +49,8 @@
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="innovator.client, Version=2018.4.9.1447, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Innovator.Client.2018.4.9.1447\lib\net45\innovator.client.dll</HintPath>
+    <Reference Include="innovator.client, Version=2018.6.19.312, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Innovator.Client.2018.6.19.312\lib\net45\innovator.client.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualBasic" />
