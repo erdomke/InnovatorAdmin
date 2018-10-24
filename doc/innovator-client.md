@@ -222,7 +222,7 @@ cases for this might include:
     purposes
   - Including additional authentication headers used by proxies within an organization
 
-The code to achive this looks like
+The code to achieve this looks like
 
 ```csharp
 var conn = Factory.GetConnection("URL", "USER_AGENT");
