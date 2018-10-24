@@ -6,7 +6,7 @@ screen.
 
 ![AML Studio](aml-studio.png)
 
-This version of AML Studio includes a number of improvments.  They include:
+This version of AML Studio includes a number of improvements.  They include:
 
 - Improved display of AML in the collapsed state
   
@@ -17,7 +17,7 @@ This version of AML Studio includes a number of improvments.  They include:
   ![Editing a table](aml-studio-table-edit.png)
 
 - Support for parameterized queries leveraging the `@` symbol. Parameters can be 
-  either the entiretly of a property or attribute or a portion of a SQL segment
+  either the entirety of a property or attribute or a portion of a SQL segment
   within a property or attribute
 
   ![Parameter substitutions](aml-studio-param.png)
