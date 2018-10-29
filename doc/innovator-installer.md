@@ -21,20 +21,20 @@ multiple exports or installs
 No longer must all the items be in a pre-declared package in the database.
 As you are creating your package, you can add items to it via a simple 
 keyed_name search or through an advanced AML search. Previously saved
-files can also be used as the basis for creating a package. This allows 
-you to create packages which represent a unit of work as opposed to having
-to create "canonical" packages and exporting pieces from multiple 
-packages.
+files can also be used as the basis for creating a package. This allows you
+to create packages which represent a unit of work as opposed to having
+to create "canonical" packages and exporting pieces from multiple packages
+.
 
 ![Package creation](screenshot-pg03.png)
 
 ## Dependency Analysis
 
-The tool will analyze the exported AML to find all dependencies. It will 
-then prompt you for each dependency allowing you to alternatively include
+The tool will analyze the exported AML to find all dependencies. It will then
+prompt you for each dependency allowing you to alternatively include
 that dependency in the package, remove the specific property reference,
-or remove the entire Item with the reference.  This helps to ensure that 
-you don't forget to include important items in the package.  In addition,
+or remove the entire Item with the reference.  This helps to ensure that you
+don't forget to include important items in the package.  In addition,
 the tool will sort your package items in order of their dependencies to
 help guarantee that they will import without any errors.
 
@@ -51,9 +51,8 @@ install the package into a target database, or both.
 ## New Package Format
 
 - The new tool defaults to a single-file package format with the extension 
-  *.innpkg. This format is a zip file containing the relevant AML script 
-  files and a manifest XML file defining the install order based on 
-  dependencies.
+  *.innpkg. This format is a zip file containing the relevant AML script filesand a manifest XML file defining the install order based oon dependencies
+.
 - This file format attempts to generate files useful to developers where 
   possible.  For example, reports are exported as XSLT files with sidecar 
   XML data files allowing for easier offline development.
@@ -72,8 +71,8 @@ The installs will run back-to-back for each database instance.
 ## Clear Progress Indicator and Warning Dialog
 
 A clear progress indicator tells you of the status of your install.  An
-updated error dialog box will also give you a clear indication of any 
-errors which may occur.  This dialog allows you to see the AML query
+updated error dialog box will also give you a clear indication of any errors
+which may occur.  This dialog allows you to see the AML query
 which caused the error and the SOAP error response.  It also gives you 
 the option to either ignore the error, retry the query (e.g. after fixing
 something in the database), or abort the entire install
