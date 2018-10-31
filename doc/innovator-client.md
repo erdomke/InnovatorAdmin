@@ -3,7 +3,7 @@
 [![innovator-client MyGet Build Status](https://www.myget.org/BuildSource/Badge/innovator-client?identifier=cb689f79-0412-4d27-b7ca-e6be3283d4e9)](https://www.myget.org/)
 [![NuGet](https://img.shields.io/nuget/v/Innovator.Client.svg)](https://www.nuget.org/packages/Innovator.Client/)
 
-It seems like for every project I started, I ended up having to enhance or rewrite some portion ofthe IOM. Because of this, I decided to bite the bullet and write a new library which would incorporate
+It seems like for every project I started, I ended up having to enhance or rewrite some portion of the IOM. Because of this, I decided to bite the bullet and write a new library which would incorporate
 all of the changes I was making to the individual projects.
 
 # First, show me the code
