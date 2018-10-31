@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnovatorAdmin.Powershell",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnovatorAdmin.Plugins", "InnovatorAdmin.Plugins\InnovatorAdmin.Plugins.csproj", "{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnovatorAdmin.Cmd", "Innovator.Cmd\InnovatorAdmin.Cmd.csproj", "{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -170,6 +172,30 @@ Global
 		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Release|WithNRefactory.Build.0 = Release|Any CPU
 		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Release|x86.ActiveCfg = Release|Any CPU
 		{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}.Release|x86.Build.0 = Release|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Debug|Net35.ActiveCfg = Debug|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Debug|Net35.Build.0 = Debug|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Debug|Net40.ActiveCfg = Debug|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Debug|Net40.Build.0 = Debug|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Debug|WithNRefactory.ActiveCfg = Debug|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Debug|WithNRefactory.Build.0 = Debug|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Debug|x86.Build.0 = Debug|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Release|Net35.ActiveCfg = Release|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Release|Net35.Build.0 = Release|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Release|Net40.ActiveCfg = Release|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Release|Net40.Build.0 = Release|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Release|WithNRefactory.ActiveCfg = Release|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Release|WithNRefactory.Build.0 = Release|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Release|x86.ActiveCfg = Release|Any CPU
+		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

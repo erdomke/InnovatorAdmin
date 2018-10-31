@@ -30,8 +30,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="innovator.client, Version=2018.6.19.312, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Innovator.Client.2018.6.19.312\lib\net45\innovator.client.dll</HintPath>
+    <Reference Include="innovator.client, Version=2018.10.29.2050, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Innovator.Client.2018.10.29.2050\lib\net45\innovator.client.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

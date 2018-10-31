@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace InnovatorAdmin
@@ -10,6 +11,7 @@ namespace InnovatorAdmin
   public abstract class InnovatorPackage : IDisposable
   {
     private List<string> _paths = new List<string>();
+    protected bool _parallel = false;
 
     public virtual InstallScript Read()
     {
@@ -78,7 +80,6 @@ namespace InnovatorAdmin
 
     public virtual void Write(InstallScript script)
     {
-      string newPath;
       var existingPaths = new HashSet<string>();
 
       // Record the import order
@@ -103,6 +104,20 @@ namespace InnovatorAdmin
           if (script.Website != null)
             manifestWriter.WriteAttributeString("website", script.Website.ToString());
 
+          // Achieve consistent file names regardless of the ordering.
+          foreach (var line in script.Lines)
+            line.Path = GetPath(line, existingPaths);
+          existingPaths.UnionWith(script.Lines.Select(l => l.Path));
+
+          foreach (var group in script.Lines.GroupBy(l => l.Path).Where(g => g.Skip(1).Any()))
+          {
+            foreach (var line in group.OrderBy(l => l.Reference.Unique).Skip(1))
+            {
+              line.Path = GetPath(line, existingPaths);
+            }
+          }
+
+
           foreach (var line in script.Lines)
           {
             if (line.Type == InstallType.Warning)
@@ -115,35 +130,53 @@ namespace InnovatorAdmin
             }
             else
             {
-              if (line.Reference.Type == "Report" && line.Type != InstallType.Script)
-              {
-                newPath = line.FilePath(existingPaths, ".xslt");
-                WriteReport(line, newPath);
-              }
-              else
-              {
-                newPath = line.FilePath(existingPaths);
-
-                using (var stream = GetNewStream(newPath))
-                {
-                  using (var writer = GetWriter(stream))
-                  {
-                    writer.WriteStartElement("AML");
-                    line.Script.WriteTo(writer);
-                    writer.WriteEndElement();
-                  }
-                }
-              }
-
-              existingPaths.Add(newPath);
               manifestWriter.WriteStartElement("Path");
-              manifestWriter.WriteAttributeString("path", newPath);
+              manifestWriter.WriteAttributeString("path", line.Path);
               manifestWriter.WriteEndElement();
             }
           }
           manifestWriter.WriteEndElement();
+
+          Action<InstallItem> writeFunc = line =>
+          {
+            if (line.Reference.Type == "Report" && line.Type != InstallType.Script)
+            {
+              WriteReport(line, line.Path);
+            }
+            else
+            {
+              using (var stream = GetNewStream(line.Path))
+              {
+                using (var writer = GetWriter(stream))
+                {
+                  writer.WriteStartElement("AML");
+                  line.Script.WriteTo(writer);
+                  writer.WriteEndElement();
+                }
+              }
+            }
+          };
+
+          var scriptLines = script.Lines.Where(l => l.Type != InstallType.Warning && l.Type != InstallType.DependencyCheck);
+          if (_parallel)
+          {
+            Parallel.ForEach(scriptLines, writeFunc);
+          }
+          else
+          {
+            foreach (var line in scriptLines)
+              writeFunc(line);
+          }
         }
       }
+    }
+
+    private string GetPath(InstallItem line, HashSet<string> existingPaths)
+    {
+      if (line.Reference.Type == "Report" && line.Type != InstallType.Script)
+        return line.FilePath(existingPaths, ".xslt");
+      else
+        return line.FilePath(existingPaths);
     }
 
     #region "Report XSLT Handling"

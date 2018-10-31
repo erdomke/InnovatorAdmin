@@ -57,127 +57,52 @@ namespace InnovatorAdmin
       script.Lines = null;
       var itemList = uniqueItems.ToList();
 
-      ItemType metaData;
       var outputDoc = new XmlDocument();
       outputDoc.AppendChild(outputDoc.CreateElement("AML"));
       XmlElement queryElem;
       var whereClause = new StringBuilder();
 
       ConvertPolyItemReferencesToActualType(itemList);
-      string itemType;
-
-      var groups = itemList.PagedGroupBy(i => new { Type = i.Type, Levels = i.Levels }, 25);
+      itemList = (await NormalizeReferences(itemList).ConfigureAwait(false)).ToList();
+      
+      var groups = itemList.GroupBy(i => new { Type = i.Type, Levels = i.Levels });
+      var queries = new List<XmlElement>();
       foreach (var typeItems in groups)
       {
-        whereClause.Length = 0;
-        itemType = typeItems.Key.Type;
-
-        // For versionable item types, get the latest generation
-        if (_metadata.ItemTypeByName(typeItems.Key.Type.ToLowerInvariant(), out metaData) && metaData.IsVersionable)
+        var pageSize = GroupSize(typeItems.Key.Type, typeItems.Key.Levels);
+        var pageCount = (int)Math.Ceiling((double)typeItems.Count() / pageSize);
+        for (var p = 0; p < pageCount; p++)
         {
+          var refs = typeItems.Skip(p * pageSize).Take(pageSize);
+          whereClause.Length = 0;
           queryElem = outputDoc.CreateElement("Item")
             .Attr("action", "get")
             .Attr("type", typeItems.Key.Type);
 
-          if (typeItems.Any(i => i.Unique.IsGuid()))
-          {
-            whereClause.Append("[")
-              .Append(typeItems.Key.Type.Replace(' ', '_'))
-              .Append("].[config_id] in (select config_id from innovator.[")
-              .Append(typeItems.Key.Type.Replace(' ', '_'))
-              .Append("] where id in ('")
-              .Append(typeItems.Where(i => i.Unique.IsGuid()).Select(i => i.Unique).Aggregate((p, c) => p + "','" + c))
-              .Append("'))");
-          }
-          if (typeItems.Any(i => !i.Unique.IsGuid()))
-          {
-            whereClause.AppendSeparator(" or ",
-              typeItems.Where(i => !i.Unique.IsGuid()).Select(i => i.Unique).Aggregate((p, c) => p + " or " + c));
-          }
-          queryElem.SetAttribute("where", whereClause.ToString());
-        }
-        else if (typeItems.Key.Type == "ItemType")
-        {
-          // Make sure relationship item types aren't accidentally added
-          queryElem = outputDoc.CreateElement("Item").Attr("action", "get").Attr("type", typeItems.Key.Type);
-
-          if (typeItems.Any(i => i.Unique.IsGuid()))
-          {
-            whereClause.Append("[ItemType].[id] in ('")
-              .Append(typeItems.Where(i => i.Unique.IsGuid()).Select(i => i.Unique).Aggregate((p, c) => p + "','" + c))
-              .Append("')");
-          }
-          if (typeItems.Any(i => !i.Unique.IsGuid()))
-          {
-            whereClause.AppendSeparator(" or ",
-              typeItems.Where(i => !i.Unique.IsGuid()).Select(i => i.Unique).Aggregate((p, c) => p + " or " + c));
-          }
-          queryElem.SetAttribute("where", "(" + whereClause.ToString() + ") and [ItemType].[is_relationship] = '0'");
-
-          SetQueryAttributes(queryElem, typeItems.Key.Type, typeItems.Key.Levels, typeItems);
-          outputDoc.DocumentElement.AppendChild(queryElem);
-
-          queryElem = outputDoc.CreateElement("Item")
-            .Attr("action", "get")
-            .Attr("type", "RelationshipType")
-            .Attr("where", "[RelationshipType].[relationship_id] in (select id from innovator.[ItemType] where " + whereClause.ToString() + ")");
-          itemType = "RelationshipType";
-        }
-        else if (typeItems.Key.Type == "List")
-        {
-          // Filter out auto-generated lists for polymorphic item types
-          queryElem = outputDoc.CreateElement("Item")
-            .Attr("action", "get")
-            .Attr("type", typeItems.Key.Type);
-
-          if (typeItems.Any(i => i.Unique.IsGuid()))
-          {
-            whereClause.Append("[List].[id] in ('")
-              .Append(typeItems.Where(i => i.Unique.IsGuid()).Select(i => i.Unique).Aggregate((p, c) => p + "','" + c))
-              .Append("')");
-          }
-          if (typeItems.Any(i => !i.Unique.IsGuid()))
-          {
-            whereClause.AppendSeparator(" or ",
-              typeItems.Where(i => !i.Unique.IsGuid()).Select(i => i.Unique).Aggregate((p, c) => p + " or " + c));
-          }
-
-          queryElem.SetAttribute("where", "(" + whereClause + @") and not [List].[id] in (
-            select l.id
-            from innovator.LIST l
-            inner join innovator.PROPERTY p
-            on l.id = p.DATA_SOURCE
-            and p.name = 'itemtype'
-            inner join innovator.ITEMTYPE it
-            on it.id = p.SOURCE_ID
-            and it.IMPLEMENTATION_TYPE = 'polymorphic'
-            )");
-        }
-        else
-        {
-          queryElem = outputDoc.CreateElement("Item")
-            .Attr("action", "get")
-            .Attr("type", typeItems.Key.Type);
-
-          if (typeItems.Any(i => i.Unique.IsGuid()))
+          if (refs.Any(i => i.Unique.IsGuid()))
           {
             whereClause.Append("[")
               .Append(typeItems.Key.Type.Replace(' ', '_'))
               .Append("].[id] in ('")
-              .Append(typeItems.Where(i => i.Unique.IsGuid()).Select(i => i.Unique).Aggregate((p, c) => p + "','" + c))
+              .Append(refs.Where(i => i.Unique.IsGuid()).Select(i => i.Unique).GroupConcat("','"))
               .Append("')");
           }
-          if (typeItems.Any(i => !i.Unique.IsGuid()))
+          if (refs.Any(i => !i.Unique.IsGuid()))
           {
             whereClause.AppendSeparator(" or ",
-              typeItems.Where(i => !i.Unique.IsGuid()).Select(i => i.Unique).Aggregate((p, c) => p + " or " + c));
+              refs.Where(i => !i.Unique.IsGuid()).Select(i => i.Unique).GroupConcat(" or "));
           }
 
           queryElem.SetAttribute("where", whereClause.ToString());
+          SetQueryAttributes(queryElem, typeItems.Key.Type, typeItems.Key.Levels, refs);
+          queries.Add(queryElem);
         }
+      }
 
-        SetQueryAttributes(queryElem, itemType, typeItems.Key.Levels, typeItems);
-        outputDoc.DocumentElement.AppendChild(queryElem);
+      queries.Shuffle();
+      foreach (var query in queries)
+      {
+        outputDoc.DocumentElement.AppendChild(query);
       }
 
       try
@@ -264,6 +189,112 @@ namespace InnovatorAdmin
       if (duplicates.Length > 0)
         throw new InvalidOperationException("The package has duplicate entries for the following items: " + duplicates.GroupConcat(", ", g => g.Key));
 #endif
+    }
+
+    private int GroupSize(string itemType, int levels)
+    {
+      switch (itemType)
+      {
+        case "ItemType":
+        case "RelationshipType":
+        case "cmf_ContentType":
+        case "cmf_TabularView":
+        case "cmf_ElementType":
+        case "cmf_PropertyType":
+        case "Form":
+          return 10;
+      }
+      return levels > 1 ? 10 : 40;
+    }
+
+    /// <summary>
+    /// Normalize the list of items to be exported
+    /// </summary>
+    /// <remarks>
+    /// Get the latest version of versionable items, switch item type references to relationship types, and don't export polyitem lists
+    /// </remarks>
+    private async Task<IEnumerable<ItemReference>> NormalizeReferences(IEnumerable<ItemReference> references)
+    {
+      var groups = references.PagedGroupBy(i => new { i.Type, IsId = i.Unique.IsGuid() }, 250);
+      var results = new List<ItemReference>();
+      foreach (var group in groups)
+      {
+        if (_metadata.ItemTypeByName(group.Key.Type.ToLowerInvariant(), out var metaData) && metaData.IsVersionable && group.Key.IsId)
+        {
+          // For versionable item types, get the latest generation
+          var toResolve = (await _conn.ApplyAsync(@"<Item type='@0' action='get' select='config_id'>
+  <id condition='in'>@1</id>
+  <is_current>0</is_current>
+</Item>", true, false, group.Key.Type, group.Select(i => i.Unique).ToList()).ConfigureAwait(false)).Items()
+            .ToDictionary(i => i.Id(), i => i.ConfigId().Value);
+          results.AddRange(group.Where(i => !toResolve.ContainsKey(i.Unique)));
+          if (toResolve.Count > 0)
+          {
+            results.AddRange((await _conn.ApplyAsync(@"<Item type='@0' action='get' select='id'>
+  <config_id condition='in'>@1</config_id>
+</Item>", true, false, group.Key.Type, toResolve.Values).ConfigureAwait(false)).Items()
+              .Select(i => ItemReference.FromFullItem(i, true)));
+          }
+        }
+        else if (group.Key.Type == "ItemType")
+        {
+          // Make sure relationship item types aren't accidentally added
+          if (group.Key.IsId)
+          {
+            var relations = (await _conn.ApplyAsync(@"<Item type='RelationshipType' action='get' select='relationship_id'>
+  <relationship_id condition='in'>@0</relationship_id>
+</Item>", true, false, group.Select(i => i.Unique).ToList()).ConfigureAwait(false)).Items()
+              .ToDictionary(i => i.Property("relationship_id").Value, i => ItemReference.FromFullItem(i, true));
+            results.AddRange(group.Where(i => !relations.ContainsKey(i.Unique)));
+            results.AddRange(relations.Values);
+          }
+          else
+          {
+            foreach (var itemType in group)
+            {
+              var relation = (await _conn.ApplyAsync(@"<Item type='RelationshipType' action='get' select='id'>
+  <relationship_id><Item type='ItemType' action='get' where='@0'></Item></relationship_id>
+</Item>", true, false, itemType.Unique).ConfigureAwait(false)).Items().FirstOrNullItem();
+              if (relation.Exists)
+                results.Add(ItemReference.FromFullItem(relation, true));
+              else
+                results.Add(itemType);
+            }
+          }
+        }
+        else if (group.Key.Type == "List")
+        {
+          var refs = default(List<ItemReference>);
+          if (group.Key.IsId)
+          {
+            refs = group.ToList();
+          }
+          else
+          {
+            refs = (await _conn.ApplyAsync(@"<Item type='List' action='get' where='@0'></Item>", true, false, group.Select(i => i.Unique).GroupConcat(" or ")).ConfigureAwait(false))
+              .Items()
+              .Select(i => ItemReference.FromFullItem(i, true))
+              .ToList();
+          }
+
+          // Filter out auto-generated lists for polymorphic item types
+          var polyLists = new HashSet<string>((await _conn.ApplyAsync(@"<Item type='Property' action='get' select='data_source'>
+  <source_id>
+    <Item type='ItemType' action='get'>
+      <implementation_type>polymorphic</implementation_type>
+    </Item>
+  </source_id>
+  <name>itemtype</name>
+  <data_source condition='in'>@0</data_source>
+</Item>", true, false, refs.Select(i => i.Unique).ToList()).ConfigureAwait(false)).Items().Select(i => i.Property("data_source").Value));
+          results.AddRange(refs.Where(i => !polyLists.Contains(i.Unique)));
+        }
+        else
+        {
+          results.AddRange(group);
+        }
+      }
+      return results;
     }
 
     /// <summary>
@@ -740,23 +771,21 @@ namespace InnovatorAdmin
       var result = query.NewDoc();
       ReportProgress(4, "Searching for data...");
 
-      var promises = queryItems.Select(q => (Func<IPromise>)(
-          () => _conn.Process(q.OuterXml, true)
-            .Convert(s =>
-            {
-              return (IEnumerable<XmlElement>)(Items(result, s, itemDic).ToArray());
-            })
-          )
-        ).ToArray();
-      query = null; // Release the query memory as soon as possible;
-      var items = Promises.Pooled(30, promises)
-        .Progress((i, m) =>
+      var promises = queryItems.Select(q => (Func<Task<IEnumerable<XmlElement>>>)(
+        async () =>
         {
-          ReportProgress(4 + (int)(i * 0.9), "Searching for data...");
-        }).Wait();
+          var stream = await _conn.Process(q.OuterXml, true).ConfigureAwait(false);
+          return Items(result, stream, itemDic).ToList();
+        })
+      ).ToArray();
+      query = null; // Release the query memory as soon as possible;
+      var items = SharedUtils.TaskPool(10, (i, m) =>
+      {
+        ReportProgress(4 + (int)(i * 0.9), "Searching for data...");
+      }, promises).Result;
 
       ReportProgress(95, "Loading results into memory...");
-      var elems = items.SelectMany(r => (IEnumerable<XmlElement>)r);
+      var elems = items.SelectMany(r => r);
       var root = result.Elem("Result");
 
       foreach (var elem in elems)
@@ -769,8 +798,10 @@ namespace InnovatorAdmin
     private IEnumerable<XmlElement> Items(XmlDocument doc, Stream stream
       , IDictionary<ItemReference, ItemReference> itemDict)
     {
-      var settings = new XmlReaderSettings();
-      settings.NameTable = doc.NameTable ?? new NameTable();
+      var settings = new XmlReaderSettings
+      {
+        NameTable = doc.NameTable ?? new NameTable()
+      };
       using (var reader = XmlReader.Create(stream, settings))
       {
         while (!reader.EOF)
@@ -781,6 +812,18 @@ namespace InnovatorAdmin
             RemoveRelatedItems(elem, itemDict);
             CleanUpSystemProps(Enumerable.Repeat(elem, 1), itemDict, false);
             yield return elem;
+          }
+          else if (reader.NodeType == XmlNodeType.Element && reader.LocalName == "Fault"
+            && string.Equals(reader.NamespaceURI, "http://schemas.xmlsoap.org/soap/envelope/", StringComparison.OrdinalIgnoreCase))
+          {
+            var fault = (XmlElement)doc.ReadNode(reader);
+            var env = doc.CreateElement("SOAP-ENV", "Envelope", "http://schemas.xmlsoap.org/soap/envelope/");
+            var body = doc.CreateElement("SOAP-ENV", "Body", "http://schemas.xmlsoap.org/soap/envelope/");
+            env.AppendChild(body);
+            body.AppendChild(fault);
+            var result = ElementFactory.Local.FromXml(env);
+            if (!(result.Exception is NoItemsFoundException))
+              result.AssertNoError();
           }
           else
           {
@@ -1973,53 +2016,20 @@ namespace InnovatorAdmin
           if (_arasVersion.Major < 11)
           {
             queryElem.InnerXml = @"<Relationships>
-  <Item type='Property' action='get' levels='1'>
-  </Item>
-  <Item type='RelationshipType' action='get' />
-  <Item type='View' action='get'>
-    <related_id>
-      <Item type='Form' action='get'>
-        <Relationships>
-          <Item type='Body' action='get' />
-        </Relationships>
-      </Item>
-    </related_id>
-  </Item>
+  <Item type='Property' action='get' levels='1' />
+  <Item type='RelationshipType' action='get' related_expand='0' />
+  <Item type='View' action='get' />
   <Item type='Server Event' action='get' />
-  <Item type='Item Action' action='get' />
-  <Item type='ItemType Life Cycle' action='get' />
+  <Item type='Item Action' action='get' related_expand='0' />
+  <Item type='ItemType Life Cycle' action='get' related_expand='0' />
   <Item type='Allowed Workflow' action='get' />
-  <Item type='TOC Access' action='get'>
-    <related_id>
-      <Item type='Identity' action='get'>
-        <Relationships>
-          <Item type='Member' action='get' />
-        </Relationships>
-      </Item>
-    </related_id>
-  </Item>
-  <Item type='TOC View' action='get' />
+  <Item type='TOC Access' action='get' related_expand='0' />
+  <Item type='TOC View' action='get'  related_expand='0' />
   <Item type='Client Event' action='get' />
-  <Item type='Can Add' action='get'>
-    <related_id>
-      <Item type='Identity' action='get'>
-        <Relationships>
-          <Item type='Member' action='get' />
-        </Relationships>
-      </Item>
-    </related_id>
-  </Item>
-  <Item type='Allowed Permission' action='get'>
-    <related_id>
-      <Item type='Permission' action='get'>
-        <Relationships>
-          <Item type='Access' action='get' />
-        </Relationships>
-      </Item>
-    </related_id>
-  </Item>
-  <Item type='Item Report' action='get' />
-  <Item type='Morphae' action='get' />
+  <Item type='Can Add' action='get' related_expand='0' />
+  <Item type='Allowed Permission' action='get' related_expand='0' />
+  <Item type='Item Report' action='get' related_expand='0' />
+  <Item type='Morphae' action='get' related_expand='0' />
 </Relationships>";
           }
           else
@@ -2039,54 +2049,21 @@ namespace InnovatorAdmin
       </Item>
     </Relationships>
   </Item>
-  <Item type='ITPresentationConfiguration' action='get' related_expand='0'/>
-  <Item type='Property' action='get' levels='1'>
-  </Item>
-  <Item type='RelationshipType' action='get' />
-  <Item type='View' action='get'>
-    <related_id>
-      <Item type='Form' action='get'>
-        <Relationships>
-          <Item type='Body' action='get' />
-        </Relationships>
-      </Item>
-    </related_id>
-  </Item>
+  <Item type='ITPresentationConfiguration' action='get' related_expand='0' />
+  <Item type='Property' action='get' levels='1' />
+  <Item type='RelationshipType' action='get' related_expand='0' />
+  <Item type='View' action='get' />
   <Item type='Server Event' action='get' />
-  <Item type='Item Action' action='get' />
-  <Item type='ItemType Life Cycle' action='get' />
+  <Item type='Item Action' action='get' related_expand='0' />
+  <Item type='ItemType Life Cycle' action='get' related_expand='0' />
   <Item type='Allowed Workflow' action='get' />
-  <Item type='TOC Access' action='get'>
-    <related_id>
-      <Item type='Identity' action='get'>
-        <Relationships>
-          <Item type='Member' action='get' />
-        </Relationships>
-      </Item>
-    </related_id>
-  </Item>
-  <Item type='TOC View' action='get' />
+  <Item type='TOC Access' action='get' related_expand='0' />
+  <Item type='TOC View' action='get'  related_expand='0' />
   <Item type='Client Event' action='get' />
-  <Item type='Can Add' action='get'>
-    <related_id>
-      <Item type='Identity' action='get'>
-        <Relationships>
-          <Item type='Member' action='get' />
-        </Relationships>
-      </Item>
-    </related_id>
-  </Item>
-  <Item type='Allowed Permission' action='get'>
-    <related_id>
-      <Item type='Permission' action='get'>
-        <Relationships>
-          <Item type='Access' action='get' />
-        </Relationships>
-      </Item>
-    </related_id>
-  </Item>
-  <Item type='Item Report' action='get' />
-  <Item type='Morphae' action='get' />
+  <Item type='Can Add' action='get' related_expand='0' />
+  <Item type='Allowed Permission' action='get' related_expand='0' />
+  <Item type='Item Report' action='get' related_expand='0' />
+  <Item type='Morphae' action='get' related_expand='0' />
 </Relationships>";
           }
           levels = 1;

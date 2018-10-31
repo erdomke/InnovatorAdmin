@@ -15,6 +15,7 @@ namespace InnovatorAdmin
     {
       _manifestPath = path;
       _baseFolder = Path.GetDirectoryName(_manifestPath);
+      _parallel = true;
     }
 
     protected override System.IO.Stream GetExistingStream(string path)

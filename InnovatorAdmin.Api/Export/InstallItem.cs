@@ -311,7 +311,7 @@ namespace InnovatorAdmin
     {
       var folder = line.Type == InstallType.Script ? "_Scripts" : line.Reference.Type;
       var newPath = folder + "\\" + Utils.CleanFileName(line.Reference.KeyedName ?? line.Reference.Unique) + extension;
-      if (existingPaths.Contains(newPath))
+      if (existingPaths?.Contains(newPath) == true)
         newPath = folder + "\\" + Utils.CleanFileName((line.Reference.KeyedName ?? "") + "_" + line.Reference.Unique) + extension;
       return newPath;
     }
