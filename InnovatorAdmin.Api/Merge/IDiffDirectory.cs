@@ -89,12 +89,18 @@ namespace InnovatorAdmin
               }
               break;
             case 1: // Add
-              using (var baseStream = c.OpenRead())
-              using (var writer = callback(path, completed * 100 / total))
+              using (var baseStream = ReadFile(c, p => Array.Find(comparePaths, f => f.Path == p)))
               {
                 var elem = XElement.Load(baseStream);
-                elem.WriteTo(writer);
-                metadata.Add(elem);
+                IdentityMergeToAdd(elem);
+                if (ItemAddToIgnore(elem))
+                  return;
+
+                using (var writer = callback(path, completed * 100 / total))
+                {
+                  elem.WriteTo(writer);
+                  metadata.Add(elem);
+                }
               }
               break;
             default: // Edit
@@ -120,6 +126,41 @@ namespace InnovatorAdmin
       });
 
       return metadata;
+    }
+
+    /// <summary>
+    /// Change action='merge' to action='add' for identities
+    /// </summary>
+    private static void IdentityMergeToAdd(XElement aml)
+    {
+      var item = aml.DescendantsAndSelf("Item").FirstOrDefault();
+      if (item?.Attribute("type")?.Value != "Identity")
+        return;
+      item.SetAttributeValue("action", "add");
+    }
+
+    /// <summary>
+    /// Indicates that the add should be ignored.
+    /// </summary>
+    private static bool ItemAddToIgnore(XElement aml)
+    {
+      return IsAddMorphaeToFileContainerItems(aml);
+    }
+
+    private static bool IsAddMorphaeToFileContainerItems(XElement aml)
+    {
+      var item = aml.DescendantsAndSelf("Item").FirstOrDefault();
+      if (item?.Attribute("type")?.Value != "ItemType" || item.Attribute("action")?.Value != "edit")
+        return false;
+      if (item.Elements().Count() != 1 || item.Elements().First().Name.LocalName != "Relationships")
+        return false;
+      var relationships = item.Elements().First();
+      if (relationships.Elements().Count() != 1 || item.Elements().First().Name.LocalName == "Item")
+        return false;
+      var relation = relationships.Elements().First();
+      if (relation.Attribute("type")?.Value != "Morphae" || relation.Element("source_id")?.Value != "41EF49EFD2ED4F6EAB04C047681F33AC")
+        return false;
+      return true;
     }
 
     public static void WriteAmlMergeScripts(this IDiffDirectory baseDir, IDiffDirectory compareDir
@@ -155,12 +196,13 @@ namespace InnovatorAdmin
           return new MemoryStream(Encoding.UTF8.GetBytes("<Result><Item></Item></Result>"));
         });
 
-        var settings = new XmlWriterSettings();
-        settings.OmitXmlDeclaration = true;
-        settings.Indent = true;
-        settings.IndentChars = "  ";
         var result = new MemoryStream();
-        using (var writer = XmlWriter.Create(result, settings))
+        using (var writer = XmlWriter.Create(result, new XmlWriterSettings
+        {
+          OmitXmlDeclaration = true,
+          Indent = true,
+          IndentChars = "  "
+        }))
         {
           report.WriteTo(writer);
         };

@@ -2,6 +2,8 @@
 using Innovator.Client;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -11,20 +13,20 @@ namespace InnovatorAdmin.Cmd
 {
   class SharedOptions
   {
-    [Option('s', "server", HelpText = "server's URL (e.g. server=http://localhost/InnovatorServer)", Required = true)]
+    [Option('l', "url", HelpText = "server's URL (e.g. server=http://localhost/InnovatorServer)", Required = true)]
     public string Url { get; set; }
 
     [Option('d', "database", HelpText = "database's name (e.g. database=dbWithoutSolution)", Required = true)]
     public string Database { get; set; }
 
-    [Option('l', "login", HelpText = "user's login (e.g. login=root); NOTE: login must have root or admin privileges")]
+    [Option('u', "user", HelpText = "user's login (e.g. login=root); NOTE: login must have root or admin privileges")]
     public string Username { get; set; }
 
     [Option('p', "password", HelpText = "user's password (e.g. password=xxxx )")]
     public string Password { get; set; }
 
-    [Option('k', "package", HelpText = "Path to package file containing the items to import/export")]
-    public string Package { get; set; }
+    [Option('f', "inputfile", HelpText = "Path to package file containing the items to import/export")]
+    public string InputFile { get; set; }
 
     public async Task<IAsyncConnection> GetConnection()
     {
@@ -84,6 +86,96 @@ namespace InnovatorAdmin.Cmd
         }
       }
       return true;
+    }
+
+    public static IEnumerable<IDiffDirectory> GetDirectories(params string[] paths)
+    {
+      foreach (var path in paths)
+      {
+        var repos = new Dictionary<string, GitRepo>(StringComparer.OrdinalIgnoreCase);
+        if (path.StartsWith("git://", StringComparison.OrdinalIgnoreCase))
+        {
+          var query = new QueryString("file://" + path.Substring(6));
+          var commit = query["commit"].ToString();
+
+          var filePath = query.Uri.LocalPath;
+          if (!repos.TryGetValue(filePath, out var repo))
+          {
+            repo = new GitRepo(filePath);
+            repos[filePath] = repo;
+          }
+          yield return repo.GetDirectory(commit, query["path"].ToString());
+        }
+        else if (string.Equals(Path.GetExtension(path), ".innpkg", StringComparison.OrdinalIgnoreCase))
+        {
+          yield return InnovatorPackage.Load(path).Read();
+        }
+        else if (string.Equals(Path.GetExtension(path), ".mf", StringComparison.OrdinalIgnoreCase))
+        {
+          yield return new FileSysDiffDirectory(Path.GetDirectoryName(path));
+        }
+        else
+        {
+          yield return new FileSysDiffDirectory(path);
+        }
+      }
+    }
+
+    public static void WritePackage(Stopwatch st, InstallScript script, string output, bool multipleDirectories, bool cleanOutput)
+    {
+      multipleDirectories = multipleDirectories || string.Equals(Path.GetExtension(output), ".mf", StringComparison.OrdinalIgnoreCase);
+
+      if (cleanOutput)
+      {
+        Console.Write(@"{0:hh\:mm\:ss} Cleaning output... ", st.Elapsed);
+        if (multipleDirectories)
+        {
+          var dir = new DirectoryInfo(Path.GetDirectoryName(output));
+          if (dir.Exists)
+          {
+            Parallel.ForEach(dir.EnumerateFileSystemInfos(), fs =>
+            {
+              if (fs is DirectoryInfo di)
+                di.Delete(true);
+              else
+                fs.Delete();
+            });
+          }
+          else
+          {
+            dir.Create();
+          }
+        }
+        else
+        {
+          File.Delete(output);
+        }
+        Console.WriteLine("Done.");
+      }
+
+      Console.Write(@"{0:hh\:mm\:ss} Writing package... ", st.Elapsed);
+      switch (Path.GetExtension(output).ToLowerInvariant())
+      {
+        case ".mf":
+          var manifest = new ManifestFolder(output);
+          manifest.Write(script);
+          break;
+        case ".innpkg":
+          if (multipleDirectories)
+          {
+            using (var pkgFolder = new InnovatorPackageFolder(output))
+              pkgFolder.Write(script);
+          }
+          else
+          {
+            using (var pkgFile = new InnovatorPackageFile(output))
+              pkgFile.Write(script);
+          }
+          break;
+        default:
+          throw new NotSupportedException("Output file type is not supported");
+      }
+      Console.WriteLine("Done.");
     }
   }
 }

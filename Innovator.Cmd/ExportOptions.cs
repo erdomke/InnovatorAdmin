@@ -39,8 +39,8 @@ namespace InnovatorAdmin.Cmd
       var st = Stopwatch.StartNew();
       try
       {
-
         Console.WriteLine(Parser.Default.FormatCommandLine(this));
+        Console.WriteLine();
         Console.WriteLine(@"{0:hh\:mm\:ss} Connecting to innovator...", st.Elapsed);
         var conn = await this.GetConnection().ConfigureAwait(false);
         var processor = new ExportProcessor(conn);
@@ -48,7 +48,7 @@ namespace InnovatorAdmin.Cmd
         var refsToExport = default(List<ItemReference>);
         var checkDependencies = true;
 
-        if (string.IsNullOrEmpty(this.Package))
+        if (string.IsNullOrEmpty(this.InputFile))
         {
           var version = await conn.FetchVersion(true).ConfigureAwait(false);
           var types = ExportAllType.Types.Where(t => t.Applies(version)).ToList();
@@ -93,52 +93,7 @@ namespace InnovatorAdmin.Cmd
         }
         Console.WriteLine("Done.");
 
-        MultipleDirectories = MultipleDirectories || string.Equals(Path.GetExtension(Output), ".mf", StringComparison.OrdinalIgnoreCase);
-
-        if (CleanOutput)
-        {
-          Console.Write(@"{0:hh\:mm\:ss} Cleaning output... ", st.Elapsed);
-          if (MultipleDirectories)
-          {
-            var dir = new DirectoryInfo(Path.GetDirectoryName(Output));
-            Parallel.ForEach(dir.EnumerateFileSystemInfos(), fs =>
-            {
-              if (fs is DirectoryInfo di)
-                di.Delete(true);
-              else
-                fs.Delete();
-            });
-          }
-          else
-          {
-            File.Delete(Output);
-          }
-          Console.WriteLine("Done.");
-        }
-
-        Console.Write(@"{0:hh\:mm\:ss} Writing package... ", st.Elapsed);
-        switch (Path.GetExtension(Output).ToLowerInvariant())
-        {
-          case ".mf":
-            var manifest = new ManifestFolder(Output);
-            manifest.Write(script);
-            break;
-          case ".innpkg":
-            if (MultipleDirectories)
-            {
-              using (var pkgFolder = new InnovatorPackageFolder(Output))
-                pkgFolder.Write(script);
-            }
-            else
-            {
-              using (var pkgFile = new InnovatorPackageFile(Output))
-                pkgFile.Write(script);
-            }
-            break;
-          default:
-            throw new NotSupportedException("Output file type is not supported");
-        }
-        Console.WriteLine("Done.");
+        WritePackage(st, script, Output, MultipleDirectories, CleanOutput);
 
         Console.WriteLine();
         Console.WriteLine(@"{0:hh\:mm\:ss} Export succeeded.", st.Elapsed);

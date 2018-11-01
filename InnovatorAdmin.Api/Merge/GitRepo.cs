@@ -20,10 +20,13 @@ namespace InnovatorAdmin
     {
       return new GitMergeOperation(_repo, localBranch, remoteBranch);
     }
-    public IDiffDirectory GetDirectory(string id)
+
+    public IDiffDirectory GetDirectory(string id = null, string path = null)
     {
-      var commit = _repo.Commits.Single(c => c.Sha.StartsWith(id));
-      return new GitDiffDirectory(commit);
+      var commit = string.IsNullOrEmpty(id)
+        ? _repo.Head.Tip
+        : _repo.Commits.Single(c => c.Sha.StartsWith(id));
+      return new GitDiffDirectory(commit, path);
     }
   }
 }

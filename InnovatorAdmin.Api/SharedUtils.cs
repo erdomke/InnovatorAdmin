@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,6 +38,14 @@ namespace InnovatorAdmin
       }
 
       return results;
+    }
+
+    public static void WriteTo(this Stream stream, string path)
+    {
+      using (var write = new FileStream(path, FileMode.Create, FileAccess.Write))
+      {
+        stream.CopyTo(write);
+      }
     }
   }
 }

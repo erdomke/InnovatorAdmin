@@ -112,6 +112,7 @@ namespace InnovatorAdmin
         FixFederatedRelationships(outputDoc.DocumentElement);
         var result = ExecuteExportQuery(ref outputDoc, items);
         RemoveCmfGeneratedTypes(result);
+        RemoveVaultUrl(result);
         FixCmfComputedPropDependencies(result);
         FixCmfTabularViewMissingWarning(result);
 
@@ -183,11 +184,14 @@ namespace InnovatorAdmin
       }
 #if DEBUG
       // This is useful for debugging and making sure duplicate items are not present
-      var grps = script.Lines.Where(l => l.Type == InstallType.Create)
-        .GroupBy(l => l.Reference.Unique);
-      var duplicates = grps.Where(g => g.Skip(1).Any()).ToArray();
-      if (duplicates.Length > 0)
-        throw new InvalidOperationException("The package has duplicate entries for the following items: " + duplicates.GroupConcat(", ", g => g.Key));
+      if (script.Lines != null)
+      {
+        var grps = script.Lines.Where(l => l.Type == InstallType.Create)
+          .GroupBy(l => l.Reference.Unique);
+        var duplicates = grps.Where(g => g.Skip(1).Any()).ToArray();
+        if (duplicates.Length > 0)
+          throw new InvalidOperationException("The package has duplicate entries for the following items: " + duplicates.GroupConcat(", ", g => g.Key));
+      }
 #endif
     }
 
@@ -362,7 +366,11 @@ namespace InnovatorAdmin
         {
           var newInstallItems = (from e in itemNode.ParentNode.Elements()
                                  where e.LocalName == "Item" && e.HasAttribute("type")
-                                 select InstallItem.FromScript(e)).ToList();
+                                 select InstallItem.FromScript(e))
+            .OrderBy(l => DefaultInstallOrder(l.Reference))
+            .ThenBy(l => l.Reference.Type.ToLowerInvariant())
+            .ThenBy(l => l.Reference.Unique)
+            .ToList();
           //foreach (var item in newInstallItems)
           //{
           //  item.Script.SetAttribute(XmlFlags.Attr_DependenciesAnalyzed, "1");
@@ -418,7 +426,7 @@ namespace InnovatorAdmin
         .Where(i => !IsDelete(i))
         .Concat(results
           .Where(IsDelete)
-          .OrderByDescending(i => DefaultInstallOrder(i.Reference))
+          .OrderByDescending(DefaultInstallOrder)
         ).ToArray();
 
       return results;
@@ -1278,7 +1286,10 @@ namespace InnovatorAdmin
 
       // Bias the install order initially to try and help the dependency sort properly handle anything
       // where explicit dependencies don't exist.  Then, perform the dependency sort.
-      var initialSort = lookup.Keys.OrderBy(DefaultInstallOrder);
+      var initialSort = lookup.Keys
+        .OrderBy(DefaultInstallOrder)
+        .ThenBy(i => i.Type.ToLowerInvariant())
+        .ThenBy(i => i.Unique);
       sorted = initialSort.DependencySort<ItemReference>(d =>
       {
         IEnumerable<InstallItem> res = null;
@@ -1342,6 +1353,14 @@ namespace InnovatorAdmin
       }
 
       return result;
+    }
+
+    private static int DefaultInstallOrder(InstallItem line)
+    {
+      var itemRef = line.Reference;
+      if (line.Reference.Type == "*Script")
+        itemRef = ItemReference.FromElement(line.Script);
+      return DefaultInstallOrder(itemRef);
     }
 
     private static int DefaultInstallOrder(ItemReference itemRef)
@@ -1756,6 +1775,19 @@ namespace InnovatorAdmin
     }
 
     /// <summary>
+    /// Remove the calculated vault URL
+    /// </summary>
+    private void RemoveVaultUrl(XmlDocument doc)
+    {
+      var query = "//Item[@type='Vault']/vault_url";
+      var elements = doc.ElementsByXPath(query).ToList();
+      foreach (var elem in elements)
+      {
+        elem.Parent().RemoveChild(elem);
+      }
+    }
+
+    /// <summary>
     /// Remove the ID attribute from relationships from versionable items.  This will improve the
     /// compare process and the import process should handle the import of these items without an
     /// ID.
@@ -2096,6 +2128,7 @@ namespace InnovatorAdmin
         case "UserMessage":
         case "Workflow Promotion":
           queryElem.SetAttribute("levels", "1");
+          queryElem.SetAttribute("related_expand", "0");
           levels = 1;
           break;
         case "Grid":
@@ -2301,7 +2334,7 @@ namespace InnovatorAdmin
 
       var doc = results.NewDoc();
       // Transform the output
-      ReportProgress(94, "Transforming the results");
+      ReportProgress(95, "Transforming the results");
       using (var memStream = new MemoryStream(results.DocumentElement.ChildNodes.Count * 1000))
       using (var output = new StreamWriter(memStream))
       {

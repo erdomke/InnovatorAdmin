@@ -14,10 +14,11 @@ namespace InnovatorAdmin.Cmd
     static async Task<int> Main(string[] args)
     {
       //var parser = new Parser(with => with.IgnoreUnknownArguments = false);
-      var cmdArgs = Parser.Default.ParseArguments<ExportOptions, ImportOptions>(args);
+      var cmdArgs = Parser.Default.ParseArguments<ExportOptions, ImportOptions, PackageDiffOptions>(args);
       var task = default(Task<int>);
       cmdArgs
         .WithParsed<ExportOptions>(o => task = o.Execute())
+        .WithParsed<PackageDiffOptions>(o => task = Task.FromResult(o.Execute()))
         .WithParsed<ImportOptions>(o => task = Import(o))
         .WithNotParsed(err => task = TryParseArasFormat(cmdArgs, args));
       var result = await task;
@@ -61,7 +62,7 @@ namespace InnovatorAdmin.Cmd
               opts.Password = arg.Substring(idx + 1);
               break;
             case "mffile":
-              opts.Package = arg.Substring(idx + 1);
+              opts.InputFile = arg.Substring(idx + 1);
               break;
             case "dir":
               if (opts is ExportOptions e2)

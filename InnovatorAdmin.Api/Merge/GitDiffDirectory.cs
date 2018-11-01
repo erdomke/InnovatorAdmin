@@ -12,12 +12,14 @@ namespace InnovatorAdmin
   {
     private IEnumerable<IDiffFile> _files;
 
-    public GitDiffDirectory(Commit commit)
+    public GitDiffDirectory(Commit commit, string root = null)
     {
       var files = new List<IDiffFile>();
+      root = string.IsNullOrEmpty(root) ? "\\" : "\\" + root.Trim('\\').Replace('/', '\\') + "\\";
       GitMergeOperation.WalkTree(commit.Tree, (path, blob) =>
       {
-        files.Add(new GitDiffFile(blob) { Path = path });
+        if (("\\" + path).StartsWith(root))
+          files.Add(new GitDiffFile(blob) { Path = path });
       });
       _files = files;
     }
