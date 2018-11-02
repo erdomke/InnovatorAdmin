@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using CommandLine.Text;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -26,6 +27,21 @@ namespace InnovatorAdmin.Cmd
     [Option("clean", HelpText = "Clean the output file/directory before writing the new content")]
     public bool CleanOutput { get; set; }
 
+    [Usage(ApplicationAlias = "InnovatorAdmin.Cmd")]
+    public static IEnumerable<Example> Examples
+    {
+      get
+      {
+        yield return new Example("Example", new UnParserSettings() { PreferShortName = true }, new PackageDiffOptions()
+        {
+          BasePackage = "git:///c:/Repo/Path?commit=base&path=AML",
+          OurPackage = "git:///c:/Repo/Path?commit=ours&path=AML",
+          MultipleDirectories = true,
+          CleanOutput = true,
+          Output = @"C:\Output\Path\TestPackage.innpkg",
+        });
+      }
+    }
     public int Execute()
     {
       var st = Stopwatch.StartNew();

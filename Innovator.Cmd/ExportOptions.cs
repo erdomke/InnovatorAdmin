@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using CommandLine.Text;
 using Innovator.Client;
 using System;
 using System.Collections.Generic;
@@ -33,6 +34,23 @@ namespace InnovatorAdmin.Cmd
 
     [Option("clean", HelpText = "Clean the output file/directory before writing the new content")]
     public bool CleanOutput { get; set; }
+
+    [Usage(ApplicationAlias = "InnovatorAdmin.Cmd")]
+    public static IEnumerable<Example> Examples
+    {
+      get
+      {
+        yield return new Example("Example", new UnParserSettings() { PreferShortName = true }, new ExportOptions() {
+          Url = "http://localhost/InnovatorServer/",
+          Database = "InnovatorSolutions",
+          Username = "admin",
+          Password = "innovator",
+          Output = @"C:\Output\Path\TestPackage.innpkg",
+          MultipleDirectories = true,
+          CleanOutput = true
+        });
+      }
+    }
 
     public async Task<int> Execute()
     {

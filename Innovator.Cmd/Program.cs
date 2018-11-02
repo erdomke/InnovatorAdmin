@@ -14,15 +14,18 @@ namespace InnovatorAdmin.Cmd
     static async Task<int> Main(string[] args)
     {
       //var parser = new Parser(with => with.IgnoreUnknownArguments = false);
-      var cmdArgs = Parser.Default.ParseArguments<ExportOptions, ImportOptions, PackageDiffOptions>(args);
+      var cmdArgs = Parser.Default.ParseArguments<ExportOptions, ImportOptions, PackageDiffOptions, ConvertOptions>(args);
       var task = default(Task<int>);
       cmdArgs
         .WithParsed<ExportOptions>(o => task = o.Execute())
         .WithParsed<PackageDiffOptions>(o => task = Task.FromResult(o.Execute()))
-        .WithParsed<ImportOptions>(o => task = Import(o))
+        .WithParsed<ImportOptions>(o => task = o.Execute())
+        .WithParsed<ConvertOptions>(o => task = Task.FromResult(o.Execute()))
         .WithNotParsed(err => task = TryParseArasFormat(cmdArgs, args));
       var result = await task;
+#if DEBUG
       Console.ReadLine();
+#endif
       return result;
     }
 
@@ -79,14 +82,8 @@ namespace InnovatorAdmin.Cmd
       if (opts is ExportOptions export)
         return export.Execute();
       else if (opts is ImportOptions import)
-        return Import(import);
+        return import.Execute();
       return Task.FromResult(-1);
-    }
-    
-    private static async Task<int> Import(ImportOptions opts)
-    {
-      Console.WriteLine(Parser.Default.FormatCommandLine(opts));
-      return -1;
     }
   }
 }
