@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace InnovatorAdmin.Cmd
 {
   [Verb("diff", HelpText = "Generate a patch package based on a diff")]
-  class PackageDiffOptions
+  internal class PackageDiffCommand
   {
     [Option("base", HelpText = "Path to package file containing the base items", Required = true)]
     public string BasePackage { get; set; }
@@ -18,7 +18,7 @@ namespace InnovatorAdmin.Cmd
     [Option("ours", HelpText = "Path to package file containing our items", Required = true)]
     public string OurPackage { get; set; }
 
-    [Option('o', "output", HelpText = "Path to the file to output", Required = true)]
+    [Option('o', "outputfile", HelpText = "Path to the file to output", Required = true)]
     public string Output { get; set; }
 
     [Option("multiple", HelpText = "Whether the output should prefer multiple directories")]
@@ -32,7 +32,7 @@ namespace InnovatorAdmin.Cmd
     {
       get
       {
-        yield return new Example("Example", new UnParserSettings() { PreferShortName = true }, new PackageDiffOptions()
+        yield return new Example("Example", new UnParserSettings() { PreferShortName = true }, new PackageDiffCommand()
         {
           BasePackage = "git:///c:/Repo/Path?commit=base&path=AML",
           OurPackage = "git:///c:/Repo/Path?commit=ours&path=AML",
@@ -44,16 +44,13 @@ namespace InnovatorAdmin.Cmd
     }
     public int Execute()
     {
-      var st = Stopwatch.StartNew();
-      try
+      return ConsoleTask.Execute(this, console =>
       {
-        Console.WriteLine(Parser.Default.FormatCommandLine(this));
-        Console.WriteLine();
-        Console.WriteLine(@"{0:hh\:mm\:ss} Getting package information...", st.Elapsed);
+        console.WriteLine("Getting package information...");
         var dirs = SharedOptions.GetDirectories(BasePackage, OurPackage).ToList();
 
         var script = default(InstallScript);
-        Console.Write(@"{0:hh\:mm\:ss} Calculating diffs... ", st.Elapsed);
+        console.Write("Calculating diffs... ");
         using (var prog = new ProgressBar())
         {
           var processor = new MergeProcessor()
@@ -63,21 +60,10 @@ namespace InnovatorAdmin.Cmd
           processor.ProgressChanged += (s, ev) => prog.Report(ev.Progress / 100.0);
           script = processor.Merge(dirs[0], dirs[1]);
         }
-        Console.WriteLine("Done.");
+        console.WriteLine("Done.");
 
-        SharedOptions.WritePackage(st, script, Output, MultipleDirectories, CleanOutput);
-        Console.WriteLine();
-        Console.WriteLine(@"{0:hh\:mm\:ss} Diff succeeded.", st.Elapsed);
-        return 0;
-      }
-      catch (Exception ex)
-      {
-        Console.WriteLine();
-        Console.WriteLine();
-        Console.Error.WriteLine(@"{0:hh\:mm\:ss} Diff failed.", st.Elapsed);
-        Console.Error.WriteLine(ex.ToString());
-        return -1;
-      }
+        SharedOptions.WritePackage(console, script, Output, MultipleDirectories, CleanOutput);
+      });
     }
   }
 }

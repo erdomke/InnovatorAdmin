@@ -17,8 +17,8 @@ string version;
 Task("Clean")
   .Does(() =>
 {
-  var buildDir = Directory("./public/InnovatorAdmin/lib/");
-  CleanDirectory(buildDir);
+  CleanDirectory("./publish/InnovatorAdmin/lib/");
+  CleanDirectory("./publish/InnovatorAdmin.Cmd/tools/");
 });
 
 Task("Patch-Version")
@@ -137,6 +137,23 @@ Task("Squirrel-Release")
   });
 });
 
+Task("Cmd-Pack")
+  .IsDependentOn("Build")
+  .Does(() =>
+{
+  DeleteFiles("./artifacts/*.nupkg");
+  DeleteFiles("./publish/InnovatorAdmin.Cmd/tools/*.pdb");
+  DeleteFiles("./publish/InnovatorAdmin.Cmd/tools/*.xml");
+  var nuGetPackSettings = new NuGetPackSettings {
+    Id = "InnovatorAdmin.Cmd",
+    Version = version,
+    Authors = new [] {"eric.domke"},
+    Description = "Command-line application for administrating an Aras Innovator instance.",
+    RequireLicenseAcceptance = false,
+    OutputDirectory = "./artifacts"
+  };
+  NuGetPack("./publish/InnovatorAdmin.Cmd/InnovatorAdmin.Cmd.nuspec", nuGetPackSettings);
+});
 
 //////////////////////////////////////////////////////////////////////
 // TASK TARGETS

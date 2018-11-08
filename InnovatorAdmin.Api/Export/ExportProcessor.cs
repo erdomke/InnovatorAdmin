@@ -35,6 +35,8 @@ namespace InnovatorAdmin
     public ExportProcessor(IAsyncConnection conn)
     {
       _conn = conn;
+      if (_conn is Innovator.Client.Connection.IArasConnection arasConn)
+        arasConn.DefaultSettings.Add(r => r.Timeout = TimeSpan.FromMinutes(3));
       _metadata = ArasMetadataProvider.Cached(conn);
       _metadata.Reset();
       _dependAnalyzer = new DependencyAnalyzer(_metadata);
@@ -64,7 +66,7 @@ namespace InnovatorAdmin
 
       ConvertPolyItemReferencesToActualType(itemList);
       itemList = (await NormalizeReferences(itemList).ConfigureAwait(false)).ToList();
-      
+
       var groups = itemList.GroupBy(i => new { Type = i.Type, Levels = i.Levels });
       var queries = new List<XmlElement>();
       foreach (var typeItems in groups)
@@ -206,7 +208,7 @@ namespace InnovatorAdmin
         case "cmf_ElementType":
         case "cmf_PropertyType":
         case "Form":
-          return 10;
+          return 6;
       }
       return levels > 1 ? 10 : 40;
     }
@@ -2135,6 +2137,8 @@ namespace InnovatorAdmin
         case "User":
         case "Preference":
         case "Property":
+        case "qry_QueryDefinition":
+        case "rb_TreeGridViewDefinition":
           queryElem.SetAttribute("levels", "2");
           levels = 2;
           break;

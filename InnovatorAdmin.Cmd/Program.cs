@@ -14,13 +14,14 @@ namespace InnovatorAdmin.Cmd
     static async Task<int> Main(string[] args)
     {
       //var parser = new Parser(with => with.IgnoreUnknownArguments = false);
-      var cmdArgs = Parser.Default.ParseArguments<ExportOptions, ImportOptions, PackageDiffOptions, ConvertOptions>(args);
+      var cmdArgs = Parser.Default.ParseArguments<ExportCommand, ImportCommand, PackageDiffCommand, ConvertCommand, ApplyCommand>(args);
       var task = default(Task<int>);
       cmdArgs
-        .WithParsed<ExportOptions>(o => task = o.Execute())
-        .WithParsed<PackageDiffOptions>(o => task = Task.FromResult(o.Execute()))
-        .WithParsed<ImportOptions>(o => task = o.Execute())
-        .WithParsed<ConvertOptions>(o => task = Task.FromResult(o.Execute()))
+        .WithParsed<ExportCommand>(o => task = o.Execute())
+        .WithParsed<PackageDiffCommand>(o => task = Task.FromResult(o.Execute()))
+        .WithParsed<ImportCommand>(o => task = o.Execute())
+        .WithParsed<ConvertCommand>(o => task = Task.FromResult(o.Execute()))
+        .WithParsed<ApplyCommand>(o => task = o.Execute())
         .WithNotParsed(err => task = TryParseArasFormat(cmdArgs, args));
       var result = await task;
 #if DEBUG
@@ -34,7 +35,7 @@ namespace InnovatorAdmin.Cmd
       var opts = default(SharedOptions);
       if (result.TypeInfo.Choices.Any())
       {
-        opts = new ExportOptions();
+        opts = new ExportCommand();
       }
       else if (typeof(SharedOptions).IsAssignableFrom(result.TypeInfo.Current))
       {
@@ -68,7 +69,7 @@ namespace InnovatorAdmin.Cmd
               opts.InputFile = arg.Substring(idx + 1);
               break;
             case "dir":
-              if (opts is ExportOptions e2)
+              if (opts is ExportCommand e2)
                 e2.Output = arg.Substring(idx + 1);
               break;
           }
@@ -79,9 +80,9 @@ namespace InnovatorAdmin.Cmd
         || string.IsNullOrEmpty(opts.Database))
         return Task.FromResult(-1);
 
-      if (opts is ExportOptions export)
+      if (opts is ExportCommand export)
         return export.Execute();
-      else if (opts is ImportOptions import)
+      else if (opts is ImportCommand import)
         return import.Execute();
       return Task.FromResult(-1);
     }

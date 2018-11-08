@@ -61,7 +61,10 @@ namespace InnovatorAdmin
             else
             {
               doc = new XmlDocument(manifest.NameTable);
-              doc.Load(GetExistingStream(path));
+              var stream = GetExistingStream(path);
+              if (stream == null)
+                throw new FileNotFoundException("A referenced file was not found in the package", path);
+              doc.Load(stream);
             }
 
             foreach (var item in doc.DocumentElement.Elements("Item"))

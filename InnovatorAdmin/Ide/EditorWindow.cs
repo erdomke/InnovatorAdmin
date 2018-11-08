@@ -2408,8 +2408,8 @@ namespace InnovatorAdmin
           if (dialog.ShowDialog() == DialogResult.OK)
           {
             var repo = new GitRepo(settings.RepoPath);
-            var initDir = repo.GetDirectory(settings.InitCommit);
-            var destDir = repo.GetDirectory(settings.DestCommit);
+            var initDir = repo.GetDirectory(new GitDirectorySearch() { Sha = settings.InitCommit });
+            var destDir = repo.GetDirectory(new GitDirectorySearch() { Sha = settings.DestCommit });
 
             var manifestPath = Path.Combine(settings.SaveDirectory, "MergeScript.innpkg");
             var pkg = new InnovatorPackageFolder(manifestPath);

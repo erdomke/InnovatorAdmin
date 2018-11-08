@@ -24,7 +24,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnovatorAdmin.Powershell",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnovatorAdmin.Plugins", "InnovatorAdmin.Plugins\InnovatorAdmin.Plugins.csproj", "{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnovatorAdmin.Cmd", "Innovator.Cmd\InnovatorAdmin.Cmd.csproj", "{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnovatorAdmin.Cmd", "InnovatorAdmin.Cmd\InnovatorAdmin.Cmd.csproj", "{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

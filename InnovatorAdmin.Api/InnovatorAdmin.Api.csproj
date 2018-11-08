@@ -80,6 +80,7 @@
     <Compile Include="Merge\AmlDiff.cs" />
     <Compile Include="AmlSelectColumn.cs" />
     <Compile Include="Export\ListCompare.cs" />
+    <Compile Include="Merge\GitDirectorySearch.cs" />
     <Compile Include="Merge\FileCompare.cs" />
     <Compile Include="Merge\FileDiff.cs" />
     <Compile Include="Merge\FileStatus.cs" />

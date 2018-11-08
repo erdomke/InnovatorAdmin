@@ -2072,6 +2072,8 @@ order by 1
   <Item type='Permission_PropertyValue' action='get' select='config_id'></Item>
   <Item type='PreferenceTypes' action='get' select='config_id'></Item>
   <Item type='PresentationConfiguration' action='get' select='config_id'></Item>
+  <Item type='qry_QueryDefinition' action='get' select='config_id'></Item>
+  <Item type='rb_TreeGridViewDefinition' action='get' select='config_id'></Item>
   <Item type='Report' action='get' select='config_id'></Item>
   <Item type='Revision' action='get' select='config_id'></Item>
   <Item type='SearchMode' action='get' select='config_id'></Item>

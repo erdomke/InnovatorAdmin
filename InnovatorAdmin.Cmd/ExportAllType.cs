@@ -78,6 +78,8 @@ namespace InnovatorAdmin.Cmd
       new ExportAllType("Permission_PropertyValue", new Version(11, 0, 12)),
       new ExportAllType("PreferenceTypes"),
       new ExportAllType("PresentationConfiguration", new Version(11, 0)),
+      new ExportAllType("qry_QueryDefinition", new Version(11, 0, 12)),
+      new ExportAllType("rb_TreeGridViewDefinition", new Version(11, 0, 12)),
       new ExportAllType("Report"),
       new ExportAllType("Revision"),
       new ExportAllType("SearchMode"),

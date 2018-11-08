@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Cmd
 {
-  class SharedOptions
+  internal class SharedOptions
   {
     [Option('l', "url", HelpText = "server's URL (e.g. server=http://localhost/InnovatorServer)", Required = true)]
     public string Url { get; set; }
@@ -37,6 +37,7 @@ namespace InnovatorAdmin.Cmd
           UserAgent = "InnovatorAdmin.Cmd v" + Assembly.GetExecutingAssembly().GetName().Version.ToString()
         },
         Url = Url,
+        DefaultTimeout = TimeSpan.FromMinutes(3).Milliseconds
       }, true).ConfigureAwait(false);
       await conn.Login(GetCredentials(), true).ConfigureAwait(false);
       return conn;
@@ -90,13 +91,12 @@ namespace InnovatorAdmin.Cmd
 
     public static IEnumerable<IDiffDirectory> GetDirectories(params string[] paths)
     {
+      var repos = new Dictionary<string, GitRepo>(StringComparer.OrdinalIgnoreCase);
       foreach (var path in paths)
       {
-        var repos = new Dictionary<string, GitRepo>(StringComparer.OrdinalIgnoreCase);
         if (path.StartsWith("git://", StringComparison.OrdinalIgnoreCase))
         {
           var query = new QueryString("file://" + path.Substring(6));
-          var commit = query["commit"].ToString();
 
           var filePath = query.Uri.LocalPath;
           if (!repos.TryGetValue(filePath, out var repo))
@@ -104,7 +104,18 @@ namespace InnovatorAdmin.Cmd
             repo = new GitRepo(filePath);
             repos[filePath] = repo;
           }
-          yield return repo.GetDirectory(commit, query["path"].ToString());
+
+          var options = new GitDirectorySearch()
+          {
+            Sha = query["commit"].ToString(),
+            Path = query["path"].ToString()
+          };
+          foreach (var branch in query["branch"])
+            options.BranchNames.Add(branch);
+          if (string.Equals(options.Sha, "tip", StringComparison.OrdinalIgnoreCase))
+            options.Sha = null;
+
+          yield return repo.GetDirectory(options);
         }
         else if (string.Equals(Path.GetExtension(path), ".innpkg", StringComparison.OrdinalIgnoreCase))
         {
@@ -121,13 +132,13 @@ namespace InnovatorAdmin.Cmd
       }
     }
 
-    public static void WritePackage(Stopwatch st, InstallScript script, string output, bool multipleDirectories, bool cleanOutput)
+    public static void WritePackage(ConsoleTask console, InstallScript script, string output, bool multipleDirectories, bool cleanOutput)
     {
       multipleDirectories = multipleDirectories || string.Equals(Path.GetExtension(output), ".mf", StringComparison.OrdinalIgnoreCase);
 
       if (cleanOutput)
       {
-        Console.Write(@"{0:hh\:mm\:ss} Cleaning output... ", st.Elapsed);
+        console.Write("Cleaning output... ");
         if (multipleDirectories)
         {
           var dir = new DirectoryInfo(Path.GetDirectoryName(output));
@@ -150,10 +161,14 @@ namespace InnovatorAdmin.Cmd
         {
           File.Delete(output);
         }
-        Console.WriteLine("Done.");
+        console.WriteLine("Done.");
       }
 
-      Console.Write(@"{0:hh\:mm\:ss} Writing package... ", st.Elapsed);
+      console.Write("Writing package... ");
+      var outputDir = Path.GetDirectoryName(output);
+      if (!Directory.Exists(outputDir))
+        Directory.CreateDirectory(outputDir);
+
       switch (Path.GetExtension(output).ToLowerInvariant())
       {
         case ".mf":
@@ -168,6 +183,8 @@ namespace InnovatorAdmin.Cmd
           }
           else
           {
+            if (File.Exists(output))
+              File.Delete(output);
             using (var pkgFile = new InnovatorPackageFile(output))
               pkgFile.Write(script);
           }
@@ -175,7 +192,7 @@ namespace InnovatorAdmin.Cmd
         default:
           throw new NotSupportedException("Output file type is not supported");
       }
-      Console.WriteLine("Done.");
+      console.WriteLine("Done.");
     }
   }
 }

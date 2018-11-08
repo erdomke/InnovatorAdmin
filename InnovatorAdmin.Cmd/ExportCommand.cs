@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace InnovatorAdmin.Cmd
 {
   [Verb("export", HelpText = "Export a solution from Aras Innovator")]
-  class ExportOptions : SharedOptions
+  internal class ExportCommand : SharedOptions
   {
     [Option("title", HelpText = "Title of the package")]
     public string Title { get; set; }
@@ -26,7 +26,7 @@ namespace InnovatorAdmin.Cmd
     [Option("description", HelpText = "Description to include with the package metadata")]
     public string Description { get; set; }
 
-    [Option('o', "output", HelpText = "Path to the file to output", Required = true)]
+    [Option('o', "outputfile", HelpText = "Path to the file to output", Required = true)]
     public string Output { get; set; }
 
     [Option("multiple", HelpText = "Whether the output should prefer multiple directories")]
@@ -40,7 +40,8 @@ namespace InnovatorAdmin.Cmd
     {
       get
       {
-        yield return new Example("Example", new UnParserSettings() { PreferShortName = true }, new ExportOptions() {
+        yield return new Example("Example", new UnParserSettings() { PreferShortName = true }, new ExportCommand()
+        {
           Url = "http://localhost/InnovatorServer/",
           Database = "InnovatorSolutions",
           Username = "admin",
@@ -52,14 +53,11 @@ namespace InnovatorAdmin.Cmd
       }
     }
 
-    public async Task<int> Execute()
+    public Task<int> Execute()
     {
-      var st = Stopwatch.StartNew();
-      try
+      return ConsoleTask.ExecuteAsync(this, async (console) =>
       {
-        Console.WriteLine(Parser.Default.FormatCommandLine(this));
-        Console.WriteLine();
-        Console.WriteLine(@"{0:hh\:mm\:ss} Connecting to innovator...", st.Elapsed);
+        console.WriteLine("Connecting to innovator...");
         var conn = await this.GetConnection().ConfigureAwait(false);
         var processor = new ExportProcessor(conn);
 
@@ -71,8 +69,8 @@ namespace InnovatorAdmin.Cmd
           var version = await conn.FetchVersion(true).ConfigureAwait(false);
           var types = ExportAllType.Types.Where(t => t.Applies(version)).ToList();
 
-          Console.Write(@"{0:hh\:mm\:ss} Identifying all metadata items... ", st.Elapsed);
-          using (var prog = new ProgressBar())
+          console.Write("Identifying all metadata items... ");
+          using (var prog = console.Progress())
           {
             var toExport = await SharedUtils.TaskPool(30, (l, m) => prog.Report(l / 100.0), types
               .Select(t => (Func<Task<IReadOnlyResult>>)(() => conn.ApplyAsync(t.ToString(), true, false).ToTask()))
@@ -81,7 +79,7 @@ namespace InnovatorAdmin.Cmd
               .Select(i => ItemReference.FromFullItem(i, true))
               .ToList();
           }
-          Console.WriteLine("Done.");
+          console.WriteLine("Done.");
 
           checkDependencies = false;
         }
@@ -103,28 +101,21 @@ namespace InnovatorAdmin.Cmd
           Modified = DateTime.Now
         };
 
-        Console.Write(@"{0:hh\:mm\:ss} Exporting metadata... ", st.Elapsed);
-        using (var prog = new ProgressBar())
+        console.Write("Exporting metadata... ");
+        using (var prog = console.Progress())
         {
           processor.ProgressChanged += (s, e) => prog.Report(e.Progress / 100.0);
+          processor.ActionComplete += (s, e) =>
+          {
+            if (e.Exception != null)
+              throw new AggregateException(e.Exception);
+          };
           await processor.Export(script, refsToExport, checkDependencies);
         }
-        Console.WriteLine("Done.");
+        console.WriteLine("Done.");
 
-        WritePackage(st, script, Output, MultipleDirectories, CleanOutput);
-
-        Console.WriteLine();
-        Console.WriteLine(@"{0:hh\:mm\:ss} Export succeeded.", st.Elapsed);
-        return 0;
-      }
-      catch (Exception ex)
-      {
-        Console.WriteLine();
-        Console.WriteLine();
-        Console.Error.WriteLine(@"{0:hh\:mm\:ss} Export failed.", st.Elapsed);
-        Console.Error.WriteLine(ex.ToString());
-        return -1;
-      }
+        WritePackage(console, script, Output, MultipleDirectories, CleanOutput);
+      });
     }
   }
 }
