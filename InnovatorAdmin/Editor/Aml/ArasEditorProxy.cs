@@ -761,7 +761,8 @@ namespace InnovatorAdmin.Editor
                   || elemIds.EndsWith("ItemType", "class_structure")
                   || elemIds.EndsWith("qry_QueryReference", "filter_xml")
                   || elemIds.EndsWith("qry_QueryItem", "filter_xml")
-                  || elemIds.EndsWith("mp_MacCondition", "condition_xml");
+                  || elemIds.EndsWith("mp_MacCondition", "condition_xml")
+                  || elemIds.EndsWith("tp_Block", "content");
                 var useCData = elemIds.EndsWith("EMail Message", "body_html")
                   || elemIds.EndsWith("EMail Message", "body_plain")
                   || elemIds.EndsWith("Method", "method_code")
