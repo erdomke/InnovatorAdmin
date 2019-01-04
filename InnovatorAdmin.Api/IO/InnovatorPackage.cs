@@ -51,8 +51,12 @@ namespace InnovatorAdmin
               : Enumerable.Repeat(currPath, 1));
 
           if (currPath == "*") result.DependencySorted = false;
+          var reportXmlPaths = new HashSet<string>(paths
+            .Where(p => p.EndsWith(".xslt", StringComparison.OrdinalIgnoreCase))
+            .Select(p => p + ".xml"), StringComparer.OrdinalIgnoreCase);
 
-          foreach (var path in paths)
+          foreach (var path in paths
+            .Where(p => !reportXmlPaths.Contains(p)))
           {
             if (path.EndsWith(".xslt", StringComparison.OrdinalIgnoreCase))
             {

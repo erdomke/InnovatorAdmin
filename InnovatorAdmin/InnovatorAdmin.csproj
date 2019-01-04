@@ -56,9 +56,6 @@
     <Reference Include="DeltaCompressionDotNet.PatchApi, Version=1.1.0.0, Culture=neutral, PublicKeyToken=3e8888ee913ed789, processorArchitecture=MSIL">
       <HintPath>..\packages\DeltaCompressionDotNet.1.1.0\lib\net20\DeltaCompressionDotNet.PatchApi.dll</HintPath>
     </Reference>
-    <Reference Include="innovator.client, Version=2018.10.29.2050, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Innovator.Client.2018.10.29.2050\lib\net45\innovator.client.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.WindowsAPICodePack, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -706,6 +703,10 @@
     <EmbeddedResource Include="resources\FilePath.xshd" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Innovator.Client\src\Innovator.Client\Innovator.Client.Net45.csproj">
+      <Project>{a2127aa1-16b2-4fa3-a59e-c5f2f670259b}</Project>
+      <Name>Innovator.Client.Net45</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ICSharpCode.AvalonEdit\ICSharpCode.AvalonEdit.csproj">
       <Project>{6c55b776-26d4-4db3-a6ab-87e783b2f3d1}</Project>
       <Name>ICSharpCode.AvalonEdit</Name>

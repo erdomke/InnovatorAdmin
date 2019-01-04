@@ -30,9 +30,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="innovator.client, Version=2018.10.29.2050, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Innovator.Client.2018.10.29.2050\lib\net45\innovator.client.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -48,13 +45,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Innovator.Client\src\Innovator.Client\Innovator.Client.Net45.csproj">
+      <Project>{a2127aa1-16b2-4fa3-a59e-c5f2f670259b}</Project>
+      <Name>Innovator.Client.Net45</Name>
+    </ProjectReference>
     <ProjectReference Include="..\InnovatorAdmin.Api\InnovatorAdmin.Api.csproj">
       <Project>{7c397623-c59e-4db2-8879-8a3385dabcd9}</Project>
       <Name>InnovatorAdmin.Api</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
