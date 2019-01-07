@@ -71,7 +71,10 @@ namespace InnovatorAdmin
               doc.Load(stream);
             }
 
-            foreach (var item in doc.DocumentElement.Elements("Item"))
+            var items = doc.DocumentElement.LocalName == "Item"
+              ? new[] { doc.DocumentElement }
+              : doc.DocumentElement.Elements("Item");
+            foreach (var item in items)
             {
               scripts.Add(InstallItem.FromScript(item, path));
             }

@@ -38,6 +38,9 @@
     <Reference Include="CommandLine, Version=2.3.0.0, Culture=neutral, PublicKeyToken=de6f01bd326f8c32, processorArchitecture=MSIL">
       <HintPath>..\packages\CommandLineParser.2.3.0\lib\net45\CommandLine.dll</HintPath>
     </Reference>
+    <Reference Include="innovator.client, Version=2018.12.6.1723, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Innovator.Client.2018.12.6.1723\lib\net45\innovator.client.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Web.XmlTransform, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Web.Xdt.2.1.2\lib\net40\Microsoft.Web.XmlTransform.dll</HintPath>
     </Reference>
@@ -82,10 +85,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Innovator.Client\src\Innovator.Client\Innovator.Client.Net45.csproj">
-      <Project>{a2127aa1-16b2-4fa3-a59e-c5f2f670259b}</Project>
-      <Name>Innovator.Client.Net45</Name>
-    </ProjectReference>
     <ProjectReference Include="..\InnovatorAdmin.Api\InnovatorAdmin.Api.csproj">
       <Project>{7c397623-c59e-4db2-8879-8a3385dabcd9}</Project>
       <Name>InnovatorAdmin.Api</Name>

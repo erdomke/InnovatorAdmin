@@ -19,7 +19,10 @@ namespace InnovatorAdmin
       GitMergeOperation.WalkTree(commit.Tree, (path, blob) =>
       {
         if (("\\" + path).StartsWith(root))
-          files.Add(new GitDiffFile(blob) { Path = path });
+        {
+          var relPath = path.Substring(root.Length - 1).TrimStart('/', '\\');
+          files.Add(new GitDiffFile(blob) { Path = relPath });
+        }
       });
       _files = files;
     }
