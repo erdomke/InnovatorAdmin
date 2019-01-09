@@ -361,17 +361,6 @@ namespace InnovatorAdmin
           result.IsSorted = true;
         }
       }
-
-      // Float props
-      r = await floatProps;
-      foreach (var floatProp in r.Items())
-      {
-        if (_itemTypesByName.TryGetValue(floatProp.SourceId().Attribute("name").Value.ToLowerInvariant(), out result))
-        {
-          result.FloatProperties.Add(floatProp.Property("name").AsString(""));
-        }
-      }
-
       return true;
     }
 

@@ -16,13 +16,7 @@ namespace InnovatorAdmin
       = new Dictionary<string, Property>(StringComparer.OrdinalIgnoreCase);
 
     public IEnumerable<string> ClassPaths { get; set; }
-    /// <summary>
-    /// List of the properties which reference versionable items and are set to float
-    /// </summary>
-    public IList<string> FloatProperties
-    {
-      get { return _floatProps; }
-    }
+
     /// <summary>
     /// ID of the item type
     /// </summary>
