@@ -303,7 +303,8 @@ namespace InnovatorAdmin
         ItemReference sql;
         foreach (var name in names)
         {
-          if (_metadata.ItemTypeByName(name.Replace('_', ' '), out itemType))
+          if (_metadata.ItemTypeByName(name.Replace('_', ' '), out itemType)
+            || _metadata.ItemTypeByName(name, out itemType))
           {
             AddDependency(itemType.Reference, elem.Parent(), elem, masterRef);
           }

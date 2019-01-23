@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using Innovator.Client;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -188,6 +189,21 @@ namespace InnovatorAdmin.Cmd
         errorOutput?.WriteLine(@"{0:hh\:mm\:ss} {1} failed.", task.Elapsed, verb);
         errorOutput?.WriteLine();
         errorOutput?.WriteLine(flat.ToString());
+
+        var serverEx = ex as ServerException;
+        if (serverEx != null)
+        {
+          if (!string.IsNullOrEmpty(serverEx.Database))
+          {
+            errorOutput?.WriteLine();
+            errorOutput?.WriteLine("DATABASE: " + serverEx.Database);
+          }
+          if (!string.IsNullOrEmpty(serverEx.Query))
+          {
+            errorOutput?.WriteLine();
+            errorOutput?.WriteLine("QUERY: " + serverEx.Query);
+          }
+        }
         return -1;
       }
       finally
