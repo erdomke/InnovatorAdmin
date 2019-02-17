@@ -101,7 +101,8 @@ namespace InnovatorAdmin.Editor
                   Type = GetType(reader),
                   Action = reader.GetAttribute("action"),
                   Condition = reader.GetAttribute("condition"),
-                  Id = reader.GetAttribute("id")
+                  Id = reader.GetAttribute("id"),
+                  By = reader.GetAttribute("by")
                 });
 
               attrName = null;
@@ -376,6 +377,10 @@ namespace InnovatorAdmin.Editor
                 });
                 if (path.Last().LocalName.StartsWith("xp-"))
                   items = items.Concat(Attributes(notExisting, "set", "permission_id", "explicit"));
+                if (path.Last().Condition == "is defined" || path.Last().Condition == "is not defined")
+                  items = items.Concat(Attributes(notExisting, "defined_as"));
+                if (path.Last().Condition == "in")
+                  items = items.Concat(Attributes(notExisting, "by"));
                 break;
             }
 
@@ -746,6 +751,9 @@ namespace InnovatorAdmin.Editor
                 case "is_null":
                   items = AttributeValues("0", "1");
                   break;
+                case "defined_as":
+                  items = AttributeValues("class", "explicit");
+                  break;
                 case "set":
                   items = new ICompletionData[] {
                     new BasicCompletionData("value") { Image = Icons.Property16.Wpf },
@@ -943,6 +951,17 @@ namespace InnovatorAdmin.Editor
                   if (path.Last().LocalName == "Relationships")
                   {
                     items = Elements("Item");
+                  }
+                  else if (path.Last().Condition == "in" && !string.IsNullOrEmpty(path.Last().By))
+                  {
+                    items = Elements("Item").Concat(new AttributeCompletionData[] {
+                      new AttributeCompletionData()
+                      {
+                        Text = "Item action='get' select='" + path.Last().By + "'",
+                        Action = () => "Item action='get' select='" + path.Last().By + "' type",
+                        Image = Icons.Attribute16.Wpf
+                      }
+                    });
                   }
                   else if (path.Last().Condition == "in"
                     || path.Last().LocalName.Equals("sql", StringComparison.OrdinalIgnoreCase))
@@ -1660,6 +1679,7 @@ namespace InnovatorAdmin.Editor
       public string Action { get; set; }
       public string Condition { get; set; }
       public Dictionary<string, string> Values { get { return _values; } }
+      public string By { get; set; }
     }
 
     public IEnumerable<string> GetSchemaNames()

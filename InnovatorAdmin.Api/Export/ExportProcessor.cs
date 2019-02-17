@@ -113,6 +113,8 @@ namespace InnovatorAdmin
 
         FixFederatedRelationships(outputDoc.DocumentElement);
         var result = ExecuteExportQuery(ref outputDoc, items);
+        RemoveXPropertyFlattenRelationships(result);
+        RemoveGeneratedItemTypeRelationships(result);
         RemoveCmfGeneratedTypes(result);
         RemoveVaultUrl(result);
         FixCmfComputedPropDependencies(result);
@@ -1847,6 +1849,24 @@ namespace InnovatorAdmin
       }
     }
 
+    private void RemoveGeneratedItemTypeRelationships(XmlDocument doc)
+    {
+      var elemsToRemove = doc.ElementsByXPath("//Relationships/Item[@type='Client Event' and related_id[@keyed_name='cmf_OnShowContainer']]").ToList();
+      foreach (var elem in elemsToRemove)
+      {
+        elem.Detach();
+      }
+    }
+
+    private void RemoveXPropertyFlattenRelationships(XmlDocument doc)
+    {
+      var elemsToRemove = doc.ElementsByXPath("//Item[@type='xClass_xProperty_Flatten']").ToList();
+      foreach (var elem in elemsToRemove)
+      {
+        elem.Detach();
+      }
+    }
+
     /// <summary>
     /// The CMF generated types will get recreated by Aras.  Don't export them here.
     /// </summary>
@@ -2164,6 +2184,7 @@ namespace InnovatorAdmin
         case "Property":
         case "qry_QueryDefinition":
         case "rb_TreeGridViewDefinition":
+        case "xClassificationTree":
           queryElem.SetAttribute("levels", "2");
           levels = 2;
           break;
