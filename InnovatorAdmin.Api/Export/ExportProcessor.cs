@@ -20,7 +20,7 @@ namespace InnovatorAdmin
       ResolvedCycle
     }
 
-    private readonly Version _arasVersion;
+    private Version _arasVersion;
     private readonly IAsyncConnection _conn;
     private readonly DependencyAnalyzer _dependAnalyzer;
     private readonly ArasMetadataProvider _metadata;
@@ -40,7 +40,6 @@ namespace InnovatorAdmin
       _metadata = ArasMetadataProvider.Cached(conn);
       _metadata.Reset();
       _dependAnalyzer = new DependencyAnalyzer(_metadata);
-      _arasVersion = (conn as Innovator.Client.Connection.IArasConnection)?.Version ?? new Version(9, 3);
     }
 
     /// <summary>
@@ -49,6 +48,7 @@ namespace InnovatorAdmin
     public async Task Export(InstallScript script, IEnumerable<ItemReference> items
       , bool checkDependencies = true)
     {
+      _arasVersion = (await _conn.FetchVersion(true)) ?? new Version(9, 3);
       ReportProgress(0, "Loading system data");
       await _metadata.ReloadTask().ConfigureAwait(false);
 
@@ -2185,6 +2185,7 @@ namespace InnovatorAdmin
         case "qry_QueryDefinition":
         case "rb_TreeGridViewDefinition":
         case "xClassificationTree":
+        case "DiscussionTemplate":
           queryElem.SetAttribute("levels", "2");
           levels = 2;
           break;

@@ -8,6 +8,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using System.Xml.XPath;
 
 namespace InnovatorAdmin.Cmd
 {
@@ -64,29 +66,73 @@ namespace InnovatorAdmin.Cmd
         var refsToExport = default(List<ItemReference>);
         var checkDependencies = true;
 
-        if (string.IsNullOrEmpty(this.InputFile))
+        console.Write("Identifying items to export... ");
+        if (this.InputFile?.EndsWith(".innpkg", StringComparison.OrdinalIgnoreCase) == true
+          || this.InputFile?.EndsWith(".mf", StringComparison.OrdinalIgnoreCase) == true)
         {
-          var version = await conn.FetchVersion(true).ConfigureAwait(false);
-          var types = ExportAllType.Types.Where(t => t.Applies(version)).ToList();
-
-          console.Write("Identifying all metadata items... ");
-          using (var prog = console.Progress())
-          {
-            var toExport = await SharedUtils.TaskPool(30, (l, m) => prog.Report(l / 100.0), types
-              .Select(t => (Func<Task<IReadOnlyResult>>)(() => conn.ApplyAsync(t.ToString(), true, false).ToTask()))
-              .ToArray());
-            refsToExport = toExport.SelectMany(r => r.Items())
-              .Select(i => ItemReference.FromFullItem(i, true))
-              .ToList();
-          }
-          console.WriteLine("Done.");
-
-          checkDependencies = false;
+          var exportScript = InnovatorPackage.Load(this.InputFile).Read();
+          refsToExport = exportScript.Lines
+            .Where(l => l.Type == InstallType.Create)
+            .Select(l => l.Reference)
+            .Distinct()
+            .ToList();
         }
         else
         {
-          throw new NotSupportedException("Input package is not supported");
+          var exportQuery = XElement.Parse("<AML><Item type='*' /></AML>");
+          if (!string.IsNullOrEmpty(this.InputFile))
+            exportQuery = XElement.Load(this.InputFile);
+
+          var firstItem = exportQuery.XPathSelectElement("//Item[1]");
+          if (firstItem == null)
+            throw new Exception("No item nodes could be found");
+
+          var items = default(IEnumerable<XElement>);
+          if (firstItem.Parent == null)
+            items = new[] { firstItem };
+          else
+            items = firstItem.Parent.Elements("Item");
+
+          var version = await conn.FetchVersion(true).ConfigureAwait(false);
+          var types = ExportAllType.Types.Where(t => t.Applies(version)).ToList();
+          var queries = GetQueryies(items, types).ToList();
+          checkDependencies = items.All(e => e.Attribute("type")?.Value != "*");
+
+          using (var prog = console.Progress())
+          {
+            var toExport = await SharedUtils.TaskPool(30, (l, m) => prog.Report(l / 100.0), queries
+              .Select(q =>
+              {
+                var aml = new XElement(q);
+                var levels = aml.Attribute("levels");
+                if (levels != null)
+                  levels.Remove();
+                return (Func<Task<QueryAndResult>>)(() => conn.ApplyAsync(aml, true, false)
+                  .ToTask()
+                  .ContinueWith(t => new QueryAndResult()
+                  {
+                    Query = q,
+                    Result = t.Result
+                  }));
+              })
+              .ToArray());
+            refsToExport = toExport.SelectMany(r =>
+              {
+                var refs = r.Result.Items()
+                  .Select(i => ItemReference.FromFullItem(i, true))
+                  .ToList();
+                var levels = (int?)r.Query.Attribute("levels");
+                if (levels.HasValue)
+                {
+                  foreach (var iRef in refs)
+                    iRef.Levels = levels.Value;
+                }
+                return refs;
+              })
+              .ToList();
+          }
         }
+        console.WriteLine("Done.");
 
         var script = new InstallScript
         {
@@ -116,6 +162,34 @@ namespace InnovatorAdmin.Cmd
 
         WritePackage(console, script, Output, MultipleDirectories, CleanOutput);
       });
+    }
+
+    private class QueryAndResult
+    {
+      public XElement Query { get; set; }
+      public IReadOnlyResult Result { get; set; }
+    }
+
+    private IEnumerable<XElement> GetQueryies(IEnumerable<XElement> items, IEnumerable<ExportAllType> defaultTypes)
+    {
+      foreach (var item in items)
+      {
+        if (item.Attribute("type")?.Value == "*")
+        {
+          foreach (var type in defaultTypes)
+            yield return XElement.Parse(type.ToString());
+        }
+        else
+        {
+          if (string.IsNullOrEmpty(item.Attribute("action")?.Value))
+            item.SetAttributeValue("action", "get");
+          if (string.IsNullOrEmpty(item.Attribute("type")?.Value)
+            && string.IsNullOrEmpty(item.Attribute("typeId")?.Value))
+            throw new NotSupportedException("Neither type nor typeId is specified");
+          item.SetAttributeValue("select", "config_id");
+          yield return item;
+        }
+      }
     }
   }
 }

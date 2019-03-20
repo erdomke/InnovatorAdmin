@@ -56,8 +56,8 @@
     <Reference Include="DeltaCompressionDotNet.PatchApi, Version=1.1.0.0, Culture=neutral, PublicKeyToken=3e8888ee913ed789, processorArchitecture=MSIL">
       <HintPath>..\packages\DeltaCompressionDotNet.1.1.0\lib\net20\DeltaCompressionDotNet.PatchApi.dll</HintPath>
     </Reference>
-    <Reference Include="innovator.client, Version=2018.12.6.1723, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Innovator.Client.2018.12.6.1723\lib\net45\innovator.client.dll</HintPath>
+    <Reference Include="innovator.client, Version=2019.3.6.1658, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Innovator.Client.2019.3.6.1658\lib\net45\innovator.client.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualBasic" />
