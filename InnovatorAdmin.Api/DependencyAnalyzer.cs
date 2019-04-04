@@ -178,8 +178,8 @@ namespace InnovatorAdmin
         }
         catch (ArgumentException)
         {
-          throw new ArgumentException(string.Format("Error: {0} is defined twice, once in {1} and another time in {2}.\r\nCurrently processing {3}",
-            defn, _allDefinitions[defn], itemRef, elem.OuterXml));
+          //throw new ArgumentException(string.Format("Error: {0} is defined twice, once in {1} and another time in {2}.\r\nCurrently processing {3}",
+          //  defn, _allDefinitions[defn], itemRef, elem.OuterXml));
         }
       }
       _dependencies.ExceptWith(_metadata.SystemIdentities);

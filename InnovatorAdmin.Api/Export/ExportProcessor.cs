@@ -1363,7 +1363,7 @@ namespace InnovatorAdmin
     private static int DefaultInstallOrder(InstallItem line)
     {
       var itemRef = line.Reference;
-      if (line.Reference.Type == "*Script")
+      if (line.Reference.Type == InstallItem.ScriptType)
         itemRef = ItemReference.FromElement(line.Script);
       return DefaultInstallOrder(itemRef);
     }
@@ -1665,52 +1665,65 @@ namespace InnovatorAdmin
     {
       switch (itemRef.Type)
       {
-        case "List": return 1;
-        case "Sequence": return 2;
-        case "Revision": return 3;
-        case "Variable": return 4;
-        case "Method": return 5;
-        case "Identity": return 6;
-        case "Member": return 7;
-        case "User": return 8;
-        case "Permission": return 9;
-        case "EMail Message": return 10;
-        case "Action": return 11;
-        case "Report": return 12;
-        case "Form": return 13;
-        case "Workflow Map": return 14;
-        case "Life Cycle Map": return 15;
-        case "Grid": return 16;
         case "ItemType":
           // Prioritize core types (e.g. ItemType, List, etc.)
           if (_dataModelIds.Contains(itemRef.Unique))
             return -20;
           else if (_coreItemTypeIds.Contains(itemRef.Unique))
             return -10;
-          return 17;
+          break;
         case "RelationshipType":
           // Prioritize core metadata types (e.g. Member)
           if (_dataModelIds.Contains(itemRef.Unique))
             return -20;
           else if (_coreRelationshipTypeIds.Contains(itemRef.Unique))
             return -10;
-          return 18;
-        case "Field": return 19;
-        case "Property": return 20;
-        case "View": return 21;
-        case "SQL": return 22;
-        case "Metric": return 23;
-        case "Chart": return 24;
-        case "Dashboard": return 25;
-        case "*Script":
+          break;
+        case InstallItem.ScriptType:
           if (itemRef.Unique.Split(' ').Concat(itemRef.KeyedName.Split(' ')).Any(p => _dataModelIds.Contains(p)))
             return -15;
           if (itemRef.Unique.Split(' ').Concat(itemRef.KeyedName.Split(' ')).Any(p => _coreItemTypeIds.Contains(p) || _coreRelationshipTypeIds.Contains(p)))
             return -5;
-          return 50;
-
+          var order = DefaultInstallOrder(itemRef.Unique.Split(':')[0]);
+          if (order < 120)
+            return order + 1;
+          break;
       }
-      return 99;
+      return DefaultInstallOrder(itemRef.Type);
+    }
+
+    private static int DefaultInstallOrder(string type)
+    {
+      switch (type)
+      {
+        case "List": return 10;
+        case "Sequence": return 20;
+        case "Revision": return 30;
+        case "Variable": return 40;
+        case "Method": return 50;
+        case "Identity": return 60;
+        case "Member": return 70;
+        case "User": return 80;
+        case "Permission": return 90;
+        case "EMail Message": return 100;
+        case "Action": return 110;
+        case "Report": return 120;
+        case "Form": return 130;
+        case "Workflow Map": return 140;
+        case "Life Cycle Map": return 150;
+        case "Grid": return 160;
+        case "ItemType": return 170;
+        case "RelationshipType": return 180;
+        case "Field": return 190;
+        case "Property": return 200;
+        case "View": return 210;
+        case "SQL": return 220;
+        case "Metric": return 230;
+        case "Chart": return 240;
+        case "Dashboard": return 250;
+        case InstallItem.ScriptType: return 500;
+      }
+      return 9999;
     }
 
 
