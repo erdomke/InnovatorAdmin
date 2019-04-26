@@ -351,7 +351,7 @@ namespace InnovatorAdmin
                 }
                 newColumn.PropMetadata(pMeta);
               }
-              catch (KeyNotFoundException)
+              catch (Exception)
               {
                 newColumn = new DataColumn(prop, typeof(string));
                 newColumn.IsUiVisible(string.IsNullOrEmpty(kvp.Key) || metadata == null);

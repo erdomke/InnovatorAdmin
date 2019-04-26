@@ -153,7 +153,7 @@ namespace InnovatorAdmin.Editor
             metadata = null;
         }
 
-        if (Conn != null)
+        if (Conn != null && itemType != null)
         {
           yield return ArasEditorProxy.ItemTypeAddScript(Conn, itemType);
         }
