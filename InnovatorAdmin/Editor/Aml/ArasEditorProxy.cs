@@ -118,6 +118,7 @@ namespace InnovatorAdmin.Editor
 
     private string[] _actions;
     private Editor.AmlEditorHelper _helper;
+    private Version _version;
 
     public string Action
     {
@@ -165,8 +166,8 @@ namespace InnovatorAdmin.Editor
       }
 
       _helper = new Editor.AmlEditorHelper();
-      var arasConn = Connection as Innovator.Client.Connection.IArasConnection;
-      _actions = GetActions(arasConn?.Version?.Major ?? -1).OrderBy(a => a).ToArray();
+      _version = Connection.FetchVersion(false).Wait();
+      _actions = GetActions(_version.Major).OrderBy(a => a).ToArray();
     }
 
     private IEnumerable<string> GetActions(int version)
@@ -940,8 +941,14 @@ namespace InnovatorAdmin.Editor
 
     public IPromise<IEnumerable<IEditorTreeNode>> GetNodes()
     {
-      return Promises.All(Connection.ApplyAsync(new Command("<Item/>").WithAction(CommandAction.GetMainTreeItems)
-          , true, false),
+      var tocPromise = _version.Major >= 12
+        ? Connection.ApplyAsync(@"<Item type='Method' action='GetCommandBarItems'>
+  <location_name>TOC</location_name>
+</Item>", true, false)
+        : Connection.ApplyAsync(new Command("<Item/>").WithAction(CommandAction.GetMainTreeItems)
+          , true, false);
+
+      return Promises.All(tocPromise,
           Connection.ApplyAsync(@"<Item type='ItemType' action='get'>
                               <name>ItemType</name>
                               <Relationships>
@@ -955,9 +962,9 @@ namespace InnovatorAdmin.Editor
         {
           _itemTypeReportNames = ((IReadOnlyResult)r[1]).AssertItem().Relationships()
             .Select(rep => rep.RelatedItem().Property("name").Value).ToArray();
-          return ((IReadOnlyResult)r[0]).AssertItem()
-            .Property("root")
-            .Elements().OfType<IReadOnlyItem>()
+          var node = TocNode.FromXml(((IReadOnlyResult)r[0]).CreateReader());
+          return node
+            .Children
             .Select(ProcessTreeNode)
             .Concat(Scripts());
         });
@@ -1018,46 +1025,53 @@ namespace InnovatorAdmin.Editor
       };
     }
 
-    private IEditorTreeNode ProcessTreeNode(IReadOnlyItem item)
+    private IEditorTreeNode ProcessTreeNode(TocNode node)
     {
-      switch (item.Classification().Value.ToLowerInvariant())
+      var savedSearch = node.References
+        .FirstOrDefault(r => string.Equals(r.TypeName(), "Saved Search", StringComparison.OrdinalIgnoreCase));
+      var itemType = node.References
+        .FirstOrDefault(r => string.Equals(r.TypeName(), "ItemType", StringComparison.OrdinalIgnoreCase));
+      if (savedSearch != null)
       {
-        case "tree node/savedsearchintoc":
-          return new EditorTreeNode()
-          {
-            Name = item.Property("label").Value,
-            Description = "Saved Search",
-            Image = Icons.XmlTag16,
-            HasChildren = item.Relationships("Tree Node Child").Any(),
-            Children = item.Relationships().Select(r => ProcessTreeNode(r.RelatedItem())),
-            ScriptGetter = () => Enumerable.Repeat(
-              new EditorScript()
-              {
-                Name = item.Property("label").Value,
-                Action = "ApplyItem",
-                Script = Connection.Apply("<Item type='SavedSearch' action='get' select='criteria' id='@0' />", item.Property("saved_search_id").Value)
-                  .AssertItem().Property("criteria").Value
-              }, 1)
-          };
-        case "tree node/itemtypeintoc":
-          return new EditorTreeNode()
-          {
-            Name = item.Property("label").Value,
-            Image = Icons.Class16,
-            Description = "ItemType: " + item.Property("name").Value,
-            HasChildren = true,
-            ScriptGetter = () => ItemTypeScripts(ArasMetadataProvider.Cached(Connection).ItemTypeById(item.Property("itemtype_id").Value)),
-            Children = ItemTypeChildren(item.Property("itemtype_id").Value)
-            .Concat(item.Relationships().Select(r => ProcessTreeNode(r.RelatedItem())))
-          };
-        default:
-          return new EditorTreeNode()
-          {
-            Name = item.Property("label").Value,
-            Image = Icons.Folder16,
-            HasChildren = item.Relationships("Tree Node Child").Any(),
-            Children = item.Relationships().Select(r => ProcessTreeNode(r.RelatedItem()))
-          };
+        return new EditorTreeNode()
+        {
+          Name = node.Label,
+          Description = "Saved Search",
+          Image = Icons.XmlTag16,
+          HasChildren = node.Children.Any(),
+          Children = node.Children.Select(ProcessTreeNode),
+          ScriptGetter = () => Enumerable.Repeat(
+            new EditorScript()
+            {
+              Name = node.Label,
+              Action = "ApplyItem",
+              Script = Connection.Apply("<Item type='SavedSearch' action='get' select='criteria' id='@0' />", savedSearch.Id())
+                .AssertItem().Property("criteria").Value
+            }, 1)
+        };
+      }
+      else if (itemType != null)
+      {
+        return new EditorTreeNode()
+        {
+          Name = node.Label,
+          Image = Icons.Class16,
+          Description = "ItemType: " + itemType.TypeName(),
+          HasChildren = true,
+          ScriptGetter = () => ItemTypeScripts(ArasMetadataProvider.Cached(Connection).ItemTypeById(itemType.Id())),
+          Children = ItemTypeChildren(itemType.Id())
+            .Concat(node.Children.Select(ProcessTreeNode))
+        };
+      }
+      else
+      {
+        return new EditorTreeNode()
+        {
+          Name = node.Label,
+          Image = Icons.Folder16,
+          HasChildren = node.Children.Any(),
+          Children = node.Children.Select(ProcessTreeNode)
+        };
       }
     }
 

@@ -52,8 +52,8 @@
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="innovator.client, Version=2019.3.6.1658, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Innovator.Client.2019.3.6.1658\lib\net45\innovator.client.dll</HintPath>
+    <Reference Include="innovator.client, Version=2019.5.11.21, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Innovator.Client.2019.5.11.21\lib\net45\innovator.client.dll</HintPath>
     </Reference>
     <Reference Include="LibGit2Sharp, Version=0.24.1.0, Culture=neutral, PublicKeyToken=7cbde695407f0333, processorArchitecture=MSIL">
       <HintPath>..\packages\LibGit2Sharp.0.24.1\lib\net40\LibGit2Sharp.dll</HintPath>
