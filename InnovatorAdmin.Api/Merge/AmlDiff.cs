@@ -163,14 +163,18 @@ namespace InnovatorAdmin
     private static bool TextDiffers(XElement x, XElement y)
     {
       // CData nodes inherit from XText, so this covers both
-      var xText = x.Nodes().OfType<XText>().FirstOrDefault();
-      var yText = y.Nodes().OfType<XText>().FirstOrDefault();
+      var xText = x.Nodes().OfType<XText>().FirstOrDefault()?.Value;
+      if (!x.Nodes().Any())
+        xText = (string)x.Attribute("_config_id");
+      var yText = y.Nodes().OfType<XText>().FirstOrDefault()?.Value;
+      if (!y.Nodes().Any())
+        yText = (string)y.Attribute("_config_id");
 
       if (xText == null && yText == null)
         return false;
       if (xText == null || yText == null)
         return true;
-      return !string.Equals(xText.Value, yText.Value);
+      return !string.Equals(xText, yText);
     }
 
     private static XElement EnsurePath(XElement path, XElement result)
