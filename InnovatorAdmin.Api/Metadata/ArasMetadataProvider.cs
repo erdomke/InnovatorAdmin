@@ -18,8 +18,6 @@ namespace InnovatorAdmin
     private Dictionary<string, ItemType> _itemTypesById;
     private Task<bool[]> _metadataComplete;
     private IEnumerable<Method> _methods = Enumerable.Empty<Method>();
-    private IEnumerable<ItemReference> _polyItemLists = Enumerable.Empty<ItemReference>();
-    private IEnumerable<ItemReference> _sequences = Enumerable.Empty<ItemReference>();
     private Dictionary<string, Sql> _sql;
     private Dictionary<string, ItemReference> _systemIdentities;
     private Dictionary<string, IEnumerable<ListValue>> _listValues
@@ -28,8 +26,6 @@ namespace InnovatorAdmin
       = new Dictionary<string, IEnumerable<IListValue>>();
     private readonly Dictionary<string, IEnumerable<IListValue>> _serverActions
       = new Dictionary<string, IEnumerable<IListValue>>();
-    private HashSet<string> _cmfGeneratedTypes = new HashSet<string>();
-    private Dictionary<string, ItemReference> _cmfLinkedTypes = new Dictionary<string, ItemReference>();
 
     /// <summary>
     /// Enumerable of methods where core = 1
@@ -62,16 +58,13 @@ namespace InnovatorAdmin
     /// <summary>
     /// Enumerable of all lists that are auto-generated for a polyitem item type
     /// </summary>
-    public IEnumerable<ItemReference> PolyItemLists
-    {
-      get { return _polyItemLists; }
-    }
+    public IEnumerable<ItemReference> PolyItemLists { get; private set; } = Enumerable.Empty<ItemReference>();
     /// <summary>
     /// Enumerable of all sequences
     /// </summary>
     public IEnumerable<ItemReference> Sequences
     {
-      get { return _sequences; }
+      get { return Sequences1; }
     }
     /// <summary>
     /// Enumerable of all system identities
@@ -84,12 +77,19 @@ namespace InnovatorAdmin
     /// <summary>
     /// Hashset of all CMF-generated ItemType IDs
     /// </summary>
-    public HashSet<string> CmfGeneratedTypes => _cmfGeneratedTypes;
+    public HashSet<string> CmfGeneratedTypes { get; private set; } = new HashSet<string>();
+
+    /// <summary>
+    /// Gets the IDs of all the TOC presentation configs.
+    /// </summary>
+    public HashSet<string> TocPresentationConfigs { get; } = new HashSet<string>();
 
     /// <summary>
     /// Dictionary of all ItemTypes linked from contentTypes
     /// </summary>
-    public Dictionary<string, ItemReference> CmfLinkedTypes => _cmfLinkedTypes;
+    public Dictionary<string, ItemReference> CmfLinkedTypes { get; private set; } = new Dictionary<string, ItemReference>();
+
+    public IEnumerable<ItemReference> Sequences1 { get; set; } = Enumerable.Empty<ItemReference>();
 
     /// <summary>
     /// Gets a reference to a system identity given the ID (if the ID matches a system identity;
@@ -413,6 +413,18 @@ namespace InnovatorAdmin
                                                 </Item>
                                               </linked_item_type>
                                             </Item>", true, false).ToTask();
+      var presentationConfigs = _conn.ApplyAsync(@"<Item type='ITPresentationConfiguration' action='get' select='id,related_id'>
+  <related_id>
+    <Item type='PresentationConfiguration' action='get' select='id'>
+      <name condition='like'>*_TOC_Configuration</name>
+      <color condition='is null'></color>
+      <Relationships>
+        <Item action='get' type='cui_PresentConfigWinSection' select='id' />
+        <Item action='get' type='PresentationCommandBarSection' select='id,related_id(id)' />
+      </Relationships>
+    </Item>
+  </related_id>
+</Item>", true, false).ToTask();
 
       _methods = (await methods).Items().Select(i =>
       {
@@ -458,30 +470,46 @@ namespace InnovatorAdmin
         };
       }
 
-      _polyItemLists = (await polyLists).Items()
+      PolyItemLists = (await polyLists).Items()
         .OfType<Innovator.Client.Model.Property>()
         .Select(i => new ItemReference("List", i.DataSource().Value)
         {
           KeyedName = i.DataSource().KeyedName().Value
         }).ToArray();
 
-      _sequences = (await sequences).Items().Select(i => ItemReference.FromFullItem(i, true)).ToArray();
+      Sequences1 = (await sequences).Items().Select(i => ItemReference.FromFullItem(i, true)).ToArray();
 
       try
       {
-        _cmfGeneratedTypes = new HashSet<string>((await elementTypes).Items().SelectMany(x =>
+        CmfGeneratedTypes = new HashSet<string>((await elementTypes).Items().SelectMany(x =>
         {
           var relations = x.Relationships().Select(y => y.Property("generated_type").Value).ToList();
           relations.Add(x.Property("generated_type").Value);
           return relations;
         }));
 
-        _cmfLinkedTypes = (await contentTypes).Items().ToDictionary(x => x.Property("linked_item_type").Value, y => ItemReference.FromFullItem(y, true));
+        CmfLinkedTypes = (await contentTypes).Items().ToDictionary(x => x.Property("linked_item_type").Value, y => ItemReference.FromFullItem(y, true));
       }
       catch (ServerException)
       {
         //TODO: Do something when cmf types don't exist
       }
+
+      try
+      {
+        TocPresentationConfigs.Clear();
+        TocPresentationConfigs.UnionWith((await presentationConfigs)
+          .Items()
+          .Select(i => i.RelatedItem())
+          .Where(i => i.Relationships().Count() == 1
+            && i.Relationships().Single().RelatedId().KeyedName().AsString("").EndsWith("_TOC_Content"))
+          .Select(i => i.Id()));
+      }
+      catch (ServerException)
+      {
+        //TODO: Do something
+      }
+
       return true;
     }
 
