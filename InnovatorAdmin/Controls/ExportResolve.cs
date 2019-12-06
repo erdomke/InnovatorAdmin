@@ -38,13 +38,12 @@ namespace InnovatorAdmin.Controls
       if (_items.Any(i => i.HasChanges))
       {
         var prog = new ProgressStep<ExportProcessor>(_wizard.ExportProcessor);
-        prog.MethodInvoke = e => {
-          _wizard.InstallScript.Lines = (from i in _items
-                                         where !i.HasChanges
-                                         select i.Item).ToList();
+        prog.MethodInvoke = e =>
+        {
+          _wizard.InstallScript.Lines = Enumerable.Empty<InstallItem>();
           e.Export(_wizard.InstallScript,
             e.NormalizeRequest(from i in _items
-                               where i.HasChanges
+                               where i.Type == InstallType.Create && i.Item.Reference.Type != "Member"
                                select i.Item.Reference));
         };
         prog.GoNextAction = () => _wizard.GoToStep(new ExportResolve());
