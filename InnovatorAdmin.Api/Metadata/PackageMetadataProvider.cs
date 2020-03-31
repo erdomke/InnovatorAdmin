@@ -140,6 +140,10 @@ namespace InnovatorAdmin
             .AsBoolean(_coreIds.Contains(item.ConfigId().Value ?? item.Id()));
           _methods.Add(method);
           break;
+        case "relationshiptype":
+          if (item.Property("relationship_id").HasValue())
+            Add(item.Property("relationship_id").AsItem());
+          break;
         case "itemtype":
           var itemType = new ItemType()
           {
