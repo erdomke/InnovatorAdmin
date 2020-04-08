@@ -2175,8 +2175,11 @@ namespace InnovatorAdmin
           break;
         case "RelationshipType":
           queryElem.SetAttribute("levels", "1");
-          var relId = queryElem.AppendChild(queryElem.OwnerDocument.CreateElement("relationship_id"));
-          relId.InnerXml = "<Item type=\"ItemType\" action=\"get\" levels=\"2\" config_path=\"Property|RelationshipType|View|Server Event|Item Action|ItemType Life Cycle|Allowed Workflow|TOC Access|TOC View|Client Event|Can Add|Allowed Permission|Item Report|Morphae\" />";
+          var relId = (XmlElement)queryElem.AppendChild(queryElem.OwnerDocument.CreateElement("relationship_id"));
+          var itemType = (XmlElement)relId.AppendChild(queryElem.OwnerDocument.CreateElement("Item"));
+          itemType.SetAttribute("type", "ItemType");
+          itemType.SetAttribute("action", "get");
+          SetQueryAttributes(itemType, "ItemType", levels - 1, Enumerable.Empty<ItemReference>());
           levels = 1;
           break;
         case "Action":
