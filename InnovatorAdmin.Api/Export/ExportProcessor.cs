@@ -232,7 +232,7 @@ namespace InnovatorAdmin
           // For versionable item types, get the latest generation
           var toResolve = (await _conn.ApplyAsync(@"<Item type='@0' action='get' select='config_id'>
   <id condition='in'>@1</id>
-  <is_current>0</is_current>
+  <is_current>1</is_current>
 </Item>", true, false, group.Key.Type, group.Select(i => i.Unique).ToList()).ConfigureAwait(false)).Items()
             .ToDictionary(i => i.Id(), i => i.ConfigId().Value);
           results.AddRange(group.Where(i => !toResolve.ContainsKey(i.Unique)));
@@ -1223,13 +1223,12 @@ namespace InnovatorAdmin
           switch (e.LocalName)
           {
             case "Item":
-              // For item tags that are float properties, or root level item tags, set them to float
+              // For item tags root level item tags, set them to float
               if (e.Parent().Parent() != null
                 && e.Parent().Parent().LocalName == "Item"
                 && e.Attribute("action", "") != "get")
               {
-                if (_metadata.ItemTypeByName(e.Parent().Parent().Attribute("type").ToLowerInvariant(), out parent)
-                  && parent.FloatProperties.Contains(e.Parent().LocalName))
+                if (_metadata.ItemTypeByName(e.Parent().Parent().Attribute("type").ToLowerInvariant(), out parent))
                 {
                   e.SetAttribute(XmlFlags.Attr_Float, "1");
                   e.SetAttribute("id", e.Element("config_id", e.Attribute("id")));
@@ -1242,11 +1241,10 @@ namespace InnovatorAdmin
               }
               break;
             default:
-              // For item properties (with no Item tag) set to float, make sure they float
+              // For item properties (with no Item tag), make sure they float
               if (!e.Elements().Any()
                 && e.Parent().LocalName == "Item"
-                && _metadata.ItemTypeByName(e.Parent().Attribute("type").ToLowerInvariant(), out parent)
-                && parent.FloatProperties.Contains(e.LocalName))
+                && _metadata.ItemTypeByName(e.Parent().Attribute("type").ToLowerInvariant(), out parent))
               {
                 refs.Add(Tuple.Create(itemType, e.InnerText));
                 e.SetAttribute(_needs_float, "1");
@@ -2525,24 +2523,6 @@ namespace InnovatorAdmin
             && _itemTypes.TryGetValue(rel.Property("relationship_id").Attribute("name").Value.ToLowerInvariant(), out relType))
           {
             result.Relationships.Add(relType);
-          }
-        }
-
-        var floatProps = _conn.Apply(@"<Item type='Property' action='get' select='source_id,item_behavior,name' related_expand='0'>
-                                        <data_type>item</data_type>
-                                        <data_source>
-                                          <Item type='ItemType' action='get'>
-                                            <is_versionable>1</is_versionable>
-                                          </Item>
-                                        </data_source>
-                                        <item_behavior>float</item_behavior>
-                                        <name condition='not in'>'config_id','id'</name>
-                                      </Item>").Items();
-        foreach (var floatProp in floatProps)
-        {
-          if (_itemTypes.TryGetValue(floatProp.SourceId().Attribute("name").Value.ToLowerInvariant(), out result))
-          {
-            result.FloatProperties.Add(floatProp.Property("name").AsString(""));
           }
         }
       }

@@ -9,25 +9,25 @@ namespace InnovatorAdmin
   public class ItemReference : IComparable<ItemReference>, IComparable, IEquatable<ItemReference>, ICloneable
   {
     private string _unique;
-    private string _baseUnique;
-    private string _type;
 
     public string KeyedName { get; set; }
     // Used when understanding dependencies
     public ItemReference Origin { get; set; }
-    public string Type
-    {
-      get { return _type; }
-      set { _type = value; }
-    }
-    public string Unique
+        public string Type { get; set; }
+        public string Unique
     {
       get { return _unique; }
       set
       {
-        _unique = value;
-        if (_unique.IndexOf("[config_id] = '") > 0)
-          _baseUnique = _unique.Substring(_unique.Length - 33, 32);
+        // Example string: "[Item_Type].[config_id] = 'DBE8A841D6B74C679B1B3B9515C0377A'"
+        if (!String.IsNullOrEmpty(value) && value.IndexOf("[config_id] = '") > 0)
+        {
+          _unique = value.Substring(value.Length - 33, 32);
+        }
+        else
+        {
+          _unique = value;
+        }
       }
     }
 
@@ -203,13 +203,13 @@ namespace InnovatorAdmin
 
     bool IEquatable<ItemReference>.Equals(ItemReference itemRef)
     {
-      return string.Equals(_baseUnique ?? _unique, itemRef._baseUnique ?? itemRef._unique, StringComparison.OrdinalIgnoreCase)
+      return string.Equals(_unique, itemRef._unique, StringComparison.OrdinalIgnoreCase)
         && string.Equals(this.Type, itemRef.Type, StringComparison.OrdinalIgnoreCase);
     }
 
     public override int GetHashCode()
     {
-      return (_baseUnique ?? _unique ?? "").ToUpperInvariant().GetHashCode()
+      return (_unique ?? "").ToUpperInvariant().GetHashCode()
         ^ (this.Type ?? "").ToUpperInvariant().GetHashCode();
     }
 
@@ -235,9 +235,8 @@ namespace InnovatorAdmin
       var result = new ItemReference();
       result.KeyedName = this.KeyedName;
       result.Origin = this.Origin;
-      result._type = this._type;
+      result.Type = this.Type;
       result._unique = this._unique;
-      result._baseUnique = this._baseUnique;
       return result;
     }
 
