@@ -37,7 +37,7 @@ namespace InnovatorAdmin
     /// <summary>
     /// Enumerable of methods where core = 1
     /// </summary>
-    public IEnumerable<ItemReference> AllMethods
+    public IEnumerable<Method> AllMethods
     {
       get { return _methods; }
     }
@@ -48,6 +48,7 @@ namespace InnovatorAdmin
     {
       get { return _itemTypesByName.Values; }
     }
+    
     /// <summary>
     /// Enumerable of all method names
     /// </summary>
@@ -55,6 +56,7 @@ namespace InnovatorAdmin
     {
       get { return _methods.Select(i => i.KeyedName); }
     }
+
     /// <summary>
     /// Enumerable of all lists that are auto-generated for a polyitem item type
     /// </summary>
@@ -377,7 +379,7 @@ namespace InnovatorAdmin
 
     private async Task<bool> ReloadSecondaryMetadata()
     {
-      var methods = _conn.ApplyAsync("<Item type='Method' action='get' select='config_id,core,name'></Item>", true, false).ToTask();
+      var methods = _conn.ApplyAsync("<Item type='Method' action='get' select='config_id,core,name,method_code,comments'></Item>", true, false).ToTask();
       var sysIdents = _conn.ApplyAsync(@"<Item type='Identity' action='get' select='id,name'>
                                       <name condition='in'>'World', 'Creator', 'Owner', 'Manager', 'Innovator Admin', 'Super User'</name>
                                     </Item>", true, true).ToTask();
@@ -426,14 +428,7 @@ namespace InnovatorAdmin
   </related_id>
 </Item>", true, false).ToTask();
 
-      _methods = (await methods).Items().Select(i =>
-      {
-        var method = Method.FromFullItem(i, false);
-        method.KeyedName = i.Property("name").AsString("");
-        method.IsCore = i.Property("core").AsBoolean(false);
-        return method;
-      }).ToArray();
-
+      _methods = (await methods).Items().Select(i => new Method(i)).ToList();
 
       _systemIdentities = (await sysIdents).Items()
         .Select(i =>

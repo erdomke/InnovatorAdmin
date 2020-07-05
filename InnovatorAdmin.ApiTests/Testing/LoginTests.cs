@@ -6,12 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InnovatorAdmin.Testing.Tests
+namespace InnovatorAdmin.Tests
 {
-  [TestClass()]
+  //[TestClass()]
   public class LoginTests
   {
-    [TestMethod()]
+    //[TestMethod()]
     public void GetEncryptedPasswordTest()
     {
       var password = "pass123";

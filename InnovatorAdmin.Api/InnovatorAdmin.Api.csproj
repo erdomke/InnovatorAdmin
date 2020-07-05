@@ -77,6 +77,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActionCompleteEventArgs.cs" />
+    <Compile Include="AmlTypeDefinition.cs" />
     <Compile Include="Merge\AmlDiff.cs" />
     <Compile Include="AmlSelectColumn.cs" />
     <Compile Include="Export\ListCompare.cs" />
@@ -136,6 +137,8 @@
     <Compile Include="Metadata\PropertyType.cs" />
     <Compile Include="Metadata\PropertyVisibility.cs" />
     <Compile Include="Metadata\Sql.cs" />
+    <Compile Include="AmlDataType.cs" />
+    <Compile Include="AmlDocumentation.cs" />
     <Compile Include="Plugin\IPluginContext.cs" />
     <Compile Include="Plugin\IPluginMethod.cs" />
     <Compile Include="Plugin\IPluginResult.cs" />
@@ -187,6 +190,7 @@
     <Compile Include="XmlNodeWriter.cs" />
     <Compile Include="XmlUtils.cs" />
     <Compile Include="XmlValueReader.cs" />
+    <Compile Include="XPathToken.cs" />
     <Compile Include="Xslt\ArasXsltExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

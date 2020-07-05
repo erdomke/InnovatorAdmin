@@ -134,11 +134,7 @@ namespace InnovatorAdmin
       switch (item.TypeName().ToLowerInvariant())
       {
         case "method":
-          var method = Method.FromFullItem(item, false);
-          method.KeyedName = item.Property("name").AsString("");
-          method.IsCore = item.Property("core")
-            .AsBoolean(_coreIds.Contains(item.ConfigId().Value ?? item.Id()));
-          _methods.Add(method);
+          _methods.Add(new Method(item, _coreIds.Contains(item.ConfigId().Value ?? item.Id())));
           break;
         case "relationshiptype":
           if (item.Property("relationship_id").HasValue())

@@ -1,28 +1,17 @@
 ﻿using Innovator.Client;
 using Innovator.Client.Model;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace InnovatorAdmin
 {
   public class Property : IListValue
   {
-    private List<string> _restrictions = new List<string>();
-
     public string Id { get; set; }
     public string Label { get; set; }
     public string Name { get; set; }
     public string DataSource { get; set; }
-    public List<string> Restrictions
-    {
-      get
-      {
-        return _restrictions;
-      }
-    }
+    public List<string> Restrictions { get; } = new List<string>();
     public string TypeName { get; set; }
     public PropertyType Type { get; set; }
     public int StoredLength { get; set; }
@@ -37,6 +26,7 @@ namespace InnovatorAdmin
     public int ColumnWidth { get; set; }
     public bool IsRequired { get; set; }
     public bool ReadOnly { get; set; }
+    public string Description { get; set; }
 
     public Property()
     {
@@ -115,13 +105,16 @@ namespace InnovatorAdmin
 
     internal static Property FromItem(IReadOnlyItem prop, ItemType type)
     {
-      var newProp = new Property(prop.Property("name").Value);
-      newProp.Id = prop.Id();
-      newProp.Label = prop.Property("label").Value;
+      var newProp = new Property(prop.Property("name").Value)
+      {
+        Id = prop.Id(),
+        Label = prop.Property("label").Value,
+        Precision = prop.Property("prec").AsInt(-1),
+        Scale = prop.Property("scale").AsInt(-1),
+        StoredLength = prop.Property("stored_length").AsInt(-1),
+        Description = prop.Property("help_text").AsString(null) ?? prop.Property("help_tooltip").AsString(null)
+      };
       newProp.SetType(prop.Property("data_type").Value);
-      newProp.Precision = prop.Property("prec").AsInt(-1);
-      newProp.Scale = prop.Property("scale").AsInt(-1);
-      newProp.StoredLength = prop.Property("stored_length").AsInt(-1);
       var foreign = prop.Property("foreign_property").AsItem();
       if (foreign.Exists)
       {
@@ -147,6 +140,27 @@ namespace InnovatorAdmin
       newProp.ReadOnly = prop.Property("readonly").AsBoolean(false);
 
       return newProp;
+    }
+
+    public IEnumerable<AmlTypeDefinition> GetTypeDefinitions()
+    {
+      switch (Type)
+      {
+        case PropertyType.boolean:
+          return new[] { AmlTypeDefinition.FromDefinition(AmlDataType.Boolean) };
+        case PropertyType.date:
+          return new[] { AmlTypeDefinition.FromDefinition(AmlDataType.Date) };
+        case PropertyType.item:
+          return Restrictions.Select(r => AmlTypeDefinition.FromDefinition(AmlDataType.Item, r));
+        case PropertyType.list:
+          return new[] { AmlTypeDefinition.FromDefinition(AmlDataType.List, DataSource) };
+        case PropertyType.number:
+          return new[] { AmlTypeDefinition.FromDefinition(AmlDataType.Float) };
+        case PropertyType.text:
+          return new[] { AmlTypeDefinition.FromDefinition(AmlDataType.String) };
+        default:
+          return new[] { AmlTypeDefinition.FromDefinition(AmlDataType.Unknown) };
+      }
     }
   }
 }

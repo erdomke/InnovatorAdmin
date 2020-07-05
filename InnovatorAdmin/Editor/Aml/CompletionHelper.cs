@@ -265,36 +265,20 @@ namespace InnovatorAdmin.Editor
                   case "":
                     break;
                   default:
-                    var attributes = new HashSet<string>
+                    var attributes = new Dictionary<string, string>
                     {
-                      "action"
-                      , "doGetItem"
-                      , "id"
-                      , "idlist"
-                      , "serverEvents"
-                      , "type"
-                      , "typeId"
-                      , "where"
+                      { "action", null }
+                      , { "doGetItem", null }
+                      , { "id", null }
+                      , { "idlist", null }
+                      , { "serverEvents", null }
+                      , { "type", null }
+                      , { "typeId", null }
+                      , { "where", null }
                     };
 
                     switch (path.Last().Action)
                     {
-                      case "copy":
-                        attributes.UnionWith(new string[]
-                        {
-                          "do_add",
-                          "do_lock"
-                        });
-                        break;
-                      case "copyAsIs":
-                      case "copyAsNew":
-                        attributes.UnionWith(new string[]
-                        {
-                          "do_lock",
-                          "lock_related",
-                          "useInputProperties",
-                        });
-                        break;
                       case "create":
                       case "get":
                       case "getItemAllVersions":
@@ -303,44 +287,34 @@ namespace InnovatorAdmin.Editor
                       case "getItemRelationships":
                       case "GetItemRepeatConfig":
                       case "recache":
-                        attributes.UnionWith(new string[]
-                        {
-                          "config_path"
-                          , "expand"
-                          , "isCriteria"
-                          , "language"
-                          , "levels"
-                          , "maxRecords"
-                          , "page"
-                          , "pagesize"
-                          , "orderBy"
-                          , "queryDate"
-                          , "queryType"
-                          , "relas_only"
-                          , "related_expand"
-                          , "returnMode"
-                          , "select"
-                          , "stdProps"
-                        });
+                        attributes["config_path"] = null;
+                        attributes["expand"] = null;
+                        attributes["isCriteria"] = null;
+                        attributes["language"] = null;
+                        attributes["levels"] = null;
+                        attributes["maxRecords"] = null;
+                        attributes["page"] = null;
+                        attributes["pagesize"] = null;
+                        attributes["orderBy"] = null;
+                        attributes["queryDate"] = null;
+                        attributes["queryType"] = null;
+                        attributes["relas_only"] = null;
+                        attributes["related_expand"] = null;
+                        attributes["returnMode"] = null;
+                        attributes["select"] = null;
+                        attributes["stdProps"] = null;
                         if (path.Last().Action == "create")
-                          attributes.Add("do_skipOnAfterAdd");
+                        {
+                          foreach (var attr in _actionDocs["add"].Attributes)
+                            attributes[attr.Name] = attr.Summary;
+                        }
                         break;
-                      case "getPermissions":
-                        attributes.Add("access_type");
-                        break;
-                      case "add":
-                      case "AddItem":
-                        attributes.Add("do_skipOnAfterAdd");
-                        break;
-                      case "edit":
-                      case "update":
-                        attributes.Add("version");
-                        attributes.Add("unlock");
-                        break;
-                      case "merge":
-                        attributes.Add("do_skipOnAfterAdd");
-                        attributes.Add("version");
-                        attributes.Add("unlock");
+                      default:
+                        if (TryGetActionDoc(path, out var doc))
+                        {
+                          foreach (var attr in doc.Attributes)
+                            attributes[attr.Name] = attr.Summary;
+                        }
                         break;
                     }
 
@@ -349,11 +323,11 @@ namespace InnovatorAdmin.Editor
                       && path[path.Count - 3].LocalName == "Item"
                       && path[path.Count - 3].Action == "GetItemRepeatConfig")
                     {
-                      attributes.Add("repeatProp");
-                      attributes.Add("repeatTimes");
+                      attributes["repeatProp"] = null;
+                      attributes["repeatTimes"] = null;
                     }
 
-                    items = Attributes(notExisting, attributes.ToArray()).ToArray();
+                    items = Attributes(notExisting, attributes).ToArray();
                     foreach (var item in items.OfType<AttributeCompletionData>().Where(i => i.Text == "where"))
                     {
                       item.QuoteChar = '"';
@@ -362,47 +336,48 @@ namespace InnovatorAdmin.Editor
                 }
                 break;
               default:
-                items = Attributes(notExisting, "condition", "is_null");
-                items = items.Concat(new[] {
-                  new BasicCompletionData() { Text = "between", Action = () => "condition='between'", Image = Icons.EnumValue16.Wpf },
-                  new BasicCompletionData() { Text = "eq", Action = () => "condition='eq'", Content = "eq (=, Equals)", Image = Icons.EnumValue16.Wpf },
-                  new BasicCompletionData() { Text = "ge", Action = () => "condition='ge'", Content = "ge (>=, Greather than or equal to)", Image = Icons.EnumValue16.Wpf },
-                  new BasicCompletionData() { Text = "gt", Action = () => "condition='gt'", Content = "gt (>, Greather than)", Image = Icons.EnumValue16.Wpf },
-                  new BasicCompletionData() { Text = "in", Action = () => "condition='in'", Image = Icons.EnumValue16.Wpf },
-                  new BasicCompletionData() { Text = "is", Action = () => "condition='is'", Image = Icons.EnumValue16.Wpf },
-                  new BasicCompletionData() { Text = "le", Action = () => "condition='le'", Content = "le (<=, Less than or equal to)", Image = Icons.EnumValue16.Wpf },
-                  new BasicCompletionData() { Text = "like", Action = () => "condition='like'", Description = "Both * and % are wildcards", Image = Icons.EnumValue16.Wpf },
-                  new BasicCompletionData() { Text = "lt", Action = () => "condition='lt'", Content = "lt (<, Less than)", Image = Icons.EnumValue16.Wpf },
-                  new BasicCompletionData() { Text = "ne", Action = () => "condition='ne'", Content = "ne (<>, !=, Not Equals)", Image = Icons.EnumValue16.Wpf }
-                });
-                if (path.Last().LocalName.StartsWith("xp-"))
-                  items = items.Concat(Attributes(notExisting, "set", "permission_id", "explicit"));
-                if (path.Last().Condition == "is defined" || path.Last().Condition == "is not defined")
-                  items = items.Concat(Attributes(notExisting, "defined_as"));
-                if (path.Last().Condition == "in")
-                  items = items.Concat(Attributes(notExisting, "by"));
+                if (TryGetActionDoc(path, out var actionDoc))
+                {
+                  items = Attributes(notExisting, actionDoc.Attributes.Select(a => new KeyValuePair<string, string>(a.Name, a.Summary))).ToArray();
+                }
+                else
+                {
+                  items = Attributes(notExisting, "condition", "is_null");
+                  items = items.Concat(new[] {
+                    new BasicCompletionData() { Text = "between", Action = () => "condition='between'", Image = Icons.EnumValue16.Wpf },
+                    new BasicCompletionData() { Text = "eq", Action = () => "condition='eq'", Content = "eq (=, Equals)", Image = Icons.EnumValue16.Wpf },
+                    new BasicCompletionData() { Text = "ge", Action = () => "condition='ge'", Content = "ge (>=, Greather than or equal to)", Image = Icons.EnumValue16.Wpf },
+                    new BasicCompletionData() { Text = "gt", Action = () => "condition='gt'", Content = "gt (>, Greather than)", Image = Icons.EnumValue16.Wpf },
+                    new BasicCompletionData() { Text = "in", Action = () => "condition='in'", Image = Icons.EnumValue16.Wpf },
+                    new BasicCompletionData() { Text = "is", Action = () => "condition='is'", Image = Icons.EnumValue16.Wpf },
+                    new BasicCompletionData() { Text = "le", Action = () => "condition='le'", Content = "le (<=, Less than or equal to)", Image = Icons.EnumValue16.Wpf },
+                    new BasicCompletionData() { Text = "like", Action = () => "condition='like'", Description = "Both * and % are wildcards", Image = Icons.EnumValue16.Wpf },
+                    new BasicCompletionData() { Text = "lt", Action = () => "condition='lt'", Content = "lt (<, Less than)", Image = Icons.EnumValue16.Wpf },
+                    new BasicCompletionData() { Text = "ne", Action = () => "condition='ne'", Content = "ne (<>, !=, Not Equals)", Image = Icons.EnumValue16.Wpf }
+                  });
+                  if (path.Last().LocalName.StartsWith("xp-"))
+                    items = items.Concat(Attributes(notExisting, "set", "permission_id", "explicit"));
+                  if (path.Last().Condition == "is defined" || path.Last().Condition == "is not defined")
+                    items = items.Concat(Attributes(notExisting, "defined_as"));
+                  if (path.Last().Condition == "in")
+                    items = items.Concat(Attributes(notExisting, "by"));
+                }
                 break;
             }
 
             filter = attrName;
             break;
           case XmlState.AttributeValue:
-            if (path.Last().LocalName == "Item")
+            if (TryGetActionDoc(path, out var attributeDoc) && attributeDoc.Attributes.Any(a => a.Name == attrName))
             {
-              //private enum RelActionType
-              //{
-              //  add,
-              //  delete,
-              //  purge,
-              //  update,
-              //  create,
-              //  edit,
-              //  merge,
-              //  get,
-              //  skip,
-              //  exclude
-              //}
-
+              var attribute = attributeDoc.Attributes.FirstOrDefault(a => a.Name == attrName);
+              if (attribute?.ValueTypes.Any() == true)
+              {
+                items = await Completions<AttributeValueCompletionData>(state, path, attribute, attribute.ValueTypes);
+              }
+            }
+            else if (path.Last().LocalName == "Item")
+            {
               ItemType itemType;
               switch (attrName)
               {
@@ -469,107 +444,31 @@ namespace InnovatorAdmin.Editor
                   if (version < 0 || version >= 11)
                     methods = methods.Concat(new string[] { "GetInheritedServerEvents", "getHistoryItems" });
 
-                  items = _metadata.MethodNames.Select(m => (ICompletionData)new AttributeValueCompletionData()
+                  items = _metadata.AllMethods.Select(m => (ICompletionData)new AttributeValueCompletionData()
                   {
-                    Text = m,
-                    Image = Icons.Method16.Wpf
+                    Text = m.KeyedName,
+                    Image = Icons.Method16.Wpf,
+                    Description = m.Documentation?.Summary
                   }).Concat(methods.Select(m => (ICompletionData)new AttributeValueCompletionData()
                   {
                     Text = m,
                     Image = Icons.MethodFriend16.Wpf
                   }));
                   break;
-                case "access_type":
-                  items = AttributeValues("can_add", "can_delete", "can_get", "can_update", "can_discover", "can_change_access");
-                  break;
                 case "expand":
                 case "doGetItem":
-                case "do_add":
-                case "do_lock":
-                case "do_skipOnAfterAdd":
                 case "isCriteria":
-                case "lock_related":
                 case "relas_only":
                 case "related_expand":
                 case "serverEvents":
                 case "stdProps":
-                case "unlock":
-                case "useInputProperties":
-                case "version":
-                  items = new ICompletionData[] {
-                    new AttributeValueCompletionData() {
-                      Text = "0",
-                      Image = Icons.EnumValue16.Wpf,
-                      Content = "0 (False)"
-                    },
-                    new AttributeValueCompletionData()
-                    {
-                      Text = "1",
-                      Image = Icons.EnumValue16.Wpf,
-                      Content = "1 (True)"
-                    }
-                  };
+                  items = await Completions<AttributeValueCompletionData>(state, path, null, new[] { AmlTypeDefinition.FromDefinition(AmlDataType.Boolean) });
                   break;
                 case "id":
-                  var newGuid = new AttributeValueCompletionData()
-                  {
-                    Text = "(New Guid)",
-                    Content = FormatText.ColorText("(New Guid)", Brushes.Purple),
-                    Action = () => Guid.NewGuid().ToString("N").ToUpperInvariant()
-                  };
-                  items = Enumerable.Repeat<ICompletionData>(newGuid, 1);
-                  var last = path.Last();
-                  if (last.Action != "add")
-                  {
-                    switch (last.Type)
-                    {
-                      case "ItemType":
-                        items = items.Concat(ItemTypeCompletion<AttributeValueCompletionData>(_metadata.ItemTypes, true));
-                        break;
-                      case "Method":
-                        items = items.Concat(_metadata.AllMethods.Select(r => new AttributeValueCompletionData()
-                        {
-                          Text = r.KeyedName,
-                          Action = () => r.Unique,
-                          Image = Icons.EnumValue16.Wpf
-                        }));
-                        break;
-                      case "SQL":
-                        items = items.Concat(_metadata.Sqls().Select(r => new AttributeValueCompletionData()
-                        {
-                          Text = r.KeyedName,
-                          Action = () => r.Unique,
-                          Image = Icons.EnumValue16.Wpf
-                        }));
-                        break;
-                      case "Identity":
-                        items = items.Concat(_metadata.SystemIdentities.Select(r => new AttributeValueCompletionData()
-                        {
-                          Text = r.KeyedName,
-                          Action = () => r.Unique,
-                          Image = Icons.EnumValue16.Wpf
-                        }));
-                        break;
-                      case "Sequence":
-                        items = items.Concat(_metadata.Sequences.Select(r => new AttributeValueCompletionData()
-                        {
-                          Text = r.KeyedName,
-                          Action = () => r.Unique,
-                          Image = Icons.EnumValue16.Wpf
-                        }));
-                        break;
-                      case "User":
-                        items = items.Concat(new ICompletionData[] { new AttributeValueCompletionData() {
-                          Action = () => _conn.UserId,
-                          Text = "Me",
-                          Image = Icons.EnumValue16.Wpf
-                        } });
-                        break;
-                    }
-                  }
+                  items = await Completions<AttributeValueCompletionData>(state, path, null, new[] { AmlTypeDefinition.FromDefinition(AmlDataType.Item, path.Last().Type) });
                   break;
                 case "queryDate":
-                  items = GetDateCompletions();
+                  items = await Completions<AttributeValueCompletionData>(state, path, null, new[] { AmlTypeDefinition.FromDefinition(AmlDataType.Date) });
                   break;
                 case "queryType":
                   items = AttributeValues("Effective", "Latest", "Released");
@@ -830,100 +729,135 @@ namespace InnovatorAdmin.Editor
             }
             else
             {
+              if (TryGetActionDoc(path, out var actionDoc))
+              {
+                var lastItem = path.LastOrDefault(n => !string.IsNullOrEmpty(n.Action));
+                if (actionDoc.Name == "Paths" && lastItem?.Action == "EvaluateActivity" && lastItem.Values.TryGetValue("Activity", out var itemValue))
+                {
+                  var act = (await _conn.ApplyAsync(@"<Item type='Activity' action='get' select='can_delegate,can_refuse' id='@0'>
+                                        <Relationships>
+                                          <Item type='Workflow Process Path' action='get' select='id,name,label,is_default'>
+                                          </Item>
+                                        </Relationships>
+                                      </Item>", true, false, itemValue).ToTask()).Items().ToArray();
+                  if (act.Length == 1)
+                  {
+                    var defaultPath = act[0].Relationships("Workflow Process Path")
+                      .FirstOrNullItem(i => i.Property("is_default").AsBoolean(false))
+                      ?? act[0].Relationships("Workflow Process Path").FirstOrNullItem();
+
+                    var paths = new List<ICompletionData>();
+                    if (act[0].Property("can_delegate").AsBoolean(true))
+                    {
+                      paths.Add(new BasicCompletionData()
+                      {
+                        Text = "<Path id='" + defaultPath.Id() + "'>Delegate</Path>",
+                        Image = Icons.XmlTag16.Wpf,
+                        Content = "Delegate"
+                      });
+                    }
+                    if (act[0].Property("can_refuse").AsBoolean(true))
+                    {
+                      paths.Add(new BasicCompletionData()
+                      {
+                        Text = "<Path id='" + defaultPath.Id() + "'>Refuse</Path>",
+                        Image = Icons.XmlTag16.Wpf,
+                        Content = "Refuse"
+                      });
+                    }
+                    paths.AddRange(act[0].Relationships("Workflow Process Path").Select(p => new BasicCompletionData()
+                    {
+                      Text = "<Path id='" + p.Id() + "'>" + p.Property("label").AsString(p.Property("name").Value) + "</Path>",
+                      Image = Icons.XmlTag16.Wpf,
+                      Content = p.Property("label").AsString(p.Property("name").Value)
+                    }));
+                    items = paths;
+                  }
+                }
+                else if (actionDoc.Elements.Any())
+                {
+                  items = actionDoc.Elements.Select(e => {
+                    return (ICompletionData)new BasicCompletionData()
+                    {
+                      Text = e.Name + string.Join("", e.Attributes
+                        .Where(a => a.ValueTypes.All(t => t.Type == AmlDataType.Enum) && a.ValueTypes.Sum(t => t.Values.Count()) == 1)
+                        .Select(a => $" {a.Name}='{a.ValueTypes.SelectMany(t => t.Values).Single()}'")),
+                      Image = Icons.XmlTag16.Wpf,
+                      Description = e.Summary
+                    };
+                  });
+                }
+                else if (actionDoc?.ValueTypes.Any() == true)
+                {
+                  items = await Completions<BasicCompletionData>(state, path, actionDoc, actionDoc.ValueTypes);
+                }
+              }
+
               var j = path.Count - 1;
               while (path[j].LocalName == "and" || path[j].LocalName == "not" || path[j].LocalName == "or") j--;
               var last = path[j];
-              if (last.LocalName == "Item")
-              {
-                if (state == XmlState.Tag)
-                {
-                  switch (last.Action)
-                  {
-                    case "AddHistory":
-                      items = Elements("action", "filename", "form_name");
-                      break;
-                    case "GetItemsForStructureBrowser":
-                      items = Elements("Item");
-                      break;
-                    case "EvaluateActivity":
-                      items = Elements("Activity", "ActivityAssignment", "Paths", "DelegateTo"
-                        , "Tasks", "Variables", "Authentication", "Comments", "Complete");
-                      break;
-                    case "instantiateWorkflow":
-                      items = Elements("WorkflowMap");
-                      break;
-                    case "promoteItem":
-                      items = Elements("state", "comments");
-                      break;
-                    case "Run Report":
-                      items = Elements("report_name", "AML");
-                      break;
-                    case "SQL Process":
-                      items = Elements("name", "PROCESS", "ARG1", "ARG2", "ARG3", "ARG4"
-                        , "ARG5", "ARG6", "ARG7", "ARG8", "ARG9");
-                      break;
-                    default:
-                      if (path.Any(n => n.LocalName == "GetNextSequence") || SoapAction == "GetNextSequence")
-                      {
-                        items = new[] {
-                          new BasicCompletionData() {
-                            Text = "name",
-                            Image = Icons.Property16.Wpf
-                          }
-                        };
-                      }
-                      else
-                      {
-                        // Completions for item properties
-                        var buffer = new List<ICompletionData>();
 
-                        buffer.Add(new BasicCompletionData("Relationships") { Image = Icons.XmlTag16.Wpf });
-                        if (last.Action == "get")
+              var includeProperties = items?.Any() != true || (!_actionDocs.ContainsKey(last.Action ?? "") && last.Type != "Method");
+              if (includeProperties && last.LocalName == "Item" && state == XmlState.Tag)
+              {
+                if (path.Any(n => n.LocalName == "GetNextSequence") || SoapAction == "GetNextSequence")
+                {
+                  items = new[] {
+                    new BasicCompletionData() {
+                      Text = "name",
+                      Image = Icons.Property16.Wpf
+                    }
+                  };
+                }
+                else
+                {
+                  // Completions for item properties
+                  var buffer = new List<ICompletionData>(items ?? Enumerable.Empty<ICompletionData>());
+                  if (!buffer.Any(d => d.Text == "Relationships"))
+                    buffer.Add(new BasicCompletionData("Relationships") { Image = Icons.XmlTag16.Wpf });
+                  if (last.Action == "get")
+                  {
+                    buffer.Add(new BasicCompletionData("and") { Image = Icons.Operator16.Wpf });
+                    buffer.Add(new BasicCompletionData("not") { Image = Icons.Operator16.Wpf });
+                    buffer.Add(new BasicCompletionData("or") { Image = Icons.Operator16.Wpf });
+                  }
+                  ItemType itemType;
+                  if (!string.IsNullOrEmpty(last.Type)
+                    && _metadata.ItemTypeByName(last.Type, out itemType))
+                  {
+                    switch (last.Action)
+                    {
+                      case "add":
+                      case "create":
+                      case "edit":
+                      case "update":
+                      case "merge":
+                        items = await new PropertyCompletionFactory(_metadata, itemType)
                         {
-                          buffer.Add(new BasicCompletionData("and") { Image = Icons.Operator16.Wpf });
-                          buffer.Add(new BasicCompletionData("not") { Image = Icons.Operator16.Wpf });
-                          buffer.Add(new BasicCompletionData("or") { Image = Icons.Operator16.Wpf });
+                          Filter = p => !_systemControlledProperties.Contains(p.Name)
+                        }.GetPromise(buffer).ToTask();
+                        break;
+                      default:
+                        items = await new PropertyCompletionFactory(_metadata, itemType).GetPromise(buffer).ToTask();
+                        break;
+                    }
+                    if (itemType.Name == "File")
+                    {
+                      items = items.Concat(new[] {
+                        new BasicCompletionData() {
+                          Text = "actual_filename",
+                          Image = Icons.Property16.Wpf
+                        },
+                        new BasicCompletionData() {
+                          Text = "actual_data",
+                          Image = Icons.Property16.Wpf
                         }
-                        ItemType itemType;
-                        if (!string.IsNullOrEmpty(last.Type)
-                          && _metadata.ItemTypeByName(last.Type, out itemType))
-                        {
-                          switch (last.Action)
-                          {
-                            case "add":
-                            case "create":
-                            case "edit":
-                            case "update":
-                            case "merge":
-                              items = await new PropertyCompletionFactory(_metadata, itemType)
-                              {
-                                Filter = p => !_systemControlledProperties.Contains(p.Name)
-                              }.GetPromise(buffer).ToTask();
-                              break;
-                            default:
-                              items = await new PropertyCompletionFactory(_metadata, itemType).GetPromise(buffer).ToTask();
-                              break;
-                          }
-                          if (itemType.Name == "File")
-                          {
-                            items = items.Concat(new[] {
-                              new BasicCompletionData() {
-                                Text = "actual_filename",
-                                Image = Icons.Property16.Wpf
-                              },
-                              new BasicCompletionData() {
-                                Text = "actual_data",
-                                Image = Icons.Property16.Wpf
-                              }
-                            });
-                          }
-                        }
-                        else
-                        {
-                          items = buffer;
-                        }
-                      }
-                      break;
+                      });
+                    }
+                  }
+                  else
+                  {
+                    items = buffer;
                   }
                 }
               }
@@ -931,21 +865,10 @@ namespace InnovatorAdmin.Editor
               {
                 items = Elements("inBasketViewMode", "workflowTasks", "projectTasks", "actionTasks", "userID");
               }
-              else if (state == XmlState.Tag && last.LocalName == "Paths" && path.Count > 1 && path[path.Count - 2].Action == "EvaluateActivity")
-              {
-                items = Elements("Path");
-              }
-              else if (state == XmlState.Tag && last.LocalName == "Tasks" && path.Count > 1 && path[path.Count - 2].Action == "EvaluateActivity")
-              {
-                items = Elements("Task");
-              }
-              else if (state == XmlState.Tag && last.LocalName == "Variables" && path.Count > 1 && path[path.Count - 2].Action == "EvaluateActivity")
-              {
-                items = Elements("Variable");
-              }
-              else if (path.Count > 1)
+              else if (path.Count > 1 && items?.Any() != true)
               {
                 var lastItem = path.LastOrDefault(n => n.LocalName == "Item");
+
                 if (lastItem != null)
                 {
                   if (path.Last().LocalName == "Relationships")
@@ -971,11 +894,7 @@ namespace InnovatorAdmin.Editor
                   else
                   {
                     ItemType itemType;
-                    if (lastItem.Action == "Run Report" && path.Last().LocalName.Equals("AML"))
-                    {
-                      items = Elements("Item");
-                    }
-                    else if (!string.IsNullOrEmpty(lastItem.Type)
+                    if (!string.IsNullOrEmpty(lastItem.Type)
                       && _metadata.ItemTypeByName(lastItem.Type, out itemType))
                     {
                       items = await PropertyValueCompletion(itemType, state, lastItem, path).ToPromise().ToTask();
@@ -1043,6 +962,17 @@ namespace InnovatorAdmin.Editor
         Image = Icons.Field16.Wpf
       });
     }
+
+    private static IEnumerable<ICompletionData> Attributes(Func<string, bool> filter, IEnumerable<KeyValuePair<string, string>> values)
+    {
+      return values.Where(k => filter(k.Key)).Select(k => (ICompletionData)new AttributeCompletionData()
+      {
+        Text = k.Key,
+        Image = Icons.Field16.Wpf,
+        Description = k.Value
+      });
+    }
+
     private static IEnumerable<ICompletionData> AttributeValues(params string[] values)
     {
       return values.Select(v => (ICompletionData)new AttributeValueCompletionData()
@@ -1050,6 +980,230 @@ namespace InnovatorAdmin.Editor
         Text = v,
         Image = Icons.EnumValue16.Wpf
       });
+    }
+
+    private async Task<IEnumerable<ICompletionData>> Completions<T>(XmlState state, IList<AmlNode> path, AmlDocumentation doc, IEnumerable<AmlTypeDefinition> typeDefinitions) where T : BasicCompletionData, new()
+    {
+      var results = new List<ICompletionData>();
+      var action = path.LastOrDefault(n => !string.IsNullOrEmpty(n.Action))?.Action;
+      foreach (var typeDefn in typeDefinitions)
+      {
+        switch (typeDefn.Type)
+        {
+          case AmlDataType.Boolean:
+            results.Add(new T() {
+              Text = "0",
+              Image = Icons.EnumValue16.Wpf,
+              Content = "0 (False)"
+            });
+            results.Add(new T()
+            {
+              Text = "1",
+              Image = Icons.EnumValue16.Wpf,
+              Content = "1 (True)"
+            });
+            break;
+          case AmlDataType.Date:
+            results.Add(new T() {
+              Text = DateTime.Now.ToString("s"),
+              Image = Icons.EnumValue16.Wpf,
+              Content = DateTime.Now.ToString("s") + " (Now)"
+            });
+            break;
+          case AmlDataType.Enum:
+            results.AddRange(typeDefn.Values.Select(v => (ICompletionData)new T()
+            {
+              Text = v,
+              Image = Icons.EnumValue16.Wpf
+            }));
+            break;
+          case AmlDataType.Item:
+            var itemTypeName = typeDefn.Source;
+            if (string.IsNullOrEmpty(itemTypeName) && state == XmlState.Other && !string.IsNullOrEmpty(path.Last().Type))
+              itemTypeName = path.Last().Type;
+
+            results.Add(state == XmlState.AttributeValue ? new T()
+            {
+              Text = "(New Guid)",
+              Content = FormatText.ColorText("(New Guid)", Brushes.Purple),
+              Action = () => Guid.NewGuid().ToString("N").ToUpperInvariant()
+            } : new T()
+            {
+              Text = (state != XmlState.Tag ? "<" : "") + "Item type='" + itemTypeName + "'",
+              Image = Icons.XmlTag16.Wpf
+            });
+
+            if (action != "add" || state != XmlState.AttributeValue)
+            {
+              switch (itemTypeName)
+              {
+                case "ItemType":
+                  var useKeyedName = doc?.Name == "type" && state == XmlState.AttributeValue;
+                  results.AddRange(ItemTypeCompletion<T>(_metadata.ItemTypes, !useKeyedName));
+                  break;
+                case "Method":
+                  results.AddRange(_metadata.AllMethods.Select(r => new T()
+                  {
+                    Text = r.KeyedName,
+                    Action = () => r.Unique,
+                    Image = Icons.Method16.Wpf,
+                    Description = r.Documentation?.Summary
+                  }));
+                  break;
+                case "SQL":
+                  results.AddRange(_metadata.Sqls().Select(r => new T()
+                  {
+                    Text = r.KeyedName,
+                    Action = () => r.Unique,
+                    Image = Icons.EnumValue16.Wpf
+                  }));
+                  break;
+                case "Identity":
+                  results.AddRange(_metadata.SystemIdentities.Select(r => new T()
+                  {
+                    Text = r.KeyedName,
+                    Action = () => r.Unique,
+                    Image = Icons.EnumValue16.Wpf
+                  }));
+                  break;
+                case "Sequence":
+                  results.AddRange(_metadata.Sequences.Select(r => new T()
+                  {
+                    Text = r.KeyedName,
+                    Action = () => r.Unique,
+                    Image = Icons.EnumValue16.Wpf
+                  }));
+                  break;
+                case "User":
+                  results.Add(new T() {
+                    Action = () => _conn.UserId,
+                    Text = "Me",
+                    Image = Icons.EnumValue16.Wpf
+                  });
+                  break;
+                case "File":
+                  if (state != XmlState.AttributeValue)
+                  {
+                    results.Add(new T()
+                    {
+                      Text = "Select file to upload...",
+                      Content = FormatText.ColorText("Select file to upload...", Brushes.Purple),
+                      Action = () =>
+                      {
+                        using (var dialog = new System.Windows.Forms.OpenFileDialog())
+                        {
+                          dialog.Multiselect = false;
+                          if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                          {
+                            var upload = _conn.CreateUploadCommand();
+                            var query = upload.AddFile(Guid.NewGuid().ToString("N").ToUpperInvariant(),
+                              dialog.FileName);
+                            if (state == XmlState.Tag)
+                              query = query.TrimStart('<');
+                            return query;
+                          }
+                        }
+                        return string.Empty;
+                      }
+                    });
+                  }
+                  break;
+              }
+
+              if (state != XmlState.AttributeValue && itemTypeName != "File")
+                results.Add(new ItemPropertyCompletionData(_conn, path, itemTypeName));
+
+              if (action == "EvaluateActivity")
+              {
+                var lastItem = path.LastOrDefault(n => !string.IsNullOrEmpty(n.Action));
+                string itemValue;
+                if (itemTypeName == "Activity")
+                {
+                  results.Clear();
+                  results.Add(new T()
+                  {
+                    Text = "Select context item...",
+                    Content = FormatText.ColorText("Select context item...", Brushes.Purple),
+                    Action = () =>
+                    {
+                      var items = EditorWindow.GetItems(_conn, "<Item action='get'", 18).ToArray();
+                      if (items.Length != 1)
+                        return string.Empty;
+
+                      var activities = _conn.Apply(@"<Item type='Workflow' action='get' select='related_id'>
+  <source_id>@0</source_id>
+  <related_id>
+    <Item type='Workflow Process' action='get' select='id'>
+      <state>Active</state>
+      <locked_by_id condition='is null' />
+      <Relationships>
+        <Item action='get' type='Workflow Process Activity' select='related_id'>
+          <related_id>
+            <Item type='Activity' action='get' select='id'>
+              <state>Active</state>
+              <is_auto>0</is_auto>
+            </Item>
+          </related_id>
+        </Item>
+      </Relationships>
+    </Item>
+  </related_id>
+</Item>", items[0].Unique).Items().ToArray();
+                      if (activities.Length != 1)
+                        return string.Empty;
+                      var activity = activities[0].RelatedItem().Relationships().Single().RelatedItem();
+
+                      return activity.Id() + "<!-- " + activity.Property("id").KeyedName().Value + " for " + items[0].KeyedName + "-->";
+                    }
+                  });
+                }
+                else if (itemTypeName == "Activity Assignment" && lastItem.Values.TryGetValue("Activity", out itemValue))
+                {
+                  var assn = (await _conn.ApplyAsync(@"<Item type='Activity Assignment' action='get' select='id,related_id' related_expand='0'>
+  <is_disabled>0</is_disabled>
+  <closed_on condition='is null'></closed_on>
+  <source_id>@0</source_id>
+</Item>", true, false, itemValue).ToTask()).Items().ToList();
+                  results.Clear();
+                  results.AddRange(assn.Select(a => new T()
+                  {
+                    Text = a.Id() + "<!-- " + a.RelatedId().KeyedName().Value + " -->",
+                    Image = Icons.EnumValue16.Wpf,
+                    Content = a.RelatedId().KeyedName().Value
+                  }));
+                }
+              }
+            }
+            break;
+          case AmlDataType.List:
+          case AmlDataType.MultiValueList:
+            var listId = typeDefn.Source;
+            if (!listId.IsGuid())
+              listId = (await _conn.ApplyAsync("<Item type='List' action='get' select='id'><keyed_name>@0</keyed_name></Item>", true, false, typeDefn.Source)).AssertItem().Id();
+            var values = await _metadata.ListValues(listId).ToTask();
+
+            var hash = new HashSet<string>(values.Select(v => v.Value), StringComparer.CurrentCultureIgnoreCase);
+            results.AddRange(values
+              .Select(v => new T()
+              {
+                Text = v.Value,
+                Image = Icons.EnumValue16.Wpf
+              })
+              .Concat(values.Where(v => !string.IsNullOrWhiteSpace(v.Label) && !hash.Contains(v.Label))
+                .Select(v => new T()
+                {
+                  Text = v.Label + " (" + v.Value + ")",
+                  Image = Icons.EnumValue16.Wpf,
+                  Description = v.Value,
+                  Content = FormatText.MutedText(v.Label + " (" + v.Value + ")"),
+                  Action = () => v.Value
+                })));
+            break;
+          default:
+            break;
+        }
+      }
+      return results;
     }
 
     private IEnumerable<ICompletionData> ItemTypeCompletion<T>(IEnumerable<ItemType> itemTypes, bool insertId = false) where T : BasicCompletionData, new()
@@ -1064,338 +1218,95 @@ namespace InnovatorAdmin.Editor
         return result;
       }).Concat(itemTypes.Where(i => !string.IsNullOrWhiteSpace(i.Label) &&
                                      !string.Equals(i.Name, i.Label, StringComparison.OrdinalIgnoreCase))
-          .Select(i =>
-          {
-            var result = new T();
-            result.Image = Icons.Class16.Wpf;
-            result.Text = i.Label;
-            result.Description = i.Name;
-            result.Content = FormatText.MutedText(i.Label);
-            if (insertId)
-              result.Action = () => i.Id;
-            else
-              result.Action = () => i.Name;
-            return result;
-          }));
+        .Select(i =>
+        {
+          var result = new T();
+          result.Image = Icons.Class16.Wpf;
+          result.Text = i.Label;
+          result.Description = i.Name;
+          result.Content = FormatText.MutedText(i.Label);
+          if (insertId)
+            result.Action = () => i.Id;
+          else
+            result.Action = () => i.Name;
+          return result;
+        }));
     }
-
-    private static ICompletionData[] _boolCompletions = new ICompletionData[] {
-      new BasicCompletionData() {
-        Text = "0",
-        Content = "0 (False)"
-      },
-      new BasicCompletionData()
-      {
-        Text = "1",
-        Content = "1 (True)"
-      }
-    };
 
     private async Task<IEnumerable<ICompletionData>> PropertyValueCompletion(ItemType itemType, XmlState state, AmlNode lastItem, IList<AmlNode> path)
     {
       string itemValue;
 
-      if (lastItem.Action == "EvaluateActivity")
+      var p = await _metadata.GetProperty(itemType, path.Last().LocalName).ToTask();
+      if (p.Name == "classification")
       {
-        var lastName = path.Last().LocalName;
-        if (lastName == "Activity")
+        var paths = await _metadata.GetClassPaths(itemType).ToTask();
+        return paths.GetCompletions<BasicCompletionData>();
+      }
+      else if (p.Name == "name" && itemType.Name == "Property"
+        && lastItem.Values.TryGetValue("label", out itemValue)
+        && IsUpdateAction(lastItem.Action))
+      {
+        return Enumerable.Repeat(PropNameFromLabel(itemValue), 1).GetCompletions<BasicCompletionData>();
+      }
+      else if (p.Name == "name" && itemType.Name == "xPropertyDefinition"
+        && lastItem.Values.TryGetValue("label", out itemValue)
+        && IsUpdateAction(lastItem.Action))
+      {
+        return Enumerable.Repeat("xp-" + PropNameFromLabel(itemValue), 1).GetCompletions<BasicCompletionData>();
+      }
+      else if ((itemType.Name == "Value" || itemType.Name == "Filter Value")
+        && ((p.Name == "value" && lastItem.Values.TryGetValue("label", out itemValue))
+          || (p.Name == "label" && lastItem.Values.TryGetValue("value", out itemValue)))
+        && IsUpdateAction(lastItem.Action))
+      {
+        return new string[] { itemValue }.GetCompletions<BasicCompletionData>();
+      }
+      else if ((p.Name == "name" || p.Name == "keyed_name") && itemType.Name == "Property" && lastItem.Action == "get"
+        && lastItem.Values.TryGetValue("source_id", out itemValue))
+      {
+        var parentType = _metadata.ItemTypeById(itemValue);
+        return await new PropertyCompletionFactory(_metadata, parentType).GetPromise().ToTask();
+      }
+      else if (p.Name == "class_path" && itemType.Name == "Property"
+        && lastItem.Values.TryGetValue("source_id", out itemValue))
+      {
+        var parentType = _metadata.ItemTypeById(itemValue);
+        var paths = await _metadata.GetClassPaths(parentType).ToTask();
+        return paths.GetCompletions<BasicCompletionData>();
+      }
+      else if ((p.Name == "name" || p.Name == "keyed_name") && itemType.Name == "Method" && lastItem.Action == "get")
+      {
+        return _metadata.MethodNames.GetCompletions<BasicCompletionData>();
+      }
+      else if ((p.Name == "name" || p.Name == "keyed_name") && itemType.Name == "ItemType" && lastItem.Action == "get")
+      {
+        return ItemTypeCompletion<BasicCompletionData>(_metadata.ItemTypes);
+      }
+      else if ((p.Name == "name" || p.Name == "keyed_name") && itemType.Name == "SQL" && lastItem.Action == "get")
+      {
+        return _metadata.Sqls().Select(s => new BasicCompletionData()
         {
-          return new ICompletionData[]
-          {
-            new BasicCompletionData()
-            {
-              Text = "Select context item...",
-              Content = FormatText.ColorText("Select context item...", Brushes.Purple),
-              Action = () =>
-              {
-                var items = EditorWindow.GetItems(_conn, "<Item action='get'", 18).ToArray();
-                if (items.Length != 1)
-                  return string.Empty;
-
-                var activities = _conn.Apply(@"<Item type='Activity' action='get' select='id'>
-                                                  <id condition='in'>(select act.id
-                                                from innovator.[Workflow] w
-                                                inner join innovator.[Workflow_Process] wp
-                                                on wp.id = w.related_id
-                                                inner join innovator.[Workflow_Process_Activity] wpa
-                                                on wpa.source_id = w.related_id
-                                                inner join innovator.[Activity] act
-                                                on act.id = wpa.related_id
-                                                where w.source_id = @0
-                                                and wp.state = 'Active'
-                                                and wp.locked_by_id is null
-                                                and act.state = 'Active'
-                                                and act.is_auto = '0')</id>
-                                                </Item>", items[0].Unique).Items().ToArray();
-                if (activities.Length != 1)
-                  return string.Empty;
-
-                return activities[0].Id() + "<!-- " + activities[0].Property("id").KeyedName().Value + " for " + items[0].KeyedName + "-->";
-              }
-            }
-          };
-        }
-        else if (lastName == "ActivityAssignment" && lastItem.Values.TryGetValue("Activity", out itemValue))
-        {
-          var assn = (await _conn.ApplyAsync(@"<Item type='Activity Assignment' action='get' select='id,related_id' related_expand='0'>
-                                                <is_disabled>0</is_disabled>
-                                                <closed_on condition='is null'></closed_on>
-                                                <source_id>@0</source_id>
-                                              </Item>", true, false, itemValue).ToTask()).Items().ToArray();
-          if (assn.Length == 1)
-            return Enumerable.Repeat(new BasicCompletionData()
-            {
-              Text = assn[0].Id() + "<!-- " + assn[0].RelatedId().KeyedName().Value + " -->",
-              Image = Icons.EnumValue16.Wpf,
-              Content = assn[0].RelatedId().KeyedName().Value
-            }, 1);
-          return Enumerable.Empty<ICompletionData>();
-        }
-        else if (lastName == "Paths" && lastItem.Values.TryGetValue("Activity", out itemValue))
-        {
-          var act = (await _conn.ApplyAsync(@"<Item type='Activity' action='get' select='can_delegate,can_refuse' id='@0'>
-                                              <Relationships>
-                                                <Item type='Workflow Process Path' action='get' select='id,name,label,is_default'>
-                                                </Item>
-                                              </Relationships>
-                                            </Item>", true, false, itemValue).ToTask()).Items().ToArray();
-          if (act.Length != 1)
-            return Enumerable.Empty<ICompletionData>();
-
-          var defaultPath = act[0].Relationships("Workflow Process Path")
-            .FirstOrNullItem(i => i.Property("is_default").AsBoolean(false))
-            ?? act[0].Relationships("Workflow Process Path").FirstOrNullItem();
-
-          var paths = new List<ICompletionData>();
-          if (act[0].Property("can_delegate").AsBoolean(true))
-          {
-            paths.Add(new BasicCompletionData()
-            {
-              Text = "<Path id='" + defaultPath.Id() + "'>Delegate</Path>",
-              Image = Icons.XmlTag16.Wpf,
-              Content = "Delegate"
-            });
-          }
-          if (act[0].Property("can_refuse").AsBoolean(true))
-          {
-            paths.Add(new BasicCompletionData()
-            {
-              Text = "<Path id='" + defaultPath.Id() + "'>Refuse</Path>",
-              Image = Icons.XmlTag16.Wpf,
-              Content = "Refuse"
-            });
-          }
-          paths.AddRange(act[0].Relationships("Workflow Process Path").Select(p => new BasicCompletionData()
-          {
-            Text = "<Path id='" + p.Id() + "'>" + p.Property("label").AsString(p.Property("name").Value) + "</Path>",
-            Image = Icons.XmlTag16.Wpf,
-            Content = p.Property("label").AsString(p.Property("name").Value)
-          }));
-          return paths;
-        }
-        else if (lastName == "Complete")
-        {
-          return _boolCompletions;
-        }
-        else
-        {
-          return Enumerable.Empty<ICompletionData>();
-        }
+          Text = s.KeyedName,
+          Image = Icons.EnumValue16.Wpf
+        });
+      }
+      else if (p.Name == "state" && lastItem.Action == "promoteItem"
+        && !string.IsNullOrEmpty(lastItem.Type) && !string.IsNullOrEmpty(lastItem.Id))
+      {
+        var stateResult = await _conn.ApplyAsync(@"<Item type='@0' action='getItemNextStates' id='@1'></Item>"
+          , true, false, lastItem.Type, lastItem.Id).ToTask();
+        var states = stateResult.Items().Select(i => i.Property("to_state").AsItem().Property("name").Value).ToArray();
+        return states.GetCompletions<BasicCompletionData>();
+      }
+      else if (p.Name == "state" && !string.IsNullOrEmpty(lastItem.Type))
+      {
+        var states = await _metadata.ItemTypeStates(itemType);
+        return states.GetCompletions<BasicCompletionData>();
       }
       else
       {
-        var p = await _metadata.GetProperty(itemType, path.Last().LocalName).ToTask();
-
-        if (p.Type == PropertyType.item && p.Restrictions.Any())
-        {
-          var completions = p.Restrictions
-            .Select(type => (ICompletionData)new BasicCompletionData()
-            {
-              Text = (state != XmlState.Tag ? "<" : "") + "Item type='" + type + "'",
-              Image = Icons.XmlTag16.Wpf
-            });
-
-          if (p.Restrictions.Any(r => string.Equals(r, "File", StringComparison.OrdinalIgnoreCase)))
-          {
-            var uploadComplete = new BasicCompletionData()
-            {
-              Text = "Select file to upload...",
-              Content = FormatText.ColorText("Select file to upload...", Brushes.Purple),
-              Action = () =>
-              {
-                using (var dialog = new System.Windows.Forms.OpenFileDialog())
-                {
-                  dialog.Multiselect = false;
-                  if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                  {
-                    var upload = _conn.CreateUploadCommand();
-                    var query = upload.AddFile(Guid.NewGuid().ToString("N").ToUpperInvariant(),
-                      dialog.FileName);
-                    if (state == XmlState.Tag)
-                      query = query.TrimStart('<');
-                    return query;
-                  }
-                }
-                return string.Empty;
-              }
-            };
-            completions = completions.Concat(Enumerable.Repeat(uploadComplete, 1));
-          }
-          else
-          {
-            completions = completions.Concat(Enumerable.Repeat(new ItemPropertyCompletionData(_conn, path, p), 1));
-          }
-
-          if (p.Restrictions.Any(r => string.Equals(r, "ItemType", StringComparison.OrdinalIgnoreCase)))
-          {
-            completions = completions.Concat(ItemTypeCompletion<BasicCompletionData>(_metadata.ItemTypes, true));
-          }
-          if (p.Restrictions.Any(r => string.Equals(r, "Method", StringComparison.OrdinalIgnoreCase)))
-          {
-            completions = completions.Concat(_metadata.AllMethods.Select(m => new BasicCompletionData()
-            {
-              Text = m.KeyedName,
-              Action = () => m.Unique,
-              Image = Icons.Method16.Wpf
-            }));
-          }
-          if (p.Restrictions.Any(r => string.Equals(r, "SQL", StringComparison.OrdinalIgnoreCase)))
-          {
-            completions = completions.Concat(_metadata.Sqls().Select(m => new BasicCompletionData()
-            {
-              Text = m.KeyedName,
-              Action = () => m.Unique,
-              Image = Icons.EnumValue16.Wpf
-            }));
-          }
-          if (p.Restrictions.Any(r => string.Equals(r, "Identity", StringComparison.OrdinalIgnoreCase)))
-          {
-            completions = completions.Concat(_metadata.SystemIdentities.Select(m => new BasicCompletionData()
-            {
-              Text = m.KeyedName,
-              Action = () => m.Unique,
-              Image = Icons.EnumValue16.Wpf
-            }));
-          }
-          if (p.Restrictions.Any(r => string.Equals(r, "User", StringComparison.OrdinalIgnoreCase)))
-          {
-            completions = completions.Concat(new ICompletionData[] { new BasicCompletionData() {
-              Action = () => _conn.UserId,
-              Text = "Me",
-              Image = Icons.EnumValue16.Wpf
-            } });
-          }
-          if (p.Restrictions.Any(r => string.Equals(r, "Sequence", StringComparison.OrdinalIgnoreCase)))
-          {
-            completions = completions.Concat(_metadata.Sequences.Select(m => new BasicCompletionData()
-            {
-              Text = m.KeyedName,
-              Action = () => m.Unique,
-              Image = Icons.EnumValue16.Wpf
-            }));
-          }
-
-          return completions;
-        }
-        else if (p.Type == PropertyType.date)
-        {
-          return GetDateCompletions();
-        }
-        else if (p.Type == PropertyType.boolean)
-        {
-          return _boolCompletions;
-        }
-        else if (p.Type == PropertyType.list && !string.IsNullOrEmpty(p.DataSource))
-        {
-          var values = await _metadata.ListValues(p.DataSource).ToTask();
-
-          var hash = new HashSet<string>(values.Select(v => v.Value), StringComparer.CurrentCultureIgnoreCase);
-          return values
-            .Select(v => new BasicCompletionData()
-            {
-              Text = v.Value,
-              Image = Icons.EnumValue16.Wpf
-            })
-            .Concat(values.Where(v => !string.IsNullOrWhiteSpace(v.Label) && !hash.Contains(v.Label))
-                    .Select(v => new BasicCompletionData()
-                    {
-                      Text = v.Label + " (" + v.Value + ")",
-                      Image = Icons.EnumValue16.Wpf,
-                      Description = v.Value,
-                      Content = FormatText.MutedText(v.Label + " (" + v.Value + ")"),
-                      Action = () => v.Value
-                    }));
-        }
-        else if (p.Name == "classification")
-        {
-          var paths = await _metadata.GetClassPaths(itemType).ToTask();
-          return paths.GetCompletions<BasicCompletionData>();
-        }
-        else if (p.Name == "name" && itemType.Name == "Property"
-          && lastItem.Values.TryGetValue("label", out itemValue)
-          && IsUpdateAction(lastItem.Action))
-        {
-          return Enumerable.Repeat(PropNameFromLabel(itemValue), 1).GetCompletions<BasicCompletionData>();
-        }
-        else if (p.Name == "name" && itemType.Name == "xPropertyDefinition"
-          && lastItem.Values.TryGetValue("label", out itemValue)
-          && IsUpdateAction(lastItem.Action))
-        {
-          return Enumerable.Repeat("xp-" + PropNameFromLabel(itemValue), 1).GetCompletions<BasicCompletionData>();
-        }
-        else if ((itemType.Name == "Value" || itemType.Name == "Filter Value")
-          && ((p.Name == "value" && lastItem.Values.TryGetValue("label", out itemValue))
-            || (p.Name == "label" && lastItem.Values.TryGetValue("value", out itemValue)))
-          && IsUpdateAction(lastItem.Action))
-        {
-          return new string[] { itemValue }.GetCompletions<BasicCompletionData>();
-        }
-        else if ((p.Name == "name" || p.Name == "keyed_name") && itemType.Name == "Property" && lastItem.Action == "get"
-          && lastItem.Values.TryGetValue("source_id", out itemValue))
-        {
-          var parentType = _metadata.ItemTypeById(itemValue);
-          return await new PropertyCompletionFactory(_metadata, parentType).GetPromise().ToTask();
-        }
-        else if (p.Name == "class_path" && itemType.Name == "Property"
-          && lastItem.Values.TryGetValue("source_id", out itemValue))
-        {
-          var parentType = _metadata.ItemTypeById(itemValue);
-          var paths = await _metadata.GetClassPaths(parentType).ToTask();
-          return paths.GetCompletions<BasicCompletionData>();
-        }
-        else if ((p.Name == "name" || p.Name == "keyed_name") && itemType.Name == "Method" && lastItem.Action == "get")
-        {
-          return _metadata.MethodNames.GetCompletions<BasicCompletionData>();
-        }
-        else if ((p.Name == "name" || p.Name == "keyed_name") && itemType.Name == "ItemType" && lastItem.Action == "get")
-        {
-          return ItemTypeCompletion<BasicCompletionData>(_metadata.ItemTypes);
-        }
-        else if ((p.Name == "name" || p.Name == "keyed_name") && itemType.Name == "SQL" && lastItem.Action == "get")
-        {
-          return _metadata.Sqls().Select(s => new BasicCompletionData()
-          {
-            Text = s.KeyedName,
-            Image = Icons.EnumValue16.Wpf
-          });
-        }
-        else if (p.Name == "state" && lastItem.Action == "promoteItem"
-          && !string.IsNullOrEmpty(lastItem.Type) && !string.IsNullOrEmpty(lastItem.Id))
-        {
-          var stateResult = await _conn.ApplyAsync(@"<Item type='@0' action='getItemNextStates' id='@1'></Item>"
-            , true, false, lastItem.Type, lastItem.Id).ToTask();
-          var states = stateResult.Items().Select(i => i.Property("to_state").AsItem().Property("name").Value).ToArray();
-          return states.GetCompletions<BasicCompletionData>();
-        }
-        else if (p.Name == "state" && !string.IsNullOrEmpty(lastItem.Type))
-        {
-          var states = await _metadata.ItemTypeStates(itemType);
-          return states.GetCompletions<BasicCompletionData>();
-        }
-        else
-        {
-          return Enumerable.Empty<ICompletionData>();
-        }
+        return await Completions<BasicCompletionData>(state, path, null, p.GetTypeDefinitions());
       }
     }
 
@@ -1426,29 +1337,17 @@ namespace InnovatorAdmin.Editor
           || action == "edit" || action == "merge";
     }
 
-    private IEnumerable<ICompletionData> GetDateCompletions()
-    {
-      return new ICompletionData[] {
-        new BasicCompletionData() {
-          Text = DateTime.Now.ToString("s"),
-          Image = Icons.EnumValue16.Wpf,
-          Content = DateTime.Now.ToString("s") + " (Now)"
-        }
-        // Add a completion dialog option to open a calendar control
-      };
-    }
-
     private class ItemPropertyCompletionData : ICompletionData
     {
       private IAsyncConnection _conn;
       private IList<AmlNode> _path;
-      private Property _prop;
+      private string _itemTypeName;
 
-      public ItemPropertyCompletionData(IAsyncConnection conn, IList<AmlNode> path, Property prop)
+      public ItemPropertyCompletionData(IAsyncConnection conn, IList<AmlNode> path, string itemTypeName)
       {
         _conn = conn;
         _path = path;
-        _prop = prop;
+        _itemTypeName = itemTypeName;
       }
 
       public void Complete(ICSharpCode.AvalonEdit.Editing.TextArea textArea, ICSharpCode.AvalonEdit.Document.ISegment completionSegment, EventArgs insertionRequestEventArgs)
@@ -1457,11 +1356,11 @@ namespace InnovatorAdmin.Editor
         if (item == null)
           return;
 
-        var query = string.Format("<Item type='{0}' action='get'><keyed_name condition='like'>**</keyed_name></Item>", _prop.Restrictions.First());
+        var query = string.Format("<Item type='{0}' action='get'><keyed_name condition='like'>**</keyed_name></Item>", _itemTypeName);
         var items = EditorWindow.GetItems(_conn, query, query.Length - 21);
-        if (items.Any(i => _prop.Restrictions.Contains(i.Type)))
+        if (items.Any(i => _itemTypeName == i.Type))
         {
-          var allItems = items.Where(i => _prop.Restrictions.Contains(i.Type)).ToArray();
+          var allItems = items.Where(i => _itemTypeName == i.Type).ToArray();
           if (item.Action == "add" || item.Action == "create")
           {
             if (allItems.Length == 1)
@@ -1512,7 +1411,9 @@ namespace InnovatorAdmin.Editor
 
         if (allItems.Length == 1)
         {
-          doc.Replace(start, end - start, " type='" + allItems[0].Type + "' keyed_name='" + allItems[0].KeyedName + "'>" + allItems[0].Unique);
+          var needsType = string.IsNullOrEmpty(_path.LastOrDefault()?.Type)
+            || !string.Equals(_path.LastOrDefault()?.Type, allItems[0].Type, StringComparison.OrdinalIgnoreCase);
+          doc.Replace(start, end - start, (needsType ? " type='" + allItems[0].Type + "'" : "") + " keyed_name='" + allItems[0].KeyedName + "'>" + allItems[0].Unique);
         }
         else
         {
@@ -1621,6 +1522,28 @@ namespace InnovatorAdmin.Editor
       return null;
     }
 
+    private bool TryGetActionDoc(List<AmlNode> path, out AmlDocumentation actionDoc)
+    {
+      actionDoc = null;
+      var lastActionIdx = path.FindLastIndex(n => !string.IsNullOrEmpty(n.Action));
+      if (lastActionIdx < 0)
+        return false;
+
+      var action = path[lastActionIdx].Action;
+      if (!_actionDocs.TryGetValue(action ?? "", out actionDoc))
+        actionDoc = _metadata.AllMethods.OfType<Method>().FirstOrDefault(m => m.KeyedName == action)?.Documentation;
+
+      if (actionDoc == null)
+        return false;
+
+      for (var i = lastActionIdx + 1; i < path.Count && actionDoc != null; i++)
+      {
+        actionDoc = actionDoc.Elements.FirstOrDefault(e => e.Name == path[i].LocalName);
+      }
+
+      return actionDoc != null;
+    }
+
     private IEnumerable<ICompletionData> FilterAndSort(IEnumerable<ICompletionData> values, string substring)
     {
       return values
@@ -1670,15 +1593,13 @@ namespace InnovatorAdmin.Editor
 
     private class AmlNode
     {
-      private Dictionary<string, string> _values = new Dictionary<string, string>();
-
       public int Offset { get; set; }
       public string LocalName { get; set; }
       public string Type { get; set; }
       public string Id { get; set; }
       public string Action { get; set; }
       public string Condition { get; set; }
-      public Dictionary<string, string> Values { get { return _values; } }
+      public Dictionary<string, string> Values { get; } = new Dictionary<string, string>();
       public string By { get; set; }
     }
 
@@ -1759,6 +1680,81 @@ namespace InnovatorAdmin.Editor
     public IEnumerable<string> GetFunctionNames(bool tableValued)
     {
       return Enumerable.Empty<string>();
+    }
+
+    private static Dictionary<string, AmlDocumentation> _actionDocs = new Dictionary<string, AmlDocumentation>();
+
+    static AmlEditorHelper()
+    {
+      _actionDocs["add"] = new AmlDocumentation("add")
+        .WithAttribute("do_skipOnAfterAdd", "If 1 then don't run onAfterAdd server events. Default is 0", AmlDataType.Boolean)
+        .WithAttribute("serverEvents", "If 0 then disable server events when running the doGetItem only. onBefore/AfterAdd events are not disabled. Default is 1.", AmlDataType.Boolean);
+      _actionDocs["AddItem"] = _actionDocs["add"];
+      _actionDocs["copy"] = new AmlDocumentation("copy")
+        .WithAttribute("do_add", "Whether or not to add the item to the database", AmlDataType.Boolean)
+        .WithAttribute("do_lock", "Whether or not to keep the item locked when the operation is complete", AmlDataType.Boolean);
+      _actionDocs["copyAsIs"] = new AmlDocumentation("copyAsIs")
+        .WithAttribute("lock_related", null, AmlDataType.Boolean)
+        .WithAttribute("do_lock", "Whether or not to keep the item locked when the operation is complete", AmlDataType.Boolean)
+        .WithAttribute("useInputProperties", null, AmlDataType.Boolean);
+      _actionDocs["copyAsNew"] = _actionDocs["copyAsIs"];
+      _actionDocs["getPermissions"] = new AmlDocumentation("getPermissions")
+        .WithAttribute("access_type", "Permission to check for", AmlDataType.Enum, "can_add", "can_delete", "can_get", "can_update", "can_discover", "can_change_access");
+      _actionDocs["edit"] = new AmlDocumentation("edit")
+        .WithAttribute("version", "If 0 then don't version an Item on update. Default is 1, which is version the Item (if it's a versionable Item) on update.", AmlDataType.Boolean)
+        .WithAttribute("serverEvents", "If 0 then disable the server events improving performance. Default is 1. Only Update events are disabled, Lock events can be executed if using Edit.", AmlDataType.Boolean)
+        .WithAttribute("unlock", "If 1, then unlock the item after the update.", AmlDataType.Boolean);
+      _actionDocs["merge"] = new AmlDocumentation("merge")
+        .WithAttribute("do_skipOnAfterAdd", "If 1 then don't run onAfterAdd server events. Default is 0", AmlDataType.Boolean)
+        .WithAttribute("version", "If 0 then don't version an Item on update. Default is 1, which is version the Item (if it's a versionable Item) on update.", AmlDataType.Boolean)
+        .WithAttribute("serverEvents", "If 0 then disable the server events improving performance. Default is 1. Only Update events are disabled, Lock events can be executed if using Edit.", AmlDataType.Boolean)
+        .WithAttribute("unlock", "If 1, then unlock the item after the update.", AmlDataType.Boolean);
+      _actionDocs["update"] = new AmlDocumentation("update")
+        .WithAttribute("version", "If 0 then don't version an Item on update. Default is 1, which is version the Item (if it's a versionable Item) on update.", AmlDataType.Boolean)
+        .WithAttribute("serverEvents", "If 0 then disable the server events improving performance. Default is 1. Only Update events are disabled, Lock events can be executed if using Edit.", AmlDataType.Boolean);
+      _actionDocs["AddHistory"] = new AmlDocumentation("AddHistory")
+        .WithElements(new AmlDocumentation("action"), new AmlDocumentation("filename"), new AmlDocumentation("form_name"));
+      _actionDocs["GetItemsForStructureBrowser"] = new AmlDocumentation("GetItemsForStructureBrowser")
+        .WithElements(new AmlDocumentation("Item"));
+      _actionDocs["EvaluateActivity"] = new AmlDocumentation("EvaluateActivity")
+        .WithElements(new AmlDocumentation("Activity", null, AmlDataType.Item, "Activity")
+          , new AmlDocumentation("ActivityAssignment", null, AmlDataType.Item, "Activity Assignment")
+          , new AmlDocumentation("Paths")
+            .WithElements(new AmlDocumentation("Path", null, AmlDataType.String)
+              .WithAttribute("id", null, AmlDataType.Item, "Workflow Process Path"))
+          , new AmlDocumentation("DelegateTo", null, AmlDataType.Item, "Identity")
+          , new AmlDocumentation("Tasks")
+            .WithElements(new AmlDocumentation("Task")
+              .WithAttribute("id", null, AmlDataType.Item, "Activity Task Value")
+              .WithAttribute("complete", null, AmlDataType.Boolean))
+          , new AmlDocumentation("Variables")
+            .WithElements(new AmlDocumentation("Variable")
+              .WithAttribute("id", null, AmlDataType.Item, "Activity Variable Value"))
+          , new AmlDocumentation("Authentication")
+            .WithAttribute("mode", null, AmlDataType.Enum, "esignature", "password")
+          , new AmlDocumentation("Comments", null, AmlDataType.String)
+          , new AmlDocumentation("Complete", null, AmlDataType.Boolean));
+      _actionDocs["instantiateWorkflow"] = new AmlDocumentation("instantiateWorkflow")
+        .WithElements(new AmlDocumentation("WorkflowMap", null, AmlDataType.Item, "Workflow Map"));
+      _actionDocs["promoteItem"] = new AmlDocumentation("promoteItem")
+        .WithElements(new AmlDocumentation("state"),
+          new AmlDocumentation("comments"));
+      _actionDocs["Run Report"] = new AmlDocumentation("Run Report")
+        .WithElements(new AmlDocumentation("report_name"),
+          new AmlDocumentation("AML")
+            .WithElements(new AmlDocumentation("Item")));
+      _actionDocs["SQL Process"] = new AmlDocumentation("SQL Process")
+        .WithElements(new AmlDocumentation("name"),
+          new AmlDocumentation("PROCESS"),
+          new AmlDocumentation("ARG1"),
+          new AmlDocumentation("ARG2"),
+          new AmlDocumentation("ARG3"),
+          new AmlDocumentation("ARG4"),
+          new AmlDocumentation("ARG5"),
+          new AmlDocumentation("ARG6"),
+          new AmlDocumentation("ARG7"),
+          new AmlDocumentation("ARG8"),
+          new AmlDocumentation("ARG9"));
     }
   }
 }

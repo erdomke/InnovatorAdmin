@@ -7,7 +7,8 @@ using InnovatorAdmin.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using System.Xml;
-namespace InnovatorAdmin.Testing.Tests
+
+namespace InnovatorAdmin.Tests
 {
   [TestClass()]
   public class TestSerializerTests

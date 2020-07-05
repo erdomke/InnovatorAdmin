@@ -9,13 +9,16 @@ namespace InnovatorAdmin
 {
   public class Method : ItemReference
   {
-    public bool IsCore { get; set; }
+    public bool IsCore { get; }
+    public AmlDocumentation Documentation { get; }
 
-    public static Method FromFullItem(IReadOnlyItem elem, bool getKeyedName)
+    public Method(IReadOnlyItem elem, bool isCore = false)
     {
-      var result = new Method();
-      FillItemRef(result, elem, getKeyedName);
-      return result;
+      FillItemRef(this, elem, false);
+      this.KeyedName = elem.Property("name").AsString("");
+      this.IsCore = elem.Property("core").AsBoolean(isCore);
+      this.Documentation = AmlDocumentation.Parse(this.KeyedName, elem.Property("method_code").AsString(""));
+      this.Documentation.Summary = this.Documentation.Summary ?? elem.Property("comments").AsString(null);
     }
   }
 }

@@ -190,6 +190,15 @@ namespace InnovatorAdmin.Cmd
         errorOutput?.WriteLine();
         errorOutput?.WriteLine(flat.ToString());
 
+        if (flat.Data.Count > 0)
+        {
+          errorOutput?.WriteLine();
+          foreach (var key in flat.Data.Keys)
+          {
+            errorOutput?.WriteLine($"{key} = {flat.Data[key]}");
+          }
+        }
+
         var serverEx = ex as ServerException;
         if (serverEx != null)
         {
