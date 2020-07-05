@@ -5,6 +5,7 @@ using InnovatorAdmin;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Xml;
@@ -268,54 +269,16 @@ namespace InnovatorAdmin.Editor
                     var attributes = new Dictionary<string, string>
                     {
                       { "action", null }
-                      , { "doGetItem", null }
                       , { "id", null }
                       , { "idlist", null }
-                      , { "serverEvents", null }
                       , { "type", null }
                       , { "typeId", null }
-                      , { "where", null }
                     };
 
-                    switch (path.Last().Action)
+                    if (TryGetActionDoc(path, out var doc))
                     {
-                      case "create":
-                      case "get":
-                      case "getItemAllVersions":
-                      case "GetItemConfig":
-                      case "getItemLastVersion":
-                      case "getItemRelationships":
-                      case "GetItemRepeatConfig":
-                      case "recache":
-                        attributes["config_path"] = null;
-                        attributes["expand"] = null;
-                        attributes["isCriteria"] = null;
-                        attributes["language"] = null;
-                        attributes["levels"] = null;
-                        attributes["maxRecords"] = null;
-                        attributes["page"] = null;
-                        attributes["pagesize"] = null;
-                        attributes["orderBy"] = null;
-                        attributes["queryDate"] = null;
-                        attributes["queryType"] = null;
-                        attributes["relas_only"] = null;
-                        attributes["related_expand"] = null;
-                        attributes["returnMode"] = null;
-                        attributes["select"] = null;
-                        attributes["stdProps"] = null;
-                        if (path.Last().Action == "create")
-                        {
-                          foreach (var attr in _actionDocs["add"].Attributes)
-                            attributes[attr.Name] = attr.Summary;
-                        }
-                        break;
-                      default:
-                        if (TryGetActionDoc(path, out var doc))
-                        {
-                          foreach (var attr in doc.Attributes)
-                            attributes[attr.Name] = attr.Summary;
-                        }
-                        break;
+                      foreach (var attr in doc.Attributes)
+                        attributes[attr.Name] = attr.Summary;
                     }
 
                     if (path.Count >= 3
@@ -371,7 +334,84 @@ namespace InnovatorAdmin.Editor
             if (TryGetActionDoc(path, out var attributeDoc) && attributeDoc.Attributes.Any(a => a.Name == attrName))
             {
               var attribute = attributeDoc.Attributes.FirstOrDefault(a => a.Name == attrName);
-              if (attribute?.ValueTypes.Any() == true)
+              var whereType = attribute?.ValueTypes.FirstOrDefault(t => t.Type == AmlDataType.WhereClause);
+              var orderByType = attribute?.ValueTypes.FirstOrDefault(t => t.Type == AmlDataType.OrderBy);
+              var selectType = attribute?.ValueTypes.FirstOrDefault(t => t.Type == AmlDataType.SelectList);
+              var itemType = default(ItemType);
+
+              if (orderByType != null)
+              {
+                var typeName = orderByType.Source ?? path.Last().Type;
+                if (!string.IsNullOrEmpty(typeName)
+                  && _metadata.ItemTypeByName(typeName, out itemType))
+                {
+                  var lastComma = value.LastIndexOf(",");
+                  if (lastComma >= 0) value = value.Substring(lastComma + 1).Trim();
+
+                  items = await new OrderByPropertyFactory(_metadata, itemType).GetPromise().ToTask();
+                }
+              }
+              else if (selectType != null)
+              {
+                var typeName = selectType.Source ?? path.Last().Type;
+                if (!string.IsNullOrEmpty(typeName)
+                  && _metadata.ItemTypeByName(typeName, out itemType))
+                {
+                  var orig = value;
+                  string partial;
+                  var selectPath = SelectPath(value, out partial);
+                  value = partial;
+
+                  if (orig.EndsWith("["))
+                  {
+                    items = new ICompletionData[]
+                    {
+                          new BasicCompletionData("is_not_null()]") { Image = Icons.Method16.Wpf },
+                    };
+                  }
+                  else
+                  {
+                    var it = await RecurseProperties(itemType, selectPath);
+                    if (it != null)
+                    {
+                      items = await new SelectPropertyFactory(_metadata, it).GetPromise().ToTask();
+                      items = items.Concat(new ICompletionData[]
+                      {
+                            new BasicCompletionData("*") { Image = Icons.Property16.Wpf },
+                      });
+                      if (it.Properties.Values.Any(p => p.Name.StartsWith("xp-")))
+                      {
+                        items = items.Concat(new ICompletionData[]
+                        {
+                              new BasicCompletionData("xp-*") { Image = Icons.Property16.Wpf },
+                        });
+                      }
+                    }
+
+                    if (selectPath.LastOrDefault()?.StartsWith("xp-") == true)
+                    {
+                      items = (items ?? Enumerable.Empty<ICompletionData>()).Concat(new ICompletionData[]
+                      {
+                            new BasicCompletionData("$value") { Image = Icons.Property16.Wpf },
+                            new BasicCompletionData("@defined_as") { Image = Icons.Property16.Wpf },
+                            new BasicCompletionData("@explicit") { Image = Icons.Property16.Wpf },
+                            new BasicCompletionData("@permission_id") { Image = Icons.Property16.Wpf },
+                      });
+                    }
+                  }
+                }
+              }
+              else if (whereType != null)
+              {
+                var typeName = whereType.Source ?? path.Last().Type;
+                if (!string.IsNullOrEmpty(typeName)
+                    && _metadata.ItemTypeByName(typeName, out itemType))
+                {
+                  return await _sql.Completions("select * from innovator.[" + itemType.Name.Replace(' ', '_')
+                    + "] where " + value, xml, caret, xml.GetCharAt(caret - value.Length - 1).ToString(), true).ToTask();
+                }
+              }
+              else if (attribute?.ValueTypes.Any() == true)
               {
                 items = await Completions<AttributeValueCompletionData>(state, path, attribute, attribute.ValueTypes);
               }
@@ -455,84 +495,8 @@ namespace InnovatorAdmin.Editor
                     Image = Icons.MethodFriend16.Wpf
                   }));
                   break;
-                case "expand":
-                case "doGetItem":
-                case "isCriteria":
-                case "relas_only":
-                case "related_expand":
-                case "serverEvents":
-                case "stdProps":
-                  items = await Completions<AttributeValueCompletionData>(state, path, null, new[] { AmlTypeDefinition.FromDefinition(AmlDataType.Boolean) });
-                  break;
                 case "id":
                   items = await Completions<AttributeValueCompletionData>(state, path, null, new[] { AmlTypeDefinition.FromDefinition(AmlDataType.Item, path.Last().Type) });
-                  break;
-                case "queryDate":
-                  items = await Completions<AttributeValueCompletionData>(state, path, null, new[] { AmlTypeDefinition.FromDefinition(AmlDataType.Date) });
-                  break;
-                case "queryType":
-                  items = AttributeValues("Effective", "Latest", "Released");
-                  break;
-                case "returnMode":
-                  items = AttributeValues("itemsOnly", "countOnly");
-                  break;
-                case "orderBy":
-                  if (!string.IsNullOrEmpty(path.Last().Type)
-                    && _metadata.ItemTypeByName(path.Last().Type, out itemType))
-                  {
-                    var lastComma = value.LastIndexOf(",");
-                    if (lastComma >= 0) value = value.Substring(lastComma + 1).Trim();
-
-                    items = await new OrderByPropertyFactory(_metadata, itemType).GetPromise().ToTask();
-                  }
-                  break;
-                case "select":
-                  if (!string.IsNullOrEmpty(path.Last().Type)
-                    && _metadata.ItemTypeByName(path.Last().Type, out itemType))
-                  {
-                    var orig = value;
-                    string partial;
-                    var selectPath = SelectPath(value, out partial);
-                    value = partial;
-
-                    if (orig.EndsWith("["))
-                    {
-                      items = new ICompletionData[]
-                      {
-                        new BasicCompletionData("is_not_null()]") { Image = Icons.Method16.Wpf },
-                      };
-                    }
-                    else
-                    {
-                      var it = await RecurseProperties(itemType, selectPath);
-                      if (it != null)
-                      {
-                        items = await new SelectPropertyFactory(_metadata, it).GetPromise().ToTask();
-                        items = items.Concat(new ICompletionData[]
-                        {
-                          new BasicCompletionData("*") { Image = Icons.Property16.Wpf },
-                        });
-                        if (it.Properties.Values.Any(p => p.Name.StartsWith("xp-")))
-                        {
-                          items = items.Concat(new ICompletionData[]
-                          {
-                            new BasicCompletionData("xp-*") { Image = Icons.Property16.Wpf },
-                          });
-                        }
-                      }
-
-                      if (selectPath.LastOrDefault()?.StartsWith("xp-") == true)
-                      {
-                        items = (items ?? Enumerable.Empty<ICompletionData>()).Concat(new ICompletionData[]
-                        {
-                          new BasicCompletionData("$value") { Image = Icons.Property16.Wpf },
-                          new BasicCompletionData("@defined_as") { Image = Icons.Property16.Wpf },
-                          new BasicCompletionData("@explicit") { Image = Icons.Property16.Wpf },
-                          new BasicCompletionData("@permission_id") { Image = Icons.Property16.Wpf },
-                        });
-                      }
-                    }
-                  }
                   break;
                 case "type":
                   if (string.IsNullOrEmpty(value) && !string.IsNullOrEmpty(path.Last().Type))
@@ -579,14 +543,6 @@ namespace InnovatorAdmin.Editor
                   else
                   {
                     items = ItemTypeCompletion<AttributeValueCompletionData>(_metadata.ItemTypes, true);
-                  }
-                  break;
-                case "where":
-                  if (!string.IsNullOrEmpty(path.Last().Type)
-                    && _metadata.ItemTypeByName(path.Last().Type, out itemType))
-                  {
-                    return await _sql.Completions("select * from innovator.[" + itemType.Name.Replace(' ', '_')
-                      + "] where " + value, xml, caret, xml.GetCharAt(caret - value.Length - 1).ToString(), true).ToTask();
                   }
                   break;
               }
@@ -731,50 +687,7 @@ namespace InnovatorAdmin.Editor
             {
               if (TryGetActionDoc(path, out var actionDoc))
               {
-                var lastItem = path.LastOrDefault(n => !string.IsNullOrEmpty(n.Action));
-                if (actionDoc.Name == "Paths" && lastItem?.Action == "EvaluateActivity" && lastItem.Values.TryGetValue("Activity", out var itemValue))
-                {
-                  var act = (await _conn.ApplyAsync(@"<Item type='Activity' action='get' select='can_delegate,can_refuse' id='@0'>
-                                        <Relationships>
-                                          <Item type='Workflow Process Path' action='get' select='id,name,label,is_default'>
-                                          </Item>
-                                        </Relationships>
-                                      </Item>", true, false, itemValue).ToTask()).Items().ToArray();
-                  if (act.Length == 1)
-                  {
-                    var defaultPath = act[0].Relationships("Workflow Process Path")
-                      .FirstOrNullItem(i => i.Property("is_default").AsBoolean(false))
-                      ?? act[0].Relationships("Workflow Process Path").FirstOrNullItem();
-
-                    var paths = new List<ICompletionData>();
-                    if (act[0].Property("can_delegate").AsBoolean(true))
-                    {
-                      paths.Add(new BasicCompletionData()
-                      {
-                        Text = "<Path id='" + defaultPath.Id() + "'>Delegate</Path>",
-                        Image = Icons.XmlTag16.Wpf,
-                        Content = "Delegate"
-                      });
-                    }
-                    if (act[0].Property("can_refuse").AsBoolean(true))
-                    {
-                      paths.Add(new BasicCompletionData()
-                      {
-                        Text = "<Path id='" + defaultPath.Id() + "'>Refuse</Path>",
-                        Image = Icons.XmlTag16.Wpf,
-                        Content = "Refuse"
-                      });
-                    }
-                    paths.AddRange(act[0].Relationships("Workflow Process Path").Select(p => new BasicCompletionData()
-                    {
-                      Text = "<Path id='" + p.Id() + "'>" + p.Property("label").AsString(p.Property("name").Value) + "</Path>",
-                      Image = Icons.XmlTag16.Wpf,
-                      Content = p.Property("label").AsString(p.Property("name").Value)
-                    }));
-                    items = paths;
-                  }
-                }
-                else if (actionDoc.Elements.Any())
+                if (actionDoc.Elements.Any())
                 {
                   items = actionDoc.Elements.Select(e => {
                     return (ICompletionData)new BasicCompletionData()
@@ -790,6 +703,11 @@ namespace InnovatorAdmin.Editor
                 else if (actionDoc?.ValueTypes.Any() == true)
                 {
                   items = await Completions<BasicCompletionData>(state, path, actionDoc, actionDoc.ValueTypes);
+                }
+
+                if (actionDoc is CompletionDocumentation completeDoc && completeDoc.Completions != null)
+                {
+                  items = (await completeDoc.Completions(_conn, path, () => new BasicCompletionData())) ?? items;
                 }
               }
 
@@ -919,6 +837,25 @@ namespace InnovatorAdmin.Editor
 
       if (items.Any(i => i.Text == "Item"))
       {
+        try
+        {
+          var clipboard = System.Windows.Clipboard.GetText();
+          var match = Regex.Match(clipboard, @"^http(s)?://.*?StartItem=(?<type>\w+):(?<id>[0-9A-Fa-f]{32})$");
+          if (match.Success)
+          {
+            var text = $"Item type='{match.Groups["type"].Value}' id='{match.Groups["id"].Value}'";
+            items = items.Concat(new ICompletionData[] {
+              new BasicCompletionData()
+              {
+                Text = text,
+                Action = () => text,
+                Image = Icons.Attribute16.Wpf
+              }
+            });
+          }
+        }
+        catch (Exception) { }
+
         items = items.Concat(new AttributeCompletionData[] {
           new AttributeCompletionData()
           {
@@ -1022,6 +959,21 @@ namespace InnovatorAdmin.Editor
             if (string.IsNullOrEmpty(itemTypeName) && state == XmlState.Other && !string.IsNullOrEmpty(path.Last().Type))
               itemTypeName = path.Last().Type;
 
+            try
+            {
+              var clipboardText = System.Windows.Clipboard.GetText();
+              if (clipboardText.IsGuid())
+              {
+                results.Add(new T()
+                {
+                  Text = " (Paste Guid)",
+                  Content = FormatText.ColorText("(Paste Guid)", Brushes.Purple),
+                  Action = () => clipboardText
+                });
+              }
+            }
+            catch (Exception) { }
+
             results.Add(state == XmlState.AttributeValue ? new T()
             {
               Text = "(New Guid)",
@@ -1112,67 +1064,6 @@ namespace InnovatorAdmin.Editor
 
               if (state != XmlState.AttributeValue && itemTypeName != "File")
                 results.Add(new ItemPropertyCompletionData(_conn, path, itemTypeName));
-
-              if (action == "EvaluateActivity")
-              {
-                var lastItem = path.LastOrDefault(n => !string.IsNullOrEmpty(n.Action));
-                string itemValue;
-                if (itemTypeName == "Activity")
-                {
-                  results.Clear();
-                  results.Add(new T()
-                  {
-                    Text = "Select context item...",
-                    Content = FormatText.ColorText("Select context item...", Brushes.Purple),
-                    Action = () =>
-                    {
-                      var items = EditorWindow.GetItems(_conn, "<Item action='get'", 18).ToArray();
-                      if (items.Length != 1)
-                        return string.Empty;
-
-                      var activities = _conn.Apply(@"<Item type='Workflow' action='get' select='related_id'>
-  <source_id>@0</source_id>
-  <related_id>
-    <Item type='Workflow Process' action='get' select='id'>
-      <state>Active</state>
-      <locked_by_id condition='is null' />
-      <Relationships>
-        <Item action='get' type='Workflow Process Activity' select='related_id'>
-          <related_id>
-            <Item type='Activity' action='get' select='id'>
-              <state>Active</state>
-              <is_auto>0</is_auto>
-            </Item>
-          </related_id>
-        </Item>
-      </Relationships>
-    </Item>
-  </related_id>
-</Item>", items[0].Unique).Items().ToArray();
-                      if (activities.Length != 1)
-                        return string.Empty;
-                      var activity = activities[0].RelatedItem().Relationships().Single().RelatedItem();
-
-                      return activity.Id() + "<!-- " + activity.Property("id").KeyedName().Value + " for " + items[0].KeyedName + "-->";
-                    }
-                  });
-                }
-                else if (itemTypeName == "Activity Assignment" && lastItem.Values.TryGetValue("Activity", out itemValue))
-                {
-                  var assn = (await _conn.ApplyAsync(@"<Item type='Activity Assignment' action='get' select='id,related_id' related_expand='0'>
-  <is_disabled>0</is_disabled>
-  <closed_on condition='is null'></closed_on>
-  <source_id>@0</source_id>
-</Item>", true, false, itemValue).ToTask()).Items().ToList();
-                  results.Clear();
-                  results.AddRange(assn.Select(a => new T()
-                  {
-                    Text = a.Id() + "<!-- " + a.RelatedId().KeyedName().Value + " -->",
-                    Image = Icons.EnumValue16.Wpf,
-                    Content = a.RelatedId().KeyedName().Value
-                  }));
-                }
-              }
             }
             break;
           case AmlDataType.List:
@@ -1682,6 +1573,24 @@ namespace InnovatorAdmin.Editor
       return Enumerable.Empty<string>();
     }
 
+    private delegate Task<IEnumerable<ICompletionData>> CompletionOverride(IAsyncConnection conn, IList<AmlNode> path, Func<BasicCompletionData> factory);
+
+    private class CompletionDocumentation : AmlDocumentation
+    {
+      public CompletionOverride Completions { get; }
+
+      public CompletionDocumentation(string name) : base(name) { }
+      public CompletionDocumentation(string name, CompletionOverride overrideFunc) : base(name)
+      {
+        Completions = overrideFunc;
+      }
+
+      public CompletionDocumentation(string name, CompletionOverride overrideFunc, AmlDataType dataType, params string[] values) : base(name, null, dataType, values)
+      {
+        Completions = overrideFunc;
+      }
+    }
+
     private static Dictionary<string, AmlDocumentation> _actionDocs = new Dictionary<string, AmlDocumentation>();
 
     static AmlEditorHelper()
@@ -1698,12 +1607,47 @@ namespace InnovatorAdmin.Editor
         .WithAttribute("do_lock", "Whether or not to keep the item locked when the operation is complete", AmlDataType.Boolean)
         .WithAttribute("useInputProperties", null, AmlDataType.Boolean);
       _actionDocs["copyAsNew"] = _actionDocs["copyAsIs"];
+      _actionDocs["get"] = new AmlDocumentation("get")
+        .WithAttribute("select", "A comma-delimited list of property names (column names) to return", AmlDataType.SelectList)
+        .WithAttribute("orderBy", "A comma-delimited list of property names (column names) specifying the order of the results", AmlDataType.OrderBy)
+        .WithAttribute("page", "The page number for the results set.", AmlDataType.Integer)
+        .WithAttribute("pagesize", "The number of results to include in a page.", AmlDataType.Integer)
+        .WithAttribute("maxRecords", "the absolute maximum Items to be searched in the database.", AmlDataType.Integer)
+        .WithAttribute("levels", "The Item configuration depth to be returned", AmlDataType.Integer)
+        .WithAttribute("serverEvents", "If 0 then disable the server events improving performance. Default is 1.", AmlDataType.Boolean)
+        .WithAttribute("isCriteria", "If 0 then include the nested structure for the Item configuration in the response but don't use it as search criteria. Default is 1, which uses the nested structure in the request as search criteria.", AmlDataType.Boolean)
+        .WithAttribute("related_expand", "If 0 then do not expand item properties, instead, only return the ID.", AmlDataType.Boolean)
+        .WithAttribute("language", "A comma-delimited list of language codes", AmlDataType.String)
+        .WithAttribute("queryType", "Defines which version of a versionable item to return based on the queryDate", AmlDataType.Enum, "Effective", "Latest", "Released")
+        .WithAttribute("queryDate", "Date to use when searching for versionable items", AmlDataType.Date)
+        .WithAttribute("relas_only", "If 1, only return the contents of the <Relationships> tag and not the parent item. Default is 0.", AmlDataType.Boolean)
+        .WithAttribute("stdProps", "Whether to include standard system properties. Default is 1. If 0, properties such as config_id, created_by_id, current_state, modified_by_id, and permission_id are not returned.", AmlDataType.Boolean)
+        .WithAttribute("expand", null, AmlDataType.Boolean)
+        .WithAttribute("config_path", null, AmlDataType.String)
+        .WithAttribute("where", null, AmlDataType.WhereClause)
+        .WithAttribute("returnMode", null, AmlDataType.Enum, "itemsOnly", "countOnly");
+      _actionDocs["create"] = new AmlDocumentation("create");
+      _actionDocs["create"].WithAttributes(_actionDocs["get"].Attributes);
+      _actionDocs["create"].WithAttributes(_actionDocs["add"].Attributes);
+
+      _actionDocs["getItemAllVersions"] = _actionDocs["get"];
+      _actionDocs["GetItemConfig"] = _actionDocs["get"];
+      _actionDocs["getItemLastVersion"] = _actionDocs["get"];
+      _actionDocs["getItemRelationships"] = _actionDocs["get"];
+      _actionDocs["GetItemRepeatConfig"] = _actionDocs["get"];
+      _actionDocs["recache"] = _actionDocs["get"];
+
       _actionDocs["getPermissions"] = new AmlDocumentation("getPermissions")
         .WithAttribute("access_type", "Permission to check for", AmlDataType.Enum, "can_add", "can_delete", "can_get", "can_update", "can_discover", "can_change_access");
       _actionDocs["edit"] = new AmlDocumentation("edit")
         .WithAttribute("version", "If 0 then don't version an Item on update. Default is 1, which is version the Item (if it's a versionable Item) on update.", AmlDataType.Boolean)
         .WithAttribute("serverEvents", "If 0 then disable the server events improving performance. Default is 1. Only Update events are disabled, Lock events can be executed if using Edit.", AmlDataType.Boolean)
-        .WithAttribute("unlock", "If 1, then unlock the item after the update.", AmlDataType.Boolean);
+        .WithAttribute("unlock", "If 1, then unlock the item after the update.", AmlDataType.Boolean)
+        .WithAttribute("where", null, AmlDataType.WhereClause);
+      _actionDocs["delete"] = new AmlDocumentation("delete")
+        .WithAttribute("where", null, AmlDataType.WhereClause);
+      _actionDocs["purge"] = new AmlDocumentation("purge")
+        .WithAttribute("where", null, AmlDataType.WhereClause);
       _actionDocs["merge"] = new AmlDocumentation("merge")
         .WithAttribute("do_skipOnAfterAdd", "If 1 then don't run onAfterAdd server events. Default is 0", AmlDataType.Boolean)
         .WithAttribute("version", "If 0 then don't version an Item on update. Default is 1, which is version the Item (if it's a versionable Item) on update.", AmlDataType.Boolean)
@@ -1711,15 +1655,119 @@ namespace InnovatorAdmin.Editor
         .WithAttribute("unlock", "If 1, then unlock the item after the update.", AmlDataType.Boolean);
       _actionDocs["update"] = new AmlDocumentation("update")
         .WithAttribute("version", "If 0 then don't version an Item on update. Default is 1, which is version the Item (if it's a versionable Item) on update.", AmlDataType.Boolean)
-        .WithAttribute("serverEvents", "If 0 then disable the server events improving performance. Default is 1. Only Update events are disabled, Lock events can be executed if using Edit.", AmlDataType.Boolean);
+        .WithAttribute("serverEvents", "If 0 then disable the server events improving performance. Default is 1. Only Update events are disabled, Lock events can be executed if using Edit.", AmlDataType.Boolean)
+        .WithAttribute("where", null, AmlDataType.WhereClause);
       _actionDocs["AddHistory"] = new AmlDocumentation("AddHistory")
         .WithElements(new AmlDocumentation("action"), new AmlDocumentation("filename"), new AmlDocumentation("form_name"));
       _actionDocs["GetItemsForStructureBrowser"] = new AmlDocumentation("GetItemsForStructureBrowser")
         .WithElements(new AmlDocumentation("Item"));
       _actionDocs["EvaluateActivity"] = new AmlDocumentation("EvaluateActivity")
-        .WithElements(new AmlDocumentation("Activity", null, AmlDataType.Item, "Activity")
-          , new AmlDocumentation("ActivityAssignment", null, AmlDataType.Item, "Activity Assignment")
-          , new AmlDocumentation("Paths")
+        .WithElements(new CompletionDocumentation("Activity", async (conn, path, factory) =>
+          {
+            var result = factory();
+            result.Text = "Select context item...";
+            result.Content = FormatText.ColorText("Select context item...", Brushes.Purple);
+            result.Action = () =>
+            {
+              var items = EditorWindow.GetItems(conn, "<Item action='get'", 18).ToArray();
+              if (items.Length != 1)
+                return string.Empty;
+
+              var activities = conn.Apply(@"<Item type='Workflow' action='get' select='related_id'>
+  <source_id>@0</source_id>
+  <related_id>
+    <Item type='Workflow Process' action='get' select='id'>
+      <state>Active</state>
+      <locked_by_id condition='is null' />
+      <Relationships>
+        <Item action='get' type='Workflow Process Activity' select='related_id'>
+          <related_id>
+            <Item type='Activity' action='get' select='id'>
+              <state>Active</state>
+              <is_auto>0</is_auto>
+            </Item>
+          </related_id>
+        </Item>
+      </Relationships>
+    </Item>
+  </related_id>
+</Item>", items[0].Unique).Items().ToArray();
+              if (activities.Length != 1)
+                return string.Empty;
+              var activity = activities[0].RelatedItem().Relationships().Single().RelatedItem();
+
+              return activity.Id() + "<!-- " + activity.Property("id").KeyedName().Value + " for " + items[0].KeyedName + "-->";
+            };
+            return new List<BasicCompletionData>() { result };
+          })
+          , new CompletionDocumentation("ActivityAssignment", async (conn, path, factory) =>
+            {
+              var lastItem = path.LastOrDefault(n => !string.IsNullOrEmpty(n.Action));
+              if (lastItem.Values.TryGetValue("Activity", out var itemValue))
+              {
+                var assn = (await conn.ApplyAsync(@"<Item type='Activity Assignment' action='get' select='id,related_id' related_expand='0'>
+  <is_disabled>0</is_disabled>
+  <closed_on condition='is null'></closed_on>
+  <source_id>@0</source_id>
+</Item>", true, false, itemValue).ToTask()).Items().ToList();
+                return assn.Select(a =>
+                {
+                  var item = factory();
+                  item.Text = a.Id() + "<!-- " + a.RelatedId().KeyedName().Value + " -->";
+                  item.Image = Icons.EnumValue16.Wpf;
+                  item.Content = a.RelatedId().KeyedName().Value;
+                  return item;
+                });
+              }
+              return Enumerable.Empty<ICompletionData>();
+            }, AmlDataType.Item, "Activity Assignment")
+          , new CompletionDocumentation("Paths", async (conn, path, factory) =>
+            {
+              var lastItem = path.LastOrDefault(n => !string.IsNullOrEmpty(n.Action));
+              if (lastItem.Values.TryGetValue("Activity", out var itemValue))
+              {
+                var act = (await conn.ApplyAsync(@"<Item type='Activity' action='get' select='can_delegate,can_refuse' id='@0'>
+                                        <Relationships>
+                                          <Item type='Workflow Process Path' action='get' select='id,name,label,is_default'>
+                                          </Item>
+                                        </Relationships>
+                                      </Item>", true, false, itemValue).ToTask()).Items().ToArray();
+                if (act.Length == 1)
+                {
+                  var defaultPath = act[0].Relationships("Workflow Process Path")
+                    .FirstOrNullItem(i => i.Property("is_default").AsBoolean(false))
+                    ?? act[0].Relationships("Workflow Process Path").FirstOrNullItem();
+
+                  var paths = new List<ICompletionData>();
+                  if (act[0].Property("can_delegate").AsBoolean(true))
+                  {
+                    paths.Add(new BasicCompletionData()
+                    {
+                      Text = "<Path id='" + defaultPath.Id() + "'>Delegate</Path>",
+                      Image = Icons.XmlTag16.Wpf,
+                      Content = "Delegate"
+                    });
+                  }
+                  if (act[0].Property("can_refuse").AsBoolean(true))
+                  {
+                    paths.Add(new BasicCompletionData()
+                    {
+                      Text = "<Path id='" + defaultPath.Id() + "'>Refuse</Path>",
+                      Image = Icons.XmlTag16.Wpf,
+                      Content = "Refuse"
+                    });
+                  }
+                  paths.AddRange(act[0].Relationships("Workflow Process Path").Select(p => new BasicCompletionData()
+                  {
+                    Text = "<Path id='" + p.Id() + "'>" + p.Property("label").AsString(p.Property("name").Value) + "</Path>",
+                    Image = Icons.XmlTag16.Wpf,
+                    Content = p.Property("label").AsString(p.Property("name").Value)
+                  }));
+                  return paths;
+                }
+              }
+              return Enumerable.Empty<ICompletionData>();
+            })
             .WithElements(new AmlDocumentation("Path", null, AmlDataType.String)
               .WithAttribute("id", null, AmlDataType.Item, "Workflow Process Path"))
           , new AmlDocumentation("DelegateTo", null, AmlDataType.Item, "Identity")

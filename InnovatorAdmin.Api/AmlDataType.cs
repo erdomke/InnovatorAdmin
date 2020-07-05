@@ -19,5 +19,8 @@ namespace InnovatorAdmin
     List,
     MultiValueList,
     String,
+    SelectList,
+    OrderBy,
+    WhereClause
   }
 }

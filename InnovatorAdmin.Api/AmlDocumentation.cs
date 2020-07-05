@@ -75,6 +75,13 @@ namespace InnovatorAdmin
       return element;
     }
 
+    public AmlDocumentation WithAttributes(IEnumerable<AmlDocumentation> attributes)
+    {
+      _attributes = _attributes ?? new List<AmlDocumentation>();
+      _attributes.AddRange(attributes.Where(a => !_attributes.Any(e => e.Name == a.Name)).ToList());
+      return this;
+    }
+
     public AmlDocumentation WithAttribute(string name, string summary, AmlDataType dataType, params string[] values)
     {
       var attr = GetOrAddAttribute(name);
