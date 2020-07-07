@@ -955,49 +955,59 @@ namespace InnovatorAdmin.Editor
             }));
             break;
           case AmlDataType.Item:
+          case AmlDataType.ItemName:
             var itemTypeName = typeDefn.Source;
             if (string.IsNullOrEmpty(itemTypeName) && state == XmlState.Other && !string.IsNullOrEmpty(path.Last().Type))
               itemTypeName = path.Last().Type;
 
-            try
+            if (typeDefn.Type != AmlDataType.ItemName)
             {
-              var clipboardText = System.Windows.Clipboard.GetText();
-              if (clipboardText.IsGuid())
+              try
               {
-                results.Add(new T()
+                var clipboardText = System.Windows.Clipboard.GetText();
+                if (clipboardText.IsGuid())
                 {
-                  Text = " (Paste Guid)",
-                  Content = FormatText.ColorText("(Paste Guid)", Brushes.Purple),
-                  Action = () => clipboardText
-                });
+                  results.Add(new T()
+                  {
+                    Text = " (Paste Guid)",
+                    Content = FormatText.ColorText("(Paste Guid)", Brushes.Purple),
+                    Action = () => clipboardText
+                  });
+                }
               }
-            }
-            catch (Exception) { }
+              catch (Exception) { }
 
-            results.Add(state == XmlState.AttributeValue ? new T()
-            {
-              Text = "(New Guid)",
-              Content = FormatText.ColorText("(New Guid)", Brushes.Purple),
-              Action = () => Guid.NewGuid().ToString("N").ToUpperInvariant()
-            } : new T()
-            {
-              Text = (state != XmlState.Tag ? "<" : "") + "Item type='" + itemTypeName + "'",
-              Image = Icons.XmlTag16.Wpf
-            });
+              results.Add(state == XmlState.AttributeValue ? new T()
+              {
+                Text = "(New Guid)",
+                Content = FormatText.ColorText("(New Guid)", Brushes.Purple),
+                Action = () => Guid.NewGuid().ToString("N").ToUpperInvariant()
+              } : new T()
+              {
+                Text = (state != XmlState.Tag ? "<" : "") + "Item type='" + itemTypeName + "'",
+                Image = Icons.XmlTag16.Wpf
+              });
+            }
 
             if (action != "add" || state != XmlState.AttributeValue)
             {
               switch (itemTypeName)
               {
+                case "RelationshipType":
+                  if (typeDefn.Type == AmlDataType.ItemName)
+                  {
+                    results.AddRange(ItemTypeCompletion<T>(_metadata.ItemTypes.Where(i => i.IsRelationship), false));
+                  }
+                  break;
                 case "ItemType":
-                  var useKeyedName = doc?.Name == "type" && state == XmlState.AttributeValue;
+                  var useKeyedName = typeDefn.Type == AmlDataType.ItemName || (doc?.Name == "type" && state == XmlState.AttributeValue);
                   results.AddRange(ItemTypeCompletion<T>(_metadata.ItemTypes, !useKeyedName));
                   break;
                 case "Method":
                   results.AddRange(_metadata.AllMethods.Select(r => new T()
                   {
                     Text = r.KeyedName,
-                    Action = () => r.Unique,
+                    Action = () => typeDefn.Type == AmlDataType.ItemName ? r.KeyedName : r.Unique,
                     Image = Icons.Method16.Wpf,
                     Description = r.Documentation?.Summary
                   }));
@@ -1006,7 +1016,7 @@ namespace InnovatorAdmin.Editor
                   results.AddRange(_metadata.Sqls().Select(r => new T()
                   {
                     Text = r.KeyedName,
-                    Action = () => r.Unique,
+                    Action = () => typeDefn.Type == AmlDataType.ItemName ? r.KeyedName : r.Unique,
                     Image = Icons.EnumValue16.Wpf
                   }));
                   break;
@@ -1014,7 +1024,7 @@ namespace InnovatorAdmin.Editor
                   results.AddRange(_metadata.SystemIdentities.Select(r => new T()
                   {
                     Text = r.KeyedName,
-                    Action = () => r.Unique,
+                    Action = () => typeDefn.Type == AmlDataType.ItemName ? r.KeyedName : r.Unique,
                     Image = Icons.EnumValue16.Wpf
                   }));
                   break;
@@ -1022,19 +1032,22 @@ namespace InnovatorAdmin.Editor
                   results.AddRange(_metadata.Sequences.Select(r => new T()
                   {
                     Text = r.KeyedName,
-                    Action = () => r.Unique,
+                    Action = () => typeDefn.Type == AmlDataType.ItemName ? r.KeyedName : r.Unique,
                     Image = Icons.EnumValue16.Wpf
                   }));
                   break;
                 case "User":
-                  results.Add(new T() {
-                    Action = () => _conn.UserId,
-                    Text = "Me",
-                    Image = Icons.EnumValue16.Wpf
-                  });
+                  if (typeDefn.Type != AmlDataType.ItemName)
+                  {
+                    results.Add(new T() {
+                      Action = () => _conn.UserId,
+                      Text = "Me",
+                      Image = Icons.EnumValue16.Wpf
+                    });
+                  }
                   break;
                 case "File":
-                  if (state != XmlState.AttributeValue)
+                  if (state != XmlState.AttributeValue && typeDefn.Type != AmlDataType.ItemName)
                   {
                     results.Add(new T()
                     {
@@ -1062,7 +1075,7 @@ namespace InnovatorAdmin.Editor
                   break;
               }
 
-              if (state != XmlState.AttributeValue && itemTypeName != "File")
+              if (state != XmlState.AttributeValue && typeDefn.Type != AmlDataType.ItemName && itemTypeName != "File")
                 results.Add(new ItemPropertyCompletionData(_conn, path, itemTypeName));
             }
             break;

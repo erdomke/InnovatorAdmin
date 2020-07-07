@@ -281,7 +281,7 @@ namespace InnovatorAdmin
                   if (result.Count > 0 && !(result.Last().Type == XPathTokenType.AxisName || result.Last().Type == XPathTokenType.Operator
                     || result.Last().Value == "(" || result.Last().Value == "["))
                   {
-                    result.Add(new XPathToken(XPathTokenType.AxisName, name));
+                    result.Add(new XPathToken(XPathTokenType.Operator, name));
                     index = SkipWhitespace(xPath, index + name.Length);
                     continue;
                   }

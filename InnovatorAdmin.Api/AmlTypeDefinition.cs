@@ -15,12 +15,12 @@ namespace InnovatorAdmin
     public string Source { get; private set; }
     public IEnumerable<string> Values { get { return _values ?? Enumerable.Empty<string>(); } }
 
-    public static AmlTypeDefinition FromConstant(string constant)
+    public static AmlTypeDefinition FromConstants(params string[] constants)
     {
       return new AmlTypeDefinition()
       {
         Type = AmlDataType.Enum,
-        _values = new[] { constant }
+        _values = constants
       };
     }
 
@@ -40,8 +40,12 @@ namespace InnovatorAdmin
             break;
           case AmlDataType.Inherit:
           case AmlDataType.Item:
+          case AmlDataType.ItemName:
           case AmlDataType.List:
           case AmlDataType.MultiValueList:
+          case AmlDataType.OrderBy:
+          case AmlDataType.SelectList:
+          case AmlDataType.WhereClause:
             typeDefn.Source = values[0];
             break;
         }
@@ -56,7 +60,7 @@ namespace InnovatorAdmin
       if (string.IsNullOrEmpty(types))
         return result;
 
-      var typeList = Regex.Match(types, @"^(?<type>\w+(\[[^]]+\]))?(\|(?<type>\w+(\[[^]]+\])?))*$")
+      var typeList = Regex.Match(types, @"^(?<type>\w+(\[[^]]+\])?)(\|(?<type>\w+(\[[^]]+\])?))*$")
         .Groups["type"].Captures.OfType<Capture>().Select(c => c.Value);
 
       foreach (var type in typeList)

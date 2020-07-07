@@ -44,5 +44,35 @@ using (new Escalate(arasPlmIdent))
       CollectionAssert.AreEqual(new[] { "Part" }, typeAttr.ValueTypes.Single().Values.ToArray());
       Assert.AreEqual(AmlDataType.Item, idAttr.ValueTypes.Single().Type);
     }
+
+    [TestMethod]
+    public void ParseComplexRelationships()
+    {
+      var doc = AmlDocumentation.Parse("TestMethod", @"/// <summary>Create a new version of a <see cref=""itemtype.Part""/> item</summary>
+/// <param name=""Relationships/Item[@type='File' or @type='Folder'][@url][@id][filename][directoryname][content[@encoding='text' or @encoding='base64']][url]"">
+///   The files/folders to version
+/// </param>
+
+using (new Escalate(arasPlmIdent))
+{
+    var items = ToEnum(this.getRelationships())
+        .Where(i => string.Equals(i.getType(), ""Part"", StringComparison.OrdinalIgnoreCase));
+    if (!items.Any())");
+      Assert.AreEqual("TestMethod", doc.Name);
+      Assert.AreEqual("Create a new version of a Part item", doc.Summary);
+      var relationships = doc.Elements.Single();
+      Assert.AreEqual("Relationships", relationships.Name);
+      var item = relationships.Elements.Single();
+      Assert.AreEqual("Item", item.Name);
+      Assert.AreEqual("The files/folders to version", item.Summary);
+      CollectionAssert.AreEqual(new[] { "type", "url", "id" }, item.Attributes.Select(a => a.Name).ToArray());
+      var typeAttr = item.Attributes.ElementAt(0);
+      Assert.AreEqual(AmlDataType.Enum, typeAttr.ValueTypes.Single().Type);
+      CollectionAssert.AreEqual(new[] { "File", "Folder" }, typeAttr.ValueTypes.Single().Values.ToArray());
+      CollectionAssert.AreEqual(new[] { "filename", "directoryname", "content", "url" }, item.Elements.Select(a => a.Name).ToArray());
+      var encodingAttr = item.Elements.ElementAt(2).Attributes.First();
+      Assert.AreEqual(AmlDataType.Enum, encodingAttr.ValueTypes.Single().Type);
+      CollectionAssert.AreEqual(new[] { "text", "base64" }, encodingAttr.ValueTypes.Single().Values.ToArray());
+    }
   }
 }

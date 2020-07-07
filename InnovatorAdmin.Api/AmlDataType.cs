@@ -16,6 +16,7 @@ namespace InnovatorAdmin
     Inherit,
     Integer,
     Item,
+    ItemName,
     List,
     MultiValueList,
     String,

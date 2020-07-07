@@ -174,55 +174,66 @@ namespace InnovatorAdmin
           xPath = XPathToken.Parse((string)elem.Attribute("name")).ToList();
         }
         catch (Exception) { }
-        var currElem = method;
-        var currDoc = method;
+
+        var stack = new Stack<AmlDocumentation>();
+        stack.Push(method);
         var idx = 0;
 
         while (idx < xPath.Count)
         {
           if (xPath[idx].TryGetAxis(out var axis) && axis == XPathAxis.Attribute && idx + 1 < xPath.Count)
           {
-            var attrDoc = currElem.GetOrAddAttribute(xPath[idx + 1].Value);
-            currDoc = attrDoc;
+            var attrDoc = stack.Peek().GetOrAddAttribute(xPath[idx + 1].Value);
+            stack.Push(attrDoc);
             idx++;
           }
           else if (xPath[idx].TryGetNameTest(out var elemName) && XPathToken.IsNcName(elemName))
           {
-            var elemDoc = currElem.GetOrAddElement(elemName);
-            currDoc = elemDoc;
-            currElem = elemDoc;
+            var elemDoc = stack.Peek().GetOrAddElement(elemName);
+            stack.Push(elemDoc);
           }
           else if (xPath[idx].Type == XPathTokenType.Operator
             && xPath[idx].Value == "="
             && idx + 1 < xPath.Count
             && xPath[idx + 1].TryGetString(out var constant))
           {
-            currDoc._valueTypes = new List<AmlTypeDefinition>()
+            if (stack.Peek()._valueTypes == null)
             {
-              AmlTypeDefinition.FromConstant(constant)
-            };
+              stack.Peek()._valueTypes = new List<AmlTypeDefinition>()
+              {
+                AmlTypeDefinition.FromConstants(constant)
+              };
+            }
+            else
+            {
+              stack.Peek()._valueTypes[0] = AmlTypeDefinition.FromConstants(stack.Peek()._valueTypes[0].Values.Concat(new[] { constant }).ToArray());
+            }
             idx++;
+          }
+          else if ((xPath[idx].Type == XPathTokenType.Separator && xPath[idx].Value == "]")
+            || (xPath[idx].Type == XPathTokenType.Operator && xPath[idx].Value == "or"))
+          {
+            stack.Pop();
           }
           idx++;
         }
 
-        var isAttrParam = currElem == method && currElem != currDoc;
-        if (isAttrParam)
-          currElem = currDoc;
-        currElem.Summary = BuildDocString(elem);
+        stack.Peek().Summary = BuildDocString(elem);
         foreach (var dataType in elem.Elements("datatype")
           .Where(e => !string.IsNullOrEmpty((string)e.Attribute("type"))))
         {
           var path = (string)dataType.Attribute("path") ?? ".";
           var typeDefns = AmlTypeDefinition.FromType((string)dataType.Attribute("type"));
 
-          if (path == "." || path == "text()" || isAttrParam)
+          if (path == "." || path == "text()")
           {
-            currElem._valueTypes = typeDefns;
+            stack.Peek()._valueTypes = typeDefns;
           }
           else if (path.StartsWith("@"))
           {
-            var attr = currElem.Attributes.FirstOrDefault(d => d.Name == path.Substring(1));
+            var attr = stack.Peek().Attributes.FirstOrDefault(d => d.Name == path.Substring(1));
+            if (attr == null && stack.Peek().Name == path.Substring(1))
+              attr = stack.Peek();
             if (attr != null)
             {
               attr._valueTypes = typeDefns;
