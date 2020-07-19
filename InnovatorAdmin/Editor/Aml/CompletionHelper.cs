@@ -266,31 +266,30 @@ namespace InnovatorAdmin.Editor
                   case "":
                     break;
                   default:
-                    var attributes = new Dictionary<string, string>
+                    var attributes = new List<AmlDocumentation>()
                     {
-                      { "action", null }
-                      , { "id", null }
-                      , { "idlist", null }
-                      , { "type", null }
-                      , { "typeId", null }
+                      new AmlDocumentation("action", "AML action to perform", AmlDataType.ItemName, "Method"),
+                      new AmlDocumentation("id", "ID of the context item", AmlDataType.Item, path.LastOrDefault()?.Type),
+                      new AmlDocumentation("idlist", "Comma separated list of IDs", AmlDataType.String),
+                      new AmlDocumentation("type", "Name of the context itemtype", AmlDataType.ItemName, "ItemType"),
+                      new AmlDocumentation("typeId", "ID of the context itemtype", AmlDataType.Item, "ItemType")
                     };
-
-                    if (TryGetActionDoc(path, out var doc))
-                    {
-                      foreach (var attr in doc.Attributes)
-                        attributes[attr.Name] = attr.Summary;
-                    }
 
                     if (path.Count >= 3
                       && path[path.Count - 2].LocalName == "Relationships"
                       && path[path.Count - 3].LocalName == "Item"
                       && path[path.Count - 3].Action == "GetItemRepeatConfig")
                     {
-                      attributes["repeatProp"] = null;
-                      attributes["repeatTimes"] = null;
+                      attributes.Add(new AmlDocumentation("repeatProp", "Property to use for recursion", AmlDataType.ItemName, "Property"));
+                      attributes.Add(new AmlDocumentation("repeatTimes", "Number of times to recurse", AmlDataType.Integer));
                     }
 
-                    items = Attributes(notExisting, attributes).ToArray();
+                    if (TryGetActionDoc(path, out var doc))
+                    {
+                      attributes.AddRange(doc.Attributes);
+                    }
+
+                    items = Attributes(notExisting, attributes.GroupBy(a => a.Name).Select(g => g.Last())).ToArray();
                     foreach (var item in items.OfType<AttributeCompletionData>().Where(i => i.Text == "where"))
                     {
                       item.QuoteChar = '"';
@@ -301,7 +300,7 @@ namespace InnovatorAdmin.Editor
               default:
                 if (TryGetActionDoc(path, out var actionDoc))
                 {
-                  items = Attributes(notExisting, actionDoc.Attributes.Select(a => new KeyValuePair<string, string>(a.Name, a.Summary))).ToArray();
+                  items = Attributes(notExisting, actionDoc.Attributes).ToArray();
                 }
                 else
                 {
@@ -488,11 +487,12 @@ namespace InnovatorAdmin.Editor
                   {
                     Text = m.KeyedName,
                     Image = Icons.Method16.Wpf,
-                    Description = m.Documentation?.Summary
+                    Description = Tooltips.Documentation(m.Documentation, "method")
                   }).Concat(methods.Select(m => (ICompletionData)new AttributeValueCompletionData()
                   {
                     Text = m,
-                    Image = Icons.MethodFriend16.Wpf
+                    Image = Icons.MethodFriend16.Wpf,
+                    Description = _actionDocs.TryGetValue(m, out var actionDoc) ? Tooltips.Documentation(actionDoc, "action") : null
                   }));
                   break;
                 case "id":
@@ -696,7 +696,7 @@ namespace InnovatorAdmin.Editor
                         .Where(a => a.ValueTypes.All(t => t.Type == AmlDataType.Enum) && a.ValueTypes.Sum(t => t.Values.Count()) == 1)
                         .Select(a => $" {a.Name}='{a.ValueTypes.SelectMany(t => t.Values).Single()}'")),
                       Image = Icons.XmlTag16.Wpf,
-                      Description = e.Summary
+                      Description = Tooltips.Documentation(e, "parameter")
                     };
                   });
                 }
@@ -899,13 +899,13 @@ namespace InnovatorAdmin.Editor
       });
     }
 
-    private static IEnumerable<ICompletionData> Attributes(Func<string, bool> filter, IEnumerable<KeyValuePair<string, string>> values)
+    private static IEnumerable<ICompletionData> Attributes(Func<string, bool> filter, IEnumerable<AmlDocumentation> values)
     {
-      return values.Where(k => filter(k.Key)).Select(k => (ICompletionData)new AttributeCompletionData()
+      return values.Where(d => filter(d.Name)).Select(d => (ICompletionData)new AttributeCompletionData()
       {
-        Text = k.Key,
+        Text = d.Name,
         Image = Icons.Field16.Wpf,
-        Description = k.Value
+        Description = Tooltips.Documentation(d, "parameter")
       });
     }
 
@@ -1670,19 +1670,19 @@ namespace InnovatorAdmin.Editor
 
     static AmlEditorHelper()
     {
-      _actionDocs["add"] = new AmlDocumentation("add")
+      _actionDocs["add"] = new AmlDocumentation("add", "Add an item to the database")
         .WithAttribute("do_skipOnAfterAdd", "If 1 then don't run onAfterAdd server events. Default is 0", AmlDataType.Boolean)
         .WithAttribute("serverEvents", "If 0 then disable server events when running the doGetItem only. onBefore/AfterAdd events are not disabled. Default is 1.", AmlDataType.Boolean);
       _actionDocs["AddItem"] = _actionDocs["add"];
-      _actionDocs["copy"] = new AmlDocumentation("copy")
+      _actionDocs["copy"] = new AmlDocumentation("copy", "Create a copy of the specified item. Used when copying relationships in the relationships grid")
         .WithAttribute("do_add", "Whether or not to add the item to the database", AmlDataType.Boolean)
         .WithAttribute("do_lock", "Whether or not to keep the item locked when the operation is complete", AmlDataType.Boolean);
-      _actionDocs["copyAsIs"] = new AmlDocumentation("copyAsIs")
+      _actionDocs["copyAsIs"] = new AmlDocumentation("copyAsIs", "Create a copy of the specified item. Used with the `Save As...` menu item")
         .WithAttribute("lock_related", null, AmlDataType.Boolean)
         .WithAttribute("do_lock", "Whether or not to keep the item locked when the operation is complete", AmlDataType.Boolean)
         .WithAttribute("useInputProperties", null, AmlDataType.Boolean);
       _actionDocs["copyAsNew"] = _actionDocs["copyAsIs"];
-      _actionDocs["get"] = new AmlDocumentation("get")
+      _actionDocs["get"] = new AmlDocumentation("get", "Queries the database to return information about the specified items")
         .WithAttribute("select", "A comma-delimited list of property names (column names) to return", AmlDataType.SelectList)
         .WithAttribute("orderBy", "A comma-delimited list of property names (column names) specifying the order of the results", AmlDataType.OrderBy)
         .WithAttribute("page", "The page number for the results set.", AmlDataType.Integer)
@@ -1701,7 +1701,7 @@ namespace InnovatorAdmin.Editor
         .WithAttribute("config_path", null, AmlDataType.String)
         .WithAttribute("where", null, AmlDataType.WhereClause)
         .WithAttribute("returnMode", null, AmlDataType.Enum, "itemsOnly", "countOnly");
-      _actionDocs["create"] = new AmlDocumentation("create");
+      _actionDocs["create"] = new AmlDocumentation("create", "Acts as a `get` if the Item exists, otherwise acts as an `add`.");
       _actionDocs["create"].WithAttributes(_actionDocs["get"].Attributes);
       _actionDocs["create"].WithAttributes(_actionDocs["add"].Attributes);
 
@@ -1858,7 +1858,7 @@ namespace InnovatorAdmin.Editor
           , new AmlDocumentation("Comments", null, AmlDataType.String)
           , new AmlDocumentation("Complete", null, AmlDataType.Boolean));
       _actionDocs["instantiateWorkflow"] = new AmlDocumentation("instantiateWorkflow")
-        .WithElements(new AmlDocumentation("WorkflowMap", null, AmlDataType.Item, "Workflow Map"));
+        .WithElements(new AmlDocumentation("WorkflowMap", "The workflow map to instantiate", AmlDataType.Item, "Workflow Map"));
       _actionDocs["promoteItem"] = new AmlDocumentation("promoteItem")
         .WithElements(new AmlDocumentation("state"),
           new AmlDocumentation("comments"));

@@ -266,6 +266,7 @@
     </Compile>
     <Compile Include="Editor\Aml\EditorItemData.cs" />
     <Compile Include="Editor\Aml\ScriptMenuGenerator.cs" />
+    <Compile Include="Editor\Aml\Tooltips.cs" />
     <Compile Include="Editor\CompletionData\CompletionList.cs" />
     <Compile Include="Editor\CompletionData\CompletionListBox.cs" />
     <Compile Include="Editor\CompletionData\CompletionWindow.cs" />

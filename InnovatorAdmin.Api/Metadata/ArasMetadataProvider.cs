@@ -35,7 +35,7 @@ namespace InnovatorAdmin
       get { return _methods.Where(m => m.IsCore); }
     }
     /// <summary>
-    /// Enumerable of methods where core = 1
+    /// Enumerable of methods
     /// </summary>
     public IEnumerable<Method> AllMethods
     {

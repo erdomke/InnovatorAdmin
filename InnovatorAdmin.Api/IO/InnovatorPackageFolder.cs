@@ -37,6 +37,7 @@ namespace InnovatorAdmin
       if (string.IsNullOrEmpty(path)) return _manifestPath;
       return Path.Combine(_baseFolder, path);
     }
+
     private string EnsureRelativePath(string path)
     {
       var fullPath = GetRelativePath(path);
