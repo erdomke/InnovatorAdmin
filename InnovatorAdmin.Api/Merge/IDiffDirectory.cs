@@ -121,7 +121,12 @@ namespace InnovatorAdmin
         }
         catch (XmlException ex)
         {
-          throw new XmlException(string.Format("{0} ({1}, {2}, {3})", ex.Message, i, b.Path, c.Path), ex);
+          ex.Data["Index"] = i;
+          if (b != null)
+            ex.Data["BasePath"] = b.Path;
+          if (c != null)
+            ex.Data["ComparePath"] = c.Path;
+          throw;
         }
       });
 

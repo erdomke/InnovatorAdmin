@@ -19,6 +19,7 @@ namespace InnovatorAdmin.Editor
         return result;
       });
     }
+
     public static Run ColorText(string value, Brush color)
     {
       return Invoke(() => new Run(value)
@@ -26,6 +27,15 @@ namespace InnovatorAdmin.Editor
         Foreground = color
       });
     }
+
+    public static Run Bold(string value)
+    {
+      return Invoke(() => new Run(value)
+      {
+        FontWeight = System.Windows.FontWeight.FromOpenTypeWeight(700)
+      });
+    }
+
     public static Run MutedText(string value)
     {
       return Invoke(() => new Run(value)
@@ -33,12 +43,13 @@ namespace InnovatorAdmin.Editor
         Foreground = Brushes.Gray
       });
     }
+
     public static Run Text(string value)
     {
       return Invoke(() => new Run(value));
     }
 
-    private static T Invoke<T>(Func<T> factory)
+    public static T Invoke<T>(Func<T> factory)
     {
       if (System.Windows.Forms.Application.OpenForms[0].InvokeRequired)
       {

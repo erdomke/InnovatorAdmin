@@ -840,10 +840,9 @@ namespace InnovatorAdmin.Editor
         try
         {
           var clipboard = System.Windows.Clipboard.GetText();
-          var match = Regex.Match(clipboard, @"^http(s)?://.*?StartItem=(?<type>\w+):(?<id>[0-9A-Fa-f]{32})$");
-          if (match.Success)
+          if (TryParseUrl(clipboard, out var urlType, out var urlId))
           {
-            var text = $"Item type='{match.Groups["type"].Value}' id='{match.Groups["id"].Value}'";
+            var text = $"Item type='{urlType}' id='{urlId}'";
             items = items.Concat(new ICompletionData[] {
               new BasicCompletionData()
               {
@@ -974,36 +973,80 @@ namespace InnovatorAdmin.Editor
                     Action = () => clipboardText
                   });
                 }
+                else if (TryParseUrl(clipboardText, out var urlType, out var urlId)
+                  && (string.IsNullOrEmpty(itemTypeName) || string.Equals(urlType, itemTypeName, StringComparison.OrdinalIgnoreCase)))
+                {
+                  results.Add(new T()
+                  {
+                    Text = " (Paste URL)",
+                    Content = FormatText.ColorText("(Paste URL)", Brushes.Purple),
+                    Action = () => urlId
+                  });
+                }
               }
               catch (Exception) { }
 
-              results.Add(state == XmlState.AttributeValue ? new T()
+              if (state == XmlState.AttributeValue)
               {
-                Text = "(New Guid)",
-                Content = FormatText.ColorText("(New Guid)", Brushes.Purple),
-                Action = () => Guid.NewGuid().ToString("N").ToUpperInvariant()
-              } : new T()
+                switch (action)
+                {
+                  case "copy":
+                  case "copyAsIs":
+                  case "copyAsNew":
+                  case "delete":
+                  case "edit":
+                  case "get":
+                  case "getItemAllVersions":
+                  case "GetItemConfig":
+                  case "getItemLastVersion":
+                  case "getItemNextStates":
+                  case "getItemRelationships":
+                  case "GetItemRepeatConfig":
+                  case "getItemWhereUsed":
+                  case "getPermissions":
+                  case "lock":
+                  case "promoteItem":
+                  case "purge":
+                  case "recache":
+                  case "unlock":
+                  case "update":
+                  case "version":
+                    break;
+                  default:
+                    results.Add(new T()
+                    {
+                      Text = "(New Guid)",
+                      Content = FormatText.ColorText("(New Guid)", Brushes.Purple),
+                      Action = () => Guid.NewGuid().ToString("N").ToUpperInvariant()
+                    });
+                    break;
+                }
+              }
+              else
               {
-                Text = (state != XmlState.Tag ? "<" : "") + "Item type='" + itemTypeName + "'",
-                Image = Icons.XmlTag16.Wpf
-              });
+                results.Add(new T()
+                {
+                  Text = (state != XmlState.Tag ? "<" : "") + "Item type='" + itemTypeName + "'",
+                  Image = Icons.XmlTag16.Wpf
+                });
+              }
             }
 
             if (action != "add" || state != XmlState.AttributeValue)
             {
-              switch (itemTypeName)
+              switch (itemTypeName.ToUpperInvariant())
               {
-                case "RelationshipType":
+                case "RELATIONSHIPTYPE":
                   if (typeDefn.Type == AmlDataType.ItemName)
                   {
                     results.AddRange(ItemTypeCompletion<T>(_metadata.ItemTypes.Where(i => i.IsRelationship), false));
                   }
                   break;
-                case "ItemType":
+                case "ITEMTYPE":
                   var useKeyedName = typeDefn.Type == AmlDataType.ItemName || (doc?.Name == "type" && state == XmlState.AttributeValue);
                   results.AddRange(ItemTypeCompletion<T>(_metadata.ItemTypes, !useKeyedName));
                   break;
-                case "Method":
+                case "METHOD":
                   results.AddRange(_metadata.AllMethods.Select(r => new T()
                   {
                     Text = r.KeyedName,
@@ -1020,7 +1063,7 @@ namespace InnovatorAdmin.Editor
                     Image = Icons.EnumValue16.Wpf
                   }));
                   break;
-                case "Identity":
+                case "IDENTITY":
                   results.AddRange(_metadata.SystemIdentities.Select(r => new T()
                   {
                     Text = r.KeyedName,
@@ -1028,7 +1071,7 @@ namespace InnovatorAdmin.Editor
                     Image = Icons.EnumValue16.Wpf
                   }));
                   break;
-                case "Sequence":
+                case "SEQUENCE":
                   results.AddRange(_metadata.Sequences.Select(r => new T()
                   {
                     Text = r.KeyedName,
@@ -1036,7 +1079,7 @@ namespace InnovatorAdmin.Editor
                     Image = Icons.EnumValue16.Wpf
                   }));
                   break;
-                case "User":
+                case "USER":
                   if (typeDefn.Type != AmlDataType.ItemName)
                   {
                     results.Add(new T() {
@@ -1046,7 +1089,7 @@ namespace InnovatorAdmin.Editor
                     });
                   }
                   break;
-                case "File":
+                case "FILE":
                   if (state != XmlState.AttributeValue && typeDefn.Type != AmlDataType.ItemName)
                   {
                     results.Add(new T()
@@ -1110,25 +1153,46 @@ namespace InnovatorAdmin.Editor
       return results;
     }
 
+    private static bool TryParseUrl(string value, out string type, out string id)
+    {
+      type = null;
+      id = null;
+      if (Uri.TryCreate(value, UriKind.Absolute, out var uri))
+      {
+        var match = Regex.Match(uri.Query, @"^\?StartItem=([A-Za-z0-9_% ]+):([A-F0-9]{32})(:released|:current)?(\&.*)?");
+        if (match.Success && !match.Groups[3].Success)
+        {
+          type = match.Groups[1].Value;
+          id = match.Groups[2].Value;
+          return true;
+        }
+      }
+      return false;
+    }
+
     private IEnumerable<ICompletionData> ItemTypeCompletion<T>(IEnumerable<ItemType> itemTypes, bool insertId = false) where T : BasicCompletionData, new()
     {
       return itemTypes.Select(i =>
       {
-        var result = new T();
-        result.Text = i.Name;
-        result.Image = Icons.Class16.Wpf;
+        var result = new T
+        {
+          Text = i.Name,
+          Image = Icons.Class16.Wpf,
+          Description = Tooltips.ItemType(i)
+        };
         if (insertId) result.Action = () => i.Id;
-        if (!string.IsNullOrWhiteSpace(i.Label)) result.Description = i.Label;
         return result;
       }).Concat(itemTypes.Where(i => !string.IsNullOrWhiteSpace(i.Label) &&
                                      !string.Equals(i.Name, i.Label, StringComparison.OrdinalIgnoreCase))
         .Select(i =>
         {
-          var result = new T();
-          result.Image = Icons.Class16.Wpf;
-          result.Text = i.Label;
-          result.Description = i.Name;
-          result.Content = FormatText.MutedText(i.Label);
+          var result = new T
+          {
+            Image = Icons.Class16.Wpf,
+            Text = i.Label,
+            Description = Tooltips.ItemType(i),
+            Content = FormatText.MutedText(i.Label)
+          };
           if (insertId)
             result.Action = () => i.Id;
           else
@@ -1566,14 +1630,12 @@ namespace InnovatorAdmin.Editor
           {
             var data = ConfigureNormalProperty(CreateCompletion(), i);
             data.Text += " DESC";
-            data.Description += " DESC";
             return data;
           }))
           .Concat(byLabel.Select(i =>
           {
             var data = ConfigureLabeledProperty(CreateCompletion(), i);
             data.Text += " DESC";
-            data.Description += " DESC";
             data.Content = FormatText.MutedText(data.Text);
             data.Action = () => i.Value + " DESC";
             return data;

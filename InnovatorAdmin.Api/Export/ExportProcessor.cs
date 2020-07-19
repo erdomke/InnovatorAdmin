@@ -2503,15 +2503,7 @@ namespace InnovatorAdmin
         ItemType result;
         foreach (var itemTypeData in itemTypes)
         {
-          result = new ItemType();
-          result.Id = itemTypeData.Id();
-          result.IsCore = itemTypeData.Property("core").AsBoolean(false);
-          result.IsDependent = itemTypeData.Property("is_dependent").AsBoolean(false);
-          result.IsFederated = itemTypeData.Property("implementation_type").Value == "federated";
-          result.IsPolymorphic = itemTypeData.Property("implementation_type").Value == "polymorphic";
-          result.IsVersionable = itemTypeData.Property("is_versionable").AsBoolean(false);
-          result.Name = itemTypeData.Property("name").Value;
-          result.Reference = ItemReference.FromFullItem(itemTypeData, true);
+          result = new ItemType(itemTypeData);
           _itemTypes[result.Name.ToLowerInvariant()] = result;
         }
 

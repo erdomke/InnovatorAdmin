@@ -292,7 +292,7 @@ namespace InnovatorAdmin
 
     private async Task<bool> ReloadItemTypeMetadata()
     {
-      var itemTypes = _conn.ApplyAsync("<Item type='ItemType' action='get' select='is_versionable,is_dependent,implementation_type,core,name,label'></Item>", true, true).ToTask();
+      var itemTypes = _conn.ApplyAsync("<Item type='ItemType' action='get' select='is_versionable,is_dependent,implementation_type,core,name,label,description'></Item>", true, true).ToTask();
       var relTypes = _conn.ApplyAsync("<Item action='get' type='RelationshipType' related_expand='0' select='related_id,source_id,relationship_id,name,label' />", true, true).ToTask();
       var sortedProperties = _conn.ApplyAsync(@"<Item type='Property' action='get' select='source_id'>
   <order_by condition='is not null'></order_by>
@@ -314,18 +314,7 @@ namespace InnovatorAdmin
 
       foreach (var itemTypeData in r.Items())
       {
-        result = new ItemType()
-        {
-          Id = itemTypeData.Id(),
-          IsCore = itemTypeData.Property("core").AsBoolean(false),
-          IsDependent = itemTypeData.Property("is_dependent").AsBoolean(false),
-          IsFederated = itemTypeData.Property("implementation_type").Value == "federated",
-          IsPolymorphic = itemTypeData.Property("implementation_type").Value == "polymorphic",
-          IsVersionable = itemTypeData.Property("is_versionable").AsBoolean(false),
-          Label = itemTypeData.Property("label").Value,
-          Name = itemTypeData.Property("name").Value,
-          Reference = ItemReference.FromFullItem(itemTypeData, true)
-        };
+        result = new ItemType(itemTypeData);
         _itemTypesByName[result.Name] = result;
       }
 
@@ -599,7 +588,7 @@ namespace InnovatorAdmin
   <Item action='get' type='ItemType' select='name'>
     <name>@0</name>
     <Relationships>
-      <Item action='get' type='Property' select='name,label,data_type,data_source,stored_length,prec,scale,foreign_property(name,source_id),is_hidden,is_hidden2,sort_order,default_value,column_width,is_required,readonly' />
+      <Item action='get' type='Property' select='name,label,data_type,data_source,stored_length,prec,scale,foreign_property(name,source_id),is_hidden,is_hidden2,sort_order,default_value,column_width,is_required,readonly,help_text,help_tooltip' />
       {xPropQuery}
     </Relationships>
   </Item>

@@ -141,21 +141,7 @@ namespace InnovatorAdmin
             Add(item.Property("relationship_id").AsItem());
           break;
         case "itemtype":
-          var itemType = new ItemType()
-          {
-            Id = item.Id(),
-            IsCore = item.Property("core")
-              .AsBoolean(_coreIds.Contains(item.Id())),
-            IsDependent = item.Property("is_dependent").AsBoolean(false),
-            IsFederated = item.Property("implementation_type").Value == "federated",
-            IsPolymorphic = item.Property("implementation_type").Value == "polymorphic",
-            IsVersionable = item.Property("is_versionable").AsBoolean(false),
-            Label = item.Property("label").Value,
-            Name = item.Property("name").Value
-              ?? item.KeyedName().Value
-              ?? item.IdProp().KeyedName().Value,
-            Reference = ItemReference.FromFullItem(item, true)
-          };
+          var itemType = new ItemType(item);
           if (string.IsNullOrEmpty(itemType.Name))
             return;
           _itemTypesByName[itemType.Name] = itemType;
