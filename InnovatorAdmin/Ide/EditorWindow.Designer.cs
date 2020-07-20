@@ -33,7 +33,7 @@
       this.tblMain = new System.Windows.Forms.TableLayoutPanel();
       this.tblHeader = new System.Windows.Forms.TableLayoutPanel();
       this.lblClose = new System.Windows.Forms.Label();
-      this.lblTitle = new System.Windows.Forms.Label();
+      this.lblTitle = new InnovatorAdmin.Controls.NoCopyLabel();
       this.menuStrip = new System.Windows.Forms.ToolStrip();
       this.lblConnection = new System.Windows.Forms.ToolStripLabel();
       this.btnEditConnections = new System.Windows.Forms.ToolStripButton();
