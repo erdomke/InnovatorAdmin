@@ -77,7 +77,7 @@ namespace InnovatorAdmin
 
     public DialogResult ShowDialog(IWin32Window owner, Rectangle bounds)
     {
-      this.StartPosition = FormStartPosition.Manual;
+      this.StartPosition = FormStartPosition.CenterParent;
       var screenDim = SystemInformation.VirtualScreen;
       var newX = Math.Min(Math.Max(bounds.X, 0), screenDim.Width - this.DesktopBounds.Width);
       var newY = Math.Min(Math.Max(bounds.Y - 30, 0), screenDim.Height - this.DesktopBounds.Height);
