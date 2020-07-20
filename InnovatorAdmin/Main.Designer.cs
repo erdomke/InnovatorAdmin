@@ -35,7 +35,7 @@
       this.tblMain = new System.Windows.Forms.TableLayoutPanel();
       this.tblHeader = new System.Windows.Forms.TableLayoutPanel();
       this.lblClose = new System.Windows.Forms.Label();
-      this.lblTitle = new System.Windows.Forms.Label();
+      this.lblTitle = new InnovatorAdmin.Controls.NoCopyLabel();
       this.lblMaximize = new System.Windows.Forms.Label();
       this.lblMinimize = new System.Windows.Forms.Label();
       this.picLogo = new System.Windows.Forms.PictureBox();

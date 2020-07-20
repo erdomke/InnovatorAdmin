@@ -204,6 +204,9 @@
     <Compile Include="Controls\MergeInterface.Designer.cs">
       <DependentUpon>MergeInterface.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\NoCopyLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\ParameterGrid.cs">
       <SubType>UserControl</SubType>
     </Compile>

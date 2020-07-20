@@ -38,7 +38,7 @@
       this.pnlTopRight = new System.Windows.Forms.Panel();
       this.pnlBottomLeft = new System.Windows.Forms.Panel();
       this.pnlBottomRight = new System.Windows.Forms.Panel();
-      this.lblTitle = new System.Windows.Forms.Label();
+      this.lblTitle = new InnovatorAdmin.Controls.NoCopyLabel();
       this.pnlLeft = new System.Windows.Forms.Panel();
       this.pnlRight = new System.Windows.Forms.Panel();
       this.panel1 = new System.Windows.Forms.Panel();
