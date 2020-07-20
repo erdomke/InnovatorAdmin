@@ -1,4 +1,4 @@
-﻿using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Document;
 using Innovator.Client;
 using Innovator.Client.Connection;
 using InnovatorAdmin.Connections;
@@ -1648,7 +1648,56 @@ namespace InnovatorAdmin
         Utils.HandleError(ex);
       }
     }
+    private void mniTableToFile_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        using (var dialog = new SaveFileDialog())
+        {
+          if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+          {
+                var grid = tbcOutputView.SelectedTab.Controls.OfType<DataGridView>().Single();
+                DataGridViewClipboardCopyMode oldMode = grid.ClipboardCopyMode;
+                bool oldHeaders = grid.RowHeadersVisible;
+                grid.RowHeadersVisible = true;
+                grid.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+                grid.RowHeadersVisible = oldHeaders;
 
+            //System.IO.File.WriteAllText(dialog.FileName, grid.to);
+         
+              int columnCount = grid.Columns.Count;
+                string columnNames = "";
+                string outputCsv ="";
+
+            using (System.IO.StreamWriter file =
+                  new System.IO.StreamWriter(dialog.FileName))
+            {
+              for (int i = 0; i < columnCount; i++)
+              {
+                columnNames += grid.Columns[i].HeaderText.ToString() + "\t";
+              }
+              outputCsv += columnNames;
+              file.WriteLine(outputCsv);
+              outputCsv = "";
+              for (int i = 1; (i - 1) < grid.Rows.Count; i++)
+              {
+                for (int j = 0; j < columnCount; j++)
+                {
+                  outputCsv += grid.Rows[i - 1].Cells[j].Value.ToString() + "\t";
+                }
+                file.WriteLine(outputCsv);
+                outputCsv = "";
+              }
+
+            }   
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
     private void mniTableEditsToQueryEditor_Click(object sender, EventArgs e)
     {
       try
@@ -2152,6 +2201,8 @@ namespace InnovatorAdmin
           this.mniColumns,
           new ToolStripSeparator(),
           this.mniTableCopyActions,
+          new ToolStripSeparator(),
+          this.mniSaveTableToFile,
           new ToolStripSeparator(),
           this.mniSaveTableEdits,
           this.mniScriptEdits,
