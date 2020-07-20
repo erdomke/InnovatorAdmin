@@ -4,11 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace InnovatorAdmin.Merge
+namespace InnovatorAdmin
 {
-  class FileSysDiffDirectory : IDiffDirectory
+  public class FileSysDiffDirectory : IDiffDirectory
   {
     private string _base;
 

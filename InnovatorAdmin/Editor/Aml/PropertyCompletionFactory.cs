@@ -5,6 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Media;
 
 namespace InnovatorAdmin.Editor
 {
@@ -51,10 +55,11 @@ namespace InnovatorAdmin.Editor
     {
       return new BasicCompletionData();
     }
+
     protected virtual BasicCompletionData ConfigureNormalProperty(BasicCompletionData data, IListValue prop)
     {
       data.Text = prop.Value;
-      data.Description = prop.Label;
+      data.Description = Tooltips.Property(prop as Property);
       data.Image = Icons.Property16.Wpf;
 
       if (_insertion != null)
@@ -64,11 +69,12 @@ namespace InnovatorAdmin.Editor
       }
       return data;
     }
+
     protected virtual BasicCompletionData ConfigureLabeledProperty(BasicCompletionData data, IListValue prop)
     {
       var label = prop.Label + " (" + prop.Value + ")";
       data.Text = label;
-      data.Description = prop.Value;
+      data.Description = Tooltips.Property(prop as Property);
       data.Content = FormatText.MutedText(label);
       data.Image = Icons.Property16.Wpf;
 
@@ -78,5 +84,7 @@ namespace InnovatorAdmin.Editor
       data.Action = () => insertValue;
       return data;
     }
+
+    
   }
 }

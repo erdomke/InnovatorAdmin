@@ -176,7 +176,7 @@ namespace InnovatorAdmin
       var ds = new DataSet();
       string mainType = null;
       string mainId = null;
-      var selectedCols = SubSelect.FromString(select);
+      var selectedCols = SelectNode.FromString(select);
 
       List<IReadOnlyItem> items;
       try
@@ -351,7 +351,7 @@ namespace InnovatorAdmin
                 }
                 newColumn.PropMetadata(pMeta);
               }
-              catch (KeyNotFoundException)
+              catch (Exception)
               {
                 newColumn = new DataColumn(prop, typeof(string));
                 newColumn.IsUiVisible(string.IsNullOrEmpty(kvp.Key) || metadata == null);

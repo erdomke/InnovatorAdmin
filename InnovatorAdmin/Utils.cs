@@ -29,13 +29,6 @@ namespace InnovatorAdmin
       return true;
     }
 
-    public static void WriteTo(this Stream stream, string path)
-    {
-      using (var write = new FileStream(path, FileMode.Create, FileAccess.Write))
-      {
-        stream.CopyTo(write);
-      }
-    }
     public static IEnumerable<IEnumerable<TSource>> Batch<TSource>(
                   this IEnumerable<TSource> source, int size)
     {
@@ -189,17 +182,22 @@ namespace InnovatorAdmin
       if (ex == null) return;
       using (var dialog = new Dialog.MessageDialog())
       {
-        var agg = ex as AggregateException;
-        if (agg != null && agg.Flatten().InnerExceptions.Count == 1)
+        if (ex is AggregateException agg
+          && agg.Flatten().InnerExceptions.Count == 1)
         {
-          var inner = agg.Flatten().InnerExceptions[0];
-          dialog.Message = inner.Message;
-          dialog.Details = inner.ToString();
+          ex = agg.Flatten().InnerExceptions[0];
         }
-        else
+
+        dialog.Message = ex.Message;
+        dialog.Details = ex.ToString();
+
+        if (ex.Data.Count > 0)
         {
-          dialog.Message = ex.Message;
-          dialog.Details = ex.ToString();
+          dialog.Details += Environment.NewLine;
+          foreach (var key in ex.Data.Keys)
+          {
+            dialog.Details += Environment.NewLine + $"{key} = {ex.Data[key]}";
+          }
         }
 
         dialog.OkText = "&Keep Going";

@@ -12,12 +12,15 @@ using InnovatorAdmin.Testing;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Threading;
+using InnovatorAdmin.Plugin;
+using System.Linq.Expressions;
 
 namespace InnovatorAdmin.Editor
 {
   public class ArasEditorProxy : IEditorProxy
   {
-    public const string UnitTestAction = "> Run Unit Tests";
+    public static string UnitTestAction;
+    private static Dictionary<string, Func<IPluginMethod>> _pluginFactory;
 
     #region "Default Actions"
     private static readonly string[] _baseActions = new string[] {
@@ -114,51 +117,57 @@ namespace InnovatorAdmin.Editor
     #endregion
 
     private string[] _actions;
-    private IAsyncConnection _conn;
-    private Connections.ConnectionData _connData;
-    private string _name;
     private Editor.AmlEditorHelper _helper;
+    private Version _version;
 
     public string Action
     {
       get { return _helper.SoapAction; }
       set { _helper.SoapAction = value; }
     }
-    public Connections.ConnectionData ConnData
-    {
-      get { return _connData; }
-    }
-    public IAsyncConnection Connection
-    {
-      get { return _conn; }
-    }
-    public string Name
-    {
-      get { return _name; }
-    }
+
+    public Connections.ConnectionData ConnData { get; }
+
+    public IAsyncConnection Connection { get; }
+
+    public string Name { get; }
 
 
     public ArasEditorProxy(IAsyncConnection conn, string name)
     {
-      _conn = conn;
+      Connection = conn;
       Initialize();
-      _helper.InitializeConnection(_conn, null);
-      _name = name;
+      _helper.InitializeConnection(Connection, null);
+      Name = name;
     }
+
     public ArasEditorProxy(IAsyncConnection conn, Connections.ConnectionData connData)
     {
-      _conn = conn;
+      Connection = conn;
       Initialize();
-      _connData = connData;
-      _helper.InitializeConnection(_conn, _connData);
-      _name = connData.ConnectionName;
+      ConnData = connData;
+      _helper.InitializeConnection(Connection, ConnData);
+      Name = connData.ConnectionName;
     }
 
     private void Initialize()
     {
+      if (_pluginFactory == null)
+      {
+        UnitTestAction = "Plugin/" + typeof(RunUnitTests).Name;
+        _pluginFactory = AppDomain.CurrentDomain.GetAssemblies()
+          .SelectMany(a => a.GetTypes())
+          .Where(t => typeof(IPluginMethod).IsAssignableFrom(t)
+            && t.GetConstructors().Any(c => c.GetParameters().Length == 0))
+          .ToDictionary(p => "Plugin/" + p.Name
+            , p => Expression.Lambda<Func<IPluginMethod>>(
+                Expression.New(p.GetConstructor(Type.EmptyTypes))
+              ).Compile());
+      }
+
       _helper = new Editor.AmlEditorHelper();
-      var arasConn = _conn as Innovator.Client.Connection.IArasConnection;
-      _actions = GetActions(arasConn == null ? -1 : arasConn.Version).OrderBy(a => a).ToArray();
+      _version = Connection.FetchVersion(false).Wait();
+      _actions = GetActions(_version.Major).OrderBy(a => a).ToArray();
     }
 
     private IEnumerable<string> GetActions(int version)
@@ -191,7 +200,9 @@ namespace InnovatorAdmin.Editor
         yield return "VaultApplyAml";
         yield return "VaultApplyItem";
       }
-      yield return UnitTestAction;
+
+      foreach (var plugin in _pluginFactory.Keys)
+        yield return plugin;
     }
 
     public virtual IEnumerable<string> GetActions()
@@ -199,36 +210,43 @@ namespace InnovatorAdmin.Editor
       return _actions;
     }
 
-    private async Task<IResultObject> ProcessTestSuite(string commands, Action<int, string> progressCallback)
+    private async Task<IResultObject> ProcessPlugin(IPluginMethod method, string commands, Action<int, string> progressCallback)
     {
-      TestSuite suite;
-      using (var reader = new StringReader(commands))
+      var context = new PluginContext(new PluginConnection(Connection, commands)
+        , progressCallback
+        , ConnectionManager.Current.Library.Connections
+            .Select(c => c.ArasCredentials())
+            .Where(c => c != null));
+
+      try
       {
-        suite = TestSerializer.ReadTestSuite(reader);
+        var result = await method.Execute(context).ConfigureAwait(false);
+        var xmlReader = (result as PluginResult)?.CreateReader();
+        if (xmlReader != null)
+          return new ResultObject(xmlReader, Connection, "");
+        else
+          return new ResultObject(result.Write, result.Count, Connection);
       }
-      var context = new TestContext(_conn);
-      foreach (var cred in ConnectionManager.Current.Library.Connections
-                            .Select(c => c.ArasCredentials())
-                            .Where(c => c != null))
+      catch (ServerException ex)
       {
-        context.CredentialStore.Add(cred);
+        return new ResultObject(ex.CreateReader(), Connection, "");
       }
-      context.ProgressCallback = progressCallback;
-      await suite.Run(context);
-      return new ResultObject(suite, _conn);
+      catch (Exception ex)
+      {
+        return new ResultObject(Connection.AmlContext.ServerException(ex, true).CreateReader(), Connection, "");
+      }
     }
 
     public virtual IPromise<IResultObject> Process(ICommand request, bool async, Action<int, string> progressCallback)
     {
-      var innCmd = request as InnovatorCommand;
-      if (innCmd == null)
+      if (!(request is InnovatorCommand innCmd))
         throw new NotSupportedException("Cannot run commands created by a different proxy");
 
       var cmd = innCmd.Internal;
 
       // Process Unit Tests separately
-      if (cmd.ActionString == UnitTestAction)
-        return ProcessTestSuite(cmd.Aml, progressCallback).ToPromise();
+      if (_pluginFactory.TryGetValue(cmd.ActionString, out var pluginInit))
+        return ProcessPlugin(pluginInit(), cmd.Aml, progressCallback).ToPromise();
 
       var elem = XElement.Parse(cmd.Aml);
       var firstItem = elem.DescendantsAndSelf("Item").FirstOrDefault();
@@ -274,7 +292,7 @@ namespace InnovatorAdmin.Editor
 
       Func<Stream, IResultObject> getResult = s =>
       {
-        var result = new ResultObject(s, _conn, select);
+        var result = new ResultObject(s, Connection, select);
         if (cmd.Action == CommandAction.ApplySQL)
           result.PreferredMode = OutputType.Table;
         return (IResultObject)result;
@@ -291,7 +309,7 @@ namespace InnovatorAdmin.Editor
       }
       else
       {
-        var remote = _conn as IRemoteConnection;
+        var remote = Connection as IRemoteConnection;
         if (remote == null)
           return Promises.Rejected<IResultObject>(new Exception("Connection must be an IRemoteConnection to use batch processing"));
         return new DataPromise(queries, innCmd.ConcurrentCount, remote
@@ -342,7 +360,7 @@ namespace InnovatorAdmin.Editor
             }
             else if (!t.IsCanceled && !_cts.IsCancellationRequested)
             {
-              lock(_lock)
+              lock (_lock)
               {
                 _writer.WriteEndElement();
                 _writer.Flush();
@@ -452,7 +470,7 @@ namespace InnovatorAdmin.Editor
           }, _cts.Token));
 
           if (_cts.IsCancellationRequested)
-             return;
+            return;
         }
 
         // won't get here until all urls have been put into tasks
@@ -474,7 +492,7 @@ namespace InnovatorAdmin.Editor
                   && e.Attributes("action").Any(p => !string.IsNullOrEmpty(p.Value)));
       if (files.Any())
       {
-        var upload = _conn.CreateUploadCommand();
+        var upload = Connection.CreateUploadCommand();
         upload.AddFileQuery(orig.Aml);
         upload.WithAction(orig.ActionString);
         foreach (var param in parameters)
@@ -513,6 +531,7 @@ namespace InnovatorAdmin.Editor
     {
       return elem.Name.LocalName == "Item" || elem.Name.LocalName == "sql" || elem.Name.LocalName == "SQL";
     }
+
     private XElement ConcatQueries(IEnumerable<XElement> elements)
     {
       if (elements == null || !elements.Any())
@@ -539,12 +558,12 @@ namespace InnovatorAdmin.Editor
 
     protected virtual IPromise<Stream> ProcessCommand(Command cmd, bool async)
     {
-      return _conn.Process(cmd, async);
+      return Connection.Process(cmd, async);
     }
 
     public virtual IEditorProxy Clone()
     {
-      return new ArasEditorProxy(_conn, _connData);
+      return new ArasEditorProxy(Connection, ConnData);
     }
 
     public ICommand NewCommand()
@@ -569,7 +588,7 @@ namespace InnovatorAdmin.Editor
       var fileCmd = GetCommand(queries[0], cmd, innCmd.Parameters, true);
       var fileData = await ProcessCommand(fileCmd, async).ToTask();
       fileCmd.Action = CommandAction.ApplyItem;
-      var metadata = _conn.AmlContext.FromXml(await ProcessCommand(fileCmd, async).ToTask(), fileCmd.Aml, _conn).AssertItem();
+      var metadata = Connection.AmlContext.FromXml(await ProcessCommand(fileCmd, async).ToTask(), fileCmd.Aml, Connection).AssertItem();
       var fileName = metadata.Property("filename").Value;
       var path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + "\\" + fileName);
       Directory.CreateDirectory(Path.GetDirectoryName(path));
@@ -608,39 +627,42 @@ namespace InnovatorAdmin.Editor
 
     private class ResultObject : IResultObject
     {
-      private ITextSource _text;
-      private int _count;
+      private readonly ITextSource _text;
+      private readonly int _count;
       private DataSet _dataSet;
-      private int _amlLength;
+      private readonly int _amlLength;
       private string _title;
-      private IAsyncConnection _conn;
+      private readonly IAsyncConnection _conn;
       private OutputType _preferredMode = OutputType.Text;
       private string _html;
-      private string _select;
+      private readonly string _select;
 
       public int ItemCount
       {
         get { return _count; }
       }
 
-      public ResultObject(TestSuite suite, IAsyncConnection conn)
+      public ResultObject(Action<TextWriter> writer, int count, IAsyncConnection conn)
       {
         var rope = new Rope<char>();
-        using (var writer = new Editor.RopeWriter(rope))
+        using (var textWriter = new Editor.RopeWriter(rope))
         {
-          suite.Write(writer);
+          writer(textWriter);
         }
         _amlLength = rope.Length;
-        _count = suite.Tests.Count;
+        _count = count;
         _conn = conn;
         _text = new RopeTextSource(rope);
         _dataSet = new DataSet();
       }
+
       public ResultObject(Stream aml, IAsyncConnection conn, string select)
+        : this(XmlReader.Create(aml), conn, select) { }
+
+      public ResultObject(XmlReader reader, IAsyncConnection conn, string select)
       {
         _conn = conn;
         var rope = new Rope<char>();
-        using (var reader = new StreamReader(aml))
         using (var writer = new Editor.RopeWriter(rope))
         {
           IndentXml(reader, writer, out _count);
@@ -669,7 +691,7 @@ namespace InnovatorAdmin.Editor
 
 
 
-      private void IndentXml(TextReader xmlContent, TextWriter writer, out int itemCount)
+      private void IndentXml(XmlReader reader, TextWriter writer, out int itemCount)
       {
         itemCount = 0;
         char[] writeNodeBuffer = null;
@@ -677,15 +699,16 @@ namespace InnovatorAdmin.Editor
         var elemIds = new List<string>();
         string value;
 
-        var settings = new XmlWriterSettings();
-        settings.OmitXmlDeclaration = true;
-        settings.Indent = true;
-        settings.IndentChars = "  ";
-        settings.CheckCharacters = true;
-
+        var settings = new XmlWriterSettings()
+        {
+          OmitXmlDeclaration = true,
+          Indent = true,
+          IndentChars = "  ",
+          CheckCharacters = true,
+          ConformanceLevel = ConformanceLevel.Fragment
+        };
         var types = new HashSet<string>();
 
-        using (var reader = XmlReader.Create(xmlContent))
         using (var xmlWriter = XmlWriter.Create(writer, settings))
         {
           bool canReadValueChunk = reader.CanReadValueChunk;
@@ -726,42 +749,73 @@ namespace InnovatorAdmin.Editor
                 }
                 break;
               case XmlNodeType.Text:
-                if (elemIds.EndsWith("Action", "item_query")
-                  || elemIds.EndsWith("EMail Message", "body_html")
-                  || elemIds.EndsWith("EMail Message", "body_plain")
+                var textReader = canReadValueChunk
+                    ? (TextReader)new XmlValueReader(reader)
+                    : new StringReader(reader.Value);
+
+                var formatXml = elemIds.EndsWith("Action", "item_query")
                   || elemIds.EndsWith("EMail Message", "query_string")
                   || elemIds.EndsWith("Grid", "query")
-                  || elemIds.EndsWith("Method", "method_code")
                   || elemIds.EndsWith("Report", "report_query")
                   || elemIds.EndsWith("Report", "xsl_stylesheet")
                   || elemIds.EndsWith("SavedSearch", "criteria")
-                  || elemIds.EndsWith("SQL", "sqlserver_body")
                   || elemIds.EndsWith("ItemType", "class_structure")
-                  )
+                  || elemIds.EndsWith("qry_QueryReference", "filter_xml")
+                  || elemIds.EndsWith("qry_QueryItem", "filter_xml")
+                  || elemIds.EndsWith("mp_MacCondition", "condition_xml")
+                  || elemIds.EndsWith("tp_Block", "content");
+                var useCData = elemIds.EndsWith("EMail Message", "body_html")
+                  || elemIds.EndsWith("EMail Message", "body_plain")
+                  || elemIds.EndsWith("Method", "method_code")
+                  || elemIds.EndsWith("SQL", "sqlserver_body")
+                  || (elemIds.Last() != "Result" && textReader.Peek() == '<' && (textReader as XmlValueReader)?.ReadLength > 1028);
+
+                if (formatXml)
                 {
-                  xmlWriter.WriteCData(reader.Value);
+                  try
+                  {
+                    var w = new StringWriter();
+                    using (var r = XmlReader.Create(textReader, new XmlReaderSettings()
+                    {
+                      ConformanceLevel = ConformanceLevel.Fragment
+                    }))
+                    using (var xml = XmlWriter.Create(w, settings))
+                    {
+                      xml.WriteNode(r, false);
+                      xml.Flush();
+                      w.Flush();
+                    }
+                    xmlWriter.WriteCData(w.ToString());
+                  }
+                  catch (XmlException)
+                  {
+                    var textValue = reader.Value;
+                    if (string.IsNullOrEmpty(textValue))
+                      textValue = (textReader as XmlValueReader)?.ReadBufferToEnd();
+                    xmlWriter.WriteCData(textValue);
+                  }
                 }
-                else if (canReadValueChunk && elemIds.Last() != "Result")
+                else if (useCData)
                 {
-                  if (writeNodeBuffer == null)
-                  {
-                    writeNodeBuffer = new char[1024];
-                  }
-                  int count;
-                  while ((count = reader.ReadValueChunk(writeNodeBuffer, 0, 1024)) > 0)
-                  {
-                    xmlWriter.WriteChars(writeNodeBuffer, 0, count);
-                  }
+                  xmlWriter.WriteCData(textReader.ReadToEnd());
+                }
+                else if (elemIds.Last() == "Result" && textReader.Peek() == '<')
+                {
+                  _html = textReader.ReadToEnd();
+                  _preferredMode = OutputType.Html;
+                  xmlWriter.WriteString(_html);
                 }
                 else
                 {
-                  value = reader.Value;
-                  if (elemIds.Last() == "Result" && value.Trim().StartsWith("<"))
+                  if (writeNodeBuffer == null)
                   {
-                    _html = value;
-                    _preferredMode = OutputType.Html;
+                    writeNodeBuffer = new char[4096];
                   }
-                  xmlWriter.WriteString(value);
+                  int count;
+                  while ((count = textReader.Read(writeNodeBuffer, 0, writeNodeBuffer.Length)) > 0)
+                  {
+                    xmlWriter.WriteChars(writeNodeBuffer, 0, count);
+                  }
                 }
                 break;
               case XmlNodeType.CDATA:
@@ -791,7 +845,7 @@ namespace InnovatorAdmin.Editor
           }
 
           xmlWriter.Flush();
-          itemCount = levels.FirstOrDefault(i => i > 0);
+          itemCount = Array.Find(levels, i => i > 0);
           writer.Flush();
         }
 
@@ -830,7 +884,7 @@ namespace InnovatorAdmin.Editor
     private class InnovatorCommand : ICommand
     {
       private Command _internal = new Command();
-      private Dictionary<string, object> _params = new Dictionary<string,object>();
+      private Dictionary<string, object> _params = new Dictionary<string, object>();
 
       public Command Internal
       {
@@ -878,7 +932,7 @@ namespace InnovatorAdmin.Editor
 
     public void Dispose()
     {
-      var remote = _conn as IRemoteConnection;
+      var remote = Connection as IRemoteConnection;
       if (remote != null)
         remote.Logout(true, true);
     }
@@ -887,9 +941,15 @@ namespace InnovatorAdmin.Editor
 
     public IPromise<IEnumerable<IEditorTreeNode>> GetNodes()
     {
-      return Promises.All(_conn.ApplyAsync(new Command("<Item/>").WithAction(CommandAction.GetMainTreeItems)
-          , true, false),
-          _conn.ApplyAsync(@"<Item type='ItemType' action='get'>
+      var tocPromise = _version.Major >= 12
+        ? Connection.ApplyAsync(@"<Item type='Method' action='GetCommandBarItems'>
+  <location_name>TOC</location_name>
+</Item>", true, false)
+        : Connection.ApplyAsync(new Command("<Item/>").WithAction(CommandAction.GetMainTreeItems)
+          , true, false);
+
+      return Promises.All(tocPromise,
+          Connection.ApplyAsync(@"<Item type='ItemType' action='get'>
                               <name>ItemType</name>
                               <Relationships>
                                 <Item type='Item Report' action='get'>
@@ -897,14 +957,14 @@ namespace InnovatorAdmin.Editor
                                 </Item>
                               </Relationships>
                             </Item>", true, false),
-          ArasMetadataProvider.Cached(_conn).ReloadPromise())
+          ArasMetadataProvider.Cached(Connection).ReloadPromise())
         .Convert(r =>
         {
           _itemTypeReportNames = ((IReadOnlyResult)r[1]).AssertItem().Relationships()
             .Select(rep => rep.RelatedItem().Property("name").Value).ToArray();
-          return ((IReadOnlyResult)r[0]).AssertItem()
-            .Property("root")
-            .Elements().OfType<IReadOnlyItem>()
+          var node = TocNode.FromXml(((IReadOnlyResult)r[0]).CreateReader());
+          return node
+            .Children
             .Select(ProcessTreeNode)
             .Concat(Scripts());
         });
@@ -948,7 +1008,7 @@ namespace InnovatorAdmin.Editor
         Name = "Item Types",
         Image = Icons.FolderSpecial16,
         HasChildren = true,
-        Children = ArasMetadataProvider.Cached(_conn).ItemTypes
+        Children = ArasMetadataProvider.Cached(Connection).ItemTypes
           .Where(i => !i.IsRelationship)
           .Select(ItemTypeNode)
           .OrderBy(n => n.Name)
@@ -958,52 +1018,60 @@ namespace InnovatorAdmin.Editor
         Name = "Relationship Types",
         Image = Icons.FolderSpecial16,
         HasChildren = true,
-        Children = ArasMetadataProvider.Cached(_conn).ItemTypes
+        Children = ArasMetadataProvider.Cached(Connection).ItemTypes
           .Where(i => i.IsRelationship)
           .Select(ItemTypeNode)
           .OrderBy(n => n.Name)
       };
     }
 
-    private IEditorTreeNode ProcessTreeNode(IReadOnlyItem item)
+    private IEditorTreeNode ProcessTreeNode(TocNode node)
     {
-      switch (item.Classification().Value.ToLowerInvariant())
+      var savedSearch = node.References
+        .FirstOrDefault(r => string.Equals(r.TypeName(), "Saved Search", StringComparison.OrdinalIgnoreCase));
+      var itemType = node.References
+        .FirstOrDefault(r => string.Equals(r.TypeName(), "ItemType", StringComparison.OrdinalIgnoreCase));
+      if (savedSearch != null)
       {
-        case "tree node/savedsearchintoc":
-          return new EditorTreeNode()
-          {
-            Name = item.Property("label").Value,
-            Description = "Saved Search",
-            Image = Icons.XmlTag16,
-            HasChildren = item.Relationships("Tree Node Child").Any(),
-            Children = item.Relationships().Select(r => ProcessTreeNode(r.RelatedItem())),
-            ScriptGetter = () => Enumerable.Repeat(
-              new EditorScript() {
-                Name = item.Property("label").Value,
-                Action = "ApplyItem",
-                Script = _conn.Apply("<Item type='SavedSearch' action='get' select='criteria' id='@0' />", item.Property("saved_search_id").Value)
-                  .AssertItem().Property("criteria").Value
-              }, 1)
-          };
-        case "tree node/itemtypeintoc":
-          return new EditorTreeNode()
-          {
-            Name = item.Property("label").Value,
-            Image = Icons.Class16,
-            Description = "ItemType: " + item.Property("name").Value,
-            HasChildren = true,
-            ScriptGetter = () => ItemTypeScripts(ArasMetadataProvider.Cached(_conn).ItemTypeById(item.Property("itemtype_id").Value)),
-            Children = ItemTypeChildren(item.Property("itemtype_id").Value)
-            .Concat(item.Relationships().Select(r => ProcessTreeNode(r.RelatedItem())))
-          };
-        default:
-          return new EditorTreeNode()
-          {
-            Name = item.Property("label").Value,
-            Image = Icons.Folder16,
-            HasChildren = item.Relationships("Tree Node Child").Any(),
-            Children = item.Relationships().Select(r => ProcessTreeNode(r.RelatedItem()))
-          };
+        return new EditorTreeNode()
+        {
+          Name = node.Label,
+          Description = "Saved Search",
+          Image = Icons.XmlTag16,
+          HasChildren = node.Children.Any(),
+          Children = node.Children.Select(ProcessTreeNode),
+          ScriptGetter = () => Enumerable.Repeat(
+            new EditorScript()
+            {
+              Name = node.Label,
+              Action = "ApplyItem",
+              Script = Connection.Apply("<Item type='SavedSearch' action='get' select='criteria' id='@0' />", savedSearch.Id())
+                .AssertItem().Property("criteria").Value
+            }, 1)
+        };
+      }
+      else if (itemType != null)
+      {
+        return new EditorTreeNode()
+        {
+          Name = node.Label,
+          Image = Icons.Class16,
+          Description = "ItemType: " + itemType.TypeName(),
+          HasChildren = true,
+          ScriptGetter = () => ItemTypeScripts(ArasMetadataProvider.Cached(Connection).ItemTypeById(itemType.Id())),
+          Children = ItemTypeChildren(itemType.Id())
+            .Concat(node.Children.Select(ProcessTreeNode))
+        };
+      }
+      else
+      {
+        return new EditorTreeNode()
+        {
+          Name = node.Label,
+          Image = Icons.Folder16,
+          HasChildren = node.Children.Any(),
+          Children = node.Children.Select(ProcessTreeNode)
+        };
       }
     }
 
@@ -1015,7 +1083,7 @@ namespace InnovatorAdmin.Editor
           Name = "Properties",
           Image = Icons.Folder16,
           HasChildren = true,
-          ChildGetter = () => ArasMetadataProvider.Cached(_conn)
+          ChildGetter = () => ArasMetadataProvider.Cached(Connection)
             .GetPropertiesByTypeId(typeId).Wait()
             .Select(p => new EditorTreeNode()
             {
@@ -1023,13 +1091,13 @@ namespace InnovatorAdmin.Editor
               Image = Icons.Property16,
               HasChildren = p.Type == PropertyType.item && p.Restrictions.Any()
                 && p.Name != "id" && p.Name != "config_id",
-              ChildGetter = () => ItemTypeChildren(ArasMetadataProvider.Cached(_conn).ItemTypeByName(p.Restrictions.First()).Id),
+              ChildGetter = () => ItemTypeChildren(ArasMetadataProvider.Cached(Connection).ItemTypeByName(p.Restrictions.First()).Id),
               Description = GetPropertyDescription(p)
             })
             .OrderBy(n => n.Name)
         }
       };
-      var rels = ArasMetadataProvider.Cached(_conn).ItemTypeById(typeId).Relationships;
+      var rels = ArasMetadataProvider.Cached(Connection).ItemTypeById(typeId).Relationships;
       if (rels.Any())
       {
         result.Add(new EditorTreeNode()
@@ -1037,7 +1105,7 @@ namespace InnovatorAdmin.Editor
           Name = "Relationships",
           Image = Icons.Folder16,
           HasChildren = true,
-          ChildGetter = () => ArasMetadataProvider.Cached(_conn)
+          ChildGetter = () => ArasMetadataProvider.Cached(Connection)
             .ItemTypeById(typeId).Relationships
             .Select(ItemTypeNode)
             .OrderBy(n => n.Name)
@@ -1086,8 +1154,9 @@ namespace InnovatorAdmin.Editor
       {
         Name = "List " + (itemType.Label ?? itemType.Name),
         Action = "ApplyItem",
-        ScriptGetter = async () => {
-          var it = (await _conn.ApplyAsync(@"<Item type='ItemType' action='get' select='default_page_size'>
+        ScriptGetter = async () =>
+        {
+          var it = (await Connection.ApplyAsync(@"<Item type='ItemType' action='get' select='default_page_size'>
                                       <name>@0</name>
                                       <Relationships>
                                         <Item type='Property' action='get' select='default_search'>
@@ -1113,7 +1182,7 @@ namespace InnovatorAdmin.Editor
         AutoRun = true,
         PreferredOutput = OutputType.Table
       };
-      yield return ItemTypeAddScript(_conn, itemType);
+      yield return ItemTypeAddScript(Connection, itemType);
       yield return new EditorScript()
       {
         Name = "--------------------------"
@@ -1143,7 +1212,7 @@ namespace InnovatorAdmin.Editor
 
     private async Task<string> SqlSelect(ItemType itemType)
     {
-      var metadata = ArasMetadataProvider.Cached(_conn);
+      var metadata = ArasMetadataProvider.Cached(Connection);
       var props = await metadata
         .GetProperties(itemType).ToTask();
 
@@ -1804,6 +1873,239 @@ order by 1
   <Item type='Vault' action='get' select='config_id'></Item>
   <Item type='Viewer' action='get' select='config_id'></Item>
   <Item type='Workflow Map' action='get' select='config_id'></Item>
+</AML>"
+      },new EditorScript() {
+        Name = "11.0sp9 Metadata Export",
+        Action = "ApplyAML",
+        Script = @"<!-- Derived using the SQL below:
+select '<Item type=''' + name + ''' action=''get'' select=''config_id''>'
+  + case when name = 'Identity' then '<or><is_alias>0</is_alias><id condition=''in''>''DBA5D86402BF43D5976854B8B48FCDD1'',''E73F43AD85CD4A95951776D57A4D517B''</id></or>' else '' end
+  + '</Item>' AML
+from innovator.[ITEMTYPE]
+where INSTANCE_DATA in (
+  SELECT ta.name TableName
+  FROM sys.tables ta
+  INNER JOIN sys.partitions pa
+  ON pa.OBJECT_ID = ta.OBJECT_ID
+  INNER JOIN sys.schemas sc
+  ON ta.schema_id = sc.schema_id
+  WHERE ta.is_ms_shipped = 0
+    AND pa.index_id IN (1,0)
+    and ta.name in (select it.instance_data from innovator.ItemType it)
+    and not ta.name in (select it.INSTANCE_DATA
+      from innovator.[RELATIONSHIPTYPE] rt
+      inner join innovator.[ITEMTYPE] it
+      on it.id = rt.RELATIONSHIP_ID)
+    and not ta.name in (
+        'ACTIVITY2'
+      , 'ACTIVITY_TEMPLATE'
+      , 'APPLIED_UPDATES'
+      , 'APQP_CAUSE_CATALOG'
+      , 'APQP_DETECTION_CATALOG'
+      , 'APQP_EFFECT_CATALOG'
+      , 'APQP_FAILURE_MODE_CATALOG'
+      , 'APQP_MEASUREMENT_TECHNIQUE'
+      , 'APQP_OCCURRENCE_CATALOG'
+      , 'APQP_SEVERITY_CATALOG'
+      , 'BUSINESS_CALENDAR_YEAR'
+      , 'CAD'
+      , 'DATABASEUPGRADE'
+      , 'DESIGN_QUALITY_DOCUMENT'
+      , 'FILE'
+      , 'FILECONTAINERLOCATOR'
+      , 'HISTORY_CONTAINER'
+      , 'MPROCESS_PLANNER'
+      , 'PACKAGEDEFINITION'
+      , 'PART'
+      , 'PREFERENCE'
+      , 'PROJECT'
+      , 'PROJECT_TEMPLATE'
+      , 'SAVEDSEARCH'
+      , 'USER'
+      , 'WBS_ELEMENT'
+      , 'TEAM')
+  GROUP BY sc.name,ta.name
+  having SUM(pa.rows) <> 0)
+order by 1
+;
+-->
+
+<AML>
+  <Item type='Action' action='get' select='config_id'></Item>
+  <Item type='Chart' action='get' select='config_id'></Item>
+  <Item type='cmf_ContentType' action='get' select='config_id'></Item>
+  <Item type='cmf_Style' action='get' select='config_id'></Item>
+  <Item type='cmf_TabularView' action='get' select='config_id'></Item>
+  <Item type='cmf_TabularViewHeaderRow' action='get' select='config_id'></Item>
+  <Item type='CommandBarButton' action='get' select='config_id'></Item>
+  <Item type='CommandBarDropDown' action='get' select='config_id'></Item>
+  <Item type='CommandBarEdit' action='get' select='config_id'></Item>
+  <Item type='CommandBarMenu' action='get' select='config_id'></Item>
+  <Item type='CommandBarMenuButton' action='get' select='config_id'></Item>
+  <Item type='CommandBarMenuCheckbox' action='get' select='config_id'></Item>
+  <Item type='CommandBarMenuSeparator' action='get' select='config_id'></Item>
+  <Item type='CommandBarSection' action='get' select='config_id'></Item>
+  <Item type='CommandBarSeparator' action='get' select='config_id'></Item>
+  <Item type='CommandBarShortcut' action='get' select='config_id'></Item>
+  <Item type='ConversionRule' action='get' select='config_id'></Item>
+  <Item type='ConversionServer' action='get' select='config_id'></Item>
+  <Item type='ConverterType' action='get' select='config_id'></Item>
+  <Item type='Dashboard' action='get' select='config_id'></Item>
+  <Item type='EMail Message' action='get' select='config_id'></Item>
+  <Item type='FileType' action='get' select='config_id'></Item>
+  <Item type='Form' action='get' select='config_id'></Item>
+  <Item type='GlobalPresentationConfig' action='get' select='config_id'></Item>
+  <Item type='Grid' action='get' select='config_id'></Item>
+  <Item type='History Action' action='get' select='config_id'></Item>
+  <Item type='History Template' action='get' select='config_id'></Item>
+  <Item type='Identity' action='get' select='config_id'><or><is_alias>0</is_alias><id condition='in'>'DBA5D86402BF43D5976854B8B48FCDD1','E73F43AD85CD4A95951776D57A4D517B'</id></or></Item>
+  <Item type='ItemType' action='get' select='config_id'></Item>
+  <Item type='Language' action='get' select='config_id'></Item>
+  <Item type='Life Cycle Map' action='get' select='config_id'></Item>
+  <Item type='List' action='get' select='config_id'></Item>
+  <Item type='Locale' action='get' select='config_id'></Item>
+  <Item type='Measurement Unit' action='get' select='config_id'></Item>
+  <Item type='Method' action='get' select='config_id'></Item>
+  <Item type='Metric' action='get' select='config_id'></Item>
+  <Item type='Permission' action='get' select='config_id'></Item>
+  <Item type='PreferenceTypes' action='get' select='config_id'></Item>
+  <Item type='PresentationConfiguration' action='get' select='config_id'></Item>
+  <Item type='Report' action='get' select='config_id'></Item>
+  <Item type='Revision' action='get' select='config_id'></Item>
+  <Item type='SearchMode' action='get' select='config_id'></Item>
+  <Item type='SecureMessageViewTemplate' action='get' select='config_id'></Item>
+  <Item type='SelfServiceReportHelp' action='get' select='config_id'></Item>
+  <Item type='Sequence' action='get' select='config_id'></Item>
+  <Item type='SQL' action='get' select='config_id'></Item>
+  <Item type='SSVCPresentationConfiguration' action='get' select='config_id'></Item>
+  <Item type='SystemFileContainer' action='get' select='config_id'></Item>
+  <Item type='tp_XmlSchema' action='get' select='config_id'></Item>
+  <Item type='UserMessage' action='get' select='config_id'></Item>
+  <Item type='Variable' action='get' select='config_id'></Item>
+  <Item type='Vault' action='get' select='config_id'></Item>
+  <Item type='Viewer' action='get' select='config_id'></Item>
+  <Item type='Workflow Map' action='get' select='config_id'></Item>
+</AML>"
+      },new EditorScript() {
+        Name = "11.0sp12 Metadata Export",
+        Action = "ApplyAML",
+        Script = @"<!-- Derived using the SQL below:
+select '<Item type=''' + name + ''' action=''get'' select=''config_id''>'
+  + case when name = 'Identity' then '<or><is_alias>0</is_alias><id condition=''in''>''DBA5D86402BF43D5976854B8B48FCDD1'',''E73F43AD85CD4A95951776D57A4D517B''</id></or>' else '' end
+  + '</Item>' AML
+from innovator.[ITEMTYPE]
+where INSTANCE_DATA in (
+  SELECT ta.name TableName
+  FROM sys.tables ta
+  INNER JOIN sys.partitions pa
+  ON pa.OBJECT_ID = ta.OBJECT_ID
+  INNER JOIN sys.schemas sc
+  ON ta.schema_id = sc.schema_id
+  WHERE ta.is_ms_shipped = 0
+    AND pa.index_id IN (1,0)
+    and ta.name in (select it.instance_data from innovator.ItemType it)
+    and not ta.name in (select it.INSTANCE_DATA
+      from innovator.[RELATIONSHIPTYPE] rt
+      inner join innovator.[ITEMTYPE] it
+      on it.id = rt.RELATIONSHIP_ID)
+    and not ta.name in (
+        'ACTIVITY2'
+      , 'ACTIVITY_TEMPLATE'
+      , 'APPLIED_UPDATES'
+      , 'APQP_CAUSE_CATALOG'
+      , 'APQP_DETECTION_CATALOG'
+      , 'APQP_EFFECT_CATALOG'
+      , 'APQP_FAILURE_MODE_CATALOG'
+      , 'APQP_MEASUREMENT_TECHNIQUE'
+      , 'APQP_OCCURRENCE_CATALOG'
+      , 'APQP_SEVERITY_CATALOG'
+      , 'BUSINESS_CALENDAR_YEAR'
+      , 'CAD'
+      , 'DATABASEUPGRADE'
+      , 'DESIGN_QUALITY_DOCUMENT'
+      , 'FILE'
+      , 'FILECONTAINERLOCATOR'
+      , 'HISTORY_CONTAINER'
+      , 'MPROCESS_PLANNER'
+      , 'PACKAGEDEFINITION'
+      , 'PART'
+      , 'PREFERENCE'
+      , 'PROJECT'
+      , 'PROJECT_TEMPLATE'
+      , 'SAVEDSEARCH'
+      , 'USER'
+      , 'WBS_ELEMENT'
+      , 'TEAM')
+  GROUP BY sc.name,ta.name
+  having SUM(pa.rows) <> 0)
+order by 1
+;
+-->
+
+<AML>
+  <Item type='Action' action='get' select='config_id'></Item>
+  <Item type='Chart' action='get' select='config_id'></Item>
+  <Item type='cmf_ContentType' action='get' select='config_id'></Item>
+  <Item type='cmf_Style' action='get' select='config_id'></Item>
+  <Item type='cmf_TabularView' action='get' select='config_id'></Item>
+  <Item type='cmf_TabularViewHeaderRow' action='get' select='config_id'></Item>
+  <Item type='CommandBarButton' action='get' select='config_id'></Item>
+  <Item type='CommandBarDropDown' action='get' select='config_id'></Item>
+  <Item type='CommandBarEdit' action='get' select='config_id'></Item>
+  <Item type='CommandBarMenu' action='get' select='config_id'></Item>
+  <Item type='CommandBarMenuButton' action='get' select='config_id'></Item>
+  <Item type='CommandBarMenuCheckbox' action='get' select='config_id'></Item>
+  <Item type='CommandBarMenuSeparator' action='get' select='config_id'></Item>
+  <Item type='CommandBarSection' action='get' select='config_id'></Item>
+  <Item type='CommandBarSeparator' action='get' select='config_id'></Item>
+  <Item type='CommandBarShortcut' action='get' select='config_id'></Item>
+  <Item type='ConversionRule' action='get' select='config_id'></Item>
+  <Item type='ConversionServer' action='get' select='config_id'></Item>
+  <Item type='ConverterType' action='get' select='config_id'></Item>
+  <Item type='Dashboard' action='get' select='config_id'></Item>
+  <Item type='EMail Message' action='get' select='config_id'></Item>
+  <Item type='FileType' action='get' select='config_id'></Item>
+  <Item type='Form' action='get' select='config_id'></Item>
+  <Item type='GlobalPresentationConfig' action='get' select='config_id'></Item>
+  <Item type='Grid' action='get' select='config_id'></Item>
+  <Item type='History Action' action='get' select='config_id'></Item>
+  <Item type='History Template' action='get' select='config_id'></Item>
+  <Item type='Identity' action='get' select='config_id'><or><is_alias>0</is_alias><id condition='in'>'DBA5D86402BF43D5976854B8B48FCDD1','E73F43AD85CD4A95951776D57A4D517B'</id></or></Item>
+  <Item type='ItemType' action='get' select='config_id'></Item>
+  <Item type='Language' action='get' select='config_id'></Item>
+  <Item type='Life Cycle Map' action='get' select='config_id'></Item>
+  <Item type='List' action='get' select='config_id'></Item>
+  <Item type='Locale' action='get' select='config_id'></Item>
+  <Item type='Measurement Unit' action='get' select='config_id'></Item>
+  <Item type='Method' action='get' select='config_id'></Item>
+  <Item type='Metric' action='get' select='config_id'></Item>
+  <Item type='mp_MacPolicy' action='get' select='config_id'></Item>
+  <Item type='mp_PolicyAccessEnvAttribute' action='get' select='config_id'></Item>
+  <Item type='Permission' action='get' select='config_id'></Item>
+  <Item type='Permission_ExplicitDefine' action='get' select='config_id'></Item>
+  <Item type='Permission_ItemClassification' action='get' select='config_id'></Item>
+  <Item type='Permission_PropertyValue' action='get' select='config_id'></Item>
+  <Item type='PreferenceTypes' action='get' select='config_id'></Item>
+  <Item type='PresentationConfiguration' action='get' select='config_id'></Item>
+  <Item type='qry_QueryDefinition' action='get' select='config_id'></Item>
+  <Item type='rb_TreeGridViewDefinition' action='get' select='config_id'></Item>
+  <Item type='Report' action='get' select='config_id'></Item>
+  <Item type='Revision' action='get' select='config_id'></Item>
+  <Item type='SearchMode' action='get' select='config_id'></Item>
+  <Item type='SecureMessageViewTemplate' action='get' select='config_id'></Item>
+  <Item type='SelfServiceReportHelp' action='get' select='config_id'></Item>
+  <Item type='Sequence' action='get' select='config_id'></Item>
+  <Item type='SQL' action='get' select='config_id'></Item>
+  <Item type='SSVCPresentationConfiguration' action='get' select='config_id'></Item>
+  <Item type='SystemFileContainer' action='get' select='config_id'></Item>
+  <Item type='tp_XmlSchema' action='get' select='config_id'></Item>
+  <Item type='UserMessage' action='get' select='config_id'></Item>
+  <Item type='Variable' action='get' select='config_id'></Item>
+  <Item type='Vault' action='get' select='config_id'></Item>
+  <Item type='Viewer' action='get' select='config_id'></Item>
+  <Item type='Workflow Map' action='get' select='config_id'></Item>
+  <Item type='xClassificationTree' action='get' select='config_id'></Item>
+  <Item type='xPropertyDefinition' action='get' select='config_id'></Item>
 </AML>"
       }
     };

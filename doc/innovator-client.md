@@ -3,9 +3,8 @@
 [![innovator-client MyGet Build Status](https://www.myget.org/BuildSource/Badge/innovator-client?identifier=cb689f79-0412-4d27-b7ca-e6be3283d4e9)](https://www.myget.org/)
 [![NuGet](https://img.shields.io/nuget/v/Innovator.Client.svg)](https://www.nuget.org/packages/Innovator.Client/)
 
-It seems like for every project I started, I ended up having to enhance or rewrite some portion 
-of the IOM. Because of this, I decided to bite the bullet and write a new library which would 
-incorporate all of the changes I was making to the individual projects.
+It seems like for every project I started, I ended up having to enhance or rewrite some portion of the IOM. Because of this, I decided to bite the bullet and write a new library which would incorporate
+all of the changes I was making to the individual projects.
 
 # First, show me the code
 
@@ -125,7 +124,7 @@ var result = await conn.ApplyAsync("MY_QUERY", true, false).ToTask();
 ## Support vault access via streams
 
 Requiring that files be read from/written to disk requires accessing the slowest, most error-prone
-memory accessible on a computer.  This is particular a problem for server-based code.
+memory accessible on a computer.  This is particularly a problem for a server-based code.
 
 ```csharp
 // Upload a file
@@ -146,9 +145,9 @@ var stream = conn.Process(new Command("<Item type='File' action='get' id='@0' />
 
 ## Stop 'Not a single item' exceptions
 
-Results come back from the server as an `IReadOnlyResult` object.  From this object, you can 
-assert that the server should have returned a single item, graph any items returned by the server,
-access the returned error, etc.  However, once you obtain and `IReadOnlyItem` object, you are
+Results come back from the server as an `IReadOnlyResult` object.  From this object, you can assert
+that the server should have returned a single item, graph any items returned by the server,
+access the returned error, etc.  However, once you obtain an `IReadOnlyItem` object, you are
 guaranteed throughout the code that it actually represents an `<Item />` tag.
 
 ```csharp
@@ -222,7 +221,7 @@ cases for this might include:
     purposes
   - Including additional authentication headers used by proxies within an organization
 
-The code to achive this looks like
+The code to achieve this looks like
 
 ```csharp
 var conn = Factory.GetConnection("URL", "USER_AGENT");

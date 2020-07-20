@@ -29,10 +29,10 @@ namespace InnovatorAdmin
     </Item>
     <Item type='Morphae' action='get' select='related_id' related_expand='0' />
   </Relationships>
-</Item>", true, false).ToTask()).Items().OfType<Innovator.Client.Model.ItemType>();
+</Item>", true, false).ToTask()).Items().OfType<Innovator.Client.Model.ItemType>().ToArray();
 
       var defaultFactory = new Innovator.Client.DefaultItemFactory();
-      itemTypes = itemTypes.Where(i => defaultFactory.NewItem(_conn.AmlContext, i.IdProp().KeyedName().Value) == null).ToArray();
+      //itemTypes = itemTypes.Where(i => defaultFactory.NewItem(_conn.AmlContext, i.IdProp().KeyedName().Value) == null).ToArray();
 
       var dict = itemTypes.ToDictionary(i => i.Id());
       var polymorphicIds = new HashSet<string>();
@@ -116,6 +116,9 @@ namespace Innovator.Client.Model
   ///<summary>");
           await writer.WriteAsync("Class for the item type " + itemType.IdProp().KeyedName().Value);
           await writer.WriteAsync(@" </summary>
+  [ArasName(""");
+          await writer.WriteAsync(itemType.IdProp().KeyedName().Value);
+          await writer.WriteAsync(@""")]
   public class ");
           await writer.WriteAsync(itemTypeLabel);
           await writer.WriteAsync(@" : Item");
@@ -168,6 +171,9 @@ namespace Innovator.Client.Model
             await writer.WriteAsync("    /// <summary>Retrieve the <c>");
             await writer.WriteAsync(prop.NameProp().Value);
             await writer.WriteAsync("</c> property of the item</summary>\r\n");
+            await writer.WriteAsync("    [ArasName(\"");
+            await writer.WriteAsync(prop.NameProp().Value);
+            await writer.WriteAsync("\")]\r\n");
             await writer.WriteAsync("    public IProperty_");
             await writer.WriteAsync(PropType(prop, polymorphicIds));
             await writer.WriteAsync(" ");

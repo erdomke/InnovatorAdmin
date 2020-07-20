@@ -1,33 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Innovator.Client;
 using Innovator.Client.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace InnovatorAdmin
 {
-  public class ArasMetadataProvider
+  public class ArasMetadataProvider : IArasMetadataProvider
   {
     private IAsyncConnection _conn;
     private Dictionary<ItemProperty, ItemReference> _customProps
-      = new Dictionary<ItemProperty,ItemReference>();
+      = new Dictionary<ItemProperty, ItemReference>();
     private Dictionary<string, ItemType> _itemTypesByName
       = new Dictionary<string, ItemType>(StringComparer.OrdinalIgnoreCase);
     private Dictionary<string, ItemType> _itemTypesById;
     private Task<bool[]> _metadataComplete;
     private IEnumerable<Method> _methods = Enumerable.Empty<Method>();
-    private IEnumerable<ItemReference> _polyItemLists = Enumerable.Empty<ItemReference>();
-    private IEnumerable<ItemReference> _sequences = Enumerable.Empty<ItemReference>();
     private Dictionary<string, Sql> _sql;
     private Dictionary<string, ItemReference> _systemIdentities;
     private Dictionary<string, IEnumerable<ListValue>> _listValues
-      = new Dictionary<string,IEnumerable<ListValue>>();
+      = new Dictionary<string, IEnumerable<ListValue>>();
     private Dictionary<string, IEnumerable<IListValue>> _serverReports
       = new Dictionary<string, IEnumerable<IListValue>>();
-    private Dictionary<string, IEnumerable<IListValue>> _serverActions
+    private readonly Dictionary<string, IEnumerable<IListValue>> _serverActions
       = new Dictionary<string, IEnumerable<IListValue>>();
 
     /// <summary>
@@ -38,9 +35,9 @@ namespace InnovatorAdmin
       get { return _methods.Where(m => m.IsCore); }
     }
     /// <summary>
-    /// Enumerable of methods where core = 1
+    /// Enumerable of methods
     /// </summary>
-    public IEnumerable<ItemReference> AllMethods
+    public IEnumerable<Method> AllMethods
     {
       get { return _methods; }
     }
@@ -51,6 +48,7 @@ namespace InnovatorAdmin
     {
       get { return _itemTypesByName.Values; }
     }
+    
     /// <summary>
     /// Enumerable of all method names
     /// </summary>
@@ -58,19 +56,17 @@ namespace InnovatorAdmin
     {
       get { return _methods.Select(i => i.KeyedName); }
     }
+
     /// <summary>
     /// Enumerable of all lists that are auto-generated for a polyitem item type
     /// </summary>
-    public IEnumerable<ItemReference> PolyItemLists
-    {
-      get { return _polyItemLists; }
-    }
+    public IEnumerable<ItemReference> PolyItemLists { get; private set; } = Enumerable.Empty<ItemReference>();
     /// <summary>
     /// Enumerable of all sequences
     /// </summary>
     public IEnumerable<ItemReference> Sequences
     {
-      get { return _sequences; }
+      get { return Sequences1; }
     }
     /// <summary>
     /// Enumerable of all system identities
@@ -79,6 +75,23 @@ namespace InnovatorAdmin
     {
       get { return _systemIdentities.Values; }
     }
+
+    /// <summary>
+    /// Hashset of all CMF-generated ItemType IDs
+    /// </summary>
+    public HashSet<string> CmfGeneratedTypes { get; private set; } = new HashSet<string>();
+
+    /// <summary>
+    /// Gets the IDs of all the TOC presentation configs.
+    /// </summary>
+    public HashSet<string> TocPresentationConfigs { get; } = new HashSet<string>();
+
+    /// <summary>
+    /// Dictionary of all ItemTypes linked from contentTypes
+    /// </summary>
+    public Dictionary<string, ItemReference> CmfLinkedTypes { get; private set; } = new Dictionary<string, ItemReference>();
+
+    public IEnumerable<ItemReference> Sequences1 { get; set; } = Enumerable.Empty<ItemReference>();
 
     /// <summary>
     /// Gets a reference to a system identity given the ID (if the ID matches a system identity;
@@ -155,7 +168,8 @@ namespace InnovatorAdmin
 
       return _conn.ApplyAsync("<Item type='List' action='get' id='@0' select='id'><Relationships><Item type='Value' action='get' select='label,value' /><Item type='Filter Value' action='get' select='label,value' /></Relationships></Item>"
         , true, false, id)
-        .Convert(r => {
+        .Convert(r =>
+        {
           var values = (IEnumerable<ListValue>)r.AssertItem().Relationships()
             .Select(i => new ListValue()
             {
@@ -278,8 +292,8 @@ namespace InnovatorAdmin
 
     private async Task<bool> ReloadItemTypeMetadata()
     {
-      var itemTypes = _conn.ApplyAsync(@"<Item type='ItemType' action='get' select='is_versionable,is_dependent,implementation_type,core,name,label'></Item>", true, true).ToTask();
-      var relTypes = _conn.ApplyAsync(@"<Item action='get' type='RelationshipType' related_expand='0' select='related_id,source_id,relationship_id,name,label' />", true, true).ToTask();
+      var itemTypes = _conn.ApplyAsync("<Item type='ItemType' action='get' select='is_versionable,is_dependent,implementation_type,core,name,label,description'></Item>", true, true).ToTask();
+      var relTypes = _conn.ApplyAsync("<Item action='get' type='RelationshipType' related_expand='0' select='related_id,source_id,relationship_id,name,label' />", true, true).ToTask();
       var sortedProperties = _conn.ApplyAsync(@"<Item type='Property' action='get' select='source_id'>
   <order_by condition='is not null'></order_by>
 </Item>", true, false).ToTask();
@@ -300,16 +314,7 @@ namespace InnovatorAdmin
 
       foreach (var itemTypeData in r.Items())
       {
-        result = new ItemType();
-        result.Id = itemTypeData.Id();
-        result.IsCore = itemTypeData.Property("core").AsBoolean(false);
-        result.IsDependent = itemTypeData.Property("is_dependent").AsBoolean(false);
-        result.IsFederated = itemTypeData.Property("implementation_type").Value == "federated";
-        result.IsPolymorphic = itemTypeData.Property("implementation_type").Value == "polymorphic";
-        result.IsVersionable = itemTypeData.Property("is_versionable").AsBoolean(false);
-        result.Label = itemTypeData.Property("label").Value;
-        result.Name = itemTypeData.Property("name").Value;
-        result.Reference = ItemReference.FromFullItem(itemTypeData, true);
+        result = new ItemType(itemTypeData);
         _itemTypesByName[result.Name] = result;
       }
 
@@ -363,11 +368,11 @@ namespace InnovatorAdmin
 
     private async Task<bool> ReloadSecondaryMetadata()
     {
-      var methods = _conn.ApplyAsync(@"<Item type='Method' action='get' select='config_id,core,name'></Item>", true, false).ToTask();
+      var methods = _conn.ApplyAsync("<Item type='Method' action='get' select='config_id,core,name,method_code,comments'></Item>", true, false).ToTask();
       var sysIdents = _conn.ApplyAsync(@"<Item type='Identity' action='get' select='id,name'>
                                       <name condition='in'>'World', 'Creator', 'Owner', 'Manager', 'Innovator Admin', 'Super User'</name>
                                     </Item>", true, true).ToTask();
-      var sqls = _conn.ApplyAsync(@"<Item type='SQL' action='get' select='id,name,type'></Item>", true, false).ToTask();
+      var sqls = _conn.ApplyAsync("<Item type='SQL' action='get' select='id,name,type'></Item>", true, false).ToTask();
       var customProps = _conn.ApplyAsync(@"<Item type='Property' action='get' select='name,source_id(id,name)'>
                                           <created_by_id condition='ne'>AD30A6D8D3B642F5A2AFED1A4B02BEFA</created_by_id>
                                           <source_id>
@@ -387,15 +392,32 @@ namespace InnovatorAdmin
                                           </source_id>
                                         </Item>", true, false).ToTask();
       var sequences = _conn.ApplyAsync(@"<Item type='Sequence' action='get' select='name'></Item>", true, false).ToTask();
+      var elementTypes = _conn.ApplyAsync(@"<Item action='get' type='cmf_ElementType' select='generated_type'>
+                                                <Relationships>
+                                                  <Item action='get' type='cmf_PropertyType' select='generated_type'>
+                                                  </Item>
+                                                </Relationships>
+                                              </Item>", true, false).ToTask();
+      var contentTypes = _conn.ApplyAsync(@"<Item action='get' type='cmf_ContentType' select='linked_item_type'>
+                                              <linked_item_type>
+                                                <Item type='ItemType' action='get'>
+                                                </Item>
+                                              </linked_item_type>
+                                            </Item>", true, false).ToTask();
+      var presentationConfigs = _conn.ApplyAsync(@"<Item type='ITPresentationConfiguration' action='get' select='id,related_id'>
+  <related_id>
+    <Item type='PresentationConfiguration' action='get' select='id'>
+      <name condition='like'>*_TOC_Configuration</name>
+      <color condition='is null'></color>
+      <Relationships>
+        <Item action='get' type='cui_PresentConfigWinSection' select='id' />
+        <Item action='get' type='PresentationCommandBarSection' select='id,related_id(id)' />
+      </Relationships>
+    </Item>
+  </related_id>
+</Item>", true, false).ToTask();
 
-      _methods = (await methods).Items().Select(i =>
-      {
-        var method = Method.FromFullItem(i, false);
-        method.KeyedName = i.Property("name").AsString("");
-        method.IsCore = i.Property("core").AsBoolean(false);
-        return method;
-      }).ToArray();
-
+      _methods = (await methods).Items().Select(i => new Method(i)).ToList();
 
       _systemIdentities = (await sysIdents).Items()
         .Select(i =>
@@ -432,14 +454,45 @@ namespace InnovatorAdmin
         };
       }
 
-      _polyItemLists = (await polyLists).Items()
+      PolyItemLists = (await polyLists).Items()
         .OfType<Innovator.Client.Model.Property>()
         .Select(i => new ItemReference("List", i.DataSource().Value)
         {
           KeyedName = i.DataSource().KeyedName().Value
         }).ToArray();
 
-      _sequences = (await sequences).Items().Select(i => ItemReference.FromFullItem(i, true)).ToArray();
+      Sequences1 = (await sequences).Items().Select(i => ItemReference.FromFullItem(i, true)).ToArray();
+
+      try
+      {
+        CmfGeneratedTypes = new HashSet<string>((await elementTypes).Items().SelectMany(x =>
+        {
+          var relations = x.Relationships().Select(y => y.Property("generated_type").Value).ToList();
+          relations.Add(x.Property("generated_type").Value);
+          return relations;
+        }));
+
+        CmfLinkedTypes = (await contentTypes).Items().ToDictionary(x => x.Property("linked_item_type").Value, y => ItemReference.FromFullItem(y, true));
+      }
+      catch (ServerException)
+      {
+        //TODO: Do something when cmf types don't exist
+      }
+
+      try
+      {
+        TocPresentationConfigs.Clear();
+        TocPresentationConfigs.UnionWith((await presentationConfigs)
+          .Items()
+          .Select(i => i.RelatedItem())
+          .Where(i => i.Relationships().Count() == 1
+            && i.Relationships().Single().RelatedId().KeyedName().AsString("").EndsWith("_TOC_Content"))
+          .Select(i => i.Id()));
+      }
+      catch (ServerException)
+      {
+        //TODO: Do something
+      }
 
       return true;
     }
@@ -525,13 +578,62 @@ namespace InnovatorAdmin
       if (_conn == null || itemType.Properties.Count > 0)
         return Promises.Resolved<IEnumerable<Property>>(itemType.Properties.Values);
 
-      return _conn.ApplyAsync("<AML><Item action=\"get\" type=\"ItemType\" select=\"name\"><name>@0</name><Relationships><Item action=\"get\" type=\"Property\" select=\"name,label,data_type,data_source,stored_length,prec,scale,foreign_property(name,source_id),is_hidden,is_hidden2,sort_order,default_value,column_width,is_required,readonly\" /></Relationships></Item></AML>"
-        , true, true, itemType.Name)
+      var xPropQuery = default(string);
+      if (_itemTypesById.ContainsKey("A253DB1415194344AEFB5E6A2029AB3A"))
+      {
+        xPropQuery = @"<Item type='ItemType_xPropertyDefinition' action='get' select='related_id(name,label,data_type,data_source,stored_length,prec,scale,default_value,column_width,is_required,readonly)'></Item>";
+      }
+
+      var aml = $@"<AML>
+  <Item action='get' type='ItemType' select='name'>
+    <name>@0</name>
+    <Relationships>
+      <Item action='get' type='Property' select='name,label,data_type,data_source,stored_length,prec,scale,foreign_property(name,source_id),is_hidden,is_hidden2,sort_order,default_value,column_width,is_required,readonly,help_text,help_tooltip' />
+      {xPropQuery}
+    </Relationships>
+  </Item>
+</AML>";
+
+      var promise = _conn.ApplyAsync(aml, true, true, itemType.Name)
         .Convert(r =>
         {
           LoadProperties(itemType, r.AssertItem());
           return (IEnumerable<Property>)itemType.Properties.Values;
         }).Fail(ex => System.Diagnostics.Debug.Print("PROPLOAD: " + ex.ToString()));
+
+      if (!string.IsNullOrEmpty(xPropQuery))
+      {
+        promise = promise.Continue(p =>
+        {
+          return _conn.ApplyAsync(@"<Item type='xClassificationTree' action='get' select='id'>
+  <Relationships>
+    <Item type='xClassificationTree_ItemType' action='get' select='id'>
+      <related_id>@0</related_id>
+    </Item>
+    <Item action='get' type='xClass' select='id'>
+      <Relationships>
+        <Item action='get' type='xClass_xPropertyDefinition' select='related_id(name,label,data_type,data_source,stored_length,prec,scale,default_value,column_width,is_required,readonly)'>
+          <is_current>1</is_current>
+        </Item>
+      </Relationships>
+    </Item>
+  </Relationships>
+</Item>", true, false, itemType.Id);
+        }).Convert(r =>
+        {
+          foreach (var prop in r.Items()
+            .SelectMany(i => i.Relationships("xClass"))
+            .SelectMany(i => i.Relationships("xClass_xPropertyDefinition"))
+            .Select(i => i.RelatedItem()))
+          {
+            var newProp = Property.FromItem(prop, itemType);
+            itemType.Properties[newProp.Name] = newProp;
+          }
+          return (IEnumerable<Property>)itemType.Properties.Values;
+        }).Fail(ex => System.Diagnostics.Debug.Print("PROPLOAD: " + ex.ToString()));
+      }
+
+      return promise;
     }
     /// <summary>
     /// Gets a promise to return information about property of a given Item Type and name
@@ -568,44 +670,12 @@ namespace InnovatorAdmin
     /// <param name="itemTypeMeta">The properties.</param>
     private void LoadProperties(ItemType type, IReadOnlyItem itemTypeMeta)
     {
-      var props = itemTypeMeta.Relationships("Property");
-      Property newProp = null;
+      var props = itemTypeMeta.Relationships("Property")
+        .Concat(itemTypeMeta.Relationships("ItemType_xPropertyDefinition").Select(i => i.RelatedItem()));
       foreach (var prop in props)
       {
-        newProp = new Property(prop.Property("name").Value);
-        newProp.Id = prop.Id();
-        newProp.Label = prop.Property("label").Value;
-        newProp.SetType(prop.Property("data_type").Value);
-        newProp.Precision = prop.Property("prec").AsInt(-1);
-        newProp.Scale = prop.Property("scale").AsInt(-1);
-        newProp.StoredLength = prop.Property("stored_length").AsInt(-1);
-        var foreign = prop.Property("foreign_property").AsItem();
-        if (foreign.Exists)
-        {
-          newProp.ForeignLinkPropName = prop.Property("data_source").KeyedName().Value;
-          newProp.ForeignPropName = foreign.Property("name").Value;
-          newProp.ForeignTypeName = foreign.SourceId().KeyedName().Value;
-        }
-        newProp.DataSource = prop.Property("data_source").Value;
-        if (newProp.Type == PropertyType.item && newProp.Name == "data_source" && type.Name == "Property")
-        {
-          newProp.Restrictions.AddRange(new string [] { "ItemType", "List", "Property" } );
-        }
-        else if (newProp.Type == PropertyType.item && prop.Property("data_source").Attribute("name").HasValue())
-        {
-          newProp.Restrictions.Add(prop.Property("data_source").Attribute("name").Value);
-        }
-        newProp.Visibility =
-          (prop.Property("is_hidden").AsBoolean(false) ? PropertyVisibility.None : PropertyVisibility.MainGrid)
-          | (prop.Property("is_hidden2").AsBoolean(false) ? PropertyVisibility.None : PropertyVisibility.RelationshipGrid);
-        newProp.SortOrder = prop.Property("sort_order").AsInt(int.MaxValue);
-        newProp.ColumnWidth = prop.Property("column_width").AsInt(100);
-        newProp.IsRequired = prop.Property("is_required").AsBoolean(false);
-        newProp.ReadOnly = prop.Property("readonly").AsBoolean(false);
-
-        //default_value,column_width,is_required,readonly
-
-        type.Properties.Add(newProp.Name, newProp);
+        var newProp = Property.FromItem(prop, type);
+        type.Properties[newProp.Name] = newProp;
       }
     }
 

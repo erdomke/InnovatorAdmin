@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<itemAnalysis>
+	<suppressions>
+    <whereAttribute><template><![CDATA[[RelationshipType].[relationship_id] in (select id from innovator.[ItemType] where [ItemType].[id] in (@ParametersList))]]></template></whereAttribute>
+    <whereAttribute><template><![CDATA[([List].[id] in (@ParametersList)) and not [List].[id] in (
+    select l.id
+    from innovator.LIST l
+    inner join innovator.PROPERTY p
+    on l.id = p.DATA_SOURCE
+    and p.name = 'itemtype'
+    inner join innovator.ITEMTYPE it
+    on it.id = p.SOURCE_ID
+    and it.IMPLEMENTATION_TYPE = 'polymorphic'
+    )]]></template></whereAttribute>
+    <whereAttribute><template><![CDATA[[Method].[config_id] in (select config_id from innovator.[Method] where id in (@ParametersList))]]></template></whereAttribute>
+    <conditionInProperty><template><![CDATA[(select source_id
+                                        from innovator.[PROPERTY] p
+                                        where p.ORDER_BY is not null)]]></template></conditionInProperty>    
+    <conditionInProperty><template><![CDATA[(SELECT p.id
+                                        from innovator.PROPERTY p
+                                        inner join innovator.ITEMTYPE it
+                                        on p.SOURCE_ID = it.id
+                                        where p.CREATED_BY_ID <> 'AD30A6D8D3B642F5A2AFED1A4B02BEFA'
+                                        and it.CORE = 1
+                                        and it.CREATED_BY_ID = 'AD30A6D8D3B642F5A2AFED1A4B02BEFA')]]></template></conditionInProperty>
+    <conditionInProperty><template><![CDATA[(select l.id
+                                        from innovator.LIST l
+                                        inner join innovator.PROPERTY p
+                                        on l.id = p.DATA_SOURCE
+                                        and p.name = 'itemtype'
+                                        inner join innovator.ITEMTYPE it
+                                        on it.id = p.SOURCE_ID
+                                        and it.IMPLEMENTATION_TYPE = 'polymorphic')]]></template></conditionInProperty>
+	</suppressions>
+</itemAnalysis>

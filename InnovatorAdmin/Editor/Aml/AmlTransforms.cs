@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
+using Innovator.Client;
+using Innovator.Client.QueryModel;
 
 namespace InnovatorAdmin.Editor
 {
@@ -14,6 +13,12 @@ namespace InnovatorAdmin.Editor
       var item = elem.DescendantsAndSelf("Item").First();
       if (item.Attribute("type") == null)
         return;
+
+      var origQueryType = item.Attribute("queryType")?.Value;
+      item.SetAttributeValue("queryType", "ignore");
+
+
+
 
       var builder = new CriteriaBuilder()
       {

@@ -1,26 +1,17 @@
-﻿using System;
+﻿using Innovator.Client;
+using Innovator.Client.Model;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace InnovatorAdmin
 {
   public class Property : IListValue
   {
-    private List<string> _restrictions = new List<string>();
-
     public string Id { get; set; }
     public string Label { get; set; }
     public string Name { get; set; }
     public string DataSource { get; set; }
-    public List<string> Restrictions
-    {
-      get
-      {
-        return _restrictions;
-      }
-    }
+    public List<string> Restrictions { get; } = new List<string>();
     public string TypeName { get; set; }
     public PropertyType Type { get; set; }
     public int StoredLength { get; set; }
@@ -35,6 +26,7 @@ namespace InnovatorAdmin
     public int ColumnWidth { get; set; }
     public bool IsRequired { get; set; }
     public bool ReadOnly { get; set; }
+    public string Description { get; set; }
 
     public Property()
     {
@@ -89,5 +81,86 @@ namespace InnovatorAdmin
       get { return this.Name; }
     }
 
+    public IPropertyDefinition ToItem(ElementFactory aml)
+    {
+      var item = aml.Item(aml.Type(Name.StartsWith("xp-") ? "xPropertyDefinition" : "Property"), aml.Id(Id)
+        , aml.Property("name", Name)
+        , aml.Property("label", Label)
+        , aml.Property("data_type", TypeName)
+        , aml.Property("data_source", DataSource)
+        , aml.Property("is_required", IsRequired)
+        , aml.Property("readonly", ReadOnly)
+        , aml.Property("column_width", ColumnWidth)
+      );
+      if (Precision >= 0)
+        item.Property("prec").Set(Precision);
+      if (Scale >= 0)
+        item.Property("scale").Set(Scale);
+      if (StoredLength >= 0)
+        item.Property("stored_length").Set(StoredLength);
+      if (SortOrder < int.MaxValue)
+        item.Property("sort_order").Set(SortOrder);
+      return (IPropertyDefinition)item;
+    }
+
+    internal static Property FromItem(IReadOnlyItem prop, ItemType type)
+    {
+      var newProp = new Property(prop.Property("name").Value)
+      {
+        Id = prop.Id(),
+        Label = prop.Property("label").Value,
+        Precision = prop.Property("prec").AsInt(-1),
+        Scale = prop.Property("scale").AsInt(-1),
+        StoredLength = prop.Property("stored_length").AsInt(-1),
+        Description = prop.Property("help_text").AsString(null) ?? prop.Property("help_tooltip").AsString(null)
+      };
+      newProp.SetType(prop.Property("data_type").Value);
+      var foreign = prop.Property("foreign_property").AsItem();
+      if (foreign.Exists)
+      {
+        newProp.ForeignLinkPropName = prop.Property("data_source").KeyedName().Value;
+        newProp.ForeignPropName = foreign.Property("name").Value;
+        newProp.ForeignTypeName = foreign.SourceId().KeyedName().Value;
+      }
+      newProp.DataSource = prop.Property("data_source").Value;
+      if (newProp.Type == PropertyType.item && newProp.Name == "data_source" && type.Name == "Property")
+      {
+        newProp.Restrictions.AddRange(new string[] { "ItemType", "List", "Property" });
+      }
+      else if (newProp.Type == PropertyType.item && prop.Property("data_source").Attribute("name").HasValue())
+      {
+        newProp.Restrictions.Add(prop.Property("data_source").Attribute("name").Value);
+      }
+      newProp.Visibility =
+        (prop.Property("is_hidden").AsBoolean(false) ? PropertyVisibility.None : PropertyVisibility.MainGrid)
+        | (prop.Property("is_hidden2").AsBoolean(false) ? PropertyVisibility.None : PropertyVisibility.RelationshipGrid);
+      newProp.SortOrder = prop.Property("sort_order").AsInt(int.MaxValue);
+      newProp.ColumnWidth = prop.Property("column_width").AsInt(100);
+      newProp.IsRequired = prop.Property("is_required").AsBoolean(false);
+      newProp.ReadOnly = prop.Property("readonly").AsBoolean(false);
+
+      return newProp;
+    }
+
+    public IEnumerable<AmlTypeDefinition> GetTypeDefinitions()
+    {
+      switch (Type)
+      {
+        case PropertyType.boolean:
+          return new[] { AmlTypeDefinition.FromDefinition(AmlDataType.Boolean) };
+        case PropertyType.date:
+          return new[] { AmlTypeDefinition.FromDefinition(AmlDataType.Date) };
+        case PropertyType.item:
+          return Restrictions.Select(r => AmlTypeDefinition.FromDefinition(AmlDataType.Item, r));
+        case PropertyType.list:
+          return new[] { AmlTypeDefinition.FromDefinition(AmlDataType.List, DataSource) };
+        case PropertyType.number:
+          return new[] { AmlTypeDefinition.FromDefinition(AmlDataType.Float) };
+        case PropertyType.text:
+          return new[] { AmlTypeDefinition.FromDefinition(AmlDataType.String) };
+        default:
+          return new[] { AmlTypeDefinition.FromDefinition(AmlDataType.Unknown) };
+      }
+    }
   }
 }

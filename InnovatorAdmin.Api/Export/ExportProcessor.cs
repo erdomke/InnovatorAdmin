@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Innovator.Client;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Xsl;
-using System.IO;
-using System.Diagnostics;
-using Innovator.Client;
-using System.Threading.Tasks;
 
 namespace InnovatorAdmin
 {
@@ -21,10 +20,10 @@ namespace InnovatorAdmin
       ResolvedCycle
     }
 
-    private int _arasVersion;
-    private IAsyncConnection _conn;
-    private DependencyAnalyzer _dependAnalyzer;
-    private ArasMetadataProvider _metadata;
+    private Version _arasVersion;
+    private readonly IAsyncConnection _conn;
+    private readonly DependencyAnalyzer _dependAnalyzer;
+    private readonly ArasMetadataProvider _metadata;
     XslCompiledTransform _resultTransform;
     public event EventHandler<ActionCompleteEventArgs> ActionComplete;
     public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
@@ -36,13 +35,11 @@ namespace InnovatorAdmin
     public ExportProcessor(IAsyncConnection conn)
     {
       _conn = conn;
+      if (_conn is Innovator.Client.Connection.IArasConnection arasConn)
+        arasConn.DefaultSettings.Add(r => r.Timeout = TimeSpan.FromMinutes(3));
       _metadata = ArasMetadataProvider.Cached(conn);
       _metadata.Reset();
       _dependAnalyzer = new DependencyAnalyzer(_metadata);
-      _arasVersion = 9;
-      var arasConn = conn as Innovator.Client.Connection.IArasConnection;
-      if (arasConn != null)
-        _arasVersion = arasConn.Version;
     }
 
     /// <summary>
@@ -51,8 +48,9 @@ namespace InnovatorAdmin
     public async Task Export(InstallScript script, IEnumerable<ItemReference> items
       , bool checkDependencies = true)
     {
+      _arasVersion = (await _conn.FetchVersion(true)) ?? new Version(9, 3);
       ReportProgress(0, "Loading system data");
-      await _metadata.ReloadTask();
+      await _metadata.ReloadTask().ConfigureAwait(false);
 
       // On each scan, reload everything from the database.  Even if this might degrade
       // performance, it is much more reliable
@@ -61,127 +59,52 @@ namespace InnovatorAdmin
       script.Lines = null;
       var itemList = uniqueItems.ToList();
 
-      ItemType metaData;
       var outputDoc = new XmlDocument();
       outputDoc.AppendChild(outputDoc.CreateElement("AML"));
       XmlElement queryElem;
       var whereClause = new StringBuilder();
 
       ConvertPolyItemReferencesToActualType(itemList);
-      string itemType;
+      itemList = (await NormalizeReferences(itemList).ConfigureAwait(false)).ToList();
 
-      var groups = itemList.PagedGroupBy(i => new { Type = i.Type, Levels = i.Levels }, 25);
+      var groups = itemList.GroupBy(i => new { Type = i.Type, Levels = i.Levels });
+      var queries = new List<XmlElement>();
       foreach (var typeItems in groups)
       {
-        whereClause.Length = 0;
-        itemType = typeItems.Key.Type;
-
-        // For versionable item types, get the latest generation
-        if (_metadata.ItemTypeByName(typeItems.Key.Type.ToLowerInvariant(), out metaData) && metaData.IsVersionable)
+        var pageSize = GroupSize(typeItems.Key.Type, typeItems.Key.Levels);
+        var pageCount = (int)Math.Ceiling((double)typeItems.Count() / pageSize);
+        for (var p = 0; p < pageCount; p++)
         {
+          var refs = typeItems.Skip(p * pageSize).Take(pageSize);
+          whereClause.Length = 0;
           queryElem = outputDoc.CreateElement("Item")
             .Attr("action", "get")
             .Attr("type", typeItems.Key.Type);
 
-          if (typeItems.Any(i => i.Unique.IsGuid()))
-          {
-            whereClause.Append("[")
-              .Append(typeItems.Key.Type.Replace(' ', '_'))
-              .Append("].[config_id] in (select config_id from innovator.[")
-              .Append(typeItems.Key.Type.Replace(' ', '_'))
-              .Append("] where id in ('")
-              .Append(typeItems.Where(i => i.Unique.IsGuid()).Select(i => i.Unique).Aggregate((p, c) => p + "','" + c))
-              .Append("'))");
-          }
-          if (typeItems.Any(i => !i.Unique.IsGuid()))
-          {
-            whereClause.AppendSeparator(" or ",
-              typeItems.Where(i => !i.Unique.IsGuid()).Select(i => i.Unique).Aggregate((p, c) => p + " or " + c));
-          }
-          queryElem.SetAttribute("where", whereClause.ToString());
-        }
-        else if (typeItems.Key.Type == "ItemType")
-        {
-          // Make sure relationship item types aren't accidentally added
-          queryElem = outputDoc.CreateElement("Item").Attr("action", "get").Attr("type", typeItems.Key.Type);
-
-          if (typeItems.Any(i => i.Unique.IsGuid()))
-          {
-            whereClause.Append("[ItemType].[id] in ('")
-              .Append(typeItems.Where(i => i.Unique.IsGuid()).Select(i => i.Unique).Aggregate((p, c) => p + "','" + c))
-              .Append("')");
-          }
-          if (typeItems.Any(i => !i.Unique.IsGuid()))
-          {
-            whereClause.AppendSeparator(" or ",
-              typeItems.Where(i => !i.Unique.IsGuid()).Select(i => i.Unique).Aggregate((p, c) => p + " or " + c));
-          }
-          queryElem.SetAttribute("where", "(" + whereClause.ToString() + ") and [ItemType].[is_relationship] = '0'");
-
-          SetQueryAttributes(queryElem, typeItems.Key.Type, typeItems.Key.Levels, typeItems);
-          outputDoc.DocumentElement.AppendChild(queryElem);
-
-          queryElem = outputDoc.CreateElement("Item")
-            .Attr("action", "get")
-            .Attr("type", "RelationshipType")
-            .Attr("where", "[RelationshipType].[relationship_id] in (select id from innovator.[ItemType] where " + whereClause.ToString() + ")");
-          itemType = "RelationshipType";
-        }
-        else if (typeItems.Key.Type == "List")
-        {
-          // Filter out auto-generated lists for polymorphic item types
-          queryElem = outputDoc.CreateElement("Item")
-            .Attr("action", "get")
-            .Attr("type", typeItems.Key.Type);
-
-          if (typeItems.Any(i => i.Unique.IsGuid()))
-          {
-            whereClause.Append("[List].[id] in ('")
-              .Append(typeItems.Where(i => i.Unique.IsGuid()).Select(i => i.Unique).Aggregate((p, c) => p + "','" + c))
-              .Append("')");
-          }
-          if (typeItems.Any(i => !i.Unique.IsGuid()))
-          {
-            whereClause.AppendSeparator(" or ",
-              typeItems.Where(i => !i.Unique.IsGuid()).Select(i => i.Unique).Aggregate((p, c) => p + " or " + c));
-          }
-
-          queryElem.SetAttribute("where", "(" + whereClause.ToString() + @") and not [List].[id] in (
-            select l.id
-            from innovator.LIST l
-            inner join innovator.PROPERTY p
-            on l.id = p.DATA_SOURCE
-            and p.name = 'itemtype'
-            inner join innovator.ITEMTYPE it
-            on it.id = p.SOURCE_ID
-            and it.IMPLEMENTATION_TYPE = 'polymorphic'
-            )");
-        }
-        else
-        {
-          queryElem = outputDoc.CreateElement("Item")
-            .Attr("action", "get")
-            .Attr("type", typeItems.Key.Type);
-
-          if (typeItems.Any(i => i.Unique.IsGuid()))
+          if (refs.Any(i => i.Unique.IsGuid()))
           {
             whereClause.Append("[")
               .Append(typeItems.Key.Type.Replace(' ', '_'))
               .Append("].[id] in ('")
-              .Append(typeItems.Where(i => i.Unique.IsGuid()).Select(i => i.Unique).Aggregate((p, c) => p + "','" + c))
+              .Append(refs.Where(i => i.Unique.IsGuid()).Select(i => i.Unique).GroupConcat("','"))
               .Append("')");
           }
-          if (typeItems.Any(i => !i.Unique.IsGuid()))
+          if (refs.Any(i => !i.Unique.IsGuid()))
           {
             whereClause.AppendSeparator(" or ",
-              typeItems.Where(i => !i.Unique.IsGuid()).Select(i => i.Unique).Aggregate((p, c) => p + " or " + c));
+              refs.Where(i => !i.Unique.IsGuid()).Select(i => i.Unique).GroupConcat(" or "));
           }
 
           queryElem.SetAttribute("where", whereClause.ToString());
+          SetQueryAttributes(queryElem, typeItems.Key.Type, typeItems.Key.Levels, refs);
+          queries.Add(queryElem);
         }
+      }
 
-        SetQueryAttributes(queryElem, itemType, typeItems.Key.Levels, typeItems);
-        outputDoc.DocumentElement.AppendChild(queryElem);
+      queries.Shuffle();
+      foreach (var query in queries)
+      {
+        outputDoc.DocumentElement.AppendChild(query);
       }
 
       try
@@ -190,6 +113,12 @@ namespace InnovatorAdmin
 
         FixFederatedRelationships(outputDoc.DocumentElement);
         var result = ExecuteExportQuery(ref outputDoc, items);
+        RemoveXPropertyFlattenRelationships(result);
+        RemoveGeneratedItemTypeRelationships(result);
+        RemoveCmfGeneratedTypes(result);
+        RemoveVaultUrl(result);
+        FixCmfComputedPropDependencies(result);
+        FixCmfTabularViewMissingWarning(result);
 
         // Add warnings for embedded relationships
         var warnings = new HashSet<ItemReference>();
@@ -201,18 +130,31 @@ namespace InnovatorAdmin
           warnings.Add(warning);
         }
 
+        //Add warnings for cmf linked itemtypes
+        foreach (var item in result.ElementsByXPath("/Result/Item[@type='ItemType']"))
+        {
+          var id = item.Attribute("id", "");
+          if (_metadata.CmfLinkedTypes.TryGetValue(id, out var reference))
+          {
+            warning = reference.Clone();
+            warning.KeyedName = "* Possible missing ContentType: " + warning.KeyedName;
+            warnings.Add(warning);
+          }
+        }
+
         //RemoveRelatedItems(result, items);
         //CleanUpSystemProps(result.DocumentElement.Elements(), items, false);
         FixPolyItemReferences(result);
         FloatVersionableRefs(result);
         var doc = TransformResults(ref result);
+        SetDoGetItemForCmf(doc);
         NormalizeClassStructure(doc);
         FixFormFieldsPointingToSystemProperties(doc);
         ExpandSystemIdentities(doc);
         RemoveVersionableRelIds(doc);
         //TODO: Replace references to poly item lists
 
-        await Export(script, doc, warnings, checkDependencies);
+        await Export(script, doc, warnings, checkDependencies).ConfigureAwait(false);
         CleanUpSystemProps(doc.DocumentElement.Elements(), items.ToDictionary(i => i), true);
         ConvertFloatProps(doc);
         RemoveKeyedNameAttributes(doc.DocumentElement);
@@ -244,6 +186,123 @@ namespace InnovatorAdmin
       {
         this.OnActionComplete(new ActionCompleteEventArgs() { Exception = ex });
       }
+#if DEBUG
+      // This is useful for debugging and making sure duplicate items are not present
+      if (script.Lines != null)
+      {
+        var grps = script.Lines.Where(l => l.Type == InstallType.Create)
+          .GroupBy(l => l.Reference.Unique);
+        var duplicates = grps.Where(g => g.Skip(1).Any()).ToArray();
+        if (duplicates.Length > 0)
+          throw new InvalidOperationException("The package has duplicate entries for the following items: " + duplicates.GroupConcat(", ", g => g.Key));
+      }
+#endif
+    }
+
+    private int GroupSize(string itemType, int levels)
+    {
+      switch (itemType)
+      {
+        case "ItemType":
+        case "RelationshipType":
+        case "cmf_ContentType":
+        case "cmf_TabularView":
+        case "cmf_ElementType":
+        case "cmf_PropertyType":
+        case "Form":
+          return 6;
+      }
+      return levels > 1 ? 10 : 40;
+    }
+
+    /// <summary>
+    /// Normalize the list of items to be exported
+    /// </summary>
+    /// <remarks>
+    /// Get the latest version of versionable items, switch item type references to relationship types, and don't export polyitem lists
+    /// </remarks>
+    private async Task<IEnumerable<ItemReference>> NormalizeReferences(IEnumerable<ItemReference> references)
+    {
+      var groups = references.PagedGroupBy(i => new { i.Type, IsId = i.Unique.IsGuid() }, 250);
+      var results = new List<ItemReference>();
+      foreach (var group in groups)
+      {
+        if (_metadata.ItemTypeByName(group.Key.Type.ToLowerInvariant(), out var metaData) && metaData.IsVersionable && group.Key.IsId)
+        {
+          // For versionable item types, get the latest generation
+          var toResolve = (await _conn.ApplyAsync(@"<Item type='@0' action='get' select='config_id'>
+  <id condition='in'>@1</id>
+  <is_current>0</is_current>
+</Item>", true, false, group.Key.Type, group.Select(i => i.Unique).ToList()).ConfigureAwait(false)).Items()
+            .ToDictionary(i => i.Id(), i => i.ConfigId().Value);
+          results.AddRange(group.Where(i => !toResolve.ContainsKey(i.Unique)));
+          if (toResolve.Count > 0)
+          {
+            results.AddRange((await _conn.ApplyAsync(@"<Item type='@0' action='get' select='id'>
+  <config_id condition='in'>@1</config_id>
+</Item>", true, false, group.Key.Type, toResolve.Values).ConfigureAwait(false)).Items()
+              .Select(i => ItemReference.FromFullItem(i, true)));
+          }
+        }
+        else if (group.Key.Type == "ItemType")
+        {
+          // Make sure relationship item types aren't accidentally added
+          if (group.Key.IsId)
+          {
+            var relations = (await _conn.ApplyAsync(@"<Item type='RelationshipType' action='get' select='relationship_id'>
+  <relationship_id condition='in'>@0</relationship_id>
+</Item>", true, false, group.Select(i => i.Unique).ToList()).ConfigureAwait(false)).Items()
+              .ToDictionary(i => i.Property("relationship_id").Value, i => ItemReference.FromFullItem(i, true));
+            results.AddRange(group.Where(i => !relations.ContainsKey(i.Unique)));
+            results.AddRange(relations.Values);
+          }
+          else
+          {
+            foreach (var itemType in group)
+            {
+              var relation = (await _conn.ApplyAsync(@"<Item type='RelationshipType' action='get' select='id'>
+  <relationship_id><Item type='ItemType' action='get' where='@0'></Item></relationship_id>
+</Item>", true, false, itemType.Unique).ConfigureAwait(false)).Items().FirstOrNullItem();
+              if (relation.Exists)
+                results.Add(ItemReference.FromFullItem(relation, true));
+              else
+                results.Add(itemType);
+            }
+          }
+        }
+        else if (group.Key.Type == "List")
+        {
+          var refs = default(List<ItemReference>);
+          if (group.Key.IsId)
+          {
+            refs = group.ToList();
+          }
+          else
+          {
+            refs = (await _conn.ApplyAsync(@"<Item type='List' action='get' where='@0'></Item>", true, false, group.Select(i => i.Unique).GroupConcat(" or ")).ConfigureAwait(false))
+              .Items()
+              .Select(i => ItemReference.FromFullItem(i, true))
+              .ToList();
+          }
+
+          // Filter out auto-generated lists for polymorphic item types
+          var polyLists = new HashSet<string>((await _conn.ApplyAsync(@"<Item type='Property' action='get' select='data_source'>
+  <source_id>
+    <Item type='ItemType' action='get'>
+      <implementation_type>polymorphic</implementation_type>
+    </Item>
+  </source_id>
+  <name>itemtype</name>
+  <data_source condition='in'>@0</data_source>
+</Item>", true, false, refs.Select(i => i.Unique).ToList()).ConfigureAwait(false)).Items().Select(i => i.Property("data_source").Value));
+          results.AddRange(refs.Where(i => !polyLists.Contains(i.Unique)));
+        }
+        else
+        {
+          results.AddRange(group);
+        }
+      }
+      return results;
     }
 
     /// <summary>
@@ -254,10 +313,10 @@ namespace InnovatorAdmin
     {
       try
       {
-        await _metadata.ReloadTask();
+        await _metadata.ReloadTask().ConfigureAwait(false);
         FixPolyItemReferences(doc);
         FixPolyItemListReferences(doc);
-        await FixForeignPropertyReferences(doc);
+        await FixForeignPropertyReferences(doc).ConfigureAwait(false);
         FixForeignPropertyDependencies(doc);
         FixCyclicalWorkflowLifeCycleRefs(doc);
         FixCyclicalWorkflowItemTypeRefs(doc);
@@ -311,7 +370,11 @@ namespace InnovatorAdmin
         {
           var newInstallItems = (from e in itemNode.ParentNode.Elements()
                                  where e.LocalName == "Item" && e.HasAttribute("type")
-                                 select InstallItem.FromScript(e)).ToList();
+                                 select InstallItem.FromScript(e))
+            .OrderBy(l => DefaultInstallOrder(l.Reference))
+            .ThenBy(l => l.Reference.Type.ToLowerInvariant())
+            .ThenBy(l => l.Reference.Unique)
+            .ToList();
           //foreach (var item in newInstallItems)
           //{
           //  item.Script.SetAttribute(XmlFlags.Attr_DependenciesAnalyzed, "1");
@@ -322,7 +385,7 @@ namespace InnovatorAdmin
         }
 
 
-        if (warnings == null) warnings = new HashSet<ItemReference>();
+        warnings = warnings ?? new HashSet<ItemReference>();
         warnings.ExceptWith(results.Select(r => r.Reference));
 
         script.Lines = warnings.Select(w => InstallItem.FromWarning(w, w.KeyedName))
@@ -342,13 +405,11 @@ namespace InnovatorAdmin
       }
     }
 
-    public static async Task<IEnumerable<InstallItem>> SortByDependencies(IEnumerable<InstallItem> items, IAsyncConnection conn)
+    public static IEnumerable<InstallItem> SortByDependencies(IEnumerable<InstallItem> items, IArasMetadataProvider metadata)
     {
       int loops = 0;
       var state = CycleState.ResolvedCycle;
       var results = items ?? Enumerable.Empty<InstallItem>();
-      var metadata = ArasMetadataProvider.Cached(conn);
-      await metadata.ReloadTask();
       var analyzer = new DependencyAnalyzer(metadata);
       while (loops < 10 && state == CycleState.ResolvedCycle)
       {
@@ -365,7 +426,26 @@ namespace InnovatorAdmin
         loops++;
       }
 
+      results = results
+        .Where(i => !IsDelete(i))
+        .Concat(results
+          .Where(IsDelete)
+          .OrderByDescending(DefaultInstallOrder)
+        ).ToArray();
+
       return results;
+    }
+
+    private static bool IsDelete(InstallItem item)
+    {
+      return item.Type == InstallType.Script && item.Name.Split(' ').Contains("Delete");
+    }
+
+    public static async Task<IEnumerable<InstallItem>> SortByDependencies(IEnumerable<InstallItem> items, IAsyncConnection conn)
+    {
+      var metadata = ArasMetadataProvider.Cached(conn);
+      await metadata.ReloadTask().ConfigureAwait(false);
+      return SortByDependencies(items, metadata);
     }
 
     /// <summary>
@@ -381,7 +461,7 @@ namespace InnovatorAdmin
           switch (item.Type)
           {
             case "Life Cycle State":
-              yield return new ItemReference("Life Cycle Map", "[Life_Cycle_Map].[id] in (select source_id from [innovator].[Life_Cycle_State] where id = '" + item.Unique +"')");
+              yield return new ItemReference("Life Cycle Map", "[Life_Cycle_Map].[id] in (select source_id from [innovator].[Life_Cycle_State] where id = '" + item.Unique + "')");
               break;
             case "Life Cycle Transition":
               yield return new ItemReference("Life Cycle Map", "[Life_Cycle_Map].[id] in (select source_id from [innovator].[Life_Cycle_Transition] where id = '" + item.Unique + "')");
@@ -450,7 +530,7 @@ namespace InnovatorAdmin
     {
       foreach (var node in doc.SelectNodes("//*[@_is_dependency = '1']").OfType<XmlElement>())
       {
-        node.Detatch();
+        node.Detach();
       }
     }
 
@@ -505,7 +585,7 @@ namespace InnovatorAdmin
                 {
                   if (cleanAll)
                   {
-                    prop.Detatch();
+                    prop.Detach();
                   }
                   else
                   {
@@ -514,7 +594,7 @@ namespace InnovatorAdmin
                 }
                 else
                 {
-                  prop.Detatch();
+                  prop.Detach();
                 }
                 break;
               case "behavior":
@@ -524,7 +604,7 @@ namespace InnovatorAdmin
                   {
                     if (cleanAll)
                     {
-                      prop.Detatch();
+                      prop.Detach();
                     }
                     else
                     {
@@ -533,7 +613,7 @@ namespace InnovatorAdmin
                   }
                   else
                   {
-                    prop.Detatch();
+                    prop.Detach();
                   }
                 }
                 break;
@@ -542,7 +622,7 @@ namespace InnovatorAdmin
                 {
                   if (cleanAll)
                   {
-                    prop.Detatch();
+                    prop.Detach();
                   }
                   else
                   {
@@ -551,7 +631,7 @@ namespace InnovatorAdmin
                 }
                 else
                 {
-                  prop.Detatch();
+                  prop.Detach();
                 }
                 break;
               case "created_by_id":
@@ -562,7 +642,7 @@ namespace InnovatorAdmin
                 {
                   if (cleanAll)
                   {
-                    prop.Detatch();
+                    prop.Detach();
                   }
                   else
                   {
@@ -571,7 +651,7 @@ namespace InnovatorAdmin
                 }
                 else
                 {
-                  prop.Detatch();
+                  prop.Detach();
                 }
                 break;
               case "major_rev":
@@ -580,7 +660,7 @@ namespace InnovatorAdmin
                 {
                   if (cleanAll)
                   {
-                    prop.Detatch();
+                    prop.Detach();
                   }
                   else
                   {
@@ -589,7 +669,7 @@ namespace InnovatorAdmin
                 }
                 else
                 {
-                  prop.Detatch();
+                  prop.Detach();
                 }
                 break;
             }
@@ -703,22 +783,21 @@ namespace InnovatorAdmin
       var result = query.NewDoc();
       ReportProgress(4, "Searching for data...");
 
-      var promises = queryItems.Select(q => (Func<IPromise>)(
-          () => _conn.Process(q.OuterXml, true)
-            .Convert(s => {
-              return (IEnumerable<XmlElement>)(Items(result, s, itemDic).ToArray());
-            })
-          )
-        ).ToArray();
-      query = null; // Release the query memory as soon as possible;
-      var items = Promises.Pooled(30, promises)
-        .Progress((i, m) =>
+      var promises = queryItems.Select(q => (Func<Task<IEnumerable<XmlElement>>>)(
+        async () =>
         {
-          ReportProgress(4 + (int)(i * 0.9), "Searching for data...");
-        }).Wait();
+          var stream = await _conn.Process(q.OuterXml, true).ConfigureAwait(false);
+          return Items(result, stream, itemDic).ToList();
+        })
+      ).ToArray();
+      query = null; // Release the query memory as soon as possible;
+      var items = SharedUtils.TaskPool(10, (i, m) =>
+      {
+        ReportProgress(4 + (int)(i * 0.9), "Searching for data...");
+      }, promises).Result;
 
       ReportProgress(95, "Loading results into memory...");
-      var elems = items.SelectMany(r => (IEnumerable<XmlElement>)r);
+      var elems = items.SelectMany(r => r);
       var root = result.Elem("Result");
 
       foreach (var elem in elems)
@@ -731,11 +810,13 @@ namespace InnovatorAdmin
     private IEnumerable<XmlElement> Items(XmlDocument doc, Stream stream
       , IDictionary<ItemReference, ItemReference> itemDict)
     {
-      var settings = new XmlReaderSettings();
-      settings.NameTable = doc.NameTable ?? new NameTable();
+      var settings = new XmlReaderSettings
+      {
+        NameTable = doc.NameTable ?? new NameTable()
+      };
       using (var reader = XmlReader.Create(stream, settings))
       {
-        while(!reader.EOF)
+        while (!reader.EOF)
         {
           if (reader.NodeType == XmlNodeType.Element && reader.LocalName == "Item")
           {
@@ -743,6 +824,18 @@ namespace InnovatorAdmin
             RemoveRelatedItems(elem, itemDict);
             CleanUpSystemProps(Enumerable.Repeat(elem, 1), itemDict, false);
             yield return elem;
+          }
+          else if (reader.NodeType == XmlNodeType.Element && reader.LocalName == "Fault"
+            && string.Equals(reader.NamespaceURI, "http://schemas.xmlsoap.org/soap/envelope/", StringComparison.OrdinalIgnoreCase))
+          {
+            var fault = (XmlElement)doc.ReadNode(reader);
+            var env = doc.CreateElement("SOAP-ENV", "Envelope", "http://schemas.xmlsoap.org/soap/envelope/");
+            var body = doc.CreateElement("SOAP-ENV", "Body", "http://schemas.xmlsoap.org/soap/envelope/");
+            env.AppendChild(body);
+            body.AppendChild(fault);
+            var result = ElementFactory.Local.FromXml(env);
+            if (!(result.Exception is NoItemsFoundException))
+              result.AssertNoError();
           }
           else
           {
@@ -808,7 +901,7 @@ namespace InnovatorAdmin
       }
     }
     /// <summary>
-    /// Fix cyclical workflow-itemtype references by creating an edit script
+    /// Fix cyclical ContentType references by creating an edit script
     /// </summary>
     private void FixCyclicalContentTypeTabularViewRefs(XmlDocument doc)
     {
@@ -871,14 +964,15 @@ namespace InnovatorAdmin
           if (itemType.Relationships.Any(r => !r.IsFederated))
           {
             relQuery = (from r in itemType.Relationships
-                         where !r.IsFederated
-                         select string.Format("<Item type=\"{0}\" action=\"get\" />", r.Name))
+                        where !r.IsFederated
+                        select string.Format("<Item type=\"{0}\" action=\"get\" />", r.Name))
                         .Aggregate((p, c) => p + c);
             item.InnerXml = "<Relationships>" + relQuery + "</Relationships>";
           }
         }
       }
     }
+
     /// <summary>
     /// Move all foreign properties to a script.  This is because the other properties must be created first before these can
     /// be added.
@@ -899,7 +993,7 @@ namespace InnovatorAdmin
 
         foreach (var foreignProp in itemType.ElementsByXPath(".//Relationships/Item[@type = 'Property' and data_type = 'foreign']").ToList())
         {
-          foreignProp.Detatch();
+          foreignProp.Detach();
           fix.AppendChild(foreignProp);
         }
       }
@@ -983,7 +1077,7 @@ namespace InnovatorAdmin
           tempDoc.LoadXml(propData);
 
           propType.AppendChild(propType.OwnerDocument.ImportNode(tempDoc.DocumentElement, true));
-          propType.Detatch();
+          propType.Detach();
           parentItem = field.Parents().Last(e => e.LocalName == "Item");
           script = parentItem.OwnerDocument.CreateElement("Item")
             .Attr("type", field.Attribute("type"))
@@ -1196,16 +1290,24 @@ namespace InnovatorAdmin
 
       // Bias the install order initially to try and help the dependency sort properly handle anything
       // where explicit dependencies don't exist.  Then, perform the dependency sort.
-      var initialSort = lookup.Keys.OrderBy(DefaultInstallOrder);
+      var initialSort = lookup.Keys
+        .OrderBy(DefaultInstallOrder)
+        .ThenBy(i => i.Type.ToLowerInvariant())
+        .ThenBy(i => i.Unique)
+        .ToList();
       sorted = initialSort.DependencySort<ItemReference>(d =>
       {
         IEnumerable<InstallItem> res = null;
-        if (lookup.TryGetValue(d, out res)) return res.SelectMany(r =>
+        if (lookup.TryGetValue(d, out res))
         {
-          var ii = r as InstallItem;
-          if (ii == null) return Enumerable.Empty<ItemReference>();
-          return dependAnalyzer.GetDependencies(ii.Reference);
-        });
+          return res.SelectMany(r =>
+          {
+            var ii = r as InstallItem;
+            if (ii == null) return Enumerable.Empty<ItemReference>();
+            return dependAnalyzer.GetDependencies(ii.Reference);
+          });
+        }
+
         return Enumerable.Empty<ItemReference>();
       }, ref cycle, false);
 
@@ -1225,14 +1327,14 @@ namespace InnovatorAdmin
               var parentTag = refs[0].Parents().Last(e => e.LocalName == "Item").Parent();
               foreach (var child in relTag.Elements().ToList())
               {
-                child.Detatch();
+                child.Detach();
                 parentTag.AppendChild(child);
                 var sourceId = (XmlElement)child.AppendChild(child.OwnerDocument.CreateElement("source_id"));
                 sourceId.SetAttribute("type", relTag.Parent().Attribute("type"));
                 sourceId.SetAttribute("keyed_name", relTag.Parent().Attribute("_keyed_name"));
                 sourceId.InnerText = relTag.Parent().Attribute("id");
               }
-              relTag.Detatch();
+              relTag.Detach();
               cycleState = CycleState.ResolvedCycle;
               return Enumerable.Empty<InstallItem>();
             }
@@ -1258,325 +1360,370 @@ namespace InnovatorAdmin
       return result;
     }
 
+    private static int DefaultInstallOrder(InstallItem line)
+    {
+      var itemRef = line.Reference;
+      if (line.Reference.Type == InstallItem.ScriptType)
+        itemRef = ItemReference.FromElement(line.Script);
+      return DefaultInstallOrder(itemRef);
+    }
+
+    private static HashSet<string> _coreItemTypeIds = new HashSet<string>()
+    {
+      "483228BE6B9A4C0E99ACD55FDF328DEC",
+      "937CE47DE2854308BE6FF5AB1CFB19D4",
+      "7A3EFE7242DB4403965890C053A57A0B",
+      "6B9057491021453ABA0A425570CC10D2",
+      "E8335FB6E4834AFF9BA8F9D4C6E3DE2C",
+      "1DD844998D3941D1BB8680612D9B4B0C",
+      "5D9A5583B5A54CA78586FDBF9716E53A",
+      "FC1A83F673B542C7AC8EEC29F25C602E",
+      "EFC5E36233D541FDA5B23B7BD374653C",
+      "D003393AB1E447B3A8D3B274CAA70F69",
+      "3538F62649F3477EA1F8990EB20F88B9",
+      "1675E79E847F4D3E9408B57EE7DA69EF",
+      "B228811F241240FE8962E14AD584F2AD",
+      "94E345F15EB94D86ADE8FF1B6AE2B439",
+      "550DEE262619410A82F8F7378D6184D0",
+      "D3F830490AB143E4ACC00D16538C6DB0",
+      "2C95B39863F346EFB224DCB85390F465",
+      "7BFF05B795FA4C1293C0B68C282F78F1",
+      "BF62E8B6450447D89EF86B539F49F992",
+      "31392C4909A249BF9EA143915F3F9553",
+      "B5175846B27145EEA5653DA35ED78BE4",
+      "51F1815885E3477D8B6385A69236C5AA",
+      "A16A77E9E9B84559AA435361BAB057F7",
+      "6DF95CF17D824F5DAC6A996FFC34D5F8",
+      "837D345236384B5DAE4B52042419F966",
+      "05DF56FF833542F98251528F3FFE2FA0",
+      "02FA838247DF47C2BB85AAB299E646B2",
+      "0300B828CBEE4610B77C41377209C900",
+      "0DE14E76AA794A039DA8D2CDC34E6B1D",
+      "645774D6072F41FD8F998C861E211741",
+      "4DAD707F62B54823AE2E4730BB00C649",
+      "09586A35D3534D5EAD92B94CB1036AEF",
+      "F91DE6AE038A4CC8B53D47D5A7FA49FC",
+      "CE0C4143D35E46CDA3874C4339F159BE",
+      "8052A558B9084D41B9F11805E464F443",
+      "41EF49EFD2ED4F6EAB04C047681F33AC",
+      "45F28B3088E74905913152E9BE3B9B12",
+      "68D1EEEAA8B84B75962D3008C00E2280",
+      "2A69EFFD543B4F74AB5AE964FE83203D",
+      "B8940FB948604232B27FC1263FC7E203",
+      "13EC84A626F1457BB5F60A13DA03580B",
+      "47573682FB7549F59ADECD4BFE04F1DE",
+      "2E25B49E218A45D28D0C7D3C0633710C",
+      "8AB5CEB9824B4CF7920AFED29F662C66",
+      "8EABD91B465443F0A4995418F483DC51",
+      "1718DC9FB25043B9A3F0B76DB5DC6637",
+      "B2D9F59116B944CE9151C7C05F4D946C",
+      "06E0660816FE40A2BF1411B2280062B3",
+      "BA053C68D62E4E5293039323F10E116E",
+      "38CAFF4302AC45EBAF91EE4DCE4948C7",
+      "E582AB17663F4EF28460015B2BE9E094",
+      "BC7977377FFF40D59FF14205914E9C71",
+      "450906E86E304F55A34B3C0D65C097EA",
+      "030019FA30FE40FEB5E32AD2FC9B1F20",
+      "AC32527D85604A4D9FC9107C516AEF47",
+      "5736C479A8CB49BCA20138514C637266",
+      "137D24DFD9AC4D0CA2ABF8D90346AABB",
+      "F8F19489113C487B860733E7F7D5B12D",
+      "87879A09B8044DE380D59DF22DE1867F",
+      "1C5BA0A1491843378E48FF481F6F1DF1",
+      "0B9D641B40D24036A117D911558CBDCE",
+      "F312562D6AD948DCBCCCCF6A615EE0EA",
+      "C6A89FDE1294451497801DF78341B473",
+      "7C63771EBC8D46FE8E902C5188033515",
+      "AD09B1279AC246BB9EE39BD153D28586",
+      "80881F5852BC439E9F3CF0AEC03ABE2A",
+      "2DAC2B407B0043A692905CF6A94296A8",
+      "98FF7C1BFDFA43448B1EC5A95EA13AEA",
+      "F0834BBA6FB64394B78DF5BB725532DD",
+      "F81CDEF9FE324D01947CC9023BC38317",
+      "18C15AB147F84834874F2E0CB6B8B4C0",
+      "E5BC8090E82D4F8D8E3F389C95316433",
+      "DA581F2EAD1641CF976A1F1211E1ADBA",
+      "B5048D604A6A4D53B3FC6C3BF3D81157",
+      "BB3394EA2B014A6493267E7867B4ABD7",
+      "920AAA3EAE684F6E99A0EAB95516D064",
+      "A46890D3535C41D4A5D79240B8C373B0",
+      "DF17056D3AC1479DBC7196255105D04B",
+      "2B46201802CE46708C269667DB4798AC",
+      "42EA5C9FEC6B49CD8E2784E9E846EAFE",
+      "E5326B5A2B93464A9795B1F8A6E6B666",
+      "FC3E32F18F804FD9BE4B175973D29112",
+      "B7DF834246F24F10BC9B91056D828538",
+      "E7A68175B2024FFB876E87D0081071A9",
+      "B30032741C894BB086148DDB551D3BEE",
+      "2F4E2B53BFBA4351BFFCEE0E438ECF97",
+      "FF53A19A424D4B2F80938A5A5C1A29EA",
+      "83EBCDAE9D834E169ABC95CC0C7CCB28",
+      "CC23F9130F574E7D99DF9659F27590A6",
+      "63EC2E6B69FC4FB09859077EE073D9A5",
+      "ED9F61ADA4334D7D94361F426C081DB5",
+      "E4A23B0AC84D4155BF4C1E44B84CBD45",
+      "DE828FBA99FF4ABB9E251E8A4118B397",
+      "DD54C11BF6004B09A9E152AFD61ABEA9",
+      "45E899CD2859442982EB22BB2DF683E5",
+      "122BF06C8B8E423A9931604DD939172F",
+      "6DAB4ACC09E6471DB4BDD15F36C3482B",
+      "8FC29FEF933641A09CEE13A604A9DC74",
+      "602D9828174C48EBA648B1D261C54E43",
+      "B19D349CC6FC44BC97D50A6D70AE79CB",
+      "261EAC08AE9144FC95C49182ACE0D3FE",
+      "321BD822949149C597FD596B1212B85C",
+      "EDC5F1D5759D4C7CBDC7F8C20D76087D",
+    };
+
+    private static HashSet<string> _coreRelationshipTypeIds = new HashSet<string>()
+    {
+      "AEFCD3D2DC1D4E3EA126D49D68041EB6",
+      "85924010F3184E77B24E9142FDBB481B",
+      "90D8880C29CD45C3AA8DAFF1DAEBC60E",
+      "BF3EAD31AAA2403592CAAC2446FF7797",
+      "46BDE53304404C28B5C45610E41C1DD5",
+      "BD4A250787A742A484C7B174A4AED1E2",
+      "96C238700CD840DEBE512EE85D440AF3",
+      "67735DF455F54736A9D51CB53AB129E3",
+      "05A68B0BC74C47A6A2FD4404A73C815F",
+      "E32DB4E6E3B64F98A12B550C578E6A01",
+      "F88A91D29C4F446BB309BEEE925AADD1",
+      "FA1755A31ACF4EDFBBFFCD6A8C6F7AF8",
+      "EB4ADB2BC83C410FB265CB42ED5C633B",
+      "8B58025F8E504DBDADF0E1176D3CE178",
+      "CB7696CC33EC4D1BB98716465F1AD580",
+      "4E355E04444B4676AE723B43DECA37DC",
+      "DB54505FA3E9419DA3C1E1AFB7A48C1C",
+      "10B8BB84EEE9413AAD071C8341BBAB04",
+      "BF60433C7E924BE6B78D901809F8FEF6",
+      "3A65F41FF1FC42518A702FDA164AF420",
+      "6EA4299D271743BFB50DBB14C08AC55B",
+      "432E29895A994D0DBC9DF9B0918E189F",
+      "421A0EC1E68C4661AA9274C297BD410C",
+      "D4C8D8008DAE4799A426518C2B6D0889",
+      "4E24BC6E89394C8D8D05D3F9871EA5D8",
+      "103F7DC6DDEA415389587AC6D37C135C",
+      "21E1EF3C68744A53BF5FAC205A1B51CF",
+      "8EC6FCD4C5344652A2C751023B66B889",
+      "7FAFAF8FFCE143A0985010F83DACDA88",
+      "0CFC2324C1A141C59B2B4612442D0433",
+      "64DA1324EE1D4A6FA84783D93CEE0EA2",
+      "91D179E2AC9C4BDA92E0CB877D45E051",
+      "A008CBA8749B405C9A3FE02904EBA067",
+      "DC80041DD3544835BDB50A8CAA535903",
+      "692D9D11B6524E54BC96AE8244EE6AE3",
+      "9CB248B6DD5F4EBD9D56A75B30DBEBCB",
+      "B5C980B0A6494F1FBEDE80F96F96BEBE",
+      "1F5F9158F3ED435CAD9757BCFA3A4453",
+      "8F3CDD9B7F8B4B8FB6A35BB39DED6EC1",
+      "C779CBB024A04E519D2806435882F7F9",
+      "0EA142227FAE40148A4BDD8CF1D450EF",
+      "621D9BA267174927B0E6A08601BDCF08",
+      "8E7749E9F3C84E11A5F7F5E4E7D51B22",
+      "17F8471D9F0346379B33D94E3A90689B",
+      "52E7E19747864AB5900BBABF82E66382",
+      "617069E6F5C04687B0526750978CFA51",
+      "39C52F7B48ED4CEA824196BE9DBE6784",
+      "E45E85D702F14A37B0E65F3C770D1195",
+      "C5283EF5760B424C974E2E2F81CE02CE",
+      "6733DCABB12E49E7A1FA6A76863DDA95",
+      "70E817CC22644F538032177DEC7B6ECD",
+      "95D6B96F155543CF86ED9CC9989A1059",
+      "0BDF3A9BA8D94A18A016541653EA9097",
+      "241944ED565940B5BC4987C3D9EAB6C7",
+      "91ABEDE7189D4F509795396D3C646ADA",
+      "D3F7714E036040BA8B24F0B8F5601452",
+      "D3E6C97153E1408FB218FA34D8B65A3D",
+      "CB10A07383CC4C35A22B1577B7712D38",
+      "789104C736664FAA9748352CBBF86BCA",
+      "3E85D9DD379643F8A207B99A9DFB72C2",
+      "9C0541DDA9644E4EBA9CBC68BBD37C52",
+      "C64BA744050149A1A32F402ED965CB1A",
+      "ED06F0AEA37242349F2C499B7FEA6A26",
+      "1549FB139D6B4AD99FDC1ED4B8011DB9",
+      "721F8FFCBA8448D8BA61E9AD980A52C1",
+      "4697179F1FC94E25A8274E586EEF2F39",
+      "0BB5B81FEB37475BB9C779408080DB61",
+      "3572C4D1479445D9959C413624A9FFF6",
+      "EA473F6BF22F4F34807F2FA03497147F",
+      "F03364FA841641EF82C8D893CA2C6727",
+      "EEC427EA9E754FD9BE93D1C6C72F2F2E",
+      "92BC895A020E452D926B6F64E985A197",
+      "15FA7E0A9F2A41269B8B6CF7C52BD11D",
+      "BCC8053D365143A18B033850EFE56F3C",
+      "96730C617F4C40729D730D97395FD620",
+      "2578D0D1427A4FE384544CA498301E40",
+      "0A871CCD40364A03AD2F0FD24AEAB4E5",
+      "640C685B4AE14A239A138C5A8876A1C9",
+      "A7C8B9475B884B9593E3B9ED3F3B828C",
+      "3844E4C9C5FA4ABAB3034FD6D4BE596E",
+      "19193BC7942C41AEBA8147BD1778F35E",
+      "AC218DF3AE43488C9E64E1AA551D2522",
+      "CA289ED4F1A84A9EB6CDD822846FD745",
+      "C24A87B33E3740B3B01254DC776F1EFE",
+      "E2DECCA6300E4815B466C62C66E9D3AF",
+      "ACD5116613FF40C9BC5EF7447CBEBBCB",
+      "213B74E721ED457C9BE735C038C7CB95",
+      "B70DE4074ABC49C69B0D8729D9212982",
+      "6323EE2C82E94CC4BB83779DDFDDD6F5",
+      "EECAA9639E054096B4A0F98E6845E963",
+      "74F9BBD18C9143AE8547D078C9FAB456",
+      "B1B179DB316A4178B0A5A57F00185A27",
+      "E1F075B555A24EA8BF0E945CE580254F",
+      "6C280692633D4498BD9CFEA7989138AB",
+      "5BD6BED0CD794A078AA42476F47ECF46",
+      "A2294A4CD0B14DE4912C1B530218AB57",
+      "797EE3B1B9624E369B3E45FA0C10757C",
+      "5EFB53D35BAE468B851CD388BEA46B30",
+      "1E764495A5134823B30060D83FD6A2F9",
+      "5698BACD2A7A45D6AC3FA60EAB3E6566",
+      "8EF041900FE2428AABD404063AB979B6",
+      "7348E620D27E40D1868C54247B5DE8D1",
+      "E0849D6A48B84B8D9C135488C4C1DDF4",
+      "A7AE79CD9E144A15B5B34B455AFB66D9",
+      "B2A302B6DCD54F92AD0912A37A1D4850",
+      "5ED4936039F64E9E99F703F8F46A1DB1",
+      "E4F3367A4A6C4956875CAEF580692564",
+      "5D6C6E00F2114D678570FC877B6F44BC",
+      "D1AEF724041942BCAAC8CADBBDFD5EF4",
+      "51CE2CDC8D3F49C7BF707B8E0A4BD15F",
+      "CFACA4085F044622A1D4E00F7DB9C71E",
+      "0EB9440796664EEBBAD9BE8B4DAE660F",
+      "5CDF0A9CB3FC49BEB83D361B4CEE4082",
+      "929D27BAADFE4F2F9194EF8E29B8B869",
+      "26D7CD4E033242148E2724D3D054B4D3",
+      "8CFAF78BCFFB41E6A3ED838D9EC2FD7C",
+      "FF5EFC69BB8F4E56839A43A8477AE58F",
+      "C57EC6AAFE22490082F06FD8DCBE2E1C",
+      "471932C33B604C3099070F4106EE5024",
+      "A274904C583C4290BB734B7F1875AB82",
+      "9501CD77346746B39A98460EF44376D2",
+      "A93B9C603CAA498AA19454C75B0826F8",
+      "A1B184A401B546EEB7D09CDD35C47911",
+      "D2ECF1B2A7FC45DB9D916996CE9BE9C9",
+      "F0A8BC4265E44C47A127AEC1975F4C89",
+      "56C80A4B7A774848824BA91BBB1065D5",
+      "FA745E2F3D0B406FA6C0F3ECE4C5F5D4",
+      "13558E4C883D4E1788160C87AB6F61BC",
+      "9F7E6D76DB664D44AE13769DBF007571",
+      "9344B56F71AA4BE1BB0A5DB6A75825B8",
+      "9FC5E87F173747AB840D966D4238290C",
+      "475E03B3E64740C5856F6E33EE8301FA",
+      "8214ECDE53F04AFC95243E10B2C7BBD4",
+      "4625FCFBF49747ACA31F31FA3101F1D5",
+      "A3605A9B20E74483A7F4B8EF64AB72D6",
+      "3D7E7F7C1487472A9690CDD361C6B26F",
+      "D2794EA7FB7B4B52BA2CE4681E2D9DFB",
+      "F0B2EAE5414249748F2986CC1EE78340",
+      "F0CC0E7AEC0A401A94E8A63C9AC4F4D3",
+      "73B2E56B742C40398F649727233DBD87",
+      "B3441B45957C4BDFABBC2EA1E37FD31D",
+      "D9520A9B3DEA453CB8F6A3A5CA1C9FEB",
+      "C455246EFC1C402296B1C2249D00B04D",
+      "3C3A0C482534454884151CCD97FCD561",
+      "38C9CE2A4E06401DABF942E1D0224E87",
+      "F356C4CED1584EBF812912F2D926066B",
+      "E5B978ACDB914BA0AE53ED501B6F2600",
+      "C3A6C9422EB64F5A8B9F82C4AE4FC928",
+      "2F80CC4282644DDEB6DD5E57F6BDF9C1",
+      "FBA0C040106A44CA93F48A6E112FB14E",
+      "46A05975EE8A43DB82BA9D6C477D5756",
+      "AABF8B3AD8AC4839BF103B1BFB3E9473",
+      "5804B3F85FAB49B6B0B8B2686F4F5512",
+      "1DA22B3D6F12458290F8549165B490EC",
+      "8E5FA57F5168436BA998A70CB2C7F259",
+      "8651DCAB4D714EF6AA747BB8F50719BA",
+      "8EFCE40BCB74478B8254CEB594CE8774",
+      "2D700440AC084B99AD123528BAE67D29",
+      "9E212D4ED3C64493B631EE15D0A62AF7",
+      "42A80AD3F88443F785C005BAF2121E01",
+      "97F00180EC8442B3A1CB67E6349D7BDE",
+      "AE7AC22E64D746B69F970EA1EC65DB05",
+      "7937E5F0640240FDBBF9B158F45F4F6C",
+      "FE597F427BF84EC783435F4471520403",
+      "F3F07BFCCDDF48E79ED239F0111E4710",
+      "34682D3EB66141ECACC8796C9D3A42B8",
+      "4245947FE6244E37982F46D2FA46D74E",
+      "30F30E1181BA43FE99706038200EFEBF",
+      "40F45DEED2D84BA58B223F556FA25617",
+      "DA0772F930654164AEC517CC6CDC5DBA",
+      "3D1EF44A78D34058A32CB1C658AE90FE",
+      "DCF6BD55DE71421CA49C6FF4F3B2D1FC",
+      "EED63D7ABCB24E7E9AC1C4AA7C3ADC40",
+      "D98433ED30FF48CDA8D2A84E846EC2DF",
+    };
+
+    // Ids for the property and itemtype item types
+    private static HashSet<string> _dataModelIds = new HashSet<string>()
+    {
+      "D98433ED30FF48CDA8D2A84E846EC2DF",
+      "26D7CD4E033242148E2724D3D054B4D3",
+      "450906E86E304F55A34B3C0D65C097EA"
+    };
+
     private static int DefaultInstallOrder(ItemReference itemRef)
     {
       switch (itemRef.Type)
       {
-        case "List": return 1;
-        case "Sequence": return 2;
-        case "Revision": return 3;
-        case "Variable": return 4;
-        case "Method": return 5;
-        case "Identity": return 6;
-        case "Member": return 7;
-        case "User": return 8;
-        case "Permission": return 9;
-        case "EMail Message": return 10;
-        case "Action": return 11;
-        case "Report": return 12;
-        case "Form": return 13;
-        case "Workflow Map": return 14;
-        case "Life Cycle Map": return 15;
-        case "Grid": return 16;
         case "ItemType":
           // Prioritize core types (e.g. ItemType, List, etc.)
-          switch (itemRef.Unique)
-          {
-            case "483228BE6B9A4C0E99ACD55FDF328DEC":
-            case "937CE47DE2854308BE6FF5AB1CFB19D4":
-            case "7A3EFE7242DB4403965890C053A57A0B":
-            case "6B9057491021453ABA0A425570CC10D2":
-            case "E8335FB6E4834AFF9BA8F9D4C6E3DE2C":
-            case "1DD844998D3941D1BB8680612D9B4B0C":
-            case "5D9A5583B5A54CA78586FDBF9716E53A":
-            case "FC1A83F673B542C7AC8EEC29F25C602E":
-            case "EFC5E36233D541FDA5B23B7BD374653C":
-            case "D003393AB1E447B3A8D3B274CAA70F69":
-            case "3538F62649F3477EA1F8990EB20F88B9":
-            case "1675E79E847F4D3E9408B57EE7DA69EF":
-            case "B228811F241240FE8962E14AD584F2AD":
-            case "94E345F15EB94D86ADE8FF1B6AE2B439":
-            case "550DEE262619410A82F8F7378D6184D0":
-            case "D3F830490AB143E4ACC00D16538C6DB0":
-            case "2C95B39863F346EFB224DCB85390F465":
-            case "7BFF05B795FA4C1293C0B68C282F78F1":
-            case "BF62E8B6450447D89EF86B539F49F992":
-            case "31392C4909A249BF9EA143915F3F9553":
-            case "B5175846B27145EEA5653DA35ED78BE4":
-            case "51F1815885E3477D8B6385A69236C5AA":
-            case "A16A77E9E9B84559AA435361BAB057F7":
-            case "6DF95CF17D824F5DAC6A996FFC34D5F8":
-            case "837D345236384B5DAE4B52042419F966":
-            case "05DF56FF833542F98251528F3FFE2FA0":
-            case "02FA838247DF47C2BB85AAB299E646B2":
-            case "0300B828CBEE4610B77C41377209C900":
-            case "0DE14E76AA794A039DA8D2CDC34E6B1D":
-            case "645774D6072F41FD8F998C861E211741":
-            case "4DAD707F62B54823AE2E4730BB00C649":
-            case "09586A35D3534D5EAD92B94CB1036AEF":
-            case "F91DE6AE038A4CC8B53D47D5A7FA49FC":
-            case "CE0C4143D35E46CDA3874C4339F159BE":
-            case "8052A558B9084D41B9F11805E464F443":
-            case "41EF49EFD2ED4F6EAB04C047681F33AC":
-            case "45F28B3088E74905913152E9BE3B9B12":
-            case "68D1EEEAA8B84B75962D3008C00E2280":
-            case "2A69EFFD543B4F74AB5AE964FE83203D":
-            case "B8940FB948604232B27FC1263FC7E203":
-            case "13EC84A626F1457BB5F60A13DA03580B":
-            case "47573682FB7549F59ADECD4BFE04F1DE":
-            case "2E25B49E218A45D28D0C7D3C0633710C":
-            case "8AB5CEB9824B4CF7920AFED29F662C66":
-            case "8EABD91B465443F0A4995418F483DC51":
-            case "1718DC9FB25043B9A3F0B76DB5DC6637":
-            case "B2D9F59116B944CE9151C7C05F4D946C":
-            case "06E0660816FE40A2BF1411B2280062B3":
-            case "BA053C68D62E4E5293039323F10E116E":
-            case "38CAFF4302AC45EBAF91EE4DCE4948C7":
-            case "E582AB17663F4EF28460015B2BE9E094":
-            case "BC7977377FFF40D59FF14205914E9C71":
-            case "450906E86E304F55A34B3C0D65C097EA":
-            case "030019FA30FE40FEB5E32AD2FC9B1F20":
-            case "AC32527D85604A4D9FC9107C516AEF47":
-            case "5736C479A8CB49BCA20138514C637266":
-            case "137D24DFD9AC4D0CA2ABF8D90346AABB":
-            case "F8F19489113C487B860733E7F7D5B12D":
-            case "87879A09B8044DE380D59DF22DE1867F":
-            case "1C5BA0A1491843378E48FF481F6F1DF1":
-            case "0B9D641B40D24036A117D911558CBDCE":
-            case "F312562D6AD948DCBCCCCF6A615EE0EA":
-            case "C6A89FDE1294451497801DF78341B473":
-            case "7C63771EBC8D46FE8E902C5188033515":
-            case "AD09B1279AC246BB9EE39BD153D28586":
-            case "80881F5852BC439E9F3CF0AEC03ABE2A":
-            case "2DAC2B407B0043A692905CF6A94296A8":
-            case "98FF7C1BFDFA43448B1EC5A95EA13AEA":
-            case "F0834BBA6FB64394B78DF5BB725532DD":
-            case "F81CDEF9FE324D01947CC9023BC38317":
-            case "18C15AB147F84834874F2E0CB6B8B4C0":
-            case "E5BC8090E82D4F8D8E3F389C95316433":
-            case "DA581F2EAD1641CF976A1F1211E1ADBA":
-            case "B5048D604A6A4D53B3FC6C3BF3D81157":
-            case "BB3394EA2B014A6493267E7867B4ABD7":
-            case "920AAA3EAE684F6E99A0EAB95516D064":
-            case "A46890D3535C41D4A5D79240B8C373B0":
-            case "DF17056D3AC1479DBC7196255105D04B":
-            case "2B46201802CE46708C269667DB4798AC":
-            case "42EA5C9FEC6B49CD8E2784E9E846EAFE":
-            case "E5326B5A2B93464A9795B1F8A6E6B666":
-            case "FC3E32F18F804FD9BE4B175973D29112":
-            case "B7DF834246F24F10BC9B91056D828538":
-            case "E7A68175B2024FFB876E87D0081071A9":
-            case "B30032741C894BB086148DDB551D3BEE":
-            case "2F4E2B53BFBA4351BFFCEE0E438ECF97":
-            case "FF53A19A424D4B2F80938A5A5C1A29EA":
-            case "83EBCDAE9D834E169ABC95CC0C7CCB28":
-            case "CC23F9130F574E7D99DF9659F27590A6":
-            case "63EC2E6B69FC4FB09859077EE073D9A5":
-            case "ED9F61ADA4334D7D94361F426C081DB5":
-            case "E4A23B0AC84D4155BF4C1E44B84CBD45":
-            case "DE828FBA99FF4ABB9E251E8A4118B397":
-            case "DD54C11BF6004B09A9E152AFD61ABEA9":
-            case "45E899CD2859442982EB22BB2DF683E5":
-            case "122BF06C8B8E423A9931604DD939172F":
-            case "6DAB4ACC09E6471DB4BDD15F36C3482B":
-            case "8FC29FEF933641A09CEE13A604A9DC74":
-            case "602D9828174C48EBA648B1D261C54E43":
-            case "B19D349CC6FC44BC97D50A6D70AE79CB":
-            case "261EAC08AE9144FC95C49182ACE0D3FE":
-            case "321BD822949149C597FD596B1212B85C":
-            case "EDC5F1D5759D4C7CBDC7F8C20D76087D":
-              return 0;
-          }
-          return 17;
+          if (_dataModelIds.Contains(itemRef.Unique))
+            return -20;
+          else if (_coreItemTypeIds.Contains(itemRef.Unique))
+            return -10;
+          break;
         case "RelationshipType":
           // Prioritize core metadata types (e.g. Member)
-          switch (itemRef.Unique)
-          {
-            case "AEFCD3D2DC1D4E3EA126D49D68041EB6":
-            case "85924010F3184E77B24E9142FDBB481B":
-            case "90D8880C29CD45C3AA8DAFF1DAEBC60E":
-            case "BF3EAD31AAA2403592CAAC2446FF7797":
-            case "46BDE53304404C28B5C45610E41C1DD5":
-            case "BD4A250787A742A484C7B174A4AED1E2":
-            case "96C238700CD840DEBE512EE85D440AF3":
-            case "67735DF455F54736A9D51CB53AB129E3":
-            case "05A68B0BC74C47A6A2FD4404A73C815F":
-            case "E32DB4E6E3B64F98A12B550C578E6A01":
-            case "F88A91D29C4F446BB309BEEE925AADD1":
-            case "FA1755A31ACF4EDFBBFFCD6A8C6F7AF8":
-            case "EB4ADB2BC83C410FB265CB42ED5C633B":
-            case "8B58025F8E504DBDADF0E1176D3CE178":
-            case "CB7696CC33EC4D1BB98716465F1AD580":
-            case "4E355E04444B4676AE723B43DECA37DC":
-            case "DB54505FA3E9419DA3C1E1AFB7A48C1C":
-            case "10B8BB84EEE9413AAD071C8341BBAB04":
-            case "BF60433C7E924BE6B78D901809F8FEF6":
-            case "3A65F41FF1FC42518A702FDA164AF420":
-            case "6EA4299D271743BFB50DBB14C08AC55B":
-            case "432E29895A994D0DBC9DF9B0918E189F":
-            case "421A0EC1E68C4661AA9274C297BD410C":
-            case "D4C8D8008DAE4799A426518C2B6D0889":
-            case "4E24BC6E89394C8D8D05D3F9871EA5D8":
-            case "103F7DC6DDEA415389587AC6D37C135C":
-            case "21E1EF3C68744A53BF5FAC205A1B51CF":
-            case "8EC6FCD4C5344652A2C751023B66B889":
-            case "7FAFAF8FFCE143A0985010F83DACDA88":
-            case "0CFC2324C1A141C59B2B4612442D0433":
-            case "64DA1324EE1D4A6FA84783D93CEE0EA2":
-            case "91D179E2AC9C4BDA92E0CB877D45E051":
-            case "A008CBA8749B405C9A3FE02904EBA067":
-            case "DC80041DD3544835BDB50A8CAA535903":
-            case "692D9D11B6524E54BC96AE8244EE6AE3":
-            case "9CB248B6DD5F4EBD9D56A75B30DBEBCB":
-            case "B5C980B0A6494F1FBEDE80F96F96BEBE":
-            case "1F5F9158F3ED435CAD9757BCFA3A4453":
-            case "8F3CDD9B7F8B4B8FB6A35BB39DED6EC1":
-            case "C779CBB024A04E519D2806435882F7F9":
-            case "0EA142227FAE40148A4BDD8CF1D450EF":
-            case "621D9BA267174927B0E6A08601BDCF08":
-            case "8E7749E9F3C84E11A5F7F5E4E7D51B22":
-            case "17F8471D9F0346379B33D94E3A90689B":
-            case "52E7E19747864AB5900BBABF82E66382":
-            case "617069E6F5C04687B0526750978CFA51":
-            case "39C52F7B48ED4CEA824196BE9DBE6784":
-            case "E45E85D702F14A37B0E65F3C770D1195":
-            case "C5283EF5760B424C974E2E2F81CE02CE":
-            case "6733DCABB12E49E7A1FA6A76863DDA95":
-            case "70E817CC22644F538032177DEC7B6ECD":
-            case "95D6B96F155543CF86ED9CC9989A1059":
-            case "0BDF3A9BA8D94A18A016541653EA9097":
-            case "241944ED565940B5BC4987C3D9EAB6C7":
-            case "91ABEDE7189D4F509795396D3C646ADA":
-            case "D3F7714E036040BA8B24F0B8F5601452":
-            case "D3E6C97153E1408FB218FA34D8B65A3D":
-            case "CB10A07383CC4C35A22B1577B7712D38":
-            case "789104C736664FAA9748352CBBF86BCA":
-            case "3E85D9DD379643F8A207B99A9DFB72C2":
-            case "9C0541DDA9644E4EBA9CBC68BBD37C52":
-            case "C64BA744050149A1A32F402ED965CB1A":
-            case "ED06F0AEA37242349F2C499B7FEA6A26":
-            case "1549FB139D6B4AD99FDC1ED4B8011DB9":
-            case "721F8FFCBA8448D8BA61E9AD980A52C1":
-            case "4697179F1FC94E25A8274E586EEF2F39":
-            case "0BB5B81FEB37475BB9C779408080DB61":
-            case "3572C4D1479445D9959C413624A9FFF6":
-            case "EA473F6BF22F4F34807F2FA03497147F":
-            case "F03364FA841641EF82C8D893CA2C6727":
-            case "EEC427EA9E754FD9BE93D1C6C72F2F2E":
-            case "92BC895A020E452D926B6F64E985A197":
-            case "15FA7E0A9F2A41269B8B6CF7C52BD11D":
-            case "BCC8053D365143A18B033850EFE56F3C":
-            case "96730C617F4C40729D730D97395FD620":
-            case "2578D0D1427A4FE384544CA498301E40":
-            case "0A871CCD40364A03AD2F0FD24AEAB4E5":
-            case "640C685B4AE14A239A138C5A8876A1C9":
-            case "A7C8B9475B884B9593E3B9ED3F3B828C":
-            case "3844E4C9C5FA4ABAB3034FD6D4BE596E":
-            case "19193BC7942C41AEBA8147BD1778F35E":
-            case "AC218DF3AE43488C9E64E1AA551D2522":
-            case "CA289ED4F1A84A9EB6CDD822846FD745":
-            case "C24A87B33E3740B3B01254DC776F1EFE":
-            case "E2DECCA6300E4815B466C62C66E9D3AF":
-            case "ACD5116613FF40C9BC5EF7447CBEBBCB":
-            case "213B74E721ED457C9BE735C038C7CB95":
-            case "B70DE4074ABC49C69B0D8729D9212982":
-            case "6323EE2C82E94CC4BB83779DDFDDD6F5":
-            case "EECAA9639E054096B4A0F98E6845E963":
-            case "74F9BBD18C9143AE8547D078C9FAB456":
-            case "B1B179DB316A4178B0A5A57F00185A27":
-            case "E1F075B555A24EA8BF0E945CE580254F":
-            case "6C280692633D4498BD9CFEA7989138AB":
-            case "5BD6BED0CD794A078AA42476F47ECF46":
-            case "A2294A4CD0B14DE4912C1B530218AB57":
-            case "797EE3B1B9624E369B3E45FA0C10757C":
-            case "5EFB53D35BAE468B851CD388BEA46B30":
-            case "1E764495A5134823B30060D83FD6A2F9":
-            case "5698BACD2A7A45D6AC3FA60EAB3E6566":
-            case "8EF041900FE2428AABD404063AB979B6":
-            case "7348E620D27E40D1868C54247B5DE8D1":
-            case "E0849D6A48B84B8D9C135488C4C1DDF4":
-            case "A7AE79CD9E144A15B5B34B455AFB66D9":
-            case "B2A302B6DCD54F92AD0912A37A1D4850":
-            case "5ED4936039F64E9E99F703F8F46A1DB1":
-            case "E4F3367A4A6C4956875CAEF580692564":
-            case "5D6C6E00F2114D678570FC877B6F44BC":
-            case "D1AEF724041942BCAAC8CADBBDFD5EF4":
-            case "51CE2CDC8D3F49C7BF707B8E0A4BD15F":
-            case "CFACA4085F044622A1D4E00F7DB9C71E":
-            case "0EB9440796664EEBBAD9BE8B4DAE660F":
-            case "5CDF0A9CB3FC49BEB83D361B4CEE4082":
-            case "929D27BAADFE4F2F9194EF8E29B8B869":
-            case "26D7CD4E033242148E2724D3D054B4D3":
-            case "8CFAF78BCFFB41E6A3ED838D9EC2FD7C":
-            case "FF5EFC69BB8F4E56839A43A8477AE58F":
-            case "C57EC6AAFE22490082F06FD8DCBE2E1C":
-            case "471932C33B604C3099070F4106EE5024":
-            case "A274904C583C4290BB734B7F1875AB82":
-            case "9501CD77346746B39A98460EF44376D2":
-            case "A93B9C603CAA498AA19454C75B0826F8":
-            case "A1B184A401B546EEB7D09CDD35C47911":
-            case "D2ECF1B2A7FC45DB9D916996CE9BE9C9":
-            case "F0A8BC4265E44C47A127AEC1975F4C89":
-            case "56C80A4B7A774848824BA91BBB1065D5":
-            case "FA745E2F3D0B406FA6C0F3ECE4C5F5D4":
-            case "13558E4C883D4E1788160C87AB6F61BC":
-            case "9F7E6D76DB664D44AE13769DBF007571":
-            case "9344B56F71AA4BE1BB0A5DB6A75825B8":
-            case "9FC5E87F173747AB840D966D4238290C":
-            case "475E03B3E64740C5856F6E33EE8301FA":
-            case "8214ECDE53F04AFC95243E10B2C7BBD4":
-            case "4625FCFBF49747ACA31F31FA3101F1D5":
-            case "A3605A9B20E74483A7F4B8EF64AB72D6":
-            case "3D7E7F7C1487472A9690CDD361C6B26F":
-            case "D2794EA7FB7B4B52BA2CE4681E2D9DFB":
-            case "F0B2EAE5414249748F2986CC1EE78340":
-            case "F0CC0E7AEC0A401A94E8A63C9AC4F4D3":
-            case "73B2E56B742C40398F649727233DBD87":
-            case "B3441B45957C4BDFABBC2EA1E37FD31D":
-            case "D9520A9B3DEA453CB8F6A3A5CA1C9FEB":
-            case "C455246EFC1C402296B1C2249D00B04D":
-            case "3C3A0C482534454884151CCD97FCD561":
-            case "38C9CE2A4E06401DABF942E1D0224E87":
-            case "F356C4CED1584EBF812912F2D926066B":
-            case "E5B978ACDB914BA0AE53ED501B6F2600":
-            case "C3A6C9422EB64F5A8B9F82C4AE4FC928":
-            case "2F80CC4282644DDEB6DD5E57F6BDF9C1":
-            case "FBA0C040106A44CA93F48A6E112FB14E":
-            case "46A05975EE8A43DB82BA9D6C477D5756":
-            case "AABF8B3AD8AC4839BF103B1BFB3E9473":
-            case "5804B3F85FAB49B6B0B8B2686F4F5512":
-            case "1DA22B3D6F12458290F8549165B490EC":
-            case "8E5FA57F5168436BA998A70CB2C7F259":
-            case "8651DCAB4D714EF6AA747BB8F50719BA":
-            case "8EFCE40BCB74478B8254CEB594CE8774":
-            case "2D700440AC084B99AD123528BAE67D29":
-            case "9E212D4ED3C64493B631EE15D0A62AF7":
-            case "42A80AD3F88443F785C005BAF2121E01":
-            case "97F00180EC8442B3A1CB67E6349D7BDE":
-            case "AE7AC22E64D746B69F970EA1EC65DB05":
-            case "7937E5F0640240FDBBF9B158F45F4F6C":
-            case "FE597F427BF84EC783435F4471520403":
-            case "F3F07BFCCDDF48E79ED239F0111E4710":
-            case "34682D3EB66141ECACC8796C9D3A42B8":
-            case "4245947FE6244E37982F46D2FA46D74E":
-            case "30F30E1181BA43FE99706038200EFEBF":
-            case "40F45DEED2D84BA58B223F556FA25617":
-            case "DA0772F930654164AEC517CC6CDC5DBA":
-            case "3D1EF44A78D34058A32CB1C658AE90FE":
-            case "DCF6BD55DE71421CA49C6FF4F3B2D1FC":
-            case "EED63D7ABCB24E7E9AC1C4AA7C3ADC40":
-              return 0;
-          }
-          return 18;
-        case "Field": return 19;
-        case "Property": return 20;
-        case "View": return 21;
-        case "SQL": return 22;
-        case "Metric": return 23;
-        case "Chart": return 24;
-        case "Dashboard": return 25;
+          if (_dataModelIds.Contains(itemRef.Unique))
+            return -20;
+          else if (_coreRelationshipTypeIds.Contains(itemRef.Unique))
+            return -10;
+          break;
+        case InstallItem.ScriptType:
+          if (itemRef.Unique.Split(' ').Concat(itemRef.KeyedName.Split(' ')).Any(p => _dataModelIds.Contains(p)))
+            return -15;
+          if (itemRef.Unique.Split(' ').Concat(itemRef.KeyedName.Split(' ')).Any(p => _coreItemTypeIds.Contains(p) || _coreRelationshipTypeIds.Contains(p)))
+            return -5;
+          var order = DefaultInstallOrder(itemRef.Unique.Split(':')[0]);
+          if (order < 120)
+            return order + 1;
+          break;
       }
-      return 99;
+      return DefaultInstallOrder(itemRef.Type);
+    }
+
+    private static int DefaultInstallOrder(string type)
+    {
+      switch (type)
+      {
+        case "List": return 10;
+        case "Sequence": return 20;
+        case "Revision": return 30;
+        case "Variable": return 40;
+        case "Method": return 50;
+        case "Identity": return 60;
+        case "Member": return 70;
+        case "User": return 80;
+        case "Permission": return 90;
+        case "EMail Message": return 100;
+        case "Action": return 110;
+        case "Report": return 120;
+        case "Form": return 130;
+        case "Workflow Map": return 140;
+        case "Life Cycle Map": return 150;
+        case "Grid": return 160;
+        case "ItemType": return 170;
+        case "RelationshipType": return 180;
+        case "Field": return 190;
+        case "Property": return 200;
+        case "View": return 210;
+        case "SQL": return 220;
+        case "Metric": return 230;
+        case "Chart": return 240;
+        case "Dashboard": return 250;
+        case InstallItem.ScriptType: return 500;
+      }
+      return 9999;
     }
 
 
@@ -1599,7 +1746,7 @@ namespace InnovatorAdmin
             formRef.InnerXml = form.OuterXml;
             foreach (var relTag in formRef.Elements("Item").Elements("Relationships").ToList())
             {
-              relTag.Detatch();
+              relTag.Detach();
             }
           }
         }
@@ -1616,7 +1763,7 @@ namespace InnovatorAdmin
               formRef.InnerXml = form.OuterXml;
               foreach (var relTag in formRef.Elements("Item").Elements("Relationships").ToList())
               {
-                relTag.Detatch();
+                relTag.Detach();
               }
             }
 
@@ -1670,6 +1817,19 @@ namespace InnovatorAdmin
     }
 
     /// <summary>
+    /// Remove the calculated vault URL
+    /// </summary>
+    private void RemoveVaultUrl(XmlDocument doc)
+    {
+      var query = "//Item[@type='Vault']/vault_url";
+      var elements = doc.ElementsByXPath(query).ToList();
+      foreach (var elem in elements)
+      {
+        elem.Parent().RemoveChild(elem);
+      }
+    }
+
+    /// <summary>
     /// Remove the ID attribute from relationships from versionable items.  This will improve the
     /// compare process and the import process should handle the import of these items without an
     /// ID.
@@ -1690,14 +1850,141 @@ namespace InnovatorAdmin
     }
 
     /// <summary>
+    /// Set <c>doGetItem="0"</c> for cmf_ContentType elements
+    /// </summary>
+    private void SetDoGetItemForCmf(XmlDocument doc)
+    {
+      var elements = doc.Descendants(e => e.Attribute("type", "") == "cmf_ContentType")
+        .ToArray();
+      foreach (var elem in elements)
+      {
+        elem.Attr("doGetItem", "0");
+      }
+    }
+
+    private void RemoveGeneratedItemTypeRelationships(XmlDocument doc)
+    {
+      var elemsToRemove = doc.ElementsByXPath("//Relationships/Item[@type='Client Event' and related_id[@keyed_name='cmf_OnShowContainer']]").ToList();
+      foreach (var elem in elemsToRemove)
+      {
+        elem.Detach();
+      }
+
+      elemsToRemove = doc.ElementsByXPath("//Relationships/Item[@type='ITPresentationConfiguration']")
+        .Where(e => _metadata.TocPresentationConfigs.Contains(e.Element("related_id")?.InnerText))
+        .ToList();
+      foreach (var elem in elemsToRemove)
+      {
+        elem.Detach();
+      }
+    }
+
+    private void RemoveXPropertyFlattenRelationships(XmlDocument doc)
+    {
+      var elemsToRemove = doc.ElementsByXPath("//Item[@type='xClass_xProperty_Flatten']").ToList();
+      foreach (var elem in elemsToRemove)
+      {
+        elem.Detach();
+      }
+    }
+
+    /// <summary>
+    /// The CMF generated types will get recreated by Aras.  Don't export them here.
+    /// </summary>
+    private void RemoveCmfGeneratedTypes(XmlDocument doc)
+    {
+      foreach (var element in doc.Descendants(x => x.Attribute("type", "") == "cmf_ElementType" || x.Attribute("type", "") == "cmf_PropertyType"))
+      {
+        var generatedTypeProps = element.Descendants(e => e.LocalName == "generated_type")
+        .ToArray();
+        foreach (var generatedTypeProp in generatedTypeProps)
+        {
+          var itemType = generatedTypeProp.Elements().Single();
+          var parentItem = generatedTypeProp.Parents().Last(e => e.LocalName == "Item");
+          itemType.Attr("action", "merge");
+          itemType.Attr("where", "[ItemType].name = '" + itemType.Element("name").InnerText + "'");
+          itemType.RemoveAttribute("id");
+          itemType.Element("id").Detach();
+          itemType.Attr("_cmf_generated", "1");
+          itemType.Attr("keyed_name", generatedTypeProp.Attribute("keyed_name", ""));
+          // The following referenceElement is for dependency sorting
+          var referenceElement = itemType.Elem("___cmf_content_type_ref___").Attr("type", parentItem.Attribute("type"));
+          referenceElement.InnerText = parentItem.Attribute("id");
+
+          itemType.Detach();
+          parentItem.ParentNode.InsertAfter(itemType, parentItem);
+          generatedTypeProp.Detach();
+        }
+      }
+
+      var elems = doc.Descendants(e => e.Attribute("type", "") == "RelationshipType"
+        && e.Elements(x => x.LocalName == "relationship_id"
+        && x.Attribute("type", "") == "ItemType"
+        && _metadata.CmfGeneratedTypes.Contains(x.InnerText)).Any()
+      ).ToArray();
+
+      foreach (var elem in elems)
+      {
+        elem.Detach();
+      }
+    }
+
+    /// <summary>
+    /// The CMF computed property dependencies are dependent on inter-item properties. Extract and insert them later.
+    /// </summary>
+    private void FixCmfComputedPropDependencies(XmlDocument doc)
+    {
+      var existingComputedDeps = doc.ElementsByXPath("/Result/Item[@type='cmf_ComputedPropertyDependency']").Select(x => x.Attribute("id", "")).ToList();
+      foreach (var contentType in doc.ElementsByXPath("/Result/Item[@type='cmf_ContentType']"))
+      {
+        var computedDependencies = contentType.Descendants(e => e.LocalName == "Item" && e.Attribute("type", "") == "cmf_ComputedPropertyDependency")
+          .ToArray();
+        foreach (var computedDep in computedDependencies)
+        {
+          var computedDepID = computedDep.Attribute("id", "");
+          if (existingComputedDeps.Contains(computedDepID))
+          {
+            computedDep.Detach();
+            continue;
+          }
+          var parentItem = computedDep.Parents().Last(e => e.LocalName == "Item");
+          computedDep.Attr("action", "merge");
+          computedDep.Detach();
+          parentItem.ParentNode.InsertAfter(computedDep, parentItem);
+          existingComputedDeps.Add(computedDepID);
+        }
+      }
+    }
+
+    /// <summary>
+    /// The CMF TabularView Item is expanded by default, need to replace with only related_id. This will allow processor to notice possible missing items.
+    /// </summary>
+    private void FixCmfTabularViewMissingWarning(XmlDocument doc)
+    {
+      foreach (var contentType in doc.ElementsByXPath("/Result/Item[@type='cmf_ContentType']"))
+      {
+        var relatedBaseViews = contentType.Descendants(e => e.LocalName == "related_id" && e.Parent().Attribute("type", "") == "cmf_ContentTypeView"
+        && (e.Attribute("type", "") == "cmf_BaseView" || e.Attribute("type", "") == "cmf_TabularView"))
+          .ToArray();
+        foreach (var relatedBaseView in relatedBaseViews)
+        {
+          var tabularView = relatedBaseView.Element("Item");
+          relatedBaseView.InnerText = tabularView.Attribute("id", "");
+          relatedBaseView.Attr("type", tabularView.Attribute("type", ""));
+          tabularView.Detach();
+        }
+      }
+    }
+
+    /// <summary>
     /// Remove empty &lt;Relationship/&gt; tags that weren't dealt with by the xslt template
     /// </summary>
     private void RemoveEmptyRelationshipTags(XmlDocument doc)
     {
-      var elements = doc.Descendants(e => e.LocalName == "Relationships" && e.IsEmpty).ToList();
+      var elements = doc.Descendants(e => e.LocalName == "Relationships" && e.IsEmpty).ToArray();
       foreach (var elem in elements)
       {
-        elem.Detatch();
+        elem.Detach();
       }
     }
 
@@ -1728,7 +2015,37 @@ namespace InnovatorAdmin
         .ToArray();
         foreach (var child in children)
         {
-          child.Element.Detatch();
+          child.Element.Detach();
+        }
+        foreach (var child in children)
+        {
+          elem.AppendChild(child.Element);
+        }
+      }
+
+      // Sort list values by the text of the value instead of the sort order to ease merging
+      var sortByValueTypes = new HashSet<string>(new string[] { "Value", "Filter Value" });
+      elements = doc.Descendants(e =>
+        e.LocalName == "Relationships"
+        && e.Elements().HasMultiple(c => c.HasAttribute("id")
+          && c.HasAttribute("type")
+          && sortByValueTypes.Contains(c.Attribute("type")))).ToList();
+      foreach (var elem in elements)
+      {
+        var children = elem.Elements().Select((e, i) => new
+        {
+          Element = e,
+          Type = e.Attribute("type"),
+          SortKey = e.HasAttribute("id") && e.HasAttribute("type")
+            && sortByValueTypes.Contains(e.Attribute("type"))
+            ? (e.Element("value", null) ?? e.Attribute("id")) : i.ToString("D5")
+        })
+        .OrderBy(e => e.Type)
+        .ThenBy(e => e.SortKey)
+        .ToArray();
+        foreach (var child in children)
+        {
+          child.Element.Detach();
         }
         foreach (var child in children)
         {
@@ -1762,7 +2079,12 @@ namespace InnovatorAdmin
       {
         parents = elem.Parents().Where(e => e.LocalName == "Item").Skip(1).ToList();
         levels = 1;
-        if (parents.Any() && itemDict.TryGetValue(ItemReference.FromFullItem(parents.Last(), false), out itemRefOpts))
+
+        if (parents.Any(e => e.Attribute("type", "").StartsWith("cmf_", StringComparison.OrdinalIgnoreCase))
+          && !parents.Any(e => e.Attribute("type", "") == "ItemType"))
+          continue;
+
+        if (parents.Count > 0 && itemDict.TryGetValue(ItemReference.FromFullItem(parents.Last(), false), out itemRefOpts))
         {
           levels = Math.Min(itemRefOpts.Levels, 1);
         }
@@ -1791,56 +2113,23 @@ namespace InnovatorAdmin
         case "ItemType":
           //queryElem.SetAttribute("levels", "2");
           //queryElem.SetAttribute("config_path", "Property|RelationshipType|View|Server Event|Item Action|ItemType Life Cycle|Allowed Workflow|TOC Access|TOC View|Client Event|Can Add|Allowed Permission|Item Report|Morphae");
-          if (_arasVersion < 11)
+          if (_arasVersion.Major < 11)
           {
             queryElem.InnerXml = @"<Relationships>
-  <Item type='Property' action='get' levels='1'>
-  </Item>
-  <Item type='RelationshipType' action='get' />
-  <Item type='View' action='get'>
-    <related_id>
-      <Item type='Form' action='get'>
-        <Relationships>
-          <Item type='Body' action='get' />
-        </Relationships>
-      </Item>
-    </related_id>
-  </Item>
+  <Item type='Property' action='get' levels='1' />
+  <Item type='RelationshipType' action='get' related_expand='0' />
+  <Item type='View' action='get' />
   <Item type='Server Event' action='get' />
-  <Item type='Item Action' action='get' />
-  <Item type='ItemType Life Cycle' action='get' />
+  <Item type='Item Action' action='get' related_expand='0' />
+  <Item type='ItemType Life Cycle' action='get' related_expand='0' />
   <Item type='Allowed Workflow' action='get' />
-  <Item type='TOC Access' action='get'>
-    <related_id>
-      <Item type='Identity' action='get'>
-        <Relationships>
-          <Item type='Member' action='get' />
-        </Relationships>
-      </Item>
-    </related_id>
-  </Item>
-  <Item type='TOC View' action='get' />
+  <Item type='TOC Access' action='get' related_expand='0' />
+  <Item type='TOC View' action='get'  related_expand='0' />
   <Item type='Client Event' action='get' />
-  <Item type='Can Add' action='get'>
-    <related_id>
-      <Item type='Identity' action='get'>
-        <Relationships>
-          <Item type='Member' action='get' />
-        </Relationships>
-      </Item>
-    </related_id>
-  </Item>
-  <Item type='Allowed Permission' action='get'>
-    <related_id>
-      <Item type='Permission' action='get'>
-        <Relationships>
-          <Item type='Access' action='get' />
-        </Relationships>
-      </Item>
-    </related_id>
-  </Item>
-  <Item type='Item Report' action='get' />
-  <Item type='Morphae' action='get' />
+  <Item type='Can Add' action='get' related_expand='0' />
+  <Item type='Allowed Permission' action='get' related_expand='0' />
+  <Item type='Item Report' action='get' related_expand='0' />
+  <Item type='Morphae' action='get' related_expand='0' />
 </Relationships>";
           }
           else
@@ -1860,54 +2149,21 @@ namespace InnovatorAdmin
       </Item>
     </Relationships>
   </Item>
-  <Item type='ITPresentationConfiguration' action='get' related_expand='0'/>
-  <Item type='Property' action='get' levels='1'>
-  </Item>
-  <Item type='RelationshipType' action='get' />
-  <Item type='View' action='get'>
-    <related_id>
-      <Item type='Form' action='get'>
-        <Relationships>
-          <Item type='Body' action='get' />
-        </Relationships>
-      </Item>
-    </related_id>
-  </Item>
+  <Item type='ITPresentationConfiguration' action='get' related_expand='0' />
+  <Item type='Property' action='get' levels='1' />
+  <Item type='RelationshipType' action='get' related_expand='0' />
+  <Item type='View' action='get' />
   <Item type='Server Event' action='get' />
-  <Item type='Item Action' action='get' />
-  <Item type='ItemType Life Cycle' action='get' />
+  <Item type='Item Action' action='get' related_expand='0' />
+  <Item type='ItemType Life Cycle' action='get' related_expand='0' />
   <Item type='Allowed Workflow' action='get' />
-  <Item type='TOC Access' action='get'>
-    <related_id>
-      <Item type='Identity' action='get'>
-        <Relationships>
-          <Item type='Member' action='get' />
-        </Relationships>
-      </Item>
-    </related_id>
-  </Item>
-  <Item type='TOC View' action='get' />
+  <Item type='TOC Access' action='get' related_expand='0' />
+  <Item type='TOC View' action='get'  related_expand='0' />
   <Item type='Client Event' action='get' />
-  <Item type='Can Add' action='get'>
-    <related_id>
-      <Item type='Identity' action='get'>
-        <Relationships>
-          <Item type='Member' action='get' />
-        </Relationships>
-      </Item>
-    </related_id>
-  </Item>
-  <Item type='Allowed Permission' action='get'>
-    <related_id>
-      <Item type='Permission' action='get'>
-        <Relationships>
-          <Item type='Access' action='get' />
-        </Relationships>
-      </Item>
-    </related_id>
-  </Item>
-  <Item type='Item Report' action='get' />
-  <Item type='Morphae' action='get' />
+  <Item type='Can Add' action='get' related_expand='0' />
+  <Item type='Allowed Permission' action='get' related_expand='0' />
+  <Item type='Item Report' action='get' related_expand='0' />
+  <Item type='Morphae' action='get' related_expand='0' />
 </Relationships>";
           }
           levels = 1;
@@ -1919,8 +2175,11 @@ namespace InnovatorAdmin
           break;
         case "RelationshipType":
           queryElem.SetAttribute("levels", "1");
-          var relId = queryElem.AppendChild(queryElem.OwnerDocument.CreateElement("relationship_id"));
-          relId.InnerXml = "<Item type=\"ItemType\" action=\"get\" levels=\"2\" config_path=\"Property|RelationshipType|View|Server Event|Item Action|ItemType Life Cycle|Allowed Workflow|TOC Access|TOC View|Client Event|Can Add|Allowed Permission|Item Report|Morphae\" />";
+          var relId = (XmlElement)queryElem.AppendChild(queryElem.OwnerDocument.CreateElement("relationship_id"));
+          var itemType = (XmlElement)relId.AppendChild(queryElem.OwnerDocument.CreateElement("Item"));
+          itemType.SetAttribute("type", "ItemType");
+          itemType.SetAttribute("action", "get");
+          SetQueryAttributes(itemType, "ItemType", levels - 1, Enumerable.Empty<ItemReference>());
           levels = 1;
           break;
         case "Action":
@@ -1940,12 +2199,17 @@ namespace InnovatorAdmin
         case "UserMessage":
         case "Workflow Promotion":
           queryElem.SetAttribute("levels", "1");
+          queryElem.SetAttribute("related_expand", "0");
           levels = 1;
           break;
         case "Grid":
         case "User":
         case "Preference":
         case "Property":
+        case "qry_QueryDefinition":
+        case "rb_TreeGridViewDefinition":
+        case "xClassificationTree":
+        case "DiscussionTemplate":
           queryElem.SetAttribute("levels", "2");
           levels = 2;
           break;
@@ -1963,6 +2227,18 @@ namespace InnovatorAdmin
   <Item type='cmf_ContentTypeView' action='get'>
   </Item>
   <Item type='cmf_ElementType' action='get'>
+    <generated_type>
+      <Item action='get' type='ItemType'>
+        <Relationships>
+          <Item action='get' type='Allowed Permission'>
+          </Item>
+          <Item action='get' type='Server Event'>
+          </Item>
+          <Item action='get' type='Can Add'>
+          </Item>
+        </Relationships>
+      </Item>
+    </generated_type>
     <Relationships>
       <Item type='cmf_ElementAllowedPermission' action='get'>
       </Item>
@@ -1973,8 +2249,24 @@ namespace InnovatorAdmin
         </Relationships>
       </Item>
       <Item type='cmf_PropertyType' action='get'>
+        <generated_type>
+          <Item action='get' type='ItemType'>
+            <Relationships>
+              <Item action='get' type='Allowed Permission'>
+              </Item>
+              <Item action='get' type='Server Event'>
+              </Item>
+              <Item action='get' type='Can Add'>
+              </Item>
+            </Relationships>
+          </Item>
+        </generated_type>
         <Relationships>
           <Item type='cmf_ComputedProperty' action='get'>
+            <Relationships>
+              <Item action='get' type='cmf_ComputedPropertyDependency' related_expand='0'>
+              </Item>
+            </Relationships>
           </Item>
           <Item type='cmf_PropertyAllowedPermission' action='get'>
           </Item>
@@ -2012,6 +2304,90 @@ namespace InnovatorAdmin
 </Relationships>";
           levels = 0;
           break;
+        case "cmf_ElementType":
+          queryElem.InnerXml = @"
+<generated_type>
+  <Item action='get' type='ItemType'>
+    <Relationships>
+      <Item action='get' type='Allowed Permission'>
+      </Item>
+      <Item action='get' type='Server Event'>
+      </Item>
+      <Item action='get' type='Can Add'>
+      </Item>
+    </Relationships>
+  </Item>
+</generated_type>
+<Relationships>
+  <Item type='cmf_ElementAllowedPermission' action='get'>
+  </Item>
+  <Item type='cmf_ElementBinding' action='get'>
+    <Relationships>
+      <Item type='cmf_PropertyBinding' action='get'>
+      </Item>
+    </Relationships>
+  </Item>
+  <Item type='cmf_PropertyType' action='get'>
+    <generated_type>
+      <Item action='get' type='ItemType'>
+        <Relationships>
+          <Item action='get' type='Allowed Permission'>
+          </Item>
+          <Item action='get' type='Server Event'>
+          </Item>
+          <Item action='get' type='Can Add'>
+          </Item>
+        </Relationships>
+      </Item>
+    </generated_type>
+    <Relationships>
+      <Item type='cmf_ComputedProperty' action='get'>
+        <Relationships>
+          <Item action='get' type='cmf_ComputedPropertyDependency' related_expand='0'>
+          </Item>
+        </Relationships>
+      </Item>
+      <Item type='cmf_PropertyAllowedPermission' action='get'>
+      </Item>
+    </Relationships>
+  </Item>
+</Relationships>";
+          levels = 0;
+          break;
+        case "cmf_PropertyType":
+          queryElem.InnerXml = @"
+<generated_type>
+  <Item action='get' type='ItemType'>
+    <Relationships>
+      <Item action='get' type='Allowed Permission'>
+      </Item>
+      <Item action='get' type='Server Event'>
+      </Item>
+      <Item action='get' type='Can Add'>
+      </Item>
+    </Relationships>
+  </Item>
+</generated_type>
+<Relationships>
+  <Item type='cmf_ComputedProperty' action='get'>
+    <Relationships>
+      <Item action='get' type='cmf_ComputedPropertyDependency' related_expand='0'>
+      </Item>
+    </Relationships>
+  </Item>
+  <Item type='cmf_PropertyAllowedPermission' action='get'>
+  </Item>
+</Relationships>";
+          levels = 0;
+          break;
+        case "cmf_TabularViewColumn":
+          queryElem.InnerXml = @"
+<Relationships>
+  <Item action='get' type='cmf_AdditionalPropertyType'>
+  </Item>
+</Relationships>";
+          levels = 0;
+          break;
         default:
           levels = (levels < 0 ? 1 : levels);
           queryElem.SetAttribute("levels", levels.ToString());
@@ -2033,7 +2409,7 @@ namespace InnovatorAdmin
 
       var doc = results.NewDoc();
       // Transform the output
-      ReportProgress(94, "Transforming the results");
+      ReportProgress(95, "Transforming the results");
       using (var memStream = new MemoryStream(results.DocumentElement.ChildNodes.Count * 1000))
       using (var output = new StreamWriter(memStream))
       {
@@ -2127,15 +2503,7 @@ namespace InnovatorAdmin
         ItemType result;
         foreach (var itemTypeData in itemTypes)
         {
-          result = new ItemType();
-          result.Id = itemTypeData.Id();
-          result.IsCore = itemTypeData.Property("core").AsBoolean(false);
-          result.IsDependent = itemTypeData.Property("is_dependent").AsBoolean(false);
-          result.IsFederated = itemTypeData.Property("implementation_type").Value == "federated";
-          result.IsPolymorphic = itemTypeData.Property("implementation_type").Value == "polymorphic";
-          result.IsVersionable = itemTypeData.Property("is_versionable").AsBoolean(false);
-          result.Name = itemTypeData.Property("name").Value;
-          result.Reference = ItemReference.FromFullItem(itemTypeData, true);
+          result = new ItemType(itemTypeData);
           _itemTypes[result.Name.ToLowerInvariant()] = result;
         }
 

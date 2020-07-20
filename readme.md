@@ -2,10 +2,10 @@
 
 Innovator Admin is a Windows tool for querying and administrating databases. 
 It is the ideal tool for administrating Aras Innovator PLM systems featuring 
-an advanced AML query editor (with full intellisense) along with streamlined 
+an advanced AML query editor (with full IntelliSense) along with streamlined 
 tools for exporting solutions from one database and importing them into 
 another (e.g. during DEV to PROD migrations). It is also quickly becoming a 
-great tool for querying SQL Server databases (with intellisense for SQL 
+great tool for querying SQL Server databases (with IntelliSense for SQL 
 queries) among other data sources.
 
 ![AML Studio](doc/aml-studio.png)
@@ -16,7 +16,7 @@ queries) among other data sources.
 
 ## ...[for querying](doc/aml-studio.md)
 
-- Full Intellisense for AML and SQL provides helpful suggestions as you type
+- Full IntelliSense for AML and SQL provides helpful suggestions as you type
 - Run just the query under your cursor with Run Current (or Ctrl+Enter)
 - Parameter bindings: include @paramName parameters in your queries and give them values when the query runs
 - (Innovator only) Editable grid which allows you to make changes and save them back to the database

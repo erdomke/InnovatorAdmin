@@ -59,6 +59,7 @@ namespace ICSharpCode.AvalonEdit.CodeCompletion
 			toolTip.PlacementTarget = this;
 			toolTip.Placement = PlacementMode.Right;
 			toolTip.Closed += toolTip_Closed;
+      toolTip.MaxWidth = 600;
 			
 			AttachEvents();
 		}
@@ -80,16 +81,19 @@ namespace ICSharpCode.AvalonEdit.CodeCompletion
 				return;
 			object description = item.Description;
 			if (description != null) {
-				string descriptionText = description as string;
-				if (descriptionText != null) {
-					toolTip.Content = new TextBlock  {
-						Text = descriptionText,
-						TextWrapping = TextWrapping.Wrap
-					};
-				} else {
-					toolTip.Content = description;
-				}
-				toolTip.IsOpen = true;
+        if (description is string descriptionText)
+        {
+          toolTip.Content = new TextBlock
+          {
+            Text = descriptionText,
+            TextWrapping = TextWrapping.Wrap
+          };
+        }
+        else
+        {
+          toolTip.Content = description;
+        }
+        toolTip.IsOpen = true;
 			} else {
 				toolTip.IsOpen = false;
 			}

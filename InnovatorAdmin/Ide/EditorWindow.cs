@@ -254,7 +254,8 @@ namespace InnovatorAdmin
       _commands.Add<Editor.FullEditor>(mniBlockComment, e => e.Modifiers == (Keys.Control | Keys.Shift) && e.KeyCode == Keys.Q, BlockComment);
       _commands.Add<Editor.FullEditor>(mniBlockUncomment, null, BlockUncomment);
       _commands.Add<Editor.FullEditor>(mniInsertNewGuid, null, c => c.ReplaceSelectionSegments(t => Guid.NewGuid().ToString("N").ToUpperInvariant()));
-      _commands.Add<Editor.FullEditor>(mniXmlToEntity, null, c => c.ReplaceSelectionSegments(t => {
+      _commands.Add<Editor.FullEditor>(mniXmlToEntity, null, c => c.ReplaceSelectionSegments(t =>
+      {
         try
         {
           var sb = new System.Text.StringBuilder();
@@ -275,7 +276,8 @@ namespace InnovatorAdmin
           return t.Replace("<", "&lt;").Replace(">", "&gt;").Replace("&", "&amp;");
         }
       }));
-      _commands.Add<Editor.FullEditor>(mniEntityToXml, null, c => c.ReplaceSelectionSegments(t => {
+      _commands.Add<Editor.FullEditor>(mniEntityToXml, null, c => c.ReplaceSelectionSegments(t =>
+      {
         try
         {
           var xml = "<a>" + t + "</a>";
@@ -609,7 +611,7 @@ namespace InnovatorAdmin
         {
           req.SetHeader(param.Name, param.Value);
         }
-        req.Timeout = _proxy.ConnData.Timeout;
+        req.Timeout = TimeSpan.FromMilliseconds(_proxy.ConnData.Timeout);
       }
     }
 
@@ -904,7 +906,8 @@ namespace InnovatorAdmin
       if (string.IsNullOrWhiteSpace(editor.Helper.LineComment))
         return;
 
-      ActOnSelectedLines(editor, start => {
+      ActOnSelectedLines(editor, start =>
+      {
         var length = editor.Helper.LineComment.Length;
         if (start + length < editor.Document.TextLength
           && editor.Document.GetText(start, length) == editor.Helper.LineComment)
@@ -1921,6 +1924,16 @@ namespace InnovatorAdmin
 
     private void btnInstall_Click(object sender, EventArgs e)
     {
+      InstallCommand();
+    }
+
+    private void mniInstall_Click(object sender, EventArgs e)
+    {
+      InstallCommand();
+    }
+
+    private void InstallCommand()
+    {
       try
       {
         var main = new Main();
@@ -1935,6 +1948,16 @@ namespace InnovatorAdmin
 
     private void btnCreate_Click(object sender, EventArgs e)
     {
+      CreateCommand();
+    }
+
+    private void mniCreate_Click(object sender, EventArgs e)
+    {
+      CreateCommand();
+    }
+
+    private void CreateCommand()
+    {
       try
       {
         var main = new Main();
@@ -1948,6 +1971,37 @@ namespace InnovatorAdmin
       {
         Utils.HandleError(ex);
       }
+    }
+
+
+    private void btnCompare_Click(object sender, EventArgs e)
+    {
+      CompareCommand();
+    }
+
+    private void mniCompare_Click(object sender, EventArgs e)
+    {
+      CompareCommand();
+    }
+
+    private void CompareCommand()
+    {
+      try
+      {
+        var main = new Main();
+        var compareSel = new CompareSelect();
+        main.GoToStep(compareSel);
+        main.Show();
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private async void lnkCreateModelFiles_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    {
+
     }
 
     private void mniColumns_Click(object sender, EventArgs e)
@@ -2191,7 +2245,8 @@ namespace InnovatorAdmin
     private void OpenFile(FullEditor control, string path)
     {
       lblProgress.Text = "Opening file...";
-      control.OpenFile(path).ContinueWith(t => {
+      control.OpenFile(path).ContinueWith(t =>
+      {
         if (t.IsCanceled)
           lblProgress.Text = "";
         else if (t.IsFaulted)
@@ -2259,6 +2314,52 @@ namespace InnovatorAdmin
 
     private void lnkGitMergeHelper_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
     {
+
+    }
+
+    private class MergeSettings
+    {
+      [DisplayName("Continue Last Merge")]
+      public bool ContinueLast { get; set; }
+      [DisplayName("Git Repository Path"), ParamControl(typeof(Editor.FilePathControl))]
+      public string RepoPath { get; set; }
+      [DisplayName("Local Branch Name")]
+      public string LocalBranch { get; set; }
+      [DisplayName("Remote Branch Name")]
+      public string RemoteBranch { get; set; }
+    }
+
+    private void lnkWriteMergeScripts_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    {
+
+    }
+
+    private class ScriptWriterSettings
+    {
+      [DisplayName("Git Repository Path"), ParamControl(typeof(Editor.FilePathControl))]
+      public string RepoPath { get; set; }
+      [DisplayName("Initial Commit")]
+      public string InitCommit { get; set; }
+      [DisplayName("Destination Commit")]
+      public string DestCommit { get; set; }
+      [DisplayName("Script Save Directory"), ParamControl(typeof(Editor.FilePathControl))]
+      public string SaveDirectory { get; set; }
+    }
+
+    private void splitViewHorizontally()
+    {
+      splitEditors.Orientation = Orientation.Horizontal;
+      splitEditors.SplitterDistance = splitEditors.Size.Height / 2;
+    }
+
+    private void splitViewVertically()
+    {
+      splitEditors.Orientation = Orientation.Vertical;
+      splitEditors.SplitterDistance = splitEditors.Size.Width / 2;
+    }
+
+    private void mniGitMergeHelper_Click(object sender, EventArgs e)
+    {
       try
       {
         using (var dialog = new Dialog.ConfigDialog<MergeSettings>())
@@ -2283,73 +2384,7 @@ namespace InnovatorAdmin
       }
     }
 
-    private class MergeSettings
-    {
-      [DisplayName("Continue Last Merge")]
-      public bool ContinueLast { get; set; }
-      [DisplayName("Git Repository Path"), ParamControl(typeof(Editor.FilePathControl))]
-      public string RepoPath { get; set; }
-      [DisplayName("Local Branch Name")]
-      public string LocalBranch { get; set; }
-      [DisplayName("Remote Branch Name")]
-      public string RemoteBranch { get; set; }
-    }
-
-    private void lnkWriteMergeScripts_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-    {
-      try
-      {
-        using (var dialog = new Dialog.ConfigDialog<ScriptWriterSettings>())
-        {
-          var settings = new ScriptWriterSettings();
-          dialog.DataSource = settings;
-          if (dialog.ShowDialog() == DialogResult.OK)
-          {
-            var repo = new GitRepo(settings.RepoPath);
-            var initDir = repo.GetDirectory(settings.InitCommit);
-            var destDir = repo.GetDirectory(settings.DestCommit);
-
-            ProgressDialog.Display(this, d =>
-            {
-              initDir.WriteAmlMergeScripts(destDir, settings.SaveDirectory, d.SetProgress);
-            });
-          }
-        }
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private class ScriptWriterSettings
-    {
-      [DisplayName("Git Repository Path"), ParamControl(typeof(Editor.FilePathControl))]
-      public string RepoPath { get; set; }
-      [DisplayName("Initial Commit")]
-      public string InitCommit { get; set; }
-      [DisplayName("Destination Commit")]
-      public string DestCommit { get; set; }
-      [DisplayName("Script Save Directory"), ParamControl(typeof(Editor.FilePathControl))]
-      public string SaveDirectory { get; set; }
-    }
-
-    private void btnCompare_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        var main = new Main();
-        var compareSel = new CompareSelect();
-        main.GoToStep(compareSel);
-        main.Show();
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private async void lnkCreateModelFiles_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    private async void mniCreateModelFiles_Click(object sender, EventArgs e)
     {
       try
       {
@@ -2362,16 +2397,39 @@ namespace InnovatorAdmin
       }
     }
 
-    private void splitViewHorizontally()
+    private void mniMergeScripts_Click(object sender, EventArgs e)
     {
-      splitEditors.Orientation = Orientation.Horizontal;
-      splitEditors.SplitterDistance = splitEditors.Size.Height / 2;
-    }
+      try
+      {
+        using (var dialog = new Dialog.ConfigDialog<ScriptWriterSettings>())
+        {
+          var settings = new ScriptWriterSettings();
+          dialog.DataSource = settings;
+          if (dialog.ShowDialog() == DialogResult.OK)
+          {
+            var repo = new GitRepo(settings.RepoPath);
+            var initDir = repo.GetDirectory(new GitDirectorySearch() { Sha = settings.InitCommit });
+            var destDir = repo.GetDirectory(new GitDirectorySearch() { Sha = settings.DestCommit });
 
-    private void splitViewVertically()
-    {
-      splitEditors.Orientation = Orientation.Vertical;
-      splitEditors.SplitterDistance = splitEditors.Size.Width / 2;
+            var manifestPath = Path.Combine(settings.SaveDirectory, "MergeScript.innpkg");
+            var pkg = new InnovatorPackageFolder(manifestPath);
+            ProgressDialog.Display(this, d =>
+            {
+              var processor = new MergeProcessor()
+              {
+                SortDependencies = true
+              };
+              processor.ProgressChanged += (s, ev) => d.SetProgress(ev.Progress);
+              var script = processor.Merge(initDir, destDir);
+              pkg.Write(script);
+            });
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
     }
   }
 }

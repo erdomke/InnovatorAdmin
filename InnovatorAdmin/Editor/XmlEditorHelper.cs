@@ -165,7 +165,7 @@ namespace InnovatorAdmin.Editor
     }
 
 
-    public virtual IEnumerable<IEditorScript> GetScripts(ITextSource text, int offset)
+    public virtual IEnumerable<IEditorScript> GetScripts(ITextSource text, int offset, bool readOnly)
     {
       return Enumerable.Empty<IEditorScript>();
     }

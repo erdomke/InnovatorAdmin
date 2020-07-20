@@ -8,13 +8,14 @@ namespace InnovatorAdmin
 {
   public class InnovatorPackageFolder : InnovatorPackage
   {
-    private string _manifestPath;
-    private string _baseFolder;
+    private readonly string _manifestPath;
+    private readonly string _baseFolder;
 
     public InnovatorPackageFolder(string path)
     {
       _manifestPath = path;
       _baseFolder = Path.GetDirectoryName(_manifestPath);
+      _parallel = true;
     }
 
     protected override System.IO.Stream GetExistingStream(string path)
@@ -28,7 +29,7 @@ namespace InnovatorAdmin
 
     protected override System.IO.Stream GetNewStream(string path)
     {
-      return new FileStream(EnsureRelativePath(path), FileMode.OpenOrCreate, FileAccess.Write);
+      return new FileStream(EnsureRelativePath(path), FileMode.Create, FileAccess.Write);
     }
 
     private string GetRelativePath(string path)
@@ -36,6 +37,7 @@ namespace InnovatorAdmin
       if (string.IsNullOrEmpty(path)) return _manifestPath;
       return Path.Combine(_baseFolder, path);
     }
+
     private string EnsureRelativePath(string path)
     {
       var fullPath = GetRelativePath(path);

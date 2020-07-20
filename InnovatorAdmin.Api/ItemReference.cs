@@ -1,9 +1,8 @@
-﻿using System;
+using Innovator.Client;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml;
-using Innovator.Client;
 
 namespace InnovatorAdmin
 {
@@ -55,6 +54,9 @@ namespace InnovatorAdmin
     }
     public static ItemReference FromItemProp(XmlElement elem)
     {
+      if (elem.Elements("Item").Any())
+        return FromFullItem(elem.Element("Item"), false);
+
       return new ItemReference(elem.Attributes["type"].Value, elem.InnerText)
       {
         KeyedName = (elem.HasAttribute("keyed_name") ? elem.Attributes["keyed_name"].Value : "")

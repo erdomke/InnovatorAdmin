@@ -77,7 +77,7 @@ namespace InnovatorAdmin.Editor
       return text.Substring(start, end - start);
     }
 
-    public IEnumerable<IEditorScript> GetScripts(ITextSource text, int offset)
+    public IEnumerable<IEditorScript> GetScripts(ITextSource text, int offset, bool readOnly)
     {
       return Enumerable.Empty<IEditorScript>();
     }

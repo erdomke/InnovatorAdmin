@@ -51,7 +51,8 @@ namespace InnovatorAdmin.Editor
           {
             var context = new SqlContext(parGroup);
             return ContextFromData(Tables(null).Concat(Schemas())
-              .Concat(context.Definitions.Select(d => new SqlGeneralCompletionData() {
+              .Concat(context.Definitions.Select(d => new SqlGeneralCompletionData()
+              {
                 Text = d,
                 Description = "Locally defined table",
                 Image = Icons.Class16.Wpf
@@ -77,7 +78,8 @@ namespace InnovatorAdmin.Editor
                   _overloadWin.EndOffset = caret + 1;
                   _overloadWin.Provider = new OverloadList().AddRange(overloads);
                   _overloadWin.Show();
-                  _overloadWin.Closed += (s, e) => {
+                  _overloadWin.Closed += (s, e) =>
+                  {
                     _overloadWin = null;
                     _overloadName = null;
                   };
@@ -94,12 +96,12 @@ namespace InnovatorAdmin.Editor
                 case "DATENAME":
                 case "DATEPART":
                   return ContextFromData(_datePartNames.Select(n => new SqlGeneralCompletionData()
-                    {
-                      Text = n[0] + (n[1] == n[0] ? "" : " (" + n[1] + ")"),
-                      Description = n[1],
-                      Image = Icons.EnumValue16.Wpf,
-                      Action = () => n[0]
-                    })
+                  {
+                    Text = n[0] + (n[1] == n[0] ? "" : " (" + n[1] + ")"),
+                    Description = n[1],
+                    Image = Icons.EnumValue16.Wpf,
+                    Action = () => n[0]
+                  })
                     .OrderBy(i => i.Text));
               }
             }
@@ -238,7 +240,8 @@ namespace InnovatorAdmin.Editor
 
       if (info.Columns == null && info.AdditionalColumns == null)
       {
-        var allProps = await _provider.GetColumnNames(info.Name.FullName).ToTask();
+        var allProps = (await _provider.GetColumnNames(info.Name.FullName).ToTask())
+          .Where(p => !p.Value.StartsWith("xp-"));
         result.AddRange(new PropertyCompletionFactory().GetCompletions(allProps, alias));
       }
       else
@@ -275,18 +278,19 @@ namespace InnovatorAdmin.Editor
       if (string.IsNullOrEmpty(schema))
       {
         var results = _provider.GetFunctionNames(tableValued)
-          .Select(t => new SqlGeneralCompletionData() {
+          .Select(t => new SqlGeneralCompletionData()
+          {
             Text = GetNameLabel(t),
             Image = Icons.Method16.Wpf,
             Action = () => t
           });
         if (!tableValued)
           results = results.Concat(_coreFunctions.Select(f => new SqlGeneralCompletionData()
-            {
-              Text = f.Name,
-              Description = f.Description,
-              Image = Icons.MethodFriend16.Wpf
-            }));
+          {
+            Text = f.Name,
+            Description = f.Description,
+            Image = Icons.MethodFriend16.Wpf
+          }));
         return results;
       }
 

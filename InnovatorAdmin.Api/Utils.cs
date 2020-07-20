@@ -5,11 +5,31 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace InnovatorAdmin
 {
   internal static class Utils
   {
+    public static XElement LoadXml(Stream stream)
+    {
+      if (stream == null || (stream.CanSeek && stream.Length < 1))
+        return null;
+      return XElement.Load(stream);
+    }
+
+    public static void RemoveWhere<T>(this IList<T> list, Func<T, bool> predicate)
+    {
+      var i = 0;
+      while (i < list.Count)
+      {
+        if (predicate(list[i]))
+          list.RemoveAt(i);
+        else
+          i++;
+      }
+    }
+
     public static string Left(this string value, int count)
     {
       if (value == null)
@@ -190,6 +210,20 @@ namespace InnovatorAdmin
         }
       }
       return builder.ToString();
+    }
+
+    public static void Shuffle<T>(this IList<T> list)
+    {
+      var rng = new Random();
+      var n = list.Count;
+      while (n > 1)
+      {
+        n--;
+        var k = rng.Next(n + 1);
+        T value = list[k];
+        list[k] = list[n];
+        list[n] = value;
+      }
     }
   }
 }

@@ -64,7 +64,7 @@ namespace InnovatorAdmin.Editor
       get { return string.Empty; }
     }
 
-    public IEnumerable<IEditorScript> GetScripts(ITextSource text, int offset)
+    public IEnumerable<IEditorScript> GetScripts(ITextSource text, int offset, bool readOnly)
     {
       return Enumerable.Empty<IEditorScript>();
     }
