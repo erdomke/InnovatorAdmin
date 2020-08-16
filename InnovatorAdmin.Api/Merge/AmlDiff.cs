@@ -134,7 +134,7 @@ namespace InnovatorAdmin
             break;
           case 1:
             res = EnsurePath(d, result);
-            SetItemEdits(res.ReplaceWithElement(new XElement(d)));
+            SetKeys(SetItemEdits(res.ReplaceWithElement(new XElement(d))).DescendantsAndSelf());
             break;
           default:
             if (TextDiffers(s, d))
@@ -301,7 +301,7 @@ namespace InnovatorAdmin
           }
           else if (elem.Element("related_id") != null)
           {
-            var textNode = elem.Element("related_id").Nodes().OfType<XText>().FirstOrDefault();
+            var textNode = elem.Element("related_id").Nodes().OfType<XText>().FirstOrDefault(t => t.Value.IsGuid());
             if (textNode == null)
             {
               var item = elem.Element("related_id").Element("Item");
