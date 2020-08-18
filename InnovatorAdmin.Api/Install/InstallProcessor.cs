@@ -166,6 +166,11 @@ namespace InnovatorAdmin
                   {
                     relatedId = rel.InnerText;
                   }
+                  else if (rel.Element("related_id").Element("Item").Attribute("action") == "get")
+                  {
+                    var relatedQuery = rel.Element("related_id").Element("Item");
+                    relatedId = _conn.Apply(relatedQuery).AssertItem().Id();
+                  }
                   else
                   {
                     relatedId = rel.Element("related_id").Element("Item").Attribute("id");

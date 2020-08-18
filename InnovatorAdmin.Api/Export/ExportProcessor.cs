@@ -2086,7 +2086,7 @@ namespace InnovatorAdmin
 
         if (parents.Count > 0 && itemDict.TryGetValue(ItemReference.FromFullItem(parents.Last(), false), out itemRefOpts))
         {
-          levels = Math.Min(itemRefOpts.Levels, 1);
+          levels = Math.Max(itemRefOpts.Levels, 1);
         }
 
         var parentCount = parents.Count;
