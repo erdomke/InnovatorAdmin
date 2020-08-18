@@ -33,7 +33,7 @@
       this.btnClose = new InnovatorAdmin.Controls.FlatButton();
       this.connectionEditor = new InnovatorAdmin.ConnectionEditor();
       this.btnOk = new InnovatorAdmin.Controls.FlatButton();
-      this.lblTitle = new System.Windows.Forms.Label();
+      this.lblTitle = new InnovatorAdmin.Controls.NoCopyLabel();
       this.pnlTopLeft = new System.Windows.Forms.Panel();
       this.pnlTop = new System.Windows.Forms.Panel();
       this.pnlLeft = new System.Windows.Forms.Panel();
