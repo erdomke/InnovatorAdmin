@@ -145,6 +145,7 @@
       this.conTable = new System.Windows.Forms.ContextMenuStrip(this.components);
       this.mniColumns = new System.Windows.Forms.ToolStripMenuItem();
       this.mniSaveTableEdits = new System.Windows.Forms.ToolStripMenuItem();
+      this.mniSaveTableToFile = new System.Windows.Forms.ToolStripMenuItem();
       this.mniScriptEdits = new System.Windows.Forms.ToolStripMenuItem();
       this.mniTableEditsToClipboard = new System.Windows.Forms.ToolStripMenuItem();
       this.mniTableEditsToFile = new System.Windows.Forms.ToolStripMenuItem();
@@ -1383,7 +1384,8 @@
       this.conTable.ImageScalingSize = new System.Drawing.Size(32, 32);
       this.conTable.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mniColumns,
-            this.mniSaveTableEdits,
+			this.mniSaveTableEdits,
+			this.mniSaveTableToFile,
             this.mniScriptEdits,
             this.mniTableCopyActions,
             this.mniResetChanges});
@@ -1428,6 +1430,14 @@
       this.mniTableEditsToFile.Size = new System.Drawing.Size(140, 22);
       this.mniTableEditsToFile.Text = "File...";
       this.mniTableEditsToFile.Click += new System.EventHandler(this.mniTableEditsToFile_Click);
+      
+      //
+      // mniResultsToFile
+      //
+      this.mniSaveTableToFile.Name = "mniTableToFile_Click";
+      this.mniSaveTableToFile.Size = new System.Drawing.Size(140, 22);
+      this.mniSaveTableToFile.Text = "Save Table To File";
+      this.mniSaveTableToFile.Click += new System.EventHandler(this.mniTableToFile_Click);
       // 
       // mniTableEditsToQueryEditor
       // 
@@ -1807,6 +1817,7 @@
     private System.Windows.Forms.Panel pnlRightTop;
     private DropShadow pnlConnectionShadow;
     private System.Windows.Forms.ToolStripMenuItem mniSaveTableEdits;
+    private System.Windows.Forms.ToolStripMenuItem mniSaveTableToFile;
     private System.Windows.Forms.ToolStripMenuItem mniOpen;
     private System.Windows.Forms.ToolStripMenuItem mniSave;
     private System.Windows.Forms.Label lblClock;
