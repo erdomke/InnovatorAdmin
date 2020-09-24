@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace InnovatorAdmin
 {
   public class UiCommandManager
   {
-    private List<IUiCommand> _commands = new List<IUiCommand>();
-    private Form _form;
+    private List<UiCommand> _commands = new List<UiCommand>();
+    private readonly Form _form;
 
     public UiCommandManager(Form form)
     {
@@ -34,62 +32,16 @@ namespace InnovatorAdmin
       }
     }
 
-    public UiCommandManager Add<T>(ToolStripItem item, Func<KeyEventArgs, bool> keyFilter, Action<T> callback)
+    public UiCommandManager Add(UiCommand command)
     {
-      _commands.Add(new ToolStripCommand<T>(item, _form)
-      {
-        KeyFilter = keyFilter,
-        Callback = callback
-      });
+      _commands.Add(command);
       return this;
     }
 
-    private interface IUiCommand : IDisposable
+    public UiCommandManager Add<T>(ToolStripItem item, Func<KeyEventArgs, bool> keyFilter, Action<T> callback)
     {
-      Func<KeyEventArgs, bool> KeyFilter { get; }
-      void Execute();
-    }
-
-    private class ToolStripCommand<T> : IUiCommand
-    {
-      private ToolStripItem _item;
-      private Form _form;
-
-      public Func<KeyEventArgs, bool> KeyFilter { get; set; }
-      public Action<T> Callback { get; set; }
-
-      public ToolStripCommand(ToolStripItem item, Form form)
-      {
-        _item = item;
-        _form = form;
-        _item.Click += OnClick;
-      }
-
-      public void Execute()
-      {
-        var ctrl = _form.FindFocusedControl().ParentsAndSelf().OfType<T>().FirstOrDefault();
-        if (ctrl != null)
-        {
-          this.Callback.Invoke(ctrl);
-        }
-      }
-
-      private void OnClick(object sender, EventArgs e)
-      {
-        try
-        {
-          this.Execute();
-        }
-        catch (Exception ex)
-        {
-          Utils.HandleError(ex);
-        }
-      }
-
-      public void Dispose()
-      {
-        _item.Click -= OnClick;
-      }
+      _commands.Add(new UiCommand(item.Text, null).Bind(item, _form, keyFilter, callback));
+      return this;
     }
   }
 }

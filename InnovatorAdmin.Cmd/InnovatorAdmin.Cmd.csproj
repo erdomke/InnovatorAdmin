@@ -68,6 +68,7 @@
     <Compile Include="CommitSearch.cs" />
     <Compile Include="ConsoleTask.cs" />
     <Compile Include="ConvertCommand.cs" />
+    <Compile Include="DocumentationCommand.cs" />
     <Compile Include="ExportAllType.cs" />
     <Compile Include="ImportCommand.cs" />
     <Compile Include="PackageDiffCommand.cs" />

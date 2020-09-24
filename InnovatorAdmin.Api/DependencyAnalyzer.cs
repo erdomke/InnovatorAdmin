@@ -183,7 +183,7 @@ namespace InnovatorAdmin
         }
       }
       _dependencies.ExceptWith(_metadata.SystemIdentities);
-      _dependencies.ExceptWith(_metadata.CoreMethods);
+      _dependencies.ExceptWith(_metadata.Methods.Where(m => m.IsCore));
       _dependencies.ExceptWith(_metadata.ItemTypes.Where(i => i.IsCore).Select(i => i.Reference));
       _dependencies.ExceptWith(_dependencies.Where(d =>
       {

@@ -17,10 +17,12 @@ namespace InnovatorAdmin
     {
       _path = path;
 
-      _settings = new XmlWriterSettings();
-      _settings.OmitXmlDeclaration = true;
-      _settings.Indent = true;
-      _settings.IndentChars = "  ";
+      _settings = new XmlWriterSettings
+      {
+        OmitXmlDeclaration = true,
+        Indent = true,
+        IndentChars = "  "
+      };
     }
 
     public XmlDocument Read(out string title)
@@ -30,9 +32,7 @@ namespace InnovatorAdmin
       pkgDoc.Load(_path);
       string folderPath;
       var root = result.AppendChild(result.CreateElement("AML"));
-      XmlElement child;
-
-      var scripts = new List<InstallItem>();
+      
       title = null;
       foreach (var pkg in pkgDoc.DocumentElement.Elements("package"))
       {
@@ -41,17 +41,17 @@ namespace InnovatorAdmin
         if (folderPath == ".\\") folderPath = Utils.CleanFileName(title).Replace('.', '\\');
         foreach (var file in Directory.GetFiles(Path.Combine(Path.GetDirectoryName(_path), folderPath), "*.xml", SearchOption.AllDirectories))
         {
-          child = result.CreateElement("AML");
-          child.InnerXml = System.IO.File.ReadAllText(file);
-          foreach (var item in child.Element("AML").Elements("Item"))
+          using (var writer = root.CreateNavigator().AppendChild())
+          using (var reader = XmlReader.Create(file))
           {
-            root.AppendChild(item);
+            writer.WriteNode(reader, false);
           }
         }
       }
 
       return result;
     }
+
     public void Write(InstallScript script)
     {
       using (var xml = XmlTextWriter.Create(_path, _settings))
@@ -107,8 +107,6 @@ namespace InnovatorAdmin
         existingPaths.Add(newPath);
       }
     }
-
-
 
     private XmlWriter GetWriter(string path)
     {

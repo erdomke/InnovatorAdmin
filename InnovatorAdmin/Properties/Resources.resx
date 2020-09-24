@@ -437,9 +437,6 @@ where SOURCE_ID = '{0}')&lt;/source_id&gt;
   <data name="check32" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\icons\check32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Header" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\Header.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="login16" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\icons\login16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>

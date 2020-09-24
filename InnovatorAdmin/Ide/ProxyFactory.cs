@@ -55,8 +55,6 @@ namespace InnovatorAdmin
               });
           case ConnectionType.SqlServer:
             return Promises.Resolved<IEditorProxy>(new Editor.SqlEditorProxy(conn));
-          case ConnectionType.Sharepoint:
-            return new Editor.SharepointEditorProxy(conn).Initialize().ToPromise();
         }
         return Promises.Rejected<IEditorProxy>(new NotSupportedException("Unsupported connection type"));
       }

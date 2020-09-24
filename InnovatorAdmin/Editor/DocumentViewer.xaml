@@ -1,0 +1,83 @@
+﻿<UserControl x:Class="InnovatorAdmin.Editor.DocumentViewer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:InnovatorAdmin.Editor"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Grid.Column="0" BorderThickness="0 0 0 1" BorderBrush="LightGray">
+            <StackPanel Orientation="Horizontal">
+                <Button Name="BackButton" MinWidth="24" MinHeight="24" Background="Transparent" BorderThickness="0" Click="BackButton_Click" IsEnabled="False">
+                    <Rectangle Width="16" Height="16">
+                        <Rectangle.Fill>
+                            <DrawingBrush>
+                                <DrawingBrush.Drawing>
+                                    <DrawingGroup>
+                                        <DrawingGroup.Children>
+                                            <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
+                                            <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M15,8C15,11.866 11.866,15 8,15 4.134,15 1,11.866 1,8 1,4.134 4.134,1 8,1 11.866,1 15,4.134 15,8" />
+                                            <GeometryDrawing Brush="#FF00539C" Geometry="F1M4,8L7,5 9,5 7,7 12,7 12,9 7,9 9,11 7,11z M2,8C2,11.247 4.755,14 8,14 11.245,14 14,11.247 14,8 14,4.756 11.245,2 8,2 4.755,2 2,4.756 2,8" />
+                                            <GeometryDrawing Brush="#FFF0EFF1" Geometry="F1M4,8L7,5 9,5 7,7 12,7 12,9 7,9 9,11 7,11z" />
+                                        </DrawingGroup.Children>
+                                    </DrawingGroup>
+                                </DrawingBrush.Drawing>
+                            </DrawingBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Background" Value="Transparent" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Name="ForwardButton" MinWidth="24" MinHeight="24" Background="Transparent" BorderThickness="0" Click="ForwardButton_Click" IsEnabled="False">
+                    <Rectangle Width="16" Height="16">
+                        <Rectangle.Fill>
+                            <DrawingBrush>
+                                <DrawingBrush.Drawing>
+                                    <DrawingGroup>
+                                        <DrawingGroup.Children>
+                                            <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
+                                            <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M15,8C15,11.866 11.866,15 8,15 4.134,15 1,11.866 1,8 1,4.134 4.134,1 8,1 11.866,1 15,4.134 15,8" />
+                                            <GeometryDrawing Brush="#FF00539C" Geometry="F1M9,11L7,11 9,9 4,9 4,7 9,7 7,5 9,5 12,8z M8,2C4.755,2 2,4.756 2,8 2,11.247 4.755,14 8,14 11.245,14 14,11.247 14,8 14,4.756 11.245,2 8,2" />
+                                            <GeometryDrawing Brush="#FFF0EFF1" Geometry="F1M9,11L7,11 9,9 4,9 4,7 9,7 7,5 9,5 12,8z" />
+                                        </DrawingGroup.Children>
+                                    </DrawingGroup>
+                                </DrawingBrush.Drawing>
+                            </DrawingBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Background" Value="Transparent" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <StackPanel Orientation="Horizontal" Margin="12,0">
+                    <Button Name="CategoryButton" VerticalAlignment="Center" BorderThickness="0" Margin="6,0" MinHeight="24" Background="Transparent" Click="CategoryButton_Click">ItemType</Button>
+                    <TextBlock Text="›" VerticalAlignment="Center" />
+                    <Button Name="NameButton" VerticalAlignment="Center" BorderThickness="0" Margin="6,0" MinHeight="24" Background="Transparent" Click="NameButton_Click">ans_Data</Button>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        <FlowDocumentScrollViewer Name="flowViewer" Grid.Row="1" Grid.Column="0" />
+    </Grid>
+</UserControl>

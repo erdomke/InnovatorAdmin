@@ -17,7 +17,6 @@ namespace InnovatorAdmin
       = new Dictionary<string, ItemType>(StringComparer.OrdinalIgnoreCase);
     private Dictionary<string, ItemType> _itemTypesById;
     private Task<bool[]> _metadataComplete;
-    private IEnumerable<Method> _methods = Enumerable.Empty<Method>();
     private Dictionary<string, Sql> _sql;
     private Dictionary<string, ItemReference> _systemIdentities;
     private Dictionary<string, IEnumerable<ListValue>> _listValues
@@ -32,29 +31,19 @@ namespace InnovatorAdmin
     /// </summary>
     public IEnumerable<ItemReference> CoreMethods
     {
-      get { return _methods.Where(m => m.IsCore); }
+      get { return Methods.Where(m => m.IsCore); }
     }
     /// <summary>
     /// Enumerable of methods
     /// </summary>
-    public IEnumerable<Method> AllMethods
-    {
-      get { return _methods; }
-    }
+    public IEnumerable<Method> Methods { get; private set; } = Enumerable.Empty<Method>();
+
     /// <summary>
     /// Enumerable of all item types
     /// </summary>
     public IEnumerable<ItemType> ItemTypes
     {
       get { return _itemTypesByName.Values; }
-    }
-    
-    /// <summary>
-    /// Enumerable of all method names
-    /// </summary>
-    public IEnumerable<string> MethodNames
-    {
-      get { return _methods.Select(i => i.KeyedName); }
     }
 
     /// <summary>
@@ -64,10 +53,7 @@ namespace InnovatorAdmin
     /// <summary>
     /// Enumerable of all sequences
     /// </summary>
-    public IEnumerable<ItemReference> Sequences
-    {
-      get { return Sequences1; }
-    }
+    public IEnumerable<ItemReference> Sequences { get; private set; } = Enumerable.Empty<ItemReference>();
     /// <summary>
     /// Enumerable of all system identities
     /// </summary>
@@ -90,8 +76,6 @@ namespace InnovatorAdmin
     /// Dictionary of all ItemTypes linked from contentTypes
     /// </summary>
     public Dictionary<string, ItemReference> CmfLinkedTypes { get; private set; } = new Dictionary<string, ItemReference>();
-
-    public IEnumerable<ItemReference> Sequences1 { get; set; } = Enumerable.Empty<ItemReference>();
 
     /// <summary>
     /// Gets a reference to a system identity given the ID (if the ID matches a system identity;
@@ -166,7 +150,7 @@ namespace InnovatorAdmin
       if (_listValues.TryGetValue(id, out result))
         return Promises.Resolved(result);
 
-      return _conn.ApplyAsync("<Item type='List' action='get' id='@0' select='id'><Relationships><Item type='Value' action='get' select='label,value' /><Item type='Filter Value' action='get' select='label,value' /></Relationships></Item>"
+      return _conn.ApplyAsync("<Item type='List' action='get' id='@0' select='id,description,name,label'><Relationships><Item type='Value' action='get' select='label,value' /><Item type='Filter Value' action='get' select='label,value,filter' /></Relationships></Item>"
         , true, false, id)
         .Convert(r =>
         {
@@ -292,7 +276,7 @@ namespace InnovatorAdmin
 
     private async Task<bool> ReloadItemTypeMetadata()
     {
-      var itemTypes = _conn.ApplyAsync("<Item type='ItemType' action='get' select='is_versionable,is_dependent,implementation_type,core,name,label,description'></Item>", true, true).ToTask();
+      var itemTypes = _conn.ApplyAsync("<Item type='ItemType' action='get' select='is_versionable,is_dependent,is_relationship,implementation_type,core,name,label,description,maxrecords,default_page_size'></Item>", true, true).ToTask();
       var relTypes = _conn.ApplyAsync("<Item action='get' type='RelationshipType' related_expand='0' select='related_id,source_id,relationship_id,name,label' />", true, true).ToTask();
       var sortedProperties = _conn.ApplyAsync(@"<Item type='Property' action='get' select='source_id'>
   <order_by condition='is not null'></order_by>
@@ -324,7 +308,6 @@ namespace InnovatorAdmin
       r = await relTypes;
       ItemType relType;
       ItemType source;
-      ItemType related;
       foreach (var rel in r.Items())
       {
         if (rel.SourceId().Attribute("name").HasValue()
@@ -333,13 +316,9 @@ namespace InnovatorAdmin
           && _itemTypesByName.TryGetValue(rel.Property("relationship_id").Attribute("name").Value, out relType))
         {
           source.Relationships.Add(relType);
-          relType.Source = source;
+          relType.SourceTypeName = source.Name;
           relType.TabLabel = rel.Property("label").AsString(null);
-          if (rel.RelatedId().Attribute("name").HasValue()
-            && _itemTypesByName.TryGetValue(rel.RelatedId().Attribute("name").Value, out related))
-          {
-            relType.Related = related;
-          }
+          relType.RelatedTypeName = rel.RelatedId().Attribute("name").Value;
         }
       }
 
@@ -368,7 +347,7 @@ namespace InnovatorAdmin
 
     private async Task<bool> ReloadSecondaryMetadata()
     {
-      var methods = _conn.ApplyAsync("<Item type='Method' action='get' select='config_id,core,name,method_code,comments'></Item>", true, false).ToTask();
+      var methods = _conn.ApplyAsync("<Item type='Method' action='get' select='config_id,core,name,method_code,comments,execution_allowed_to'></Item>", true, false).ToTask();
       var sysIdents = _conn.ApplyAsync(@"<Item type='Identity' action='get' select='id,name'>
                                       <name condition='in'>'World', 'Creator', 'Owner', 'Manager', 'Innovator Admin', 'Super User'</name>
                                     </Item>", true, true).ToTask();
@@ -416,8 +395,12 @@ namespace InnovatorAdmin
     </Item>
   </related_id>
 </Item>", true, false).ToTask();
+      var serverEvents = _conn.ApplyAsync(@"<Item type='Server Event' action='get' related_expand='0' select='source_id,server_event,related_id,sort_order'>
+</Item>", true, false).ToTask();
+      var morphae = _conn.ApplyAsync(@"<Item type='Morphae' action='get' related_expand='0' select='source_id,related_id'>
+</Item>", true, false).ToTask();
 
-      _methods = (await methods).Items().Select(i => new Method(i)).ToList();
+      Methods = (await methods).Items().Select(i => new Method(i)).ToList();
 
       _systemIdentities = (await sysIdents).Items()
         .Select(i =>
@@ -438,10 +421,9 @@ namespace InnovatorAdmin
         }).ToDictionary(i => i.KeyedName.ToLowerInvariant(), StringComparer.OrdinalIgnoreCase);
 
       var r = (await customProps);
-      IReadOnlyItem itemType;
       foreach (var customProp in r.Items())
       {
-        itemType = customProp.SourceItem();
+        var itemType = customProp.SourceItem();
         _customProps[new ItemProperty()
         {
           ItemType = itemType.Property("name").Value,
@@ -461,7 +443,7 @@ namespace InnovatorAdmin
           KeyedName = i.DataSource().KeyedName().Value
         }).ToArray();
 
-      Sequences1 = (await sequences).Items().Select(i => ItemReference.FromFullItem(i, true)).ToArray();
+      Sequences = (await sequences).Items().Select(i => ItemReference.FromFullItem(i, true)).ToArray();
 
       try
       {
@@ -494,6 +476,22 @@ namespace InnovatorAdmin
         //TODO: Do something
       }
 
+      foreach (var serverEvent in (await serverEvents).Items())
+      {
+        var ev = new ServerEvent(serverEvent);
+        if (_itemTypesById.TryGetValue(serverEvent.SourceId().Value, out var itemType))
+          itemType.ServerEvents.Add(ev);
+        var method = Methods.FirstOrDefault(m => m.Unique == ev.Method.Unique);
+        if (method != null)
+          method.IsServerEvent = true;
+      }
+
+      foreach (var poly in (await morphae).Items())
+      {
+        if (_itemTypesById.TryGetValue(poly.SourceId().Value, out var itemType))
+          itemType.Morphae.Add(poly.RelatedId().Attribute("name").Value ?? poly.RelatedId().KeyedName().Value);
+      }
+
       return true;
     }
 
@@ -507,7 +505,7 @@ namespace InnovatorAdmin
 
     public IPromise<IEnumerable<string>> GetClassPaths(ItemType itemType)
     {
-      if (_conn == null || itemType.ClassPaths != null)
+      if (_conn == null || itemType.ClassStructure != null)
         return Promises.Resolved(itemType.ClassPaths);
 
       return _conn.ApplyAsync("<AML><Item action=\"get\" type=\"ItemType\" id=\"@0\" select='class_structure'></Item></AML>"
@@ -517,57 +515,21 @@ namespace InnovatorAdmin
           var structure = r.AssertItem().Property("class_structure").Value;
           if (string.IsNullOrEmpty(structure))
           {
-            itemType.ClassPaths = Enumerable.Empty<string>();
+            itemType.ClassStructure = new ClassStructure("<class id='0' />");
           }
           else
           {
             try
             {
-              itemType.ClassPaths = ParseClassStructure(new System.IO.StringReader(structure)).ToArray();
+              itemType.ClassStructure = new ClassStructure(structure);
             }
             catch (XmlException)
             {
-              itemType.ClassPaths = Enumerable.Empty<string>();
+              itemType.ClassStructure = new ClassStructure("<class id='0' />");
             }
           }
           return itemType.ClassPaths;
         });
-    }
-
-    private IEnumerable<string> ParseClassStructure(System.IO.TextReader structure)
-    {
-      var path = new List<string>();
-      var returned = 0;
-
-      using (var reader = XmlReader.Create(structure))
-      {
-        while (reader.Read())
-        {
-          if (reader.NodeType == XmlNodeType.Element && reader.LocalName == "class")
-          {
-            if (reader.IsEmptyElement)
-            {
-              returned = path.Count;
-              yield return path.Concat(Enumerable.Repeat(reader.GetAttribute("name"), 1)).GroupConcat("/");
-            }
-            else
-            {
-              var name = reader.GetAttribute("name");
-              if (!string.IsNullOrEmpty(name))
-                path.Add(name);
-            }
-          }
-          else if (reader.NodeType == XmlNodeType.EndElement && reader.LocalName == "class")
-          {
-            if (returned < path.Count)
-              yield return path.GroupConcat("/");
-
-            if (path.Count > 0)
-              path.RemoveAt(path.Count - 1);
-            returned = path.Count;
-          }
-        }
-      }
     }
 
     /// <summary>
@@ -588,7 +550,7 @@ namespace InnovatorAdmin
   <Item action='get' type='ItemType' select='name'>
     <name>@0</name>
     <Relationships>
-      <Item action='get' type='Property' select='name,label,data_type,data_source,stored_length,prec,scale,foreign_property(name,source_id),is_hidden,is_hidden2,sort_order,default_value,column_width,is_required,readonly,help_text,help_tooltip' />
+      <Item action='get' type='Property' select='name,label,data_type,data_source,stored_length,prec,scale,foreign_property(name,source_id),is_hidden,is_hidden2,sort_order,default_value,column_width,is_required,readonly,help_text,help_tooltip,class_path,keyed_name_order,default_search,pattern,order_by' />
       {xPropQuery}
     </Relationships>
   </Item>

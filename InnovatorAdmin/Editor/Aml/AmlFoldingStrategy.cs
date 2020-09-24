@@ -164,8 +164,10 @@ namespace InnovatorAdmin.Editor
       {
         if (document.IndexOf('<', 0, document.TextLength) < 0)
           return Enumerable.Empty<NewFolding>();
-        var reader = new XmlTextReader(document.CreateReader());
-        reader.XmlResolver = null; // don't resolve DTDs
+        var reader = new XmlTextReader(document.CreateReader())
+        {
+          XmlResolver = null // don't resolve DTDs
+        };
         return CreateNewFoldings(document, reader, out firstErrorOffset);
       }
       catch (XmlException)

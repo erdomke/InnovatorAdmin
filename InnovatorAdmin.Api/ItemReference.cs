@@ -68,6 +68,7 @@ namespace InnovatorAdmin
       FillItemRef(result, elem, getKeyedName);
       return result;
     }
+
     internal static void FillItemRef(ItemReference result, IReadOnlyItem elem, bool getKeyedName)
     {
       result.Type = elem.Type().Value;

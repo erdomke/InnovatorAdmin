@@ -231,13 +231,14 @@ namespace InnovatorAdmin.Editor
             AutoRun = true,
             PreferredOutput = OutputType.Table
           };
-          if (item.Property("related_id") != null && itemType.Related != null)
+          if (item.Property("related_id") != null && !string.IsNullOrEmpty(itemType.RelatedTypeName))
           {
+            var related = metadata.ItemTypeByName(itemType.RelatedTypeName);
             yield return new EditorScript()
             {
-              Name = "View \"" + (itemType.Related.Label ?? itemType.Related.Name) + "\"",
+              Name = "View \"" + (related.Label ?? related.Name) + "\"",
               Action = "ApplyItem",
-              Script = string.Format("<Item type='{0}' id='{1}' action='get' levels='1'></Item>", itemType.Related.Name, item.Property("related_id")),
+              Script = string.Format("<Item type='{0}' id='{1}' action='get' levels='1'></Item>", related.Name, item.Property("related_id")),
               AutoRun = true,
               PreferredOutput = OutputType.Table
             };

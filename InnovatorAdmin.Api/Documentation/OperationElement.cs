@@ -5,53 +5,67 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace InnovatorAdmin
+namespace InnovatorAdmin.Documentation
 {
   [DebuggerDisplay("{Name,nq}")]
-  public class AmlDocumentation
+  public class OperationElement
   {
-    private List<AmlDocumentation> _attributes;
-    private List<AmlDocumentation> _elements;
+    private List<OperationElement> _attributes;
+    private List<OperationElement> _elements;
     private List<AmlTypeDefinition> _valueTypes;
 
+    public string OriginalXPath { get; set; }
     public string Name { get; set; }
-    public string Summary { get; set; }
+    public List<IElement> Summary { get; }
+    public List<IElement> Documentation { get; } = new List<IElement>();
 
-    public IEnumerable<AmlDocumentation> Attributes { get { return _attributes ?? Enumerable.Empty<AmlDocumentation>(); } }
-    public IEnumerable<AmlDocumentation> Elements { get { return _elements ?? Enumerable.Empty<AmlDocumentation>(); } }
+    public IEnumerable<OperationElement> Attributes { get { return _attributes ?? Enumerable.Empty<OperationElement>(); } }
+    public IEnumerable<OperationElement> Elements { get { return _elements ?? Enumerable.Empty<OperationElement>(); } }
     public IEnumerable<AmlTypeDefinition> ValueTypes { get { return _valueTypes ?? Enumerable.Empty<AmlTypeDefinition>(); } }
 
-    private AmlDocumentation() { }
+    private OperationElement()
+    {
+      Summary = new List<IElement>();
+    }
 
-    public AmlDocumentation(string name)
+    public OperationElement(string name) : this()
     {
       Name = name;
     }
 
-    public AmlDocumentation(string name, string summary)
+    public OperationElement(string name, string summary)
     {
       Name = name;
-      Summary = summary;
+      Summary = new List<IElement>() { new TextRun(summary) };
     }
 
-    public AmlDocumentation(string name, string summary, AmlDataType dataType, params string[] values) : this(name, summary)
+    public OperationElement(string name, string summary, AmlDataType dataType, params string[] values) : this(name, summary)
     {
       _valueTypes = new List<AmlTypeDefinition>() { AmlTypeDefinition.FromDefinition(dataType, values) };
     }
 
-    
-
-    public AmlDocumentation GetOrAddAttribute(string name)
+    public IEnumerable<OperationElement> DescendantDoc()
     {
-      _attributes = _attributes ?? new List<AmlDocumentation>();
+      foreach (var attribute in Attributes)
+        yield return attribute;
+      foreach (var element in Elements)
+      {
+        yield return element;
+        foreach (var child in element.DescendantDoc())
+          yield return child;
+      }
+    }
+
+    public OperationElement GetOrAddAttribute(string name)
+    {
+      _attributes = _attributes ?? new List<OperationElement>();
       var attr = _attributes.FirstOrDefault(d => d.Name == name);
       if (attr == null)
       {
-        attr = new AmlDocumentation()
+        attr = new OperationElement()
         {
           Name = name
         };
@@ -60,13 +74,13 @@ namespace InnovatorAdmin
       return attr;
     }
 
-    public AmlDocumentation GetOrAddElement(string name)
+    public OperationElement GetOrAddElement(string name)
     {
-      _elements = _elements ?? new List<AmlDocumentation>();
+      _elements = _elements ?? new List<OperationElement>();
       var element = _elements.FirstOrDefault(d => d.Name == name);
       if (element == null)
       {
-        element = new AmlDocumentation()
+        element = new OperationElement()
         {
           Name = name
         };
@@ -75,24 +89,24 @@ namespace InnovatorAdmin
       return element;
     }
 
-    public AmlDocumentation WithAttributes(IEnumerable<AmlDocumentation> attributes)
+    public OperationElement WithAttributes(IEnumerable<OperationElement> attributes)
     {
-      _attributes = _attributes ?? new List<AmlDocumentation>();
+      _attributes = _attributes ?? new List<OperationElement>();
       _attributes.AddRange(attributes.Where(a => !_attributes.Any(e => e.Name == a.Name)).ToList());
       return this;
     }
 
-    public AmlDocumentation WithAttribute(string name, string summary, AmlDataType dataType, params string[] values)
+    public OperationElement WithAttribute(string name, string summary, AmlDataType dataType, params string[] values)
     {
       var attr = GetOrAddAttribute(name);
-      attr.Summary = summary;
+      attr.Summary.Add(new TextRun(summary));
       attr._valueTypes = new List<AmlTypeDefinition>() { AmlTypeDefinition.FromDefinition(dataType, values) };
       return this;
     }
 
-    public AmlDocumentation WithElements(params AmlDocumentation[] elements)
+    public OperationElement WithElements(params OperationElement[] elements)
     {
-      _elements = _elements ?? new List<AmlDocumentation>();
+      _elements = _elements ?? new List<OperationElement>();
       _elements.AddRange(elements);
       return this;
     }
@@ -104,9 +118,9 @@ namespace InnovatorAdmin
       Vb
     }
 
-    public static AmlDocumentation Parse(string methodName, string methodCode)
+    public static OperationElement Parse(string methodName, string methodCode)
     {
-      var method = new AmlDocumentation
+      var method = new OperationElement
       {
         Name = methodName
       };
@@ -162,9 +176,9 @@ namespace InnovatorAdmin
       }
 
       var builder = new StringBuilder();
-      foreach (var elem in elements.Where(e => e.Name.LocalName == "summary"))
-        BuildDocString(elem, builder);
-      method.Summary = builder.ToString().Trim();
+      method.Summary.AddRange(elements
+        .Where(e => e.Name.LocalName == "summary")
+        .SelectMany(e => ParseDoc(e.Nodes())));
 
       foreach (var elem in elements.Where(e => e.Name.LocalName == "param"))
       {
@@ -175,7 +189,7 @@ namespace InnovatorAdmin
         }
         catch (Exception) { }
 
-        var stack = new Stack<AmlDocumentation>();
+        var stack = new Stack<OperationElement>();
         stack.Push(method);
         var idx = 0;
 
@@ -218,7 +232,8 @@ namespace InnovatorAdmin
           idx++;
         }
 
-        stack.Peek().Summary = BuildDocString(elem);
+        stack.Peek().OriginalXPath = (string)elem.Attribute("name");
+        stack.Peek().Summary.AddRange(ParseDoc(elem.Nodes().Where(n => !(n is XElement e && e.Name.LocalName == "datatype"))));
         foreach (var dataType in elem.Elements("datatype")
           .Where(e => !string.IsNullOrEmpty((string)e.Attribute("type"))))
         {
@@ -242,62 +257,92 @@ namespace InnovatorAdmin
         }
       }
 
+      method.Documentation.AddRange(ParseDoc(elements
+        .Where(e => e.Name.LocalName != "summary" && e.Name.LocalName != "param")));
       return method;
     }
 
-    private static string BuildDocString(XElement element)
+    private static bool IsWhitespace(XNode node)
     {
-      var builder = new StringBuilder();
-      BuildDocString(element, builder);
-      return builder.ToString().Trim();
+      return string.IsNullOrWhiteSpace((node as XText)?.Value ?? (node as XCData)?.Value ?? "*");
     }
 
-    private static void BuildDocString(XElement element, StringBuilder builder)
+    internal static IEnumerable<IElement> ParseDoc(IEnumerable<XNode> nodes)
     {
-      foreach (var node in element.Nodes())
+      var list = nodes
+        .Where(n => !IsWhitespace(n))
+        .ToList();
+      for (var i = 0; i < list.Count; i++)
       {
-        if (node is XText text)
+        var node = list[i];
+        if (node.NodeType == XmlNodeType.Text || node.NodeType == XmlNodeType.CDATA)
         {
-          builder.Append(Regex.Replace(text.Value, @"\s+", " "));
-        }
-        else if (node is XCData cData)
-        {
-          builder.Append(Regex.Replace(cData.Value, @"\s+", " "));
+          var text = (node as XText)?.Value ?? (node as XCData)?.Value ?? "";
+          if (i == 0)
+            text = text.TrimStart();
+          if (i == list.Count - 1)
+            text = text.TrimEnd();
+
+          yield return new TextRun(Regex.Replace(text, @"\s+", " "));
         }
         else if (node is XElement child)
         {
           switch (child.Name.LocalName)
           {
-            case "datatype":
-              break;
             case "para":
-              if (builder.Length > 0)
-                builder.Append("\r\n\r\n");
-              BuildDocString(child, builder);
+              yield return new Paragraph(ParseDoc(child.Nodes()));
               break;
-            case "see":
-              var cref = (string)child.Attribute("cref");
-              if (!string.IsNullOrEmpty(cref))
-                builder.Append(cref.Split('.').Last());
+            case "c":
+            case "b":
+            case "strong":
+            case "em":
+            case "i":
+              yield return GetRun(child, RunStyle.Default);
+              break;
+            case "a":
+              yield return new Hyperlink((string)child.Attribute("href"), ParseDoc(child.Nodes()));
+              break;
+            case "example":
+              yield return new Section("Example", ParseDoc(child.Nodes()));
+              break;
+            case "remarks":
+              yield return new Section("Remarks", ParseDoc(child.Nodes()));
+              break;
+            case "exception":
+              yield return new Section("Exception", ParseDoc(child.Nodes()));
               break;
             case "list":
-              foreach (var item in child.Elements("item"))
-              {
-                if (builder.Length > 0)
-                  builder.Append("\r\n");
-                builder.Append("- ");
-                builder.Append(string.Join(": ", new[] {
-                  (string)item.Element("term"),
-                  (string)item.Element("description")
-                }.Where(v => !string.IsNullOrEmpty(v))));
-              }
+              yield return List.Parse(child);
               break;
-            default:
-              BuildDocString(child, builder);
+            case "see":
+              var parts = ((string)child.Attribute("cref") ?? "").Split('.');
+              yield return new DocLink() { Type = parts[0], Name = parts.Last() };
+              break;
+            case "code":
+              yield return new CodeBlock() { Code = (string)child, Language = (string)child.Attribute("lang") };
               break;
           }
         }
       }
+    }
+
+    private static TextRun GetRun(XNode node, RunStyle style)
+    {
+      var elem = node as XElement;
+
+      switch (elem?.Name.LocalName ?? "")
+      {
+        case "c":
+          return GetRun(elem.Nodes().FirstOrDefault(), style | RunStyle.Code);
+        case "b":
+        case "strong":
+          return GetRun(elem.Nodes().FirstOrDefault(), style | RunStyle.Bold);
+        case "em":
+        case "i":
+          return GetRun(elem.Nodes().FirstOrDefault(), style | RunStyle.Italic);
+      }
+
+      return new TextRun((node as XText)?.Value ?? (node as XCData)?.Value, style);
     }
   }
 }
