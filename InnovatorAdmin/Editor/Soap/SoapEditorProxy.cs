@@ -160,14 +160,15 @@ namespace InnovatorAdmin.Editor
       {
         char[] writeNodeBuffer = null;
 
-        var settings = new XmlWriterSettings();
-        settings.OmitXmlDeclaration = true;
-        settings.Indent = true;
-        settings.IndentChars = "  ";
-        settings.CheckCharacters = true;
 
         using (var reader = XmlReader.Create(xmlContent))
-        using (var xmlWriter = XmlWriter.Create(writer, settings))
+        using (var xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings
+        {
+          OmitXmlDeclaration = true,
+          Indent = true,
+          IndentChars = "  ",
+          CheckCharacters = true
+        }))
         {
           bool canReadValueChunk = reader.CanReadValueChunk;
           while (reader.Read())

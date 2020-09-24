@@ -1,9 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
+﻿using InnovatorAdmin.Documentation;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Tests
 {
@@ -13,7 +10,7 @@ namespace InnovatorAdmin.Tests
     [TestMethod]
     public void ParseMethod()
     {
-      var doc = AmlDocumentation.Parse("TestMethod", @"/// <summary>Create a new version of a <see cref=""itemtype.Part""/> item</summary>
+      var doc = OperationElement.Parse("TestMethod", @"/// <summary>Create a new version of a <see cref=""itemtype.Part""/> item</summary>
 /// <param name=""@snapshot""><datatype path=""@snapshot"" type=""boolean"" />If <c>1</c>, create a minor 
 /// revision if the current version is not released. Otherwise, follow the standard 
 /// logic of the <c>version</c> action</param>
@@ -48,7 +45,7 @@ using (new Escalate(arasPlmIdent))
     [TestMethod]
     public void ParseComplexRelationships()
     {
-      var doc = AmlDocumentation.Parse("TestMethod", @"/// <summary>Create a new version of a <see cref=""itemtype.Part""/> item</summary>
+      var doc = OperationElement.Parse("TestMethod", @"/// <summary>Create a new version of a <see cref=""itemtype.Part""/> item</summary>
 /// <param name=""Relationships/Item[@type='File' or @type='Folder'][@url][@id][filename][directoryname][content[@encoding='text' or @encoding='base64']][url]"">
 ///   The files/folders to version
 /// </param>

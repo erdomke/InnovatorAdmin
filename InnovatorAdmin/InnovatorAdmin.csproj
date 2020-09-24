@@ -267,13 +267,20 @@
     <Compile Include="Dialog\SettingsDialog.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Editor\Aml\BaseWpfDocumentationVisitor.cs" />
     <Compile Include="Editor\Aml\EditorItemData.cs" />
     <Compile Include="Editor\Aml\ScriptMenuGenerator.cs" />
     <Compile Include="Editor\Aml\Tooltips.cs" />
+    <Compile Include="Editor\Aml\DocumentationViewVisitor.cs" />
+    <Compile Include="Editor\Aml\TooltipElementVisitor.cs" />
     <Compile Include="Editor\CompletionData\CompletionList.cs" />
     <Compile Include="Editor\CompletionData\CompletionListBox.cs" />
     <Compile Include="Editor\CompletionData\CompletionWindow.cs" />
+    <Compile Include="Editor\DocumentViewer.xaml.cs">
+      <DependentUpon>DocumentViewer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Ide\OutputModelClasses.cs" />
+    <Compile Include="Ide\UiCommand.cs" />
     <Compile Include="PropertyFilter.cs" />
     <Compile Include="Dialog\ConfigDialog.cs">
       <SubType>Form</SubType>
@@ -336,7 +343,6 @@
     <Compile Include="Editor\SearchStrategy\SearchResult.cs" />
     <Compile Include="Editor\SearchStrategy\StringHelper.cs" />
     <Compile Include="Editor\SearchStrategy\XPathSearchStrategy.cs" />
-    <Compile Include="Editor\Sharepoint\SharepointEditorProxy.cs" />
     <Compile Include="Editor\Soap\Facets.cs" />
     <Compile Include="Editor\Soap\Generator.cs" />
     <Compile Include="Editor\Soap\InstanceAttribute.cs" />
@@ -529,11 +535,6 @@
       <DependentUpon>Messages.resx</DependentUpon>
     </Compile>
     <Compile Include="Release.cs" />
-    <Compile Include="resources\TreeImages.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>TreeImages.resx</DependentUpon>
-    </Compile>
     <Compile Include="Scripts\FastObjectFactory.cs" />
     <Compile Include="Scripts\GenerateCtClass.cs" />
     <Compile Include="Scripts\ReplaceItem.cs" />
@@ -696,10 +697,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Messages.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="resources\TreeImages.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>TreeImages.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
     <EmbeddedResource Include="Scripts\ScriptWindow.resx">
       <DependentUpon>ScriptWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -772,9 +769,6 @@
     <None Include="resources\icons\arrowRightSimpleBlack16.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="resources\Header.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="resources\icons\packageDefinition.png" />
   </ItemGroup>
   <ItemGroup>
@@ -809,6 +803,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Editor\CompletionData\CompletionList.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Editor\DocumentViewer.xaml">
+      <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Editor\EditorWpf.xaml">
@@ -867,7 +865,6 @@
   <ItemGroup>
     <None Include="resources\icons\tree\field-16.png" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

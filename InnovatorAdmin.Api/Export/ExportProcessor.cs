@@ -2091,7 +2091,9 @@ namespace InnovatorAdmin
 
         var parentCount = parents.Count;
         if (parentCount < 1) parentCount = 1;
-        if (parentCount >= levels && _metadata.ItemTypeByName(elem.Element("Item").Attribute("type").ToLowerInvariant(), out itemType) && !itemType.IsDependent)
+        if (_metadata.ItemTypeByName(elem.Element("Item").Attribute("type").ToLowerInvariant(), out itemType)
+          && !itemType.IsDependent
+          && (parentCount >= levels || string.Equals(itemType.Name, "Method", StringComparison.OrdinalIgnoreCase)))
         {
           if (itemType.IsVersionable && elem.Parent().Element("behavior", "").IndexOf("float") >= 0)
           {

@@ -166,7 +166,7 @@ namespace InnovatorAdmin.Editor
       }
 
       _helper = new Editor.AmlEditorHelper();
-      _version = Connection.FetchVersion(false).Wait();
+      _version = Connection.FetchVersion(false).Wait() ?? new Version(12, 0);
       _actions = GetActions(_version.Major).OrderBy(a => a).ToArray();
     }
 
@@ -699,17 +699,16 @@ namespace InnovatorAdmin.Editor
         var elemIds = new List<string>();
         string value;
 
-        var settings = new XmlWriterSettings()
+        var types = new HashSet<string>();
+
+        using (var xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings()
         {
           OmitXmlDeclaration = true,
           Indent = true,
           IndentChars = "  ",
           CheckCharacters = true,
           ConformanceLevel = ConformanceLevel.Fragment
-        };
-        var types = new HashSet<string>();
-
-        using (var xmlWriter = XmlWriter.Create(writer, settings))
+        }))
         {
           bool canReadValueChunk = reader.CanReadValueChunk;
           while (reader.Read())
@@ -763,7 +762,8 @@ namespace InnovatorAdmin.Editor
                   || elemIds.EndsWith("qry_QueryReference", "filter_xml")
                   || elemIds.EndsWith("qry_QueryItem", "filter_xml")
                   || elemIds.EndsWith("mp_MacCondition", "condition_xml")
-                  || elemIds.EndsWith("tp_Block", "content");
+                  || elemIds.EndsWith("tp_Block", "content")
+                  || elemIds.EndsWith("Fault", "faultstring");
                 var useCData = elemIds.EndsWith("EMail Message", "body_html")
                   || elemIds.EndsWith("EMail Message", "body_plain")
                   || elemIds.EndsWith("Method", "method_code")
@@ -772,28 +772,7 @@ namespace InnovatorAdmin.Editor
 
                 if (formatXml)
                 {
-                  try
-                  {
-                    var w = new StringWriter();
-                    using (var r = XmlReader.Create(textReader, new XmlReaderSettings()
-                    {
-                      ConformanceLevel = ConformanceLevel.Fragment
-                    }))
-                    using (var xml = XmlWriter.Create(w, settings))
-                    {
-                      xml.WriteNode(r, false);
-                      xml.Flush();
-                      w.Flush();
-                    }
-                    xmlWriter.WriteCData(w.ToString());
-                  }
-                  catch (XmlException)
-                  {
-                    var textValue = reader.Value;
-                    if (string.IsNullOrEmpty(textValue))
-                      textValue = (textReader as XmlValueReader)?.ReadBufferToEnd();
-                    xmlWriter.WriteCData(textValue);
-                  }
+                  xmlWriter.WriteCData(FormatXml(reader, textReader));
                 }
                 else if (useCData)
                 {
@@ -819,7 +798,17 @@ namespace InnovatorAdmin.Editor
                 }
                 break;
               case XmlNodeType.CDATA:
-                xmlWriter.WriteCData(reader.Value);
+                if (elemIds.EndsWith("Fault", "faultstring"))
+                {
+                  var txtReader = canReadValueChunk
+                    ? (TextReader)new XmlValueReader(reader)
+                    : new StringReader(reader.Value);
+                  xmlWriter.WriteCData(FormatXml(reader, txtReader));
+                }
+                else
+                {
+                  xmlWriter.WriteCData(reader.Value);
+                }
                 break;
               case XmlNodeType.EntityReference:
                 xmlWriter.WriteEntityRef(reader.Name);
@@ -860,6 +849,39 @@ namespace InnovatorAdmin.Editor
           {
             _title = _count + " Item(s)";
           }
+        }
+      }
+
+      private string FormatXml(XmlReader reader, TextReader textReader)
+      {
+        try
+        {
+          var w = new StringWriter();
+          using (var r = XmlReader.Create(textReader, new XmlReaderSettings()
+          {
+            ConformanceLevel = ConformanceLevel.Fragment
+          }))
+          using (var xml = XmlWriter.Create(w, new XmlWriterSettings()
+          {
+            OmitXmlDeclaration = true,
+            Indent = true,
+            IndentChars = "  ",
+            CheckCharacters = true,
+            ConformanceLevel = ConformanceLevel.Fragment
+          }))
+          {
+            xml.WriteNode(r, false);
+            xml.Flush();
+            w.Flush();
+          }
+          return w.ToString();
+        }
+        catch (XmlException)
+        {
+          var textValue = reader.Value;
+          if (string.IsNullOrEmpty(textValue))
+            textValue = (textReader as XmlValueReader)?.ReadBufferToEnd();
+          return textValue;
         }
       }
 
@@ -1092,7 +1114,7 @@ namespace InnovatorAdmin.Editor
               HasChildren = p.Type == PropertyType.item && p.Restrictions.Any()
                 && p.Name != "id" && p.Name != "config_id",
               ChildGetter = () => ItemTypeChildren(ArasMetadataProvider.Cached(Connection).ItemTypeByName(p.Restrictions.First()).Id),
-              Description = GetPropertyDescription(p)
+              Description = $"Property {p.Name}: {p.TypeDisplay()}"
             })
             .OrderBy(n => n.Name)
         }
@@ -1119,7 +1141,7 @@ namespace InnovatorAdmin.Editor
       return new EditorTreeNode()
       {
         Name = itemType.Label ?? itemType.Name,
-        Image = Icons.Class16,
+        Image = Icons.ForItemType(itemType),
         Description = "ItemType: " + itemType.Name,
         HasChildren = true,
         Children = ItemTypeChildren(itemType.Id),
@@ -1299,28 +1321,6 @@ namespace InnovatorAdmin.Editor
       if (itemAdded != null)
         itemAdded(itemType.Name, alias);
       return alias;
-    }
-
-
-    private string GetPropertyDescription(Property prop)
-    {
-      var builder = new StringBuilder("Property ")
-        .Append(prop.Name)
-        .Append(": ")
-        .Append(prop.TypeName);
-      if (prop.Restrictions.Any())
-      {
-        builder.Append("[").Append(prop.Restrictions.First()).Append("]");
-      }
-      else if (prop.StoredLength > 0)
-      {
-        builder.Append("[").Append(prop.StoredLength).Append("]");
-      }
-      else if (prop.Precision > 0 || prop.Scale > 0)
-      {
-        builder.Append("[").Append(prop.Precision).Append(",").Append(prop.Scale).Append("]");
-      }
-      return builder.ToString();
     }
 
     #region "Scripts"

@@ -20,6 +20,7 @@ using System.Xml;
 using System.Text;
 using System.ComponentModel;
 using System.Net.Http;
+using System.Windows.Documents;
 
 namespace InnovatorAdmin
 {
@@ -45,6 +46,7 @@ namespace InnovatorAdmin
     private bool _updateCheckComplete = false;
     private HttpClient _webService = new HttpClient();
     private ConnectionType _oldConnType = ConnectionType.Innovator;
+    private DocumentViewer _docViewer = new DocumentViewer();
 
     public bool AllowRun
     {
@@ -115,10 +117,6 @@ namespace InnovatorAdmin
       InitializeDpi();
 
       menuStrip.Renderer = new SimpleToolstripRenderer() { BaseColor = Color.White };
-      lblConnection.Font = FontAwesome.Font;
-      lblConnection.Text = FontAwesome.Fa_cloud.ToString();
-      lblSoapAction.Font = FontAwesome.Font;
-      lblSoapAction.Text = FontAwesome.Fa_bolt.ToString();
       picLogo.Image = Properties.Resources.logo_black;
       btnPanelToggle.BackColor = Color.White;
       picLogo.MouseDown += SystemLabel_MouseDown;
@@ -134,7 +132,6 @@ namespace InnovatorAdmin
       tbcOutputView.TabsVisible = false;
 
       btnSoapAction.Visible = false;
-      lblSoapAction.Visible = false;
       exploreButton.Visible = false;
       btnSubmit.Visible = false;
 
@@ -197,8 +194,27 @@ namespace InnovatorAdmin
       _commands = new UiCommandManager(this);
       inputEditor.KeyDown += _commands.OnKeyDown;
       outputEditor.KeyDown += _commands.OnKeyDown;
-      _commands.Add<Control>(btnEditConnections, e => e.KeyCode == Keys.Q && e.Modifiers == Keys.Control, ChangeConnection);
-      _commands.Add<Control>(btnSoapAction, e => e.KeyCode == Keys.M && e.Modifiers == Keys.Control, ChangeSoapAction);
+      _commands.Add(new UiCommand("Not Connected ▼", null)
+        .WithIcon(new IconInfo("change-connection", @"<DrawingGroup xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'>
+  <DrawingGroup.Children>
+    <GeometryDrawing Brush='#00FFFFFF' Geometry='F1M16,16L0,16 0,0 16,0z' />
+    <GeometryDrawing Brush='#FFF6F6F6' Geometry='F1M11,11.7744C13.018,10.7234 14.352,8.6274 14.352,6.2554 14.352,6.2034 14.349,6.1514 14.343,6.0434 14.229,2.6574 11.486,0.00539999999999985 8.102,0.00539999999999985 4.656,0.00539999999999985 1.852,2.8094 1.852,6.2554 1.852,6.4394 1.862,6.6204 1.878,6.7954 1.892,6.9554 1.915,7.1124 1.943,7.2844 2.256,9.1724 3.395,10.7584 5,11.6684L5,12.0004 3,12.0004 3,15.0004 6,15.0004 6,16.0004 10,16.0004 10,15.0004 13,15.0004 13,12.0004 11,12.0004z' />
+    <GeometryDrawing Brush='#FF414141' Geometry='F1M8.0981,8.1382C8.1991,8.1402 8.2991,8.1402 8.4001,8.1402 8.6611,8.1402 8.9241,8.1322 9.1891,8.1192 8.9611,8.8632 8.6211,9.6782 8.1761,10.5642 8.1511,10.5642 8.1271,10.5682 8.1021,10.5682 7.9751,10.5682 7.8481,10.5602 7.7241,10.5492 7.3471,9.7112 7.0581,8.8802 6.8781,8.0702 7.2711,8.1092 7.6781,8.1342 8.0981,8.1382 M3.9671,7.4742C4.5651,7.6582 5.2501,7.8332 6.0251,7.9572 6.1791,8.7422 6.4311,9.5452 6.7611,10.3532 5.4181,9.9142 4.3681,8.8342 3.9671,7.4742 M3.7891,6.2552C3.7891,5.6412 3.9201,5.0582 4.1511,4.5292 4.6651,4.6802 5.2381,4.8242 5.8761,4.9322 5.8441,5.2372 5.8221,5.5482 5.8191,5.8762 5.8141,6.2772 5.8441,6.6882 5.8921,7.1032 5.0851,6.9562 4.3881,6.7552 3.8051,6.5582 3.7971,6.4572 3.7891,6.3572 3.7891,6.2552 M6.5391,2.2392C6.3231,2.7822 6.1231,3.4052 5.9911,4.1202 5.4721,4.0302 4.9971,3.9152 4.5641,3.7932 5.0491,3.0962 5.7371,2.5522 6.5391,2.2392 M6.6861,5.0482C7.1381,5.0992 7.6091,5.1332 8.0981,5.1382 8.1991,5.1392 8.2991,5.1402 8.4001,5.1402 8.7661,5.1402 9.1371,5.1282 9.5151,5.1002 9.5451,5.3542 9.5641,5.6132 9.5681,5.8852 9.5721,6.3182 9.5171,6.7862 9.4121,7.2862 8.9731,7.3182 8.5431,7.3242 8.1061,7.3212 7.6291,7.3162 7.1701,7.2812 6.7281,7.2292 6.6641,6.7722 6.6311,6.3222 6.6351,5.8842 6.6391,5.5952 6.6591,5.3182 6.6861,5.0482 M7.5531,1.9822C7.7331,1.9582 7.9151,1.9432 8.1021,1.9432 8.2261,1.9432 8.3471,1.9512 8.4681,1.9612 8.8191,2.5702 9.1761,3.3452 9.3831,4.2912 8.9551,4.3212 8.5341,4.3252 8.1061,4.3212 7.6571,4.3162 7.2211,4.2852 6.8021,4.2382 6.9771,3.3262 7.2661,2.5772 7.5531,1.9822 M11.6641,3.8252C11.1481,4.0022 10.6641,4.1252 10.2011,4.1972 10.0391,3.4242 9.7871,2.7582 9.5121,2.1842 10.3941,2.4892 11.1461,3.0692 11.6641,3.8252 M12.0661,4.5562C12.2891,5.0782 12.4141,5.6522 12.4141,6.2552 12.4141,6.3502 12.4061,6.4422 12.4001,6.5352 11.6211,6.8752 10.9221,7.0772 10.2651,7.1832 10.3481,6.7242 10.3901,6.2872 10.3851,5.8762 10.3831,5.5762 10.3591,5.2892 10.3281,5.0092 10.8731,4.9242 11.4491,4.7782 12.0661,4.5562 M9.1401,10.4372C9.5491,9.5762 9.8651,8.7762 10.0681,8.0412 10.7381,7.9552 11.4511,7.7842 12.2321,7.4912 11.7991,8.9432 10.6191,10.0702 9.1401,10.4372 M10.0001,12.0002L9.0001,12.0002 9.0001,11.4062C11.4681,10.9752 13.3511,8.8462 13.3511,6.2552 13.3511,6.1952 13.3441,6.1372 13.3441,6.0772 13.2481,3.2612 10.9411,1.0052 8.1021,1.0052 5.2021,1.0052 2.8521,3.3562 2.8521,6.2552 2.8521,6.4092 2.8611,6.5592 2.8741,6.7082 2.8861,6.8432 2.9061,6.9752 2.9271,7.1072 2.9281,7.1122 2.9281,7.1162 2.9291,7.1202 3.2821,9.2452 4.9101,10.9202 7.0001,11.3702L7.0001,12.0002 6.0001,12.0002 6.0001,13.0002 4.0001,13.0002 4.0001,14.0002 7.0001,14.0002 7.0001,15.0002 9.0001,15.0002 9.0001,14.0002 12.0001,14.0002 12.0001,13.0002 10.0001,13.0002z' />
+    <GeometryDrawing Brush='#FFF0EFF1' Geometry='F1M10.3281,5.0093C10.8731,4.9243 11.3861,4.7783 12.0021,4.5563 12.2241,5.0783 12.4021,5.6523 12.4021,6.2553 12.4021,6.3503 12.4081,6.4423 12.4021,6.5353 11.6231,6.8753 10.9221,7.0773 10.2651,7.1833 10.3481,6.7243 10.3911,6.2873 10.3851,5.8763 10.3831,5.5763 10.3591,5.2893 10.3281,5.0093' />
+    <GeometryDrawing Brush='#FFF0EFF1' Geometry='F1M11.6641,3.8252C11.1481,4.0022 10.6641,4.1252 10.2011,4.1972 10.0391,3.4242 9.7871,2.7582 9.5121,2.1842 10.3941,2.4892 11.1461,3.0692 11.6641,3.8252' />
+    <GeometryDrawing Brush='#FFF0EFF1' Geometry='F1M8.1021,10.5684C7.9751,10.5684 7.8481,10.5604 7.7241,10.5484 7.3471,9.7114 7.0581,8.8804 6.8781,8.0694 7.2711,8.1094 7.6781,8.1344 8.0981,8.1384 8.1991,8.1404 8.2991,8.1404 8.4001,8.1404 8.6611,8.1404 8.9241,8.1324 9.1891,8.1194 8.9611,8.8624 8.6221,9.6774 8.1761,10.5644 8.1511,10.5644 8.1271,10.5684 8.1021,10.5684' />
+    <GeometryDrawing Brush='#FFF0EFF1' Geometry='F1M8.1021,7.355C7.6251,7.35 7.1441,7.281 6.7021,7.229 6.6391,6.772 6.6311,6.322 6.6351,5.884 6.6391,5.595 6.6551,5.318 6.6821,5.048 7.1341,5.1 7.6091,5.15 8.0981,5.155 8.1991,5.157 8.2991,5.155 8.4001,5.155 8.7661,5.155 9.1371,5.128 9.5161,5.1 9.5451,5.354 9.5641,5.613 9.5681,5.885 9.5721,6.318 9.5181,6.787 9.4121,7.287 8.9731,7.318 8.5401,7.358 8.1021,7.355' />
+    <GeometryDrawing Brush='#FFF0EFF1' Geometry='F1M8.1021,1.9429C8.2261,1.9429 8.3471,1.9509 8.4681,1.9619 8.8191,2.5699 9.1751,3.3449 9.3821,4.2919 8.9541,4.3209 8.5301,4.3599 8.1021,4.3559 7.6531,4.3509 7.2211,4.3029 6.8021,4.2559 6.9771,3.3439 7.2661,2.5769 7.5531,1.9819 7.7331,1.9589 7.9151,1.9429 8.1021,1.9429' />
+    <GeometryDrawing Brush='#FFF0EFF1' Geometry='F1M6.5396,2.2393C6.3226,2.7813 6.1236,3.4053 5.9906,4.1203 5.4726,4.0303 4.9976,3.9153 4.5636,3.7933 5.0496,3.0963 5.7366,2.5523 6.5396,2.2393' />
+    <GeometryDrawing Brush='#FFF0EFF1' Geometry='F1M3.7896,6.2554C3.7896,5.6414 3.9206,5.0584 4.1506,4.5284 4.6656,4.6804 5.2376,4.8234 5.8766,4.9324 5.8446,5.2364 5.8216,5.5484 5.8186,5.8764 5.8136,6.2774 5.8446,6.6884 5.8926,7.1034 5.0856,6.9564 4.3886,6.7554 3.8056,6.5584 3.7976,6.4574 3.7896,6.3574 3.7896,6.2554' />
+    <GeometryDrawing Brush='#FFF0EFF1' Geometry='F1M4.002,7.4741C4.6,7.6581 5.228,7.8331 6.002,7.9571 6.156,8.7431 6.431,9.5451 6.761,10.3531 5.419,9.9141 4.402,8.8341 4.002,7.4741' />
+    <GeometryDrawing Brush='#FFF0EFF1' Geometry='F1M9.1016,10.4355C9.5116,9.5745 9.8686,8.7755 10.0726,8.0415 10.7426,7.9555 11.4516,7.7495 12.2326,7.4555 11.7986,8.9075 10.5816,10.0685 9.1016,10.4355' />
+  </DrawingGroup.Children>
+</DrawingGroup>"))
+        .Bind<Control>(btnEditConnections, this, e => e.KeyCode == Keys.Q && e.Modifiers == Keys.Control, ChangeConnection));
+      _commands.Add(new UiCommand("Action", null)
+        .WithIcon(Icons.Event16)
+        .Bind<Control>(btnSoapAction, this, e => e.KeyCode == Keys.M && e.Modifiers == Keys.Control, ChangeSoapAction));
       _commands.Add<Editor.FullEditor>(mniNewDocument, e => e.KeyCode == Keys.N && e.Modifiers == (Keys.Control), c =>
       {
         c.NewFile();
@@ -314,6 +330,92 @@ namespace InnovatorAdmin
       });
       _commands.Add<Control>(horizontalSplitToolStripMenuItem, null, c => splitViewHorizontally(true));
       _commands.Add<Control>(verticalSplitToolStripMenuItem, null, c => splitViewVertically(true));
+
+      var installCommand = new UiCommand("Install Package", "Import a package of metadata into an Innovator instance")
+        .WithIcon(new IconInfo("install-package", @"<DrawingGroup xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'>
+  <DrawingGroup.Children>
+    <GeometryDrawing Brush='#00FFFFFF' Geometry='F1M16,16L0,16 0,0 16,0z' />
+    <GeometryDrawing Brush='#FFF6F6F6' Geometry='F1M14.6045,7C14.4485,5.978 13.6535,5.123 12.5745,4.939 12.4305,4.917 12.2925,4.906 12.1635,4.906 11.5165,4.906 10.9605,5.147 10.5005,5.627 10.0425,5.147 9.4875,4.906 8.8385,4.906 8.7905,4.906 8.7355,4.916 8.6855,4.918L9.2505,4.354 4.9135,0 4.1075,0 0.000500000000000611,4.083 0.000500000000000611,4.622 1.8615,6.473 3.0005,5.345 3.0005,9 5.0005,9 5.0005,16 16.0005,16 16.0005,7z' />
+    <GeometryDrawing Brush='#FFEFEFF0' Geometry='F1M11,14L14,14 14,9 11,9z M7,9L10,9 10,14 7,14z' />
+    <GeometryDrawing Brush='#FF424242' Geometry='F1M14,14L11,14 11,9 14,9z M11.668,7.432C11.952,6.863 12.111,6.888 12.246,6.913 12.498,6.955 12.668,7.194 12.625,7.446 12.617,7.492 12.594,7.632 12.341,7.804 12.261,7.858 12.137,7.928 12.002,8L11.409,8C11.525,7.739,11.627,7.512,11.668,7.432 M10,14L7,14 7,9 10,9z M8.754,6.913C8.89,6.889 9.048,6.863 9.333,7.434 9.373,7.513 9.475,7.739 9.592,8L8.999,8C8.864,7.928 8.74,7.858 8.66,7.805 8.406,7.632 8.383,7.492 8.375,7.445 8.332,7.194 8.502,6.955 8.754,6.913 M13.476,8C13.538,7.877 13.588,7.75 13.611,7.613 13.746,6.818 13.209,6.062 12.414,5.927 11.38,5.759 10.942,6.647 10.774,6.982 10.732,7.066 10.624,7.306 10.5,7.583 10.376,7.306 10.268,7.067 10.227,6.984 10.059,6.647 9.623,5.758 8.586,5.927 7.791,6.062 7.254,6.818 7.389,7.612 7.412,7.75 7.462,7.877 7.525,8L6,8 6,15 15,15 15,8z' />
+    <GeometryDrawing Brush='#FF00529C' Geometry='F1M4,2.937L4,8 5,8 5,2.919 7.148,5.06 7.855,4.353 4.515,0.999999999999999 1.163,4.353 1.87,5.06z' />
+  </DrawingGroup.Children>
+</DrawingGroup>"))
+        .Bind(mniInstall, null, () =>
+        {
+          var main = new Main();
+          main.GoToStep(new InstallSource());
+          main.Show();
+        });
+      var createCommand = new UiCommand("Create Package", "Export a package of metadata from an Innovator instance")
+        .WithIcon(new IconInfo("create-package", @"<DrawingGroup xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'>
+  <DrawingGroup.Children>
+    <GeometryDrawing Brush='#00FFFFFF' Geometry='F1M16,16L0,16 0,0 16,0z' />
+    <GeometryDrawing Brush='#FFF6F6F6' Geometry='F1M16,7L16,16 5,16 5,9 3,9 3,8 1,8 1,6 0,6 0,3 1,3 1,1 3,1 3,0 6,0 6,1 8,1 8,3 9,3 9,4.921C9.578,4.959 10.082,5.188 10.501,5.626 10.96,5.147 11.516,4.906 12.163,4.906 12.293,4.906 12.431,4.917 12.574,4.939 13.653,5.123 14.448,5.978 14.604,7z' />
+    <GeometryDrawing Brush='#FFEFEFF0' Geometry='F1M11,14L14,14 14,9 11,9z M7,9L10,9 10,14 7,14z' />
+    <GeometryDrawing Brush='#FF424242' Geometry='F1M14,14L11,14 11,9 14,9z M11.668,7.432C11.952,6.863 12.111,6.888 12.246,6.913 12.498,6.955 12.668,7.194 12.625,7.446 12.617,7.492 12.594,7.632 12.341,7.804 12.261,7.858 12.137,7.928 12.002,8L11.409,8C11.525,7.739,11.627,7.512,11.668,7.432 M10,14L7,14 7,9 10,9z M8.754,6.913C8.89,6.889 9.048,6.863 9.333,7.434 9.373,7.513 9.475,7.739 9.592,8L8.999,8C8.864,7.928 8.74,7.858 8.66,7.805 8.406,7.632 8.383,7.492 8.375,7.445 8.332,7.194 8.502,6.955 8.754,6.913 M13.476,8C13.538,7.877 13.588,7.75 13.611,7.613 13.746,6.818 13.209,6.062 12.414,5.927 11.38,5.759 10.942,6.647 10.774,6.982 10.732,7.066 10.624,7.306 10.5,7.583 10.376,7.306 10.268,7.067 10.227,6.984 10.059,6.647 9.623,5.758 8.586,5.927 7.791,6.062 7.254,6.818 7.389,7.612 7.412,7.75 7.462,7.877 7.525,8L6,8 6,15 15,15 15,8z' />
+    <GeometryDrawing Brush='#FFC17C1A' Geometry='F1M6,6L7,6 7,7 6,7z M2,6L3,6 3,7 2,7z M7,3L6,3 6,2 7,2z M3,3L2,3 2,2 3,2z M4,4L5,4 5,5 4,5z M8,5L8,4 6,4 6,3 5,3 5,1 4,1 4,3 3,3 3,4 1,4 1,5 3,5 3,6 4,6 4,8 5,8 5,6 6,6 6,5z' />
+  </DrawingGroup.Children>
+</DrawingGroup>"))
+        .Bind(mniCreate, null, () =>
+        {
+          var main = new Main();
+          main.GoToStep(new ConnectionSelection
+          {
+            MultiSelect = false,
+            GoNextAction = () => main.GoToStep(new ExportSelect())
+          });
+          main.Show();
+        });
+      var compareCommand = new UiCommand("Compare Packages", "Compare two packages of metadata")
+        .WithIcon(new IconInfo("compare-package", @"<DrawingGroup xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'>
+  <DrawingGroup.Children>
+    <GeometryDrawing Brush='#00FFFFFF' Geometry='F1M16,16L0,16 0,0 16,0z' />
+    <GeometryDrawing Brush='#FFF6F6F6' Geometry='F1M11.3877,9L12.9707,9 12.9727,10.585z M8.0857,12L7.9997,12 7.9997,10 6.9997,10 6.9997,9 11.0847,9z M7.9997,3.88L7.9997,5 6.9997,5 6.9997,7 4.8797,7z M13.3267,13.984L13.4737,13.984C14.8527,13.984,15.9737,12.867,15.9737,11.493L15.9737,9 15.9997,9 15.9997,5 14.9997,5 14.9997,3 13.9997,3 13.9997,0 8.9997,0 8.9997,3 7.9997,3 7.9997,3.104 4.8857,0 4.4877,0 2.5637,1.924 2.6457,2.007 2.4997,2.007C1.1217,2.007,-0.000299999999999301,3.125,-0.000299999999999301,4.498L-0.000299999999999301,6.992 3.0037,6.992 3.0007,5.407 4.5947,7 1.9997,7 1.9997,10 0.999700000000001,10 0.999700000000001,12 -0.000299999999999301,12 -0.000299999999999301,16 8.9997,16 8.9997,13.912 11.0957,16 11.4777,16 13.4097,14.067z' />
+    <GeometryDrawing Brush='#FF424242' Geometry='F1M14,6L14,4 12,4 12,3 13,3 13,1 10,1 10,3 11,3 11,4 9,4 9,6 8,6 8,8 11,8 11,6 10,6 10,5 13,5 13,6 12,6 12,8 15,8 15,6z M7,13L8,13 8,15 5,15 5,13 6,13 6,12 3,12 3,13 4,13 4,15 1,15 1,13 2,13 2,11 4,11 4,10 3,10 3,8 6,8 6,10 5,10 5,11 7,11z' />
+    <GeometryDrawing Brush='#FF00539C' Geometry='F1M4.7368,5.7285L4.0288,5.0205 5.0368,4.0065 2.4998,3.9985C2.2248,3.9985,1.9998,4.2225,1.9998,4.4985L2.0018,5.9915 0.9998,5.9915 0.9998,4.4985C0.9998,3.6705,1.6728,3.0065,2.4998,3.0065L5.0538,3.0065 3.9768,1.9255 4.6878,1.2145 6.9738,3.4925z M11.2368,10.2625L11.9448,10.9715 10.9368,11.9845 13.4738,11.9935C13.7488,11.9935,13.9738,11.7685,13.9738,11.4935L13.9718,9.9995 14.9738,9.9995 14.9738,11.4935C14.9738,12.3205,14.3008,12.9845,13.4738,12.9845L10.9188,12.9845 11.9968,14.0665 11.2858,14.7775 8.9998,12.4995z' />
+  </DrawingGroup.Children>
+</DrawingGroup>"))
+        .Bind(mniCompare, null, () =>
+        {
+          var main = new Main();
+          main.GoToStep(new CompareSelect());
+          main.Show();
+        });
+
+      _docViewer.AddTopic("Getting Started", () =>
+      {
+        var document = _docViewer.CreateDocument();
+        document.Blocks.Add(new Paragraph(new Run("Getting Started") { FontSize = document.FontSize * 1.5 }));
+        document.Blocks.Add(new System.Windows.Documents.List
+        {
+          MarkerStyle = System.Windows.TextMarkerStyle.Decimal,
+          ListItems =
+          {
+            new ListItem(new Paragraph(new Run("Enter an AML query above ⬆"))),
+            new ListItem(new Paragraph(new Run("Run the query. The button is in the upper right corner ↗."))),
+          }
+        });
+        document.Blocks.Add(new Paragraph(new Run("Tools") { FontSize = document.FontSize * 1.5 }));
+        document.Blocks.Add(new Paragraph(new Run("The following tools can help with exporting solutions from one database and importing them into another (e.g. during staging to production migrations)")));
+        var grid = new System.Windows.Controls.Grid();
+        grid.ColumnDefinitions.Add(new System.Windows.Controls.ColumnDefinition() { Width = System.Windows.GridLength.Auto });
+        grid.ColumnDefinitions.Add(new System.Windows.Controls.ColumnDefinition() { Width = System.Windows.GridLength.Auto });
+        installCommand.AddToGrid(grid);
+        createCommand.AddToGrid(grid);
+        compareCommand.AddToGrid(grid);
+        document.Blocks.Add(new BlockUIContainer()
+        {
+          Child = grid
+        });
+        return document;
+      });
+      _docViewer.TryNavigate("Help", "Getting Started");
+    }
+
+    private void AddCommandToGrid(System.Windows.Controls.Grid grid, string title, string description, string wpfImage, Action handler)
+    {
+      
     }
 
     protected override void OnSizeChanged(EventArgs e)
@@ -370,7 +472,6 @@ namespace InnovatorAdmin
       {
         _loadingConnection = true;
         btnSoapAction.Visible = false;
-        lblSoapAction.Visible = false;
         exploreButton.Visible = false;
         btnSubmit.Visible = false;
 
@@ -394,8 +495,7 @@ namespace InnovatorAdmin
         {
           lblProgress.Text = ex.Message;
           btnEditConnections.Text = "Not Connected ▼";
-          lblConnection.Visible = true;
-          btnEditConnections.Visible = lblConnection.Visible;
+          btnEditConnections.Visible = true;
         }
         _loadingConnection = false;
         return true;
@@ -409,6 +509,7 @@ namespace InnovatorAdmin
 
       _proxy = proxy;
       UpdateTitle(null);
+      _docViewer.SetProxy(proxy as ArasEditorProxy);
       if (proxy == null)
         return;
 
@@ -422,16 +523,14 @@ namespace InnovatorAdmin
       {
         btnSoapAction.Visible = false;
       }
-      lblSoapAction.Visible = btnSoapAction.Visible;
-
+      
       inputEditor.Helper = _proxy.GetHelper();
       outputEditor.Helper = _proxy.GetOutputHelper();
       btnEditConnections.Text = string.Format("{0} ▼", _proxy.Name);
 
       if (proxy.ConnData != null)
       {
-        lblConnection.Visible = true;
-        btnEditConnections.Visible = lblConnection.Visible;
+        btnEditConnections.Visible = true;
         this.ConnectionColor = proxy.ConnData.Color;
       }
       InitializeUi(_proxy as ArasEditorProxy);
@@ -517,9 +616,9 @@ namespace InnovatorAdmin
           tblMain.ColumnStyles[col2].Width = 0;
         }
 
-        //lblConnection.Visible = _proxy != null && _proxy.ConnData != null;
-        lblConnection.Visible = true;
-        btnEditConnections.Visible = lblConnection.Visible;
+        docHost.Child = _docViewer;
+        
+        btnEditConnections.Visible = true;
 
         if (_proxy == null)
         {
@@ -735,11 +834,9 @@ namespace InnovatorAdmin
     {
       var tbl = (DataTable)grid.DataSource;
       grid.RowTemplate.Height = (int)(DpiScale * 22);
-      var arasProxy = _proxy as ArasEditorProxy;
-      ArasMetadataProvider metadata = null;
-      if (arasProxy != null)
-        metadata = ArasMetadataProvider.Cached(arasProxy.Connection);
 
+      var metadata = _proxy is ArasEditorProxy arasProxy ? ArasMetadataProvider.Cached(arasProxy.Connection) : null;
+      
       grid.Columns.Clear();
       foreach (var dataCol in tbl.Columns.OfType<DataColumn>())
       {
@@ -1971,83 +2068,6 @@ namespace InnovatorAdmin
       }
     }
 
-    private void btnInstall_Click(object sender, EventArgs e)
-    {
-      InstallCommand();
-    }
-
-    private void mniInstall_Click(object sender, EventArgs e)
-    {
-      InstallCommand();
-    }
-
-    private void InstallCommand()
-    {
-      try
-      {
-        var main = new Main();
-        main.GoToStep(new InstallSource());
-        main.Show();
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-    private void btnCreate_Click(object sender, EventArgs e)
-    {
-      CreateCommand();
-    }
-
-    private void mniCreate_Click(object sender, EventArgs e)
-    {
-      CreateCommand();
-    }
-
-    private void CreateCommand()
-    {
-      try
-      {
-        var main = new Main();
-        var connSelect = new ConnectionSelection();
-        connSelect.MultiSelect = false;
-        connSelect.GoNextAction = () => main.GoToStep(new ExportSelect());
-        main.GoToStep(connSelect);
-        main.Show();
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
-
-    private void btnCompare_Click(object sender, EventArgs e)
-    {
-      CompareCommand();
-    }
-
-    private void mniCompare_Click(object sender, EventArgs e)
-    {
-      CompareCommand();
-    }
-
-    private void CompareCommand()
-    {
-      try
-      {
-        var main = new Main();
-        var compareSel = new CompareSelect();
-        main.GoToStep(compareSel);
-        main.Show();
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
-      }
-    }
-
     private async void lnkCreateModelFiles_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
     {
 
@@ -2243,8 +2263,6 @@ namespace InnovatorAdmin
       tblMain.ColumnStyles[tblMain.ColumnStyles.Count - 1].Width = size;
       tblMain.RowStyles[0].Height = size;
       tblMain.RowStyles[tblMain.RowStyles.Count - 1].Height = size;
-      btnInstall.MinimumSize = new Size((int)(120 * scale), (int)(40 * scale));
-      btnCreate.MinimumSize = btnInstall.MinimumSize;
     }
 
     private static BindingList<string> _recentDocs = new BindingList<string>();

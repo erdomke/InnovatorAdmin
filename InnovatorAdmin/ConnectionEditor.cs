@@ -60,12 +60,9 @@ namespace InnovatorAdmin
       lblName.Text = FontAwesome.Fa_bookmark.ToString();
       lblDatabase.Font = FontAwesome.Font;
       lblDatabase.Text = FontAwesome.Fa_database.ToString();
-      lblType.Font = FontAwesome.Font;
-      lblType.Text = FontAwesome.Fa_tag.ToString();
-
+      
       this.MultiSelect = false;
       _bs.CurrentChanged += _bs_CurrentChanged;
-      cmbType.DataSource = Enum.GetValues(typeof(ConnectionType));
     }
 
     public void InitializeFocus()
@@ -120,7 +117,6 @@ namespace InnovatorAdmin
         txtPassword.DataBindings.Add("Text", _bs, "Password");
         txtUrl.DataBindings.Add("Text", _bs, "Url");
         txtUser.DataBindings.Add("Text", _bs, "UserName");
-        cmbType.DataBindings.Add("SelectedItem", _bs, "Type");
 
         if (lstConnections.Items.Count > 0 && !this.MultiSelect)
           lstConnections.SetItemSelected(0, true);
@@ -409,14 +405,10 @@ namespace InnovatorAdmin
       {
         _programChangingCheck = true;
         ((ConnectionData)_bs.Current).Authentication = value;
-        chkAnonymous.Checked = false;
         chkPassword.Checked = false;
         chkWindows.Checked = false;
         switch (value)
         {
-          case Connections.Authentication.Anonymous:
-            chkAnonymous.Checked = true;
-            break;
           case Connections.Authentication.Windows:
             chkWindows.Checked = true;
             break;

@@ -14,7 +14,7 @@ namespace InnovatorAdmin.Cmd
     static async Task<int> Main(string[] args)
     {
       //var parser = new Parser(with => with.IgnoreUnknownArguments = false);
-      var cmdArgs = Parser.Default.ParseArguments<ExportCommand, ImportCommand, PackageDiffCommand, ConvertCommand, ApplyCommand, RepairCommand>(args);
+      var cmdArgs = Parser.Default.ParseArguments<ExportCommand, ImportCommand, PackageDiffCommand, ConvertCommand, ApplyCommand, RepairCommand, DocumentationCommand>(args);
       var task = default(Task<int>);
       cmdArgs
         .WithParsed<ExportCommand>(o => task = o.Execute())
@@ -23,6 +23,7 @@ namespace InnovatorAdmin.Cmd
         .WithParsed<ConvertCommand>(o => task = Task.FromResult(o.Execute()))
         .WithParsed<ApplyCommand>(o => task = o.Execute())
         .WithParsed<RepairCommand>(o => task = Task.FromResult(o.Execute()))
+        .WithParsed<DocumentationCommand>(o => task = o.Execute())
         .WithNotParsed(err => task = TryParseArasFormat(cmdArgs, args));
       var result = await task;
 #if DEBUG

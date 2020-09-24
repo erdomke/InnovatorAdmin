@@ -1,10 +1,8 @@
-﻿using System;
+﻿using Innovator.Client;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using Innovator.Client;
 
 namespace InnovatorAdmin
 {
@@ -18,27 +16,19 @@ namespace InnovatorAdmin
     private readonly ItemReference[] _systemIdentities;
     private readonly Dictionary<string, string> _propertyNames
       = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-    /// <summary>
-    /// Enumerable of methods where core = 1
-    /// </summary>
-    public IEnumerable<ItemReference> CoreMethods
-    {
-      get { return _methods.Where(m => m.IsCore); }
-    }
+    private readonly Dictionary<string, DatabaseList> _listsById
+      = new Dictionary<string, DatabaseList>();
 
     /// <summary>
     /// Enumerable of all item types
     /// </summary>
-    public IEnumerable<ItemType> ItemTypes
-    {
-      get { return _itemTypesByName.Values; }
-    }
+    public IEnumerable<ItemType> ItemTypes => _itemTypesByName.Values;
 
-    public IEnumerable<ItemReference> SystemIdentities
-    {
-      get { return _systemIdentities; }
-    }
+    public IEnumerable<ItemReference> SystemIdentities => _systemIdentities;
+
+    public IEnumerable<Method> Methods => _methods;
+
+    public string Title { get; private set; }
 
     public bool CustomPropertyByPath(ItemProperty path, out ItemReference propRef)
     {
@@ -120,9 +110,11 @@ namespace InnovatorAdmin
       }
     }
 
-    public void Add(IEnumerable<IReadOnlyItem> items)
+    public void AddRange(IEnumerable<IReadOnlyItem> items)
     {
-      foreach (var item in items)
+      foreach (var item in items
+        .OrderBy(i => string.Equals(i.TypeName(), "relationshiptype", StringComparison.OrdinalIgnoreCase)
+          || string.Equals(i.TypeName(), "morphae", StringComparison.OrdinalIgnoreCase) ? 99 : 0))
         Add(item);
     }
 
@@ -138,14 +130,30 @@ namespace InnovatorAdmin
           break;
         case "relationshiptype":
           if (item.Property("relationship_id").HasValue())
-            Add(item.Property("relationship_id").AsItem());
+          {
+            var relType = new ItemType(item, null, true);
+            if (string.IsNullOrEmpty(relType.Name))
+              return;
+            _itemTypesByName[relType.Name] = relType;
+            var source = _itemTypesByName.Values
+              .FirstOrDefault(i => i.Id == item.SourceId().Value);
+            if (source != null)
+              source.Relationships.Add(relType);
+          }
           break;
         case "itemtype":
-          var itemType = new ItemType(item);
-          if (string.IsNullOrEmpty(itemType.Name))
-            return;
-          _itemTypesByName[itemType.Name] = itemType;
-          Add(item.Relationships("Property"));
+          var itemType = new ItemType(item, null, item.Property("name").HasValue());
+          if (!string.IsNullOrEmpty(itemType.Name) && !_itemTypesByName.ContainsKey(itemType.Name))
+          {
+            _itemTypesByName[itemType.Name] = itemType;
+            AddRange(item.Relationships("Property"));
+          }
+          else if (!string.IsNullOrEmpty(itemType.Id))
+          {
+            _itemTypesByName.Values
+              .FirstOrDefault(i => i.Id == itemType.Id)
+              ?.WithScripts(item);
+          }
           break;
         case "sql":
           var sql = Sql.FromFullItem(item, false);
@@ -163,7 +171,36 @@ namespace InnovatorAdmin
             ?? item.KeyedName().Value
             ?? item.IdProp().KeyedName().Value;
           break;
+        case "list":
+          _listsById[item.Id()] = new DatabaseList(item);
+          break;
       }
+    }
+
+    public static PackageMetadataProvider FromFile(string path)
+    {
+      if (string.Equals(System.IO.Path.GetExtension(path), ".mf", StringComparison.OrdinalIgnoreCase))
+        return FromPackage(new ManifestFolder(path));
+      else
+        return FromPackage(InnovatorPackage.Load(path));
+    }
+
+    public static PackageMetadataProvider FromPackage(ManifestFolder package)
+    {
+      var doc = package.Read(out var title);
+      var metadata = new PackageMetadataProvider() { Title = title };
+      metadata.AddRange(doc.SelectNodes("/AML/AML/Item")
+        .OfType<System.Xml.XmlElement>()
+        .Select(e => ElementFactory.Local.FromXml(e).AssertItem()));
+      return metadata;
+    }
+
+    public static PackageMetadataProvider FromPackage(InnovatorPackage package)
+    {
+      var script = package.Read();
+      var metadata = new PackageMetadataProvider() { Title = script.Title };
+      metadata.AddRange(script.Lines.Select(i => ElementFactory.Local.FromXml(i.Script).AssertItem()));
+      return metadata;
     }
 
     // Loaded from 11sp9

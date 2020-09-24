@@ -79,6 +79,7 @@
     <Compile Include="StringEnumerableReaderTests.cs" />
     <Compile Include="Testing\LoginTests.cs" />
     <Compile Include="Testing\TestSerializerTests.cs" />
+    <Compile Include="TryParseQuery.cs" />
     <Compile Include="UtilsTests.cs" />
     <Compile Include="XmlNodeWriterTests.cs" />
     <Compile Include="XmlUtilsTests.cs" />
