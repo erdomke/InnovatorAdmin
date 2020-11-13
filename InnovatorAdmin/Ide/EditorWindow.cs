@@ -188,6 +188,11 @@ namespace InnovatorAdmin
       BuildRecentDocsMenu();
       _recentDocs.ListChanged += (s, e) => BuildRecentDocsMenu();
 
+      if (Properties.Settings.Default.LastEditorSplitOrientation == Orientation.Vertical)
+      {
+        splitViewVertically();
+      }
+
       // Wire up the commands
       _commands = new UiCommandManager(this);
       inputEditor.KeyDown += _commands.OnKeyDown;
@@ -307,8 +312,8 @@ namespace InnovatorAdmin
           dialog.ShowDialog();
         }
       });
-      _commands.Add<Control>(horizontalSplitToolStripMenuItem, null, c => splitViewHorizontally());
-      _commands.Add<Control>(verticalSplitToolStripMenuItem, null, c => splitViewVertically());
+      _commands.Add<Control>(horizontalSplitToolStripMenuItem, null, c => splitViewHorizontally(true));
+      _commands.Add<Control>(verticalSplitToolStripMenuItem, null, c => splitViewVertically(true));
     }
 
     protected override void OnSizeChanged(EventArgs e)
@@ -1657,11 +1662,11 @@ namespace InnovatorAdmin
         {
           if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
           {
-                var grid = tbcOutputView.SelectedTab.Controls.OfType<DataGridView>().Single();
-         
-                int columnCount = grid.Columns.Count;
-                string columnNames = "";
-                string outputCsv ="";
+            var grid = tbcOutputView.SelectedTab.Controls.OfType<DataGridView>().Single();
+
+            int columnCount = grid.Columns.Count;
+            string columnNames = "";
+            string outputCsv = "";
 
             using (System.IO.StreamWriter file =
                   new System.IO.StreamWriter(dialog.FileName))
@@ -1683,7 +1688,7 @@ namespace InnovatorAdmin
                 outputCsv = "";
               }
 
-            }   
+            }
           }
         }
       }
@@ -1692,7 +1697,7 @@ namespace InnovatorAdmin
         Utils.HandleError(ex);
       }
     }
-	
+
     private void mniTableEditsToQueryEditor_Click(object sender, EventArgs e)
     {
       try
@@ -2392,16 +2397,26 @@ namespace InnovatorAdmin
       public string SaveDirectory { get; set; }
     }
 
-    private void splitViewHorizontally()
+    private void splitViewHorizontally(bool save = false)
     {
       splitEditors.Orientation = Orientation.Horizontal;
       splitEditors.SplitterDistance = splitEditors.Size.Height / 2;
+      if (save)
+      {
+        Properties.Settings.Default.LastEditorSplitOrientation = splitEditors.Orientation;
+        Properties.Settings.Default.Save();
+      }
     }
 
-    private void splitViewVertically()
+    private void splitViewVertically(bool save = false)
     {
       splitEditors.Orientation = Orientation.Vertical;
       splitEditors.SplitterDistance = splitEditors.Size.Width / 2;
+      if (save)
+      {
+        Properties.Settings.Default.LastEditorSplitOrientation = splitEditors.Orientation;
+        Properties.Settings.Default.Save();
+      }
     }
 
     private void mniGitMergeHelper_Click(object sender, EventArgs e)
