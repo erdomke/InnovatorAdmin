@@ -111,6 +111,8 @@ namespace InnovatorAdmin
 
     public string TabLabel { get; set; }
 
+    public string RelationshipTypeId { get; set; }
+
     public IEnumerable<string> States { get; set; }
 
     public string Description { get; }
@@ -131,7 +133,7 @@ namespace InnovatorAdmin
 
     public bool IsUiOnly => RelationshipView?.Contains("aras.innovator.TreeGridView") == true;
 
-    public ItemType(IReadOnlyItem itemType, HashSet<string> coreIds = null, bool defaultProperties = false)
+    public ItemType(IReadOnlyItem itemType, HashSet<string> coreIds = null, bool defaultProperties = false, Func<string, string> getName = null)
     {
       var relType = itemType.Property("relationship_id").AsItem();
       var sourceProp = itemType.SourceId();
@@ -140,6 +142,7 @@ namespace InnovatorAdmin
       RelatedTypeName = relatedProp.Attribute("name").Value ?? relatedProp.KeyedName().Value;
       if (relType.Exists)
       {
+        RelationshipTypeId = itemType.Id();
         TabLabel = itemType.Property("label").Value;
         RelationshipView = itemType.Relationships("Relationship View")
           .FirstOrNullItem(i => i.Property("start_page").HasValue())
@@ -168,7 +171,7 @@ namespace InnovatorAdmin
       HasLifeCycle = itemType.Relationships("ItemType Life Cycle").Any();
 
       _properties = itemType.Relationships("Property")
-        .Select(p => Property.FromItem(p, this))
+        .Select(p => Property.FromItem(p, this, getName))
         .ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
 
       if (_properties.Count > 0 || defaultProperties)

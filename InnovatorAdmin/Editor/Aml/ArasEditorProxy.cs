@@ -155,8 +155,7 @@ namespace InnovatorAdmin.Editor
       if (_pluginFactory == null)
       {
         UnitTestAction = "Plugin/" + typeof(RunUnitTests).Name;
-        _pluginFactory = AppDomain.CurrentDomain.GetAssemblies()
-          .SelectMany(a => a.GetTypes())
+        _pluginFactory = GetTypesWithoutError()
           .Where(t => typeof(IPluginMethod).IsAssignableFrom(t)
             && t.GetConstructors().Any(c => c.GetParameters().Length == 0))
           .ToDictionary(p => "Plugin/" + p.Name
@@ -168,6 +167,29 @@ namespace InnovatorAdmin.Editor
       _helper = new Editor.AmlEditorHelper();
       _version = Connection.FetchVersion(false).Wait() ?? new Version(12, 0);
       _actions = GetActions(_version.Major).OrderBy(a => a).ToArray();
+    }
+
+    private IEnumerable<Type> GetTypesWithoutError()
+    {
+      try
+      {
+        return AppDomain.CurrentDomain.GetAssemblies()
+          .SelectMany(a =>
+          {
+            try
+            {
+              return a.GetTypes();
+            }
+            catch (Exception)
+            {
+              return Enumerable.Empty<Type>();
+            }
+          });
+      }
+      catch (Exception)
+      {
+        return Enumerable.Empty<Type>();
+      }
     }
 
     private IEnumerable<string> GetActions(int version)

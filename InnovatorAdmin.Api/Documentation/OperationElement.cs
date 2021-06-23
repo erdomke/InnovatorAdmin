@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -120,12 +121,8 @@ namespace InnovatorAdmin.Documentation
 
     public static OperationElement Parse(string methodName, string methodCode)
     {
-      var method = new OperationElement
-      {
-        Name = methodName
-      };
       if (string.IsNullOrEmpty(methodCode))
-        return method;
+        return new OperationElement { Name = methodName };
 
       var lines = methodCode
         .Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
@@ -152,7 +149,7 @@ namespace InnovatorAdmin.Documentation
       }
 
       if (xmlComments.Length < 1)
-        return method;
+        return new OperationElement { Name = methodName };
 
       var elements = new List<XElement>();
       using (var reader = new StringReader(xmlComments.ToString()))
@@ -175,10 +172,31 @@ namespace InnovatorAdmin.Documentation
         catch (XmlException) { }
       }
 
+      return Parse(methodName, elements);
+    }
+
+    private static OperationElement Parse(string methodName, IEnumerable<XElement> elements)
+    {
+      var method = new OperationElement
+      {
+        Name = methodName
+      };
       var builder = new StringBuilder();
+
       method.Summary.AddRange(elements
         .Where(e => e.Name.LocalName == "summary")
         .SelectMany(e => ParseDoc(e.Nodes())));
+
+      foreach (var elem in elements.Where(e => e.Name.LocalName == "inheritdoc"))
+      {
+        if (Standard.TryGetValue((string)elem.Attribute("cref"), out var doc))
+        {
+          method.WithAttributes(doc.Attributes);
+          method.WithElements(doc.Elements.ToArray());
+          if (method.Summary.Count < 1 && doc.Summary.Count > 0)
+            method.Summary.AddRange(doc.Summary);
+        }
+      }
 
       foreach (var elem in elements.Where(e => e.Name.LocalName == "param"))
       {
@@ -258,7 +276,7 @@ namespace InnovatorAdmin.Documentation
       }
 
       method.Documentation.AddRange(ParseDoc(elements
-        .Where(e => e.Name.LocalName != "summary" && e.Name.LocalName != "param")));
+        .Where(e => e.Name.LocalName != "summary" && e.Name.LocalName != "param" && e.Name.LocalName != "inheritdoc")));
       return method;
     }
 
@@ -343,6 +361,20 @@ namespace InnovatorAdmin.Documentation
       }
 
       return new TextRun((node as XText)?.Value ?? (node as XCData)?.Value, style);
+    }
+
+    public static Dictionary<string, OperationElement> Standard { get; } = new Dictionary<string, OperationElement>();
+
+    static OperationElement() {
+      using (var stream = Assembly.GetExecutingAssembly()
+        .GetManifestResourceStream("InnovatorAdmin.Documentation.ActionDocumentation.xml"))
+      {
+        var xml = XElement.Load(stream);
+        foreach (var method in xml.Elements("method"))
+        {
+          Standard[(string)method.Attribute("name")] = Parse((string)method.Attribute("name"), method.Elements());
+        }
+      }
     }
   }
 }

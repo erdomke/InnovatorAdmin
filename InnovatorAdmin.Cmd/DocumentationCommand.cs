@@ -3,8 +3,6 @@ using InnovatorAdmin.Documentation;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Cmd
@@ -25,72 +23,42 @@ namespace InnovatorAdmin.Cmd
     {
       return ConsoleTask.ExecuteAsync(this, async (console) =>
       {
-      foreach (var file in GetMatchingFiles(InputFile))
-      {
-        console.Write("Generating doc for ");
-        console.WriteLine(file);
-
-        var metadata = PackageMetadataProvider.FromFile(file);
-        var outputPath = Output.Replace("*", CleanFileName(metadata.Title));
-        switch (Path.GetExtension(outputPath).ToUpperInvariant())
+        foreach (var file in GetMatchingFiles(InputFile))
         {
-          case ".PUML":
-          case ".TXT":
-            var diagram = EntityDiagram.FromTypes(metadata.ItemTypes, metadata.Title);
-            var uml = new PlantUmlWriter();
-            using (var writer = new StreamWriter(outputPath))
-              uml.Write(diagram, writer);
-            break;
-          case ".SVG":
-          case ".PNG":
-            var diagramImg = EntityDiagram.FromTypes(metadata.ItemTypes, metadata.Title);
-            var urlWriter = new PlantUmlUrlWriter()
-            {
-              Format = Path.GetExtension(outputPath).TrimStart('.').ToLowerInvariant()
-            };
-            using (var writer = new StringWriter())
-            {
-              urlWriter.Write(diagramImg, writer);
-              var client = new HttpClient();
-              var url = writer.ToString();
-              try
-              {
-                using (var readStream = await client.GetStreamAsync(url))
-                using (var writeStream = File.OpenWrite(outputPath))
-                {
-                  await readStream.CopyToAsync(writeStream);
-                }
-              }
-              catch (HttpRequestException ex)
-              {
-                console.WriteLine(url);
-                console.WriteLine(ex.ToString());
-              }
-            }
-            break;
-          case ".MD":
-            var diagramMd = EntityDiagram.FromTypes(metadata.ItemTypes, metadata.Title);
-            var umlMd = new PlantUmlWriter();
-            using (var writer = new StreamWriter(outputPath))
-            {
-              writer.WriteLine("# Diagram");
-              writer.WriteLine();
-              writer.WriteLine("```plantuml");
-              umlMd.Write(diagramMd, writer);
-              writer.WriteLine();
-              writer.WriteLine("```");
-              writer.WriteLine();
-              var mdWriter = new MarkdownVisitor(writer);
-              foreach (var itemType in metadata.ItemTypes.Where(i => !i.IsUiOnly).OrderBy(i => i.Name))
-              {
-                mdWriter.Visit(Document.FromItemType(itemType, new DocumentOptions()
-                {
-                  IncludeCrossReferenceLinks = false,
-                  IncludeCoreProperties = false
-                }, metadata));
-              }
-            }
-            break;
+          console.Write("Generating doc for ");
+          console.WriteLine(file);
+
+          var metadata = PackageMetadataProvider.FromFile(file);
+          var outputPath = Output.Replace("*", CleanFileName(metadata.Title));
+          var writer = new DocumentationWriter();
+          var extension = Path.GetExtension(outputPath).ToUpperInvariant().TrimStart('.');
+          switch (extension)
+          {
+            case "PUML":
+            case "TXT":
+              writer.Format = DiagramFormat.PlantUml;
+              writer.Output = DocumentOutput.Diagram;
+              break;
+            case "SVG":
+            case "PNG":
+              writer.Format = (DiagramFormat)Enum.Parse(typeof(DiagramFormat), extension, true);
+              writer.Output = DocumentOutput.Diagram;
+              break;
+            case "MD":
+              writer.Format = DiagramFormat.PlantUml;
+              writer.Output = DocumentOutput.Markdown;
+              break;
+          }
+
+          try
+          {
+            using (var stream = File.OpenWrite(outputPath))
+              await writer.WriteAsync(metadata, stream);
+          }
+          catch (Exception ex)
+          {
+            console.WriteLine("Error documenting " + file);
+            console.WriteLine(ex.ToString());
           }
         }
       });

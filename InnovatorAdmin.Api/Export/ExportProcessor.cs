@@ -149,7 +149,7 @@ namespace InnovatorAdmin
         var doc = TransformResults(ref result);
         SetDoGetItemForCmf(doc);
         NormalizeClassStructure(doc);
-        FixFormFieldsPointingToSystemProperties(doc);
+        FixPropertyReferencesToSystemProperties(doc);
         ExpandSystemIdentities(doc);
         RemoveVersionableRelIds(doc);
         //TODO: Replace references to poly item lists
@@ -1044,48 +1044,51 @@ namespace InnovatorAdmin
     /// <summary>
     /// Convert form fields pointing to a system property from an ID reference to a search
     /// </summary>
-    private void FixFormFieldsPointingToSystemProperties(XmlDocument doc)
+    private void FixPropertyReferencesToSystemProperties(XmlDocument doc)
     {
       const string sysProps = "|behavior|classification|config_id|created_by_id|created_on|css|current_state|generation|history_id|id|is_current|is_released|keyed_name|release_date|effective_date|locked_by_id|major_rev|managed_by_id|minor_rev|modified_by_id|modified_on|new_version|not_lockable|owned_by_id|permission_id|related_id|sort_order|source_id|state|itemtype|superseded_date|team_id|";
-      var fields = doc.ElementsByXPath("//Item[@type='Field'][contains($p0,concat('|',propertytype_id/@keyed_name,'|'))]", sysProps).ToList();
-      if (fields.Count < 1) return;
+      var propReferences = doc.ElementsByXPath("//*[@type='Property'][string-length(text())=32][contains($p0,concat('|',@keyed_name,'|'))]", sysProps).ToList();
+      if (propReferences.Count < 1) return;
 
-      var query = "<Item type=\"Property\" action=\"get\" idlist=\"" + fields.GroupConcat(",", f => f.Element("propertytype_id", "")) + "\" select=\"name,source_id\" />";
+      var query = "<Item type=\"Property\" action=\"get\" idlist=\"" + propReferences.Select(f => f.InnerText).Distinct().GroupConcat(",") + "\" select=\"name,source_id\" />";
 
       // Get all the property information from the database
       var results = _conn.Apply(query).Items().ToDictionary(e => e.Id(), e => new Command(
-        @"<Item type='@0' action='get' select='id'>
-            <name>@1</name>
-            <source_id>@2</source_id>
-        </Item>", e.Type().Value, e.Property("name").Value, e.SourceId().Value)
-                .ToNormalizedAml(_conn.AmlContext.LocalizationContext));
+        @"<Item type='@0' action='get' select='id'><name>@1</name><source_id>@2</source_id></Item>"
+          , e.Type().Value, e.Property("name").Value, e.SourceId().Value)
+        .ToNormalizedAml(_conn.AmlContext.LocalizationContext));
 
-      // Update the export the the proper edit scripts
-      string propData;
-      XmlDocument tempDoc;
-      XmlElement propType;
-      XmlElement parentItem;
-      XmlElement script;
-      foreach (var field in fields)
+      // Update the export with the proper edit scripts
+      foreach (var propReference in propReferences)
       {
-        if (results.TryGetValue(field.Element("propertytype_id", ""), out propData))
+        if (results.TryGetValue(propReference.InnerText, out var propData))
         {
-          propType = field.Element("propertytype_id");
-          propType.RemoveAll();
+          if (propReference.LocalName == "propertytype_id"
+            && propReference.Parent() is XmlElement field
+            && field.LocalName == "Item"
+            && field.Attribute("type") == "Field")
+          {
+            var propType = field.Element("propertytype_id");
+            propType.RemoveAll();
 
-          tempDoc = doc.NewDoc();
-          tempDoc.LoadXml(propData);
+            var tempDoc = doc.NewDoc();
+            tempDoc.LoadXml(propData);
 
-          propType.AppendChild(propType.OwnerDocument.ImportNode(tempDoc.DocumentElement, true));
-          propType.Detach();
-          parentItem = field.Parents().Last(e => e.LocalName == "Item");
-          script = parentItem.OwnerDocument.CreateElement("Item")
-            .Attr("type", field.Attribute("type"))
-            .Attr("id", field.Attribute("id"))
-            .Attr("action", "edit")
-            .Attr(XmlFlags.Attr_ScriptType, "6");
-          script.AppendChild(propType);
-          parentItem.Parent().InsertAfter(script, parentItem);
+            propType.AppendChild(propType.OwnerDocument.ImportNode(tempDoc.DocumentElement, true));
+            propType.Detach();
+            var parentItem = field.Parents().Last(e => e.LocalName == "Item");
+            var script = parentItem.OwnerDocument.CreateElement("Item")
+              .Attr("type", field.Attribute("type"))
+              .Attr("id", field.Attribute("id"))
+              .Attr("action", "edit")
+              .Attr(XmlFlags.Attr_ScriptType, "6");
+            script.AppendChild(propType);
+            parentItem.Parent().InsertAfter(script, parentItem);
+          }
+          else
+          {
+            propReference.InnerXml = propData;
+          }
         }
       }
     }

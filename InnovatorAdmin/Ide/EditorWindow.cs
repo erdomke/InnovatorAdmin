@@ -275,6 +275,11 @@ namespace InnovatorAdmin
       _commands.Add<Editor.FullEditor>(mniBlockComment, e => e.Modifiers == (Keys.Control | Keys.Shift) && e.KeyCode == Keys.Q, BlockComment);
       _commands.Add<Editor.FullEditor>(mniBlockUncomment, null, BlockUncomment);
       _commands.Add<Editor.FullEditor>(mniInsertNewGuid, null, c => c.ReplaceSelectionSegments(t => Guid.NewGuid().ToString("N").ToUpperInvariant()));
+      _commands.Add<Editor.FullEditor>(mniRefreshIntellisense, null, c =>
+      {
+        if (_proxy is ArasEditorProxy proxy)
+          ArasMetadataProvider.Cached(proxy.Connection).Reset();
+      });
       _commands.Add<Editor.FullEditor>(mniXmlToEntity, null, c => c.ReplaceSelectionSegments(t =>
       {
         try

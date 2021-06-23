@@ -3,6 +3,7 @@ using InnovatorAdmin.Controls;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ namespace InnovatorAdmin.Editor
   /// </summary>
   public partial class DocumentViewer : System.Windows.Controls.UserControl
   {
+    private Documentation.Document _document;
     private ArasMetadataProvider _metadata;
     private int _historyIndex = -1;
     private List<DocumentUrl> _history = new List<DocumentUrl>();
@@ -116,6 +118,7 @@ namespace InnovatorAdmin.Editor
           case "HELP":
             if (_topics.TryGetValue(documentUrl.Name, out var generator))
             {
+              _document = null;
               Display(generator());
               return true;
             }
@@ -169,6 +172,7 @@ namespace InnovatorAdmin.Editor
         return;
       }
 
+      _document = null;
       var flowDocument = CreateDocument();
       flowDocument.Blocks.Add(new Paragraph(new Run(message)));
       this.flowViewer.Document = flowDocument;
@@ -187,6 +191,7 @@ namespace InnovatorAdmin.Editor
 
     private void Display(Documentation.Document document)
     {
+      _document = document;
       var flowDocument = CreateDocument();
       var visitor = new DocumentationViewVisitor()
       {
@@ -279,52 +284,17 @@ namespace InnovatorAdmin.Editor
     {
       try
       {
+        var category = default(string);
         using (var categoryDialog = new FilterSelect<string>())
         {
           categoryDialog.DataSource = _categories;
           categoryDialog.Message = "Select a category";
           if (categoryDialog.ShowDialog(System.Windows.Forms.Application.OpenForms[0]) == DialogResult.OK && categoryDialog.SelectedItem != null)
-          {
-            switch (categoryDialog.SelectedItem)
-            {
-              case "ItemType":
-                using (var nameDialog = new FilterSelect<ItemType>())
-                {
-                  nameDialog.DataSource = _metadata.ItemTypes;
-                  nameDialog.DisplayMember = "Name";
-                  nameDialog.Message = "Select an item type";
-                  if (nameDialog.ShowDialog(System.Windows.Forms.Application.OpenForms[0]) == DialogResult.OK && nameDialog.SelectedItem != null)
-                  {
-                    TryNavigate(categoryDialog.SelectedItem, nameDialog.SelectedItem.Name);
-                  }
-                }
-                break;
-              case "Method":
-                using (var nameDialog = new FilterSelect<Method>())
-                {
-                  nameDialog.DataSource = _metadata.Methods;
-                  nameDialog.DisplayMember = "KeyedName";
-                  nameDialog.Message = "Select a method";
-                  if (nameDialog.ShowDialog(System.Windows.Forms.Application.OpenForms[0]) == DialogResult.OK && nameDialog.SelectedItem != null)
-                  {
-                    TryNavigate(categoryDialog.SelectedItem, nameDialog.SelectedItem.KeyedName);
-                  }
-                }
-                break;
-              default: // "General",
-                using (var nameDialog = new FilterSelect<string>())
-                {
-                  nameDialog.DataSource = _topics.Keys;
-                  nameDialog.Message = "Select a topic";
-                  if (nameDialog.ShowDialog(System.Windows.Forms.Application.OpenForms[0]) == DialogResult.OK && nameDialog.SelectedItem != null)
-                  {
-                    TryNavigate(categoryDialog.SelectedItem, nameDialog.SelectedItem);
-                  }
-                }
-                break;
-            }
-          }
+            category = categoryDialog.SelectedItem;
         }
+
+        if (!string.IsNullOrEmpty(category))
+          PromptName(category);
       }
       catch (Exception ex)
       {
@@ -336,7 +306,75 @@ namespace InnovatorAdmin.Editor
     {
       try
       {
-        
+        if (_historyIndex >= 0 && _historyIndex < _history.Count)
+          PromptName(_history[_historyIndex].Category);
+      }
+      catch (Exception ex)
+      {
+        Utils.HandleError(ex);
+      }
+    }
+
+    private void PromptName(string category)
+    {
+      switch (category.ToUpperInvariant())
+      {
+        case "ITEMTYPE":
+          using (var nameDialog = new FilterSelect<ItemType>())
+          {
+            nameDialog.DataSource = _metadata.ItemTypes;
+            nameDialog.DisplayMember = "Name";
+            nameDialog.Message = "Select an item type";
+            if (nameDialog.ShowDialog(System.Windows.Forms.Application.OpenForms[0]) == DialogResult.OK && nameDialog.SelectedItem != null)
+            {
+              TryNavigate(category, nameDialog.SelectedItem.Name);
+            }
+          }
+          break;
+        case "METHOD":
+          using (var nameDialog = new FilterSelect<Method>())
+          {
+            nameDialog.DataSource = _metadata.Methods;
+            nameDialog.DisplayMember = "KeyedName";
+            nameDialog.Message = "Select a method";
+            if (nameDialog.ShowDialog(System.Windows.Forms.Application.OpenForms[0]) == DialogResult.OK && nameDialog.SelectedItem != null)
+            {
+              TryNavigate(category, nameDialog.SelectedItem.KeyedName);
+            }
+          }
+          break;
+        default: // "General",
+          using (var nameDialog = new FilterSelect<string>())
+          {
+            nameDialog.DataSource = _topics.Keys;
+            nameDialog.Message = "Select a topic";
+            if (nameDialog.ShowDialog(System.Windows.Forms.Application.OpenForms[0]) == DialogResult.OK && nameDialog.SelectedItem != null)
+            {
+              TryNavigate(category, nameDialog.SelectedItem);
+            }
+          }
+          break;
+      }
+    }
+
+    private void mniExportMarkdown_Click(object sender, RoutedEventArgs e)
+    {
+      try
+      {
+        if (_document != null)
+        {
+          using (var saveFile = new SaveFileDialog())
+          {
+            if (saveFile.ShowDialog() == DialogResult.OK)
+            {
+              using (var writer = new StreamWriter(saveFile.FileName))
+              {
+                var markdown = new Documentation.MarkdownVisitor(writer);
+                markdown.Visit(_document);
+              }
+            }
+          }
+        }
       }
       catch (Exception ex)
       {

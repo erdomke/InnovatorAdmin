@@ -1,12 +1,14 @@
 ﻿using Innovator.Client;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Documentation
 {
-  public class EntityDiagram
+  public class EntityDiagram : IDiagram
   {
     public List<EntityAssociation> Associations { get; } = new List<EntityAssociation>();
     public List<Entity> Entities { get; } = new List<Entity>();
@@ -140,6 +142,11 @@ namespace InnovatorAdmin.Documentation
         builder.AppendLine(child.Name);
         BuildClassificationNote(child, indent + 1, builder);
       }
+    }
+
+    public Task WriteAsync<T>(IDiagramWriter<T> writer, T target)
+    {
+      return writer.WriteAsync(this, target);
     }
   }
 }

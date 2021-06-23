@@ -1,4 +1,5 @@
 ﻿using Innovator.Client;
+using InnovatorAdmin.Documentation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace InnovatorAdmin
     private readonly List<Method> _methods = new List<Method>();
     private readonly Dictionary<string, ItemType> _itemTypesByName
       = new Dictionary<string, ItemType>(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, Sql> _sql
+    private readonly Dictionary<string, Sql> _sqlByName
       = new Dictionary<string, Sql>(StringComparer.OrdinalIgnoreCase);
     private readonly ItemReference[] _systemIdentities;
     private readonly Dictionary<string, string> _propertyNames
@@ -56,13 +57,15 @@ namespace InnovatorAdmin
     {
       Sql buffer;
       sql = null;
-      if (_sql.TryGetValue(name, out buffer))
+      if (_sqlByName.TryGetValue(name, out buffer))
       {
         sql = buffer;
         return true;
       }
       return false;
     }
+
+    public List<StateDiagram> Diagrams { get; } = new List<StateDiagram>();
 
     public PackageMetadataProvider()
     {
@@ -142,7 +145,7 @@ namespace InnovatorAdmin
           }
           break;
         case "itemtype":
-          var itemType = new ItemType(item, null, item.Property("name").HasValue());
+          var itemType = new ItemType(item, null, item.Property("name").HasValue(), GetName);
           if (!string.IsNullOrEmpty(itemType.Name) && !_itemTypesByName.ContainsKey(itemType.Name))
           {
             _itemTypesByName[itemType.Name] = itemType;
@@ -164,7 +167,7 @@ namespace InnovatorAdmin
           sql.Type = item.Property("type").AsString("");
           if (string.IsNullOrEmpty(sql.KeyedName))
             return;
-          _sql[sql.KeyedName.ToLowerInvariant()] = sql;
+          _sqlByName[sql.KeyedName.ToLowerInvariant()] = sql;
           break;
         case "property":
           _propertyNames[item.Id()] = item.Property("name").Value
@@ -174,6 +177,25 @@ namespace InnovatorAdmin
         case "list":
           _listsById[item.Id()] = new DatabaseList(item);
           break;
+        case "life cycle map":
+        case "workflow map":
+          if (item.Action().Value != "edit")
+            Diagrams.Add(new StateDiagram(item));
+          break;
+      }
+    }
+
+    private string GetName(string id)
+    {
+      if (_listsById.TryGetValue(id, out var list))
+      {
+        return list.Name;
+      }
+      else
+      {
+        return _methods.FirstOrDefault(m => m.Unique == id)?.KeyedName
+          ?? _itemTypesByName.Values.FirstOrDefault(i => i.Id == id)?.Name
+          ?? _sqlByName.Values.FirstOrDefault(s => s.Unique == id)?.KeyedName;
       }
     }
 
@@ -199,7 +221,10 @@ namespace InnovatorAdmin
     {
       var script = package.Read();
       var metadata = new PackageMetadataProvider() { Title = script.Title };
-      metadata.AddRange(script.Lines.Select(i => ElementFactory.Local.FromXml(i.Script).AssertItem()));
+      metadata.AddRange(script.Lines
+        .Where(l => l.Type != InstallType.DependencyCheck
+          && l.Type != InstallType.Warning)
+        .Select(l => ElementFactory.Local.FromXml(l.Script).AssertItem()));
       return metadata;
     }
 

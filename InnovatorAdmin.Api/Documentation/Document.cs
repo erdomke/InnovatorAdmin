@@ -28,7 +28,7 @@ namespace InnovatorAdmin.Documentation
         document.SubTitle = "RelationshipType";
       var label = itemType.Label ?? itemType.TabLabel;
       if (!string.IsNullOrEmpty(label) && !string.Equals(label, itemType.Name, StringComparison.OrdinalIgnoreCase))
-        document.SubTitle = "(" + label + ") " + document.SubTitle;
+        document.Title += " (" + label + ")";
 
       var typeDescripPara = new Paragraph();
       if (!string.IsNullOrEmpty(itemType.Description))

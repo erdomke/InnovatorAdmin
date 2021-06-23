@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:InnovatorAdmin.Editor"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
@@ -16,8 +17,14 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" Grid.Column="0" BorderThickness="0 0 0 1" BorderBrush="LightGray">
-            <StackPanel Orientation="Horizontal">
-                <Button Name="BackButton" MinWidth="24" MinHeight="24" Background="Transparent" BorderThickness="0" Click="BackButton_Click" IsEnabled="False">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="24" />
+                    <ColumnDefinition Width="24" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="120" />
+                </Grid.ColumnDefinitions>
+                <Button Grid.Row="0" Grid.Column="0" Name="BackButton" MinWidth="24" MinHeight="24" Background="Transparent" BorderThickness="0" Click="BackButton_Click" IsEnabled="False">
                     <Rectangle Width="16" Height="16">
                         <Rectangle.Fill>
                             <DrawingBrush>
@@ -44,7 +51,7 @@
                         </Style>
                     </Button.Style>
                 </Button>
-                <Button Name="ForwardButton" MinWidth="24" MinHeight="24" Background="Transparent" BorderThickness="0" Click="ForwardButton_Click" IsEnabled="False">
+                <Button Grid.Row="0" Grid.Column="1" Name="ForwardButton" MinWidth="24" MinHeight="24" Background="Transparent" BorderThickness="0" Click="ForwardButton_Click" IsEnabled="False">
                     <Rectangle Width="16" Height="16">
                         <Rectangle.Fill>
                             <DrawingBrush>
@@ -71,12 +78,17 @@
                         </Style>
                     </Button.Style>
                 </Button>
-                <StackPanel Orientation="Horizontal" Margin="12,0">
+                <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" Margin="12,0">
                     <Button Name="CategoryButton" VerticalAlignment="Center" BorderThickness="0" Margin="6,0" MinHeight="24" Background="Transparent" Click="CategoryButton_Click">ItemType</Button>
                     <TextBlock Text="›" VerticalAlignment="Center" />
-                    <Button Name="NameButton" VerticalAlignment="Center" BorderThickness="0" Margin="6,0" MinHeight="24" Background="Transparent" Click="NameButton_Click">ans_Data</Button>
+                    <Button Name="NameButton" VerticalAlignment="Top" BorderThickness="0" Margin="6,0" MinHeight="24" Background="Transparent" Click="NameButton_Click">ans_Data</Button>
                 </StackPanel>
-            </StackPanel>
+                <Menu Grid.Row="0" Grid.Column="3" Background="Transparent">
+                    <MenuItem Header="Save Document As">
+                        <MenuItem Name="mniExportMarkdown" Header="Markdown" HorizontalAlignment="Left" Click="mniExportMarkdown_Click"/>
+                    </MenuItem>
+                </Menu>
+            </Grid>
         </Border>
         <FlowDocumentScrollViewer Name="flowViewer" Grid.Row="1" Grid.Column="0" />
     </Grid>

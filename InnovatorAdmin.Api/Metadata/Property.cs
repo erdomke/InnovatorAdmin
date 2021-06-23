@@ -140,7 +140,7 @@ namespace InnovatorAdmin
       return (IPropertyDefinition)item;
     }
 
-    internal static Property FromItem(IReadOnlyItem prop, ItemType type)
+    internal static Property FromItem(IReadOnlyItem prop, ItemType type, Func<string, string> getName = null)
     {
       var newProp = new Property()
       {
@@ -182,10 +182,17 @@ namespace InnovatorAdmin
       {
         newProp.Restrictions.AddRange(new string[] { "ItemType", "List", "Property" });
       }
-      else if (prop.Property("data_source").KeyedName().HasValue())
+      else if (prop.Property("data_source").Attribute("name").HasValue()
+        || prop.Property("data_source").KeyedName().HasValue())
       {
         newProp.Restrictions.Add(prop.Property("data_source").Attribute("name").Value
           ?? prop.Property("data_source").KeyedName().Value);
+      }
+      else if (prop.Property("data_source").HasValue() && !string.IsNullOrEmpty(prop.Property("data_source").Value))
+      {
+        var name = getName?.Invoke(prop.Property("data_source").Value);
+        if (!string.IsNullOrEmpty(name))
+          newProp.Restrictions.Add(name);
       }
       newProp.Visibility =
         (prop.Property("is_hidden").AsBoolean(false) ? PropertyVisibility.None : PropertyVisibility.MainGrid)
