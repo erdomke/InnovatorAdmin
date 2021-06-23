@@ -412,13 +412,10 @@ namespace InnovatorAdmin
       if (TopRightPanel != null) TopRightPanel.Cursor = Cursors.SizeWE;
       BottomBorderPanel.Cursor = Cursors.SizeNS;
 
-      var marlett = new Font("Marlett", 8.5f);
-
       if (SystemLabel != null)
       {
         SystemLabel.MouseDown += SystemLabel_MouseDown;
         SystemLabel.MouseUp += SystemLabel_MouseUp;
-        SystemLabel.Font = marlett;
       }
 
       if (TitleLabel != null)
@@ -430,19 +427,16 @@ namespace InnovatorAdmin
 
       if (MinimizeLabel != null)
       {
-        MinimizeLabel.Font = marlett;
         MinimizeLabel.MouseClick += (s, e) => { if (e.Button == MouseButtons.Left) WindowState = FormWindowState.Minimized; };
       }
 
       if (MaximizeLabel != null)
       {
-        MaximizeLabel.Font = marlett;
         MaximizeLabel.MouseClick += (s, e) => { if (e.Button == MouseButtons.Left) ToggleMaximize(); };
       }
 
       if (CloseLabel != null)
       {
-        CloseLabel.Font = marlett;
         CloseLabel.MouseClick += (s, e) => Close(e);
       }
 
@@ -539,7 +533,7 @@ namespace InnovatorAdmin
       if (!_themeInitialize) return;
 
       var maximized = MinMaxState == FormWindowState.Maximized;
-      if (MaximizeLabel != null) MaximizeLabel.Text = maximized ? "2" : "1";
+      if (MaximizeLabel != null) MaximizeLabel.Text = maximized ? "🗗" : "🗖";
 
       //var panels = new[] { TopLeftCornerPanel, TopRightCornerPanel, BottomLeftCornerPanel, BottomRightCornerPanel,
       //          TopBorderPanel, LeftBorderPanel, RightBorderPanel, BottomBorderPanel, TopLeftPanel, TopRightPanel };

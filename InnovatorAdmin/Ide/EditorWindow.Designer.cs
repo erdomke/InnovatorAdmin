@@ -130,6 +130,8 @@
       this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
       this.tbcOutputView = new InnovatorAdmin.Controls.FlatTabControl();
       this.pgTools = new System.Windows.Forms.TabPage();
+      this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+      this.docHost = new System.Windows.Forms.Integration.ElementHost();
       this.pgTextOutput = new System.Windows.Forms.TabPage();
       this.outputEditor = new InnovatorAdmin.Editor.FullEditor();
       this.pgHtml = new System.Windows.Forms.TabPage();
@@ -161,8 +163,8 @@
       this.pnlLeftTop = new System.Windows.Forms.Panel();
       this.pnlRightTop = new System.Windows.Forms.Panel();
       this.pnlConnectionShadow = new InnovatorAdmin.DropShadow();
-      this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-      this.docHost = new System.Windows.Forms.Integration.ElementHost();
+      this.mniRefreshIntellisense = new System.Windows.Forms.ToolStripMenuItem();
+      this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
       this.tblMain.SuspendLayout();
       this.tblHeader.SuspendLayout();
       this.menuStrip.SuspendLayout();
@@ -182,12 +184,12 @@
       this.tableLayoutPanel2.SuspendLayout();
       this.tbcOutputView.SuspendLayout();
       this.pgTools.SuspendLayout();
+      this.tableLayoutPanel1.SuspendLayout();
       this.pgTextOutput.SuspendLayout();
       this.pgHtml.SuspendLayout();
       this.pgTableOutput.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.dgvItems)).BeginInit();
       this.conTable.SuspendLayout();
-      this.tableLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
       // 
       // tblMain
@@ -270,7 +272,7 @@
       this.lblClose.Padding = new System.Windows.Forms.Padding(3);
       this.lblClose.Size = new System.Drawing.Size(19, 22);
       this.lblClose.TabIndex = 14;
-      this.lblClose.Text = "r";
+      this.lblClose.Text = "🗙";
       this.lblClose.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
       // 
       // lblTitle
@@ -426,7 +428,9 @@
             this.commentUncommentToolStripMenuItem,
             this.toolStripMenuItem1,
             this.lineOperationsToolStripMenuItem,
-            this.xMLToolStripMenuItem});
+            this.xMLToolStripMenuItem,
+            this.toolStripSeparator10,
+            this.mniRefreshIntellisense});
       this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
       this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
       this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
@@ -904,7 +908,7 @@
       this.lblMaximize.Padding = new System.Windows.Forms.Padding(3);
       this.lblMaximize.Size = new System.Drawing.Size(22, 22);
       this.lblMaximize.TabIndex = 13;
-      this.lblMaximize.Text = "1";
+      this.lblMaximize.Text = "🗖";
       this.lblMaximize.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
       // 
       // lblMinimize
@@ -919,7 +923,7 @@
       this.lblMinimize.Padding = new System.Windows.Forms.Padding(3);
       this.lblMinimize.Size = new System.Drawing.Size(22, 22);
       this.lblMinimize.TabIndex = 12;
-      this.lblMinimize.Text = "0";
+      this.lblMinimize.Text = "🗕";
       this.lblMinimize.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
       // 
       // picLogo
@@ -1199,6 +1203,30 @@
       this.pgTools.TabIndex = 3;
       this.pgTools.Text = "Tools";
       this.pgTools.UseVisualStyleBackColor = true;
+      // 
+      // tableLayoutPanel1
+      // 
+      this.tableLayoutPanel1.ColumnCount = 1;
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.tableLayoutPanel1.Controls.Add(this.docHost, 0, 1);
+      this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 3);
+      this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+      this.tableLayoutPanel1.RowCount = 2;
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 28F));
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.tableLayoutPanel1.Size = new System.Drawing.Size(752, 372);
+      this.tableLayoutPanel1.TabIndex = 0;
+      // 
+      // docHost
+      // 
+      this.docHost.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.docHost.Location = new System.Drawing.Point(3, 31);
+      this.docHost.Name = "docHost";
+      this.docHost.Size = new System.Drawing.Size(746, 338);
+      this.docHost.TabIndex = 0;
+      this.docHost.Text = "elementHost1";
+      this.docHost.Child = null;
       // 
       // pgTextOutput
       // 
@@ -1543,29 +1571,16 @@
       this.pnlConnectionShadow.Size = new System.Drawing.Size(996, 4);
       this.pnlConnectionShadow.TabIndex = 17;
       // 
-      // tableLayoutPanel1
+      // mniRefreshIntellisense
       // 
-      this.tableLayoutPanel1.ColumnCount = 1;
-      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-      this.tableLayoutPanel1.Controls.Add(this.docHost, 0, 1);
-      this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 3);
-      this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-      this.tableLayoutPanel1.RowCount = 2;
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 28F));
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel1.Size = new System.Drawing.Size(752, 372);
-      this.tableLayoutPanel1.TabIndex = 0;
+      this.mniRefreshIntellisense.Name = "mniRefreshIntellisense";
+      this.mniRefreshIntellisense.Size = new System.Drawing.Size(244, 26);
+      this.mniRefreshIntellisense.Text = "Refresh Intellisense";
       // 
-      // docHost
+      // toolStripSeparator10
       // 
-      this.docHost.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.docHost.Location = new System.Drawing.Point(3, 31);
-      this.docHost.Name = "docHost";
-      this.docHost.Size = new System.Drawing.Size(746, 338);
-      this.docHost.TabIndex = 0;
-      this.docHost.Text = "elementHost1";
-      this.docHost.Child = null;
+      this.toolStripSeparator10.Name = "toolStripSeparator10";
+      this.toolStripSeparator10.Size = new System.Drawing.Size(241, 6);
       // 
       // EditorWindow
       // 
@@ -1606,12 +1621,12 @@
       this.tableLayoutPanel2.ResumeLayout(false);
       this.tbcOutputView.ResumeLayout(false);
       this.pgTools.ResumeLayout(false);
+      this.tableLayoutPanel1.ResumeLayout(false);
       this.pgTextOutput.ResumeLayout(false);
       this.pgHtml.ResumeLayout(false);
       this.pgTableOutput.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this.dgvItems)).EndInit();
       this.conTable.ResumeLayout(false);
-      this.tableLayoutPanel1.ResumeLayout(false);
       this.ResumeLayout(false);
 
     }
@@ -1751,5 +1766,7 @@
     private Controls.NoCopyLabel lblTitle;
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     private System.Windows.Forms.Integration.ElementHost docHost;
+    private System.Windows.Forms.ToolStripMenuItem mniRefreshIntellisense;
+    private System.Windows.Forms.ToolStripSeparator toolStripSeparator10;
   }
 }

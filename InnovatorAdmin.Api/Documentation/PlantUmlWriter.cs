@@ -1,18 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Documentation
 {
-  public class PlantUmlWriter : IEntityWriter
+  public class PlantUmlWriter : IDiagramWriter<TextWriter>
   {
     public Dictionary<string, string> SkipParams { get; } = new Dictionary<string, string>()
     {
       { "monochrome", "true" },
       { "shadowing", "false" }
     };
-
-    public void Write(EntityDiagram diagram, TextWriter writer)
+    
+    public Task WriteAsync(EntityDiagram diagram, TextWriter writer)
     {
       writer.Write(@"@startuml ");
       writer.WriteLine(diagram.Entities.FirstOrDefault(e => !string.IsNullOrEmpty(e.Package))?.Package ?? "Entities");
@@ -32,9 +34,9 @@ namespace InnovatorAdmin.Documentation
       {
         if (!string.IsNullOrEmpty(package.Key))
         {
-          writer.Write("package ");
+          writer.Write("package \"");
           writer.Write(package.Key);
-          writer.WriteLine(" <<Rectangle>> {");
+          writer.WriteLine("\" <<Rectangle>> {");
         }
         foreach (var entity in package)
         {
@@ -114,6 +116,7 @@ namespace InnovatorAdmin.Documentation
 
       writer.WriteLine("@enduml");
       writer.Flush();
+      return Task.FromResult(true);
     }
 
     private string AssociationEndLabel(AssociationEnd associationEnd)
@@ -148,6 +151,128 @@ namespace InnovatorAdmin.Documentation
         default: // AssociationType.Unknown
           return "";
       }
+    }
+    
+    public Task WriteAsync(StateDiagram diagram, TextWriter writer)
+    {
+      const string terminalNode = "[*]";
+      writer.WriteLine("@startuml");
+      foreach (var skinParam in SkipParams)
+      {
+        writer.Write("skinparam ");
+        writer.Write(skinParam.Key);
+        writer.Write(" ");
+        writer.WriteLine(skinParam.Value);
+      }
+
+      var nodesByName = new Dictionary<string, StateNode>(StringComparer.OrdinalIgnoreCase);
+      var namesById = new Dictionary<string, string>();
+      var hasOneStartNode = diagram.Nodes.Values.Count(DisplayAsStartNode) == 1;
+      if (!hasOneStartNode)
+        nodesByName[terminalNode] = null;
+      foreach (var node in diagram.Nodes.Values)
+      {
+        if (hasOneStartNode && DisplayAsStartNode(node))
+        {
+          nodesByName[terminalNode] = node;
+          namesById[node.Id] = terminalNode;
+        }
+        else
+        {
+          var baseName = node.Name.Replace(" ", "").Replace("-", "");
+          var name = baseName;
+          var index = 1;
+          while (nodesByName.ContainsKey(name))
+            name = baseName + (++index).ToString();
+          nodesByName[name] = node;
+          namesById[node.Id] = name;
+          var label = node.Label ?? node.Name;
+          if (label != name)
+          {
+            writer.Write("state \"");
+            writer.Write(label);
+            writer.Write("\" as ");
+            writer.WriteLine(name);
+          }
+        }
+      }
+
+      var links = new List<StateLink>();
+      if (nodesByName[terminalNode] == null)
+      {
+        links.AddRange(diagram.Nodes.Values
+          .Where(n => n.Type == NodeType.Start)
+          .OrderBy(n => Math.Pow(n.Location.X, 2) + Math.Pow(n.Location.Y, 2))
+          .Select(n => new StateLink(null, n, "Start")));
+      }
+      links.AddRange(diagram.Links
+        .OrderBy(l => l.Source.Type == NodeType.Start ? 0
+          : (l.Related.Type == NodeType.End ? 2 : 1))
+        .ThenBy(l => Math.Pow(l.Source.Location.X, 2) + Math.Pow(l.Source.Location.Y, 2))
+        .ThenBy(l => Math.Pow(l.Related.Location.X, 2) + Math.Pow(l.Related.Location.Y, 2)));
+
+      foreach (var link in links)
+      {
+        if (link.Source == null)
+          writer.Write(terminalNode);
+        else
+          writer.Write(namesById[link.Source.Id]);
+
+        writer.Write(" -");
+        var direction = GetDirection(link);
+        writer.Write(direction);
+        var styles = new List<string>();
+        if (link.IsDefault)
+          styles.Add("bold");
+        if (link.IsOverride)
+          styles.Add("dashed");
+        if (styles.Count > 0)
+        {
+          writer.Write('[');
+          writer.Write(string.Join(",", styles));
+          writer.Write(']');
+        }
+        writer.Write("-> ");
+
+        if (link.Related == null)
+          writer.Write(terminalNode);
+        else
+          writer.Write(namesById[link.Related.Id]);
+        var label = link.Label ?? link.Name;
+        if (!string.IsNullOrEmpty(label))
+        {
+          writer.Write(" : ");
+          writer.Write(label);
+        }
+        writer.WriteLine();
+      }
+
+      writer.WriteLine("@enduml");
+      writer.Flush();
+      return Task.FromResult(true);
+    }
+
+    private static string GetDirection(StateLink link)
+    {
+      if (link.Source != null && link.Related != null)
+      {
+        var angle = Math.Atan2(link.Related.Location.Y - link.Source.Location.Y
+          , link.Related.Location.X - link.Source.Location.X);
+        if (angle >= Math.PI / 12 && angle <= Math.PI * 11 / 12)
+          return "down";
+        else if (angle <= -Math.PI / 12 && angle >= -Math.PI * 11 / 12)
+          return "up";
+        else if (Math.Abs(angle) > Math.PI * 11 / 12)
+          return "left";
+      }
+      return "right";
+    }
+
+    private static bool DisplayAsStartNode(StateNode node)
+    {
+      return node.Type == NodeType.Start
+        && node.IsAutomatic
+        && string.Equals(node.Label ?? node.Name, "Start", System.StringComparison.OrdinalIgnoreCase);
     }
   }
 }

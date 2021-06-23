@@ -1,22 +1,35 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Documentation
 {
-  public class PlantUmlUrlWriter : IEntityWriter
+  public class HttpImageWriter : IDiagramWriter<Stream>
   {
     public string Format { get; set; } = "svg";
     public Uri Url { get; set; } = new Uri("http://www.plantuml.com/plantuml/");
     public PlantUmlWriter Writer { get; set; }
+    public HttpClient HttpClient { get; set; }
 
-    public void Write(EntityDiagram diagram, TextWriter writer)
+    public Task WriteAsync(EntityDiagram diagram, Stream stream)
+    {
+      return WriteInternal(diagram, stream);
+    }
+
+    public Task WriteAsync(StateDiagram diagram, Stream stream)
+    {
+      return WriteInternal(diagram, stream);
+    }
+
+    public async Task<string> GetUrl(IDiagram diagram)
     {
       var memStream = new MemoryStream();
       using (var deflate = new DeflateStream(memStream, CompressionLevel.Optimal))
       using (var compressWriter = new StreamWriter(deflate))
       {
-        (Writer ?? new PlantUmlWriter()).Write(diagram, compressWriter);
+        await diagram.WriteAsync(Writer ?? new PlantUmlWriter(), compressWriter);
       }
 
       const string base64Map = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -29,13 +42,21 @@ namespace InnovatorAdmin.Documentation
       for (var i = 0; i < characters.Length; i++)
         characters[i] = map[characters[i]];
 
-      writer.Write(Url.AbsoluteUri);
-      if (!Url.AbsoluteUri.EndsWith("/"))
-        writer.Write('/');
-      writer.Write(Format);
-      writer.Write('/');
-      writer.Write(characters);
-      writer.Flush();
+      var url = Url.AbsoluteUri;
+      if (!url.EndsWith("/"))
+        url += "/";
+      url += Format + "/" + characters;
+      return url;
+    }
+
+    private async Task WriteInternal(IDiagram diagram, Stream stream)
+    {
+      var url = await GetUrl(diagram);
+      HttpClient = HttpClient ?? new HttpClient();
+      using (var readStream = await HttpClient.GetStreamAsync(url))
+      {
+        await readStream.CopyToAsync(stream);
+      }
     }
   }
 }

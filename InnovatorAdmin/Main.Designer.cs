@@ -182,7 +182,7 @@
       this.tblHeader.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tblHeader.RowStyles.Add(new System.Windows.Forms.RowStyle());
       this.tblHeader.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-      this.tblHeader.Size = new System.Drawing.Size(589, 74);
+      this.tblHeader.Size = new System.Drawing.Size(589, 63);
       this.tblHeader.TabIndex = 1;
       // 
       // lblClose
@@ -195,7 +195,7 @@
       this.lblClose.Name = "lblClose";
       this.lblClose.Size = new System.Drawing.Size(24, 32);
       this.lblClose.TabIndex = 14;
-      this.lblClose.Text = "r";
+      this.lblClose.Text = "🗙";
       this.lblClose.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
       // 
       // lblTitle
@@ -223,7 +223,7 @@
       this.lblMaximize.Name = "lblMaximize";
       this.lblMaximize.Size = new System.Drawing.Size(24, 32);
       this.lblMaximize.TabIndex = 13;
-      this.lblMaximize.Text = "1";
+      this.lblMaximize.Text = "🗖";
       this.lblMaximize.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
       // 
       // lblMinimize
@@ -236,7 +236,7 @@
       this.lblMinimize.Name = "lblMinimize";
       this.lblMinimize.Size = new System.Drawing.Size(24, 32);
       this.lblMinimize.TabIndex = 12;
-      this.lblMinimize.Text = "0";
+      this.lblMinimize.Text = "🗕";
       this.lblMinimize.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
       // 
       // picLogo
@@ -256,7 +256,7 @@
       this.lblMessage.Location = new System.Drawing.Point(83, 41);
       this.lblMessage.Margin = new System.Windows.Forms.Padding(3);
       this.lblMessage.Name = "lblMessage";
-      this.lblMessage.Size = new System.Drawing.Size(0, 30);
+      this.lblMessage.Size = new System.Drawing.Size(0, 19);
       this.lblMessage.TabIndex = 16;
       // 
       // pnlTopLeft
@@ -406,9 +406,9 @@
       // 
       this.lblVersion.Anchor = System.Windows.Forms.AnchorStyles.Left;
       this.lblVersion.AutoSize = true;
-      this.lblVersion.Location = new System.Drawing.Point(3, 6);
+      this.lblVersion.Location = new System.Drawing.Point(3, 11);
       this.lblVersion.Name = "lblVersion";
-      this.lblVersion.Size = new System.Drawing.Size(0, 30);
+      this.lblVersion.Size = new System.Drawing.Size(0, 19);
       this.lblVersion.TabIndex = 18;
       // 
       // pnlBottom
@@ -424,7 +424,7 @@
       // 
       // Main
       // 
-      this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 30F);
+      this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 19F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.BackColor = System.Drawing.Color.DarkGray;
       this.ClientSize = new System.Drawing.Size(597, 384);
@@ -454,7 +454,6 @@
     private System.Windows.Forms.TableLayoutPanel tblMain;
     private System.Windows.Forms.TableLayoutPanel tblHeader;
     private System.Windows.Forms.Label lblClose;
-    private System.Windows.Forms.Label lblTitle;
     private System.Windows.Forms.Label lblMaximize;
     private System.Windows.Forms.Label lblMinimize;
     private System.Windows.Forms.PictureBox picLogo;
@@ -472,7 +471,7 @@
     private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     private System.Windows.Forms.Label lblVersion;
     private System.Windows.Forms.Panel pnlBottom;
-
+    private Controls.NoCopyLabel lblTitle;
   }
 }
 

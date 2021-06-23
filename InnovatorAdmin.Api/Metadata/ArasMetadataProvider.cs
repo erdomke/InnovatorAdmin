@@ -318,6 +318,7 @@ namespace InnovatorAdmin
           source.Relationships.Add(relType);
           relType.SourceTypeName = source.Name;
           relType.TabLabel = rel.Property("label").AsString(null);
+          relType.RelationshipTypeId = rel.Id();
           relType.RelatedTypeName = rel.RelatedId().Attribute("name").Value;
         }
       }
@@ -347,42 +348,49 @@ namespace InnovatorAdmin
 
     private async Task<bool> ReloadSecondaryMetadata()
     {
-      var methods = _conn.ApplyAsync("<Item type='Method' action='get' select='config_id,core,name,method_code,comments,execution_allowed_to'></Item>", true, false).ToTask();
+      var methods = _conn.ApplyAsync(new Command(@"<AML>
+  <Item type='Method' action='get' select='config_id,core,name,method_code,comments,execution_allowed_to,method_type'>
+    <method_type condition='ne'>JavaScript</method_type>
+  </Item>
+  <Item type='Method' action='get' select='config_id,core,name,comments,method_type'>
+    <method_type>JavaScript</method_type>
+  </Item>
+</AML>").WithAction(CommandAction.ApplyAML), true, false).ToTask();
       var sysIdents = _conn.ApplyAsync(@"<Item type='Identity' action='get' select='id,name'>
-                                      <name condition='in'>'World', 'Creator', 'Owner', 'Manager', 'Innovator Admin', 'Super User'</name>
-                                    </Item>", true, true).ToTask();
+  <name condition='in'>'World', 'Creator', 'Owner', 'Manager', 'Innovator Admin', 'Super User'</name>
+</Item>", true, true).ToTask();
       var sqls = _conn.ApplyAsync("<Item type='SQL' action='get' select='id,name,type'></Item>", true, false).ToTask();
       var customProps = _conn.ApplyAsync(@"<Item type='Property' action='get' select='name,source_id(id,name)'>
-                                          <created_by_id condition='ne'>AD30A6D8D3B642F5A2AFED1A4B02BEFA</created_by_id>
-                                          <source_id>
-                                            <Item type='ItemType' action='get'>
-                                              <core>1</core>
-                                              <created_by_id>AD30A6D8D3B642F5A2AFED1A4B02BEFA</created_by_id>
-                                            </Item>
-                                          </source_id>
-                                        </Item>", true, false).ToTask();
+  <created_by_id condition='ne'>AD30A6D8D3B642F5A2AFED1A4B02BEFA</created_by_id>
+  <source_id>
+    <Item type='ItemType' action='get'>
+      <core>1</core>
+      <created_by_id>AD30A6D8D3B642F5A2AFED1A4B02BEFA</created_by_id>
+    </Item>
+  </source_id>
+</Item>", true, false).ToTask();
       var polyLists = _conn.ApplyAsync(@"<Item type='Property' action='get' select='data_source(id)'>
-                                          <name>itemtype</name>
-                                          <data_type>list</data_type>
-                                          <source_id>
-                                            <Item type='ItemType' action='get'>
-                                              <implementation_type>polymorphic</implementation_type>
-                                            </Item>
-                                          </source_id>
-                                        </Item>", true, false).ToTask();
+  <name>itemtype</name>
+  <data_type>list</data_type>
+  <source_id>
+    <Item type='ItemType' action='get'>
+      <implementation_type>polymorphic</implementation_type>
+    </Item>
+  </source_id>
+</Item>", true, false).ToTask();
       var sequences = _conn.ApplyAsync(@"<Item type='Sequence' action='get' select='name'></Item>", true, false).ToTask();
       var elementTypes = _conn.ApplyAsync(@"<Item action='get' type='cmf_ElementType' select='generated_type'>
-                                                <Relationships>
-                                                  <Item action='get' type='cmf_PropertyType' select='generated_type'>
-                                                  </Item>
-                                                </Relationships>
-                                              </Item>", true, false).ToTask();
+  <Relationships>
+    <Item action='get' type='cmf_PropertyType' select='generated_type'>
+    </Item>
+  </Relationships>
+</Item>", true, false).ToTask();
       var contentTypes = _conn.ApplyAsync(@"<Item action='get' type='cmf_ContentType' select='linked_item_type'>
-                                              <linked_item_type>
-                                                <Item type='ItemType' action='get'>
-                                                </Item>
-                                              </linked_item_type>
-                                            </Item>", true, false).ToTask();
+  <linked_item_type>
+    <Item type='ItemType' action='get'>
+    </Item>
+  </linked_item_type>
+</Item>", true, false).ToTask();
       var presentationConfigs = _conn.ApplyAsync(@"<Item type='ITPresentationConfiguration' action='get' select='id,related_id'>
   <related_id>
     <Item type='PresentationConfiguration' action='get' select='id'>

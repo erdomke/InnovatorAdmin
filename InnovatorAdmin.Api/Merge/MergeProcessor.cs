@@ -19,7 +19,7 @@ namespace InnovatorAdmin
         ProgressChanged?.Invoke(this, new ProgressChangedEventArgs("Reading files", prog / 2));
         var doc = new XmlDocument();
         docs.Add(Tuple.Create(doc, path));
-        return new XmlNodeWriter(doc);
+        return doc.CreateNavigator().AppendChild();
       });
 
       ProgressChanged?.Invoke(this, new ProgressChangedEventArgs("Performing cleanup", 50));

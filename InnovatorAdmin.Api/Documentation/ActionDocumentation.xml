@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<methods>
+  <method name="add">
+    <summary>Add an item to the database</summary>
+    <param name="@do_skipOnAfterAdd"><datatype type="boolean" />If <c>1</c> then don't run <c>onAfterAdd</c> server events. Default is <c>0</c>.</param>
+    <param name="@serverEvents"><datatype type="boolean" />If <c>0</c> then disable server events when running the <c>doGetItem</c> only. <c>onBefore/AfterAdd</c> events are not disabled. Default is <c>1</c>.</param>
+  </method>
+  <method name="AddItem">
+    <inheritdoc cref="add" />
+  </method>
+  <method name="copy">
+    <summary>Create a copy of the specified item. Used when copying relationships in the relationships grid</summary>
+    <param name="@do_add"><datatype type="boolean" />Whether or not to add the item to the database</param>
+    <param name="@do_lock"><datatype type="boolean" />Whether or not to keep the item locked when the operation is complete</param>
+  </method>
+  <method name="copyAsIs">
+    <summary>Create a copy of the specified item. Used with the <c>Save As...</c> menu item</summary>
+    <param name="@lock_related"><datatype type="boolean" /></param>
+    <param name="@do_lock"><datatype type="boolean" />Whether or not to keep the item locked when the operation is complete</param>
+    <param name="@useInputProperties"><datatype type="boolean" /></param>
+  </method>
+  <method name="copyAsNew">
+    <inheritdoc cref="copyAsIs" />
+  </method>
+  <method name="EmailItem">
+    <param name="___aras_email_identity_name___"><datatype type="itemname[Identity]" />The name of the identity to send to</param>
+    <param name="___aras_email_item___/Item[@type='EMail Message'][subject][body_plain][body_html][from_user][query_string]">The e-mail item to send</param>
+  </method>
+  <method name="get">
+    <summary>Queries the database to return information about the specified items</summary>
+    <param name="@select"><datatype type="selectlist" />A comma-delimited list of property names (column names) to return</param>
+    <param name="@orderBy"><datatype type="orderBy" />A comma-delimited list of property names (column names) specifying the order of the results</param>
+    <param name="@page"><datatype type="integer" />The page number for the results set.</param>
+    <param name="@pagesize"><datatype type="integer" />The number of results to include in a page.</param>
+    <param name="@maxRecords"><datatype type="integer" />The absolute maximum Items to be searched in the database.</param>
+    <param name="@levels"><datatype type="integer" />The item configuration depth to be returned</param>
+    <param name="@serverEvents"><datatype type="boolean" />If <c>0</c> then disable the server events improving performance. Default is <c>1</c></param>
+    <param name="@isCriteria"><datatype type="boolean" />If <c>0</c> then include the nested structure for the Item configuration in the response but don't use it as search criteria. Default is <c>1</c>, which uses the nested structure in the request as search criteria.</param>
+    <param name="@related_expand"><datatype type="boolean" />If <c>0</c> then do not expand item properties, instead, only return the ID.</param>
+    <param name="@language"><datatype type="string" />A comma-delimited list of language codes</param>
+    <param name="@queryType"><datatype type="enum[Effective|Latest|Released]" />Defines which version of a versionable item to return based on the <c>queryDate</c></param>
+    <param name="@queryDate"><datatype type="date" />Date to use when searching for versionable items</param>
+    <param name="@relas_only"><datatype type="boolean" />If <c>1</c>, only return the contents of the <c>&lt;Relationships&gt;</c> tag and not the parent item. Default is <c>0</c>.</param>
+    <param name="@stdProps"><datatype type="boolean" />Whether to include standard system properties. Default is <c>1</c>. If <c>0</c>, properties such as <c>config_id</c>, <c>created_by_id</c>, <c>current_state</c>, <c>modified_by_id</c>, and <c>permission_id</c> are not returned.</param>
+    <param name="@expand"><datatype type="boolean" /></param>
+    <param name="@config_path"><datatype type="string" /></param>
+    <param name="@where"><datatype type="whereclause" /></param>
+    <param name="@returnMode"><datatype type="enum[itemsOnly|countOnly]" />Whether to return just the items or the count of items.</param>
+  </method>
+  <method name="create">
+    <summary>Acts as a <c>get</c> if the Item exists, otherwise acts as an <c>add</c>.</summary>
+    <inheritdoc cref="get" />
+    <inheritdoc cref="add" />
+  </method>
+  <method name="getItemAllVersions">
+    <summary>Returns all versions of the item with the specified ID.</summary>
+    <inheritdoc cref="get" />
+  </method>
+  <method name="GetItemConfig">
+    <inheritdoc cref="get" />
+  </method>
+  <method name="getItemLastVersion">
+    <inheritdoc cref="get" />
+  </method>
+  <method name="getItemRelationships">
+    <inheritdoc cref="get" />
+  </method>
+  <method name="GetItemRepeatConfig">
+    <inheritdoc cref="get" />
+    <summary>Add an item to the database</summary>
+    <param name="@resolution"><datatype type="enum[AsSaved|Released|Current]" />Determines how to resolve a versionable structure</param>
+    <param name="Relationships/Item[@repeatTimes][@repeatProp]">
+      <datatype path="@repeatTimes" type="integer" />
+      <datatype path="@repeatProp" type="string" />
+    </param>
+  </method>
+  <method name="recache">
+    <inheritdoc cref="get" />
+  </method>
+  <method name="getPermissions">
+    <summary>Determine if the current user has the specified permissions</summary>
+    <param name="@access_type"><datatype type="enum[can_add|can_delete|can_get|can_update|can_discover|can_change_access]" />Permission to check for</param>
+  </method>
+  <method name="GetPermissionsClause">
+    <param name="tablename"><datatype type="itemname[ItemType]" /></param>
+    <param name="allownulls"><datatype type="boolean" /></param>
+  </method>
+  <method name="edit">
+    <param name="@version"><datatype type="boolean" />If <c>0</c> then don't version an Item on update. Default is <c>1</c>, which is version the Item (if it's a versionable Item) on update.</param>
+    <param name="@serverEvents"><datatype type="boolean" />If <c>0</c> then disable the server events improving performance. Default is <c>1</c>. Only <c>update</c> events are disabled, <c>lock</c> events can be executed if using <c>edit</c>.</param>
+    <param name="@where"><datatype type="whereclause" /></param>
+  </method>
+  <method name="delete">
+    <param name="@where"><datatype type="whereclause" /></param>
+  </method>
+  <method name="purge">
+    <inheritdoc cref="delete" />
+  </method>
+  <method name="merge">
+    <param name="@do_skipOnAfterAdd"><datatype type="boolean" />If <c>1</c> then don't run <c>onAfterAdd</c> server events. Default is <c>0</c>.</param>
+    <param name="@version"><datatype type="boolean" />If <c>0</c> then don't version an Item on update. Default is <c>1</c>, which is version the Item (if it's a versionable Item) on update.</param>
+    <param name="@serverEvents"><datatype type="boolean" />If <c>0</c> then disable the server events improving performance. Default is <c>1</c>. Only <c>update</c> events are disabled, <c>lock</c> events can be executed if using <c>edit</c>.</param>
+    <param name="@where"><datatype type="whereclause" /></param>
+  </method>
+  <method name="update">
+    <param name="@version"><datatype type="boolean" />If <c>0</c> then don't version an Item on update. Default is <c>1</c>, which is version the Item (if it's a versionable Item) on update.</param>
+    <param name="@serverEvents"><datatype type="boolean" />If <c>0</c> then disable the server events improving performance. Default is <c>1</c>. Only <c>update</c> events are disabled, <c>lock</c> events can be executed if using <c>edit</c>.</param>
+    <param name="@where"><datatype type="whereclause" /></param>
+  </method>
+  <method name="AddHistory">
+    <param name="action"></param>
+    <param name="filename"></param>
+    <param name="form_name"></param>
+  </method>
+  <method name="GetItemsForStructureBrowser">
+    <param name="Item"></param>
+  </method>
+  <method name="instantiateWorkflow">
+    <param name="WorkflowMap"><datatype type="item[Workflow Map]" />The workflow map to instantiate</param>
+  </method>
+  <method name="promoteItem">
+    <param name="state"><datatype type="string" /></param>
+    <param name="comments"><datatype type="string" /></param>
+  </method>
+  <method name="Run Report">
+    <param name="report_name"><datatype type="string" /></param>
+    <param name="AML/Item"></param>
+  </method>
+  <method name="SQL Process">
+    <param name="name"><datatype type="string" /></param>
+    <param name="PROCESS"></param>
+    <param name="ARG1"></param>
+    <param name="ARG2"></param>
+    <param name="ARG3"></param>
+    <param name="ARG4"></param>
+    <param name="ARG5"></param>
+    <param name="ARG6"></param>
+    <param name="ARG7"></param>
+    <param name="ARG8"></param>
+    <param name="ARG9"></param>
+  </method>
+
+  <method name="ES_Search">
+    <param name="query_text"><datatype type="string"/>The search text</param>
+    <param name="start"><datatype type="integer"/>How many results to offset (Default is <c>0</c>)</param>
+    <param name="rows"><datatype type="integer"/>Number of results to return</param>
+    <param name="Relationships/Item[@type='Facet'][solr_name][name][Relationships/Item[@type='FacetValue'][value][is_selected]]"></param>
+  </method>
+  <method name="GetCommandBarItems">
+    <param name="item_id"><datatype type="string"/>Context item ID</param>
+    <param name="item_type_id"><datatype type="item[itemtype]"/>Item type ID</param>
+    <param name="location_name"><datatype type="itemname[cui_Location]"/>Location</param>
+    <param name="item_classification"><datatype type="string"/></param>
+  </method>
+  <method name="PE_GetResolvedStructure">
+    <inheritdoc cref="GetItemRepeatConfig" />
+  </method>
+</methods>

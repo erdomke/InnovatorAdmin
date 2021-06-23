@@ -485,17 +485,19 @@ namespace InnovatorAdmin.Editor
                   if (version < 0 || version >= 11)
                     methods = methods.Concat(new string[] { "GetInheritedServerEvents", "getHistoryItems" });
 
-                  items = _metadata.Methods.Select(m => (ICompletionData)new AttributeValueCompletionData()
-                  {
-                    Text = m.KeyedName,
-                    Image = Icons.ForMethod(m).Wpf,
-                    Description = Tooltips.Documentation(m.Documentation, "method")
-                  }).Concat(methods.Select(m => (ICompletionData)new AttributeValueCompletionData()
-                  {
-                    Text = m,
-                    Image = Icons.DatabaseMethod16.Wpf,
-                    Description = _actionDocs.TryGetValue(m, out var actionDoc) ? Tooltips.Documentation(actionDoc, "action") : null
-                  }));
+                  items = _metadata.Methods
+                    .Where(m => m.IsServerMethod)
+                    .Select(m => (ICompletionData)new AttributeValueCompletionData()
+                    {
+                      Text = m.KeyedName,
+                      Image = Icons.ForMethod(m).Wpf,
+                      Description = Tooltips.Documentation(m.Documentation, "method")
+                    }).Concat(methods.Select(m => (ICompletionData)new AttributeValueCompletionData()
+                    {
+                      Text = m,
+                      Image = Icons.DatabaseMethod16.Wpf,
+                      Description = _actionDocs.TryGetValue(m, out var actionDoc) ? Tooltips.Documentation(actionDoc, "action") : null
+                    }));
                   break;
                 case "id":
                   items = await Completions<AttributeValueCompletionData>(state, path, null, new[] { AmlTypeDefinition.FromDefinition(AmlDataType.Item, path.Last().Type) });
@@ -539,12 +541,12 @@ namespace InnovatorAdmin.Editor
                     if (!string.IsNullOrEmpty(path[path.Count - 3].Type)
                       && _metadata.ItemTypeByName(path[path.Count - 3].Type, out itemType))
                     {
-                      items = ItemTypeCompletion<AttributeValueCompletionData>(itemType.Relationships, true);
+                      items = ItemTypeCompletion<AttributeValueCompletionData>(itemType.Relationships, i => i.Id);
                     }
                   }
                   else
                   {
-                    items = ItemTypeCompletion<AttributeValueCompletionData>(_metadata.ItemTypes, true);
+                    items = ItemTypeCompletion<AttributeValueCompletionData>(_metadata.ItemTypes, i => i.Id);
                   }
                   break;
               }
@@ -1066,13 +1068,15 @@ namespace InnovatorAdmin.Editor
               {
                 case "RELATIONSHIPTYPE":
                   if (typeDefn.Type == AmlDataType.ItemName)
-                  {
-                    results.AddRange(ItemTypeCompletion<T>(_metadata.ItemTypes.Where(i => i.IsRelationship), false));
-                  }
+                    results.AddRange(ItemTypeCompletion<T>(_metadata.ItemTypes.Where(i => i.IsRelationship)));
+                  else
+                    results.AddRange(ItemTypeCompletion<T>(_metadata.ItemTypes.Where(i => i.IsRelationship), i => i.RelationshipTypeId));
                   break;
                 case "ITEMTYPE":
-                  var useKeyedName = typeDefn.Type == AmlDataType.ItemName || (doc?.Name == "type" && state == XmlState.AttributeValue);
-                  results.AddRange(ItemTypeCompletion<T>(_metadata.ItemTypes, !useKeyedName));
+                  if (typeDefn.Type == AmlDataType.ItemName || (doc?.Name == "type" && state == XmlState.AttributeValue))
+                    results.AddRange(ItemTypeCompletion<T>(_metadata.ItemTypes));
+                  else
+                    results.AddRange(ItemTypeCompletion<T>(_metadata.ItemTypes, i => i.Id));
                   break;
                 case "METHOD":
                   results.AddRange(_metadata.Methods.Select(m => new T()
@@ -1181,7 +1185,7 @@ namespace InnovatorAdmin.Editor
       return results;
     }
 
-    private IEnumerable<ICompletionData> ItemTypeCompletion<T>(IEnumerable<ItemType> itemTypes, bool insertId = false) where T : BasicCompletionData, new()
+    private IEnumerable<ICompletionData> ItemTypeCompletion<T>(IEnumerable<ItemType> itemTypes, Func<ItemType, string> insertAction = null) where T : BasicCompletionData, new()
     {
       return itemTypes.Select(i =>
       {
@@ -1191,7 +1195,7 @@ namespace InnovatorAdmin.Editor
           Image = Icons.ForItemType(i).Wpf,
           Description = Tooltips.ItemType(i)
         };
-        if (insertId) result.Action = () => i.Id;
+        if (insertAction != null) result.Action = () => insertAction(i);
         return result;
       }).Concat(itemTypes.Where(i => !string.IsNullOrWhiteSpace(i.Label) &&
                                      !string.Equals(i.Name, i.Label, StringComparison.OrdinalIgnoreCase))
@@ -1204,10 +1208,10 @@ namespace InnovatorAdmin.Editor
             Description = Tooltips.ItemType(i),
             Content = FormatText.MutedText(i.Label)
           };
-          if (insertId)
-            result.Action = () => i.Id;
-          else
+          if (insertAction == null)
             result.Action = () => i.Name;
+          else
+            result.Action = () => insertAction(i);
           return result;
         }));
     }
@@ -1246,6 +1250,10 @@ namespace InnovatorAdmin.Editor
       {
         var parentType = _metadata.ItemTypeById(itemValue);
         return await new PropertyCompletionFactory(_metadata, parentType).GetPromise().ToTask();
+      }
+      else if (p.Name == "name" && itemType.Name == "RelationshipType")
+      {
+        return ItemTypeCompletion<BasicCompletionData>(_metadata.ItemTypes.Where(i => i.IsRelationship && !i.IsPolymorphic));
       }
       else if (p.Name == "class_path" && itemType.Name == "Property"
         && lastItem.Values.TryGetValue("source_id", out itemValue))
@@ -1682,76 +1690,11 @@ namespace InnovatorAdmin.Editor
       }
     }
 
-    private static Dictionary<string, OperationElement> _actionDocs = new Dictionary<string, OperationElement>();
+    private static Dictionary<string, OperationElement> _actionDocs;
 
     static AmlEditorHelper()
     {
-      _actionDocs["add"] = new OperationElement("add", "Add an item to the database")
-        .WithAttribute("do_skipOnAfterAdd", "If 1 then don't run onAfterAdd server events. Default is 0", AmlDataType.Boolean)
-        .WithAttribute("serverEvents", "If 0 then disable server events when running the doGetItem only. onBefore/AfterAdd events are not disabled. Default is 1.", AmlDataType.Boolean);
-      _actionDocs["AddItem"] = _actionDocs["add"];
-      _actionDocs["copy"] = new OperationElement("copy", "Create a copy of the specified item. Used when copying relationships in the relationships grid")
-        .WithAttribute("do_add", "Whether or not to add the item to the database", AmlDataType.Boolean)
-        .WithAttribute("do_lock", "Whether or not to keep the item locked when the operation is complete", AmlDataType.Boolean);
-      _actionDocs["copyAsIs"] = new OperationElement("copyAsIs", "Create a copy of the specified item. Used with the `Save As...` menu item")
-        .WithAttribute("lock_related", null, AmlDataType.Boolean)
-        .WithAttribute("do_lock", "Whether or not to keep the item locked when the operation is complete", AmlDataType.Boolean)
-        .WithAttribute("useInputProperties", null, AmlDataType.Boolean);
-      _actionDocs["copyAsNew"] = _actionDocs["copyAsIs"];
-      _actionDocs["get"] = new OperationElement("get", "Queries the database to return information about the specified items")
-        .WithAttribute("select", "A comma-delimited list of property names (column names) to return", AmlDataType.SelectList)
-        .WithAttribute("orderBy", "A comma-delimited list of property names (column names) specifying the order of the results", AmlDataType.OrderBy)
-        .WithAttribute("page", "The page number for the results set.", AmlDataType.Integer)
-        .WithAttribute("pagesize", "The number of results to include in a page.", AmlDataType.Integer)
-        .WithAttribute("maxRecords", "the absolute maximum Items to be searched in the database.", AmlDataType.Integer)
-        .WithAttribute("levels", "The Item configuration depth to be returned", AmlDataType.Integer)
-        .WithAttribute("serverEvents", "If 0 then disable the server events improving performance. Default is 1.", AmlDataType.Boolean)
-        .WithAttribute("isCriteria", "If 0 then include the nested structure for the Item configuration in the response but don't use it as search criteria. Default is 1, which uses the nested structure in the request as search criteria.", AmlDataType.Boolean)
-        .WithAttribute("related_expand", "If 0 then do not expand item properties, instead, only return the ID.", AmlDataType.Boolean)
-        .WithAttribute("language", "A comma-delimited list of language codes", AmlDataType.String)
-        .WithAttribute("queryType", "Defines which version of a versionable item to return based on the queryDate", AmlDataType.Enum, "Effective", "Latest", "Released")
-        .WithAttribute("queryDate", "Date to use when searching for versionable items", AmlDataType.Date)
-        .WithAttribute("relas_only", "If 1, only return the contents of the <Relationships> tag and not the parent item. Default is 0.", AmlDataType.Boolean)
-        .WithAttribute("stdProps", "Whether to include standard system properties. Default is 1. If 0, properties such as config_id, created_by_id, current_state, modified_by_id, and permission_id are not returned.", AmlDataType.Boolean)
-        .WithAttribute("expand", null, AmlDataType.Boolean)
-        .WithAttribute("config_path", null, AmlDataType.String)
-        .WithAttribute("where", null, AmlDataType.WhereClause)
-        .WithAttribute("returnMode", null, AmlDataType.Enum, "itemsOnly", "countOnly");
-      _actionDocs["create"] = new OperationElement("create", "Acts as a `get` if the Item exists, otherwise acts as an `add`.");
-      _actionDocs["create"].WithAttributes(_actionDocs["get"].Attributes);
-      _actionDocs["create"].WithAttributes(_actionDocs["add"].Attributes);
-
-      _actionDocs["getItemAllVersions"] = _actionDocs["get"];
-      _actionDocs["GetItemConfig"] = _actionDocs["get"];
-      _actionDocs["getItemLastVersion"] = _actionDocs["get"];
-      _actionDocs["getItemRelationships"] = _actionDocs["get"];
-      _actionDocs["GetItemRepeatConfig"] = _actionDocs["get"];
-      _actionDocs["recache"] = _actionDocs["get"];
-
-      _actionDocs["getPermissions"] = new OperationElement("getPermissions")
-        .WithAttribute("access_type", "Permission to check for", AmlDataType.Enum, "can_add", "can_delete", "can_get", "can_update", "can_discover", "can_change_access");
-      _actionDocs["edit"] = new OperationElement("edit")
-        .WithAttribute("version", "If 0 then don't version an Item on update. Default is 1, which is version the Item (if it's a versionable Item) on update.", AmlDataType.Boolean)
-        .WithAttribute("serverEvents", "If 0 then disable the server events improving performance. Default is 1. Only Update events are disabled, Lock events can be executed if using Edit.", AmlDataType.Boolean)
-        .WithAttribute("unlock", "If 1, then unlock the item after the update.", AmlDataType.Boolean)
-        .WithAttribute("where", null, AmlDataType.WhereClause);
-      _actionDocs["delete"] = new OperationElement("delete")
-        .WithAttribute("where", null, AmlDataType.WhereClause);
-      _actionDocs["purge"] = new OperationElement("purge")
-        .WithAttribute("where", null, AmlDataType.WhereClause);
-      _actionDocs["merge"] = new OperationElement("merge")
-        .WithAttribute("do_skipOnAfterAdd", "If 1 then don't run onAfterAdd server events. Default is 0", AmlDataType.Boolean)
-        .WithAttribute("version", "If 0 then don't version an Item on update. Default is 1, which is version the Item (if it's a versionable Item) on update.", AmlDataType.Boolean)
-        .WithAttribute("serverEvents", "If 0 then disable the server events improving performance. Default is 1. Only Update events are disabled, Lock events can be executed if using Edit.", AmlDataType.Boolean)
-        .WithAttribute("unlock", "If 1, then unlock the item after the update.", AmlDataType.Boolean);
-      _actionDocs["update"] = new OperationElement("update")
-        .WithAttribute("version", "If 0 then don't version an Item on update. Default is 1, which is version the Item (if it's a versionable Item) on update.", AmlDataType.Boolean)
-        .WithAttribute("serverEvents", "If 0 then disable the server events improving performance. Default is 1. Only Update events are disabled, Lock events can be executed if using Edit.", AmlDataType.Boolean)
-        .WithAttribute("where", null, AmlDataType.WhereClause);
-      _actionDocs["AddHistory"] = new OperationElement("AddHistory")
-        .WithElements(new OperationElement("action"), new OperationElement("filename"), new OperationElement("form_name"));
-      _actionDocs["GetItemsForStructureBrowser"] = new OperationElement("GetItemsForStructureBrowser")
-        .WithElements(new OperationElement("Item"));
+      _actionDocs = OperationElement.Standard.ToDictionary(k => k.Key, k => k.Value);
       _actionDocs["EvaluateActivity"] = new OperationElement("EvaluateActivity")
         .WithElements(new CompletionDocumentation("Activity", async (conn, path, factory) =>
           {
@@ -1873,27 +1816,6 @@ namespace InnovatorAdmin.Editor
             .WithAttribute("mode", null, AmlDataType.Enum, "esignature", "password")
           , new OperationElement("Comments", null, AmlDataType.String)
           , new OperationElement("Complete", null, AmlDataType.Boolean));
-      _actionDocs["instantiateWorkflow"] = new OperationElement("instantiateWorkflow")
-        .WithElements(new OperationElement("WorkflowMap", "The workflow map to instantiate", AmlDataType.Item, "Workflow Map"));
-      _actionDocs["promoteItem"] = new OperationElement("promoteItem")
-        .WithElements(new OperationElement("state"),
-          new OperationElement("comments"));
-      _actionDocs["Run Report"] = new OperationElement("Run Report")
-        .WithElements(new OperationElement("report_name"),
-          new OperationElement("AML")
-            .WithElements(new OperationElement("Item")));
-      _actionDocs["SQL Process"] = new OperationElement("SQL Process")
-        .WithElements(new OperationElement("name"),
-          new OperationElement("PROCESS"),
-          new OperationElement("ARG1"),
-          new OperationElement("ARG2"),
-          new OperationElement("ARG3"),
-          new OperationElement("ARG4"),
-          new OperationElement("ARG5"),
-          new OperationElement("ARG6"),
-          new OperationElement("ARG7"),
-          new OperationElement("ARG8"),
-          new OperationElement("ARG9"));
     }
   }
 }

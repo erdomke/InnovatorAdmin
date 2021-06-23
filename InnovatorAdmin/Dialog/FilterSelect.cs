@@ -188,7 +188,7 @@ namespace InnovatorAdmin.Controls
 
     public DialogResult ShowDialog(IWin32Window owner, Rectangle bounds)
     {
-      if (bounds != default)
+      if (bounds != default(Rectangle))
       {
         this.StartPosition = FormStartPosition.CenterParent;
         var screenDim = SystemInformation.VirtualScreen;
