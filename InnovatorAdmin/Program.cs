@@ -31,7 +31,6 @@ namespace InnovatorAdmin
     {
       try
       {
-        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
 
