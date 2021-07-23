@@ -1,224 +1,20 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{7C397623-C59E-4DB2-8879-8A3385DABCD9}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWpf>true</UseWpf>
     <RootNamespace>InnovatorAdmin</RootNamespace>
-    <AssemblyName>InnovatorAdmin.Api</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\InnovatorAdmin.Api.XML</DocumentationFile>
-    <Prefer32Bit>false</Prefer32Bit>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.DirectoryServices" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Security" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase" />
+    <None Remove="Export\ExportResult.xslt" />
+    <None Remove="Documentation\ActionDocumentation.xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActionCompleteEventArgs.cs" />
-    <Compile Include="Documentation\AmlTypeDefinition.cs" />
-    <Compile Include="Documentation\AssociationEnd.cs" />
-    <Compile Include="Documentation\AssociationType.cs" />
-    <Compile Include="Documentation\AttributeVisibility.cs" />
-    <Compile Include="Documentation\CodeBlock.cs" />
-    <Compile Include="Documentation\DiagramFormat.cs" />
-    <Compile Include="Documentation\Document.cs" />
-    <Compile Include="Documentation\DocLink.cs" />
-    <Compile Include="Documentation\DocumentationWriter.cs" />
-    <Compile Include="Documentation\DocumentOptions.cs" />
-    <Compile Include="Documentation\DocumentOutput.cs" />
-    <Compile Include="Documentation\EntityDiagram.cs" />
-    <Compile Include="Documentation\Entity.cs" />
-    <Compile Include="Documentation\EntityAssociation.cs" />
-    <Compile Include="Documentation\EntityAttribute.cs" />
-    <Compile Include="Documentation\EntityType.cs" />
-    <Compile Include="Documentation\Hyperlink.cs" />
-    <Compile Include="Documentation\IDiagram.cs" />
-    <Compile Include="Documentation\IElement.cs" />
-    <Compile Include="Documentation\IElementVisitor.cs" />
-    <Compile Include="Documentation\IDiagramWriter.cs" />
-    <Compile Include="Documentation\List.cs" />
-    <Compile Include="Documentation\ListItem.cs" />
-    <Compile Include="Documentation\ListType.cs" />
-    <Compile Include="Documentation\MarkdownVisitor.cs" />
-    <Compile Include="Documentation\NodeType.cs" />
-    <Compile Include="Documentation\Paragraph.cs" />
-    <Compile Include="Documentation\HttpImageWriter.cs" />
-    <Compile Include="Documentation\PlantUmlWriter.cs" />
-    <Compile Include="Documentation\Point.cs" />
-    <Compile Include="Documentation\StateDiagram.cs" />
-    <Compile Include="Documentation\StateLink.cs" />
-    <Compile Include="Documentation\StateNode.cs" />
-    <Compile Include="Documentation\StringVisitor.cs" />
-    <Compile Include="Documentation\TextRun.cs" />
-    <Compile Include="Documentation\RunStyle.cs" />
-    <Compile Include="Documentation\Section.cs" />
-    <Compile Include="ItemQuery.cs" />
-    <Compile Include="Merge\AmlDiff.cs" />
-    <Compile Include="AmlSelectColumn.cs" />
-    <Compile Include="Export\ListCompare.cs" />
-    <Compile Include="Merge\GitDirectorySearch.cs" />
-    <Compile Include="Merge\FileCompare.cs" />
-    <Compile Include="Merge\FileDiff.cs" />
-    <Compile Include="Merge\FileStatus.cs" />
-    <Compile Include="Merge\FileSysDiffDirectory.cs" />
-    <Compile Include="Merge\GitDiffDirectory.cs" />
-    <Compile Include="Merge\GitMergeOperation.cs" />
-    <Compile Include="Merge\GitRepo.cs" />
-    <Compile Include="Merge\IDiffDirectory.cs" />
-    <Compile Include="Merge\IDiffFile.cs" />
-    <Compile Include="Merge\IMergeOperation.cs" />
-    <Compile Include="Merge\MergeFilePaths.cs" />
-    <Compile Include="Merge\MergeProcessor.cs" />
-    <Compile Include="Merge\MergeStatus.cs" />
-    <Compile Include="Merge\TextDiff.cs" />
-    <Compile Include="Metadata\ArasMetadataProvider.cs" />
-    <Compile Include="Connection\IProgressCallback.cs" />
-    <Compile Include="DependencyAnalyzer.cs" />
-    <Compile Include="Export\InstallItem.cs" />
-    <Compile Include="Export\ExportProcessor.cs" />
-    <Compile Include="Export\InstallItemDiff.cs" />
-    <Compile Include="Export\InstallType.cs" />
-    <Compile Include="Export\XmlFlags.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="GroupedList.cs" />
-    <Compile Include="Import\DataExtractorFactory.cs" />
-    <Compile Include="Import\DataTableWriter.cs" />
-    <Compile Include="Import\FileSysExtractor.cs" />
-    <Compile Include="Import\FolderExtractor.cs" />
-    <Compile Include="Import\IDataExtractor.cs" />
-    <Compile Include="Import\IDataWriter.cs" />
-    <Compile Include="Import\ImportProcessor.cs" />
-    <Compile Include="Import\ImportType.cs" />
-    <Compile Include="Import\XmlDataWriter.cs" />
-    <Compile Include="Install\InstallProcessor.cs" />
-    <Compile Include="IO\ConfigurableXmlWriter.cs" />
-    <Compile Include="IO\DatabasePackage.cs" />
-    <Compile Include="IO\DatabasePackageAction.cs" />
-    <Compile Include="IO\InnovatorPackage.cs" />
-    <Compile Include="IO\InnovatorPackageFile.cs" />
-    <Compile Include="IO\InnovatorPackageFolder.cs" />
-    <Compile Include="IO\InstallScript.cs" />
-    <Compile Include="IO\ManifestFolder.cs" />
-    <Compile Include="IProgressReporter.cs" />
-    <Compile Include="ItemProperty.cs" />
-    <Compile Include="ItemReference.cs" />
-    <Compile Include="Metadata\DatabaseList.cs" />
-    <Compile Include="Metadata\IArasMetadataProvider.cs" />
-    <Compile Include="Metadata\IListValue.cs" />
-    <Compile Include="Metadata\ItemType.cs" />
-    <Compile Include="Metadata\ListValue.cs" />
-    <Compile Include="Metadata\Method.cs" />
-    <Compile Include="Metadata\PackageMetadataProvider.cs" />
-    <Compile Include="Metadata\Property.cs" />
-    <Compile Include="Metadata\PropertyType.cs" />
-    <Compile Include="Metadata\PropertyVisibility.cs" />
-    <Compile Include="Metadata\ServerEvent.cs" />
-    <Compile Include="Metadata\Sql.cs" />
-    <Compile Include="Documentation\AmlDataType.cs" />
-    <Compile Include="Documentation\OperationElement.cs" />
-    <Compile Include="Plugin\IPluginContext.cs" />
-    <Compile Include="Plugin\IPluginMethod.cs" />
-    <Compile Include="Plugin\IPluginResult.cs" />
-    <Compile Include="Plugin\MethodRunner.cs" />
-    <Compile Include="Plugin\PluginConnection.cs" />
-    <Compile Include="Plugin\PluginItemContext.cs" />
-    <Compile Include="Plugin\PluginResult.cs" />
-    <Compile Include="ProgressChangedEventArgs.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RecoverableErrorEventArgs.cs" />
-    <Compile Include="RecoveryOption.cs" />
-    <Compile Include="SharedUtils.cs" />
-    <Compile Include="Sql\SqlContext.cs" />
-    <Compile Include="Sql\SqlDeclares.cs" />
-    <Compile Include="Sql\SqlGroup.cs" />
-    <Compile Include="Sql\SqlGroupBase.cs" />
-    <Compile Include="Sql\SqlLiteral.cs" />
-    <Compile Include="Sql\SqlName.cs" />
-    <Compile Include="Sql\SqlNode.cs" />
-    <Compile Include="Sql\SqlParseExtensions.cs" />
-    <Compile Include="Sql\SqlTableInfo.cs" />
-    <Compile Include="Sql\SqlTokenizer.cs" />
-    <Compile Include="Sql\SqlType.cs" />
-    <Compile Include="StringEnumerableReader.cs" />
-    <Compile Include="SystemPropertyGroup.cs" />
-    <Compile Include="Testing\AssertionFailedException.cs" />
-    <Compile Include="Testing\AssertMatch.cs" />
-    <Compile Include="Testing\CredentialType.cs" />
-    <Compile Include="Testing\Delay.cs" />
-    <Compile Include="Testing\DownloadFile.cs" />
-    <Compile Include="Testing\ElementsXpathResult.cs" />
-    <Compile Include="Testing\ICommand.cs" />
-    <Compile Include="Testing\ITestCommand.cs" />
-    <Compile Include="Testing\ITestVisitable.cs" />
-    <Compile Include="Testing\ITestVisitor.cs" />
-    <Compile Include="Testing\Login.cs" />
-    <Compile Include="Testing\Logout.cs" />
-    <Compile Include="Testing\ParamAssign.cs" />
-    <Compile Include="Testing\PrintError.cs" />
-    <Compile Include="Testing\Query.cs" />
-    <Compile Include="Testing\Test.cs" />
-    <Compile Include="Testing\TestContext.cs" />
-    <Compile Include="Testing\TestResult.cs" />
-    <Compile Include="Testing\TestRun.cs" />
-    <Compile Include="Testing\TestSerializer.cs" />
-    <Compile Include="Testing\TestSuite.cs" />
-    <Compile Include="Testing\IXPathResult.cs" />
-    <Compile Include="Utils.cs" />
-    <Compile Include="XmlNodeWriter.cs" />
-    <Compile Include="XmlUtils.cs" />
-    <Compile Include="XmlValueReader.cs" />
-    <Compile Include="XPathToken.cs" />
-    <Compile Include="Xslt\ArasXsltExtensions.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Export\ExportResult.xslt">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
+    <EmbeddedResource Include="Export\ExportResult.xslt" />
     <EmbeddedResource Include="Documentation\ActionDocumentation.xml" />
   </ItemGroup>
+  
   <ItemGroup>
     <PackageReference Include="Innovator.Client">
       <Version>2020.2.23.1756</Version>
@@ -230,12 +26,4 @@
       <Version>2.3.0</Version>
     </PackageReference>
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
