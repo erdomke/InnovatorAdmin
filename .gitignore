@@ -22,6 +22,7 @@ _site/
 _exported_templates/
 api/*.yml
 tools/
+artifacts/
 
 # Roslyn cache directories
 *.ide/

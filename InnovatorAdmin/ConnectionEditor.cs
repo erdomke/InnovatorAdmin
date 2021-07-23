@@ -139,20 +139,6 @@ namespace InnovatorAdmin
               .Done(c => btnTest.Text = "Success. Test Again.")
               .Fail(ex => btnTest.Text = ex.Message);
             break;
-          case ConnectionType.SqlServer:
-            try
-            {
-              using (var conn = Editor.SqlEditorProxy.GetConnection(connData, "master"))
-              {
-                conn.Open();
-              }
-              btnTest.Text = "Success. Test Again.";
-            }
-            catch (Exception ex)
-            {
-              btnTest.Text = ex.Message;
-            }
-            break;
           default:
             ProxyFactory.FromConn(connData)
               .UiPromise(this)
@@ -273,24 +259,6 @@ namespace InnovatorAdmin
             foreach (var db in Factory.GetConnection(_lastDatabaseUrl, "InnovatorAdmin").GetDatabases())
             {
               cmbDatabase.Items.Add(db);
-            }
-            break;
-          case ConnectionType.SqlServer:
-            using (var conn = Editor.SqlEditorProxy.GetConnection(data, "master"))
-            {
-              conn.Open();
-              // Set up a command with the given query and associate
-              // this with the current connection.
-              using (var cmd = new SqlCommand("SELECT name from sys.databases order by name", conn))
-              {
-                using (var dr = cmd.ExecuteReader())
-                {
-                  while (dr.Read())
-                  {
-                    cmbDatabase.Items.Add(dr[0].ToString());
-                  }
-                }
-              }
             }
             break;
         }

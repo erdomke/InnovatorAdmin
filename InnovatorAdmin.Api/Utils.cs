@@ -125,7 +125,7 @@ namespace InnovatorAdmin
         FileStream fileStream = null;
         try
         {
-          fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+          fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
           using (BufferedStream bufferedStream = new BufferedStream(fileStream, 32768))
           {
             fileStream = null;

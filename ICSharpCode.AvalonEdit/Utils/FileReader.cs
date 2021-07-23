@@ -89,7 +89,7 @@ namespace ICSharpCode.AvalonEdit.Utils
 		/// <returns>The file content as string.</returns>
 		public static string ReadFileContent(string fileName, Encoding defaultEncoding)
 		{
-			using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)) {
+			using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
 				return ReadFileContent(fs, defaultEncoding);
 			}
 		}
@@ -105,7 +105,7 @@ namespace ICSharpCode.AvalonEdit.Utils
 		{
 			if (fileName == null)
 				throw new ArgumentNullException("fileName");
-			FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+			FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
 			try {
 				return OpenStream(fs, defaultEncoding);
 				// don't use finally: the stream must be kept open until the StreamReader closes it

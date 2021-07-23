@@ -964,7 +964,7 @@ namespace ICSharpCode.AvalonEdit
 		{
 			if (fileName == null)
 				throw new ArgumentNullException("fileName");
-			using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)) {
+			using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
 				Load(fs);
 			}
 		}
@@ -1015,7 +1015,7 @@ namespace ICSharpCode.AvalonEdit
 		{
 			if (fileName == null)
 				throw new ArgumentNullException("fileName");
-			using (FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None)) {
+			using (FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.Write)) {
 				Save(fs);
 			}
 		}
