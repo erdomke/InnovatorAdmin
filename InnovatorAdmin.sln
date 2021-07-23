@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnovatorAdmin.Api", "InnovatorAdmin.Api\InnovatorAdmin.Api.csproj", "{7C397623-C59E-4DB2-8879-8A3385DABCD9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnovatorAdmin", "InnovatorAdmin\InnovatorAdmin.csproj", "{56CC682F-1810-4A66-B06C-129A86621294}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InnovatorAdmin", "InnovatorAdmin\InnovatorAdmin.csproj", "{56CC682F-1810-4A66-B06C-129A86621294}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnovatorAdmin.ApiTests", "InnovatorAdmin.ApiTests\InnovatorAdmin.ApiTests.csproj", "{ABE4BC56-D84A-480C-A6A7-FC7EB2E21CDB}"
 EndProject
@@ -64,8 +64,8 @@ Global
 		{7C397623-C59E-4DB2-8879-8A3385DABCD9}.Release|x86.ActiveCfg = Release|Any CPU
 		{7C397623-C59E-4DB2-8879-8A3385DABCD9}.Release|x86.Build.0 = Release|Any CPU
 		{56CC682F-1810-4A66-B06C-129A86621294}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{56CC682F-1810-4A66-B06C-129A86621294}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{56CC682F-1810-4A66-B06C-129A86621294}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{56CC682F-1810-4A66-B06C-129A86621294}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{56CC682F-1810-4A66-B06C-129A86621294}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{56CC682F-1810-4A66-B06C-129A86621294}.Debug|Net35.ActiveCfg = Debug|x86
 		{56CC682F-1810-4A66-B06C-129A86621294}.Debug|Net40.ActiveCfg = Debug|x86
 		{56CC682F-1810-4A66-B06C-129A86621294}.Debug|WithNRefactory.ActiveCfg = Debug|x86

@@ -5,11 +5,6 @@
     <ProjectName>InnovatorAdmin</ProjectName>
     <NuSpecPath>$(ProjectName).nuspec</NuSpecPath>
     <OutDir45>bin\Release</OutDir45>
-    <ObjDir45>obj\net45</ObjDir45>
-    <AssemInfo><![CDATA[using System.Reflection%3B
-
-[assembly: AssemblyVersion("$(BuildVersion)")]
-[assembly: AssemblyFileVersion("$(BuildVersion)")]]]></AssemInfo>
   </PropertyGroup>
   
   <Target Name="Clean">
@@ -17,9 +12,6 @@
       <FilesToDelete Include="$(OutDir45)\**\*.*;$(ObjDir45)\**\*.*;*.nupkg"/>
     </ItemGroup>   
     <Delete Files="@(FilesToDelete)" />
-  </Target>
-  <Target Name="GenerateFiles">
-    <WriteLinesToFile File="AssemblyInfo.Version.cs" Lines="$(AssemInfo)" Overwrite="true" />
   </Target>
   <Target Name="Build">
     <ItemGroup>

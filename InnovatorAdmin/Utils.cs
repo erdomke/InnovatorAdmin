@@ -5,6 +5,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
@@ -335,28 +336,12 @@ namespace InnovatorAdmin
     /// <param name="method">Method to execute</param>
     public static bool CallWithTimeout(int timeout, Action method)
     {
-      var wait = new System.Threading.ManualResetEvent(false);
-      Exception exception = null;
-      method.BeginInvoke(iar =>
+      using (var cts = new CancellationTokenSource())
       {
-        try
-        {
-          ((Action)iar.AsyncState).EndInvoke(iar);
-        }
-        catch (Exception ex)
-        {
-          exception = ex;
-        }
-        wait.Set();
-      }, method);
-
-      if (wait.WaitOne(timeout))
-      {
-        if (exception != null)
-          throw exception;
+        cts.CancelAfter(timeout);
+        Task.Run(method, cts.Token).Wait();
         return true;
       }
-      return false;
     }
 
     public static string PathEllipse(string path)
