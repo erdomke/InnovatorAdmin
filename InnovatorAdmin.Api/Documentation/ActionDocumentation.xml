@@ -4,6 +4,7 @@
     <summary>Add an item to the database</summary>
     <param name="@do_skipOnAfterAdd"><datatype type="boolean" />If <c>1</c> then don't run <c>onAfterAdd</c> server events. Default is <c>0</c>.</param>
     <param name="@serverEvents"><datatype type="boolean" />If <c>0</c> then disable server events when running the <c>doGetItem</c> only. <c>onBefore/AfterAdd</c> events are not disabled. Default is <c>1</c>.</param>
+    <param name="@doGetItem"><datatype type="boolean" />If <c>0</c> then do not perform a get of the item after the change. Only the type and id attributes will be returned for the item. Default is <c>1</c>.</param>
   </method>
   <method name="AddItem">
     <inheritdoc cref="add" />
@@ -89,6 +90,7 @@
     <param name="@version"><datatype type="boolean" />If <c>0</c> then don't version an Item on update. Default is <c>1</c>, which is version the Item (if it's a versionable Item) on update.</param>
     <param name="@serverEvents"><datatype type="boolean" />If <c>0</c> then disable the server events improving performance. Default is <c>1</c>. Only <c>update</c> events are disabled, <c>lock</c> events can be executed if using <c>edit</c>.</param>
     <param name="@where"><datatype type="whereclause" /></param>
+    <param name="@doGetItem"><datatype type="boolean" />If <c>0</c> then do not perform a get of the item after the change. Only the type and id attributes will be returned for the item. Default is <c>1</c>.</param>
   </method>
   <method name="delete">
     <param name="@where"><datatype type="whereclause" /></param>
@@ -101,11 +103,13 @@
     <param name="@version"><datatype type="boolean" />If <c>0</c> then don't version an Item on update. Default is <c>1</c>, which is version the Item (if it's a versionable Item) on update.</param>
     <param name="@serverEvents"><datatype type="boolean" />If <c>0</c> then disable the server events improving performance. Default is <c>1</c>. Only <c>update</c> events are disabled, <c>lock</c> events can be executed if using <c>edit</c>.</param>
     <param name="@where"><datatype type="whereclause" /></param>
+    <param name="@doGetItem"><datatype type="boolean" />If <c>0</c> then do not perform a get of the item after the change. Only the type and id attributes will be returned for the item. Default is <c>1</c>.</param>
   </method>
   <method name="update">
     <param name="@version"><datatype type="boolean" />If <c>0</c> then don't version an Item on update. Default is <c>1</c>, which is version the Item (if it's a versionable Item) on update.</param>
     <param name="@serverEvents"><datatype type="boolean" />If <c>0</c> then disable the server events improving performance. Default is <c>1</c>. Only <c>update</c> events are disabled, <c>lock</c> events can be executed if using <c>edit</c>.</param>
     <param name="@where"><datatype type="whereclause" /></param>
+    <param name="@doGetItem"><datatype type="boolean" />If <c>0</c> then do not perform a get of the item after the change. Only the type and id attributes will be returned for the item. Default is <c>1</c>.</param>
   </method>
   <method name="AddHistory">
     <param name="action"></param>
