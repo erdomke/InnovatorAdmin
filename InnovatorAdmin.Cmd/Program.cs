@@ -26,9 +26,6 @@ namespace InnovatorAdmin.Cmd
         .WithParsed<DocumentationCommand>(o => task = o.Execute())
         .WithNotParsed(err => task = TryParseArasFormat(cmdArgs, args));
       var result = await task;
-#if DEBUG
-      Console.ReadLine();
-#endif
       return result;
     }
 

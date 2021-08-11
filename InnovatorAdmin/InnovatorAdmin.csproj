@@ -5,11 +5,16 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWpf>true</UseWpf>
     <UseWindowsForms>true</UseWindowsForms>
-    <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <Authors>erdomke</Authors>
+    <Version>21.204.29545</Version>
+    <ApplicationIcon>InnovatorAdmin.ico</ApplicationIcon>
+    <!--
+    <PublishSingleFile>true</PublishSingleFile>
     <PublishTrimmed>true</PublishTrimmed>
     <PublishReadyToRun>true</PublishReadyToRun>
+    -->
   </PropertyGroup>
 
   <ItemGroup>

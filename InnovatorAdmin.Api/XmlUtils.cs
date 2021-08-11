@@ -192,7 +192,14 @@ namespace InnovatorAdmin
 
     public static IEnumerable<XmlElement> ElementsByXPath(this XmlNode node, string xPath)
     {
-      return XPathCache.SelectNodes(xPath, node).OfType<XmlElement>();
+      try
+      {
+        return XPathCache.SelectNodes(xPath, node).OfType<XmlElement>();
+      }
+      catch (NullReferenceException)
+      {
+        return node.SelectNodes(xPath).OfType<XmlElement>();
+      }
     }
 
     public static IEnumerable<XmlElement> ElementsByXPath(this XmlNode node, string xPath, params object[] vars)

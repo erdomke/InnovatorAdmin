@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "InnovatorAdmin.Cmd": {
+      "commandName": "Project",
+      "commandLineArgs": "diff --base \"git:///D:/ANSYSDev/Code/Upgrade/test1?path=AML&commit=7a047cdda4ea70a516810343f09b73c227b2b963\" --outputfile \"D:/ANSYSDev/Code/Upgrade/Nokia-diff.innpkg\" --ours \"git:///D:/ANSYSDev/Code/Upgrade/test1?path=AML&commit=f692f30d316742b208c2b0bddd4ac8ebd8ac690a\""
+    }
+  }
+}

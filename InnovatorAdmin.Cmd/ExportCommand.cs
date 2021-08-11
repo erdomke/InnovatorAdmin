@@ -129,6 +129,7 @@ namespace InnovatorAdmin.Cmd
                 }
                 return refs;
               })
+              .Distinct()
               .ToList();
           }
         }

@@ -130,8 +130,7 @@
       this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
       this.tbcOutputView = new InnovatorAdmin.Controls.FlatTabControl();
       this.pgTools = new System.Windows.Forms.TabPage();
-      this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-      this.docHost = new System.Windows.Forms.Integration.ElementHost();
+      this.docLayout = new System.Windows.Forms.TableLayoutPanel();
       this.pgTextOutput = new System.Windows.Forms.TabPage();
       this.outputEditor = new InnovatorAdmin.Editor.FullEditor();
       this.pgHtml = new System.Windows.Forms.TabPage();
@@ -184,7 +183,7 @@
       this.tableLayoutPanel2.SuspendLayout();
       this.tbcOutputView.SuspendLayout();
       this.pgTools.SuspendLayout();
-      this.tableLayoutPanel1.SuspendLayout();
+      this.docLayout.SuspendLayout();
       this.pgTextOutput.SuspendLayout();
       this.pgHtml.SuspendLayout();
       this.pgTableOutput.SuspendLayout();
@@ -1195,7 +1194,7 @@
       // 
       // pgTools
       // 
-      this.pgTools.Controls.Add(this.tableLayoutPanel1);
+      this.pgTools.Controls.Add(this.docLayout);
       this.pgTools.Location = new System.Drawing.Point(4, 29);
       this.pgTools.Name = "pgTools";
       this.pgTools.Padding = new System.Windows.Forms.Padding(3);
@@ -1206,27 +1205,16 @@
       // 
       // tableLayoutPanel1
       // 
-      this.tableLayoutPanel1.ColumnCount = 1;
-      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-      this.tableLayoutPanel1.Controls.Add(this.docHost, 0, 1);
-      this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 3);
-      this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-      this.tableLayoutPanel1.RowCount = 2;
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 28F));
-      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-      this.tableLayoutPanel1.Size = new System.Drawing.Size(752, 372);
-      this.tableLayoutPanel1.TabIndex = 0;
-      // 
-      // docHost
-      // 
-      this.docHost.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.docHost.Location = new System.Drawing.Point(3, 31);
-      this.docHost.Name = "docHost";
-      this.docHost.Size = new System.Drawing.Size(746, 338);
-      this.docHost.TabIndex = 0;
-      this.docHost.Text = "elementHost1";
-      this.docHost.Child = null;
+      this.docLayout.ColumnCount = 1;
+      this.docLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.docLayout.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.docLayout.Location = new System.Drawing.Point(3, 3);
+      this.docLayout.Name = "docLayout";
+      this.docLayout.RowCount = 2;
+      this.docLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 28F));
+      this.docLayout.RowStyles.Add(new System.Windows.Forms.RowStyle());
+      this.docLayout.Size = new System.Drawing.Size(752, 372);
+      this.docLayout.TabIndex = 0;
       // 
       // pgTextOutput
       // 
@@ -1621,7 +1609,7 @@
       this.tableLayoutPanel2.ResumeLayout(false);
       this.tbcOutputView.ResumeLayout(false);
       this.pgTools.ResumeLayout(false);
-      this.tableLayoutPanel1.ResumeLayout(false);
+      this.docLayout.ResumeLayout(false);
       this.pgTextOutput.ResumeLayout(false);
       this.pgHtml.ResumeLayout(false);
       this.pgTableOutput.ResumeLayout(false);
@@ -1764,8 +1752,7 @@
     private System.Windows.Forms.ToolStripMenuItem mniMergeScripts;
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator9;
     private Controls.NoCopyLabel lblTitle;
-    private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-    private System.Windows.Forms.Integration.ElementHost docHost;
+    private System.Windows.Forms.TableLayoutPanel docLayout;
     private System.Windows.Forms.ToolStripMenuItem mniRefreshIntellisense;
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator10;
   }

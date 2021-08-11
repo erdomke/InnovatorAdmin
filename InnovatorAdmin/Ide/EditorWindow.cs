@@ -621,7 +621,20 @@ namespace InnovatorAdmin
           tblMain.ColumnStyles[col2].Width = 0;
         }
 
-        docHost.Child = _docViewer;
+        try
+        {
+          var docHost = new System.Windows.Forms.Integration.ElementHost
+          {
+            Dock = DockStyle.Fill,
+            Name = "docHost"
+          };
+          docLayout.Controls.Add(docHost, 0, 1);
+          docHost.Child = _docViewer;
+        }
+        catch (Exception ex)
+        {
+          Utils.HandleError(ex);
+        }
         
         btnEditConnections.Visible = true;
 

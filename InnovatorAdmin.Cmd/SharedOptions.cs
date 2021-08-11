@@ -37,7 +37,7 @@ namespace InnovatorAdmin.Cmd
           UserAgent = "InnovatorAdmin.Cmd v" + Assembly.GetExecutingAssembly().GetName().Version.ToString()
         },
         Url = Url,
-        DefaultTimeout = TimeSpan.FromMinutes(3).Milliseconds
+        DefaultTimeout = (int)TimeSpan.FromMinutes(3).TotalMilliseconds
       }, true).ConfigureAwait(false);
       await conn.Login(GetCredentials(), true).ConfigureAwait(false);
       return conn;

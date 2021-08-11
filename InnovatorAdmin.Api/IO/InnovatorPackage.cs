@@ -64,11 +64,23 @@ namespace InnovatorAdmin
             }
             else
             {
-              doc = new XmlDocument(manifest.NameTable);
-              var stream = GetExistingStream(path);
-              if (stream == null)
-                throw new FileNotFoundException("A referenced file was not found in the package", path);
-              doc.Load(stream);
+              try
+              {
+                doc = new XmlDocument(manifest.NameTable);
+                var stream = GetExistingStream(path);
+                if (stream == null)
+                  throw new FileNotFoundException("A referenced file was not found in the package", path);
+                using (stream)
+                using (var reader = new StreamReader(stream))
+                {
+                  var text = reader.ReadToEnd();
+                  doc.LoadXml(text);
+                }
+              }
+              catch (Exception ex) when (ex is XmlException || ex is IOException)
+              {
+                throw new InvalidOperationException($"Error reading the file {path}: {ex.Message}", ex);
+              }
             }
 
             var items = doc.DocumentElement.LocalName == "Item"
@@ -198,48 +210,55 @@ namespace InnovatorAdmin
 
     public static XmlDocument ReadReport(string path, Func<string, Stream> fileGetter)
     {
-      string file;
-      using (var reader = new StreamReader(fileGetter(path)))
+      try
       {
-        file = reader.ReadToEnd();
-      }
-      string dataFile = null;
-      var dataFileStream = fileGetter(path + ".xml");
-      if (dataFileStream != null)
-      {
-        using (var reader = new StreamReader(dataFileStream))
+        string file;
+        using (var reader = new StreamReader(fileGetter(path)))
         {
-          dataFile = reader.ReadToEnd();
+          file = reader.ReadToEnd();
         }
-      }
-
-      var metaStart = file.IndexOf(_reportStart);
-      var metaEnd = file.IndexOf(_reportEnd);
-      var result = new XmlDocument();
-
-      if (metaStart >= 0 && metaEnd >= 0)
-      {
-        result.LoadXml(file.Substring(metaStart + _reportStart.Length, metaEnd - metaStart - _reportStart.Length).Trim());
-        var reportItem = result.SelectSingleNode("//Item[@type='Report']") as XmlElement;
-        var xsltElem = result.CreateElement("xsl_stylesheet");
-        var xslt = file.Substring(metaEnd + _reportEnd.Length).Trim();
-        if (!string.IsNullOrEmpty(dataFile))
+        string dataFile = null;
+        var dataFileStream = fileGetter(path + ".xml");
+        if (dataFileStream != null)
         {
-          xslt += Environment.NewLine + Environment.NewLine + _reportDataStart + Environment.NewLine + dataFile + Environment.NewLine + _reportDataEnd;
+          using (var reader = new StreamReader(dataFileStream))
+          {
+            dataFile = reader.ReadToEnd();
+          }
         }
-        xsltElem.InnerText = xslt;
-        reportItem.AppendChild(xsltElem);
-      }
-      else if (file.StartsWith("<AML>"))
-      {
-        result.LoadXml(file);
-      }
-      else
-      {
-        throw new ArgumentException("Invalid xslt file");
-      }
 
-      return result;
+        var metaStart = file.IndexOf(_reportStart);
+        var metaEnd = file.IndexOf(_reportEnd);
+        var result = new XmlDocument();
+
+        if (metaStart >= 0 && metaEnd >= 0)
+        {
+          result.LoadXml(file.Substring(metaStart + _reportStart.Length, metaEnd - metaStart - _reportStart.Length).Trim());
+          var reportItem = result.SelectSingleNode("//Item[@type='Report']") as XmlElement;
+          var xsltElem = result.CreateElement("xsl_stylesheet");
+          var xslt = file.Substring(metaEnd + _reportEnd.Length).Trim();
+          if (!string.IsNullOrEmpty(dataFile))
+          {
+            xslt += Environment.NewLine + Environment.NewLine + _reportDataStart + Environment.NewLine + dataFile + Environment.NewLine + _reportDataEnd;
+          }
+          xsltElem.InnerText = xslt;
+          reportItem.AppendChild(xsltElem);
+        }
+        else if (file.StartsWith("<AML>"))
+        {
+          result.LoadXml(file);
+        }
+        else
+        {
+          throw new ArgumentException("Invalid xslt file");
+        }
+
+        return result;
+      }
+      catch (Exception ex)
+      {
+        throw new InvalidOperationException($"Error reading the report the report at {path}: {ex.Message}", ex);
+      }
     }
 
     private XmlDocument ReadReport(string path)
