@@ -57,18 +57,10 @@ Task("Build")
 {
   foreach (var config in configs)
   {
-    if(IsRunningOnWindows())
+    DotNetCoreBuild("./InnovatorAdmin.sln", new DotNetCoreBuildSettings
     {
-      // Use MSBuild
-      MSBuild("./InnovatorAdmin.sln", settings =>
-        settings.SetConfiguration(config));
-    }
-    else
-    {
-      // Use XBuild
-      XBuild("./InnovatorAdmin.sln", settings =>
-        settings.SetConfiguration(config));
-    }
+      Configuration = config,
+    });
   }
 });
 
@@ -92,7 +84,10 @@ Task("NuGet-Pack")
   DeleteFiles("./publish/InnovatorAdmin/lib/net45/Innovator.Client*");
   DeleteFiles("./publish/InnovatorAdmin/lib/net45/SharpCompress*");
   DeleteFiles("./publish/InnovatorAdmin/lib/net45/*.xml");
-  DeleteDirectory("./publish/InnovatorAdmin/lib/net45/lib",true);
+  DeleteDirectory("./publish/InnovatorAdmin/lib/net45/lib", new DeleteDirectorySettings {
+    Recursive = true,
+    Force = true
+  });
   var nuGetPackSettings = new NuGetPackSettings {
     Id = "InnovatorAdmin",
     Version = version,
@@ -111,7 +106,10 @@ Task("Release-NuGet-Pack")
   DeleteFiles("./artifacts/*.nupkg");
   DeleteFiles("./publish/InnovatorAdmin/lib/net45/*.xml");
   DeleteFiles("./publish/InnovatorAdmin/lib/net45/*.pdb");
-  DeleteDirectory("./publish/InnovatorAdmin/lib/net45/lib",true);
+  DeleteDirectory("./publish/InnovatorAdmin/lib/net45/lib", new DeleteDirectorySettings {
+    Recursive = true,
+    Force = true
+  });
   var nuGetPackSettings = new NuGetPackSettings {
     Id = "InnovatorAdmin",
     Version = version,
