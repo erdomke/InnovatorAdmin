@@ -60,7 +60,7 @@ namespace InnovatorAdmin
     public static PackageMetadataProvider WriteAmlMergeScripts(this IDiffDirectory baseDir, IDiffDirectory compareDir
       , Func<string, int, XmlWriter> callback = null)
     {
-      Func<IDiffFile, IComparable> keyGetter = i => i.Path;
+      Func<IDiffFile, IComparable> keyGetter = i => i.Path.Replace('\\', '/').TrimStart('/');
       var basePaths = baseDir.GetFiles().OrderBy(keyGetter).ToArray();
       var comparePaths = compareDir.GetFiles().OrderBy(keyGetter).ToArray();
       var completed = 0;
