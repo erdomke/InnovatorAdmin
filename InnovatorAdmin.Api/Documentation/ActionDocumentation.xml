@@ -144,6 +144,11 @@
     <param name="ARG9"></param>
   </method>
 
+  <method name="CreateConversionTask">
+    <param name="rule_id"><datatype type="item[ConversionRule]"/>The conversion rule to use</param>
+    <param name="file_id"><datatype type="item[File]"/>The context file</param>
+    <param name="file_type"><datatype type="item[FileType]"/>The type of the context file</param>
+  </method>
   <method name="ES_Search">
     <param name="query_text"><datatype type="string"/>The search text</param>
     <param name="start"><datatype type="integer"/>How many results to offset (Default is <c>0</c>)</param>

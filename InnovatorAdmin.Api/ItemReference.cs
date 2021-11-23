@@ -190,7 +190,7 @@ namespace InnovatorAdmin
       var node = elem;
       while (node != null && node.LocalName != "Item") node = node.ChildNodes.OfType<XmlElement>().FirstOrDefault();
       if (node == null) return Enumerable.Empty<ItemReference>();
-      return (from e in node.ParentNode.ChildNodes.OfType<XmlElement>()
+      return (from e in node.ParentNode.NextSiblingsAndSelf().SelectMany(s => s.ChildNodes.OfType<XmlElement>())
               where e.LocalName == "Item"
               select FromFullItem(e, getKeyedName));
     }

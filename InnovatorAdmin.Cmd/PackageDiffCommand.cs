@@ -27,6 +27,9 @@ namespace InnovatorAdmin.Cmd
     [Option("clean", HelpText = "Clean the output file/directory before writing the new content")]
     public bool CleanOutput { get; set; }
 
+    [Option("sort-first-of-type", HelpText = "Comma delimited list of IDs that should be sorted at the beginning of their type")]
+    public string FirstOfGroup { get; set; }
+
     [Usage(ApplicationAlias = "InnovatorAdmin.Cmd")]
     public static IEnumerable<Example> Examples
     {
@@ -57,6 +60,8 @@ namespace InnovatorAdmin.Cmd
           {
             SortDependencies = true
           };
+          if (!string.IsNullOrEmpty(FirstOfGroup))
+            processor.FirstOfGroup.UnionWith(FirstOfGroup.Split(','));
           processor.ProgressChanged += (s, ev) => prog.Report(ev.Progress / 100.0);
           script = processor.Merge(dirs[0], dirs[1]);
         }

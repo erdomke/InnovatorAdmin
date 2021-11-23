@@ -70,8 +70,15 @@ namespace InnovatorAdmin
       {
         visited.Add(item);
 
+        var cycleList = cycle;
         foreach (var dep in (dependencies(item) ?? Enumerable.Empty<T>()).Where(d => !Object.ReferenceEquals(d, item)))
-          hasCycle = Visit(dep, visited, sorted, dependencies, cycle, throwOnCycle) || hasCycle;
+        {
+          if (Visit(dep, visited, sorted, dependencies, cycleList, throwOnCycle))
+          {
+            hasCycle = true;
+            cycleList = new List<T>();
+          }
+        }
 
         sorted.Add(item);
       }

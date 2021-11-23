@@ -10,6 +10,7 @@ namespace InnovatorAdmin
 {
   public class InstallProcessor : IProgressReporter
   {
+    private DependencySorter _sorter = new DependencySorter();
     private readonly IAsyncConnection _conn;
     private int _currLine;
     private InstallScript _script;
@@ -64,7 +65,7 @@ namespace InnovatorAdmin
       _script = script;
       _lines = (_script.DependencySorted
         ? (_script.Lines ?? Enumerable.Empty<InstallItem>())
-        : (await ExportProcessor.SortByDependencies(script.Lines, _conn).ConfigureAwait(false))
+        : (await _sorter.SortByDependencies(script.Lines, _conn).ConfigureAwait(false))
           .Where(l => l.Type != InstallType.DependencyCheck)
       ).Where(l => l.Script != null && l.Type != InstallType.Warning).ToList();
       _currLine = -1;

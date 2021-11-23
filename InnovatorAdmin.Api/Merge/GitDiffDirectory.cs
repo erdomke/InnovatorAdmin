@@ -18,7 +18,7 @@ namespace InnovatorAdmin
       root = string.IsNullOrEmpty(root) ? "\\" : "\\" + root.Trim('\\').Replace('/', '\\') + "\\";
       GitMergeOperation.WalkTree(commit.Tree, (path, blob) =>
       {
-        if (("\\" + path).StartsWith(root))
+        if (("\\" + path).Replace('/', '\\').StartsWith(root))
         {
           var relPath = path.Substring(root.Length - 1).TrimStart('/', '\\');
           files.Add(new GitDiffFile(blob) { Path = relPath });

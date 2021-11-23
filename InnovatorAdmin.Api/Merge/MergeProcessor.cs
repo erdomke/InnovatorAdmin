@@ -7,9 +7,12 @@ namespace InnovatorAdmin
 {
   public class MergeProcessor
   {
+    private DependencySorter _sorter = new DependencySorter();
+
     public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
 
     public bool SortDependencies { get; set; } = true;
+    public HashSet<string> FirstOfGroup => _sorter.FirstOfGroup;
 
     public InstallScript Merge(IDiffDirectory baseDir, IDiffDirectory compareDir)
     {
@@ -42,7 +45,7 @@ namespace InnovatorAdmin
       ProgressChanged?.Invoke(this, new ProgressChangedEventArgs("Processing dependencies", 75));
 
       var lines = (SortDependencies
-        ? ExportProcessor.SortByDependencies(installScripts, metadata)
+        ? _sorter.SortByDependencies(installScripts, metadata)
         : installScripts).ToList();
       lines.RemoveWhere(i => i.Type == InstallType.DependencyCheck);
 

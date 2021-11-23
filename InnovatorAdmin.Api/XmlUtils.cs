@@ -250,5 +250,16 @@ namespace InnovatorAdmin
       result.LoadXml(xml);
       return result;
     }
+
+    public static IEnumerable<XmlElement> NextSiblingsAndSelf(this XmlNode element)
+    {
+      var curr = element;
+      while (curr != null)
+      {
+        if (curr is XmlElement result)
+          yield return result;
+        curr = curr.NextSibling;
+      }
+    }
   }
 }
