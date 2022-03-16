@@ -1,16 +1,17 @@
-﻿using System;
+﻿using Innovator.Client;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Diagnostics;
-using System.IO;
-using System.Xml.Linq;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace InnovatorAdmin.Controls
 {
@@ -326,8 +327,8 @@ namespace InnovatorAdmin.Controls
     {
       UpdateFilter();
       var lines = (from i in _mergeData.Unfiltered
-                  where i.IsModified
-                  select i.Path + "|" + ((int)i.ResolutionStatus).ToString()).ToArray();
+                   where i.IsModified
+                   select i.Path + "|" + ((int)i.ResolutionStatus).ToString()).ToArray();
       File.WriteAllText(GetPersistedFile(), lines.GroupConcat(Environment.NewLine, i => i));
     }
     private void ProcessTakes()
@@ -337,7 +338,7 @@ namespace InnovatorAdmin.Controls
     private Dictionary<string, MergeStatus> GetExisting()
     {
       var path = GetPersistedFile();
-      if (!File.Exists(path)) return new Dictionary<string,MergeStatus>();
+      if (!File.Exists(path)) return new Dictionary<string, MergeStatus>();
       return (from l in File.ReadAllLines(GetPersistedFile())
               where !string.IsNullOrEmpty(l)
               let parts = l.Split('|')
@@ -449,7 +450,7 @@ namespace InnovatorAdmin.Controls
             .ToArray();
 
           FileCompare file;
-          for (var i = 0; i < toProcess.Length; i++ )
+          for (var i = 0; i < toProcess.Length; i++)
           {
             file = toProcess[i];
             var path = mergeOp.MergePath(file.Path);

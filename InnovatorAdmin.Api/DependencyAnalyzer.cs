@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Innovator.Client;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using Innovator.Client;
 
 namespace InnovatorAdmin
 {
-  internal class DependencyAnalyzer
+  public class DependencyAnalyzer
   {
     //// Persistent variables between scans
     // Pointer from a child reference to the master reference that defines it
@@ -407,7 +407,7 @@ namespace InnovatorAdmin
 
     private class References
     {
-      private List<ReferenceContext> _contexts = new List<ReferenceContext>();
+      private readonly List<ReferenceContext> _contexts = new List<ReferenceContext>();
 
       public void AddReferences(XmlNode reference, XmlNode context, ItemReference masterRef)
       {

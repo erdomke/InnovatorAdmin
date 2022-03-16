@@ -15,7 +15,7 @@ namespace InnovatorAdmin.Testing
     // TODO: Implement some sort of file download
     // TODO: Create tests that expect an error
 
-    private static RNGCryptoServiceProvider _secureRandom = new RNGCryptoServiceProvider();
+    private static readonly RNGCryptoServiceProvider _secureRandom = new RNGCryptoServiceProvider();
 
     public static TestSuite ReadTestSuite(TextReader reader)
     {
@@ -230,7 +230,7 @@ namespace InnovatorAdmin.Testing
         return string.IsNullOrWhiteSpace(xml.Value) ? null : xml.Value;
       }
     }
-    internal static bool IsXml(string value)
+    public static bool IsXml(string value)
     {
       if (value == null)
         return false;
@@ -332,8 +332,8 @@ namespace InnovatorAdmin.Testing
 
     private class TestWriter : ITestVisitor, IDisposable
     {
-      private XmlWriter _xml;
-      private string _sessionId;
+      private readonly XmlWriter _xml;
+      private readonly string _sessionId;
 
       private TestWriter()
       {

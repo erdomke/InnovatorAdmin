@@ -1,11 +1,11 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using InnovatorAdmin;
+﻿using InnovatorAdmin;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.IO;
 using System.Xml;
 
 namespace InnovatorAdmin.Tests
@@ -13,9 +13,6 @@ namespace InnovatorAdmin.Tests
   [TestClass()]
   public class XmlValueReaderTests
   {
-
-
-    [TestMethod()]
     public void RunTest(string expected)
     {
       var stringReader = new StringReader(expected);

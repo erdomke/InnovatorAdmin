@@ -162,22 +162,6 @@ namespace InnovatorAdmin
       }
     }
 
-    public static string GroupConcat<T>(this IEnumerable<T> values, string separator, Func<T, string> renderer)
-    {
-      if (values.Any())
-      {
-        if (renderer == null)
-        {
-          return values.Select(v => v.ToString()).Aggregate((p, c) => p + separator + c);
-        }
-        return values.Select(renderer).Aggregate((p, c) => p + separator + c);
-      }
-      else
-      {
-        return string.Empty;
-      }
-    }
-
     public static void HandleError(Exception ex)
     {
       if (ex == null) return;
@@ -297,7 +281,8 @@ namespace InnovatorAdmin
 
     public static IPromise<T> UiPromise<T>(this IPromise<T> promise, Control ctrl)
     {
-      return promise.WithInvoker((d, a) => {
+      return promise.WithInvoker((d, a) =>
+      {
         if (ctrl.InvokeRequired)
           ctrl.Invoke(d, a);
         else

@@ -6,7 +6,7 @@
     <UseWpf>true</UseWpf>
     <UseWindowsForms>true</UseWindowsForms>
     <SelfContained>true</SelfContained>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <RuntimeIdentifier>win-x86</RuntimeIdentifier>
     <Authors>erdomke</Authors>
     <Version>21.204.29545</Version>
     <ApplicationIcon>InnovatorAdmin.ico</ApplicationIcon>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Innovator.Client;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -55,7 +56,7 @@ namespace InnovatorAdmin
       }
     }
 
-    private string _compare;
+    private readonly string _compare;
     IComparable IDiffFile.CompareKey
     {
       get

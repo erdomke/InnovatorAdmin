@@ -1,4 +1,5 @@
-﻿using InnovatorAdmin.Documentation;
+﻿using Innovator.Client;
+using InnovatorAdmin.Documentation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 
