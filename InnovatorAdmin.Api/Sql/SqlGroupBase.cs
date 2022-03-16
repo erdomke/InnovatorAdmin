@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Innovator.Client;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,7 +32,7 @@ namespace InnovatorAdmin
       }
     }
 
-    private List<T> _nodes = new List<T>();
+    private readonly List<T> _nodes = new List<T>();
 
     public SqlGroupBase()
     {

@@ -1,6 +1,6 @@
 #tool "Squirrel.Windows" 
 #addin Cake.Squirrel
-#addin "Cake.FileHelpers"
+#addin nuget:?package=Cake.FileHelpers&version=4.0.1
 
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
@@ -36,12 +36,7 @@ Task("Patch-Version")
 , (int)((DateTime.UtcNow - DateTime.UtcNow.Date).TotalSeconds / 2));  
   }
   Information("Version: " + version);
-  
-  var content = string.Format(@"using System.Reflection;
-  
-[assembly: AssemblyVersion(""{0}"")]
-[assembly: AssemblyFileVersion(""{0}"")]", version);
-  FileWriteText("./InnovatorAdmin/AssemblyInfo.Version.cs", content);
+  // TODO: Set version?
 });
 
 Task("Restore-NuGet-Packages")
@@ -69,25 +64,6 @@ Task("NuGet-Pack")
   .Does(() =>
 {
   DeleteFiles("./artifacts/*.nupkg");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/Squirrel*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/Splat*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/ObjectListView*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/NuGet*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/Nancy*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/Mvp.Xml*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/Mono.Cecil*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/Microsoft.*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/LibGit*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/DeltaCompression*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/ICSharpCode.SharpZipLib*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/Innovator.Client*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/Innovator.Client*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/SharpCompress*");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/*.xml");
-  DeleteDirectory("./publish/InnovatorAdmin/lib/net45/lib", new DeleteDirectorySettings {
-    Recursive = true,
-    Force = true
-  });
   var nuGetPackSettings = new NuGetPackSettings {
     Id = "InnovatorAdmin",
     Version = version,
@@ -104,12 +80,6 @@ Task("Release-NuGet-Pack")
   .Does(() =>
 {
   DeleteFiles("./artifacts/*.nupkg");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/*.xml");
-  DeleteFiles("./publish/InnovatorAdmin/lib/net45/*.pdb");
-  DeleteDirectory("./publish/InnovatorAdmin/lib/net45/lib", new DeleteDirectorySettings {
-    Recursive = true,
-    Force = true
-  });
   var nuGetPackSettings = new NuGetPackSettings {
     Id = "InnovatorAdmin",
     Version = version,

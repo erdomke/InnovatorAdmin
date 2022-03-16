@@ -9,7 +9,7 @@ using System.Xml.Linq;
 
 namespace InnovatorAdmin
 {
-  internal static class Utils
+  public static class Utils
   {
     public static XElement LoadXml(Stream stream)
     {
@@ -102,22 +102,6 @@ namespace InnovatorAdmin
 
       if (!hasCycle) cycle.RemoveAt(cycle.Count - 1);
       return hasCycle;
-    }
-
-    public static string GroupConcat<T>(this IEnumerable<T> values, string separator, Func<T, string> renderer)
-    {
-      if (values.Any())
-      {
-        if (renderer == null)
-        {
-          return values.Select(v => v.ToString()).Aggregate((p, c) => p + separator + c);
-        }
-        return values.Select(renderer).Aggregate((p, c) => p + separator + c);
-      }
-      else
-      {
-        return string.Empty;
-      }
     }
 
     public static string GetFileChecksum(string fileName)
