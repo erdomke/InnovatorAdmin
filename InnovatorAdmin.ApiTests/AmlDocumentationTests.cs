@@ -1,5 +1,7 @@
 ﻿using InnovatorAdmin.Documentation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace InnovatorAdmin.Tests
@@ -24,22 +26,35 @@ using (new Escalate(arasPlmIdent))
     var items = ToEnum(this.getRelationships())
         .Where(i => string.Equals(i.getType(), ""Part"", StringComparison.OrdinalIgnoreCase));
     if (!items.Any())");
+
       Assert.AreEqual("TestMethod", doc.Name);
-      Assert.AreEqual("Create a new version of a Part item", doc.Summary);
+      Assert.AreEqual("Create a new version of a [Part](#itemtype.Part) item", ElementsToMarkdown(doc.Summary));
+
       var attr = doc.Attributes.Single();
       Assert.AreEqual("snapshot", attr.Name);
       Assert.AreEqual(AmlDataType.Boolean, attr.ValueTypes.Single().Type);
-      Assert.AreEqual("If 1, create a minor revision if the current version is not released. Otherwise, follow the standard logic of the version action", attr.Summary);
+      Assert.AreEqual("If `1`, create a minor revision if the current version is not released. Otherwise, follow the standard logic of the `version` action", ElementsToMarkdown(attr.Summary));
       var relationships = doc.Elements.Single();
       Assert.AreEqual("Relationships", relationships.Name);
       var item = relationships.Elements.Single();
       Assert.AreEqual("Item", item.Name);
-      Assert.AreEqual("The Part items to version", item.Summary);
+      Assert.AreEqual("The Part items to version", ElementsToMarkdown(item.Summary));
       var typeAttr = item.Attributes.ElementAt(0);
       var idAttr = item.Attributes.ElementAt(1);
       Assert.AreEqual(AmlDataType.Enum, typeAttr.ValueTypes.Single().Type);
       CollectionAssert.AreEqual(new[] { "Part" }, typeAttr.ValueTypes.Single().Values.ToArray());
       Assert.AreEqual(AmlDataType.Item, idAttr.ValueTypes.Single().Type);
+    }
+
+    private string ElementsToMarkdown(IEnumerable<IElement> elements)
+    {
+      using (var writer = new StringWriter())
+      {
+        var md = new MarkdownVisitor(writer);
+        foreach (var element in elements)
+          element.Visit(md);
+        return writer.ToString();
+      }
     }
 
     [TestMethod]
@@ -55,13 +70,14 @@ using (new Escalate(arasPlmIdent))
     var items = ToEnum(this.getRelationships())
         .Where(i => string.Equals(i.getType(), ""Part"", StringComparison.OrdinalIgnoreCase));
     if (!items.Any())");
+
       Assert.AreEqual("TestMethod", doc.Name);
-      Assert.AreEqual("Create a new version of a Part item", doc.Summary);
+
       var relationships = doc.Elements.Single();
       Assert.AreEqual("Relationships", relationships.Name);
       var item = relationships.Elements.Single();
       Assert.AreEqual("Item", item.Name);
-      Assert.AreEqual("The files/folders to version", item.Summary);
+      Assert.AreEqual("The files/folders to version", ElementsToMarkdown(item.Summary));
       CollectionAssert.AreEqual(new[] { "type", "url", "id" }, item.Attributes.Select(a => a.Name).ToArray());
       var typeAttr = item.Attributes.ElementAt(0);
       Assert.AreEqual(AmlDataType.Enum, typeAttr.ValueTypes.Single().Type);

@@ -1,12 +1,7 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
-using InnovatorAdmin;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using prop = global::InnovatorAdmin.ApiTests.Properties;
 
 namespace InnovatorAdmin.Tests
 {
@@ -17,7 +12,32 @@ namespace InnovatorAdmin.Tests
     public void XPathTest()
     {
       var doc = new XmlDocument();
-      doc.LoadXml(prop.Resources.MsdnXml);
+      doc.LoadXml(@"<?xml version=""1.0"" encoding=""utf-8"" ?>
+<bookstore>
+    <book genre=""autobiography"" publicationdate=""1981-03-22"" ISBN=""1-861003-11-0"">
+        <title>The Autobiography of Benjamin Franklin</title>
+        <author>
+            <first-name>Benjamin</first-name>
+            <last-name>Franklin</last-name>
+        </author>
+        <price>8.99</price>
+    </book>
+    <book genre=""novel"" publicationdate=""1967-11-17"" ISBN=""0-201-63361-2"">
+        <title>The Confidence Man</title>
+        <author>
+            <first-name>Herman</first-name>
+            <last-name>Melville</last-name>
+        </author>
+        <price>11.99</price>
+    </book>
+    <book genre=""philosophy"" publicationdate=""1991-02-15"" ISBN=""1-861001-57-6"">
+        <title>The Gorgias</title>
+        <author>
+            <name>Plato</name>
+        </author>
+        <price>9.99</price>
+    </book>
+</bookstore>");
       var nodes = doc.XPath("/bookstore/book/price").ToList();
       Assert.AreEqual(3, nodes.Count);
       Assert.AreEqual("8.99", nodes[0].InnerText);

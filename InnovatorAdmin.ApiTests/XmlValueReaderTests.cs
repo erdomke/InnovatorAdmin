@@ -13,9 +13,6 @@ namespace InnovatorAdmin.Tests
   [TestClass()]
   public class XmlValueReaderTests
   {
-
-
-    [TestMethod()]
     public void RunTest(string expected)
     {
       var stringReader = new StringReader(expected);

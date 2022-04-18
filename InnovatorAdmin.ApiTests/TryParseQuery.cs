@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InnovatorAdmin.ApiTests
+namespace InnovatorAdmin.Tests
 {
   [TestClass]
   public class TryParseQuery
