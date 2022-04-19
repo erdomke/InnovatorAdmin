@@ -75,7 +75,6 @@ namespace InnovatorAdmin.Controls
       {
         if (_createInstallScript != null)
           _wizard.InstallScript = await _createInstallScript.Invoke();
-        _wizard.InstallScript.AddPackage = chkAddPackage.Checked;
         _wizard.GoToStep(new InstallProgress());
       };
       _wizard.GoToStep(connStep);

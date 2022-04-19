@@ -33,7 +33,6 @@
       this.radManageState = new System.Windows.Forms.RadioButton();
       this.radManageStatePreview = new System.Windows.Forms.RadioButton();
       this.radAppend = new System.Windows.Forms.RadioButton();
-      this.chkAddPackage = new System.Windows.Forms.CheckBox();
       this.tableLayoutPanel1.SuspendLayout();
       this.groupBox1.SuspendLayout();
       this.SuspendLayout();
@@ -46,7 +45,6 @@
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
       this.tableLayoutPanel1.Controls.Add(this.groupBox1, 1, 0);
-      this.tableLayoutPanel1.Controls.Add(this.chkAddPackage, 1, 1);
       this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
       this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -103,16 +101,6 @@
       this.radAppend.Text = "Append Package\r\nAdd new items and edit existing ones";
       this.radAppend.UseVisualStyleBackColor = true;
       // 
-      // chkAddPackage
-      // 
-      this.chkAddPackage.AutoSize = true;
-      this.chkAddPackage.Location = new System.Drawing.Point(103, 333);
-      this.chkAddPackage.Name = "chkAddPackage";
-      this.chkAddPackage.Size = new System.Drawing.Size(152, 17);
-      this.chkAddPackage.TabIndex = 9;
-      this.chkAddPackage.Text = "Add Package to Database";
-      this.chkAddPackage.UseVisualStyleBackColor = true;
-      // 
       // InstallOptions
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -131,7 +119,6 @@
         #endregion
 
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.CheckBox chkAddPackage;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.RadioButton radManageState;
         private System.Windows.Forms.RadioButton radManageStatePreview;

@@ -299,28 +299,6 @@ namespace InnovatorAdmin
           _currLine++;
         }
 
-        if (_script.AddPackage)
-        {
-          var pkg = new DatabasePackage(_conn);
-          pkg.Write(_script, e =>
-          {
-            args = new RecoverableErrorEventArgs() { Message = e };
-            OnErrorRaised(args);
-            switch (args.RecoveryOption)
-            {
-              case RecoveryOption.Skip:
-                return DatabasePackageAction.RemoveElementsFromPackages;
-              case RecoveryOption.Retry:
-                return DatabasePackageAction.TryAgain;
-              default:
-                return DatabasePackageAction.Abort;
-            }
-          }, (i, m) =>
-          {
-            ReportProgress((int)(i * 0.2 + 80), m);
-          });
-        }
-
         _conn.Apply("<Item type=\"DatabaseUpgrade\" action=\"merge\" id=\"@0\"><upgrade_status>1</upgrade_status></Item>", upgradeId).AssertNoError();
         OnActionComplete(new ActionCompleteEventArgs());
       }

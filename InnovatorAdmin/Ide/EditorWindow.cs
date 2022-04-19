@@ -1,26 +1,24 @@
 ﻿using ICSharpCode.AvalonEdit.Document;
 using Innovator.Client;
-using Innovator.Client.Connection;
 using InnovatorAdmin.Connections;
 using InnovatorAdmin.Controls;
 using InnovatorAdmin.Editor;
-using Nancy;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Xml;
-using System.Text;
-using System.ComponentModel;
-using System.Net.Http;
-using System.Windows.Documents;
 
 namespace InnovatorAdmin
 {
@@ -2108,64 +2106,41 @@ namespace InnovatorAdmin
       }
     }
 
-    public Response GetResponse(NancyContext context, string rootPath)
+    public async Task GetResponse(HttpListenerRequest request, HttpListenerResponse response)
     {
-      if (context.Request.Method != "GET" || _result == null)
-        return new Response().WithStatusCode(HttpStatusCode.InternalServerError);
-
-      if (string.Equals(context.Request.Url.Path, GetReportUri().LocalPath))
+      if (!string.Equals(request.HttpMethod, "GET", StringComparison.OrdinalIgnoreCase) || _result == null)
       {
-        var resp = new Response().WithStatusCode(HttpStatusCode.OK);
-        resp.ContentType = "text/html";
-        resp.Contents = s =>
+        response.StatusCode = (int)HttpStatusCode.InternalServerError;
+      }
+      else if (string.Equals(request.Url.LocalPath, GetReportUri().LocalPath, StringComparison.OrdinalIgnoreCase))
+      {
+        response.StatusCode = (int)HttpStatusCode.OK;
+        var bytes = Encoding.UTF8.GetBytes(_result.Html);
+        response.ContentType = "text/html";
+        response.ContentLength64 = bytes.LongLength;
+        response.OutputStream.Write(bytes);
+        response.OutputStream.Close();
+      }
+      else if (_proxy is ArasEditorProxy arasProxy && arasProxy.Connection != null)
+      {
+        var reportUrlBase = GetReportUri().LocalPath;
+        var idx = reportUrlBase.IndexOf("/Client/") + 8;
+        var relativeUrl = "../" + request.Url.LocalPath.Substring(idx);
+        var absUrl = arasProxy.Connection.MapClientUrl(relativeUrl);
+        var pResp = await _webService.GetAsync(absUrl).ConfigureAwait(false);
+
+        response.StatusCode = (int)pResp.StatusCode;
+        response.ContentType = pResp.Headers.GetValues("Content-Type").FirstOrDefault();
+        using (var stream = await pResp.Content.ReadAsStreamAsync().ConfigureAwait(false))
         {
-          using (var writer = new StreamWriter(s))
-          {
-            writer.Write(_result.Html);
-          }
-        };
-        return resp;
+          await stream.CopyToAsync(response.OutputStream).ConfigureAwait(false);
+          response.OutputStream.Close();
+        }
       }
       else
       {
-        var parts = context.Request.Url.Path.Split('/');
-        if (parts.Length > 4 && parts[2] == "ProcessMapXml")
-        {
-          var type = parts[3];
-          var id = parts[4];
-          var cmd = _proxy.NewCommand();
-          switch (type.ToLowerInvariant())
-          {
-            case "life cycle map":
-              cmd.WithAction("ApplyItem")
-                .WithQuery("<Item type='Life Cycle Map' action='get' id='@id' levels='1'></Item>")
-                .WithParam("id", id);
-              var resultObj = _proxy.Process(cmd, false, null).Wait();
-              var aml = ElementFactory.Local;
-              var map = aml.FromXml(resultObj.GetTextSource().CreateReader()).AssertItem();
-
-              break;
-          }
-        }
-        else
-        {
-          var arasProxy = _proxy as ArasEditorProxy;
-          if (arasProxy != null && arasProxy.Connection != null)
-          {
-            var reportUrlBase = GetReportUri().LocalPath;
-            var idx = reportUrlBase.IndexOf("/Client/") + 8;
-            var relativeUrl = "../" + context.Request.Url.Path.Substring(idx);
-            var absUrl = arasProxy.Connection.MapClientUrl(relativeUrl);
-            var pResp = _webService.GetAsync(absUrl).Result;
-            var resp = new Response().WithStatusCode((int)pResp.StatusCode);
-            resp.ContentType = pResp.Headers.GetValues("Content-Type").FirstOrDefault();
-            resp.Contents = s => pResp.Content.ReadAsStreamAsync().Result.CopyTo(s);
-            return resp;
-          }
-        }
+        response.StatusCode = (int)HttpStatusCode.NotFound;
       }
-
-      return new Response().WithStatusCode(HttpStatusCode.NotFound);
     }
 
     private Uri GetReportUri()

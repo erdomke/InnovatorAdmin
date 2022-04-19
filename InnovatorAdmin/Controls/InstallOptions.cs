@@ -28,7 +28,6 @@ namespace InnovatorAdmin.Controls
 
     public void GoNext()
     {
-      _wizard.InstallScript.AddPackage = chkAddPackage.Checked;
       var connStep = new ConnectionSelection();
       connStep.MultiSelect = true;
       connStep.GoNextAction = () =>

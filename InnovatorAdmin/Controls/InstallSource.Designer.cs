@@ -34,7 +34,6 @@
       this.label2 = new System.Windows.Forms.Label();
       this.label3 = new System.Windows.Forms.Label();
       this.label4 = new System.Windows.Forms.Label();
-      this.chkAddPackage = new System.Windows.Forms.CheckBox();
       this.lblName = new System.Windows.Forms.Label();
       this.lblAuthor = new System.Windows.Forms.Label();
       this.lblWebsite = new System.Windows.Forms.LinkLabel();
@@ -54,7 +53,6 @@
       this.tableLayoutPanel1.Controls.Add(this.label2, 0, 2);
       this.tableLayoutPanel1.Controls.Add(this.label3, 0, 3);
       this.tableLayoutPanel1.Controls.Add(this.label4, 0, 4);
-      this.tableLayoutPanel1.Controls.Add(this.chkAddPackage, 1, 5);
       this.tableLayoutPanel1.Controls.Add(this.lblName, 1, 1);
       this.tableLayoutPanel1.Controls.Add(this.lblAuthor, 1, 2);
       this.tableLayoutPanel1.Controls.Add(this.lblWebsite, 1, 3);
@@ -142,16 +140,6 @@
       this.label4.TabIndex = 7;
       this.label4.Text = "Description";
       // 
-      // chkAddPackage
-      // 
-      this.chkAddPackage.AutoSize = true;
-      this.chkAddPackage.Location = new System.Drawing.Point(69, 174);
-      this.chkAddPackage.Name = "chkAddPackage";
-      this.chkAddPackage.Size = new System.Drawing.Size(152, 17);
-      this.chkAddPackage.TabIndex = 9;
-      this.chkAddPackage.Text = "Add Package to Database";
-      this.chkAddPackage.UseVisualStyleBackColor = true;
-      // 
       // lblName
       // 
       this.lblName.AutoSize = true;
@@ -214,7 +202,6 @@
     private System.Windows.Forms.Label label2;
     private System.Windows.Forms.Label label3;
     private System.Windows.Forms.Label label4;
-    private System.Windows.Forms.CheckBox chkAddPackage;
     private System.Windows.Forms.Label lblName;
     private System.Windows.Forms.Label lblAuthor;
     private System.Windows.Forms.LinkLabel lblWebsite;

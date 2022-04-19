@@ -1,9 +1,6 @@
-﻿using Nancy.Hosting.Self;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Windows.Forms;
 
 namespace InnovatorAdmin
@@ -38,11 +35,9 @@ namespace InnovatorAdmin
           a.StartsWith("/amlstudio:", StringComparison.OrdinalIgnoreCase));
 
         _serverPort = FreeTcpPort();
-        var config = new HostConfiguration();
-        config.RewriteLocalhost = false;
-        using (var host = new NancyHost(config, new Uri("http://localhost:" + _serverPort.ToString())))
+        using (var server = new WebServer(new[] { "http://localhost:" + _serverPort.ToString() + "/" }))
         {
-          host.Start();
+          server.Run();
           if (string.IsNullOrEmpty(amlStudioStart))
           {
             Application.Run(new AppContext(new EditorWindow()));
@@ -69,10 +64,7 @@ namespace InnovatorAdmin
     {
       get
       {
-        var codeBase = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
-        var uri = new UriBuilder(codeBase);
-        var path = Uri.UnescapeDataString(uri.Path);
-        return Path.GetFullPath(path);
+        return Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory);
       }
     }
   }
