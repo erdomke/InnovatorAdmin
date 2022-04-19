@@ -554,7 +554,7 @@ namespace InnovatorAdmin
     }
 
     public static void MergeSorted<T, TKey>(this IList<T> start, IList<T> dest,
-      Func<T, TKey> keyGetter, Action<int, T, T> callback) where TKey : IComparable
+      Func<T, TKey> keyGetter, Action<MergeType, T, T> callback) where TKey : IComparable
     {
       var startPtr = 0;
       var destPtr = 0;
@@ -566,15 +566,15 @@ namespace InnovatorAdmin
         switch (status)
         {
           case -1:
-            callback(status, start[startPtr], default(T));
+            callback(MergeType.StartOnly, start[startPtr], default(T));
             startPtr++;
             break;
           case 1:
-            callback(status, default(T), dest[destPtr]);
+            callback(MergeType.DestinationOnly, default(T), dest[destPtr]);
             destPtr++;
             break;
           default:
-            callback(0, start[startPtr], dest[destPtr]);
+            callback(MergeType.Both, start[startPtr], dest[destPtr]);
             startPtr++;
             destPtr++;
             break;
@@ -582,14 +582,21 @@ namespace InnovatorAdmin
       }
       while (startPtr < start.Count)
       {
-        callback(-1, start[startPtr], default(T));
+        callback(MergeType.StartOnly, start[startPtr], default(T));
         startPtr++;
       }
       while (destPtr < dest.Count)
       {
-        callback(1, default(T), dest[destPtr]);
+        callback(MergeType.DestinationOnly, default(T), dest[destPtr]);
         destPtr++;
       }
     }
+  }
+
+  public enum MergeType
+  {
+    StartOnly = -1,
+    DestinationOnly = 1,
+    Both = 0
   }
 }

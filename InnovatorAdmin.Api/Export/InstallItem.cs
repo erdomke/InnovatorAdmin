@@ -55,29 +55,6 @@ namespace InnovatorAdmin
       }
     }
 
-    private string _compare;
-    IComparable IDiffFile.CompareKey
-    {
-      get
-      {
-        if (_compare == null)
-        {
-          using (var md5 = new MD5CryptoServiceProvider())
-          using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(Script.OuterXml)))
-          {
-            var result = new StringBuilder(32);
-            var hash = md5.ComputeHash(stream);
-            for (var i = 0; i < hash.Length; i++)
-            {
-              result.AppendFormat("{0:x2}", hash[i]);
-            }
-            return result.ToString();
-          }
-        }
-        return _compare;
-      }
-    }
-
     public InstallItem() { }
 
     public void SetScript(string script)

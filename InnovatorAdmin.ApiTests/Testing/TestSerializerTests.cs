@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using InnovatorAdmin.Testing;
+﻿using InnovatorAdmin.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
-using System.Xml;
 
 namespace InnovatorAdmin.Tests
 {

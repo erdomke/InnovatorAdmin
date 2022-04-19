@@ -40,8 +40,6 @@ namespace InnovatorAdmin
       {
         _blob = blob;
       }
-
-      public IComparable CompareKey { get { return _blob.Sha; } }
       public string Path { get; set; }
 
       public Stream OpenRead()

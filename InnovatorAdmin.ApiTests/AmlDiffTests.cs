@@ -1,6 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace InnovatorAdmin.Tests
 {
@@ -823,6 +827,390 @@ namespace InnovatorAdmin.Tests
       var diff = AmlDiff.GetMergeScript(XmlReader.Create(new StringReader(start)),
         XmlReader.Create(new StringReader(dest)));
       Assert.AreEqual(expected, diff.ToString());
+    }
+
+    [TestMethod()]
+    public void ItemTypeScript_DontDeleteSystemProperties()
+    {
+      var start = @"<AML>
+  <Item type=""ItemType"" id=""2CFE6D5B341947668654545F031810ED"" action=""edit"" _scriptType=""1"">
+    <Relationships>
+      <Item type=""Property"" id=""0A6A4C8C27594767BE581CEB7684A961"" action=""merge"">
+        <column_alignment>left</column_alignment>
+        <column_width>80</column_width>
+        <data_source>11F1E302DEFC469BADFD48150875A7AB</data_source>
+        <data_type>sequence</data_type>
+        <help_text>Server-assigned number identifying the task</help_text>
+        <is_hidden>0</is_hidden>
+        <is_hidden2>0</is_hidden2>
+        <is_indexed>0</is_indexed>
+        <is_keyed>1</is_keyed>
+        <is_multi_valued>0</is_multi_valued>
+        <is_required>0</is_required>
+        <keyed_name_order>10</keyed_name_order>
+        <label xml:lang=""en"">Task ID</label>
+        <order_by>10</order_by>
+        <range_inclusive>0</range_inclusive>
+        <readonly>0</readonly>
+        <sort_order>10</sort_order>
+        <track_history>0</track_history>
+        <name>item_number</name>
+      </Item>
+      <Item type=""Property"" action=""edit"" where=""source_id='2CFE6D5B341947668654545F031810ED' and name='classification'"">
+        <column_alignment>left</column_alignment>
+        <data_type>string</data_type>
+        <help_text />
+        <is_hidden>1</is_hidden>
+        <is_hidden2>1</is_hidden2>
+        <is_indexed>0</is_indexed>
+        <is_keyed>0</is_keyed>
+        <is_multi_valued>0</is_multi_valued>
+        <is_required>0</is_required>
+        <range_inclusive>0</range_inclusive>
+        <readonly>0</readonly>
+        <sort_order>128</sort_order>
+        <stored_length>512</stored_length>
+        <track_history>0</track_history>
+        <name>classification</name>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>";
+      var dest = @"<AML>
+  <Item type=""ItemType"" id=""2CFE6D5B341947668654545F031810ED"" action=""edit"" _scriptType=""1"">
+    <Relationships>
+      <Item type=""Property"" id=""0A6A4C8C27594767BE581CEB7684A961"" action=""merge"">
+        <column_alignment>left</column_alignment>
+        <column_width>80</column_width>
+        <data_source>1DD29EE33CD44AAC9B1E6CB75219BD6D</data_source>
+        <data_type>sequence</data_type>
+        <help_text>Server-assigned number identifying the task</help_text>
+        <is_hidden>0</is_hidden>
+        <is_hidden2>0</is_hidden2>
+        <is_indexed>0</is_indexed>
+        <is_keyed>1</is_keyed>
+        <is_multi_valued>0</is_multi_valued>
+        <is_required>0</is_required>
+        <keyed_name_order>10</keyed_name_order>
+        <label xml:lang=""en"">Task ID</label>
+        <order_by>10</order_by>
+        <range_inclusive>0</range_inclusive>
+        <readonly>0</readonly>
+        <sort_order>10</sort_order>
+        <track_history>0</track_history>
+        <name>item_number</name>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>";
+      var expected = @"<AML>
+  <Item type=""ItemType"" id=""2CFE6D5B341947668654545F031810ED"" _scriptType=""1"" action=""edit"">
+    <Relationships>
+      <Item type=""Property"" id=""0A6A4C8C27594767BE581CEB7684A961"" action=""edit"">
+        <data_source>1DD29EE33CD44AAC9B1E6CB75219BD6D</data_source>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>";
+      var diff = AmlDiff.GetMergeScript(XmlReader.Create(new StringReader(start)),
+        XmlReader.Create(new StringReader(dest)));
+      Assert.AreEqual(expected, diff.ToString());
+    }
+
+    [TestMethod]
+    public void HandleFileRename()
+    {
+      var baseDir = new MockDiffDirectory();
+      baseDir.Add("User/Innovator Admin.xml", @"<AML>
+ <Item type=""User"" id=""30B991F927274FA3829655F50C99472E"" _keyed_name=""Innovator Admin"" action=""merge"">
+  <login_name>admin</login_name>
+  <logon_enabled>1</logon_enabled>
+  <first_name>Innovator</first_name>
+  <last_name>Admin</last_name>
+ </Item>
+</AML>");
+      var compareDir = new MockDiffDirectory();
+      compareDir.Add("User/Software Admin.xml", @"<AML>
+ <Item type=""User"" id=""30B991F927274FA3829655F50C99472E"" _keyed_name=""Software Admin"" action=""merge"">
+  <login_name>admin</login_name>
+  <logon_enabled>1</logon_enabled>
+  <first_name>Software</first_name>
+  <last_name>Admin</last_name>
+ </Item>
+</AML>");
+      var scripts = new Dictionary<string, XDocument>(StringComparer.OrdinalIgnoreCase);
+      baseDir.WriteAmlMergeScripts(compareDir, (path, progress) =>
+      {
+        var root = new XDocument();
+        scripts[path] = root;
+        return root.CreateWriter();
+      });
+      Assert.AreEqual(1, scripts.Count);
+      Assert.AreEqual("User/Software Admin.xml", scripts.Keys.Single().ToString());
+      Assert.AreEqual(@"<AML>
+  <Item type=""User"" id=""30B991F927274FA3829655F50C99472E"" _keyed_name=""Innovator Admin"" action=""edit"">
+    <first_name>Software</first_name>
+  </Item>
+</AML>", scripts.Values.Single().ToString());
+    }
+
+    [TestMethod]
+    public void HandleFileShuffle()
+    {
+      var baseDir = new MockDiffDirectory();
+      baseDir.Add("App/Wb.xml", @"﻿<AML>
+  <Item type=""Application"" id=""C1AEEBAA77C541A2911BE86B6BFAED82"" _keyed_name=""Wb"" action=""merge"">
+    <allow_custom_import>0</allow_custom_import>
+    <arguments />
+    <executable_path>${Agent.Cust.SecScript}</executable_path>
+    <export_file_permissions>ReadWrite</export_file_permissions>
+    <icon>../Images/Cust/Wb.svg</icon>
+    <import_file type=""FileTransferDefinition"">9AFAE40E77B04F539A35EA26E19F2284</import_file>
+    <job_template type=""ItemType"" name=""JobTemplate_Wb"">6B70C74779D84E808BC69A5A074644B6</job_template>
+    <launch_local>0</launch_local>
+    <solver_tag>Wb</solver_tag>
+    <tags>Cust</tags>
+    <type>batch</type>
+    <name>Wb</name>
+    <Relationships>
+      <Item type=""Application_File"" id=""6BCAFC95169B466AB4D11FBB866C5614"" action=""merge"">
+        <content>Update file content</content>
+        <path>update-wbpz.wbjn</path>
+        <sort_order>128</sort_order>
+      </Item>
+      <Item type=""Application_File"" id=""D2D4A8F306DC44A18B655ED9B26FFC7C"" action=""merge"">
+        <content>Run multiple</content>
+        <path>ans-wb-run-multiple-dps.wbjn</path>
+        <sort_order>256</sort_order>
+      </Item>
+      <Item type=""Application_File"" id=""1C71B0D2E835472492C2B4D5CE4EC973"" action=""merge"">
+        <content>server_utils</content>
+        <path>Wb_server_utils.py</path>
+        <sort_order>384</sort_order>
+      </Item>	  
+      <Item type=""Application_FileType"" id=""9E5C6BB96EF24BE9B40BFA723161592A"" action=""merge"">
+        <related_id type=""FileType"">51EDE60C62664961A9D25E1A52CC0165</related_id>
+        <sort_order>128</sort_order>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>");
+      var compareDir = new MockDiffDirectory();
+      compareDir.Add("App/Wb.xml", @"﻿<AML>
+  <Item type=""ans_Application"" id=""10C4994DCB93471C97C96E7012151C68"" _keyed_name=""Wb"" action=""merge"">
+    <allow_custom_import>1</allow_custom_import>
+    <arguments>-F ""${Job.File.0}""</arguments>
+    <executable_path>${Agent.Cust.InstallDirectory}/Framework/bin/${Agent.Platform}/runwb2</executable_path>
+    <export_file_permissions>ReadWrite</export_file_permissions>
+    <icon>../Images/Cust/Wb.svg</icon>
+    <job_template type=""ItemType"" name=""ans_JobTemplate_Local"">1362424A17364B50A9052E144751E360</job_template>
+    <launch_local>1</launch_local>
+    <tags>Cust</tags>
+    <type>local</type>
+    <name>Wb</name>
+    <Relationships>
+      <Item type=""ans_Application_FileType"" id=""DE2E9CBD3F674F77A38F0DECA4AAF24B"" action=""merge"">
+        <related_id type=""FileType"">51EDE60C62664961A9D25E1A52CC0165</related_id>
+        <sort_order>128</sort_order>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>");
+      compareDir.Add("App/Wb_C1AEEBAA77C541A2911BE86B6BFAED82.xml", @"﻿<AML>
+  <Item type=""Application"" id=""C1AEEBAA77C541A2911BE86B6BFAED82"" _keyed_name=""Wb"" action=""merge"">
+    <allow_custom_import>0</allow_custom_import>
+    <arguments />
+    <executable_path>${Agent.Cust.SecScript}</executable_path>
+    <export_file_permissions>ReadWrite</export_file_permissions>
+    <icon>../Images/Cust/Wb.svg</icon>
+    <import_file type=""FileTransferDefinition"">9AFAE40E77B04F539A35EA26E19F2284</import_file>
+    <job_template type=""ItemType"" name=""JobTemplate_Wb"">6B70C74779D84E808BC69A5A074644B6</job_template>
+    <launch_local>0</launch_local>
+    <solver_tag>Wb</solver_tag>
+    <tags>Cust</tags>
+    <type>batch</type>
+    <name>Wb</name>
+    <Relationships>
+      <Item type=""Application_File"" id=""1C71B0D2E835472492C2B4D5CE4EC973"" action=""merge"">
+        <content>server_utils</content>
+        <path>Wb_server_utils.py</path>
+        <sort_order>384</sort_order>
+      </Item>
+      <Item type=""Application_File"" id=""6BCAFC95169B466AB4D11FBB866C5614"" action=""merge"">
+        <content>Update file content</content>
+        <path>update-wbpz.wbjn</path>
+        <sort_order>128</sort_order>
+      </Item>
+      <Item type=""Application_File"" id=""D2D4A8F306DC44A18B655ED9B26FFC7C"" action=""merge"">
+        <content>Run multiple with change</content>
+        <path>ans-wb-run-multiple-dps.wbjn</path>
+        <sort_order>256</sort_order>
+      </Item>
+      <Item type=""Application_FileType"" id=""9E5C6BB96EF24BE9B40BFA723161592A"" action=""merge"">
+        <related_id type=""FileType"">51EDE60C62664961A9D25E1A52CC0165</related_id>
+        <sort_order>128</sort_order>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>");
+      var scripts = new Dictionary<string, XDocument>(StringComparer.OrdinalIgnoreCase);
+      baseDir.WriteAmlMergeScripts(compareDir, (path, progress) =>
+      {
+        var root = new XDocument();
+        scripts[path] = root;
+        return root.CreateWriter();
+      });
+      Assert.AreEqual(@"<AML>
+  <Item type=""ans_Application"" id=""10C4994DCB93471C97C96E7012151C68"" _keyed_name=""Wb"" action=""merge"">
+    <allow_custom_import>1</allow_custom_import>
+    <arguments>-F ""${Job.File.0}""</arguments>
+    <executable_path>${Agent.Cust.InstallDirectory}/Framework/bin/${Agent.Platform}/runwb2</executable_path>
+    <export_file_permissions>ReadWrite</export_file_permissions>
+    <icon>../Images/Cust/Wb.svg</icon>
+    <job_template type=""ItemType"" name=""ans_JobTemplate_Local"">1362424A17364B50A9052E144751E360</job_template>
+    <launch_local>1</launch_local>
+    <tags>Cust</tags>
+    <type>local</type>
+    <name>Wb</name>
+    <Relationships>
+      <Item type=""ans_Application_FileType"" id=""DE2E9CBD3F674F77A38F0DECA4AAF24B"" action=""merge"">
+        <related_id type=""FileType"">51EDE60C62664961A9D25E1A52CC0165</related_id>
+        <sort_order>128</sort_order>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>", scripts["App/Wb.xml"].ToString());
+      Assert.AreEqual(@"<AML>
+  <Item type=""Application"" id=""C1AEEBAA77C541A2911BE86B6BFAED82"" _keyed_name=""Wb"" action=""edit"">
+    <Relationships>
+      <Item type=""Application_File"" id=""D2D4A8F306DC44A18B655ED9B26FFC7C"" action=""edit"">
+        <content>Run multiple with change</content>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>", scripts["App/Wb_C1AEEBAA77C541A2911BE86B6BFAED82.xml"].ToString());
+    }
+
+
+    [TestMethod]
+    public void HandleFileShuffle_Reverse()
+    {
+      var baseDir = new MockDiffDirectory();
+      baseDir.Add("App/Wb.xml", @"﻿<AML>
+  <Item type=""ans_Application"" id=""10C4994DCB93471C97C96E7012151C68"" _keyed_name=""Wb"" action=""merge"">
+    <allow_custom_import>1</allow_custom_import>
+    <arguments>-F ""${Job.File.0}""</arguments>
+    <executable_path>${Agent.Cust.InstallDirectory}/Framework/bin/${Agent.Platform}/runwb2</executable_path>
+    <export_file_permissions>ReadWrite</export_file_permissions>
+    <icon>../Images/Cust/Wb.svg</icon>
+    <job_template type=""ItemType"" name=""ans_JobTemplate_Local"">1362424A17364B50A9052E144751E360</job_template>
+    <launch_local>1</launch_local>
+    <tags>Cust</tags>
+    <type>local</type>
+    <name>Wb</name>
+    <Relationships>
+      <Item type=""ans_Application_FileType"" id=""DE2E9CBD3F674F77A38F0DECA4AAF24B"" action=""merge"">
+        <related_id type=""FileType"">51EDE60C62664961A9D25E1A52CC0165</related_id>
+        <sort_order>128</sort_order>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>");
+      baseDir.Add("App/Wb_C1AEEBAA77C541A2911BE86B6BFAED82.xml", @"﻿<AML>
+  <Item type=""Application"" id=""C1AEEBAA77C541A2911BE86B6BFAED82"" _keyed_name=""Wb"" action=""merge"">
+    <allow_custom_import>0</allow_custom_import>
+    <arguments />
+    <executable_path>${Agent.Cust.SecScript}</executable_path>
+    <export_file_permissions>ReadWrite</export_file_permissions>
+    <icon>../Images/Cust/Wb.svg</icon>
+    <import_file type=""FileTransferDefinition"">9AFAE40E77B04F539A35EA26E19F2284</import_file>
+    <job_template type=""ItemType"" name=""JobTemplate_Wb"">6B70C74779D84E808BC69A5A074644B6</job_template>
+    <launch_local>0</launch_local>
+    <solver_tag>Wb</solver_tag>
+    <tags>Cust</tags>
+    <type>batch</type>
+    <name>Wb</name>
+    <Relationships>
+      <Item type=""Application_File"" id=""1C71B0D2E835472492C2B4D5CE4EC973"" action=""merge"">
+        <content>server_utils</content>
+        <path>Wb_server_utils.py</path>
+        <sort_order>384</sort_order>
+      </Item>
+      <Item type=""Application_File"" id=""6BCAFC95169B466AB4D11FBB866C5614"" action=""merge"">
+        <content>Update file content</content>
+        <path>update-wbpz.wbjn</path>
+        <sort_order>128</sort_order>
+      </Item>
+      <Item type=""Application_File"" id=""D2D4A8F306DC44A18B655ED9B26FFC7C"" action=""merge"">
+        <content>Run multiple with change</content>
+        <path>ans-wb-run-multiple-dps.wbjn</path>
+        <sort_order>256</sort_order>
+      </Item>
+      <Item type=""Application_FileType"" id=""9E5C6BB96EF24BE9B40BFA723161592A"" action=""merge"">
+        <related_id type=""FileType"">51EDE60C62664961A9D25E1A52CC0165</related_id>
+        <sort_order>128</sort_order>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>");
+      
+      var compareDir = new MockDiffDirectory();
+      compareDir.Add("App/Wb.xml", @"﻿<AML>
+  <Item type=""Application"" id=""C1AEEBAA77C541A2911BE86B6BFAED82"" _keyed_name=""Wb"" action=""merge"">
+    <allow_custom_import>0</allow_custom_import>
+    <arguments />
+    <executable_path>${Agent.Cust.SecScript}</executable_path>
+    <export_file_permissions>ReadWrite</export_file_permissions>
+    <icon>../Images/Cust/Wb.svg</icon>
+    <import_file type=""FileTransferDefinition"">9AFAE40E77B04F539A35EA26E19F2284</import_file>
+    <job_template type=""ItemType"" name=""JobTemplate_Wb"">6B70C74779D84E808BC69A5A074644B6</job_template>
+    <launch_local>0</launch_local>
+    <solver_tag>Wb</solver_tag>
+    <tags>Cust</tags>
+    <type>batch</type>
+    <name>Wb</name>
+    <Relationships>
+      <Item type=""Application_File"" id=""6BCAFC95169B466AB4D11FBB866C5614"" action=""merge"">
+        <content>Update file content</content>
+        <path>update-wbpz.wbjn</path>
+        <sort_order>128</sort_order>
+      </Item>
+      <Item type=""Application_File"" id=""D2D4A8F306DC44A18B655ED9B26FFC7C"" action=""merge"">
+        <content>Run multiple</content>
+        <path>ans-wb-run-multiple-dps.wbjn</path>
+        <sort_order>256</sort_order>
+      </Item>
+      <Item type=""Application_File"" id=""1C71B0D2E835472492C2B4D5CE4EC973"" action=""merge"">
+        <content>server_utils</content>
+        <path>Wb_server_utils.py</path>
+        <sort_order>384</sort_order>
+      </Item>	  
+      <Item type=""Application_FileType"" id=""9E5C6BB96EF24BE9B40BFA723161592A"" action=""merge"">
+        <related_id type=""FileType"">51EDE60C62664961A9D25E1A52CC0165</related_id>
+        <sort_order>128</sort_order>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>");
+      var scripts = new Dictionary<string, XDocument>(StringComparer.OrdinalIgnoreCase);
+      baseDir.WriteAmlMergeScripts(compareDir, (path, progress) =>
+      {
+        var root = new XDocument();
+        scripts[path] = root;
+        return root.CreateWriter();
+      });
+      Assert.AreEqual(@"<AML>
+  <Item type=""ans_Application"" id=""10C4994DCB93471C97C96E7012151C68"" _keyed_name=""Wb"" action=""delete"" />
+</AML>", scripts["App/Wb.xml"].ToString());
+      Assert.AreEqual(@"<AML>
+  <Item type=""Application"" id=""C1AEEBAA77C541A2911BE86B6BFAED82"" _keyed_name=""Wb"" action=""edit"">
+    <Relationships>
+      <Item type=""Application_File"" id=""D2D4A8F306DC44A18B655ED9B26FFC7C"" action=""edit"">
+        <content>Run multiple</content>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>", scripts["App/Wb_C1AEEBAA77C541A2911BE86B6BFAED82.xml"].ToString());
     }
   }
 }

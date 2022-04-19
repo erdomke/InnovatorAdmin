@@ -16,120 +16,128 @@ namespace InnovatorAdmin
 
   public static class DirectoryExtensions
   {
-    public static IEnumerable<FileDiff> GetDiffs(this IDiffDirectory baseDir, IDiffDirectory compareDir)
-    {
-      Func<IDiffFile, IComparable> keyGetter = i => i.Path;
-      var basePaths = baseDir.GetFiles().OrderBy(keyGetter).ToArray();
-      var comparePaths = compareDir.GetFiles().OrderBy(keyGetter).ToArray();
-
-      var result = new List<FileDiff>();
-      basePaths.MergeSorted(comparePaths, keyGetter, (i, b, c) =>
-      {
-        switch (i)
-        {
-          case -1:
-            result.Add(new FileDiff()
-            {
-              Path = b.Path,
-              InBase = FileStatus.Unchanged,
-              InCompare = FileStatus.DoesntExist
-            });
-            break;
-          case 1:
-            result.Add(new FileDiff()
-            {
-              Path = c.Path,
-              InBase = FileStatus.DoesntExist,
-              InCompare = FileStatus.Unchanged
-            });
-            break;
-          default:
-            result.Add(new FileDiff()
-            {
-              Path = b.Path,
-              InBase = FileStatus.Unchanged,
-              InCompare = b.CompareKey.CompareTo(c.CompareKey) == 0
-                ? FileStatus.Unchanged : FileStatus.Unchanged
-            });
-            break;
-        }
-      });
-      return result;
-    }
-
+    /// <summary>
+    /// Writes the difference between two directories
+    /// </summary>
+    /// <param name="baseDir">The base directory which needs to be transformed</param>
+    /// <param name="compareDir">The comparison directory which is what the base directoy should look like after transformation</param>
+    /// <param name="callback">Gets an XML writer to write the merge script given the path and current progress (integer between 0 and 100)</param>
+    /// <returns>Metadata regarding the target state</returns>
     public static PackageMetadataProvider WriteAmlMergeScripts(this IDiffDirectory baseDir, IDiffDirectory compareDir
-      , Func<string, int, XmlWriter> callback = null)
+      , Func<string, int, XmlWriter> callback)
     {
-      Func<IDiffFile, IComparable> keyGetter = i => i.Path.Replace('\\', '/').TrimStart('/');
-      var basePaths = baseDir.GetFiles().OrderBy(keyGetter).ToArray();
-      var comparePaths = compareDir.GetFiles().OrderBy(keyGetter).ToArray();
+      Func<IDiffFile, IComparable> keyGetter = i => i.Path.ToUpperInvariant().Replace('\\', '/').TrimStart('/');
+      var basePaths = baseDir.GetFiles().OrderBy(keyGetter).ToList();
+      var comparePaths = compareDir.GetFiles().OrderBy(keyGetter).ToList();
       var completed = 0;
-      var total = basePaths.Length + comparePaths.Length;
-      var result = new List<FileDiff>();
+      var total = basePaths.Count + comparePaths.Count;
       var metadata = new PackageMetadataProvider();
 
-      basePaths.MergeSorted(comparePaths, keyGetter, (i, b, c) =>
+      var baseScripts = new List<AmlScript>();
+      var compareScripts = new List<AmlScript>();
+
+      Action<MergeType, AmlScript, AmlScript> mergeScripts = (type, baseScript, compareScript) =>
+      {
+        switch (type)
+        {
+          case MergeType.StartOnly: // Delete
+            completed++;
+            using (var writer = callback(baseScript.Path, completed * 100 / total))
+            {
+              var elem = AmlDiff.GetMergeScript(baseScript.Script, null);
+              if (elem.Elements().Any())
+                elem.WriteTo(writer);
+            }
+            break;
+          case MergeType.DestinationOnly: // Add
+            completed++;
+            using (var writer = callback(compareScript.Path, completed * 100 / total))
+            {
+              compareScript.Script.WriteTo(writer);
+              metadata.Add(compareScript.Script);
+            }
+            break;
+          default:
+            total--;
+            completed++;
+
+            var path = compareScript.Path;
+            if (!string.Equals(baseScript.Path, compareScript.Path, StringComparison.OrdinalIgnoreCase)
+              && !string.IsNullOrEmpty(compareScript.Id)
+              && baseScript.Path.IndexOf(compareScript.Id) >= 0)
+            {
+              path = baseScript.Path;
+            }
+            using (var writer = callback(path, completed * 100 / total))
+            {
+              metadata.Add(compareScript.Script);
+              var elem = AmlDiff.GetMergeScript(baseScript.Script, compareScript.Script);
+              if (elem.Elements().Any())
+                elem.WriteTo(writer);
+            }
+            break;
+        }
+      };
+
+      basePaths.MergeSorted(comparePaths, keyGetter, (type, baseFile, compareFile) =>
       {
         try
         {
-          var path = (c ?? b).Path;
-          if (path.EndsWith(".xslt.xml") || path.EndsWith(".innpkg"))
+          var path = (compareFile ?? baseFile).Path;
+          if (path.EndsWith(".xslt.xml", StringComparison.OrdinalIgnoreCase)
+            || path.EndsWith(".innpkg", StringComparison.OrdinalIgnoreCase))
             return;
 
-          completed++;
-          switch (i)
+          switch (type)
           {
-            case -1: // Delete
-              using (var baseStream = ReadFile(b, p => Array.Find(basePaths, f => f.Path == p)))
-              using (var writer = callback(path, completed * 100 / total))
-              {
-                var elem = AmlDiff.GetMergeScript(baseStream, null);
-                if (elem.Elements().Any())
-                  elem.WriteTo(writer);
-              }
+            case MergeType.StartOnly: // Delete
+              var baseScript = new AmlScript(baseFile, basePaths);
+              if (baseScript.Key == null)
+                mergeScripts(type, baseScript, null);
+              else
+                baseScripts.Add(baseScript);
               break;
-            case 1: // Add
-              using (var baseStream = ReadFile(c, p => Array.Find(comparePaths, f => f.Path == p)))
-              {
-                var elem = XElement.Load(baseStream);
-                IdentityMergeToAdd(elem);
-                if (ItemAddToIgnore(elem))
-                  return;
+            case MergeType.DestinationOnly: // Add
+              var compareScript = new AmlScript(compareFile, comparePaths);
+              IdentityMergeToAdd(compareScript.Script);
+              if (ItemAddToIgnore(compareScript.Script))
+                return;
 
-                using (var writer = callback(path, completed * 100 / total))
-                {
-                  elem.WriteTo(writer);
-                  metadata.Add(elem);
-                }
-              }
+              if (compareScript.Key == null)
+                mergeScripts(type, null, compareScript);
+              else
+                compareScripts.Add(compareScript);
               break;
             default: // Edit
-              total--;
-              using (var baseStream = ReadFile(b, p => Array.Find(basePaths, f => f.Path == p)))
-              using (var compareStream = ReadFile(c, p => Array.Find(comparePaths, f => f.Path == p)))
-              using (var writer = callback(path, completed * 100 / total))
+              baseScript = new AmlScript(baseFile, basePaths);
+              compareScript = new AmlScript(compareFile, comparePaths);
+              if (baseScript.Key == compareScript.Key)
               {
-                var baseElem = Utils.LoadXml(baseStream);
-                var compareElem = Utils.LoadXml(compareStream);
-                metadata.Add(compareElem);
-                var elem = AmlDiff.GetMergeScript(baseElem, compareElem);
-                if (elem.Elements().Any())
-                  elem.WriteTo(writer);
+                mergeScripts(type, baseScript, compareScript);
+              }
+              else
+              {
+                baseScripts.Add(baseScript);
+                compareScripts.Add(compareScript);
               }
               break;
           }
         }
         catch (XmlException ex)
         {
-          ex.Data["Index"] = i;
-          if (b != null)
-            ex.Data["BasePath"] = b.Path;
-          if (c != null)
-            ex.Data["ComparePath"] = c.Path;
+          ex.Data["MergeType"] = type.ToString();
+          if (baseFile != null)
+            ex.Data["BasePath"] = baseFile.Path;
+          if (compareFile != null)
+            ex.Data["ComparePath"] = compareFile.Path;
           throw;
         }
       });
 
+      baseScripts = baseScripts.OrderBy(s => s.Key).ToList();
+      compareScripts = compareScripts.OrderBy(s => s.Key).ToList();
+
+      baseScripts.MergeSorted(compareScripts, s => s.Key, mergeScripts);
       return metadata;
     }
 
@@ -189,36 +197,67 @@ namespace InnovatorAdmin
       });
     }
 
-    private static Stream ReadFile(IDiffFile file, Func<string, IDiffFile> fileGetter)
+    private class AmlScript
     {
-      if (file.Path.EndsWith(".xslt", StringComparison.OrdinalIgnoreCase))
-      {
-        var report = InnovatorPackage.ReadReport(file.Path, p =>
-        {
-          var f = fileGetter(p);
-          if (f != null)
-            return f.OpenRead();
-          return new MemoryStream(Encoding.UTF8.GetBytes("<Result><Item></Item></Result>"));
-        });
+      public string Key { get; }
+      public string Path { get; }
+      public string Id { get; }
+      public XElement Script { get; }
 
-        var result = new MemoryStream();
-        using (var writer = XmlWriter.Create(result, new XmlWriterSettings
-        {
-          OmitXmlDeclaration = true,
-          Indent = true,
-          IndentChars = "  "
-        }))
-        {
-          report.WriteTo(writer);
-        };
-        result.Position = 0;
-        return result;
-      }
-      else
+      public AmlScript(IDiffFile file, IEnumerable<IDiffFile> others)
       {
-        return file.OpenRead();
+        Path = file.Path;
+        using (var stream = ReadFile(file, path => others.FirstOrDefault(f => string.Equals(f.Path, path, StringComparison.OrdinalIgnoreCase))))
+        {
+          Script = Utils.LoadXml(stream);
+          var item = Script.DescendantsAndSelf("Item").FirstOrDefault();
+          if (item != null
+            && (item.Parent == null
+              || !item.Parent.Elements("Item").Skip(1).Any()))
+          {
+            Id = (string)item.Attribute("id");
+            var parts = new[] {
+              ((string)(item.Attribute("id") ?? item.Attribute("where")))?.ToUpperInvariant(),
+              (string)item.Attribute(XmlFlags.Attr_ScriptType),
+              (string)item.Attribute("action")
+            };
+            if (parts[2] == "add" || parts[2] == "create")
+              parts[2] = "merge";
+            Key = string.Join(".", parts);
+          }
+        }
       }
 
+      private static Stream ReadFile(IDiffFile file, Func<string, IDiffFile> fileGetter)
+      {
+        if (file.Path.EndsWith(".xslt", StringComparison.OrdinalIgnoreCase))
+        {
+          var report = InnovatorPackage.ReadReport(file.Path, p =>
+          {
+            var f = fileGetter(p);
+            if (f != null)
+              return f.OpenRead();
+            return new MemoryStream(Encoding.UTF8.GetBytes("<Result><Item></Item></Result>"));
+          });
+
+          var result = new MemoryStream();
+          using (var writer = XmlWriter.Create(result, new XmlWriterSettings
+          {
+            OmitXmlDeclaration = true,
+            Indent = true,
+            IndentChars = "  "
+          }))
+          {
+            report.WriteTo(writer);
+          };
+          result.Position = 0;
+          return result;
+        }
+        else
+        {
+          return file.OpenRead();
+        }
+      }
     }
   }
 }

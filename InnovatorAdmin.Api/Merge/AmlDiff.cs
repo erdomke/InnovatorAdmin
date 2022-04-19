@@ -120,7 +120,10 @@ namespace InnovatorAdmin
       {
         switch (i)
         {
-          case -1:
+          case MergeType.StartOnly: // delete
+            if ((string)s.Attribute("action") == "edit")
+              return;
+
             res = EnsurePath(s, result);
             if (res.Name.LocalName == "Item")
             {
@@ -132,7 +135,7 @@ namespace InnovatorAdmin
               res.Parent.SetAttributeValue("action", "edit");
             }
             break;
-          case 1:
+          case MergeType.DestinationOnly: // add
             res = EnsurePath(d, result);
             SetKeys(SetItemEdits(res.ReplaceWithElement(new XElement(d))).DescendantsAndSelf());
             break;
