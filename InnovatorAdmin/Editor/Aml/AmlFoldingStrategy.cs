@@ -350,40 +350,7 @@ namespace InnovatorAdmin.Editor
 
       return newFoldStart;
     }
-    /// <summary>
-    /// Gets the element's attributes as a string on one line that will
-    /// be displayed when the element is folded.
-    /// </summary>
-    /// <remarks>
-    /// Currently this puts all attributes from an element on the same
-    /// line of the start tag.  It does not cater for elements where attributes
-    /// are not on the same line as the start tag.
-    /// </remarks>
-    static string GetAttributeFoldText(XmlReader reader)
-    {
-      StringBuilder text = new StringBuilder();
-
-      for (int i = 0; i < reader.AttributeCount; ++i)
-      {
-        reader.MoveToAttribute(i);
-
-        text.Append(reader.Name);
-        text.Append("=");
-        text.Append(reader.QuoteChar.ToString());
-        text.Append(XmlEncodeAttributeValue(reader.Value, reader.QuoteChar));
-        text.Append(reader.QuoteChar.ToString());
-
-        // Append a space if this is not the
-        // last attribute.
-        if (i < reader.AttributeCount - 1)
-        {
-          text.Append(" ");
-        }
-      }
-
-      return text.ToString();
-    }
-
+    
     /// <summary>
     /// Xml encode the attribute string since the string returned from
     /// the XmlTextReader is the plain unencoded string and .NET

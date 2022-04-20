@@ -1,11 +1,6 @@
-﻿using ICSharpCode.AvalonEdit.CodeCompletion;
-using ICSharpCode.AvalonEdit.Highlighting;
+﻿using ICSharpCode.AvalonEdit.Highlighting;
 using Innovator.Client;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Media;
 
@@ -13,8 +8,6 @@ namespace InnovatorAdmin.Editor
 {
   public class RegexReplacementHelper : PlainTextEditorHelper
   {
-    private InsightWindow _currentInsight;
-
     public override ICSharpCode.AvalonEdit.Highlighting.IHighlightingDefinition GetHighlighting()
     {
       return _highlighter;

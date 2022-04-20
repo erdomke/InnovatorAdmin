@@ -88,24 +88,6 @@ namespace InnovatorAdmin.Controls
       }
     }
 
-    private string WriteXml(XmlElement elem)
-    {
-      var settings = new XmlWriterSettings();
-      settings.OmitXmlDeclaration = true;
-      settings.Indent = true;
-      settings.IndentChars = "  ";
-
-      using (var writer = new StringWriter())
-      {
-        using (var xml = XmlTextWriter.Create(writer, settings))
-        {
-          elem.WriteTo(xml);
-        }
-        return writer.ToString();
-      }
-
-    }
-
     private void btnPatchLeftRight_Click(object sender, EventArgs e)
     {
       try

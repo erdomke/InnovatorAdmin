@@ -1,20 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
+﻿using Innovator.Client;
+using System;
 using System.Windows.Forms;
-using System.Xml;
-using Innovator.Client;
 
 namespace InnovatorAdmin.Controls
 {
   public partial class InstallComplete : UserControl, IWizardStep
   {
-    private IWizard _wizard;
-
     public InstallComplete()
     {
       InitializeComponent();
@@ -23,7 +14,6 @@ namespace InnovatorAdmin.Controls
     public void Configure(IWizard wizard)
     {
       wizard.NextEnabled = false;
-      _wizard = wizard;
     }
 
     public void GoNext()

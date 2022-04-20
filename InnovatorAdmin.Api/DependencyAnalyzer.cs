@@ -1,12 +1,14 @@
-﻿using System;
+﻿using Innovator.Client;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml;
-using Innovator.Client;
 
 namespace InnovatorAdmin
 {
+  /// <summary>
+  /// Detect the dependencies between AML scripts
+  /// </summary>
   internal class DependencyAnalyzer
   {
     //// Persistent variables between scans
@@ -148,6 +150,11 @@ namespace InnovatorAdmin
       }
     }
 
+    /// <summary>
+    /// Get the items that the <paramref name="itemRef"/> depends on
+    /// </summary>
+    /// <param name="itemRef">The reference to check</param>
+    /// <returns>The list of dependencies</returns>
     public IEnumerable<ItemReference> GetDependencies(ItemReference itemRef)
     {
       HashSet<ItemReference> dependencies;
@@ -158,7 +165,15 @@ namespace InnovatorAdmin
       return Enumerable.Empty<ItemReference>();
     }
 
-    public void GatherDependencies(XmlElement elem, ItemReference itemRef, IEnumerable<ItemReference> existingDependencies)
+    /// <summary>
+    /// Determine the dependencies of an install item script
+    /// </summary>
+    public void AddReferenceAndDependencies(InstallItem installItem)
+    {
+      AddReferenceAndDependencies(installItem.Script, installItem.Reference, installItem.CoreDependencies);
+    }
+
+    private void AddReferenceAndDependencies(XmlElement elem, ItemReference itemRef, IEnumerable<ItemReference> existingDependencies)
     {
       _dependencies.Clear();
       _definitions.Clear();
@@ -220,7 +235,10 @@ namespace InnovatorAdmin
       _definitions.Clear();
     }
 
-    public void CleanDependencies()
+    /// <summary>
+    /// After adding all of the dependencies, perform cleanup operations
+    /// </summary>
+    public void FinishAdding()
     {
       ItemReference topDefn;
       ItemReference currValue;
@@ -345,6 +363,12 @@ namespace InnovatorAdmin
           }
         }
       }
+      else if (elem.LocalName == "reference" && elem.Parent().LocalName == "Item"
+        && (elem.Parent().Attribute("type") == "FeedTemplate" || elem.Parent().Attribute("type") == "FileSelectorTemplate")
+        && TryGetSsvcReference(elem.InnerText, out var ssvcElement))
+      {
+        VisitNode(ssvcElement, masterRef);
+      }
       else if (elem != _elem && elem.LocalName == "Item" && elem.HasAttribute("type")
         && elem.Attribute("action", "") == "get"
         && (elem.HasAttribute("id") || elem.HasAttribute("where")))
@@ -387,6 +411,55 @@ namespace InnovatorAdmin
           }
           VisitNode(child, masterRef);
         }
+      }
+    }
+
+    private bool TryGetSsvcReference(string reference, out XmlElement element)
+    {
+      if (string.IsNullOrEmpty(reference))
+      {
+        element = null;
+        return false;
+      }
+
+      var doc = new XmlDocument();
+      if (reference == "this")
+      {
+        element = doc.CreateElement("Item");
+        return true;
+      }
+      else if (reference.StartsWith("<"))
+      {
+        doc.LoadXml(reference);
+        element = doc.DocumentElement;
+        return true;
+      }
+      else if (reference.IndexOf('(') > 0)
+      {
+        var path = reference.Substring(0, reference.IndexOf('(')).Split('/');
+        element = doc.CreateElement("Item");
+        var current = element;
+        foreach (var relationship in path)
+        {
+          if (!string.IsNullOrEmpty(current.GetAttribute("type")))
+          {
+            var rel = doc.CreateElement("Relationships");
+            var related = doc.CreateElement("Item");
+            current.AppendChild(rel);
+            rel.AppendChild(related);
+            current = related;
+          }
+          current.SetAttribute("type", relationship);
+        }
+        var property = reference.Substring(reference.IndexOf('(') + 1).TrimEnd(')');
+        current.SetAttribute("select", property);
+        return true;
+      }
+      else
+      {
+        element = doc.CreateElement("Item");
+        element.SetAttribute("select", reference);
+        return true;
       }
     }
 

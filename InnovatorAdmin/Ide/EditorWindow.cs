@@ -416,11 +416,6 @@ namespace InnovatorAdmin
       _docViewer.TryNavigate("Help", "Getting Started");
     }
 
-    private void AddCommandToGrid(System.Windows.Controls.Grid grid, string title, string description, string wpfImage, Action handler)
-    {
-      
-    }
-
     protected override void OnSizeChanged(EventArgs e)
     {
       base.OnSizeChanged(e);

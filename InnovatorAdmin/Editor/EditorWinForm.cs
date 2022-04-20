@@ -723,8 +723,7 @@ namespace InnovatorAdmin.Editor
     private class CompletionWindowEx : ICSharpCode.AvalonEdit.CodeCompletion.CompletionWindow
     {
       private bool _allowEnter = false;
-      private double _minWidth = 0;
-
+      
       public CompletionWindowEx(TextArea textArea) : base(textArea) { }
 
       protected override void OnKeyDown(System.Windows.Input.KeyEventArgs e)

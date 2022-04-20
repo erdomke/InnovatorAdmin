@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Windows.Forms;
 using System.Threading;
+using System.Windows.Forms;
+using System.Xml;
 
 namespace InnovatorAdmin.Controls
 {
@@ -15,7 +13,6 @@ namespace InnovatorAdmin.Controls
     private IWizard _wizard;
     private System.Windows.Forms.Timer _timer = new System.Windows.Forms.Timer();
     private Exception _ex;
-    private bool _unlinked = false;
     private List<Connections.ConnectionData> _connections;
     private System.Windows.Forms.Timer _clock = new System.Windows.Forms.Timer();
     private DateTime _start = DateTime.UtcNow;
@@ -70,9 +67,7 @@ namespace InnovatorAdmin.Controls
     {
       _wizard = wizard;
       _wizard.NextEnabled = false;
-      _wizard.InstallProcessor.ActionComplete += InstallProcessor_ActionComplete;
-      _wizard.InstallProcessor.ErrorRaised += InstallProcessor_ErrorRaised;
-      _wizard.InstallProcessor.ProgressChanged += InstallProcessor_ProgressChanged;
+      Link();
 
       _connections = _wizard.ConnectionInfo.ToList();
       StartInstall(true);
@@ -85,13 +80,9 @@ namespace InnovatorAdmin.Controls
         if (!isLoggedIn)
         {
           var conn = _connections.First().ArasLogin();
-          _wizard.InstallProcessor.ActionComplete -= InstallProcessor_ActionComplete;
-          _wizard.InstallProcessor.ErrorRaised -= InstallProcessor_ErrorRaised;
-          _wizard.InstallProcessor.ProgressChanged -= InstallProcessor_ProgressChanged;
+          UnLink();
           _wizard.Connection = conn;
-          _wizard.InstallProcessor.ActionComplete += InstallProcessor_ActionComplete;
-          _wizard.InstallProcessor.ErrorRaised += InstallProcessor_ErrorRaised;
-          _wizard.InstallProcessor.ProgressChanged += InstallProcessor_ProgressChanged;
+          Link();
         }
 
         _ex = null;
@@ -106,21 +97,39 @@ namespace InnovatorAdmin.Controls
       return false;
     }
 
+    private void Link()
+    {
+      var xmlPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Innovator Admin", "InstallLog_" + DateTime.UtcNow.ToString("yyyyMMddHHmmss") + ".xml");
+      Directory.CreateDirectory(Path.GetDirectoryName(xmlPath));
+      _wizard.InstallProcessor.LogWriter = XmlWriter.Create(xmlPath, new XmlWriterSettings()
+      {
+        Indent = true,
+        IndentChars = "  ",
+        ConformanceLevel = ConformanceLevel.Fragment,
+        OmitXmlDeclaration = true,
+      });
+      _wizard.InstallProcessor.ActionComplete += InstallProcessor_ActionComplete;
+      _wizard.InstallProcessor.ErrorRaised += InstallProcessor_ErrorRaised;
+      _wizard.InstallProcessor.ProgressChanged += InstallProcessor_ProgressChanged;
+    }
+
     private void UnLink()
     {
-      if (!_unlinked)
-      {
-        _unlinked = true;
-        _wizard.InstallProcessor.ActionComplete -= InstallProcessor_ActionComplete;
-        _wizard.InstallProcessor.ErrorRaised -= InstallProcessor_ErrorRaised;
-        _wizard.InstallProcessor.ProgressChanged -= InstallProcessor_ProgressChanged;
-      }
+      if (this.IsDisposed)
+        return;
+      _wizard.InstallProcessor.LogWriter?.Dispose();
+      _wizard.InstallProcessor.LogWriter = null;
+      _wizard.InstallProcessor.ActionComplete -= InstallProcessor_ActionComplete;
+      _wizard.InstallProcessor.ErrorRaised -= InstallProcessor_ErrorRaised;
+      _wizard.InstallProcessor.ProgressChanged -= InstallProcessor_ProgressChanged;
     }
 
     void InstallProcessor_ActionComplete(object sender, ActionCompleteEventArgs e)
     {
       this.UiThreadInvoke(() =>
       {
+        _wizard.InstallProcessor.LogWriter.Dispose();
+        _wizard.InstallProcessor.LogWriter = null;
         _timer.Enabled = true;
         if (e.Exception != null)
           Utils.HandleError(e.Exception);

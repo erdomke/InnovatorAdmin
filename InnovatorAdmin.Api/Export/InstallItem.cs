@@ -55,7 +55,7 @@ namespace InnovatorAdmin
       }
     }
 
-    public InstallItem() { }
+    private InstallItem() { }
 
     public void SetScript(string script)
     {
@@ -82,6 +82,7 @@ namespace InnovatorAdmin
       result.Path = path;
       return result;
     }
+
     public static InstallItem FromScript(XmlElement elem
       , Func<XmlElement, string> keyedNameGetter = null)
     {
@@ -193,6 +194,7 @@ namespace InnovatorAdmin
       }
       return result;
     }
+
     public static InstallItem FromDependency(ItemReference itemRef)
     {
       var result = new InstallItem();
@@ -213,6 +215,7 @@ namespace InnovatorAdmin
       result.Type = InstallType.DependencyCheck;
       return result;
     }
+
     public static InstallItem FromWarning(ItemReference itemRef, string warning)
     {
       var result = new InstallItem();

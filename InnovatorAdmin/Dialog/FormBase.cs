@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows.Forms;
 
 namespace InnovatorAdmin
@@ -375,7 +372,6 @@ namespace InnovatorAdmin
     protected Panel RightBorderPanel { get; set; }
     protected Panel BottomBorderPanel { get; set; }
 
-    private FormWindowState previousWindowState;
     private bool _themeInitialize = false;
 
     protected void InitializeTheme()
@@ -439,8 +435,6 @@ namespace InnovatorAdmin
       {
         CloseLabel.MouseClick += (s, e) => Close(e);
       }
-
-      previousWindowState = MinMaxState;
     }
 
     protected override void OnTextChanged(EventArgs e)

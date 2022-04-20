@@ -5,7 +5,9 @@
 		<SelfContained>true</SelfContained>
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 		<Authors>erdomke</Authors>
+		<!--
 		<PublishSingleFile>true</PublishSingleFile>
+		-->
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -246,15 +246,6 @@ namespace InnovatorAdmin.Connections
         return false;
       }
     }
-
-    private string EncryptStatic(string password)
-    {
-      if (!password.IsGuid())
-      {
-        password = ConnectionDataExtensions.CalcMD5(password);
-      }
-      return RijndaelSimple.Encrypt(_encryptKey, password);
-    }
     #endregion
 
     private Color FromHex(string hex)

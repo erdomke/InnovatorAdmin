@@ -349,9 +349,9 @@ namespace InnovatorAdmin
 
             foreach (var newInstallItem in newInstallItems)
             {
-              _dependAnalyzer.GatherDependencies(newInstallItem.Script, newInstallItem.Reference, newInstallItem.CoreDependencies);
+              _dependAnalyzer.AddReferenceAndDependencies(newInstallItem);
             }
-            _dependAnalyzer.CleanDependencies();
+            _dependAnalyzer.FinishAdding();
 
             results = _sorter.GetDependencyList(_dependAnalyzer
               , (script.Lines ?? Enumerable.Empty<InstallItem>()).Concat(newInstallItems)

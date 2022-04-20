@@ -1,13 +1,11 @@
-﻿using InnovatorAdmin.Connections;
+﻿using Innovator.Client;
+using InnovatorAdmin.Connections;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Windows.Forms;
-using System.Xml;
-using Innovator.Client;
-using System.Reflection;
 using System.Drawing;
+using System.Linq;
+using System.Reflection;
+using System.Windows.Forms;
 
 namespace InnovatorAdmin
 {
@@ -136,8 +134,6 @@ namespace InnovatorAdmin
         Utils.HandleError(ex);
       }
     }
-
-    private DateTime _lastFileWrite = DateTime.Now;
 
     public void GoToStep(IWizardStep step)
     {
