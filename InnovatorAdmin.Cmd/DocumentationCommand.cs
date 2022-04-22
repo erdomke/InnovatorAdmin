@@ -3,6 +3,7 @@ using InnovatorAdmin.Documentation;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Cmd
@@ -28,7 +29,7 @@ namespace InnovatorAdmin.Cmd
           console.Write("Generating doc for ");
           console.WriteLine(file);
 
-          var metadata = PackageMetadataProvider.FromFile(file);
+          var metadata = PackageMetadataProvider.FromPackage(Package.Create(file).Single());
           var outputPath = Output.Replace("*", CleanFileName(metadata.Title));
           var writer = new DocumentationWriter();
           var extension = Path.GetExtension(outputPath).ToUpperInvariant().TrimStart('.');

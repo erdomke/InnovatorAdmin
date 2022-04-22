@@ -2,13 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
 namespace InnovatorAdmin
 {
-  internal class DependencySorter
+  public class DependencySorter
   {
     /// <summary>
     /// Indicates that the item should be sorted as the first item of it's group / type
@@ -22,13 +21,13 @@ namespace InnovatorAdmin
       return SortByDependencies(items, metadata);
     }
 
-    public IEnumerable<InstallItem> SortByDependencies(IEnumerable<InstallItem> items, IArasMetadataProvider metadata)
+    public IEnumerable<InstallItem> SortByDependencies(IEnumerable<InstallItem> items, IArasMetadataProvider metadata, int maxLoops = 10)
     {
       int loops = 0;
       var state = CycleState.ResolvedCycle;
       var results = items ?? Enumerable.Empty<InstallItem>();
       var analyzer = new DependencyAnalyzer(metadata);
-      while (loops < 10 && state == CycleState.ResolvedCycle)
+      while (loops < maxLoops && state == CycleState.ResolvedCycle)
       {
         if (loops > 0)
           analyzer.Reset();
@@ -58,7 +57,7 @@ namespace InnovatorAdmin
       return item.Type == InstallType.Script && item.Name.Split(' ').Contains("Delete");
     }
 
-    public IEnumerable<InstallItem> GetDependencyList(DependencyAnalyzer dependAnalyzer
+    internal IEnumerable<InstallItem> GetDependencyList(DependencyAnalyzer dependAnalyzer
       , IEnumerable<InstallItem> values, out CycleState cycleState)
     {
       cycleState = CycleState.NoCycle;
@@ -119,7 +118,7 @@ namespace InnovatorAdmin
               }
               relTag.Detach();
               cycleState = CycleState.ResolvedCycle;
-              return Enumerable.Empty<InstallItem>();
+              //return Enumerable.Empty<InstallItem>();
             }
           }
         }

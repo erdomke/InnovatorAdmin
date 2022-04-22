@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace InnovatorAdmin
 {
@@ -21,7 +19,7 @@ namespace InnovatorAdmin
       return new GitMergeOperation(_repo, localBranch, remoteBranch);
     }
 
-    public IDiffDirectory GetDirectory(GitDirectorySearch options)
+    public IPackage GetDirectory(GitDirectorySearch options)
     {
       var commit = default(Commit);
       if (!string.IsNullOrEmpty(options.Sha))
@@ -33,7 +31,7 @@ namespace InnovatorAdmin
       else
         commit = _repo.Head.Tip;
 
-      return new GitDiffDirectory(commit, options.Path);
+      return new GitPackage(_repo, commit, options.Path);
     }
 
     /// <remarks>Trying to avoid loading all commits into memory at once.</remarks>

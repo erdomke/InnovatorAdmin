@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Cmd
@@ -21,7 +22,7 @@ namespace InnovatorAdmin.Cmd
         var script = default(InstallScript);
         if (Path.GetExtension(InputFile) == ".innpkg")
         {
-          using (var pkg = InnovatorPackage.Load(InputFile))
+          using (var pkg = Package.Create(InputFile).Single())
             script = pkg.Read();
         }
         else

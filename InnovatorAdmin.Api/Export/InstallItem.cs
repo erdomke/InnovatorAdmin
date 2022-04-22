@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 
 namespace InnovatorAdmin
 {
-  public class InstallItem : IDiffFile
+  public class InstallItem : IPackageFile
   {
     public const string ScriptType = "*Script";
 
@@ -44,7 +43,7 @@ namespace InnovatorAdmin
     public string Path { get; set; }
     public XmlElement Script { get { return _elem; } }
 
-    string IDiffFile.Path
+    string IPackageFile.Path
     {
       get
       {
@@ -264,16 +263,18 @@ namespace InnovatorAdmin
       return builder.ToString();
     }
 
-    Stream IDiffFile.OpenRead()
+    Stream IPackageFile.Open()
     {
-      var settings = new XmlWriterSettings();
-      settings.OmitXmlDeclaration = true;
-      settings.Indent = true;
-      settings.IndentChars = "  ";
-      settings.CloseOutput = false;
+      var settings = new XmlWriterSettings
+      {
+        OmitXmlDeclaration = true,
+        Indent = true,
+        IndentChars = "  ",
+        CloseOutput = false
+      };
 
       var result = new MemoryStream();
-      using (var writer = XmlTextWriter.Create(result, settings))
+      using (var writer = XmlWriter.Create(result, settings))
       {
         writer.WriteStartElement("AML");
         this.Script.WriteTo(writer);
@@ -294,25 +295,6 @@ namespace InnovatorAdmin
       if (existingPaths?.Contains(newPath) == true)
         newPath = folder + "\\" + Utils.CleanFileName((line.Reference.KeyedName ?? "") + "_" + line.Reference.Unique) + extension;
       return newPath;
-    }
-
-    public static void CleanKeyedNames(this IEnumerable<InstallItem> lines)
-    {
-      var groups = lines.Where(l => l.Type == InstallType.Create)
-        .GroupBy(l => l.Reference.Unique);
-      var duplicates = groups.Where(g => g.Skip(1).Any()).ToArray();
-      if (duplicates.Length > 0)
-        throw new InvalidOperationException("The package has duplicate entries for the following items: " + duplicates.GroupConcat(", ", g => g.Key));
-      var existing = groups
-        .ToDictionary(g => g.Key, g => g.First());
-      InstallItem item;
-      foreach (var line in lines.Where(l => l.Type == InstallType.Script))
-      {
-        if (existing.TryGetValue(line.InstalledId, out item))
-        {
-          line.Reference.KeyedName = InstallItem.RenderAttributes(line.Script, item.Reference.KeyedName);
-        }
-      }
     }
   }
 }

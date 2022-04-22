@@ -1715,10 +1715,14 @@ namespace InnovatorAdmin
         case "rb_TreeGridViewDefinition":
         case "xClassificationTree":
         case "DiscussionTemplate":
+        case "MSO_CommonSettings":
+        case "MSO_Preferences":
+        case "MSO_Reference":
           queryElem.SetAttribute("levels", "2");
           levels = 2;
           break;
         case "Form":
+        case "ES_IndexedConfiguration":
           queryElem.SetAttribute("levels", "3");
           levels = 3;
           break;

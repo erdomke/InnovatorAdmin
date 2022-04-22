@@ -199,27 +199,14 @@ namespace InnovatorAdmin
       }
     }
 
-    public static PackageMetadataProvider FromFile(string path)
-    {
-      if (string.Equals(System.IO.Path.GetExtension(path), ".mf", StringComparison.OrdinalIgnoreCase))
-        return FromPackage(new ManifestFolder(path));
-      else
-        return FromPackage(InnovatorPackage.Load(path));
-    }
-
-    public static PackageMetadataProvider FromPackage(ManifestFolder package)
-    {
-      var doc = package.Read(out var title);
-      var metadata = new PackageMetadataProvider() { Title = title };
-      metadata.AddRange(doc.SelectNodes("/AML/AML/Item")
-        .OfType<System.Xml.XmlElement>()
-        .Select(e => ElementFactory.Local.FromXml(e).AssertItem()));
-      return metadata;
-    }
-
-    public static PackageMetadataProvider FromPackage(InnovatorPackage package)
+    public static PackageMetadataProvider FromPackage(IPackage package)
     {
       var script = package.Read();
+      return FromScript(script);
+    }
+
+    public static PackageMetadataProvider FromScript(InstallScript script)
+    {
       var metadata = new PackageMetadataProvider() { Title = script.Title };
       metadata.AddRange(script.Lines
         .Where(l => l.Type != InstallType.DependencyCheck

@@ -22,7 +22,7 @@ using System.Xml;
 
 namespace InnovatorAdmin
 {
-  public partial class EditorWindow : FormBase, IUpdateListener
+  public partial class EditorWindow : FormBase
   {
     private const string GeneratedPage = "__GeneratedPage_";
 
@@ -2143,46 +2143,6 @@ namespace InnovatorAdmin
       return new Uri("http://localhost:" + Program.PortNumber + "/" + Uid + "/Client/Scripts/report.html");
     }
 
-    public void UpdateCheckComplete(Version latestVersion)
-    {
-      try
-      {
-        _updateCheckComplete = true;
-        var currVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        if (latestVersion == default(Version))
-        {
-          this.lblVersion.Text = string.Format("v{0} (No updates available)", currVer);
-        }
-        else
-        {
-          var newVer = latestVersion.ToString();
-
-          if (newVer != currVer)
-          {
-            this.lblVersion.Text = string.Format("v{0} (Restart to install v{1}!)", currVer, newVer);
-          }
-          else
-          {
-            this.lblVersion.Text = string.Format("v{0} (No updates available)", currVer);
-          }
-        }
-      }
-      catch (Exception) { }
-    }
-
-    public void UpdateCheckProgress(int progress)
-    {
-      try
-      {
-        if (!_updateCheckComplete)
-        {
-          var currVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-          this.lblVersion.Text = string.Format("v{0} (Checking updates: {1}%)", currVer, progress);
-        }
-      }
-      catch (Exception) { }
-    }
-
     private void conTable_Opening(object sender, System.ComponentModel.CancelEventArgs e)
     {
       try
@@ -2479,7 +2439,7 @@ namespace InnovatorAdmin
             var destDir = repo.GetDirectory(new GitDirectorySearch() { Sha = settings.DestCommit });
 
             var manifestPath = Path.Combine(settings.SaveDirectory, "MergeScript.innpkg");
-            var pkg = new InnovatorPackageFolder(manifestPath);
+            var pkg = new DirectoryPackage(manifestPath);
             ProgressDialog.Display(this, d =>
             {
               var processor = new MergeProcessor()

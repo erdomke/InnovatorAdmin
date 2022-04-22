@@ -83,7 +83,7 @@ namespace InnovatorAdmin.Controls
                 switch (dialog.FilterIndex)
                 {
                   case 2:
-                    var pkgFolder = new InnovatorPackageFolder(dialog.FileName);
+                    var pkgFolder = new DirectoryPackage(dialog.FileName);
                     if (!_wizard.InstallScript.Created.HasValue) _wizard.InstallScript.Created = DateTime.Now;
                     _wizard.InstallScript.Modified = DateTime.Now;
                     pkgFolder.Write(_wizard.InstallScript);
@@ -93,7 +93,7 @@ namespace InnovatorAdmin.Controls
                     manifest.Write(_wizard.InstallScript);
                     break;
                   default:
-                    using (var pkgFile = new InnovatorPackageFile(dialog.FileName))
+                    using (var pkgFile = new ZipPackage(dialog.FileName))
                     {
                       if (!_wizard.InstallScript.Created.HasValue) _wizard.InstallScript.Created = DateTime.Now;
                       _wizard.InstallScript.Modified = DateTime.Now;

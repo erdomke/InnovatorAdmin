@@ -356,13 +356,14 @@ namespace InnovatorAdmin
     private bool TryHandleErrorDefault(RecoverableErrorEventArgs args, XmlNode query)
     {
       var isAuto = false;
-      if (args.Exception.Message.Trim() == "No items of type ? found."
+      if (args.Exception.FaultCode == "0"
         && (query.Attribute("action") == "delete" || query.Attribute("action") == "purge"))
       {
         args.RecoveryOption = RecoveryOption.Skip;
         isAuto = true;
       }
       else if (args.Exception.Message.Trim() == "Identity already exists."
+        && query.Attribute("type") == "Identity"
         && query.Attribute("action") == "add")
       {
         ((XmlElement)query).SetAttribute("action", "edit");
@@ -370,6 +371,10 @@ namespace InnovatorAdmin
         args.RecoveryOption = RecoveryOption.Retry;
         isAuto = true;
       }
+      //else if (args.Exception.FaultCode == "SOAP-ENV:Server.PropertiesAreNotUniqueException")
+      //{
+      //  args.Exception.Fault.Element("detail").Element("af:item");
+      //}
 
       if (LogWriter != null)
       {

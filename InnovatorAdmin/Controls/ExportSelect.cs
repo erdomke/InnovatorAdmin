@@ -312,7 +312,7 @@ namespace InnovatorAdmin.Controls
           {
             if (Path.GetExtension(dialog.FileName) == ".innpkg")
             {
-              using (var pkg = InnovatorPackage.Load(dialog.FileName))
+              using (var pkg = Package.Create(dialog.FileName).Single())
               {
                 var installScript = pkg.Read();
 

@@ -3,9 +3,9 @@ using System.IO;
 
 namespace InnovatorAdmin
 {
-  public interface IDiffFile
+  public interface IPackageFile
   {
     string Path { get; }
-    Stream OpenRead();
+    Stream Open();
   }
 }

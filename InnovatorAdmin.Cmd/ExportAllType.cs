@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Cmd
 {
@@ -54,6 +51,7 @@ namespace InnovatorAdmin.Cmd
       new ExportAllType("ConversionServer", new Version(11, 0, 0)),
       new ExportAllType("ConverterType", new Version(11, 0, 5)),
       new ExportAllType("cui_Control", new Version(12, 0, 0)),
+      new ExportAllType("cui_Event", new Version(12, 0, 0)),
       new ExportAllType("cui_Location", new Version(12, 0, 0)),
       new ExportAllType("cui_WindowSection", new Version(12, 0, 0)),
       new ExportAllType("Dashboard"),
@@ -100,6 +98,11 @@ namespace InnovatorAdmin.Cmd
       new ExportAllType("Workflow Map"),
       new ExportAllType("xClassificationTree", new Version(11, 0, 12)),
       new ExportAllType("xPropertyDefinition", new Version(11, 0, 12)),
+
+      new ExportAllType("ES_IndexedConfiguration"),
+      new ExportAllType("MSO_CommonSettings"),
+      new ExportAllType("MSO_Preferences"),
+      new ExportAllType("MSO_Reference")
     };
   }
 }

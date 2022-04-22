@@ -67,7 +67,7 @@ namespace InnovatorAdmin.Cmd
         if (this.InputFile?.EndsWith(".innpkg", StringComparison.OrdinalIgnoreCase) == true
           || this.InputFile?.EndsWith(".mf", StringComparison.OrdinalIgnoreCase) == true)
         {
-          var exportScript = InnovatorPackage.Load(this.InputFile).Read();
+          var exportScript = Package.Create(this.InputFile).Single().Read();
           refsToExport = exportScript.Lines
             .Where(l => l.Type == InstallType.Create)
             .Select(l => l.Reference)
@@ -91,7 +91,16 @@ namespace InnovatorAdmin.Cmd
             items = firstItem.Parent.Elements("Item");
 
           var version = await conn.FetchVersion(true).ConfigureAwait(false);
-          var types = ExportAllType.Types.Where(t => t.Applies(version)).ToList();
+          var types = ExportAllType.Types
+            .Where(t => t.Applies(version))
+            .ToList();
+          var exitingTypes = new HashSet<string>((await conn.ApplyAsync($@"<Item type='ItemType' action='get' select='name'>
+  <name condition='in'>'{string.Join("','", types.Select(t => t.Name))}'</name>
+</Item>", true, true).ConfigureAwait(false))
+            .Items()
+            .Select(i => i.Property("name").ToString()), StringComparer.OrdinalIgnoreCase);
+          types = types.Where(t => exitingTypes.Contains(t.Name)).ToList();
+
           var queries = GetQueryies(items, types).ToList();
           checkDependencies = items.All(e => e.Attribute("type")?.Value != "*");
 
@@ -101,18 +110,17 @@ namespace InnovatorAdmin.Cmd
               .Select(q =>
               {
                 var aml = new XElement(q);
-                var levels = aml.Attribute("levels");
-                if (levels != null)
-                  levels.Remove();
-                return (Func<Task<QueryAndResult>>)(() => conn.ApplyAsync(aml, true, false)
-                  .ToTask()
-                  .ContinueWith(t => new QueryAndResult()
+                aml.Attribute("levels")?.Remove();
+                return (Func<Task<QueryAndResult>>)(async () => {
+                  var t = await conn.ApplyAsync(aml, true, false).ConfigureAwait(false);
+                  return new QueryAndResult()
                   {
                     Query = q,
-                    Result = t.Result
-                  }));
+                    Result = t
+                  };
+                });
               })
-              .ToArray());
+              .ToArray()).ConfigureAwait(false);
             refsToExport = toExport.SelectMany(r =>
               {
                 var refs = r.Result.Items()

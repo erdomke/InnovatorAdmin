@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -228,36 +227,18 @@ namespace InnovatorAdmin
       }
     }
 
-    public static string GetAppFilePath(AppFileType fileType)
-    {
-      string path = string.Empty;
-      switch (fileType)
-      {
-        case AppFileType.ImportExtractor:
-          path = @"{0}\{1}\last_extractor.xml";
-          break;
-        case AppFileType.ImportLog:
-          path = @"{0}\{1}\import.log";
-          break;
-        case AppFileType.XsltAutoSave:
-          path = @"{0}\{1}\autosave.xslt";
-          break;
-        default:
-          throw new NotSupportedException("Unexpected app file path");
-      }
-      return string.Format(path, Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Application.ProductName);
-    }
-
     public static string FormatXml(XmlNode node)
     {
-      var settings = new XmlWriterSettings();
-      settings.OmitXmlDeclaration = true;
-      settings.Indent = true;
-      settings.IndentChars = "  ";
-
-      using (var writer = new System.IO.StringWriter())
+      var settings = new XmlWriterSettings
       {
-        using (var xml = XmlTextWriter.Create(writer, settings))
+        OmitXmlDeclaration = true,
+        Indent = true,
+        IndentChars = "  "
+      };
+
+      using (var writer = new StringWriter())
+      {
+        using (var xml = XmlWriter.Create(writer, settings))
         {
           node.WriteTo(xml);
         }

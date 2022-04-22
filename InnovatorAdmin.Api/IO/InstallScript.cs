@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace InnovatorAdmin
 {
-  public class InstallScript : IDiffDirectory
+  public class InstallScript : IPackage
   {
     private List<Version> _supportedVersions = new List<Version>();
     private string _title;
@@ -30,9 +31,29 @@ namespace InnovatorAdmin
       this.DependencySorted = true;
     }
 
-    IEnumerable<IDiffFile> IDiffDirectory.GetFiles()
+    IEnumerable<IPackageFile> IPackage.Files()
     {
-      return this.Lines;
+      return Lines;
+    }
+
+    IPackageFile IPackage.Manifest(bool create)
+    {
+      throw new NotSupportedException();
+    }
+
+    bool IPackage.TryAccessFile(string path, bool create, out IPackageFile file)
+    {
+      if (create)
+        throw new NotSupportedException();
+      file = Lines
+        .OfType<IPackageFile>()
+        .FirstOrDefault(f => string.Equals(f.Path, path, StringComparison.OrdinalIgnoreCase));
+      return file != null;
+    }
+
+    void IDisposable.Dispose()
+    {
+      // Do nothing
     }
   }
 }

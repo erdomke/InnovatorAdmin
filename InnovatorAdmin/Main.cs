@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace InnovatorAdmin
 {
-  public partial class Main : FormBase, IWizard, IUpdateListener
+  public partial class Main : FormBase, IWizard
   {
     private IAsyncConnection _conn;
     private Stack<IWizardStep> _history = new Stack<IWizardStep>();
@@ -207,16 +207,19 @@ namespace InnovatorAdmin
       base.OnFormClosed(e);
       SaveFormBounds();
     }
+
     protected override void OnMove(EventArgs e)
     {
       base.OnMove(e);
       SaveFormBounds();
     }
+
     protected override void OnResizeEnd(EventArgs e)
     {
       base.OnResizeEnd(e);
       SaveFormBounds();
     }
+
     private void SaveFormBounds()
     {
       if (this.WindowState == FormWindowState.Normal)
@@ -225,46 +228,6 @@ namespace InnovatorAdmin
         Properties.Settings.Default.Save();
         Properties.Settings.Default.Reload();
       }
-    }
-
-    public void UpdateCheckComplete(Version latestVersion)
-    {
-      try
-      {
-        _updateCheckComplete = true;
-        var currVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        if (latestVersion == default(Version))
-        {
-          this.lblVersion.Text = string.Format("v{0} (No updates available)", currVer);
-        }
-        else
-        {
-          var newVer = latestVersion.ToString();
-
-          if (newVer != currVer)
-          {
-            this.lblVersion.Text = string.Format("v{0} (Restart to install v{1}!)", currVer, newVer);
-          }
-          else
-          {
-            this.lblVersion.Text = string.Format("v{0} (No updates available)", currVer);
-          }
-        }
-      }
-      catch (Exception) { }
-    }
-
-    public void UpdateCheckProgress(int progress)
-    {
-      try
-      {
-        if (!_updateCheckComplete)
-        {
-          var currVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-          this.lblVersion.Text = string.Format("v{0} (Checking updates: {1}%)", currVer, progress);
-        }
-      }
-      catch (Exception) { }
     }
   }
 }

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InnovatorAdmin.Cmd
+namespace InnovatorAdmin
 {
   public class QueryString : UriBuilder, IDictionary<string, QueryValue>
   {

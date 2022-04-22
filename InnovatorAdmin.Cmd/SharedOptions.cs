@@ -89,49 +89,6 @@ namespace InnovatorAdmin.Cmd
       return true;
     }
 
-    public static IEnumerable<IDiffDirectory> GetDirectories(params string[] paths)
-    {
-      var repos = new Dictionary<string, GitRepo>(StringComparer.OrdinalIgnoreCase);
-      foreach (var path in paths)
-      {
-        if (path.StartsWith("git://", StringComparison.OrdinalIgnoreCase))
-        {
-          var query = new QueryString("file://" + path.Substring(6));
-
-          var filePath = query.Uri.LocalPath;
-          if (!repos.TryGetValue(filePath, out var repo))
-          {
-            repo = new GitRepo(filePath);
-            repos[filePath] = repo;
-          }
-
-          var options = new GitDirectorySearch()
-          {
-            Sha = query["commit"].ToString(),
-            Path = query["path"].ToString()
-          };
-          foreach (var branch in query["branch"])
-            options.BranchNames.Add(branch);
-          if (string.Equals(options.Sha, "tip", StringComparison.OrdinalIgnoreCase))
-            options.Sha = null;
-
-          yield return repo.GetDirectory(options);
-        }
-        else if (string.Equals(Path.GetExtension(path), ".innpkg", StringComparison.OrdinalIgnoreCase))
-        {
-          yield return InnovatorPackage.Load(path).Read();
-        }
-        else if (string.Equals(Path.GetExtension(path), ".mf", StringComparison.OrdinalIgnoreCase))
-        {
-          yield return new FileSysDiffDirectory(Path.GetDirectoryName(path));
-        }
-        else
-        {
-          yield return new FileSysDiffDirectory(path);
-        }
-      }
-    }
-
     public static void WritePackage(ConsoleTask console, InstallScript script, string output, bool multipleDirectories, bool cleanOutput)
     {
       multipleDirectories = multipleDirectories || string.Equals(Path.GetExtension(output), ".mf", StringComparison.OrdinalIgnoreCase);
@@ -178,14 +135,14 @@ namespace InnovatorAdmin.Cmd
         case ".innpkg":
           if (multipleDirectories)
           {
-            using (var pkgFolder = new InnovatorPackageFolder(output))
+            using (var pkgFolder = new DirectoryPackage(output))
               pkgFolder.Write(script);
           }
           else
           {
             if (File.Exists(output))
               File.Delete(output);
-            using (var pkgFile = new InnovatorPackageFile(output))
+            using (var pkgFile = new ZipPackage(output))
               pkgFile.Write(script);
           }
           break;

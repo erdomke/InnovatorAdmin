@@ -34,8 +34,8 @@ namespace InnovatorAdmin.Controls
     public void GoNext()
     {
       var compare = new Compare();
-      compare.BaseInstall = InnovatorPackage.Load(leftPath.Text).Read();
-      _wizard.InstallScript = InnovatorPackage.Load(rightPath.Text).Read();
+      compare.BaseInstall = Package.Create(leftPath.Text).Single().Read();
+      _wizard.InstallScript = Package.Create(rightPath.Text).Single().Read();
       _wizard.GoToStep(compare);
     }
   }

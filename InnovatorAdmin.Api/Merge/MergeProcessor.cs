@@ -14,7 +14,7 @@ namespace InnovatorAdmin
     public bool SortDependencies { get; set; } = true;
     public HashSet<string> FirstOfGroup => _sorter.FirstOfGroup;
 
-    public InstallScript Merge(IDiffDirectory baseDir, IDiffDirectory compareDir)
+    public InstallScript Merge(IPackage baseDir, IPackage compareDir)
     {
       var docs = new List<Tuple<XmlDocument, string>>();
       var metadata = baseDir.WriteAmlMergeScripts(compareDir, (path, prog) =>

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 namespace InnovatorAdmin.Dialog
@@ -14,7 +12,6 @@ namespace InnovatorAdmin.Dialog
 #endregion
 
     private const string FolderPlaceHolder = "__F3102E010CAE4AA4B937CABCEC5BF2FC";
-    private Button btnUseAutoSave;
 
     private bool _checkFileExists = true;
 
@@ -53,7 +50,6 @@ namespace InnovatorAdmin.Dialog
     {
       this.InitializeComponent();
       base.CheckFileExists = false;
-      btnUseAutoSave.Enabled = File.Exists(Utils.GetAppFilePath(AppFileType.ImportExtractor));
     }
 
     protected override void OnClosingDialog(System.ComponentModel.CancelEventArgs e)
@@ -70,7 +66,6 @@ namespace InnovatorAdmin.Dialog
     private void InitializeComponent()
     {
       this.btnSelectFolder = new System.Windows.Forms.Button();
-      this.btnUseAutoSave = new System.Windows.Forms.Button();
       this.SuspendLayout();
       //
       // btnSelectFolder
@@ -86,24 +81,11 @@ namespace InnovatorAdmin.Dialog
       this.btnSelectFolder.UseVisualStyleBackColor = true;
       this.btnSelectFolder.Click += new System.EventHandler(this.btnSelectFolder_Click);
       //
-      // btnUseAutoSave
-      //
-      this.btnUseAutoSave.AutoSize = true;
-      this.btnUseAutoSave.Location = new System.Drawing.Point(3, 3);
-      this.btnUseAutoSave.MinimumSize = new System.Drawing.Size(90, 0);
-      this.btnUseAutoSave.Name = "btnUseAutoSave";
-      this.btnUseAutoSave.Size = new System.Drawing.Size(155, 23);
-      this.btnUseAutoSave.TabIndex = 1;
-      this.btnUseAutoSave.Text = "&Load Last Auto-Saved Import";
-      this.btnUseAutoSave.UseVisualStyleBackColor = true;
-      this.btnUseAutoSave.Click += new System.EventHandler(this.btnUseAutoSave_Click);
-      //
       // ImportSelectDialog
       //
       this.AddExtension = false;
       this.Caption = "Select files / folder";
       this.CheckFileExists = false;
-      this.Controls.Add(this.btnUseAutoSave);
       this.Controls.Add(this.btnSelectFolder);
       this.DefaultExtension = "";
       this.Name = "ImportSelectDialog";
@@ -117,12 +99,6 @@ namespace InnovatorAdmin.Dialog
     private void btnSelectFolder_Click(object sender, EventArgs e)
     {
       base.FileName = FolderPlaceHolder;
-      AcceptDialog();
-    }
-
-    private void btnUseAutoSave_Click(object sender, EventArgs e)
-    {
-      base.FileName = Utils.GetAppFilePath(AppFileType.ImportExtractor);
       AcceptDialog();
     }
   }

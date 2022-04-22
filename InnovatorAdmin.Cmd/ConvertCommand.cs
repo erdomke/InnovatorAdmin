@@ -1,10 +1,5 @@
 ﻿using CommandLine;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Cmd
 {
@@ -28,7 +23,7 @@ namespace InnovatorAdmin.Cmd
       return ConsoleTask.Execute(this, (console) =>
       {
         console.WriteLine("Getting package information...");
-        var script = InnovatorPackage.Load(InputFile).Read();
+        var script = Package.Create(InputFile).Single().Read();
         SharedOptions.WritePackage(console, script, Output, MultipleDirectories, CleanOutput);
       });
     }

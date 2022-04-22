@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -27,7 +28,7 @@ namespace InnovatorAdmin.Controls
           {
             if (Path.GetExtension(dialog.FileName) == ".innpkg")
             {
-              using (var pkg = InnovatorPackage.Load(dialog.FileName))
+              using (var pkg = Package.Create(dialog.FileName).Single())
               {
                 _wizard.InstallScript = pkg.Read();
               }

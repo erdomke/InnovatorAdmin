@@ -50,7 +50,7 @@ namespace InnovatorAdmin.Cmd
       return ConsoleTask.Execute(this, console =>
       {
         console.WriteLine("Getting package information...");
-        var dirs = SharedOptions.GetDirectories(BasePackage, OurPackage).ToList();
+        var dirs = Package.Create(BasePackage, OurPackage).ToList();
 
         var script = default(InstallScript);
         console.Write("Calculating diffs... ");
