@@ -15,6 +15,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\InnovatorAdmin.Api\InnovatorAdmin.Api.csproj" />
+    <ProjectReference Include="..\Telemetry\Innovator.Telemetry.csproj" />
   </ItemGroup>
   
   <ItemGroup>

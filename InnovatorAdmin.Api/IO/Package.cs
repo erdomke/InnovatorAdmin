@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -68,30 +69,60 @@ namespace InnovatorAdmin
 
     public static InstallScript Read(this IPackage package)
     {
-      var exceptions = TryRead(package, out var result);
-      if (exceptions.Any())
-      {
-        if (exceptions.Skip(1).Any())
-          throw new AggregateException("The package is not valid.", exceptions);
-        else
-          throw exceptions.First();
-      }
+      var logger = new ExceptionLogger();
+      if (!TryRead(package, logger, out var result))
+        logger.AssertNoError();
       return result;
     }
 
-    public static IEnumerable<Exception> TryRead(this IPackage package, out InstallScript installScript)
+    private class ExceptionLogger : ILogger
     {
-      var manifestFile = package.Manifest(false);
-      if (manifestFile.Path.EndsWith(".mf", StringComparison.OrdinalIgnoreCase))
-        return TryReadLegacyManifest(manifestFile, package, out installScript);
-      else
-        return TryReadPackage(manifestFile, package, out installScript);
+      private List<Exception> _exceptions = new List<Exception>();
+
+      public IDisposable BeginScope<TState>(TState state)
+      {
+        throw new NotSupportedException();
+      }
+
+      public bool IsEnabled(LogLevel logLevel)
+      {
+        return true;
+      }
+
+      public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+      {
+        if (logLevel == LogLevel.Error)
+          _exceptions.Add(new InvalidOperationException(formatter(state, exception), exception));
+      }
+
+      public void AssertNoError()
+      {
+        if (_exceptions.Count == 1)
+        {
+          throw _exceptions[0];
+        }
+        else if (_exceptions.Count > 1)
+        {
+          throw new AggregateException(_exceptions);
+        }
+      }
     }
 
-    private static IEnumerable<Exception> TryReadLegacyManifest(IPackageFile manifestFile, IPackage package, out InstallScript installScript)
+    public static bool TryRead(this IPackage package, ILogger logger, out InstallScript installScript)
+    {
+      using (SharedUtils.StartActivity("Package.TryRead", "Read an Innovator Package from disk"))
+      {
+        var manifestFile = package.Manifest(false);
+        if (manifestFile.Path.EndsWith(".mf", StringComparison.OrdinalIgnoreCase))
+          return TryReadLegacyManifest(manifestFile, package, logger, out installScript);
+        else
+          return TryReadPackage(manifestFile, package, logger, out installScript);
+      }
+    }
+
+    private static bool TryReadLegacyManifest(IPackageFile manifestFile, IPackage package, ILogger logger, out InstallScript installScript)
     {
       installScript = new InstallScript();
-      var errors = new List<Exception>();
       var scripts = new List<InstallItem>();
       var manifest = new XmlDocument();
       using (var manifestStream = manifestFile.Open())
@@ -131,15 +162,13 @@ namespace InnovatorAdmin
       }
 
       installScript.Lines = scripts;
-      CleanKeyedNames(installScript.Lines, errors);
-
-      return errors;
+      return CleanKeyedNames(installScript.Lines, logger);
     }
     
-    private static IEnumerable<Exception> TryReadPackage(IPackageFile manifestFile, IPackage package, out InstallScript installScript)
+    private static bool TryReadPackage(IPackageFile manifestFile, IPackage package, ILogger logger, out InstallScript installScript)
     {
       installScript = new InstallScript();
-      var errors = new List<Exception>();
+      var result = true;
       var scripts = new List<InstallItem>();
       var manifest = new XmlDocument();
       using (var manifestStream = manifestFile.Open())
@@ -179,7 +208,8 @@ namespace InnovatorAdmin
             }
             else
             {
-              errors.Add(new FileNotFoundException($"The file {currPath} is referenced in the manifest, but not found in the package.", currPath));
+              result = false;
+              logger.LogError("The file {Path} is referenced in the manifest, but not found in the package.", currPath);
               continue;
             }
           }
@@ -206,8 +236,8 @@ namespace InnovatorAdmin
             }
             catch (XmlException ex)
             {
-              ex.Data["path"] = file.Path;
-              errors.Add(ex);
+              result = false;
+              logger.LogError(ex, "The AML script at {Path} is malformed", file.Path);
             }
             catch (Exception ex)
             {
@@ -219,16 +249,20 @@ namespace InnovatorAdmin
       }
 
       installScript.Lines = scripts;
-      CleanKeyedNames(installScript.Lines, errors);
-      return errors;
+      result = CleanKeyedNames(installScript.Lines, logger) || result;
+      return result;
     }
 
-    private static void CleanKeyedNames(IEnumerable<InstallItem> lines, List<Exception> exceptions)
+    private static bool CleanKeyedNames(IEnumerable<InstallItem> lines, ILogger logger)
     {
       var groups = lines.Where(l => l.Type == InstallType.Create)
         .GroupBy(l => $"{l.Reference.Unique}|{l.Reference.Type}");
+      var result = true;
       foreach (var duplicate in groups.Where(g => g.Skip(1).Any()))
-        exceptions.Add(new DuplicateEntryException(duplicate));
+      {
+        result = false;
+        logger.LogError("The package has duplicate entries for creating {Type} {Name} with ID {ID} at {Paths}", duplicate.First().Reference.Type, duplicate.First().Reference.KeyedName, duplicate.First().Reference.Unique, duplicate.Select(i => i.Path));
+      }
 
       var existing = groups
         .ToDictionary(g => g.Key, g => g.First());
@@ -240,6 +274,8 @@ namespace InnovatorAdmin
           line.Reference.KeyedName = InstallItem.RenderAttributes(line.Script, item.Reference.KeyedName);
         }
       }
+
+      return result;
     }
 
     public static void Write(this IPackage package, InstallScript script)

@@ -1,4 +1,5 @@
 ﻿using Innovator.Client;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace InnovatorAdmin
     public event EventHandler<RecoverableErrorEventArgs> ErrorRaised;
     public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
 
-    public XmlWriter LogWriter { get; set; }
+    private ILogger<InstallProcessor> _logger;
 
     public InstallProcessor(IAsyncConnection conn)
     {
@@ -70,73 +71,37 @@ namespace InnovatorAdmin
 
     public void Install()
     {
-      if (LogWriter != null)
-      {
-        LogWriter.WriteStartElement("event");
-        LogWriter.WriteAttributeString("time", DateTime.UtcNow.ToString("s"));
-        LogWriter.WriteAttributeString("type", "Start");
-        LogWriter.WriteStartElement("server");
-        if (_conn is Innovator.Client.Connection.ArasHttpConnection httpConn)
-          LogWriter.WriteAttributeString("url", httpConn.Url.ToString());
-        LogWriter.WriteAttributeString("db", _conn.Database);
-        LogWriter.WriteAttributeString("user", _conn.UserId);
-        LogWriter.WriteEndElement();
-        LogWriter.WriteStartElement("client");
-        LogWriter.WriteAttributeString("os_version", Environment.OSVersion.ToString());
-        LogWriter.WriteAttributeString("machine_name", Environment.MachineName);
-        LogWriter.WriteAttributeString("user", $"{Environment.UserDomainName}\\{Environment.UserName}");
-        LogWriter.WriteEndElement();
-        LogWriter.WriteEndElement();
-        LogWriter.Flush();
-      }
+      //_logger?.LogInformation();
       _currLine = 0;
 
       var exception = default(Exception);
-      var upgradeId = Guid.NewGuid().ToArasId();
-      try
+      using (var activity = SharedUtils.StartActivity("InstallProcessor.Install"))
       {
-        _conn.Apply(@"<Item type='DatabaseUpgrade' action='merge' id='@0'>
-                        <upgrade_status>0</upgrade_status>
-                        <is_latest>0</is_latest>
-                        <type>1</type>
-                        <os_user>@1</os_user>
-                        <name>@2</name>
-                        <description>@3</description>
-                        <applied_on>__now()</applied_on>
-                      </Item>"
-          , upgradeId
-          , Environment.UserDomainName + "\\" + Environment.UserName
-          , _script.Title.Left(64)
-          , _script.Description.Left(512)).AssertNoError();
-        InstallLines();
-        _conn.Apply("<Item type=\"DatabaseUpgrade\" action=\"merge\" id=\"@0\"><upgrade_status>1</upgrade_status></Item>", upgradeId).AssertNoError();
-      }
-      catch (Exception ex)
-      {
-        if (LogWriter != null && !(ex is ServerException))
+        var upgradeId = Guid.NewGuid().ToArasId();
+        try
         {
-          LogWriter.WriteStartElement("event");
-          LogWriter.WriteAttributeString("time", DateTime.UtcNow.ToString("s"));
-          LogWriter.WriteAttributeString("type", "Error");
-          LogWriter.WriteAttributeString("message", ex.Message);
-
-          LogWriter.WriteStartElement("details");
-          LogWriter.WriteValue(ex.ToString());
-          LogWriter.WriteEndElement();
-
-          LogWriter.WriteEndElement();
-          LogWriter.Flush();
+          _conn.Apply(@"<Item type='DatabaseUpgrade' action='merge' id='@0'>
+                          <upgrade_status>0</upgrade_status>
+                          <is_latest>0</is_latest>
+                          <type>1</type>
+                          <os_user>@1</os_user>
+                          <name>@2</name>
+                          <description>@3</description>
+                          <applied_on>__now()</applied_on>
+                        </Item>"
+            , upgradeId
+            , Environment.UserDomainName + "\\" + Environment.UserName
+            , _script.Title.Left(64)
+            , _script.Description.Left(512)).AssertNoError();
+          InstallLines();
+          _conn.Apply("<Item type=\"DatabaseUpgrade\" action=\"merge\" id=\"@0\"><upgrade_status>1</upgrade_status></Item>", upgradeId).AssertNoError();
         }
-        _conn.Apply("<Item type=\"DatabaseUpgrade\" action=\"merge\" id=\"@0\"><upgrade_status>2</upgrade_status></Item>", upgradeId); //.AssertNoError();
-      }
-
-      if (LogWriter != null)
-      {
-        LogWriter.WriteStartElement("event");
-        LogWriter.WriteAttributeString("time", DateTime.UtcNow.ToString("s"));
-        LogWriter.WriteAttributeString("type", "Finish");
-        LogWriter.WriteEndElement();
-        LogWriter.Flush();
+        catch (Exception ex)
+        {
+          if (!(ex is ServerException))
+            _logger?.LogError(ex, null);
+          _conn.Apply("<Item type=\"DatabaseUpgrade\" action=\"merge\" id=\"@0\"><upgrade_status>2</upgrade_status></Item>", upgradeId); //.AssertNoError();
+        }
       }
       OnActionComplete(new ActionCompleteEventArgs() { Exception = exception });
     }
@@ -145,7 +110,7 @@ namespace InnovatorAdmin
     {
       ExportProcessor.EnsureSystemData(_conn, ref _itemTypes);
 
-      bool cont;
+      bool repeat;
       RecoverableErrorEventArgs args;
       XmlNode query;
       XmlElement newQuery;
@@ -156,11 +121,11 @@ namespace InnovatorAdmin
       IEnumerable<IReadOnlyItem> items;
       foreach (var line in _lines.Skip(_currLine).ToList())
       {
-        cont = true;
+        repeat = true;
         ReportProgress((int)(_currLine * 80.0 / _lines.Count), string.Format("Performing {0} ({1} of {2})", line.ToString(), _currLine + 1, _lines.Count));
         query = line.Script;
 
-        while (cont)
+        while (repeat)
         {
           try
           {
@@ -287,64 +252,29 @@ namespace InnovatorAdmin
             if (sqlScripts.Any())
               _conn.ApplySql(sqlScripts.Aggregate((p, c) => p + Environment.NewLine + c)).AssertNoError();
 
-            cont = false;
+            repeat = false;
           }
           catch (ServerException ex)
           {
-            args = new RecoverableErrorEventArgs() { Exception = ex };
-            if (line.Type == InstallType.DependencyCheck && ex.FaultCode == "0")
+            using (SharedUtils.StartActivity("InstallProcessor.Install.HandleServerError"))
             {
-              args.Message = "Unable to find required dependency " + line.Reference.Type + ": " + line.Reference.KeyedName;
-            }
-            var isAuto = TryHandleErrorDefault(args, query);
-            if (!isAuto)
-              OnErrorRaised(args);
+              args = new RecoverableErrorEventArgs() { Exception = ex };
+              if (line.Type == InstallType.DependencyCheck && ex.FaultCode == "0")
+                args.Message = "Unable to find required dependency " + line.Reference.Type + ": " + line.Reference.KeyedName;
 
-            switch (args.RecoveryOption)
-            {
-              case RecoveryOption.Abort:
-                if (LogWriter != null)
-                {
-                  LogWriter.WriteStartElement("action");
-                  LogWriter.WriteAttributeString("time", DateTime.UtcNow.ToString("s"));
-                  LogWriter.WriteAttributeString("type", "Abort");
-                  LogWriter.WriteEndElement();
-
-                  LogWriter.WriteEndElement();
-                  LogWriter.Flush();
-                }
-                throw;
-              case RecoveryOption.Retry:
-                query = args.NewQuery ?? query;
-                if (LogWriter != null)
-                {
-                  LogWriter.WriteStartElement("action");
-                  LogWriter.WriteAttributeString("time", DateTime.UtcNow.ToString("s"));
-                  LogWriter.WriteAttributeString("type", "Retry");
-                  if (isAuto)
-                    LogWriter.WriteAttributeString("is_auto", "1");
-                  query.WriteTo(LogWriter);
-                  LogWriter.WriteEndElement();
-
-                  LogWriter.WriteEndElement();
-                  LogWriter.Flush();
-                }
-                break;
-              default: // case RecoveryOption.Skip:
-                if (LogWriter != null)
-                {
-                  LogWriter.WriteStartElement("action");
-                  LogWriter.WriteAttributeString("time", DateTime.UtcNow.ToString("s"));
-                  LogWriter.WriteAttributeString("type", "Skip");
-                  if (isAuto)
-                    LogWriter.WriteAttributeString("is_auto", "1");
-                  LogWriter.WriteEndElement();
-
-                  LogWriter.WriteEndElement();
-                  LogWriter.Flush();
-                }
-                cont = false;
-                break;
+              HandleErrorDefault(args, query);
+              switch (args.RecoveryOption)
+              {
+                case RecoveryOption.Abort:
+                  throw;
+                case RecoveryOption.Retry:
+                  query = args.NewQuery ?? query;
+                  _logger?.LogInformation("{NewQuery}", query.OuterXml);
+                  break;
+                default: // case RecoveryOption.Skip:
+                  repeat = false;
+                  break;
+              }
             }
           }
         }
@@ -353,8 +283,10 @@ namespace InnovatorAdmin
       }
     }
 
-    private bool TryHandleErrorDefault(RecoverableErrorEventArgs args, XmlNode query)
+    private void HandleErrorDefault(RecoverableErrorEventArgs args, XmlNode query)
     {
+      _logger?.LogError(args.Exception, null);
+
       var isAuto = false;
       if (args.Exception.FaultCode == "0"
         && (query.Attribute("action") == "delete" || query.Attribute("action") == "purge"))
@@ -376,22 +308,15 @@ namespace InnovatorAdmin
       //  args.Exception.Fault.Element("detail").Element("af:item");
       //}
 
-      if (LogWriter != null)
+      if (isAuto)
       {
-        LogWriter.WriteStartElement("event");
-        LogWriter.WriteAttributeString("time", DateTime.UtcNow.ToString("s"));
-        LogWriter.WriteAttributeString("type", "Error" + (isAuto ? "." + args.RecoveryOption.ToString() : ".Prompt"));
-        LogWriter.WriteAttributeString("message", args.Exception.Message);
-
-        if (!isAuto)
-          args.Exception.ToAml(LogWriter);
-        LogWriter.WriteStartElement("AML");
-        System.Xml.Linq.XElement.Parse(args.Exception.Query).WriteTo(LogWriter);
-        LogWriter.WriteEndElement();
-        LogWriter.Flush();
+        _logger?.LogInformation("Automatically decided to {action}", args.RecoveryOption.ToString());
       }
-
-      return isAuto;
+      else
+      {
+        OnErrorRaised(args);
+        _logger?.LogInformation("User decided to {action}", args.RecoveryOption.ToString());
+      }
     }
 
     private bool TryGetConfigId(XmlNode query, out string configId)

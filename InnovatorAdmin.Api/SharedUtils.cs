@@ -1,14 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace InnovatorAdmin
 {
   public static class SharedUtils
   {
+    private static ActivitySource _activitySource = new ActivitySource("InnovatorAdmin");
+
+    public static Activity StartActivity(string name, string displayName = null, IEnumerable<KeyValuePair<string, object>> tags = null)
+    {
+      var activity = _activitySource.CreateActivity(name, ActivityKind.Internal, default(ActivityContext), tags: tags);
+      if (activity != null && !string.IsNullOrEmpty(displayName))
+        activity.DisplayName = displayName;
+      return activity?.Start();
+    }
+
     public static Task<IList<T>> TaskPool<T>(int maxConcurrent, params Func<Task<T>>[] taskFactory)
     {
       return TaskPool(maxConcurrent, null, taskFactory);

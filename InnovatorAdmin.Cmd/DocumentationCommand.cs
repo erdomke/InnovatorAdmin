@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using InnovatorAdmin.Documentation;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 namespace InnovatorAdmin.Cmd
 {
   [Verb("doc", HelpText = "Document a package from Aras Innovator")]
-  public class DocumentationCommand
+  public class DocumentationCommand : ICommand
   {
     [Option('f', "inputfile", HelpText = @"Path to package file containing the items to document. Can be a search pattern: `C:\Directory\**\*.innpkg`", Required = true)]
     public string InputFile { get; set; }
@@ -20,7 +21,7 @@ namespace InnovatorAdmin.Cmd
     [Option("multiple", HelpText = "Whether the output should prefer multiple files")]
     public bool MultipleFiles { get; set; }
 
-    public Task<int> Execute()
+    public Task<int> Execute(ILogger logger)
     {
       return ConsoleTask.ExecuteAsync(this, async (console) =>
       {

@@ -1,6 +1,5 @@
 ﻿using CommandLine;
-using System;
-using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,9 +7,9 @@ using System.Threading.Tasks;
 namespace InnovatorAdmin.Cmd
 {
   [Verb("import", HelpText = "Import a solution from Aras Innovator")]
-  internal class ImportCommand : SharedOptions
+  internal class ImportCommand : SharedOptions, ICommand
   {
-    public Task<int> Execute()
+    public Task<int> Execute(ILogger logger)
     {
       return ConsoleTask.ExecuteAsync(this, async (console) =>
       {

@@ -1,10 +1,12 @@
 ﻿using CommandLine;
+using Microsoft.Extensions.Logging;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Cmd
 {
   [Verb("convert", HelpText = "Convert a package from one format to another")]
-  internal class ConvertCommand
+  internal class ConvertCommand : ICommand
   {
     [Option('f', "inputfile", HelpText = "Path to package file containing the items to import/export")]
     public string InputFile { get; set; }
@@ -18,7 +20,7 @@ namespace InnovatorAdmin.Cmd
     [Option("clean", HelpText = "Clean the output file/directory before writing the new content")]
     public bool CleanOutput { get; set; }
 
-    public int Execute()
+    public async Task<int> Execute(ILogger logger)
     {
       return ConsoleTask.Execute(this, (console) =>
       {

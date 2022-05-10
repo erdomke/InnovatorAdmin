@@ -101,13 +101,6 @@ namespace InnovatorAdmin.Controls
     {
       var xmlPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Innovator Admin", "InstallLog_" + DateTime.UtcNow.ToString("yyyyMMddHHmmss") + ".xml");
       Directory.CreateDirectory(Path.GetDirectoryName(xmlPath));
-      _wizard.InstallProcessor.LogWriter = XmlWriter.Create(xmlPath, new XmlWriterSettings()
-      {
-        Indent = true,
-        IndentChars = "  ",
-        ConformanceLevel = ConformanceLevel.Fragment,
-        OmitXmlDeclaration = true,
-      });
       _wizard.InstallProcessor.ActionComplete += InstallProcessor_ActionComplete;
       _wizard.InstallProcessor.ErrorRaised += InstallProcessor_ErrorRaised;
       _wizard.InstallProcessor.ProgressChanged += InstallProcessor_ProgressChanged;
@@ -117,8 +110,6 @@ namespace InnovatorAdmin.Controls
     {
       if (this.IsDisposed)
         return;
-      _wizard.InstallProcessor.LogWriter?.Dispose();
-      _wizard.InstallProcessor.LogWriter = null;
       _wizard.InstallProcessor.ActionComplete -= InstallProcessor_ActionComplete;
       _wizard.InstallProcessor.ErrorRaised -= InstallProcessor_ErrorRaised;
       _wizard.InstallProcessor.ProgressChanged -= InstallProcessor_ProgressChanged;
@@ -128,8 +119,6 @@ namespace InnovatorAdmin.Controls
     {
       this.UiThreadInvoke(() =>
       {
-        _wizard.InstallProcessor.LogWriter.Dispose();
-        _wizard.InstallProcessor.LogWriter = null;
         _timer.Enabled = true;
         if (e.Exception != null)
           Utils.HandleError(e.Exception);

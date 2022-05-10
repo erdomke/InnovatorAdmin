@@ -1,6 +1,12 @@
 using CommandLine;
 using Innovator.Client;
+using Innovator.Telemetry;
+using Microsoft.Extensions.Logging;
+using OpenTelemetry;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -10,23 +16,65 @@ namespace InnovatorAdmin.Cmd
   {
     static async Task<int> Main(string[] args)
     {
-      //var parser = new Parser(with => with.IgnoreUnknownArguments = false);
-      var cmdArgs = Parser.Default.ParseArguments<ExportCommand, ImportCommand, PackageDiffCommand, ConvertCommand, ApplyCommand, AnalyzeCommand, DocumentationCommand>(args);
-      var task = default(Task<int>);
-      cmdArgs
-        .WithParsed<ExportCommand>(o => task = o.Execute())
-        .WithParsed<PackageDiffCommand>(o => task = Task.FromResult(o.Execute()))
-        .WithParsed<ImportCommand>(o => task = o.Execute())
-        .WithParsed<ConvertCommand>(o => task = Task.FromResult(o.Execute()))
-        .WithParsed<ApplyCommand>(o => task = o.Execute())
-        .WithParsed<AnalyzeCommand>(o => task = Task.FromResult(o.Execute()))
-        .WithParsed<DocumentationCommand>(o => task = o.Execute())
-        .WithNotParsed(err => task = TryParseArasFormat(cmdArgs, args));
-      var result = await task;
-      return result;
+      var resourceBuilder = ResourceBuilder.CreateDefault().AddService("InnovatorAdmin.Cmd");
+      var tags = new Dictionary<string, object>
+      {
+        ["arguments"] = args,
+        ["os_version"] = Environment.OSVersion.ToString(),
+        ["machine_name"] = Environment.MachineName,
+        ["user"] = $"{Environment.UserDomainName}\\{Environment.UserName}"
+      };
+
+      var enricher = new DefaultEnricher();
+      var consoleWriter = new SslogWriter(Console.Error)
+      {
+        UseConsoleColors = true
+      };
+      using (var tracerProvider = Sdk.CreateTracerProviderBuilder()
+        .AddSource("InnovatorAdmin")
+        .SetResourceBuilder(resourceBuilder)
+        .AddProcessor(new ActivityProcessor(consoleWriter))
+        .Build())
+      using (var loggerFactory = LoggerFactory.Create(builder =>
+      {
+        builder.AddOpenTelemetry(options =>
+        {
+          options.IncludeFormattedMessage = true;
+          options.IncludeScopes = true;
+          options.SetResourceBuilder(resourceBuilder);
+          options.AddProcessor(new LogProcessor(consoleWriter, enricher));
+        });
+      }))
+      using (SharedUtils.StartActivity("InnovatorAdmin.Cmd.exe", tags: tags))
+      {
+        var logger = loggerFactory.CreateLogger("InnovatorAdmin.Cmd");
+
+        //var parser = new Parser(with => with.IgnoreUnknownArguments = false);
+        var commands = new[]
+        {
+          typeof(ExportCommand),
+          typeof(ImportCommand),
+          typeof(PackageDiffCommand),
+          typeof(ConvertCommand),
+          typeof(ApplyCommand),
+          typeof(AnalyzeCommand),
+          typeof(DocumentationCommand)
+        };
+        var task = default(Task<int>);
+        var cmdArgs = Parser.Default.ParseArguments(args, commands);
+        cmdArgs
+          .WithNotParsed(errors => task = TryParseArasFormat((NotParsed<object>)cmdArgs, args, logger))
+          .WithParsed(options => task = Execute((ICommand)options, logger));
+        return await task;
+      }
     }
 
-    private static Task<int> TryParseArasFormat(ParserResult<object> result, string[] args)
+    private static async Task<int> Execute(ICommand command, ILogger logger)
+    {
+      return await command.Execute(logger);
+    }
+
+    private static Task<int> TryParseArasFormat(NotParsed<object> result, string[] args, ILogger logger)
     {
       var opts = default(SharedOptions);
       if (result.TypeInfo.Choices.Any())
@@ -77,9 +125,9 @@ namespace InnovatorAdmin.Cmd
         return Task.FromResult(-1);
 
       if (opts is ExportCommand export)
-        return export.Execute();
+        return Execute(export, logger);
       else if (opts is ImportCommand import)
-        return import.Execute();
+        return Execute(import, logger);
       return Task.FromResult(-1);
     }
   }

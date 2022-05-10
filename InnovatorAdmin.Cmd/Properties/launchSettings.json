@@ -2,7 +2,9 @@
   "profiles": {
     "InnovatorAdmin.Cmd": {
       "commandName": "Project",
-      "commandLineArgs": "diff --base git:///D:/ANSYSDev/Code/SPDM/InnovatorMetadata?path=AML&branch=origin/aras/12sp14new --outputfile D:\\ANSYSDev\\Code\\SPDM\\InnovatorMetadata\\artifacts\\SpdmBase-diff.innpkg --ours git:///D:/ANSYSDev/Code/SPDM/InnovatorMetadata?path=AML&commit=9a3609f5935fbd671f4a22bc6f8d0d5f0c068360 --sort-first-of-type 61385E4D09BC43BC8F64EAA898120798"
+      //"commandLineArgs": "diff --base \"git:///D:/ANSYSDev/Code/Upgrade/Nokia?path=AML&commit=998acba57d6508a4b454ca7668f494717e16094b\" --outputfile \"D:/ANSYSDev/Code/Upgrade/NokiaDebug.innpkg\" --ours \"git:///D:/ANSYSDev/Code/Upgrade/Nokia?path=AML&commit=b70a578ea476f93be529a40b96caf389d784d9ec\"",
+      "commandLineArgs": "analyze --inputfile \"git:///D:/ANSYSDev/Code/Upgrade/Nokia?path=AML&commit=bfb5a8c9ea5aa63fa4f9a52bdcf9c8b33e317def\"",
+      "workingDirectory": "D:\\ANSYSDev\\Code\\SPDM\\InnovatorMetadata"
     }
   }
 }

@@ -1,6 +1,7 @@
 ﻿using CommandLine;
 using CommandLine.Text;
 using Innovator.Client;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ using System.Xml.XPath;
 namespace InnovatorAdmin.Cmd
 {
   [Verb("export", HelpText = "Export a solution from Aras Innovator")]
-  internal class ExportCommand : SharedOptions
+  internal class ExportCommand : SharedOptions, ICommand
   {
     [Option("title", HelpText = "Title of the package")]
     public string Title { get; set; }
@@ -52,7 +53,7 @@ namespace InnovatorAdmin.Cmd
       }
     }
 
-    public Task<int> Execute()
+    public Task<int> Execute(ILogger logger)
     {
       return ConsoleTask.ExecuteAsync(this, async (console) =>
       {

@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using Innovator.Client;
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Linq;
@@ -9,7 +10,7 @@ using System.Xml;
 namespace InnovatorAdmin.Cmd
 {
   [Verb("apply", HelpText = "Apply AML")]
-  internal class ApplyCommand : SharedOptions
+  internal class ApplyCommand : SharedOptions, ICommand
   {
     [Option('a', "action", HelpText = "SOAP action to use")]
     public string SoapAction { get; set; }
@@ -23,7 +24,7 @@ namespace InnovatorAdmin.Cmd
     [Option('t', "timeout", HelpText = "Timeout for the HTTP request in milliseconds")]
     public int Timeout { get; set; }
 
-    public Task<int> Execute()
+    public Task<int> Execute(ILogger logger)
     {
       return ConsoleTask.ExecuteAsync(this, async (console) =>
       {

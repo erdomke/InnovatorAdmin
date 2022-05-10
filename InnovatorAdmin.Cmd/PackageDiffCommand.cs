@@ -1,16 +1,14 @@
 ﻿using CommandLine;
 using CommandLine.Text;
-using System;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace InnovatorAdmin.Cmd
 {
   [Verb("diff", HelpText = "Generate a patch package based on a diff")]
-  internal class PackageDiffCommand
+  internal class PackageDiffCommand : ICommand
   {
     [Option("base", HelpText = "Path to package file containing the base items", Required = true)]
     public string BasePackage { get; set; }
@@ -45,7 +43,7 @@ namespace InnovatorAdmin.Cmd
         });
       }
     }
-    public int Execute()
+    public async Task<int> Execute(ILogger logger)
     {
       return ConsoleTask.Execute(this, console =>
       {

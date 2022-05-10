@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30907.101
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32228.430
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InnovatorAdmin.Api", "InnovatorAdmin.Api\InnovatorAdmin.Api.csproj", "{7C397623-C59E-4DB2-8879-8A3385DABCD9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InnovatorAdmin", "InnovatorAdmin\InnovatorAdmin.csproj", "{56CC682F-1810-4A66-B06C-129A86621294}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnovatorAdmin.ApiTests", "InnovatorAdmin.ApiTests\InnovatorAdmin.ApiTests.csproj", "{ABE4BC56-D84A-480C-A6A7-FC7EB2E21CDB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InnovatorAdmin.ApiTests", "InnovatorAdmin.ApiTests\InnovatorAdmin.ApiTests.csproj", "{ABE4BC56-D84A-480C-A6A7-FC7EB2E21CDB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F6CDF249-A6CB-43FB-A12E-488E47229B94}"
 	ProjectSection(SolutionItems) = preProject
@@ -23,6 +23,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InnovatorAdmin.Plugins", "InnovatorAdmin.Plugins\InnovatorAdmin.Plugins.csproj", "{80D1AEC1-C225-44D0-809F-C5B8081E9F1C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InnovatorAdmin.Cmd", "InnovatorAdmin.Cmd\InnovatorAdmin.Cmd.csproj", "{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Innovator.Telemetry", "Telemetry\Innovator.Telemetry.csproj", "{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -174,6 +176,30 @@ Global
 		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Release|WithNRefactory.Build.0 = Release|Any CPU
 		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Release|x86.ActiveCfg = Release|Any CPU
 		{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}.Release|x86.Build.0 = Release|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Debug|Net35.ActiveCfg = Debug|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Debug|Net35.Build.0 = Debug|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Debug|Net40.ActiveCfg = Debug|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Debug|Net40.Build.0 = Debug|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Debug|WithNRefactory.ActiveCfg = Debug|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Debug|WithNRefactory.Build.0 = Debug|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Debug|x86.Build.0 = Debug|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Release|Net35.ActiveCfg = Release|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Release|Net35.Build.0 = Release|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Release|Net40.ActiveCfg = Release|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Release|Net40.Build.0 = Release|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Release|WithNRefactory.ActiveCfg = Release|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Release|WithNRefactory.Build.0 = Release|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Release|x86.ActiveCfg = Release|Any CPU
+		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
