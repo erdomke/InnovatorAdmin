@@ -7,6 +7,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -20,12 +21,18 @@ namespace InnovatorAdmin.Cmd
       var tags = new Dictionary<string, object>
       {
         ["arguments"] = args,
+        ["working_directory"] = Directory.GetCurrentDirectory(),
         ["os_version"] = Environment.OSVersion.ToString(),
         ["machine_name"] = Environment.MachineName,
         ["user"] = $"{Environment.UserDomainName}\\{Environment.UserName}"
       };
 
-      var enricher = new DefaultEnricher();
+      var enricher = new DefaultEnricher()
+        .WithExceptionEnricher<ServerException>((attr, ex) =>
+        {
+          attr["fault"] = ex.Fault.ToAml();
+          attr["query"] = ex.Query;
+        });
       var consoleWriter = new SslogWriter(Console.Error)
       {
         UseConsoleColors = true
@@ -48,6 +55,7 @@ namespace InnovatorAdmin.Cmd
       using (SharedUtils.StartActivity("InnovatorAdmin.Cmd.exe", tags: tags))
       {
         var logger = loggerFactory.CreateLogger("InnovatorAdmin.Cmd");
+
 
         //var parser = new Parser(with => with.IgnoreUnknownArguments = false);
         var commands = new[]

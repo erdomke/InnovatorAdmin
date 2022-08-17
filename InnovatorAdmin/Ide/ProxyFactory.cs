@@ -2,6 +2,7 @@
 using InnovatorAdmin.Connections;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Xml.Schema;
 
 namespace InnovatorAdmin
@@ -16,23 +17,12 @@ namespace InnovatorAdmin
       _factories[type] = factory;
     }
 
-    public static IPromise<IEditorProxy> FromConn(ConnectionData conn)
+    public static async Task<IEditorProxy> FromConn(ConnectionData conn)
     {
-      Func<ConnectionData, IPromise<IEditorProxy>> factory;
-      if (_factories.TryGetValue(conn.Type, out factory))
-      {
-        return factory.Invoke(conn);
-      }
+      if (_factories.TryGetValue(conn.Type, out var factory))
+        return await factory.Invoke(conn);
       else
-      {
-        switch (conn.Type)
-        {
-          case ConnectionType.Innovator:
-            return conn.ArasLogin(true)
-              .Convert(c => (IEditorProxy)new Editor.ArasEditorProxy(c, conn));
-        }
-        return Promises.Rejected<IEditorProxy>(new NotSupportedException("Unsupported connection type"));
-      }
+        return new Editor.ArasEditorProxy(await conn.ArasLogin(true), conn);        
     }
 
 

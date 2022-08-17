@@ -1,4 +1,5 @@
 ﻿using Innovator.Client;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -14,6 +15,8 @@ namespace InnovatorAdmin
 {
   public static class Utils
   {
+    public static ILogger Logger { get; set; }
+
     public static bool EndsWith(this IList<string> values, params string[] predicate)
     {
       if (predicate == null || predicate.Length < 1)
@@ -180,6 +183,9 @@ namespace InnovatorAdmin
     public static void HandleError(Exception ex)
     {
       if (ex == null) return;
+
+      Logger.LogError(ex, null);
+
       using (var dialog = new Dialog.MessageDialog())
       {
         if (ex is AggregateException agg

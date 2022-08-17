@@ -51,8 +51,7 @@ namespace InnovatorAdmin
 
     internal static string GetConnectionFilePath()
     {
-      string path = @"{0}\{1}\connections.xml";
-      return string.Format(path, Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Innovator Admin");
+      return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Innovator Admin", "connections.xml");
     }
   }
 }

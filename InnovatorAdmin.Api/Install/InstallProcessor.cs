@@ -22,13 +22,14 @@ namespace InnovatorAdmin
     public event EventHandler<RecoverableErrorEventArgs> ErrorRaised;
     public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
 
-    private ILogger<InstallProcessor> _logger;
+    private ILogger _logger;
 
-    public InstallProcessor(IAsyncConnection conn)
+    public InstallProcessor(IAsyncConnection conn, ILogger logger)
     {
       _conn = conn;
-      _exportTools = new ExportProcessor(conn);
+      _exportTools = new ExportProcessor(conn, logger);
       _currLine = -1;
+      _logger = logger;
     }
 
     public async Task<InstallScript> ConvertManifestXml(XmlDocument doc, string name)
@@ -71,11 +72,15 @@ namespace InnovatorAdmin
 
     public void Install()
     {
-      //_logger?.LogInformation();
       _currLine = 0;
 
       var exception = default(Exception);
-      using (var activity = SharedUtils.StartActivity("InstallProcessor.Install"))
+      using (var activity = SharedUtils.StartActivity("InstallProcessor.Install", null, new Dictionary<string, object>()
+      {
+        ["script.title"] = _script.Title,
+        ["script.created"] = _script.Created,
+        ["script.creator"] = _script.Creator
+      }))
       {
         var upgradeId = Guid.NewGuid().ToArasId();
         try
@@ -95,11 +100,13 @@ namespace InnovatorAdmin
             , _script.Description.Left(512)).AssertNoError();
           InstallLines();
           _conn.Apply("<Item type=\"DatabaseUpgrade\" action=\"merge\" id=\"@0\"><upgrade_status>1</upgrade_status></Item>", upgradeId).AssertNoError();
+          activity.SetStatus(System.Diagnostics.ActivityStatusCode.Ok);
         }
         catch (Exception ex)
         {
           if (!(ex is ServerException))
             _logger?.LogError(ex, null);
+          activity.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
           _conn.Apply("<Item type=\"DatabaseUpgrade\" action=\"merge\" id=\"@0\"><upgrade_status>2</upgrade_status></Item>", upgradeId); //.AssertNoError();
         }
       }
@@ -122,6 +129,7 @@ namespace InnovatorAdmin
       foreach (var line in _lines.Skip(_currLine).ToList())
       {
         repeat = true;
+        _logger.LogInformation("Performing {Line} ({Index} of {Count})", line.ToString(), _currLine + 1, _lines.Count);
         ReportProgress((int)(_currLine * 80.0 / _lines.Count), string.Format("Performing {0} ({1} of {2})", line.ToString(), _currLine + 1, _lines.Count));
         query = line.Script;
 
@@ -285,6 +293,8 @@ namespace InnovatorAdmin
 
     private void HandleErrorDefault(RecoverableErrorEventArgs args, XmlNode query)
     {
+      //args.Exception.Data["fault"] = args.Exception.Fault;
+      //args.Exception.Data["query"] = args.Exception.Query;
       _logger?.LogError(args.Exception, null);
 
       var isAuto = false;

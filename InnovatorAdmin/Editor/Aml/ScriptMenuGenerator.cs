@@ -282,7 +282,7 @@ namespace InnovatorAdmin.Editor
               if (replace.Count() == 1)
               {
                 var sqlItem = Conn.AmlContext.FromXml(_whereUsedSqlAml).AssertItem();
-                var export = new ExportProcessor(Conn);
+                var export = new ExportProcessor(Conn, Utils.Logger);
                 var script = new InstallScript();
                 var itemRef = ItemReference.FromFullItem(sqlItem, true);
                 await export.Export(script, new[] { itemRef });

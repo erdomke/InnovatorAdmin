@@ -1,12 +1,8 @@
 ﻿using Innovator.Client;
 using InnovatorAdmin.Connections;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -16,8 +12,8 @@ namespace InnovatorAdmin.Scripts
   {
     private IAsyncScript _script;
     private ConnectionData _connData;
-    private IPromise<IAsyncConnection> _conn;
-    private IPromise _currentRun;
+    private Task<IAsyncConnection> _conn;
+    private IPromise<string> _currentRun;
 
     public ScriptWindow()
     {
@@ -28,7 +24,7 @@ namespace InnovatorAdmin.Scripts
       menuStrip.Renderer = new SimpleToolstripRenderer();
     }
 
-    public void SetConnection(ConnectionData connData)
+    public async Task SetConnection(ConnectionData connData)
     {
       _conn = null;
       _connData = null;
@@ -43,13 +39,10 @@ namespace InnovatorAdmin.Scripts
 
       _connData = connData;
       btnEditConnection.Text = "Connecting... ▼";
-      _conn = connData.ArasLogin(true)
-        .UiPromise(this)
-        .Done(c =>
-        {
-          btnEditConnection.Text = connData.ConnectionName + " ▼";
-          lblConnColor.BackColor = connData.Color;
-        });
+      _conn = connData.ArasLogin(true);
+      await _conn;
+      btnEditConnection.Text = connData.ConnectionName + " ▼";
+      lblConnColor.BackColor = connData.Color;
     }
 
     public ScriptWindow WithScript(IAsyncScript script)
@@ -80,7 +73,7 @@ namespace InnovatorAdmin.Scripts
       }
     }
 
-    private void btnSubmit_Click(object sender, EventArgs e)
+    private async void btnSubmit_Click(object sender, EventArgs e)
     {
       try
       {
@@ -95,15 +88,10 @@ namespace InnovatorAdmin.Scripts
           btnSubmit.Text = "► Cancel";
           outputEditor.Text = "Processing...";
 
-          _currentRun = _conn
-            .Continue(c => _script.Execute(c))
-            .UiPromise(this)
-            .Done(s =>
-            {
-              outputEditor.Text = s;
-              _currentRun = null;
-            })
-            .Fail(ex => outputEditor.Text = ex.ToString());
+          var conn = await _conn;
+          _currentRun = _script.Execute(conn);
+          outputEditor.Text = await _currentRun;
+          _currentRun = null;
         }
         else
         {

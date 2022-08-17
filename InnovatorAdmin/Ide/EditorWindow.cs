@@ -485,7 +485,7 @@ namespace InnovatorAdmin
         try
         {
           btnEditConnections.Text = "Connecting... ▼";
-          var proxy = await ProxyFactory.FromConn(conn).ToTask();
+          var proxy = await ProxyFactory.FromConn(conn);
           SetProxy(proxy);
           _disposeProxy = true;
         }

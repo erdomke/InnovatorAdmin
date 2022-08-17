@@ -10,15 +10,17 @@ namespace Innovator.Telemetry
 
     private Dictionary<Type, Action<IDictionary<string, object>, Exception>> _exceptionEnrichers = new Dictionary<Type, Action<IDictionary<string, object>, Exception>>();
 
-    public DefaultEnricher WithExceptionEnricher(Type type, Action<IDictionary<string, object>, Exception> enricher)
+    public DefaultEnricher WithExceptionEnricher<T>(Action<IDictionary<string, object>, T> enricher) where T : Exception
     {
-      _exceptionEnrichers[type] = enricher;
+      _exceptionEnrichers[typeof(T)] = (a, e) => enricher(a, (T)e);
       return this;
     }
 
     public string Enrich(IDictionary<string, object> attributes, string formattedMessage, object state, Exception exception, Action<IDictionary<string, object>> enrichScope)
     {
       var message = formattedMessage;
+      if (formattedMessage == "[null]")
+        message = null;
       WithException(attributes, exception);
       enrichScope?.Invoke(attributes);
 

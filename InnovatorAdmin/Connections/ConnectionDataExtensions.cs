@@ -28,7 +28,7 @@ namespace InnovatorAdmin
     }
     public static IAsyncConnection ArasLogin(this ConnectionData credentials)
     {
-      return ArasLogin(credentials, false).Value;
+      return ArasLogin(credentials, false).Result;
     }
 
     public static ICredentials ArasCredentials(this ConnectionData credentials)
@@ -47,7 +47,8 @@ namespace InnovatorAdmin
       }
       return null;
     }
-    public static IPromise<IAsyncConnection> ArasLogin(this ConnectionData credentials, bool async)
+
+    public static async Task<IAsyncConnection> ArasLogin(this ConnectionData credentials, bool async)
     {
       var cred = credentials.ArasCredentials();
       var prefs = new ConnectionPreferences();
@@ -59,14 +60,11 @@ namespace InnovatorAdmin
       if (tzPref != null)
         prefs.Headers.TimeZone = tzPref.Value;
 
-      return Factory.GetConnection(credentials.Url
-        , prefs, async)
-      .Continue(c =>
-      {
-        return c.Login(cred, async)
-          .Convert(u => (IAsyncConnection)c);
-      });
+      var conn = await Factory.GetConnection(credentials.Url, prefs, async);
+      await conn.Login(cred, async);
+      return conn;
     }
+
     public static void Explore(this ConnectionData conn)
     {
       if (conn.Type == ConnectionType.Innovator)

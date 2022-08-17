@@ -25,8 +25,8 @@ namespace InnovatorAdmin
         _conn = value;
         if (_conn != null)
         {
-          _export = new ExportProcessor(_conn);
-          _install = new InstallProcessor(_conn);
+          _export = new ExportProcessor(_conn, Utils.Logger);
+          _install = new InstallProcessor(_conn, Utils.Logger);
           if (this.ConnectionInfo.Count() == 1)
           {
             this.ConnectionColor = this.ConnectionInfo.First().Color;

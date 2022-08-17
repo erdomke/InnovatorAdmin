@@ -15,7 +15,7 @@ namespace InnovatorAdmin.Cmd
       {
         console.WriteLine("Connecting to innovator...");
         var conn = await this.GetConnection().ConfigureAwait(false);
-        var processor = new InstallProcessor(conn);
+        var processor = new InstallProcessor(conn, logger);
 
         console.WriteLine("Reading the install package...");
         var script = default(InstallScript);

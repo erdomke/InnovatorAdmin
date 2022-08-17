@@ -184,6 +184,7 @@ namespace Innovator.Telemetry
         _writer.WriteLine("##");
         if (UseConsoleColors)
           Console.ResetColor();
+        _writer.Flush();
       }
     }
 

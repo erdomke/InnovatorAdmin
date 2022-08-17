@@ -17,7 +17,7 @@
   
   <ItemGroup>
     <PackageReference Include="Innovator.Client">
-      <Version>2020.2.23.1756</Version>
+      <Version>2022.4.14.1735</Version>
     </PackageReference>
     <PackageReference Include="LibGit2Sharp">
       <Version>0.26.2</Version>

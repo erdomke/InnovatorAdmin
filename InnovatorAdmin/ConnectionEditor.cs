@@ -123,33 +123,29 @@ namespace InnovatorAdmin
       }
     }
 
-    private void btnTest_Click(object sender, EventArgs e)
+    private async void btnTest_Click(object sender, EventArgs e)
     {
-      try
+      var connData = (ConnectionData)_bs.Current;
+      using (var activity = SharedUtils.StartActivity("Testing Innovator connection " + connData.ConnectionName, null, new Dictionary<string, object>()
       {
-        btnTest.Text = "Testing...";
-
-
-        var connData = (ConnectionData)_bs.Current;
-        switch (connData.Type)
+        ["url"] = connData.Url,
+        ["database"] = connData.Database,
+        ["username"] = connData.UserName
+      }))
+      {
+        try
         {
-          case ConnectionType.Innovator:
-            ((ConnectionData)_bs.Current).ArasLogin(true)
-              .UiPromise(this)
-              .Done(c => btnTest.Text = "Success. Test Again.")
-              .Fail(ex => btnTest.Text = ex.Message);
-            break;
-          default:
-            ProxyFactory.FromConn(connData)
-              .UiPromise(this)
-              .Done(c => btnTest.Text = "Success. Test Again.")
-              .Fail(ex => btnTest.Text = ex.Message);
-            break;
+          btnTest.Text = "Testing...";
+          await connData.ArasLogin(true);
+          btnTest.Text = "Success. Test Again.";
+          activity.SetStatus(System.Diagnostics.ActivityStatusCode.Ok);
         }
-      }
-      catch (Exception ex)
-      {
-        Utils.HandleError(ex);
+        catch (Exception ex)
+        {
+          activity.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
+          ClearMessage();
+          Utils.HandleError(ex);
+        }
       }
     }
 

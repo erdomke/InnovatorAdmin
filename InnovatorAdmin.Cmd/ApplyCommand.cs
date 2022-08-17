@@ -43,7 +43,8 @@ namespace InnovatorAdmin.Cmd
         }
         else
         {
-          cmd = new Command(stream.AsString());
+          cmd = new Command(stream.AsString())
+            .WithAction(SoapAction);
         }
 
         console.WriteLine("Calling action...");

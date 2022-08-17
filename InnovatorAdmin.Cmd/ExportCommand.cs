@@ -59,7 +59,7 @@ namespace InnovatorAdmin.Cmd
       {
         console.WriteLine("Connecting to innovator...");
         var conn = await this.GetConnection().ConfigureAwait(false);
-        var processor = new ExportProcessor(conn);
+        var processor = new ExportProcessor(conn, logger);
 
         var refsToExport = default(List<ItemReference>);
         var checkDependencies = true;
@@ -99,7 +99,7 @@ namespace InnovatorAdmin.Cmd
   <name condition='in'>'{string.Join("','", types.Select(t => t.Name))}'</name>
 </Item>", true, true).ConfigureAwait(false))
             .Items()
-            .Select(i => i.Property("name").ToString()), StringComparer.OrdinalIgnoreCase);
+            .Select(i => i.Property("name").AsString(null)), StringComparer.OrdinalIgnoreCase);
           types = types.Where(t => exitingTypes.Contains(t.Name)).ToList();
 
           var queries = GetQueryies(items, types).ToList();

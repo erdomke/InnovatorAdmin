@@ -16,7 +16,7 @@ namespace InnovatorAdmin
         || directory.EndsWith(".mf", StringComparison.OrdinalIgnoreCase))
       {
         _manifestPath = Path.GetFileName(directory);
-        _base = Path.GetDirectoryName(_manifestPath);
+        _base = Path.GetDirectoryName(directory);
       }
       else
       {
@@ -81,7 +81,9 @@ namespace InnovatorAdmin
         var path = System.IO.Path.Combine(_base, _path);
         if (_create)
         {
-          Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path));
+          var dir = System.IO.Path.GetDirectoryName(path);
+          if (!string.IsNullOrEmpty(dir))
+            Directory.CreateDirectory(dir);
           return new FileStream(path, FileMode.Create, FileAccess.Write);
         }
         else

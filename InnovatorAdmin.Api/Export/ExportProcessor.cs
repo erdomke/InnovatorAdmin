@@ -1,4 +1,5 @@
 ﻿using Innovator.Client;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,6 +16,7 @@ namespace InnovatorAdmin
     private DependencySorter _sorter = new DependencySorter();
     private Version _arasVersion;
     private readonly IAsyncConnection _conn;
+    private readonly ILogger _logger;
     private readonly DependencyAnalyzer _dependAnalyzer;
     private readonly ArasMetadataProvider _metadata;
     XslCompiledTransform _resultTransform;
@@ -25,9 +27,10 @@ namespace InnovatorAdmin
     /// Construct a new <see cref="ExportProcessor"/> from a connection to Aras
     /// </summary>
     /// <param name="conn"></param>
-    public ExportProcessor(IAsyncConnection conn)
+    public ExportProcessor(IAsyncConnection conn, ILogger logger)
     {
       _conn = conn;
+      _logger = logger;
       if (_conn is Innovator.Client.Connection.IArasConnection arasConn)
         arasConn.DefaultSettings.Add(r => r.Timeout = TimeSpan.FromMinutes(3));
       _metadata = ArasMetadataProvider.Cached(conn);
@@ -41,155 +44,164 @@ namespace InnovatorAdmin
     public async Task Export(InstallScript script, IEnumerable<ItemReference> items
       , bool checkDependencies = true)
     {
-      _arasVersion = (await _conn.FetchVersion(true)) ?? new Version(9, 3);
-      ReportProgress(0, "Loading system data");
-      await _metadata.ReloadTask().ConfigureAwait(false);
-
-      // On each scan, reload everything from the database.  Even if this might degrade
-      // performance, it is much more reliable
-      var uniqueItems = new HashSet<ItemReference>(items);
-      uniqueItems.UnionWith(script.Lines.Where(l => l.Type == InstallType.Create).Select(l => l.Reference));
-      script.Lines = null;
-      var itemList = uniqueItems.ToList();
-
-      var outputDoc = new XmlDocument();
-      outputDoc.AppendChild(outputDoc.CreateElement("AML"));
-      XmlElement queryElem;
-      var whereClause = new StringBuilder();
-
-      ConvertPolyItemReferencesToActualType(itemList);
-      itemList = (await NormalizeReferences(itemList).ConfigureAwait(false)).ToList();
-
-      var groups = itemList.GroupBy(i => new { Type = i.Type, Levels = i.Levels });
-      var queries = new List<XmlElement>();
-      foreach (var typeItems in groups)
+      using (var activity = SharedUtils.StartActivity("ExportProcessor.Export", null, new Dictionary<string, object>()
       {
-        var pageSize = GroupSize(typeItems.Key.Type, typeItems.Key.Levels);
-        var pageCount = (int)Math.Ceiling((double)typeItems.Count() / pageSize);
-        for (var p = 0; p < pageCount; p++)
-        {
-          var refs = typeItems.Skip(p * pageSize).Take(pageSize);
-          whereClause.Length = 0;
-          queryElem = outputDoc.CreateElement("Item")
-            .Attr("action", "get")
-            .Attr("type", typeItems.Key.Type);
-
-          if (refs.Any(i => i.Unique.IsGuid()))
-          {
-            whereClause.Append("[")
-              .Append(typeItems.Key.Type.Replace(' ', '_'))
-              .Append("].[id] in ('")
-              .Append(refs.Where(i => i.Unique.IsGuid()).Select(i => i.Unique).GroupConcat("','"))
-              .Append("')");
-          }
-          if (refs.Any(i => !i.Unique.IsGuid()))
-          {
-            whereClause.AppendSeparator(" or ",
-              refs.Where(i => !i.Unique.IsGuid()).Select(i => i.Unique).GroupConcat(" or "));
-          }
-
-          queryElem.SetAttribute("where", whereClause.ToString());
-          SetQueryAttributes(queryElem, typeItems.Key.Type, typeItems.Key.Levels, refs);
-          queries.Add(queryElem);
-        }
-      }
-
-      queries.Shuffle();
-      foreach (var query in queries)
+        ["checkDependencies"] = checkDependencies
+      }))
       {
-        outputDoc.DocumentElement.AppendChild(query);
-      }
-
-      try
-      {
+        _arasVersion = (await _conn.FetchVersion(true)) ?? new Version(9, 3);
+        _logger.LogInformation("Aras version = {Version}", _arasVersion);
         ReportProgress(0, "Loading system data");
+        await _metadata.ReloadTask().ConfigureAwait(false);
 
-        FixFederatedRelationships(outputDoc.DocumentElement);
-        var result = ExecuteExportQuery(ref outputDoc, items);
-        RemoveXPropertyFlattenRelationships(result);
-        RemoveGeneratedItemTypeRelationships(result);
-        RemoveCmfGeneratedTypes(result);
-        RemoveVaultUrl(result);
-        FixCmfComputedPropDependencies(result);
-        FixCmfTabularViewMissingWarning(result);
+        // On each scan, reload everything from the database.  Even if this might degrade
+        // performance, it is much more reliable
+        var uniqueItems = new HashSet<ItemReference>(items);
+        uniqueItems.UnionWith(script.Lines.Where(l => l.Type == InstallType.Create).Select(l => l.Reference));
+        script.Lines = null;
+        var itemList = uniqueItems.ToList();
 
-        // Add warnings for embedded relationships
-        var warnings = new HashSet<ItemReference>();
-        ItemReference warning;
-        foreach (var relType in result.ElementsByXPath("/Result/Item[@type='ItemType']/Relationships/Item[@type='RelationshipType']"))
+        var outputDoc = new XmlDocument();
+        outputDoc.AppendChild(outputDoc.CreateElement("AML"));
+        XmlElement queryElem;
+        var whereClause = new StringBuilder();
+
+        ConvertPolyItemReferencesToActualType(itemList);
+        itemList = (await NormalizeReferences(itemList).ConfigureAwait(false)).ToList();
+
+        var groups = itemList.GroupBy(i => new { Type = i.Type, Levels = i.Levels });
+        var queries = new List<XmlElement>();
+        foreach (var typeItems in groups)
         {
-          warning = ItemReference.FromFullItem(relType as XmlElement, true);
-          warning.KeyedName = "* Possible missing relationship: " + warning.KeyedName;
-          warnings.Add(warning);
+          var pageSize = GroupSize(typeItems.Key.Type, typeItems.Key.Levels);
+          var pageCount = (int)Math.Ceiling((double)typeItems.Count() / pageSize);
+          for (var p = 0; p < pageCount; p++)
+          {
+            var refs = typeItems.Skip(p * pageSize).Take(pageSize);
+            whereClause.Length = 0;
+            queryElem = outputDoc.CreateElement("Item")
+              .Attr("action", "get")
+              .Attr("type", typeItems.Key.Type);
+
+            if (refs.Any(i => i.Unique.IsGuid()))
+            {
+              whereClause.Append("[")
+                .Append(typeItems.Key.Type.Replace(' ', '_'))
+                .Append("].[id] in ('")
+                .Append(refs.Where(i => i.Unique.IsGuid()).Select(i => i.Unique).GroupConcat("','"))
+                .Append("')");
+            }
+            if (refs.Any(i => !i.Unique.IsGuid()))
+            {
+              whereClause.AppendSeparator(" or ",
+                refs.Where(i => !i.Unique.IsGuid()).Select(i => i.Unique).GroupConcat(" or "));
+            }
+
+            queryElem.SetAttribute("where", whereClause.ToString());
+            SetQueryAttributes(queryElem, typeItems.Key.Type, typeItems.Key.Levels, refs);
+            queries.Add(queryElem);
+          }
         }
 
-        //Add warnings for cmf linked itemtypes
-        foreach (var item in result.ElementsByXPath("/Result/Item[@type='ItemType']"))
+        queries.Shuffle();
+        foreach (var query in queries)
         {
-          var id = item.Attribute("id", "");
-          if (_metadata.CmfLinkedTypes.TryGetValue(id, out var reference))
+          outputDoc.DocumentElement.AppendChild(query);
+        }
+
+        try
+        {
+          ReportProgress(0, "Loading system data");
+
+          FixFederatedRelationships(outputDoc.DocumentElement);
+          var result = ExecuteExportQuery(ref outputDoc, items);
+          RemoveXPropertyFlattenRelationships(result);
+          RemoveGeneratedItemTypeRelationships(result);
+          RemoveCmfGeneratedTypes(result);
+          RemoveVaultUrl(result);
+          FixCmfComputedPropDependencies(result);
+          FixCmfTabularViewMissingWarning(result);
+
+          // Add warnings for embedded relationships
+          var warnings = new HashSet<ItemReference>();
+          ItemReference warning;
+          foreach (var relType in result.ElementsByXPath("/Result/Item[@type='ItemType']/Relationships/Item[@type='RelationshipType']"))
           {
-            warning = reference.Clone();
-            warning.KeyedName = "* Possible missing ContentType: " + warning.KeyedName;
+            warning = ItemReference.FromFullItem(relType as XmlElement, true);
+            warning.KeyedName = "* Possible missing relationship: " + warning.KeyedName;
             warnings.Add(warning);
           }
+
+          //Add warnings for cmf linked itemtypes
+          foreach (var item in result.ElementsByXPath("/Result/Item[@type='ItemType']"))
+          {
+            var id = item.Attribute("id", "");
+            if (_metadata.CmfLinkedTypes.TryGetValue(id, out var reference))
+            {
+              warning = reference.Clone();
+              warning.KeyedName = "* Possible missing ContentType: " + warning.KeyedName;
+              warnings.Add(warning);
+            }
+          }
+
+          //RemoveRelatedItems(result, items);
+          //CleanUpSystemProps(result.DocumentElement.Elements(), items, false);
+          FixPolyItemReferences(result);
+          FloatVersionableRefs(result);
+          var doc = TransformResults(ref result);
+          SetDoGetItemForCmf(doc);
+          NormalizeClassStructure(doc);
+          FixPropertyReferencesToSystemProperties(doc);
+          ExpandSystemIdentities(doc);
+          RemoveVersionableRelIds(doc);
+          //TODO: Replace references to poly item lists
+
+          await Export(script, doc, warnings, checkDependencies).ConfigureAwait(false);
+          CleanUpSystemProps(doc.DocumentElement.Elements(), items.ToDictionary(i => i), true);
+          ConvertFloatProps(doc);
+          RemoveKeyedNameAttributes(doc.DocumentElement);
+
+          if (string.IsNullOrWhiteSpace(script.Title))
+          {
+            if (script.Lines.Count(l => l.Type == InstallType.Create) == 1)
+            {
+              script.Title = script.Lines.Single(l => l.Type == InstallType.Create).Reference.ToString();
+            }
+            else if (items.Count() == 1)
+            {
+              script.Title = items.First().ToString();
+            }
+          }
+
+          // Rename the FileTypes and identities to make comparing easier
+          ItemReference newRef;
+          foreach (var line in script.Lines.Where(l => l.Reference.Type == "FileType" || l.Reference.Type == "Identity"))
+          {
+            newRef = ItemReference.FromFullItem(line.Script.DescendantsAndSelf(e => e.LocalName == "Item").First(), true);
+            if (newRef.Type == line.Reference.Type && !String.Equals(newRef.KeyedName, line.Reference.KeyedName))
+            {
+              line.Reference.KeyedName = newRef.KeyedName;
+            }
+          }
+          activity.SetStatus(System.Diagnostics.ActivityStatusCode.Ok);
         }
-
-        //RemoveRelatedItems(result, items);
-        //CleanUpSystemProps(result.DocumentElement.Elements(), items, false);
-        FixPolyItemReferences(result);
-        FloatVersionableRefs(result);
-        var doc = TransformResults(ref result);
-        SetDoGetItemForCmf(doc);
-        NormalizeClassStructure(doc);
-        FixPropertyReferencesToSystemProperties(doc);
-        ExpandSystemIdentities(doc);
-        RemoveVersionableRelIds(doc);
-        //TODO: Replace references to poly item lists
-
-        await Export(script, doc, warnings, checkDependencies).ConfigureAwait(false);
-        CleanUpSystemProps(doc.DocumentElement.Elements(), items.ToDictionary(i => i), true);
-        ConvertFloatProps(doc);
-        RemoveKeyedNameAttributes(doc.DocumentElement);
-
-        if (string.IsNullOrWhiteSpace(script.Title))
+        catch (Exception ex)
         {
-          if (script.Lines.Count(l => l.Type == InstallType.Create) == 1)
-          {
-            script.Title = script.Lines.Single(l => l.Type == InstallType.Create).Reference.ToString();
-          }
-          else if (items.Count() == 1)
-          {
-            script.Title = items.First().ToString();
-          }
+          activity.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
+          _logger.LogError(ex, null);
+          this.OnActionComplete(new ActionCompleteEventArgs() { Exception = ex });
         }
 
-        // Rename the FileTypes and identities to make comparing easier
-        ItemReference newRef;
-        foreach (var line in script.Lines.Where(l => l.Reference.Type == "FileType" || l.Reference.Type == "Identity"))
+        // This is useful for debugging and making sure duplicate items are not present
+        if (script.Lines != null)
         {
-          newRef = ItemReference.FromFullItem(line.Script.DescendantsAndSelf(e => e.LocalName == "Item").First(), true);
-          if (newRef.Type == line.Reference.Type && !String.Equals(newRef.KeyedName, line.Reference.KeyedName))
-          {
-            line.Reference.KeyedName = newRef.KeyedName;
-          }
+          var grps = script.Lines.Where(l => l.Type == InstallType.Create)
+            .GroupBy(l => l.Reference.Unique);
+          var duplicates = grps.Where(g => g.Skip(1).Any()).ToArray();
+          if (duplicates.Length > 0)
+            _logger.LogWarning("The package has duplicate entries for the following items: " + duplicates.GroupConcat(", ", g => g.Key));
         }
       }
-      catch (Exception ex)
-      {
-        this.OnActionComplete(new ActionCompleteEventArgs() { Exception = ex });
-      }
-#if DEBUG
-      // This is useful for debugging and making sure duplicate items are not present
-      if (script.Lines != null)
-      {
-        var grps = script.Lines.Where(l => l.Type == InstallType.Create)
-          .GroupBy(l => l.Reference.Unique);
-        var duplicates = grps.Where(g => g.Skip(1).Any()).ToArray();
-        if (duplicates.Length > 0)
-          throw new InvalidOperationException("The package has duplicate entries for the following items: " + duplicates.GroupConcat(", ", g => g.Key));
-      }
-#endif
     }
 
     private int GroupSize(string itemType, int levels)
