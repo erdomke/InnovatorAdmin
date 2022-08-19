@@ -53,18 +53,18 @@ namespace InnovatorAdmin.Cmd
       }
     }
 
-    public Task<int> Execute(ILogger logger)
+    public async Task<int> Execute(ILogger logger)
     {
-      return ConsoleTask.ExecuteAsync(this, async (console) =>
+      var conn = await this.GetConnection().ConfigureAwait(false);
+      var processor = new ExportProcessor(conn, logger);
+
+      var refsToExport = default(List<ItemReference>);
+      var checkDependencies = true;
+      var progress = new ProgressLogger(logger);
+
+      using (SharedUtils.StartActivity("Identifying items to export"))
       {
-        console.WriteLine("Connecting to innovator...");
-        var conn = await this.GetConnection().ConfigureAwait(false);
-        var processor = new ExportProcessor(conn, logger);
 
-        var refsToExport = default(List<ItemReference>);
-        var checkDependencies = true;
-
-        console.Write("Identifying items to export... ");
         if (this.InputFile?.EndsWith(".innpkg", StringComparison.OrdinalIgnoreCase) == true
           || this.InputFile?.EndsWith(".mf", StringComparison.OrdinalIgnoreCase) == true)
         {
@@ -96,8 +96,8 @@ namespace InnovatorAdmin.Cmd
             .Where(t => t.Applies(version))
             .ToList();
           var exitingTypes = new HashSet<string>((await conn.ApplyAsync($@"<Item type='ItemType' action='get' select='name'>
-  <name condition='in'>'{string.Join("','", types.Select(t => t.Name))}'</name>
-</Item>", true, true).ConfigureAwait(false))
+    <name condition='in'>'{string.Join("','", types.Select(t => t.Name))}'</name>
+  </Item>", true, true).ConfigureAwait(false))
             .Items()
             .Select(i => i.Property("name").AsString(null)), StringComparer.OrdinalIgnoreCase);
           types = types.Where(t => exitingTypes.Contains(t.Name)).ToList();
@@ -105,70 +105,65 @@ namespace InnovatorAdmin.Cmd
           var queries = GetQueryies(items, types).ToList();
           checkDependencies = items.All(e => e.Attribute("type")?.Value != "*");
 
-          using (var prog = console.Progress())
-          {
-            var toExport = await SharedUtils.TaskPool(30, (l, m) => prog.Report(l / 100.0), queries
-              .Select(q =>
-              {
-                var aml = new XElement(q);
-                aml.Attribute("levels")?.Remove();
-                return (Func<Task<QueryAndResult>>)(async () => {
-                  var t = await conn.ApplyAsync(aml, true, false).ConfigureAwait(false);
-                  return new QueryAndResult()
-                  {
-                    Query = q,
-                    Result = t
-                  };
-                });
-              })
-              .ToArray()).ConfigureAwait(false);
-            refsToExport = toExport.SelectMany(r =>
-              {
-                var refs = r.Result.Items()
-                  .Select(i => ItemReference.FromFullItem(i, true))
-                  .ToList();
-                var levels = (int?)r.Query.Attribute("levels");
-                if (levels.HasValue)
+          progress.Reset();
+          var toExport = await SharedUtils.TaskPool(30, progress.Report, queries
+            .Select(q =>
+            {
+              var aml = new XElement(q);
+              aml.Attribute("levels")?.Remove();
+              return (Func<Task<QueryAndResult>>)(async () => {
+                var t = await conn.ApplyAsync(aml, true, false).ConfigureAwait(false);
+                return new QueryAndResult()
                 {
-                  foreach (var iRef in refs)
-                    iRef.Levels = levels.Value;
-                }
-                return refs;
-              })
-              .Distinct()
-              .ToList();
-          }
-        }
-        console.WriteLine("Done.");
-
-        var script = new InstallScript
-        {
-          ExportUri = new Uri(Url),
-          ExportDb = Database,
-          Lines = Enumerable.Empty<InstallItem>(),
-          Title = Title ?? System.IO.Path.GetFileNameWithoutExtension(Output),
-          Creator = Author ?? Username,
-          Website = string.IsNullOrEmpty(Website) ? null : new Uri(Website),
-          Description = Description,
-          Created = DateTime.Now,
-          Modified = DateTime.Now
-        };
-
-        console.Write("Exporting metadata... ");
-        using (var prog = console.Progress())
-        {
-          processor.ProgressChanged += (s, e) => prog.Report(e.Progress / 100.0);
-          processor.ActionComplete += (s, e) =>
+                  Query = q,
+                  Result = t
+                };
+              });
+            })
+            .ToArray()).ConfigureAwait(false);
+          refsToExport = toExport.SelectMany(r =>
           {
-            if (e.Exception != null)
-              throw new AggregateException(e.Exception);
-          };
-          await processor.Export(script, refsToExport, checkDependencies);
+            var refs = r.Result.Items()
+              .Select(i => ItemReference.FromFullItem(i, true))
+              .ToList();
+            var levels = (int?)r.Query.Attribute("levels");
+            if (levels.HasValue)
+            {
+              foreach (var iRef in refs)
+                iRef.Levels = levels.Value;
+            }
+            return refs;
+          })
+            .Distinct()
+            .ToList();
         }
-        console.WriteLine("Done.");
+      }
 
-        WritePackage(console, script, Output, MultipleDirectories, CleanOutput);
-      });
+      var script = new InstallScript
+      {
+        ExportUri = new Uri(Url),
+        ExportDb = Database,
+        Lines = Enumerable.Empty<InstallItem>(),
+        Title = Title ?? System.IO.Path.GetFileNameWithoutExtension(Output),
+        Creator = Author ?? Username,
+        Website = string.IsNullOrEmpty(Website) ? null : new Uri(Website),
+        Description = Description,
+        Created = DateTime.Now,
+        Modified = DateTime.Now
+      };
+
+      progress.Reset();
+      processor.ProgressChanged += progress.Report;
+      processor.ActionComplete += (s, e) =>
+      {
+        if (e.Exception != null)
+          throw new AggregateException(e.Exception);
+      };
+      await processor.Export(script, refsToExport, checkDependencies);
+
+      WritePackage(script, Output, MultipleDirectories, CleanOutput);
+
+      return 0;
     }
 
     private class QueryAndResult

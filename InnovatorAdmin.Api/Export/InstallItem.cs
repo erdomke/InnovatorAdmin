@@ -16,9 +16,9 @@ namespace InnovatorAdmin
     private ItemReference _itemRef;
     private string _name;
 
-    internal IEnumerable<ItemReference> CoreDependencies { get { return _dependencies; } }
+    internal IEnumerable<ItemReference> CoreDependencies => _dependencies;
     public InstallType Type { get; set; }
-    public ItemReference Reference { get { return _itemRef; } }
+    public ItemReference Reference => _itemRef;
     public string InstalledId { get; set; }
     public string Name
     {
@@ -41,7 +41,7 @@ namespace InnovatorAdmin
       set { _name = value; }
     }
     public string Path { get; set; }
-    public XmlElement Script { get { return _elem; } }
+    public XmlElement Script => _elem;
 
     string IPackageFile.Path
     {
@@ -55,6 +55,11 @@ namespace InnovatorAdmin
     }
 
     private InstallItem() { }
+
+    internal bool IsDelete()
+    {
+      return Type == InstallType.Script && Name.Split(' ').Contains("Delete");
+    }
 
     public void SetScript(string script)
     {
@@ -86,9 +91,11 @@ namespace InnovatorAdmin
       , Func<XmlElement, string> keyedNameGetter = null)
     {
 
-      var result = new InstallItem();
-      result._elem = elem;
-      result._itemRef = ItemReference.FromFullItem(elem, true);
+      var result = new InstallItem
+      {
+        _elem = elem,
+        _itemRef = ItemReference.FromFullItem(elem, true)
+      };
       if (result._itemRef.Type.IsGuid())
       {
         result.InstalledId = result._itemRef.Type;

@@ -129,7 +129,22 @@ namespace InnovatorAdmin
             {
               res.SetAttributeValue("action", "delete");
             }
-            else if (res.Name.LocalName != "Relationships")
+            else if (res.Name.LocalName == "Relationships")
+            {
+              foreach (var item in s.Elements("Item"))
+              {
+                if ((string)item.Attribute("action") == "add"
+                  || (string)item.Attribute("action") == "merge")
+                {
+                  var childDelete = new XElement(item);
+                  childDelete.RemoveNodes();
+                  childDelete.SetAttributeValue("action", "delete");
+                  res.Add(childDelete);
+                }
+              }
+              res.Parent.SetAttributeValue("action", "edit");
+            }
+            else
             {
               res.SetAttributeValue("is_null", "1");
               res.Parent.SetAttributeValue("action", "edit");

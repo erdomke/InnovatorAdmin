@@ -100,50 +100,18 @@ namespace InnovatorAdmin.Editor
 
     public virtual void Format(System.IO.TextReader reader, System.IO.TextWriter writer)
     {
-      RenderXml(reader, writer, true);
+      try
+      {
+        SharedUtils.TidyXml(reader, writer, true);
+      }
+      catch (XmlException) { } // Eat it for now
     }
 
     public virtual void Minify(System.IO.TextReader reader, System.IO.TextWriter writer)
     {
-      RenderXml(reader, writer, false);
-    }
-
-    private void RenderXml(System.IO.TextReader reader, System.IO.TextWriter writer, bool indent)
-    {
-      var readerSettings = new XmlReaderSettings();
-      readerSettings.IgnoreWhitespace = true;
-      readerSettings.ConformanceLevel = ConformanceLevel.Fragment;
-
-      //var settings = new XmlWriterSettings();
-      //settings.OmitXmlDeclaration = true;
-      //settings.Indent = indent;
-      //if (indent) settings.IndentChars = "  ";
-      //settings.CheckCharacters = true;
-      //settings.CloseOutput = true;
-      //settings.ConformanceLevel = ConformanceLevel.Fragment;
-
       try
       {
-        using (var xmlReader = XmlReader.Create(reader, readerSettings))
-        using (var xmlWriter = new XmlTextWriter(writer))
-        {
-          if (indent)
-          {
-            xmlWriter.Indentation = 2;
-            xmlWriter.IndentChar = ' ';
-            xmlWriter.Formatting = Formatting.Indented;
-          }
-          else
-          {
-            xmlWriter.Formatting = Formatting.None;
-          }
-          xmlWriter.QuoteChar = '\'';
-          while (!xmlReader.EOF)
-          {
-            xmlWriter.WriteNode(xmlReader, true);
-          }
-          xmlWriter.Flush();
-        }
+        SharedUtils.TidyXml(reader, writer, false);
       }
       catch (XmlException) { } // Eat it for now
     }

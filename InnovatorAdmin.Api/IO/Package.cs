@@ -489,7 +489,10 @@ namespace InnovatorAdmin
         {
           var stack = new Stack<bool>();
           using (var strReader = new StringReader(xsltContent.Substring(metaStart + _reportStart.Length, metaEnd - metaStart - _reportStart.Length).Trim()))
-          using (var reader = XmlReader.Create(strReader))
+          using (var reader = XmlReader.Create(strReader, new XmlReaderSettings()
+          {
+            IgnoreWhitespace = true,
+          }))
           {
             while (reader.Read())
             {
@@ -524,7 +527,7 @@ namespace InnovatorAdmin
                 case XmlNodeType.DocumentType:
                   writer.WriteDocType(reader.Name, reader.GetAttribute("PUBLIC"), reader.GetAttribute("SYSTEM"), reader.Value);
                   break;
-                case XmlNodeType.Whitespace:
+                //case XmlNodeType.Whitespace:
                 case XmlNodeType.SignificantWhitespace:
                   writer.WriteWhitespace(reader.Value);
                   break;
@@ -545,7 +548,10 @@ namespace InnovatorAdmin
         else if (xsltContent.StartsWith("<AML>"))
         {
           using (var strReader = new StringReader(xsltContent))
-          using (var reader = XmlReader.Create(strReader))
+          using (var reader = XmlReader.Create(strReader, new XmlReaderSettings()
+          {
+            IgnoreWhitespace = true,
+          }))
           {
             writer.WriteNode(reader, false);
           }
@@ -558,12 +564,17 @@ namespace InnovatorAdmin
       else
       {
         using (var stream = file.Open())
-        using (var reader = XmlReader.Create(stream))
+        using (var reader = XmlReader.Create(stream, new XmlReaderSettings()
+        {
+          IgnoreWhitespace = true,
+        }))
         {
           writer.WriteNode(reader, false);
         }
       }
     }
+
+    public delegate XmlWriter AmlMergeCallback(string path, int progress, XElement baseScript);
 
     /// <summary>
     /// Writes the difference between two directories
@@ -573,7 +584,7 @@ namespace InnovatorAdmin
     /// <param name="callback">Gets an XML writer to write the merge script given the path and current progress (integer between 0 and 100)</param>
     /// <returns>Metadata regarding the target state</returns>
     public static PackageMetadataProvider WriteAmlMergeScripts(this IPackage baseDir, IPackage compareDir
-      , Func<string, int, XmlWriter> callback)
+      , AmlMergeCallback callback)
     {
       Func<IPackageFile, IComparable> keyGetter = i => i.Path.ToUpperInvariant().Replace('\\', '/').TrimStart('/');
       var basePaths = baseDir.Files().OrderBy(keyGetter).ToList();
@@ -591,7 +602,7 @@ namespace InnovatorAdmin
         {
           case MergeType.StartOnly: // Delete
             completed++;
-            using (var writer = callback(baseScript.Path, completed * 100 / total))
+            using (var writer = callback(baseScript.Path, completed * 100 / total, baseScript.Script))
             {
               var elem = AmlDiff.GetMergeScript(baseScript.Script, null);
               if (elem.Elements().Any())
@@ -600,7 +611,7 @@ namespace InnovatorAdmin
             break;
           case MergeType.DestinationOnly: // Add
             completed++;
-            using (var writer = callback(compareScript.Path, completed * 100 / total))
+            using (var writer = callback(compareScript.Path, completed * 100 / total, null))
             {
               compareScript.Script.WriteTo(writer);
               metadata.Add(compareScript.Script);
@@ -617,9 +628,10 @@ namespace InnovatorAdmin
             {
               path = baseScript.Path;
             }
-            using (var writer = callback(path, completed * 100 / total))
+            using (var writer = callback(path, completed * 100 / total, null))
             {
-              metadata.Add(compareScript.Script);
+              if (compareScript.Script.Elements("Item").Any(e => (string)e.Attribute("action") != "delete"))
+                metadata.Add(compareScript.Script);
               var elem = AmlDiff.GetMergeScript(baseScript.Script, compareScript.Script);
               if (elem.Elements().Any())
                 elem.WriteTo(writer);
@@ -728,7 +740,7 @@ namespace InnovatorAdmin
     public static void WriteAmlMergeScripts(this IPackage baseDir, IPackage compareDir
       , string outputDirectory, Action<int> progressCallback = null)
     {
-      WriteAmlMergeScripts(baseDir, compareDir, (path, progress) =>
+      WriteAmlMergeScripts(baseDir, compareDir, (path, progress, deletedScript) =>
       {
         progressCallback?.Invoke(progress);
 

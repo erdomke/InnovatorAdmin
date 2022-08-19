@@ -20,14 +20,11 @@ namespace InnovatorAdmin.Cmd
     [Option("clean", HelpText = "Clean the output file/directory before writing the new content")]
     public bool CleanOutput { get; set; }
 
-    public async Task<int> Execute(ILogger logger)
+    public Task<int> Execute(ILogger logger)
     {
-      return ConsoleTask.Execute(this, (console) =>
-      {
-        console.WriteLine("Getting package information...");
-        var script = Package.Create(InputFile).Single().Read();
-        SharedOptions.WritePackage(console, script, Output, MultipleDirectories, CleanOutput);
-      });
+      var script = Package.Create(InputFile).Single().Read();
+      SharedOptions.WritePackage(script, Output, MultipleDirectories, CleanOutput);
+      return Task.FromResult(0);
     }
   }
 }

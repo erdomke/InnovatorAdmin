@@ -66,11 +66,7 @@ namespace InnovatorAdmin
       using var logWriter = new StreamWriter(logPath);
 
       var enricher = new DefaultEnricher()
-        .WithExceptionEnricher<ServerException>((attr, ex) =>
-        {
-          attr["fault"] = ex.Fault.ToAml();
-          attr["query"] = ex.Query;
-        });
+        .WithExceptionEnricher<ServerException>(SharedUtils.EnrichServerException);
       var sslogWriter = new SslogWriter(logWriter);
       using (var tracerProvider = Sdk.CreateTracerProviderBuilder()
         .AddSource("InnovatorAdmin")

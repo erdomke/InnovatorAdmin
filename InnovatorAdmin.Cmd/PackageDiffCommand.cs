@@ -43,30 +43,21 @@ namespace InnovatorAdmin.Cmd
         });
       }
     }
-    public async Task<int> Execute(ILogger logger)
+    public Task<int> Execute(ILogger logger)
     {
-      return ConsoleTask.Execute(this, console =>
-      {
-        console.WriteLine("Getting package information...");
-        var dirs = Package.Create(BasePackage, OurPackage).ToList();
+      var dirs = Package.Create(BasePackage, OurPackage).ToList();
 
-        var script = default(InstallScript);
-        console.Write("Calculating diffs... ");
-        using (var prog = new ProgressBar())
-        {
-          var processor = new MergeProcessor()
-          {
-            SortDependencies = true
-          };
-          if (!string.IsNullOrEmpty(FirstOfGroup))
-            processor.FirstOfGroup.UnionWith(FirstOfGroup.Split(','));
-          processor.ProgressChanged += (s, ev) => prog.Report(ev.Progress / 100.0);
-          script = processor.Merge(dirs[0], dirs[1]);
-        }
-        console.WriteLine("Done.");
+      var script = default(InstallScript);
 
-        SharedOptions.WritePackage(console, script, Output, MultipleDirectories, CleanOutput);
-      });
+      var progress = new ProgressLogger(logger);
+      var processor = new MergeProcessor();
+      if (!string.IsNullOrEmpty(FirstOfGroup))
+        processor.FirstOfGroup.UnionWith(FirstOfGroup.Split(','));
+      processor.ProgressChanged += progress.Report;
+      script = processor.Merge(dirs[0], dirs[1]);
+      
+      SharedOptions.WritePackage(script, Output, MultipleDirectories, CleanOutput);
+      return Task.FromResult(0);
     }
   }
 }

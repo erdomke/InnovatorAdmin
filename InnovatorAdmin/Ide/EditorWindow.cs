@@ -2442,10 +2442,7 @@ namespace InnovatorAdmin
             var pkg = new DirectoryPackage(manifestPath);
             ProgressDialog.Display(this, d =>
             {
-              var processor = new MergeProcessor()
-              {
-                SortDependencies = true
-              };
+              var processor = new MergeProcessor();
               processor.ProgressChanged += (s, ev) => d.SetProgress(ev.Progress);
               var script = processor.Merge(initDir, destDir);
               pkg.Write(script);

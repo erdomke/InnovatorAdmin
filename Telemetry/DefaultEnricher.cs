@@ -64,7 +64,13 @@ namespace Innovator.Telemetry
         attributes[key.ToString()] = exception.Data[key];
 
       if (_exceptionEnrichers.TryGetValue(exception.GetType(), out var enricher))
-        enricher?.Invoke(attributes, exception);
+      {
+        try
+        {
+          enricher?.Invoke(attributes, exception);
+        }
+        catch (Exception) { } // Do nothing
+      }
 
       var innerExceptions = Enumerable.Empty<Exception>();
       if (exception is AggregateException aggregateException)

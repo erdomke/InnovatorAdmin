@@ -30,17 +30,20 @@ namespace InnovatorAdmin.Cmd
 
     public async Task<IAsyncConnection> GetConnection()
     {
-      var conn = await Factory.GetConnection(new ConnectionPreferences()
+      using (SharedUtils.StartActivity("GetConnection", "Connecting to Innovator"))
       {
-        Headers =
+        var conn = await Factory.GetConnection(new ConnectionPreferences()
         {
-          UserAgent = "InnovatorAdmin.Cmd v" + Assembly.GetExecutingAssembly().GetName().Version.ToString()
-        },
-        Url = Url,
-        DefaultTimeout = (int)TimeSpan.FromMinutes(3).TotalMilliseconds
-      }, true).ConfigureAwait(false);
-      await conn.Login(GetCredentials(), true).ConfigureAwait(false);
-      return conn;
+          Headers =
+          {
+            UserAgent = "InnovatorAdmin.Cmd v" + Assembly.GetExecutingAssembly().GetName().Version.ToString()
+          },
+          Url = Url,
+          DefaultTimeout = (int)TimeSpan.FromMinutes(3).TotalMilliseconds
+        }, true).ConfigureAwait(false);
+        await conn.Login(GetCredentials(), true).ConfigureAwait(false);
+        return conn;
+      }
     }
 
     public ICredentials GetCredentials()
@@ -89,67 +92,69 @@ namespace InnovatorAdmin.Cmd
       return true;
     }
 
-    public static void WritePackage(ConsoleTask console, InstallScript script, string output, bool multipleDirectories, bool cleanOutput)
+    public static void WritePackage(InstallScript script, string output, bool multipleDirectories, bool cleanOutput)
     {
       multipleDirectories = multipleDirectories || string.Equals(Path.GetExtension(output), ".mf", StringComparison.OrdinalIgnoreCase);
 
       if (cleanOutput)
       {
-        console.Write("Cleaning output... ");
-        if (multipleDirectories)
+        using (SharedUtils.StartActivity("WritePackage.Clean", "Cleaning output"))
         {
-          var dir = new DirectoryInfo(Path.GetDirectoryName(output));
-          if (dir.Exists)
-          {
-            Parallel.ForEach(dir.EnumerateFileSystemInfos(), fs =>
-            {
-              if (fs is DirectoryInfo di)
-                di.Delete(true);
-              else
-                fs.Delete();
-            });
-          }
-          else
-          {
-            dir.Create();
-          }
-        }
-        else
-        {
-          File.Delete(output);
-        }
-        console.WriteLine("Done.");
-      }
-
-      console.Write("Writing package... ");
-      var outputDir = Path.GetDirectoryName(output);
-      if (!Directory.Exists(outputDir))
-        Directory.CreateDirectory(outputDir);
-
-      switch (Path.GetExtension(output).ToLowerInvariant())
-      {
-        case ".mf":
-          var manifest = new ManifestFolder(output);
-          manifest.Write(script);
-          break;
-        case ".innpkg":
           if (multipleDirectories)
           {
-            using (var pkgFolder = new DirectoryPackage(output))
-              pkgFolder.Write(script);
+            var dir = new DirectoryInfo(Path.GetDirectoryName(output));
+            if (dir.Exists)
+            {
+              Parallel.ForEach(dir.EnumerateFileSystemInfos(), fs =>
+              {
+                if (fs is DirectoryInfo di)
+                  di.Delete(true);
+                else
+                  fs.Delete();
+              });
+            }
+            else
+            {
+              dir.Create();
+            }
           }
           else
           {
-            if (File.Exists(output))
-              File.Delete(output);
-            using (var pkgFile = new ZipPackage(output))
-              pkgFile.Write(script);
+            File.Delete(output);
           }
-          break;
-        default:
-          throw new NotSupportedException("Output file type is not supported");
+        }
       }
-      console.WriteLine("Done.");
+
+      using (SharedUtils.StartActivity("WritePackage.Write", "Writing the package"))
+      {
+        var outputDir = Path.GetDirectoryName(output);
+        if (!Directory.Exists(outputDir))
+          Directory.CreateDirectory(outputDir);
+
+        switch (Path.GetExtension(output).ToLowerInvariant())
+        {
+          case ".mf":
+            var manifest = new ManifestFolder(output);
+            manifest.Write(script);
+            break;
+          case ".innpkg":
+            if (multipleDirectories)
+            {
+              using (var pkgFolder = new DirectoryPackage(output))
+                pkgFolder.Write(script);
+            }
+            else
+            {
+              if (File.Exists(output))
+                File.Delete(output);
+              using (var pkgFile = new ZipPackage(output))
+                pkgFile.Write(script);
+            }
+            break;
+          default:
+            throw new NotSupportedException("Output file type is not supported");
+        }
+      }
     }
   }
 }

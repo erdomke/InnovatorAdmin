@@ -277,7 +277,7 @@ namespace InnovatorAdmin
                   throw;
                 case RecoveryOption.Retry:
                   query = args.NewQuery ?? query;
-                  _logger?.LogInformation("{NewQuery}", query.OuterXml);
+                  _logger?.LogInformation("{NewQuery}", SharedUtils.TidyXml(query.WriteTo, false));
                   break;
                 default: // case RecoveryOption.Skip:
                   repeat = false;
@@ -293,8 +293,6 @@ namespace InnovatorAdmin
 
     private void HandleErrorDefault(RecoverableErrorEventArgs args, XmlNode query)
     {
-      //args.Exception.Data["fault"] = args.Exception.Fault;
-      //args.Exception.Data["query"] = args.Exception.Query;
       _logger?.LogError(args.Exception, null);
 
       var isAuto = false;

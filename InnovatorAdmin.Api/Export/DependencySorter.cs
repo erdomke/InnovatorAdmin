@@ -43,18 +43,13 @@ namespace InnovatorAdmin
       }
 
       results = results
-        .Where(i => !IsDelete(i))
+        .Where(i => !i.IsDelete())
         .Concat(results
-          .Where(IsDelete)
+          .Where(i => i.IsDelete())
           .OrderByDescending(DefaultInstallOrder)
         ).ToArray();
 
       return results;
-    }
-
-    private static bool IsDelete(InstallItem item)
-    {
-      return item.Type == InstallType.Script && item.Name.Split(' ').Contains("Delete");
     }
 
     internal IEnumerable<InstallItem> GetDependencyList(DependencyAnalyzer dependAnalyzer
@@ -485,11 +480,11 @@ namespace InnovatorAdmin
         case "Sequence": return 20;
         case "Revision": return 30;
         case "Variable": return 40;
-        case "Method": return 50;
-        case "Identity": return 60;
-        case "Member": return 70;
-        case "User": return 80;
-        case "Permission": return 90;
+        case "Identity": return 50;
+        case "Member": return 60;
+        case "User": return 70;
+        case "Permission": return 80;
+        case "Method": return 90;
         case "EMail Message": return 100;
         case "Action": return 110;
         case "Report": return 120;
@@ -497,16 +492,38 @@ namespace InnovatorAdmin
         case "Workflow Map": return 140;
         case "Life Cycle Map": return 150;
         case "Grid": return 160;
-        case "ItemType": return 170;
-        case "RelationshipType": return 180;
-        case "Field": return 190;
-        case "Property": return 200;
-        case "View": return 210;
-        case "SQL": return 220;
-        case "Metric": return 230;
-        case "Chart": return 240;
-        case "Dashboard": return 250;
-        case InstallItem.ScriptType: return 500;
+        case "xPropertyDefinition": return 170;
+        case "Permission_ItemClassification": return 180;
+        case "Permission_PropertyValue": return 190;
+        case "CommandBarShortcut": return 200;
+        case "CommandBarSeparator": return 210;
+        case "CommandBarMenuSeparator": return 220;
+        case "CommandBarDropDown": return 230;
+        case "CommandBarCheckbox": return 240;
+        case "CommandBarMenuCheckbox": return 250;
+        case "CommandBarEdit": return 260;
+        case "CommandBarButton": return 270;
+        case "CommandBarMenu": return 280;
+        case "CommandBarMenuButton": return 290;
+        case "CommandBarSection": return 300;
+        case "PresentationConfiguration": return 310;
+        case "ItemType": return 320;
+        case "RelationshipType": return 330;
+        case "Morphae": return 340;
+        case "Field": return 350;
+        case "Property": return 360;
+        case "View": return 370;
+        case "SQL": return 380;
+        case "Metric": return 390;
+        case "Chart": return 400;
+        case "Dashboard": return 410;
+        case "ac_PolicyAccessItemAttribute": return 420;
+        case "mp_PolicyAccessEnvAttribute": return 430;
+        case "mp_MacPolicy": return 440;
+        case "qry_QueryDefinition": return 450;
+        case "dr_RelationshipFamily": return 460;
+        case "dac_DomainDefinition": return 470;
+        case InstallItem.ScriptType: return 700;
       }
       return 9999;
     }

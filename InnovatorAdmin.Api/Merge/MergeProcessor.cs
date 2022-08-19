@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace InnovatorAdmin
 {
@@ -11,57 +12,70 @@ namespace InnovatorAdmin
 
     public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
 
-    public bool SortDependencies { get; set; } = true;
     public HashSet<string> FirstOfGroup => _sorter.FirstOfGroup;
 
     public InstallScript Merge(IPackage baseDir, IPackage compareDir)
     {
-      var docs = new List<Tuple<XmlDocument, string>>();
-      var metadata = baseDir.WriteAmlMergeScripts(compareDir, (path, prog) =>
+      using (SharedUtils.StartActivity("MergeProcessor.Merge", "Calculating diffs"))
       {
-        ProgressChanged?.Invoke(this, new ProgressChangedEventArgs("Reading files", prog / 2));
-        var doc = new XmlDocument();
-        docs.Add(Tuple.Create(doc, path));
-        return doc.CreateNavigator().AppendChild();
-      });
+        var docs = new List<MergeScript>();
+        var metadata = baseDir.WriteAmlMergeScripts(compareDir, (path, progress, deleted) =>
+        {
+          ProgressChanged?.Invoke(this, new ProgressChangedEventArgs("Reading files", progress / 2));
+          var script = new MergeScript(path, deleted);
+          docs.Add(script);
+          return script.Document.CreateNavigator().AppendChild();
+        });
 
-      ProgressChanged?.Invoke(this, new ProgressChangedEventArgs("Performing cleanup", 50));
+        ProgressChanged?.Invoke(this, new ProgressChangedEventArgs("Performing cleanup", 50));
 
-      var allItems = docs
-        .Where(d => d.Item1.DocumentElement != null)
-        .SelectMany(d => d.Item1.DocumentElement
-          .DescendantsAndSelf(el => el.LocalName == "Item"))
-        .ToArray();
+        var allItems = docs
+          .Where(d => d.Document.DocumentElement != null)
+          .SelectMany(d => d.Document.DocumentElement
+            .DescendantsAndSelf(el => el.LocalName == "Item"))
+          .ToArray();
 
-      RemoveDeletesForItemsWithMultipleScripts(allItems);
-      RemoveChangesToSystemProperties(allItems);
+        RemoveDeletesForItemsWithMultipleScripts(allItems);
+        RemoveChangesToSystemProperties(allItems);
 
-      var installScripts = docs
-        .Where(d => d.Item1.DocumentElement != null)
-        .SelectMany(d => XmlUtils.RootItems(d.Item1.DocumentElement)
-          .Select(i => InstallItem.FromScript(i, d.Item2)))
-        .ToArray();
+        ProgressChanged?.Invoke(this, new ProgressChangedEventArgs("Processing dependencies", 75));
 
-      ProgressChanged?.Invoke(this, new ProgressChangedEventArgs("Processing dependencies", 75));
+        var installScripts = docs
+          .Where(d => d.Document.DocumentElement != null && d.DeletedScript == null)
+          .SelectMany(d => XmlUtils.RootItems(d.Document.DocumentElement)
+            .Select(i => InstallItem.FromScript(i, d.Path)))
+          .ToList();
 
-      var lines = (SortDependencies
-        ? _sorter.SortByDependencies(installScripts, metadata)
-        : installScripts).ToList();
-      lines.RemoveWhere(i => i.Type == InstallType.DependencyCheck);
+        var lines = _sorter.SortByDependencies(installScripts, metadata)
+          .Where(i => i.Type != InstallType.DependencyCheck)
+          .ToList();
 
-      var script = new InstallScript()
-      {
-        Created = DateTime.Now,
-        Creator = Environment.UserName,
-        Title = "MergeScript",
-        Lines = lines
-      };
+        var deleteLines = _sorter.SortByDependencies(docs
+            .Where(d => d.Document.DocumentElement != null  && d.DeletedScript != null)
+            .Select(d => d.DeletedScript), metadata)
+          .Where(i => i.Type != InstallType.DependencyCheck)
+          .Select(i => docs.FirstOrDefault(d => ReferenceEquals(d.DeletedScript, i)))
+          .Where(d => d != null)
+          .SelectMany(d => XmlUtils.RootItems(d.Document.DocumentElement)
+            .Select(i => InstallItem.FromScript(i, d.Path)))
+          .ToList();
+        deleteLines.Reverse();
+        lines.AddRange(deleteLines);
 
-      lines.InsertRange(0, FillInNullsOnRequiredProperties(allItems, metadata));
+        var script = new InstallScript()
+        {
+          Created = DateTime.Now,
+          Creator = Environment.UserName,
+          Title = "MergeScript",
+          Lines = lines
+        };
 
-      ProgressChanged?.Invoke(this, new ProgressChangedEventArgs("Processing dependencies", 80));
+        lines.InsertRange(0, FillInNullsOnRequiredProperties(allItems, metadata));
 
-      return script;
+        ProgressChanged?.Invoke(this, new ProgressChangedEventArgs("Processing dependencies", 80));
+
+        return script;
+      }
     }
 
     private IEnumerable<InstallItem> FillInNullsOnRequiredProperties(XmlElement[] allItems, PackageMetadataProvider metadata)
@@ -134,6 +148,25 @@ namespace InnovatorAdmin
         var parent = node.Parent();
         node.Detach();
         CleanUp(parent);
+      }
+    }
+
+    private class MergeScript
+    {
+      public XmlDocument Document { get; } = new XmlDocument();
+      public string Path { get; }
+      public InstallItem DeletedScript { get; }
+
+      public MergeScript(string path, XElement deletedScript)
+      {
+        Path = path;
+        if (deletedScript != null)
+        {
+          var doc = new XmlDocument();
+          using (var writer = doc.CreateNavigator().AppendChild())
+            deletedScript.WriteTo(writer);
+          DeletedScript = InstallItem.FromScript(XmlUtils.RootItems(doc.DocumentElement).First(), path);
+        }
       }
     }
   }

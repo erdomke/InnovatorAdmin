@@ -28,11 +28,7 @@ namespace InnovatorAdmin.Cmd
       };
 
       var enricher = new DefaultEnricher()
-        .WithExceptionEnricher<ServerException>((attr, ex) =>
-        {
-          attr["fault"] = ex.Fault.ToAml();
-          attr["query"] = ex.Query;
-        });
+        .WithExceptionEnricher<ServerException>(SharedUtils.EnrichServerException);
       var consoleWriter = new SslogWriter(Console.Error)
       {
         UseConsoleColors = true
@@ -73,7 +69,16 @@ namespace InnovatorAdmin.Cmd
         cmdArgs
           .WithNotParsed(errors => task = TryParseArasFormat((NotParsed<object>)cmdArgs, args, logger))
           .WithParsed(options => task = Execute((ICommand)options, logger));
-        return await task;
+
+        try
+        {
+          return await task;
+        }
+        catch (Exception ex)
+        {
+          logger.LogError(ex, null);
+          return -1;
+        }
       }
     }
 

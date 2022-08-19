@@ -939,7 +939,7 @@ namespace InnovatorAdmin.Tests
  </Item>
 </AML>");
       var scripts = new Dictionary<string, XDocument>(StringComparer.OrdinalIgnoreCase);
-      baseDir.WriteAmlMergeScripts(compareDir, (path, progress) =>
+      baseDir.WriteAmlMergeScripts(compareDir, (path, progress, deletedScript) =>
       {
         var root = new XDocument();
         scripts[path] = root;
@@ -950,6 +950,54 @@ namespace InnovatorAdmin.Tests
       Assert.AreEqual(@"<AML>
   <Item type=""User"" id=""30B991F927274FA3829655F50C99472E"" _keyed_name=""Innovator Admin"" action=""edit"">
     <first_name>Software</first_name>
+  </Item>
+</AML>", scripts.Values.Single().ToString());
+    }
+
+    [TestMethod]
+    public void HandleRelationshipDelete()
+    {
+      var baseDir = new MockDiffDirectory();
+      baseDir.Add("PresentationConfiguration/Activity Assignment Presentation Configuration.xml", @"<AML>
+  <Item type=""PresentationConfiguration"" id=""E1EED4609F744DE8BBE33DD6C99E2393"" _keyed_name=""Activity Assignment Presentation Configuration"" action=""merge"">
+    <color>#ffcc80</color>
+    <name>Activity Assignment Presentation Configuration</name>
+    <Relationships>
+      <Item type=""PresentationCommandBarSection"" id=""6B44F2C4839DFBD7BDEE61C462534D75"" action=""merge"">
+        <related_id type=""CommandBarSection"">6B44F2C4839DFBD7618120D9625E4BB8</related_id>
+        <role type=""Identity"">
+          <Item type=""Identity"" action=""get"" select=""id"">
+            <name>World</name>
+          </Item>
+        </role>
+        <sort_order>256</sort_order>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>");
+      var compareDir = new MockDiffDirectory();
+      compareDir.Add("PresentationConfiguration/Activity Assignment Presentation Configuration.xml", @"<AML>
+  <Item type=""PresentationConfiguration"" id=""E1EED4609F744DE8BBE33DD6C99E2393"" _keyed_name=""Activity Assignment Presentation Configuration"" action=""merge"">
+    <color>#ffcc80</color>
+    <name>Activity Assignment Presentation Configuration</name>
+  </Item>
+</AML>");
+
+      var scripts = new Dictionary<string, XDocument>(StringComparer.OrdinalIgnoreCase);
+      baseDir.WriteAmlMergeScripts(compareDir, (path, progress, deletedScript) =>
+      {
+        var root = new XDocument();
+        scripts[path] = root;
+        return root.CreateWriter();
+      });
+
+      Assert.AreEqual(1, scripts.Count);
+      Assert.AreEqual("PresentationConfiguration/Activity Assignment Presentation Configuration.xml", scripts.Keys.Single().ToString());
+      Assert.AreEqual(@"<AML>
+  <Item type=""PresentationConfiguration"" id=""E1EED4609F744DE8BBE33DD6C99E2393"" _keyed_name=""Activity Assignment Presentation Configuration"" action=""edit"">
+    <Relationships>
+      <Item type=""PresentationCommandBarSection"" id=""6B44F2C4839DFBD7BDEE61C462534D75"" action=""delete"" />
+    </Relationships>
   </Item>
 </AML>", scripts.Values.Single().ToString());
     }
@@ -1054,7 +1102,7 @@ namespace InnovatorAdmin.Tests
   </Item>
 </AML>");
       var scripts = new Dictionary<string, XDocument>(StringComparer.OrdinalIgnoreCase);
-      baseDir.WriteAmlMergeScripts(compareDir, (path, progress) =>
+      baseDir.WriteAmlMergeScripts(compareDir, (path, progress, deletedScript) =>
       {
         var root = new XDocument();
         scripts[path] = root;
@@ -1193,7 +1241,7 @@ namespace InnovatorAdmin.Tests
   </Item>
 </AML>");
       var scripts = new Dictionary<string, XDocument>(StringComparer.OrdinalIgnoreCase);
-      baseDir.WriteAmlMergeScripts(compareDir, (path, progress) =>
+      baseDir.WriteAmlMergeScripts(compareDir, (path, progress, deletedScript) =>
       {
         var root = new XDocument();
         scripts[path] = root;

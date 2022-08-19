@@ -5,9 +5,8 @@
 		<SelfContained>true</SelfContained>
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 		<Authors>erdomke</Authors>
-		<!--
 		<PublishSingleFile>true</PublishSingleFile>
-		-->
+		<Version>22.231.27817</Version>
 	</PropertyGroup>
 
 	<ItemGroup>

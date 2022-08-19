@@ -114,24 +114,12 @@ namespace InnovatorAdmin.Controls
 
     private void GetPatchPackage(InstallScript start, InstallScript dest)
     {
-      var docs = new List<Tuple<XmlDocument, string>>();
+      var processor = new MergeProcessor();
       ProgressDialog.Display(this, d =>
       {
-        start.WriteAmlMergeScripts(dest, (path, prog) =>
-        {
-          d.SetProgress(prog);
-          var doc = new XmlDocument();
-          docs.Add(Tuple.Create(doc, path));
-          return new XmlNodeWriter(doc);
-        });
+        processor.ProgressChanged += (sender, e) => d.SetProgress(e.Progress);
+        _wizard.InstallScript = processor.Merge(start, dest);
       });
-
-      var items = docs
-        .Where(d => d.Item1.DocumentElement != null)
-        .SelectMany(d => XmlUtils.RootItems(d.Item1.DocumentElement)
-          .Select(i => InstallItem.FromScript(i, d.Item2)))
-        .ToArray();
-      _wizard.InstallScript = new InstallScript() { Lines = items };
       _wizard.GoToStep(new ExportOptions());
     }
   }
