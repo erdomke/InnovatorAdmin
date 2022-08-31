@@ -29,7 +29,7 @@ namespace InnovatorAdmin.Cmd
 
       var enricher = new DefaultEnricher()
         .WithExceptionEnricher<ServerException>(SharedUtils.EnrichServerException);
-      var consoleWriter = new SslogWriter(Console.Error)
+      var consoleWriter = new SslogWriter(Console.Out)
       {
         UseConsoleColors = true
       };
