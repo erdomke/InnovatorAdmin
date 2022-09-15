@@ -135,6 +135,7 @@ namespace InnovatorAdmin
         var folderPath = pkg.Attribute("path");
         if (folderPath == ".\\")
           folderPath = Utils.CleanFileName(pkg.Attribute("name", "")).Replace('.', '\\');
+        folderPath = folderPath.Replace('\\', '/');
         foreach (var file in package.Files()
           .Where(f => f.Path.StartsWith(folderPath + "/", StringComparison.OrdinalIgnoreCase)
             && f.Path.EndsWith(".xml", StringComparison.OrdinalIgnoreCase)))

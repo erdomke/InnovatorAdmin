@@ -40,6 +40,32 @@ namespace InnovatorAdmin.Documentation
             }, metadata));
           }
 
+          if (metadata.Lists.Any())
+          {
+            writer.WriteLine();
+            writer.WriteLine("# Lists");
+            foreach (var list in metadata.Lists.OrderBy(l => l.Name))
+            {
+              writer.WriteLine();
+              writer.WriteLine($"## {MarkdownVisitor.Escape(list.Name)} ({MarkdownVisitor.Escape(list.Label)})");
+              writer.WriteLine();
+              foreach (var value in list.Values.OrderBy(l => l.Filter ?? "").ThenBy(l => l.Value))
+              {
+                writer.Write("- **");
+                MarkdownVisitor.Escape(value.Value, writer);
+                writer.Write("** (");
+                MarkdownVisitor.Escape(value.Label, writer);
+                writer.Write(")");
+                if (!string.IsNullOrEmpty(value.Filter))
+                {
+                  writer.Write(": Filter = ");
+                  MarkdownVisitor.Escape(value.Filter, writer);
+                }
+                writer.WriteLine();
+              }
+            }
+          }
+
           writer.WriteLine();
           foreach (var group in metadata.Diagrams.GroupBy(d => d.Type))
           {

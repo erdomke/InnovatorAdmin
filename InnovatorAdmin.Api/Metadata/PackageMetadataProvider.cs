@@ -25,6 +25,8 @@ namespace InnovatorAdmin
     /// </summary>
     public IEnumerable<ItemType> ItemTypes => _itemTypesByName.Values;
 
+    public IEnumerable<DatabaseList> Lists => _listsById.Values;
+
     public IEnumerable<ItemReference> SystemIdentities => _systemIdentities;
 
     public IEnumerable<Method> Methods => _methods;

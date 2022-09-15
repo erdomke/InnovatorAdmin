@@ -28,13 +28,14 @@ namespace InnovatorAdmin.Documentation
       {
         _writer.Write(new string('#', _headerLevel));
         _writer.Write(' ');
-        _writer.WriteLine(document.Title);
+        Escape(document.Title, _writer);
+        _writer.WriteLine();
       }
       if (!string.IsNullOrEmpty(document.SubTitle))
       {
         _writer.WriteLine();
         _writer.Write('*');
-        _writer.Write(document.SubTitle);
+        Escape(document.SubTitle, _writer);
         _writer.WriteLine('*');
       }
       _state = WriteState.NewLine;
@@ -85,7 +86,7 @@ namespace InnovatorAdmin.Documentation
     public object Visit(DocLink docLink)
     {
       _writer.Write('[');
-      _writer.Write(docLink.Name);
+      Escape(docLink.Name, _writer);
       _writer.Write(']');
       _writer.Write("(#");
       _writer.Write(docLink.Type);
@@ -210,7 +211,8 @@ namespace InnovatorAdmin.Documentation
       StartNewParagraph();
       _writer.Write(new string('#', _headerLevel));
       _writer.Write(' ');
-      _writer.WriteLine(section.Header);
+      Escape(section.Header, _writer);
+      _writer.WriteLine();
       _state = WriteState.NewLine;
       try
       {
@@ -237,7 +239,7 @@ namespace InnovatorAdmin.Documentation
 
       if (string.IsNullOrEmpty(prefix) || string.IsNullOrWhiteSpace(run.Text))
       {
-        _writer.Write(run.Text);
+        Escape(run.Text, _writer);
       }
       else
       {
@@ -251,7 +253,10 @@ namespace InnovatorAdmin.Documentation
         if (firstNonWhitespace > 0)
           _writer.Write(run.Text.Substring(0, firstNonWhitespace));
         _writer.Write(prefix);
-        _writer.Write(run.Text.Substring(firstNonWhitespace, lastNonWhitespace - firstNonWhitespace + 1));
+        if (prefix == "`")
+          _writer.Write(run.Text.Substring(firstNonWhitespace, lastNonWhitespace - firstNonWhitespace + 1));
+        else
+          Escape(run.Text.Substring(firstNonWhitespace, lastNonWhitespace - firstNonWhitespace + 1), _writer);
         _writer.Write(prefix);
         if (lastNonWhitespace < run.Text.Length - 1)
           _writer.Write(run.Text.Substring(lastNonWhitespace + 1));
@@ -275,6 +280,40 @@ namespace InnovatorAdmin.Documentation
       }
       if (_indent > 0)
         _writer.Write(new string(' ', _indent));
+    }
+
+
+    public static string Escape(string value)
+    {
+      using (var writer = new StringWriter())
+      {
+        Escape(value, writer);
+        return writer.ToString();
+      }
+    }
+
+    public static void Escape(string value, TextWriter writer)
+    {
+      if (value == null)
+        return;
+
+      foreach (var ch in value)
+      {
+        switch (ch)
+        {
+          case '\\':
+          case '`':
+          case '*':
+          case '_':
+          case '[':
+          case ']':
+          case '|':
+          case '#':
+            writer.Write('\\');
+            break;
+        }
+        writer.Write(ch);
+      }
     }
   }
 }
