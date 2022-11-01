@@ -467,7 +467,8 @@ namespace InnovatorAdmin
           break;
       }
       var typeOrder = DefaultInstallOrder(itemRef.Type);
-      if (FirstOfGroup?.Contains(itemRef.Unique ?? "") == true)
+      if (FirstOfGroup?.Contains(itemRef.Unique ?? "") == true
+        || string.Equals(itemRef.KeyedName, itemRef.Type, StringComparison.OrdinalIgnoreCase))
         return typeOrder - 1;
       return typeOrder;
     }
@@ -525,6 +526,9 @@ namespace InnovatorAdmin
         case "dac_DomainDefinition": return 470;
         case InstallItem.ScriptType: return 700;
       }
+
+      if (type.EndsWith("type", StringComparison.OrdinalIgnoreCase))
+        return 9000;
       return 9999;
     }
 
