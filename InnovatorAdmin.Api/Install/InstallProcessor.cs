@@ -155,6 +155,16 @@ namespace InnovatorAdmin
                 newQuery.SetAttribute("where", string.Format("[{0}].[config_id] = '{1}'", query.Attribute("type", "").Replace(' ', '_'), configId));
               }
 
+              var relationshipsElement = newQuery.Elem("Relationships");
+              foreach (var relType in query.ElementsByXPath("Relationships/Item")
+                .Select(e => e.Attribute("type"))
+                .Distinct(StringComparer.OrdinalIgnoreCase))
+              {
+                relationshipsElement.Elem("Item")
+                  .Attr("type", relType)
+                  .Attr("action", "get");
+              }
+
               // If the item exists, get the id for use in the relationships
               // If the item doesn't exist, make sure the id = config_id for the add
               items = _conn.Apply(newQuery.OuterXml).Items();
@@ -165,47 +175,14 @@ namespace InnovatorAdmin
               newQuery.RemoveAttribute(XmlFlags.Attr_ConfigId);
               query = newQuery;
 
-              string relatedId;
-              string whereClause;
-              // Check relationships and match based on source_id and related_id where necessary
-              var rels = query.ElementsByXPath("Relationships/Item[related_id]").ToArray();
-              foreach (var rel in rels)
+              foreach (var group in query.ElementsByXPath("Relationships/Item")
+                  .GroupBy(e => e.Attribute("type", ""), StringComparer.OrdinalIgnoreCase))
               {
-                if (rel.Element("related_id").Element("Item") == null)
-                {
-                  relatedId = rel.InnerText;
-                }
-                else if (rel.Element("related_id").Element("Item").Attribute("action") == "get")
-                {
-                  var relatedQuery = rel.Element("related_id").Element("Item");
-                  relatedId = _conn.Apply(relatedQuery).AssertItem().Id();
-                }
-                else
-                {
-                  relatedId = rel.Element("related_id").Element("Item").Attribute("id");
-                }
-                whereClause = string.Format("[{0}].[source_id]='{1}' and [{0}].[related_id]='{2}'"
-                  , rel.Attribute("type", "").Replace(' ', '_'), sourceId, relatedId);
-
-                if (!string.IsNullOrEmpty(relatedId))
-                {
-                  newQuery = rel.OwnerDocument.CreateElement("Item");
-                  newQuery.SetAttribute("type", rel.Attribute("type"));
-                  newQuery.SetAttribute("where", whereClause);
-                  newQuery.SetAttribute("action", "get");
-
-                  items = _conn.Apply(newQuery.OuterXml).Items();
-                  rel.RemoveAttribute("id");
-                  if (items.Any())
-                  {
-                    rel.SetAttribute("where", whereClause);
-                    rel.SetAttribute("action", "edit");
-                  }
-                  else
-                  {
-                    rel.SetAttribute("action", "add");
-                  }
-                }
+                MergeRelationshipsOnVersionableParent(sourceId, group.Key
+                  , items.FirstOrDefault()?.Relationships()
+                    .Where(r => string.Equals(r.TypeName(), group.Key, StringComparison.OrdinalIgnoreCase))
+                    .ToList()
+                  , group.ToList());
               }
             }
 
@@ -291,6 +268,77 @@ namespace InnovatorAdmin
       }
     }
 
+    private string GetPropertyValue(XmlElement rel, string property)
+    {
+      if (rel.Element(property) == null)
+      {
+        return null;
+      }
+      else if (rel.Element(property).Element("Item") == null)
+      {
+        return rel.Element(property).InnerText;
+      }
+      else if (rel.Element(property).Element("Item").Attribute("action") == "get")
+      {
+        var relatedQuery = rel.Element(property).Element("Item");
+        return _conn.Apply(relatedQuery).AssertItem().Id();
+      }
+      else
+      {
+        return rel.Element(property).Element("Item").Attribute("id");
+      }
+    }
+
+    private readonly string[] _preferredRelationshipMatch = new[] { "related_id", "item_number", "name", "label", "path" };
+
+    private void MergeRelationshipsOnVersionableParent(string sourceId, string relType, IReadOnlyList<IReadOnlyItem> existing, IReadOnlyList<XmlElement> incoming)
+    {
+      var propToMatch = default(string);
+      if (existing?.Count > 0)
+      {
+        propToMatch = _preferredRelationshipMatch
+          .FirstOrDefault(p =>
+            existing
+              .Where(i => i.Property(p).HasValue())
+              .Select(i => i.Property(p).Value)
+              .Distinct(StringComparer.OrdinalIgnoreCase)
+              .Count() == existing.Count
+            && incoming
+              .Where(e => e.Element(p) != null)
+              .Select(e => GetPropertyValue(e, p))
+              .Distinct(StringComparer.OrdinalIgnoreCase)
+              .Count() == incoming.Count);
+      }
+
+      if (propToMatch == null)
+      {
+        foreach (var rel in incoming)
+        {
+          rel.RemoveAttribute("id");
+          rel.SetAttribute("action", "add");
+        }
+      }
+      else
+      {
+        var xref = existing.ToDictionary(i => i.Property(propToMatch).Value, StringComparer.OrdinalIgnoreCase);
+        var relTableName = relType.Replace(' ', '_');
+        foreach (var rel in incoming)
+        {
+          rel.RemoveAttribute("id");
+          var propValue = GetPropertyValue(rel, propToMatch);
+          if (xref.TryGetValue(propValue, out var existingRel))
+          {
+            rel.SetAttribute("where", $"[{relTableName}].[source_id]='{sourceId}' and [{relTableName}].[{propToMatch}]='{propValue}'");
+            rel.SetAttribute("action", "edit");
+          }
+          else
+          {
+            rel.SetAttribute("action", "add");
+          }
+        }
+      }
+    }
+
     private void HandleErrorDefault(RecoverableErrorEventArgs args, XmlNode query)
     {
       _logger?.LogError(args.Exception, null);
@@ -311,10 +359,6 @@ namespace InnovatorAdmin
         args.RecoveryOption = RecoveryOption.Retry;
         isAuto = true;
       }
-      //else if (args.Exception.FaultCode == "SOAP-ENV:Server.PropertiesAreNotUniqueException")
-      //{
-      //  args.Exception.Fault.Element("detail").Element("af:item");
-      //}
 
       if (isAuto)
       {

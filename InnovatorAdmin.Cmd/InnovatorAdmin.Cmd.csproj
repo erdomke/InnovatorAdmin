@@ -6,7 +6,7 @@
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 		<Authors>erdomke</Authors>
 		<!--<PublishSingleFile>true</PublishSingleFile>-->
-		<Version>22.305.25663</Version>
+		<Version>22.311.30409</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
