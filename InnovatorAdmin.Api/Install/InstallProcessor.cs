@@ -157,6 +157,8 @@ namespace InnovatorAdmin
 
               var relationshipsElement = newQuery.Elem("Relationships");
               foreach (var relType in query.ElementsByXPath("Relationships/Item")
+                .Where(i => (string.IsNullOrEmpty(i.GetAttribute("where")))
+                  || string.IsNullOrEmpty(i.GetAttribute("action")))
                 .Select(e => e.Attribute("type"))
                 .Distinct(StringComparer.OrdinalIgnoreCase))
               {
@@ -176,7 +178,9 @@ namespace InnovatorAdmin
               query = newQuery;
 
               foreach (var group in query.ElementsByXPath("Relationships/Item")
-                  .GroupBy(e => e.Attribute("type", ""), StringComparer.OrdinalIgnoreCase))
+                .Where(i => (string.IsNullOrEmpty(i.GetAttribute("where")))
+                  || string.IsNullOrEmpty(i.GetAttribute("action")))
+                .GroupBy(e => e.Attribute("type", ""), StringComparer.OrdinalIgnoreCase))
               {
                 MergeRelationshipsOnVersionableParent(sourceId, group.Key
                   , items.FirstOrDefault()?.Relationships()
