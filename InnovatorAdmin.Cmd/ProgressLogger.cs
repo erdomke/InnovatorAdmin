@@ -27,7 +27,7 @@ namespace InnovatorAdmin.Cmd
       {
         if (string.IsNullOrEmpty(message))
           message = "Processing";
-        _logger.LogInformation(message + " @ {progress}%", value);
+        _logger.LogInformation(message + $" @ {value}%");
         _lastProgress = value;
         _lastProgressTime = DateTime.UtcNow;
       }
