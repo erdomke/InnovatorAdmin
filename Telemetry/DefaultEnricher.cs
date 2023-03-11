@@ -60,7 +60,7 @@ namespace Innovator.Telemetry
       if (exception.StackTrace != null)
         attributes["exception.stacktrace"] = exception.StackTrace.ToString();
 
-      foreach (var key in exception.Data)
+      foreach (var key in exception.Data.Keys)
         attributes[key.ToString()] = exception.Data[key];
 
       if (_exceptionEnrichers.TryGetValue(exception.GetType(), out var enricher))

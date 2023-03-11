@@ -50,7 +50,7 @@ namespace InnovatorAdmin
         if (!string.IsNullOrWhiteSpace(this.Path))
           return this.Path;
         var folder = Type == InstallType.Script ? "_Scripts" : Reference.Type;
-        return folder + "\\" + Utils.CleanFileName((Reference.KeyedName ?? "") + "_" + Reference.Unique) + ".xml";
+        return folder + "\\" + Utils.CleanFileName((Reference.KeyedName ?? "").Trim() + "_" + Reference.Unique) + ".xml";
       }
     }
 
@@ -298,9 +298,9 @@ namespace InnovatorAdmin
     public static string FilePath(this InstallItem line, HashSet<string> existingPaths, string extension = ".xml")
     {
       var folder = line.Type == InstallType.Script ? "_Scripts" : line.Reference.Type;
-      var newPath = folder + "\\" + Utils.CleanFileName(line.Reference.KeyedName ?? line.Reference.Unique) + extension;
+      var newPath = folder + "\\" + Utils.CleanFileName(line.Reference.KeyedName ?? line.Reference.Unique).Trim() + extension;
       if (existingPaths?.Contains(newPath) == true)
-        newPath = folder + "\\" + Utils.CleanFileName((line.Reference.KeyedName ?? "") + "_" + line.Reference.Unique) + extension;
+        newPath = folder + "\\" + Utils.CleanFileName((line.Reference.KeyedName ?? "").Trim() + "_" + line.Reference.Unique) + extension;
       return newPath;
     }
   }

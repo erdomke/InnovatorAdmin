@@ -465,91 +465,109 @@ namespace InnovatorAdmin
 
     public static void WriteAml(this IPackageFile file, IPackage package, XmlWriter writer)
     {
-      if (file.Path.EndsWith(".xslt", StringComparison.OrdinalIgnoreCase))
+      try
       {
-        string xsltContent;
-        using (var stream = file.Open())
-        using (var reader = new StreamReader(stream))
+        if (file.Path.EndsWith(".xslt", StringComparison.OrdinalIgnoreCase))
         {
-          xsltContent = reader.ReadToEnd();
-        }
-        string xml = null;
-        if (package.TryAccessFile(file.Path + ".xml", false, out var dataFile))
-        {
-          using (var stream = dataFile.Open())
+          string xsltContent;
+          using (var stream = file.Open())
           using (var reader = new StreamReader(stream))
           {
-            xml = reader.ReadToEnd();
+            xsltContent = reader.ReadToEnd();
           }
-        }
-
-        var metaStart = xsltContent.IndexOf(_reportStart);
-        var metaEnd = xsltContent.IndexOf(_reportEnd);
-
-        if (metaStart >= 0 && metaEnd >= 0)
-        {
-          var stack = new Stack<bool>();
-          using (var strReader = new StringReader(xsltContent.Substring(metaStart + _reportStart.Length, metaEnd - metaStart - _reportStart.Length).Trim()))
-          using (var reader = XmlReader.Create(strReader, new XmlReaderSettings()
+          string xml = null;
+          if (package.TryAccessFile(file.Path + ".xml", false, out var dataFile))
           {
-            IgnoreWhitespace = true,
-          }))
-          {
-            while (reader.Read())
+            using (var stream = dataFile.Open())
+            using (var reader = new StreamReader(stream))
             {
-              switch (reader.NodeType)
+              xml = reader.ReadToEnd();
+            }
+          }
+
+          var metaStart = xsltContent.IndexOf(_reportStart);
+          var metaEnd = xsltContent.IndexOf(_reportEnd);
+
+          if (metaStart >= 0 && metaEnd >= 0)
+          {
+            var stack = new Stack<bool>();
+            using (var strReader = new StringReader(xsltContent.Substring(metaStart + _reportStart.Length, metaEnd - metaStart - _reportStart.Length).Trim()))
+            using (var reader = XmlReader.Create(strReader, new XmlReaderSettings()
+            {
+              IgnoreWhitespace = true,
+            }))
+            {
+              while (reader.Read())
               {
-                case XmlNodeType.Element:
-                  writer.WriteStartElement(reader.Prefix, reader.LocalName, reader.NamespaceURI);
-                  writer.WriteAttributes(reader, false);
-                  if (reader.IsEmptyElement)
-                    writer.WriteEndElement();
-                  else if (reader.LocalName == "Item" && reader.GetAttribute("type") == "Report")
-                    stack.Push(true);
-                  else
-                    stack.Push(false);
-                  break;
-                case XmlNodeType.Text:
-                  writer.WriteString(reader.Value);
-                  break;
-                case XmlNodeType.CDATA:
-                  writer.WriteCData(reader.Value);
-                  break;
-                case XmlNodeType.EntityReference:
-                  writer.WriteEntityRef(reader.Name);
-                  break;
-                case XmlNodeType.ProcessingInstruction:
-                case XmlNodeType.XmlDeclaration:
-                  writer.WriteProcessingInstruction(reader.Name, reader.Value);
-                  break;
-                case XmlNodeType.Comment:
-                  writer.WriteComment(reader.Value);
-                  break;
-                case XmlNodeType.DocumentType:
-                  writer.WriteDocType(reader.Name, reader.GetAttribute("PUBLIC"), reader.GetAttribute("SYSTEM"), reader.Value);
-                  break;
-                //case XmlNodeType.Whitespace:
-                case XmlNodeType.SignificantWhitespace:
-                  writer.WriteWhitespace(reader.Value);
-                  break;
-                case XmlNodeType.EndElement:
-                  if (stack.Pop())
-                  {
-                    var xslt = xsltContent.Substring(metaEnd + _reportEnd.Length).Trim();
-                    if (!string.IsNullOrEmpty(xml))
-                      xslt += Environment.NewLine + Environment.NewLine + _reportDataStart + Environment.NewLine + xml + Environment.NewLine + _reportDataEnd;
-                    writer.WriteElementString("xsl_stylesheet", xslt);
-                  }
-                  writer.WriteFullEndElement();
-                  break;
+                switch (reader.NodeType)
+                {
+                  case XmlNodeType.Element:
+                    writer.WriteStartElement(reader.Prefix, reader.LocalName, reader.NamespaceURI);
+                    writer.WriteAttributes(reader, false);
+                    if (reader.IsEmptyElement)
+                      writer.WriteEndElement();
+                    else if (reader.LocalName == "Item" && reader.GetAttribute("type") == "Report")
+                      stack.Push(true);
+                    else
+                      stack.Push(false);
+                    break;
+                  case XmlNodeType.Text:
+                    writer.WriteString(reader.Value);
+                    break;
+                  case XmlNodeType.CDATA:
+                    writer.WriteCData(reader.Value);
+                    break;
+                  case XmlNodeType.EntityReference:
+                    writer.WriteEntityRef(reader.Name);
+                    break;
+                  case XmlNodeType.ProcessingInstruction:
+                  case XmlNodeType.XmlDeclaration:
+                    writer.WriteProcessingInstruction(reader.Name, reader.Value);
+                    break;
+                  case XmlNodeType.Comment:
+                    writer.WriteComment(reader.Value);
+                    break;
+                  case XmlNodeType.DocumentType:
+                    writer.WriteDocType(reader.Name, reader.GetAttribute("PUBLIC"), reader.GetAttribute("SYSTEM"), reader.Value);
+                    break;
+                  //case XmlNodeType.Whitespace:
+                  case XmlNodeType.SignificantWhitespace:
+                    writer.WriteWhitespace(reader.Value);
+                    break;
+                  case XmlNodeType.EndElement:
+                    if (stack.Pop())
+                    {
+                      var xslt = xsltContent.Substring(metaEnd + _reportEnd.Length).Trim();
+                      if (!string.IsNullOrEmpty(xml))
+                        xslt += Environment.NewLine + Environment.NewLine + _reportDataStart + Environment.NewLine + xml + Environment.NewLine + _reportDataEnd;
+                      writer.WriteElementString("xsl_stylesheet", xslt);
+                    }
+                    writer.WriteFullEndElement();
+                    break;
+                }
               }
             }
           }
+          else if (xsltContent.StartsWith("<AML>"))
+          {
+            using (var strReader = new StringReader(xsltContent))
+            using (var reader = XmlReader.Create(strReader, new XmlReaderSettings()
+            {
+              IgnoreWhitespace = true,
+            }))
+            {
+              writer.WriteNode(reader, false);
+            }
+          }
+          else
+          {
+            throw new ArgumentException("Invalid xslt file");
+          }
         }
-        else if (xsltContent.StartsWith("<AML>"))
+        else
         {
-          using (var strReader = new StringReader(xsltContent))
-          using (var reader = XmlReader.Create(strReader, new XmlReaderSettings()
+          using (var stream = file.Open())
+          using (var reader = XmlReader.Create(stream, new XmlReaderSettings()
           {
             IgnoreWhitespace = true,
           }))
@@ -557,21 +575,12 @@ namespace InnovatorAdmin
             writer.WriteNode(reader, false);
           }
         }
-        else
-        {
-          throw new ArgumentException("Invalid xslt file");
-        }
       }
-      else
+      catch (Exception ex)
       {
-        using (var stream = file.Open())
-        using (var reader = XmlReader.Create(stream, new XmlReaderSettings()
-        {
-          IgnoreWhitespace = true,
-        }))
-        {
-          writer.WriteNode(reader, false);
-        }
+        var newEx = new InvalidOperationException($"Error rendering the script at {file.Path}: {ex.Message}", ex);
+        newEx.Data["path"] = file.Path;
+        throw newEx;
       }
     }
 

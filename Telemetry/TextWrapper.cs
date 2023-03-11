@@ -8,7 +8,7 @@ namespace Innovator.Telemetry
 {
   public class TextWrapper : TextWriter
   {
-    private Stack<int> _indent = new Stack<int>();
+    private Stack<string> _indent = new Stack<string>();
     private int _position;
     private int _spaces;
     private TextWriter _writer;
@@ -16,7 +16,7 @@ namespace Innovator.Telemetry
     private char _onlyAllowBreakAfter = '\0';
 
     public override Encoding Encoding => _writer.Encoding;
-    public int Indent => _indent.Sum();
+    public int Indent => _indent.Sum(i => i.Length);
     public int MaxWidth { get; set; } = int.MaxValue;
     /// <summary>
     /// Whether to allow breaks in the middle of a word
@@ -40,9 +40,14 @@ namespace Innovator.Telemetry
       _writer = writer;
     }
 
-    public void IncreaseIndent(int spaces)
+    public void IncreaseIndent(int indent)
     {
-      _indent.Push(spaces);
+      _indent.Push(new string(' ', indent));
+    }
+
+    public void IncreaseIndent(string value)
+    {
+      _indent.Push(value);
     }
 
     public void DecreaseIndent()
@@ -79,7 +84,6 @@ namespace Innovator.Telemetry
     public override void Write(char[] buffer, int index, int count)
     {
       var start = index;
-      var lineStart = true;
       var lineIndent = 0;
 
       for (var i = index; i < count; i++)
@@ -88,7 +92,7 @@ namespace Innovator.Telemetry
         {
           if (!IsBreakingWhitespace(buffer[start]))
             WriteWord(buffer, start, i - start);
-          
+
           WriteLine();
 
           if (buffer[i] == '\r'
@@ -96,7 +100,6 @@ namespace Innovator.Telemetry
               && buffer[i + 1] == '\n')
             i++;
           start = i + 1;
-          lineStart = true;
           if (lineIndent > 0)
           {
             _indent.Pop();
@@ -115,10 +118,10 @@ namespace Innovator.Telemetry
         {
           if (IsBreakingWhitespace(buffer[start]))
           {
-            if (lineStart)
+            if (_position == 0)
             {
               lineIndent = i - start;
-              _indent.Push(lineIndent);
+              _indent.Push(new string(' ', lineIndent));
             }
             else
             {
@@ -126,13 +129,15 @@ namespace Innovator.Telemetry
             }
             start = i;
           }
-          lineStart = false;
         }
       }
 
-      if (start < count && !IsBreakingWhitespace(buffer[start]))
+      if (start < count)
       {
-        WriteWord(buffer, start, count - start);
+        if (IsBreakingWhitespace(buffer[start]))
+          WriteSpace(count - start);
+        else
+          WriteWord(buffer, start, count - start);
       }
 
       if (lineIndent > 0)
@@ -244,11 +249,14 @@ namespace Innovator.Telemetry
 
     private void WriteIndent()
     {
-      var indent = Math.Min(Indent, Math.Max(MaxWidth, 1) - 1);
-      while (_position < indent)
+      if (_indent.Count > 0)
       {
-        _writer.Write(' ');
-        _position++;
+        var indentStr = string.Join("", _indent.Reverse());
+        var maxLength = Math.Max(MaxWidth, 1) - 1;
+        if (maxLength < indentStr.Length)
+          indentStr = indentStr.Substring(0, maxLength);
+        _writer.Write(indentStr.Substring(_position));
+        _position = indentStr.Length;
       }
     }
 

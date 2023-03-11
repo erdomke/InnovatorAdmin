@@ -24,14 +24,14 @@ namespace InnovatorAdmin
           files.Add(new GitDiffFile(blob) { Path = relPath });
         }
       });
-      _files = files.ToDictionary(f => f.Path);
+      _files = files.ToDictionary(f => f.Path.Trim());
     }
 
     public bool TryAccessFile(string path, bool create, out IPackageFile file)
     {
       if (create)
         throw new NotSupportedException();
-      return _files.TryGetValue(path, out file);
+      return _files.TryGetValue(path.Trim(), out file);
     }
 
     public IEnumerable<IPackageFile> Files()

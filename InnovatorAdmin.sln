@@ -24,7 +24,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InnovatorAdmin.Plugins", "I
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InnovatorAdmin.Cmd", "InnovatorAdmin.Cmd\InnovatorAdmin.Cmd.csproj", "{9BA847F3-7C4F-4DDF-BE16-E40AFD369128}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Innovator.Telemetry", "Telemetry\Innovator.Telemetry.csproj", "{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Innovator.Telemetry", "Telemetry\Innovator.Telemetry.csproj", "{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConfigurationTest", "ConfigurationTest\ConfigurationTest.csproj", "{6B023DE2-C71D-41B7-97DE-49C016405F73}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -200,6 +202,30 @@ Global
 		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Release|WithNRefactory.Build.0 = Release|Any CPU
 		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Release|x86.ActiveCfg = Release|Any CPU
 		{B276EC56-C36A-4A9D-BD87-B84B3347C8CF}.Release|x86.Build.0 = Release|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Debug|Net35.ActiveCfg = Debug|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Debug|Net35.Build.0 = Debug|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Debug|Net40.ActiveCfg = Debug|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Debug|Net40.Build.0 = Debug|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Debug|WithNRefactory.ActiveCfg = Debug|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Debug|WithNRefactory.Build.0 = Debug|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Debug|x86.Build.0 = Debug|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Release|Net35.ActiveCfg = Release|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Release|Net35.Build.0 = Release|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Release|Net40.ActiveCfg = Release|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Release|Net40.Build.0 = Release|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Release|WithNRefactory.ActiveCfg = Release|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Release|WithNRefactory.Build.0 = Release|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Release|x86.ActiveCfg = Release|Any CPU
+		{6B023DE2-C71D-41B7-97DE-49C016405F73}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

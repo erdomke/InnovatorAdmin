@@ -1,5 +1,6 @@
 ﻿using Innovator.Telemetry;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 using System.IO;
 
 namespace InnovatorAdmin.Tests
@@ -17,6 +18,40 @@ namespace InnovatorAdmin.Tests
       wrapper.IncreaseIndent(indent);
       wrapper.Write(input);
       Assert.AreEqual(expected, wrapper.ToString());
+    }
+
+    private void JoinList(string separator, IEnumerable<string> items, int maxWidth)
+    {
+      var writer = new StringWriter();
+      var wrapper = new TextWrapper(writer)
+      {
+        MaxWidth = maxWidth
+      };
+
+      var first = true;
+      foreach (var item in items)
+      {
+        if (first)
+          first = false;
+        else
+          wrapper.Write(separator);
+
+        wrapper.Write(item);
+      }
+
+      Assert.AreEqual(string.Join(separator, items), wrapper.ToString());
+    }
+
+    [TestMethod]
+    public void WriteInLoop1()
+    {
+      JoinList(", ", new[] { "item", "thing", "another" }, 80);
+    }
+
+    [TestMethod]
+    public void WriteInLoop2()
+    {
+      JoinList(" | ", new[] { "item", "thing", "another" }, 80);
     }
 
     [TestMethod]
@@ -93,6 +128,22 @@ t");
 some text
 that needs
 wrapping");
+    }
+
+    [TestMethod]
+    public void SimpleWrappingWithPrefix()
+    {
+      var writer = new StringWriter();
+      var wrapper = new TextWrapper(writer)
+      {
+        MaxWidth = 12
+      };
+      wrapper.IncreaseIndent("# ");
+      wrapper.Write(@"here is some text that needs wrapping");
+      Assert.AreEqual(@"# here is
+# some text
+# that needs
+# wrapping", wrapper.ToString());
     }
 
     [TestMethod]

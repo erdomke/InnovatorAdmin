@@ -37,7 +37,7 @@ namespace InnovatorAdmin
 
     public bool TryAccessFile(string path, bool create, out IPackageFile file)
     {
-      var uri = PackUriHelper.CreatePartUri(new Uri(".\\" + path, UriKind.Relative));
+      var uri = PackUriHelper.CreatePartUri(new Uri(".\\" + path.Trim(), UriKind.Relative));
       if (create)
       {
         if (_package.PartExists(uri))

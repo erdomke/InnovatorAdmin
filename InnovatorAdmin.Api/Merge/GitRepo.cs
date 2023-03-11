@@ -23,7 +23,13 @@ namespace InnovatorAdmin
     {
       var commit = default(Commit);
       if (!string.IsNullOrEmpty(options.Sha))
-        commit = _repo.Commits.Single(c => c.Sha.StartsWith(options.Sha));
+      {
+        commit = _repo.Lookup<Commit>(options.Sha);
+        if (commit == null)
+          commit = _repo.Commits.SingleOrDefault(c => c.Sha.StartsWith(options.Sha));
+        if (commit == null)
+          throw new InvalidOperationException($"Cannot find a commit with a SHA starting with {options.Sha}.");
+      }
       else if (options.BranchNames.Count == 1)
         commit = _repo.Branches[options.BranchNames.First()].Tip;
       else if (options.BranchNames.Count > 1)

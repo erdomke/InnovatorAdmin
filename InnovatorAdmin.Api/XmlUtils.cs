@@ -9,6 +9,8 @@ namespace InnovatorAdmin
 {
   public static class XmlUtils
   {
+    private static object _lock = new object();
+
     public static string RemoveComments(string xml)
     {
       if (string.IsNullOrEmpty(xml)) { return ""; }
@@ -194,7 +196,10 @@ namespace InnovatorAdmin
     {
       try
       {
-        return XPathCache.SelectNodes(xPath, node).OfType<XmlElement>();
+        lock (_lock)
+        {
+          return XPathCache.SelectNodes(xPath, node).OfType<XmlElement>();
+        }
       }
       catch (NullReferenceException)
       {
@@ -204,9 +209,12 @@ namespace InnovatorAdmin
 
     public static IEnumerable<XmlElement> ElementsByXPath(this XmlNode node, string xPath, params object[] vars)
     {
-      return XPathCache.SelectNodes(xPath, node,
-          vars.Select((v, i) => new XPathVariable("p" + i.ToString(), v)).ToArray())
-        .OfType<XmlElement>();
+      lock (_lock)
+      {
+        return XPathCache.SelectNodes(xPath, node,
+            vars.Select((v, i) => new XPathVariable("p" + i.ToString(), v)).ToArray())
+          .OfType<XmlElement>();
+      }
     }
 
     public static bool HasValue(this XmlNode node)
@@ -216,14 +224,20 @@ namespace InnovatorAdmin
 
     public static IEnumerable<XmlNode> XPath(this XmlNode node, string xPath)
     {
-      return XPathCache.SelectNodes(xPath, node).OfType<XmlNode>();
+      lock (_lock)
+      {
+        return XPathCache.SelectNodes(xPath, node).OfType<XmlNode>();
+      }
     }
 
     public static IEnumerable<XmlNode> XPath(this XmlNode node, string xPath, params object[] vars)
     {
-      return XPathCache.SelectNodes(xPath, node,
-          vars.Select((v, i) => new XPathVariable("p" + i.ToString(), v)).ToArray())
-        .OfType<XmlNode>();
+      lock (_lock)
+      {
+        return XPathCache.SelectNodes(xPath, node,
+            vars.Select((v, i) => new XPathVariable("p" + i.ToString(), v)).ToArray())
+          .OfType<XmlNode>();
+      }
     }
 
     public static XmlNode Parent(this XmlNode node)

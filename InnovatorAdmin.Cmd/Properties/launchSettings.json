@@ -2,9 +2,10 @@
   "profiles": {
     "InnovatorAdmin.Cmd": {
       "commandName": "Project",
-      //"commandLineArgs": "diff --base \"git:///D:/ANSYSDev/Code/Upgrade/Nokia?path=AML&commit=998acba57d6508a4b454ca7668f494717e16094b\" --outputfile \"D:/ANSYSDev/Code/Upgrade/NokiaDebug.innpkg\" --ours \"git:///D:/ANSYSDev/Code/Upgrade/Nokia?path=AML&commit=b70a578ea476f93be529a40b96caf389d784d9ec\"",
-      "commandLineArgs": "analyze --inputfile \"git:///D:/ANSYSDev/Code/Upgrade/Nokia?path=AML&commit=bfb5a8c9ea5aa63fa4f9a52bdcf9c8b33e317def\"",
-      "workingDirectory": "D:\\ANSYSDev\\Code\\SPDM\\InnovatorMetadata"
+      "commandLineArgs": "diff --base \"git:///D:/AnsysDev/Code/AnsysMinerva/WebApplicationUpgrade?path=AML&commit=ca9e3c01ff82d462d32316f8b65fc58dc4c02aed\" --ours \"git:///D:/AnsysDev/Code/AnsysMinerva/WebApplicationUpgrade?path=AML&commit=32269070f7bd06cb753b54e4547fcd9b1b035a01\" -o artifacts\\SpdmBase-diff.innpkg --sort-first-of-type 61385E4D09BC43BC8F64EAA898120798",
+      //"commandLineArgs": "export -l http://localhost/AnsysMinerva/ -d AnsysMinerva22R2 -u admin -p minerva -o \"AML/SPDM Base.innpkg\" --multiple --clean -f \"ExportDefinition.xml",
+      //"commandLineArgs": "export -l http://localhost/AnsysMinerva22/ -d AnsysMinerva23R11 -u admin -p minerva -o \"AML/SPDM Base.innpkg\" --multiple --clean -f \"ExportDefinition.xml",
+      "workingDirectory": "D:\\ANSYSDev\\Code\\AnsysMinerva\\WebApplicationUpgrade"
     }
   }
 }

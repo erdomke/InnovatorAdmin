@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -36,9 +34,44 @@ namespace InnovatorAdmin
       // Create merges/deletes as necessary
       var destElem = XElement.Load(dest);
       GetMergeScript(startElem, destElem, result);
-      foreach (var elem in result.DescendantsAndSelf())
-        elem.RemoveAnnotations<ElementKey>();
+      Cleanup(result);
       return result;
+    }
+
+    private static void Cleanup(XElement element)
+    {
+      element.RemoveAnnotations<ElementKey>();
+      if (element.Elements("Item")
+        .Where(i => !string.IsNullOrEmpty((string)i.Attribute("id")))
+        .Skip(1)
+        .Any())
+      {
+        var xref = element.Elements("Item")
+          .Where(i => !string.IsNullOrEmpty((string)i.Attribute("id")))
+          .ToDictionary(i => (string)i.Attribute("id"));
+
+        var sorted = element.Elements().DependencySort(e =>
+          (e.Annotation<DiffAnnotation>()?.Original ?? e).Elements()
+            .Select(e => xref.TryGetValue((string)e ?? "", out var d) ? d : null)
+            .Where(d => d != null))
+          .ToList();
+        element.RemoveNodes();
+        foreach (var child in sorted
+          .Where(i => (string)i.Attribute("action") != "delete"))
+        {
+          element.Add(child);
+        }
+        foreach (var child in sorted
+          .Where(i => (string)i.Attribute("action") == "delete")
+          .Reverse())
+        {
+          element.Add(child);
+        }
+      }
+      foreach (var child in element.Elements())
+      {
+        Cleanup(child);
+      }
     }
 
     public static XElement GetMergeScript(Stream start, Stream dest)
@@ -128,6 +161,7 @@ namespace InnovatorAdmin
             if (res.Name.LocalName == "Item")
             {
               res.SetAttributeValue("action", "delete");
+              res.AddAnnotation(new DiffAnnotation(s, false));
             }
             else if (res.Name.LocalName == "Relationships")
             {
@@ -139,6 +173,7 @@ namespace InnovatorAdmin
                   var childDelete = new XElement(item);
                   childDelete.RemoveNodes();
                   childDelete.SetAttributeValue("action", "delete");
+                  childDelete.AddAnnotation(new DiffAnnotation(item, false));
                   res.Add(childDelete);
                 }
               }
@@ -147,18 +182,23 @@ namespace InnovatorAdmin
             else
             {
               res.SetAttributeValue("is_null", "1");
+              res.AddAnnotation(new DiffAnnotation(s, true));
               res.Parent.SetAttributeValue("action", "edit");
             }
             break;
           case MergeType.DestinationOnly: // add
             res = EnsurePath(d, result);
-            SetKeys(SetItemEdits(res.ReplaceWithElement(new XElement(d))).DescendantsAndSelf());
+            var finalAdd = new XElement(d);
+            finalAdd.AddAnnotation(new DiffAnnotation(null, true));
+            SetKeys(SetItemEdits(res.ReplaceWithElement(finalAdd)).DescendantsAndSelf());
             break;
           default:
             if (TextDiffers(s, d))
             {
               res = EnsurePath(s, result);
-              SetItemEdits(res.ReplaceWithElement(new XElement(d)));
+              var final = new XElement(d);
+              final.AddAnnotation(new DiffAnnotation(s, true));
+              SetItemEdits(res.ReplaceWithElement(final));
             }
             else
             {

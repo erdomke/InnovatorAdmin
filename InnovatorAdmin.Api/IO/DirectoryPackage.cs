@@ -31,9 +31,9 @@ namespace InnovatorAdmin
 
     public bool TryAccessFile(string path, bool create, out IPackageFile file)
     {
-      if (create || File.Exists(Path.Combine(_base, path)))
+      if (create || File.Exists(Path.Combine(_base, path.Trim())))
       {
-        file = new FileSysFile(_base, path, create);
+        file = new FileSysFile(_base, path.Trim(), create);
         return true;
       }
       else
@@ -70,7 +70,7 @@ namespace InnovatorAdmin
       public FileSysFile(string baseDir, string path, bool create)
       {
         _base = baseDir.TrimEnd('/', '\\');
-        _path = path.Replace('\\', '/').Trim('/');
+        _path = path.Replace('\\', '/').Trim('/').Trim();
         _create = create;
       }
 

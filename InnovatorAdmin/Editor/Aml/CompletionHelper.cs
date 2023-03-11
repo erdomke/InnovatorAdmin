@@ -211,12 +211,17 @@ namespace InnovatorAdmin.Editor
               case "not":
               case "Relationships":
               case "AML":
-              case "sql":
-              case "SQL":
               case "TestSuite":
               case "Tests":
               case "Init":
               case "Cleanup":
+                break;
+              case "sql":
+              case "SQL":
+                items = Attributes(notExisting, "transform");
+                break;
+              case "Parameter":
+                items = Attributes(notExisting, "name", "type", "is_null");
                 break;
               case "Path":
                 items = Attributes(notExisting, "id");
@@ -558,10 +563,17 @@ namespace InnovatorAdmin.Editor
             {
               switch (attrName)
               {
+                case "transform":
+                  items = AttributeValues("true", "false");
+                  break;
                 case "type":
                   if (path.Last().LocalName == "Login")
                   {
                     items = AttributeValues("Explicit", "Anonymous", "Windows");
+                  }
+                  else if (path.Last().LocalName == "Parameter")
+                  {
+                    items = AttributeValues("string", "text", "integer", "float", "decimal", "boolean", "date", "image", "md5", "sequence", "item", "list", "filter_list", "color_list", "color", "formatted_text", "foreign", "ml_string", "mv_list", "global_version", "ubigint", "structured", "ansi_string", "ansi_text");
                   }
                   break;
                 case "select":
@@ -632,12 +644,21 @@ namespace InnovatorAdmin.Editor
             if (path.Any() && state == XmlState.Tag)
               appendItems = new ICompletionData[] { new BasicCompletionData() { Text = "/" + path.Last().LocalName + ">" } };
 
-
             if (path.Count == 1 && path.First().LocalName == "AML" && state == XmlState.Tag)
             {
               items = Elements("Item");
             }
             else if (path.Last().LocalName.Equals("sql", StringComparison.OrdinalIgnoreCase) && !path.Any(p => p.LocalName == "Item"))
+            {
+              if (xml.GetCharAt(caret) != '<')
+                return await _sql.Completions(value, xml, caret, cdata ? "]]>" : "<").ToTask();
+              items = Elements("Query", "Parameters");
+            }
+            else if (path.Last().LocalName == "Parameters" && path.Any(p => string.Equals(p.LocalName, "sql", StringComparison.OrdinalIgnoreCase)))
+            {
+              items = Elements("Parameter");
+            }
+            else if (path.Last().LocalName == "Query" && path.Any(p => string.Equals(p.LocalName, "sql", StringComparison.OrdinalIgnoreCase)))
             {
               return await _sql.Completions(value, xml, caret, cdata ? "]]>" : "<").ToTask();
             }
@@ -693,7 +714,8 @@ namespace InnovatorAdmin.Editor
               {
                 if (actionDoc.Elements.Any())
                 {
-                  items = actionDoc.Elements.Select(e => {
+                  items = actionDoc.Elements.Select(e =>
+                  {
                     return (ICompletionData)new BasicCompletionData()
                     {
                       Text = e.Name + string.Join("", e.Attributes
