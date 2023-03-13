@@ -84,10 +84,9 @@ namespace InnovatorAdmin
       return GetMergeScript(startElem, destElem);
     }
 
-    public static XElement GetMergeScript(XElement start, XElement dest)
+    public static XElement GetMergeScript(XElement start, XElement dest, IArasMetadataProvider destMetadata = null)
     {
       var result = new XElement(start.Name);
-
       if (dest == null)
       {
         var itemTag = start.DescendantsAndSelf().First(e => e.Name.LocalName == "Item");
@@ -105,9 +104,8 @@ namespace InnovatorAdmin
       }
 
       // Create merges/deletes as necessary
-      GetMergeScript(start, dest, result);
-      foreach (var elem in result.DescendantsAndSelf())
-        elem.RemoveAnnotations<ElementKey>();
+      GetMergeScript(start, dest, result, destMetadata);
+      Cleanup(result);
       return result;
     }
 
@@ -143,7 +141,7 @@ namespace InnovatorAdmin
     //  return result;
     //}
 
-    private static void GetMergeScript(XElement start, XElement dest, XElement result)
+    private static void GetMergeScript(XElement start, XElement dest, XElement result, IArasMetadataProvider destMetadata = null)
     {
       var startList = SetKeys(start.Elements()).OrderBy(t => t.Annotation<ElementKey>().Key).ToArray();
       var destList = SetKeys(dest.Elements()).OrderBy(t => t.Annotation<ElementKey>().Key).ToArray();
@@ -187,10 +185,22 @@ namespace InnovatorAdmin
             }
             break;
           case MergeType.DestinationOnly: // add
-            res = EnsurePath(d, result);
-            var finalAdd = new XElement(d);
-            finalAdd.AddAnnotation(new DiffAnnotation(null, true));
-            SetKeys(SetItemEdits(res.ReplaceWithElement(finalAdd)).DescendantsAndSelf());
+            if (destMetadata != null
+              && (string)d == "0"
+              && d.Parent?.Name.LocalName == "Item"
+              && destMetadata.ItemTypeByName((string)d.Parent.Attribute("type"), out var itemType)
+              && itemType.Properties.TryGetValue(d.Name.LocalName, out var property)
+              && property.Type == PropertyType.boolean)
+            {
+              // Don't add boolean properties
+            }
+            else
+            {
+              res = EnsurePath(d, result);
+              var finalAdd = new XElement(d);
+              finalAdd.AddAnnotation(new DiffAnnotation(null, true));
+              SetKeys(SetItemEdits(res.ReplaceWithElement(finalAdd)).DescendantsAndSelf());
+            }
             break;
           default:
             if (TextDiffers(s, d))
@@ -202,7 +212,7 @@ namespace InnovatorAdmin
             }
             else
             {
-              GetMergeScript(s, d, result);
+              GetMergeScript(s, d, result, destMetadata);
             }
             break;
         }

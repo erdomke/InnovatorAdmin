@@ -126,7 +126,47 @@ namespace InnovatorAdmin
 
       ReportProgress(0, "Starting install.");
       IEnumerable<IReadOnlyItem> items;
-      foreach (var line in _lines.Skip(_currLine).ToList())
+
+      var linesToInstall = _lines.Skip(_currLine).ToList();
+      var lockedItems = new List<IReadOnlyItem>();
+      foreach (var group in linesToInstall
+        .Where(l => l.Reference.Unique.IsGuid())
+        .GroupBy(l => l.Reference.Type))
+      {
+        lockedItems.AddRange(_conn.Apply(new Command((IFormattable)$@"<Item type='{group.Key}' action='get' select='locked_by_id'>
+  <id condition='in'>{group.Select(l => l.Reference.Unique)}</id>
+  <locked_by_id condition='is not null' />
+</Item>")).Items());
+      }
+
+      if (lockedItems.Count > 0)
+      {
+        using (SharedUtils.StartActivity("InstallProcessor.Install.HandleServerError"))
+        {
+          var rootMessage = "The import is attempting to update items locked by the following individuals: "
+            + string.Join(", ", lockedItems
+              .GroupBy(i => i.Property("locked_by_id").Attribute("keyed_name").AsString(""))
+              .Select(g => $"{g.Key} ({g.Count()})"))
+            + ".";
+          args = new RecoverableErrorEventArgs()
+          {
+            Message = rootMessage + " Select `Retry` to unlock these items and `Ignore` to proceed."
+          };
+          HandleErrorDefault(args, null);
+          if (args.RecoveryOption == RecoveryOption.Abort)
+            throw new InvalidOperationException(rootMessage);
+
+          if (args.RecoveryOption == RecoveryOption.Retry)
+          {
+            foreach (var group in lockedItems.GroupBy(i => i.Type().AsString(null)))
+            {
+              _conn.Apply(new Command((IFormattable)$@"<Item type='{group.Key}' action='unlock' idlist='{string.Join(",", group.Select(i => i.Id()))}' />")).AssertNoError();
+            }
+          }
+        }
+      }
+
+      foreach (var line in linesToInstall)
       {
         repeat = true;
         _logger.LogInformation("Performing {Line} ({Index} of {Count})", line.ToString(), _currLine + 1, _lines.Count);
@@ -345,18 +385,18 @@ namespace InnovatorAdmin
 
     private void HandleErrorDefault(RecoverableErrorEventArgs args, XmlNode query)
     {
-      _logger?.LogError(args.Exception, null);
+      _logger?.LogError(args.Exception, args.Message);
 
       var isAuto = false;
-      if (args.Exception.FaultCode == "0"
-        && (query.Attribute("action") == "delete" || query.Attribute("action") == "purge"))
+      if (args.Exception?.FaultCode == "0"
+        && (query?.Attribute("action") == "delete" || query?.Attribute("action") == "purge"))
       {
         args.RecoveryOption = RecoveryOption.Skip;
         isAuto = true;
       }
-      else if (args.Exception.Message.Trim() == "Identity already exists."
-        && query.Attribute("type") == "Identity"
-        && query.Attribute("action") == "add")
+      else if (args.Exception?.Message.Trim() == "Identity already exists."
+        && query?.Attribute("type") == "Identity"
+        && query?.Attribute("action") == "add")
       {
         ((XmlElement)query).SetAttribute("action", "edit");
         args.NewQuery = query;

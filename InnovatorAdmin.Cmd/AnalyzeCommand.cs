@@ -3,11 +3,10 @@ using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml;
 
 namespace InnovatorAdmin.Cmd
 {
-  [Verb("analyze", HelpText = "Analyze a package file for potential issues")]
+  [Verb("analyze", HelpText = "Analyze a package file for potential issues", Hidden = true)]
   internal class AnalyzeCommand : ICommand
   {
     [Option('f', "inputfile", HelpText = "Path to package file containing the items to import/export")]
@@ -25,7 +24,13 @@ namespace InnovatorAdmin.Cmd
 
       if (package.TryRead(logger, out var script))
       {
-
+        var sorter = new DependencySorter();
+        var lines = sorter.SortByDependencies(script.Lines, PackageMetadataProvider.FromScript(script), 1);
+        var checks = string.Join("\r\n", lines
+          .Where(l => l.Type == InstallType.DependencyCheck)
+          .Select(l => l.Script.OuterXml));
+        File.WriteAllText(@"C:\Users\edomke\AppData\Roaming\Innovator Admin\logs\checks.txt", checks);
+        //logger.LogInformation()
         return 0;
       }
       else

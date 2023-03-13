@@ -39,6 +39,7 @@ namespace InnovatorAdmin
     public string ClassPath { get; set; }
     public string Pattern { get; private set; }
     public int? OrderBy { get; private set; }
+    public bool IsKeyed { get; private set; }
 
     private Property() { }
        
@@ -157,6 +158,7 @@ namespace InnovatorAdmin
         Pattern = prop.Property("pattern").Value,
         KeyedNameOrder = prop.Property("keyed_name_order").AsInt(),
         OrderBy = prop.Property("order_by").AsInt(),
+        IsKeyed = prop.Property("is_keyed").AsBoolean(false)
       };
       if (_propertyHelp.TryGetValue(newProp.Name, out var stdDescription))
       {

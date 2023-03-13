@@ -25,7 +25,9 @@ namespace InnovatorAdmin.Tests
 
     public IPackageFile Manifest(bool create)
     {
-      throw new System.NotImplementedException();
+      if (create)
+        throw new System.NotImplementedException();
+      return new MockDiffFile("something.innpkg", "<Package/>");
     }
 
     public bool TryAccessFile(string path, bool create, out IPackageFile file)

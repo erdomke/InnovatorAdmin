@@ -596,11 +596,18 @@ namespace InnovatorAdmin
     public static PackageMetadataProvider WriteAmlMergeScripts(this IPackage baseDir, IPackage compareDir
       , AmlMergeCallback callback)
     {
-      Func<IPackageFile, IComparable> keyGetter = i => i.Path.ToUpperInvariant().Replace('\\', '/').TrimStart('/');
+      Func<IPackageFile, IComparable> keyGetter = i => string.Join("/", i.Path.ToUpperInvariant()
+        .Replace('\\', '/')
+        .TrimStart('/')
+        .Split('/')
+        .Select(n => n.Trim()));
       var basePaths = baseDir.Files().OrderBy(keyGetter).ToList();
       var comparePaths = compareDir.Files().OrderBy(keyGetter).ToList();
       var completed = 0;
       var total = basePaths.Count + comparePaths.Count;
+
+      var baseMetadata = PackageMetadataProvider.FromPackage(baseDir);
+      var compareMetadata = PackageMetadataProvider.FromPackage(compareDir);
       var metadata = new PackageMetadataProvider();
 
       var baseScripts = new List<AmlScript>();
@@ -642,7 +649,7 @@ namespace InnovatorAdmin
             {
               if (compareScript.Script.Elements("Item").Any(e => (string)e.Attribute("action") != "delete"))
                 metadata.Add(compareScript.Script);
-              var elem = AmlDiff.GetMergeScript(baseScript.Script, compareScript.Script);
+              var elem = AmlDiff.GetMergeScript(baseScript.Script, compareScript.Script, compareMetadata);
               if (elem.Elements().Any())
                 elem.WriteTo(writer);
             }
@@ -682,7 +689,9 @@ namespace InnovatorAdmin
             default: // Edit
               baseScript = new AmlScript(baseFile, baseDir);
               compareScript = new AmlScript(compareFile, compareDir);
-              if (baseScript.Key == compareScript.Key)
+              if (baseScript.Key == compareScript.Key
+                || (compareMetadata.ItemTypeByName(compareScript.Type, out var itemType)
+                  && itemType.KeyedNameIsUnique))
               {
                 mergeScripts(type, baseScript, compareScript);
               }
@@ -773,6 +782,7 @@ namespace InnovatorAdmin
       public string Key { get; }
       public string Path { get; }
       public string Id { get; }
+      public string Type { get; }
       public XElement Script { get; }
 
       public AmlScript(IPackageFile file, IPackage package)
@@ -788,12 +798,13 @@ namespace InnovatorAdmin
           && (item.Parent == null
             || !item.Parent.Elements("Item").Skip(1).Any()))
         {
+          Type = (string)item.Attribute("type");
           Id = (string)item.Attribute("id");
           var parts = new[] {
-              ((string)(item.Attribute("id") ?? item.Attribute("where")))?.ToUpperInvariant(),
-              (string)item.Attribute(XmlFlags.Attr_ScriptType),
-              (string)item.Attribute("action")
-            };
+            ((string)(item.Attribute("id") ?? item.Attribute("where")))?.ToUpperInvariant(),
+            (string)item.Attribute(XmlFlags.Attr_ScriptType),
+            (string)item.Attribute("action")
+          };
           if (parts[2] == "add" || parts[2] == "create")
             parts[2] = "merge";
           Key = string.Join(".", parts);

@@ -37,8 +37,11 @@ namespace InnovatorAdmin
       {
         dialog._conn = conn;
         dialog.txtMessage.Text = args.Message ?? args.Exception.Message;
-        dialog.txtErrorDetails.Text = Utils.IndentXml(args.Exception.ToAml());
-        dialog.txtQuery.Text = Utils.IndentXml(args.Exception.Query);
+        if (args.Exception != null)
+        {
+          dialog.txtErrorDetails.Text = Utils.IndentXml(args.Exception.ToAml());
+          dialog.txtQuery.Text = Utils.IndentXml(args.Exception.Query);
+        }
         dialog.TopMost = true;
         switch (dialog.ShowDialog())
         {
@@ -47,9 +50,12 @@ namespace InnovatorAdmin
             break;
           case DialogResult.Retry:
             args.RecoveryOption = RecoveryOption.Retry;
-            var doc = new XmlDocument();
-            doc.LoadXml(dialog.txtQuery.Text);
-            args.NewQuery = doc.DocumentElement;
+            if (!string.IsNullOrEmpty(dialog.txtQuery.Text))
+            {
+              var doc = new XmlDocument();
+              doc.LoadXml(dialog.txtQuery.Text);
+              args.NewQuery = doc.DocumentElement;
+            }
             break;
           default:
             args.RecoveryOption = RecoveryOption.Abort;
@@ -57,7 +63,6 @@ namespace InnovatorAdmin
         }
       }
     }
-
 
     private void btnShowDetails_Click(object sender, EventArgs e)
     {

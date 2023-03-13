@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using Microsoft.Extensions.Logging;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,7 +36,7 @@ namespace InnovatorAdmin.Cmd
       processor.ProgressChanged += progress.Report;
       processor.ErrorRaised += (s, e) =>
       {
-        tcs.TrySetException(e.Exception);
+        tcs.TrySetException((Exception)e.Exception ?? new InvalidOperationException(e.Message));
         e.RecoveryOption = RecoveryOption.Abort;
       };
       processor.ActionComplete += (s, e) =>
