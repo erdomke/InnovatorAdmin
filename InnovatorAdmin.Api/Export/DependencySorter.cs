@@ -4,15 +4,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace InnovatorAdmin
 {
   public class DependencySorter
   {
+    private List<SortGroup> _sortGroups = new List<SortGroup>();
+
     /// <summary>
-    /// Indicates that the item should be sorted as the first item of it's group / type
+    /// Indicates that the item should be sorted as the first item of it's type within a group
     /// </summary>
     public HashSet<string> FirstOfGroup { get; } = new HashSet<string>();
+
+    public DependencySorter()
+    {
+      Load(XElement.Parse("<AML><Item type='*' /></AML>"));
+    }
+
+    public void Load(XElement element)
+    {
+      _sortGroups.Clear();
+      _sortGroups.AddRange(element.Elements("Item").Select((e, i) => new SortGroup(e, i)));
+    }
 
     public async Task<IEnumerable<InstallItem>> SortByDependencies(IEnumerable<InstallItem> items, IAsyncConnection conn)
     {
@@ -37,7 +51,6 @@ namespace InnovatorAdmin
           analyzer.AddReferenceAndDependencies(newInstallItem);
         }
         analyzer.FinishAdding();
-
         results = GetDependencyList(analyzer, items, out state).ToList();
         loops++;
       }
@@ -67,11 +80,7 @@ namespace InnovatorAdmin
 
       // Bias the install order initially to try and help the dependency sort properly handle anything
       // where explicit dependencies don't exist.  Then, perform the dependency sort.
-      var initialSort = lookup.Keys
-        .OrderBy(DefaultInstallOrder)
-        .ThenBy(i => i.Type.ToLowerInvariant())
-        .ThenBy(i => i.Unique)
-        .ToList();
+      var initialSort = FilterAndSort(lookup.Keys);
       sorted = initialSort.DependencySort<ItemReference>(d =>
       {
         IEnumerable<InstallItem> res = null;
@@ -440,29 +449,57 @@ namespace InnovatorAdmin
 
     public int DefaultInstallOrder(ItemReference itemRef)
     {
+      var groupIndex = _sortGroups
+        .OrderByDescending(g => g.IsMatch(itemRef))
+        .ThenBy(g => g.Index)
+        .FirstOrDefault()
+        .Index;
+      return (groupIndex * 10000) + DefaultInstallOrderWithinGroup(itemRef);
+    }
+
+    private IEnumerable<ItemReference> FilterAndSort(IEnumerable<ItemReference> items)
+    {
+      return items.Select(i => new
+      {
+        Group = _sortGroups
+          .OrderByDescending(g => g.IsMatch(i))
+          .ThenBy(g => g.Index)
+          .First(),
+        Item = i
+      })
+       .Where(i => !i.Group.Skip)
+       .OrderBy(i => (i.Group.Index * 10000) + DefaultInstallOrderWithinGroup(i.Item))
+       .ThenBy(i => i.Item.Type.ToLowerInvariant())
+       .ThenBy(i => i.Item.Unique)
+       .Select(i => i.Item)
+       .ToList();
+    }
+
+    private int DefaultInstallOrderWithinGroup(ItemReference itemRef)
+    {
       switch (itemRef.Type)
       {
         case "ItemType":
           // Prioritize core types (e.g. ItemType, List, etc.)
           if (_dataModelIds.Contains(itemRef.Unique))
-            return -20;
+            return 0;
           else if (_coreItemTypeIds.Contains(itemRef.Unique))
-            return -10;
+            return 10;
           break;
         case "RelationshipType":
           // Prioritize core metadata types (e.g. Member)
           if (_dataModelIds.Contains(itemRef.Unique))
-            return -20;
+            return 0;
           else if (_coreRelationshipTypeIds.Contains(itemRef.Unique))
-            return -10;
+            return 10;
           break;
         case InstallItem.ScriptType:
           if (itemRef.Unique.Split(' ').Concat(itemRef.KeyedName.Split(' ')).Any(p => _dataModelIds.Contains(p)))
-            return -15;
+            return 5;
           if (itemRef.Unique.Split(' ').Concat(itemRef.KeyedName.Split(' ')).Any(p => _coreItemTypeIds.Contains(p) || _coreRelationshipTypeIds.Contains(p)))
-            return -5;
+            return 15;
           var order = DefaultInstallOrder(itemRef.Unique.Split(':')[0]);
-          if (order < 120)
+          if (order < 220)
             return order + 1;
           break;
       }
@@ -477,53 +514,53 @@ namespace InnovatorAdmin
     {
       switch (type)
       {
-        case "List": return 10;
-        case "Sequence": return 20;
-        case "Revision": return 30;
-        case "Variable": return 40;
-        case "Identity": return 50;
-        case "Member": return 60;
-        case "User": return 70;
-        case "Permission": return 80;
-        case "Method": return 90;
-        case "EMail Message": return 100;
-        case "Action": return 110;
-        case "Report": return 120;
-        case "Form": return 130;
-        case "Workflow Map": return 140;
-        case "Life Cycle Map": return 150;
-        case "Grid": return 160;
-        case "xPropertyDefinition": return 170;
-        case "Permission_ItemClassification": return 180;
-        case "Permission_PropertyValue": return 190;
-        case "CommandBarShortcut": return 200;
-        case "CommandBarSeparator": return 210;
-        case "CommandBarMenuSeparator": return 220;
-        case "CommandBarDropDown": return 230;
-        case "CommandBarCheckbox": return 240;
-        case "CommandBarMenuCheckbox": return 250;
-        case "CommandBarEdit": return 260;
-        case "CommandBarButton": return 270;
-        case "CommandBarMenu": return 280;
-        case "CommandBarMenuButton": return 290;
-        case "CommandBarSection": return 300;
-        case "PresentationConfiguration": return 310;
-        case "ItemType": return 320;
-        case "RelationshipType": return 330;
-        case "Morphae": return 340;
-        case "Field": return 350;
-        case "Property": return 360;
-        case "View": return 370;
-        case "SQL": return 380;
-        case "Metric": return 390;
-        case "Chart": return 400;
-        case "Dashboard": return 410;
-        case "ac_PolicyAccessItemAttribute": return 420;
-        case "mp_PolicyAccessEnvAttribute": return 430;
-        case "mp_MacPolicy": return 440;
-        case "qry_QueryDefinition": return 450;
-        case "dr_RelationshipFamily": return 460;
-        case "dac_DomainDefinition": return 470;
+        case "List": return 110;
+        case "Sequence": return 120;
+        case "Revision": return 130;
+        case "Variable": return 140;
+        case "Identity": return 150;
+        case "Member": return 160;
+        case "User": return 170;
+        case "Permission": return 180;
+        case "Method": return 190;
+        case "EMail Message": return 200;
+        case "Action": return 210;
+        case "Report": return 220;
+        case "Form": return 230;
+        case "Workflow Map": return 240;
+        case "Life Cycle Map": return 250;
+        case "Grid": return 260;
+        case "xPropertyDefinition": return 270;
+        case "Permission_ItemClassification": return 280;
+        case "Permission_PropertyValue": return 290;
+        case "CommandBarShortcut": return 300;
+        case "CommandBarSeparator": return 310;
+        case "CommandBarMenuSeparator": return 320;
+        case "CommandBarDropDown": return 330;
+        case "CommandBarCheckbox": return 340;
+        case "CommandBarMenuCheckbox": return 350;
+        case "CommandBarEdit": return 360;
+        case "CommandBarButton": return 370;
+        case "CommandBarMenu": return 380;
+        case "CommandBarMenuButton": return 390;
+        case "CommandBarSection": return 400;
+        case "PresentationConfiguration": return 410;
+        case "ItemType": return 420;
+        case "RelationshipType": return 430;
+        case "Morphae": return 440;
+        case "Field": return 450;
+        case "Property": return 460;
+        case "View": return 470;
+        case "SQL": return 480;
+        case "Metric": return 490;
+        case "Chart": return 500;
+        case "Dashboard": return 510;
+        case "ac_PolicyAccessItemAttribute": return 520;
+        case "mp_PolicyAccessEnvAttribute": return 530;
+        case "mp_MacPolicy": return 540;
+        case "qry_QueryDefinition": return 550;
+        case "dr_RelationshipFamily": return 560;
+        case "dac_DomainDefinition": return 570;
         case InstallItem.ScriptType: return 700;
       }
 
@@ -537,6 +574,68 @@ namespace InnovatorAdmin
       NoCycle,
       UnresolvedCycle,
       ResolvedCycle
+    }
+
+    private class SortGroup
+    {
+      private string _type;
+      private HashSet<string> _ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+      public bool Skip { get; }
+      public int Index { get; }
+
+      public SortGroup(XElement query, int index)
+      {
+        _type = (string)query.Attribute("type");
+        foreach (var attribute in query.Attributes())
+        {
+          switch (attribute.Name.LocalName)
+          {
+            case "id":
+            case "_config_id":
+            case "where":
+              _ids.Add((string)attribute);
+              break;
+            case "idlist":
+              _ids.UnionWith(((string)attribute).Split(','));
+              break;
+          }
+        }
+        Index = index;
+        Skip = string.Equals((string)query.Attribute("action"), "skip", StringComparison.OrdinalIgnoreCase);
+      }
+
+      public MatchType IsMatch(ItemReference reference)
+      {
+        if (_type == "*")
+          return MatchType.Generic;
+
+        var type = reference.Type;
+        var id = reference.Unique;
+        if (string.Equals(type, InstallItem.ScriptType, StringComparison.OrdinalIgnoreCase)
+          && reference.Origin != null)
+        {
+          type = reference.Origin.Type;
+          id = reference.Origin.Unique;
+        }
+
+        if (!string.Equals(_type, type, StringComparison.OrdinalIgnoreCase))
+          return MatchType.None;
+        else if (_ids.Count < 1)
+          return MatchType.Type;
+        else if (_ids.Contains(id))
+          return MatchType.Id;
+        else
+          return MatchType.None;
+      }
+    }
+
+    private enum MatchType
+    {
+      None,
+      Generic,
+      Type,
+      Id
     }
   }
 }

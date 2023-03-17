@@ -577,7 +577,7 @@ namespace InnovatorAdmin.Tests
  </Item>
 </AML>");
       var scripts = new Dictionary<string, XDocument>(StringComparer.OrdinalIgnoreCase);
-      baseDir.WriteAmlMergeScripts(compareDir, (path, progress, deletedScript) =>
+      new MergeProcessor().WriteAmlMergeScripts(baseDir, compareDir, (path, progress, deletedScript) =>
       {
         var root = new XDocument();
         scripts[path] = root;
@@ -622,7 +622,7 @@ namespace InnovatorAdmin.Tests
 </AML>");
 
       var scripts = new Dictionary<string, XDocument>(StringComparer.OrdinalIgnoreCase);
-      baseDir.WriteAmlMergeScripts(compareDir, (path, progress, deletedScript) =>
+      new MergeProcessor().WriteAmlMergeScripts(baseDir, compareDir, (path, progress, deletedScript) =>
       {
         var root = new XDocument();
         scripts[path] = root;
@@ -740,7 +740,7 @@ namespace InnovatorAdmin.Tests
   </Item>
 </AML>");
       var scripts = new Dictionary<string, XDocument>(StringComparer.OrdinalIgnoreCase);
-      baseDir.WriteAmlMergeScripts(compareDir, (path, progress, deletedScript) =>
+      new MergeProcessor().WriteAmlMergeScripts(baseDir, compareDir, (path, progress, deletedScript) =>
       {
         var root = new XDocument();
         scripts[path] = root;
@@ -879,7 +879,7 @@ namespace InnovatorAdmin.Tests
   </Item>
 </AML>");
       var scripts = new Dictionary<string, XDocument>(StringComparer.OrdinalIgnoreCase);
-      baseDir.WriteAmlMergeScripts(compareDir, (path, progress, deletedScript) =>
+      new MergeProcessor().WriteAmlMergeScripts(baseDir, compareDir, (path, progress, deletedScript) =>
       {
         var root = new XDocument();
         scripts[path] = root;

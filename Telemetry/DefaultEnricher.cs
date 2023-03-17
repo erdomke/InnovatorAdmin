@@ -63,13 +63,17 @@ namespace Innovator.Telemetry
       foreach (var key in exception.Data.Keys)
         attributes[key.ToString()] = exception.Data[key];
 
-      if (_exceptionEnrichers.TryGetValue(exception.GetType(), out var enricher))
+      foreach (var type in BaseTypes(exception.GetType()))
       {
-        try
+        if (_exceptionEnrichers.TryGetValue(type, out var enricher))
         {
-          enricher?.Invoke(attributes, exception);
+          try
+          {
+            enricher?.Invoke(attributes, exception);
+          }
+          catch (Exception) { } // Do nothing
+          break;
         }
-        catch (Exception) { } // Do nothing
       }
 
       var innerExceptions = Enumerable.Empty<Exception>();
@@ -85,6 +89,16 @@ namespace Innovator.Telemetry
           .ToList();
       }
       return attributes;
+    }
+
+    private IEnumerable<Type> BaseTypes(Type type)
+    {
+      var curr = type;
+      while (curr != null && curr != typeof(object))
+      {
+        yield return curr;
+        curr = curr.BaseType;
+      }
     }
   }
 }

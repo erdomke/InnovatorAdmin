@@ -130,18 +130,33 @@ namespace InnovatorAdmin
       var linesToInstall = _lines.Skip(_currLine).ToList();
       var lockedItems = new List<IReadOnlyItem>();
       foreach (var group in linesToInstall
-        .Where(l => l.Reference.Unique.IsGuid())
-        .GroupBy(l => l.Reference.Type))
+        .GroupBy(l => l.Script.GetAttribute("type")))
       {
-        lockedItems.AddRange(_conn.Apply(new Command((IFormattable)$@"<Item type='{group.Key}' action='get' select='locked_by_id'>
-  <id condition='in'>{group.Select(l => l.Reference.Unique)}</id>
-  <locked_by_id condition='is not null' />
+        var ids = group
+          .Select(l => l.Script.GetAttribute("id"))
+          .Where(i => !string.IsNullOrEmpty(i))
+          .Distinct()
+          .ToList();
+        var configIds = group
+          .Select(l => l.Script.GetAttribute("_config_id"))
+          .Where(i => !string.IsNullOrEmpty(i))
+          .Distinct()
+          .ToList();
+        if (ids.Count > 0)
+          lockedItems.AddRange(_conn.Apply(new Command((IFormattable)$@"<Item type='{group.Key}' action='get' select='locked_by_id'>
+  <id condition='in'>{ids}</id>
+  <locked_by_id condition='ne'>{_conn.UserId}</locked_by_id>
+</Item>")).Items());
+        if (configIds.Count > 0)
+          lockedItems.AddRange(_conn.Apply(new Command((IFormattable)$@"<Item type='{group.Key}' action='get' select='locked_by_id'>
+  <config_id condition='in'>{configIds}</config_id>
+  <locked_by_id condition='ne'>{_conn.UserId}</locked_by_id>
 </Item>")).Items());
       }
 
       if (lockedItems.Count > 0)
       {
-        using (SharedUtils.StartActivity("InstallProcessor.Install.HandleServerError"))
+        using (SharedUtils.StartActivity("Unlock locked items"))
         {
           var rootMessage = "The import is attempting to update items locked by the following individuals: "
             + string.Join(", ", lockedItems
@@ -285,11 +300,13 @@ namespace InnovatorAdmin
           }
           catch (ServerException ex)
           {
-            using (SharedUtils.StartActivity("InstallProcessor.Install.HandleServerError"))
+            using (SharedUtils.StartActivity("Install Error: " + ex.Message))
             {
               args = new RecoverableErrorEventArgs() { Exception = ex };
               if (line.Type == InstallType.DependencyCheck && ex.FaultCode == "0")
                 args.Message = "Unable to find required dependency " + line.Reference.Type + ": " + line.Reference.KeyedName;
+              else
+                args.Message = $"Error installing {line.Reference.Type}, {line.Reference.KeyedName}: {ex.Message}";
 
               HandleErrorDefault(args, query);
               switch (args.RecoveryOption)

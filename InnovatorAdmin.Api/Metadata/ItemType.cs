@@ -133,7 +133,7 @@ namespace InnovatorAdmin
 
     public bool IsUiOnly => RelationshipView?.Contains("aras.innovator.TreeGridView") == true;
 
-    public bool KeyedNameIsUnique { get; }
+    public bool KeyedNameIsUnique { get; private set; }
 
     public ItemType(IReadOnlyItem itemType, HashSet<string> coreIds = null, bool defaultProperties = false, Func<string, string> getName = null)
     {
@@ -233,6 +233,8 @@ namespace InnovatorAdmin
       foreach (var prop in itemType.Relationships("Property")
         .Select(p => Property.FromItem(p, this)))
         _properties[prop.Name] = prop;
+      KeyedNameIsUnique = _properties.Values.Any(p => p.KeyedNameOrder.HasValue)
+        && _properties.Values.Where(p => p.KeyedNameOrder.HasValue).All(p => p.IsKeyed);
       WithExtra(itemType);
       return this;
     }

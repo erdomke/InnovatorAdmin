@@ -58,7 +58,8 @@ namespace InnovatorAdmin
       }
       if (diff != null && version == DiffVersion.Both)
       {
-        if (diff._textDiffers && diff.Original == null)
+        if (diff._textDiffers
+          && (diff.Original == null || (string)diff.Original.Attribute("is_null") == "1"))
           writer.WriteAttributeString("orig_is_null", "1");
         else if (diff._textDiffers)
           writer.WriteAttributeString("orig_value", (string)diff.Original);

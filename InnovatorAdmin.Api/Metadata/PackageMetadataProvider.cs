@@ -125,7 +125,8 @@ namespace InnovatorAdmin
 
     public void Add(IReadOnlyItem item)
     {
-      if (item.Attribute(XmlFlags.Attr_ScriptType).HasValue())
+      if (item.Attribute(XmlFlags.Attr_ScriptType).HasValue()
+        && !string.Equals(item.TypeName(), "ItemType", StringComparison.OrdinalIgnoreCase))
         return;
 
       switch (item.TypeName().ToLowerInvariant())

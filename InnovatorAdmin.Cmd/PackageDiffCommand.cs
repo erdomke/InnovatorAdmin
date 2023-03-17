@@ -2,8 +2,10 @@
 using CommandLine.Text;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace InnovatorAdmin.Cmd
 {
@@ -25,6 +27,9 @@ namespace InnovatorAdmin.Cmd
     [Option("clean", HelpText = "Clean the output file/directory before writing the new content")]
     public bool CleanOutput { get; set; }
 
+    [Option("sort-suggest", HelpText = "An XML file which controls how the results are sorted.")]
+    public string SortSuggest { get; set; }
+
     [Option("sort-first-of-type", HelpText = "Comma delimited list of IDs that should be sorted at the beginning of their type")]
     public string FirstOfGroup { get; set; }
 
@@ -43,6 +48,7 @@ namespace InnovatorAdmin.Cmd
         });
       }
     }
+
     public Task<int> Execute(ILogger logger)
     {
       var dirs = Package.Create(BasePackage, OurPackage).ToList();
@@ -52,7 +58,9 @@ namespace InnovatorAdmin.Cmd
       var progress = new ProgressLogger(logger);
       var processor = new MergeProcessor();
       if (!string.IsNullOrEmpty(FirstOfGroup))
-        processor.FirstOfGroup.UnionWith(FirstOfGroup.Split(','));
+        processor.Sorter.FirstOfGroup.UnionWith(FirstOfGroup.Split(','));
+      if (!string.IsNullOrEmpty(SortSuggest))
+        processor.Sorter.Load(XElement.Load(SortSuggest));
       processor.ProgressChanged += progress.Report;
       script = processor.Merge(dirs[0], dirs[1]);
       

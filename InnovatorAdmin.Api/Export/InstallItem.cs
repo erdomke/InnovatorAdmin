@@ -170,9 +170,11 @@ namespace InnovatorAdmin
               result._dependencies = Enumerable.Repeat(result._itemRef, 1);
             }
 
-            result._itemRef = new ItemReference(ScriptType, result._itemRef + " " + Utils.GetChecksum(Encoding.UTF8.GetBytes(elem.OuterXml)))
+            var scriptOrigin = result._itemRef;
+            result._itemRef = new ItemReference(ScriptType, scriptOrigin + " " + Utils.GetChecksum(Encoding.UTF8.GetBytes(elem.OuterXml)))
             {
-              KeyedName = RenderAttributes(elem)
+              KeyedName = RenderAttributes(elem),
+              Origin = scriptOrigin
             };
             result.Type = InstallType.Script;
             break;
@@ -181,13 +183,25 @@ namespace InnovatorAdmin
             {
               KeyedName = elem.Attributes["action"].Value
             }, 1);
-            result._itemRef = new ItemReference(ScriptType, result._itemRef + " " + Utils.GetChecksum(Encoding.UTF8.GetBytes(elem.OuterXml)))
+            var scriptOrigin2 = result._itemRef;
+            result._itemRef = new ItemReference(ScriptType, scriptOrigin2 + " " + Utils.GetChecksum(Encoding.UTF8.GetBytes(elem.OuterXml)))
             {
-              KeyedName = RenderAttributes(elem)
+              KeyedName = RenderAttributes(elem),
+              Origin = scriptOrigin2
             };
             result.Type = InstallType.Script;
             break;
         }
+      }
+      else
+      {
+        var scriptOrigin = result._itemRef;
+        result._itemRef = new ItemReference(ScriptType, scriptOrigin + " " + Utils.GetChecksum(Encoding.UTF8.GetBytes(elem.OuterXml)))
+        {
+          KeyedName = RenderAttributes(elem),
+          Origin = scriptOrigin
+        };
+        result.Type = InstallType.Script;
       }
 
       if (elem.Attribute(XmlFlags.Attr_IsScript) == "1")

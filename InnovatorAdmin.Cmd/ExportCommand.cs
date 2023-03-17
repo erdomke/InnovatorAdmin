@@ -95,14 +95,28 @@ namespace InnovatorAdmin.Cmd
           var types = ExportAllType.Types
             .Where(t => t.Applies(version))
             .ToList();
-          var exitingTypes = new HashSet<string>((await conn.ApplyAsync($@"<Item type='ItemType' action='get' select='name'>
-    <name condition='in'>'{string.Join("','", types.Select(t => t.Name))}'</name>
-  </Item>", true, true).ConfigureAwait(false))
+          var allTypes = (await conn.ApplyAsync($@"<Item type='ItemType' action='get' select='name' />", true, true).ConfigureAwait(false))
             .Items()
+            .ToList();
+          var exitingTypesByName = new HashSet<string>(allTypes
             .Select(i => i.Property("name").AsString(null)), StringComparer.OrdinalIgnoreCase);
-          types = types.Where(t => exitingTypes.Contains(t.Name)).ToList();
+          var exitingTypesById = new HashSet<string>(allTypes
+            .Select(i => i.Id()), StringComparer.OrdinalIgnoreCase);
+          types = types.Where(t => exitingTypesByName.Contains(t.Name)).ToList();
 
-          var queries = GetQueryies(items, types).ToList();
+          var queries = GetQueryies(items, types);
+          var cantExport = queries
+            .Where(i => !exitingTypesByName.Contains((string)i.Attribute("type") ?? "")
+              && !exitingTypesById.Contains((string)i.Attribute("typeId") ?? ""))
+            .Select(i => (string)i.Attribute("type") ?? (string)i.Attribute("typeId") ?? "?")
+            .ToList();
+          if (cantExport.Count > 0)
+            logger.LogWarning("The following types could not be exported: {Types}", string.Join(", ", cantExport));
+
+          queries = queries
+            .Where(i => exitingTypesByName.Contains((string)i.Attribute("type") ?? "")
+              || exitingTypesById.Contains((string)i.Attribute("typeId") ?? ""))
+            .ToList();
           checkDependencies = items.All(e => e.Attribute("type")?.Value != "*");
 
           progress.Reset();
