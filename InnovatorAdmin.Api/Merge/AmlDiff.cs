@@ -90,14 +90,15 @@ namespace InnovatorAdmin
       if (dest == null)
       {
         var itemTag = start.DescendantsAndSelf().First(e => e.Name.LocalName == "Item");
-        var items = itemTag.Parent.Elements("Item").Where(e => e.Attribute("action") != null
+        var startItems = itemTag.Parent.Elements("Item").Where(e => e.Attribute("action") != null
           && (e.Attribute("action").Value == "merge" || e.Attribute("action").Value == "add"
             || e.Attribute("action").Value == "create"));
         XElement newItem;
-        foreach (var item in items)
+        foreach (var startItem in startItems)
         {
-          newItem = new XElement(item.Name, item.Attributes().Where(IsAttributeToCopy));
+          newItem = new XElement(startItem.Name, startItem.Attributes().Where(IsAttributeToCopy));
           newItem.SetAttributeValue("action", "delete");
+          newItem.AddAnnotation(new DiffAnnotation(startItem, false));
           result.Add(newItem);
         }
         return result;
@@ -108,39 +109,7 @@ namespace InnovatorAdmin
       Cleanup(result);
       return result;
     }
-
-    //public static XElement GetMergeScript(string start, string dest)
-    //{
-    //  if (string.IsNullOrWhiteSpace(start))
-    //    return new XElement("AML");
-
-    //  var startElem = XElement.Parse(start);
-    //  var result = new XElement(startElem.Name);
-
-    //  // Create deletes
-    //  if (string.IsNullOrEmpty(dest))
-    //  {
-    //    var itemTag = startElem.DescendantsAndSelf().First(e => e.Name.LocalName == "Item");
-    //    var items = itemTag.Parent.Elements("Item").Where(e => e.Attribute("action") != null
-    //      && (e.Attribute("action").Value == "merge" || e.Attribute("action").Value == "add"
-    //        || e.Attribute("action").Value == "create"));
-    //    XElement newItem;
-    //    foreach (var item in items)
-    //    {
-    //      newItem = new XElement(item.Name, item.Attributes().Where(IsAttributeToCopy));
-    //      newItem.SetAttributeValue("action", "delete");
-    //    }
-    //    return result;
-    //  }
-
-    //  // Create merges/deletes as necessary
-    //  var destElem = XElement.Parse(dest);
-    //  GetMergeScript(startElem, destElem, result);
-    //  foreach (var elem in result.DescendantsAndSelf())
-    //    elem.RemoveAnnotations<ElementKey>();
-    //  return result;
-    //}
-
+    
     private static void GetMergeScript(XElement start, XElement dest, XElement result, IArasMetadataProvider destMetadata = null)
     {
       var startList = SetKeys(start.Elements()).OrderBy(t => t.Annotation<ElementKey>().Key).ToArray();

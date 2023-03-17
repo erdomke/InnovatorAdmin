@@ -19,55 +19,44 @@ namespace InnovatorAdmin
     {
       using (SharedUtils.StartActivity("MergeProcessor.Merge", "Calculating diffs"))
       {
-        var docs = new List<MergeScript>();
-        var metadata = WriteAmlMergeScripts(baseDir, compareDir, (path, progress, deleted) =>
+        var scripts = new Dictionary<string, XElement>(StringComparer.OrdinalIgnoreCase);
+        var metadata = GetAmlMergeScripts(baseDir, compareDir, scripts, progress => 
         {
           ProgressChanged?.Invoke(this, new ProgressChangedEventArgs("Reading files", progress / 2));
-          var script = new MergeScript(path, deleted);
-          docs.Add(script);
-          return script.Document.CreateNavigator().AppendChild();
         });
 
         if (_idChangeXref.Count > 0)
         {
-          foreach (var doc in docs)
-            ReplaceIdInTextNode(doc.Document.DocumentElement);
+          foreach (var diffScript in scripts.Values)
+            ReplaceIdInTextNode(diffScript);
         }
 
         ProgressChanged?.Invoke(this, new ProgressChangedEventArgs("Performing cleanup", 50));
 
-        var allItems = docs
-          .Where(d => d.Document.DocumentElement != null)
-          .SelectMany(d => d.Document.DocumentElement
-            .DescendantsAndSelf(el => el.LocalName == "Item"))
-          .ToArray();
+        var allItems = scripts.Values
+          .Where(d => d != null)
+          .SelectMany(d => d.DescendantsAndSelf("Item"))
+          .ToList();
 
         RemoveDeletesForItemsWithMultipleScripts(allItems);
         RemoveChangesToSystemProperties(allItems);
 
         ProgressChanged?.Invoke(this, new ProgressChangedEventArgs("Processing dependencies", 75));
 
-        var installScripts = docs
-          .Where(d => d.Document.DocumentElement != null && d.DeletedScript == null)
-          .SelectMany(d => XmlUtils.RootItems(d.Document.DocumentElement)
-            .Select(i => InstallItem.FromScript(i, d.Path)))
+        var installScripts = scripts
+          .SelectMany(s => RootItems(s.Value)
+            .Select(e =>
+            {
+              var doc = new XmlDocument();
+              using (var writer = doc.CreateNavigator().AppendChild())
+                DiffAnnotation.WriteTo(e, writer, DiffVersion.Both);
+              return InstallItem.FromScript(doc.DocumentElement, s.Key);
+            }))
           .ToList();
 
         var lines = _sorter.SortByDependencies(installScripts, metadata)
           .Where(i => i.Type != InstallType.DependencyCheck)
           .ToList();
-
-        var deleteLines = _sorter.SortByDependencies(docs
-            .Where(d => d.Document.DocumentElement != null  && d.DeletedScript != null)
-            .Select(d => d.DeletedScript), metadata)
-          .Where(i => i.Type != InstallType.DependencyCheck)
-          .Select(i => docs.FirstOrDefault(d => ReferenceEquals(d.DeletedScript, i)))
-          .Where(d => d != null)
-          .SelectMany(d => XmlUtils.RootItems(d.Document.DocumentElement)
-            .Select(i => InstallItem.FromScript(i, d.Path)))
-          .ToList();
-        deleteLines.Reverse();
-        lines.AddRange(deleteLines);
 
         var script = new InstallScript()
         {
@@ -85,109 +74,130 @@ namespace InnovatorAdmin
       }
     }
 
-    private IEnumerable<InstallItem> FillInNullsOnRequiredProperties(XmlElement[] allItems, PackageMetadataProvider metadata)
+    private IEnumerable<XElement> RootItems(XElement element)
     {
-      var newlyRequiredProps = allItems.Where(i => i.Attribute("type") == "Property"
-        && i.Attribute("action") == "edit"
-        && !string.IsNullOrEmpty(i.Attribute("id"))
-        && i.Element("is_required", "0") == "1"
-        && i.Element("default_value").HasValue())
-        .ToArray();
+      var curr = element;
+      while (curr != null && curr.Name.LocalName != "Item")
+        curr = curr.Elements().FirstOrDefault();
 
-      if (newlyRequiredProps.Length > 0)
+      if (curr == null
+        || curr.Name.LocalName != "Item")
       {
-        var doc = newlyRequiredProps[0].NewDoc();
+        yield break;
+      }
+      else if (curr.Parent == null)
+      {
+        yield return curr;
+      }
+      else
+      {
+        foreach (var item in curr.Parent.Elements("Item"))
+          yield return item;
+      }
+    }
+
+    private IEnumerable<InstallItem> FillInNullsOnRequiredProperties(IList<XElement> allItems, PackageMetadataProvider metadata)
+    {
+      var newlyRequiredProps = allItems.Where(i => (string)i.Attribute("type") == "Property"
+        && (string)i.Attribute("action") == "edit"
+        && !string.IsNullOrEmpty((string)i.Attribute("id"))
+        && (string)i.Element("is_required") == "1"
+        && !string.IsNullOrEmpty((string)i.Element("default_value")))
+        .ToList();
+
+      if (newlyRequiredProps.Count > 0)
+      {
+        var doc = new XmlDocument();
         var root = doc.Elem("AML");
         var idx = 0;
 
         foreach (var prop in newlyRequiredProps)
         {
-          string name;
-          metadata.PropById(prop.Attribute("id"), out name);
-          var typeId = prop.Parent().Parent().Attribute("id");
+          metadata.PropById((string)prop.Attribute("id"), out var name);
+          var typeId = (string)prop.Parent.Parent.Attribute("id");
           var typeName = metadata.ItemTypes.Single(i => i.Id == typeId).Name;
           var script = root.Elem("Item").Attr("type", typeName).Attr("action", "edit").Attr("where", "[" + typeName + "]." + name + " is null");
-          script.Elem(name, prop.Element("default_value", ""));
+          script.Elem(name, (string)prop.Element("default_value") ?? "");
           yield return InstallItem.FromScript(script, "_Scripts/NewlyRequiredProp (" + (++idx) + ").xml");
         }
       }
     }
 
-    private void ReplaceIdInTextNode(XmlNode node)
+    private void ReplaceIdInTextNode(XNode node)
     {
       if (node == null)
       {
         return;
       }
-      else if (node is XmlText text)
+      else if (node is XText text)
       {
         if (_idChangeXref.TryGetValue(text.Value, out var newId))
           text.Value = newId;
       }
-      else
+      else if (node is XElement element)
       {
-        foreach (var child in node.ChildNodes.OfType<XmlNode>())
+        foreach (var child in element.Nodes())
           ReplaceIdInTextNode(child);
       }
     }
 
-    private void RemoveChangesToSystemProperties(XmlElement[] allItems)
+    private void RemoveChangesToSystemProperties(IList<XElement> allItems)
     {
-      var sysPropEdit = allItems.Where(i => i.Attribute("type") == "Property"
-        && i.Attribute("action") == "edit"
-        && (i.Attribute("where")?.Contains("name='behavior'") == true
-          || i.Attribute("where")?.Contains("name='itemtype'") == true))
-        .ToArray();
+      var sysPropEdit = allItems.Where(i => (string)i.Attribute("type") == "Property"
+        && (string)i.Attribute("action") == "edit"
+        && (((string)i.Attribute("where"))?.Contains("name='behavior'") == true
+          || ((string)i.Attribute("where"))?.Contains("name='itemtype'") == true))
+        .ToList();
       foreach (var item in sysPropEdit)
       {
-        var parent = item.Parent();
-        item.Detach();
+        var parent = item.Parent;
+        item.Remove();
         CleanUp(parent);
       }
     }
 
-    private void RemoveDeletesForItemsWithMultipleScripts(XmlElement[] allItems)
+    private void RemoveDeletesForItemsWithMultipleScripts(IList<XElement> allItems)
     {
 
       var bestActionPerItem = allItems
-        .Select(el => new { Ref = ItemReference.FromElement(el), Action = el.Attribute("action") })
+        .Select(el => new { Ref = ItemReference.FromElement(el), Action = (string)el.Attribute("action") })
         .GroupBy(i => i.Ref)
         .ToDictionary(g => g.Key, g => g.Max(i => i.Action));
 
       var conflictingDeletesToRemove = allItems
-        .Where(el => el.Attribute("action") == "delete"
+        .Where(el => (string)el.Attribute("action") == "delete"
           && bestActionPerItem[ItemReference.FromElement(el)] != "delete")
         .ToArray();
       foreach (var item in conflictingDeletesToRemove)
       {
-        var parent = item.Parent();
-        item.Detach();
+        var parent = item.Parent;
+        item.Remove();
         CleanUp(parent);
       }
     }
 
-    private void CleanUp(XmlNode node)
+    private void CleanUp(XNode node)
     {
-      if (node.Parent() is XmlElement && !node.Elements().Any())
+      if (node != null
+        && node.Parent is XElement element
+        && !element.Elements().Any())
       {
-        var parent = node.Parent();
-        node.Detach();
+        var parent = element.Parent;
+        element.Remove();
         CleanUp(parent);
       }
     }
-
-
-    public delegate XmlWriter AmlMergeCallback(string path, int progress, XElement baseScript);
 
     /// <summary>
-    /// Writes the difference between two directories
+    /// Returns the difference between two directories
     /// </summary>
     /// <param name="baseDir">The base directory which needs to be transformed</param>
     /// <param name="compareDir">The comparison directory which is what the base directoy should look like after transformation</param>
-    /// <param name="callback">Gets an XML writer to write the merge script given the path and current progress (integer between 0 and 100)</param>
+    /// <param name="scripts">A list of scripts to run and their paths.</param>
+    /// <param name="progress">A callback for the current progress (integer between 0 and 100).</param>
     /// <returns>Metadata regarding the target state</returns>
-    internal PackageMetadataProvider WriteAmlMergeScripts(IPackage baseDir, IPackage compareDir
-      , AmlMergeCallback callback)
+    internal PackageMetadataProvider GetAmlMergeScripts(IPackage baseDir, IPackage compareDir
+      , Dictionary<string, XElement> scripts, Action<int> progress)
     {
       _idChangeXref.Clear();
       Func<IPackageFile, IComparable> keyGetter = i => string.Join("/", i.Path.ToUpperInvariant()
@@ -213,20 +223,16 @@ namespace InnovatorAdmin
         {
           case MergeType.StartOnly: // Delete
             completed++;
-            using (var writer = callback(baseScript.Path, completed * 100 / total, baseScript.Script))
-            {
-              var elem = AmlDiff.GetMergeScript(baseScript.Script, null);
-              if (elem.Elements().Any())
-                elem.WriteTo(writer);
-            }
+            progress?.Invoke(completed * 100 / total);
+            var deleteScript = AmlDiff.GetMergeScript(baseScript.Script, null);
+            if (deleteScript.Elements().Any())
+              scripts.Add(baseScript.Path, deleteScript);
             break;
           case MergeType.DestinationOnly: // Add
             completed++;
-            using (var writer = callback(compareScript.Path, completed * 100 / total, null))
-            {
-              compareScript.Script.WriteTo(writer);
-              metadata.Add(compareScript.Script);
-            }
+            progress?.Invoke(completed * 100 / total);
+            scripts.Add(compareScript.Path, compareScript.Script);
+            metadata.Add(compareScript.Script);
             break;
           default:
             total--;
@@ -239,14 +245,12 @@ namespace InnovatorAdmin
             {
               path = baseScript.Path;
             }
-            using (var writer = callback(path, completed * 100 / total, null))
-            {
-              if (compareScript.Script.Elements("Item").Any(e => (string)e.Attribute("action") != "delete"))
-                metadata.Add(compareScript.Script);
-              var elem = AmlDiff.GetMergeScript(baseScript.Script, compareScript.Script, compareMetadata);
-              if (elem.Elements().Any())
-                elem.WriteTo(writer);
-            }
+            progress?.Invoke(completed * 100 / total);
+            if (compareScript.Script.Elements("Item").Any(e => (string)e.Attribute("action") != "delete"))
+              metadata.Add(compareScript.Script);
+            var editScript = AmlDiff.GetMergeScript(baseScript.Script, compareScript.Script, compareMetadata);
+            if (editScript.Elements().Any())
+              scripts.Add(path, editScript);
             break;
         }
       };

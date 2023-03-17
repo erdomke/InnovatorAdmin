@@ -576,13 +576,8 @@ namespace InnovatorAdmin.Tests
   <last_name>Admin</last_name>
  </Item>
 </AML>");
-      var scripts = new Dictionary<string, XDocument>(StringComparer.OrdinalIgnoreCase);
-      new MergeProcessor().WriteAmlMergeScripts(baseDir, compareDir, (path, progress, deletedScript) =>
-      {
-        var root = new XDocument();
-        scripts[path] = root;
-        return root.CreateWriter();
-      });
+      var scripts = new Dictionary<string, XElement>(StringComparer.OrdinalIgnoreCase);
+      new MergeProcessor().GetAmlMergeScripts(baseDir, compareDir, scripts, null);
       Assert.AreEqual(1, scripts.Count);
       Assert.AreEqual("User/Software Admin.xml", scripts.Keys.Single().ToString());
       Assert.AreEqual(@"<AML>
@@ -621,13 +616,8 @@ namespace InnovatorAdmin.Tests
   </Item>
 </AML>");
 
-      var scripts = new Dictionary<string, XDocument>(StringComparer.OrdinalIgnoreCase);
-      new MergeProcessor().WriteAmlMergeScripts(baseDir, compareDir, (path, progress, deletedScript) =>
-      {
-        var root = new XDocument();
-        scripts[path] = root;
-        return root.CreateWriter();
-      });
+      var scripts = new Dictionary<string, XElement>(StringComparer.OrdinalIgnoreCase);
+      new MergeProcessor().GetAmlMergeScripts(baseDir, compareDir, scripts, null);
 
       Assert.AreEqual(1, scripts.Count);
       Assert.AreEqual("PresentationConfiguration/Activity Assignment Presentation Configuration.xml", scripts.Keys.Single().ToString());
@@ -739,13 +729,8 @@ namespace InnovatorAdmin.Tests
     </Relationships>
   </Item>
 </AML>");
-      var scripts = new Dictionary<string, XDocument>(StringComparer.OrdinalIgnoreCase);
-      new MergeProcessor().WriteAmlMergeScripts(baseDir, compareDir, (path, progress, deletedScript) =>
-      {
-        var root = new XDocument();
-        scripts[path] = root;
-        return root.CreateWriter();
-      });
+      var scripts = new Dictionary<string, XElement>(StringComparer.OrdinalIgnoreCase);
+      new MergeProcessor().GetAmlMergeScripts(baseDir, compareDir, scripts, null);
       Assert.AreEqual(@"<AML>
   <Item type=""ans_Application"" id=""10C4994DCB93471C97C96E7012151C68"" _keyed_name=""Wb"" action=""merge"">
     <allow_custom_import>1</allow_custom_import>
@@ -878,13 +863,8 @@ namespace InnovatorAdmin.Tests
     </Relationships>
   </Item>
 </AML>");
-      var scripts = new Dictionary<string, XDocument>(StringComparer.OrdinalIgnoreCase);
-      new MergeProcessor().WriteAmlMergeScripts(baseDir, compareDir, (path, progress, deletedScript) =>
-      {
-        var root = new XDocument();
-        scripts[path] = root;
-        return root.CreateWriter();
-      });
+      var scripts = new Dictionary<string, XElement>(StringComparer.OrdinalIgnoreCase);
+      new MergeProcessor().GetAmlMergeScripts(baseDir, compareDir, scripts, null);
       Assert.AreEqual(@"<AML>
   <Item type=""ans_Application"" id=""10C4994DCB93471C97C96E7012151C68"" _keyed_name=""Wb"" action=""delete"" />
 </AML>", scripts["App/Wb.xml"].ToString());

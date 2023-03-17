@@ -8,6 +8,8 @@ namespace InnovatorAdmin
 {
   internal class DiffAnnotation
   {
+    public const string OriginalXmlAttribute = "orig_xml";
+
     private bool _textDiffers;
 
     public XElement Original { get; }
@@ -64,7 +66,7 @@ namespace InnovatorAdmin
         else if (diff._textDiffers)
           writer.WriteAttributeString("orig_value", (string)diff.Original);
         else
-          writer.WriteAttributeString("orig_xml", diff.Original.ToString());
+          writer.WriteAttributeString(OriginalXmlAttribute, diff.Original.ToString());
       }
 
       foreach (var node in element.Nodes())

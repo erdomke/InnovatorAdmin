@@ -52,6 +52,7 @@ namespace InnovatorAdmin
         ItemReference.FromFullItem(elem, false) :
         ItemReference.FromItemProp(elem);
     }
+
     public static ItemReference FromItemProp(XmlElement elem)
     {
       if (elem.Elements("Item").Any())
@@ -62,6 +63,25 @@ namespace InnovatorAdmin
         KeyedName = (elem.HasAttribute("keyed_name") ? elem.Attributes["keyed_name"].Value : "")
       };
     }
+
+    public static ItemReference FromElement(System.Xml.Linq.XElement elem)
+    {
+      return elem.Name.LocalName == "Item" ?
+        ItemReference.FromFullItem(elem, false) :
+        ItemReference.FromItemProp(elem);
+    }
+
+    public static ItemReference FromItemProp(System.Xml.Linq.XElement elem)
+    {
+      if (elem.Elements("Item").Any())
+        return FromFullItem(elem.Element("Item"), false);
+
+      return new ItemReference((string)elem.Attribute("type"), (string)elem)
+      {
+        KeyedName = (string)elem.Attribute("keyed_name") ?? ""
+      };
+    }
+
     public static ItemReference FromFullItem(IReadOnlyItem elem, bool getKeyedName)
     {
       var result = new ItemReference();
@@ -71,120 +91,82 @@ namespace InnovatorAdmin
 
     internal static void FillItemRef(ItemReference result, IReadOnlyItem elem, bool getKeyedName)
     {
-      result.Type = elem.Type().Value;
-      if (elem.Attribute("id").Exists)
-      {
-        result.Unique = elem.Attribute("id").Value;
-      }
-      else if (elem.Attribute("where").Exists)
-      {
-        result.Unique = elem.Attribute("where").Value;
-      }
+      FillItemRef(result, elem, getKeyedName
+        , (p, a) => p.Attribute(a).AsString(null)
+        , (p, e) => p.Property(e).AsString(null)
+        , (p, e, a) => p.Property(e).Attribute(a).AsString(null));
+    }
+
+    private static void FillItemRef<T>(ItemReference result, T elem, bool getKeyedName
+      , Func<T, string, string> getAttribute
+      , Func<T, string, string> getElement
+      , Func<T, string, string, string> getElementAttribute)
+    {
+      result.Type = getAttribute(elem, "type");
+      result.Unique = getAttribute(elem, "id")
+        ?? getAttribute(elem, "where")
+        ?? "";
+
       if (getKeyedName)
       {
-        if (result.Type == "FileType" && elem.Property("mimetype").HasValue())
+        if (result.Type == "FileType"
+          && !string.IsNullOrEmpty(getElement(elem, "mimetype")))
         {
-          result.KeyedName = elem.Property("extension").AsString("") + ", "
-            + elem.Property("mimetype").AsString("");
+          result.KeyedName = (getElement(elem, "extension") ?? "") + ", "
+            + (getElement(elem, "mimetype") ?? "");
+        }
+        else if (result.Type == "Identity"
+          && !string.IsNullOrEmpty(getElement(elem, "name")))
+        {
+          result.KeyedName = (getElement(elem, "name") ?? "");
         }
         else
         {
-          IReadOnlyProperty_Base node = elem.Property("id");
-          if (node.Exists && node.KeyedName().Exists)
-          {
-            result.KeyedName = node.KeyedName().Value;
-          }
-          else
-          {
-            result.KeyedName = node.Attribute("_keyed_name").Value
-                            ?? elem.KeyedName().AsString(null)
-                            ?? elem.Property("name").AsString(null);
-          }
+          result.KeyedName = getElementAttribute(elem, "id", "keyed_name")
+            ?? getAttribute(elem, "_keyed_name")
+            ?? getElement(elem, "keyed_name")
+            ?? getElement(elem, "name");
 
-          node = elem.SourceId();
-          if (node.Exists && node.KeyedName().Exists)
+          var sourceKeyedName = getElementAttribute(elem, "source_id", "keyed_name");
+          if (!string.IsNullOrEmpty(sourceKeyedName))
           {
             if (result.KeyedName.IsGuid())
             {
-              var related = elem.RelatedId();
-              if (related.Exists && related.KeyedName().Exists)
-              {
-                result.KeyedName = node.Attribute("keyed_name").Value + " > " + related.Attribute("keyed_name").Value;
-              }
+              var relatedKeyedName = getElementAttribute(elem, "related_id", "keyed_name");
+              if (!string.IsNullOrEmpty(relatedKeyedName))
+                result.KeyedName = sourceKeyedName + " > " + relatedKeyedName;
               else
-              {
-                result.KeyedName = node.Attribute("keyed_name").Value + ": " + result.KeyedName;
-              }
+                result.KeyedName = sourceKeyedName + ": " + result.KeyedName;
             }
-            else if (!string.IsNullOrEmpty(node.Attribute("keyed_name").Value))
+            else 
             {
-              result.KeyedName += " {" + node.Attribute("keyed_name").Value + "}";
+              result.KeyedName += " {" + sourceKeyedName + "}";
             }
           }
         }
       }
     }
+
     public static ItemReference FromFullItem(XmlElement elem, bool getKeyedName)
     {
       var result = new ItemReference();
-      result.Type = elem.Attributes["type"].Value;
-      if (elem.HasAttribute("id"))
-      {
-        result.Unique = elem.Attributes["id"].Value;
-      }
-      else if (elem.HasAttribute("where"))
-      {
-        result.Unique = elem.Attributes["where"].Value;
-      }
-      if (getKeyedName)
-      {
-        if (result.Type == "FileType" && !string.IsNullOrEmpty(elem.Element("mimetype", null)))
-        {
-          result.KeyedName = elem.Element("extension", "") + ", " + elem.Element("mimetype", "");
-        }
-        else if (result.Type == "Identity" && !string.IsNullOrEmpty(elem.Element("name", null)))
-        {
-          result.KeyedName = elem.Element("name", "");
-        }
-        else
-        {
-          var node = elem.Elements(e => e.LocalName == "id" && e.HasAttribute("keyed_name")).SingleOrDefault();
-          if (node != null)
-          {
-            result.KeyedName = node.Attribute("keyed_name");
-          }
-          else
-          {
-            result.KeyedName = elem.Attribute("_keyed_name", null)
-                            ?? elem.Element("keyed_name", null)
-                            ?? elem.Element("name", null);
-          }
-
-          node = elem.Elements(e => e.LocalName == "source_id" && e.HasAttribute("keyed_name")).SingleOrDefault();
-          if (node != null)
-          {
-            if (result.KeyedName.IsGuid())
-            {
-              var related = elem.Elements(e => e.LocalName == "related_id" && e.HasAttribute("keyed_name")).SingleOrDefault();
-              if (related == null)
-              {
-                result.KeyedName = node.Attribute("keyed_name") + ": " + result.KeyedName;
-              }
-              else
-              {
-                result.KeyedName = node.Attribute("keyed_name") + " > " + related.Attribute("keyed_name");
-              }
-            }
-            else if (!string.IsNullOrEmpty(node.Attribute("keyed_name")))
-            {
-              result.KeyedName += " {" + node.Attribute("keyed_name") + "}";
-            }
-          }
-        }
-      }
-
+      FillItemRef(result, elem, getKeyedName
+        , (p, a) => p.Attribute(a, null)
+        , (p, e) => p.Element(e, null)
+        , (p, e, a) => p.Element(e)?.Attribute(a, null));
       return result;
     }
+
+    public static ItemReference FromFullItem(System.Xml.Linq.XElement elem, bool getKeyedName)
+    {
+      var result = new ItemReference();
+      FillItemRef(result, elem, getKeyedName
+        , (p, a) => (string)p.Attribute(a)
+        , (p, e) => (string)p.Element(e)
+        , (p, e, a) => (string)p.Element(e)?.Attribute(a));
+      return result;
+    }
+
     public static IEnumerable<ItemReference> FromFullItems(XmlElement elem, bool getKeyedName)
     {
       var node = elem;

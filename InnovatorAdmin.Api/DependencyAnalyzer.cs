@@ -1,6 +1,7 @@
 ﻿using Innovator.Client;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Xml;
 
@@ -178,6 +179,15 @@ namespace InnovatorAdmin
       _dependencies.Clear();
       _definitions.Clear();
 
+      var originalXml = elem.GetAttribute(DiffAnnotation.OriginalXmlAttribute);
+      if (!string.IsNullOrEmpty(originalXml))
+      {
+        Debug.Print("Found original XML for " + itemRef.KeyedName);
+        var doc = new XmlDocument();
+        doc.LoadXml(originalXml);
+        elem = doc.DocumentElement;
+      }
+
       if (existingDependencies != null) _dependencies.UnionWith(existingDependencies);
 
       _elem = elem;
@@ -242,12 +252,28 @@ namespace InnovatorAdmin
     {
       ItemReference topDefn;
       ItemReference currValue;
+
+      var refToDeleteRef = _allItemDependencies.Keys
+        .Where(i => i.Type == InstallItem.ScriptType
+          && i.KeyedName.IndexOf("Delete", StringComparison.OrdinalIgnoreCase) >= 0
+          && i.Origin != null)
+        .ToDictionary(i => i.Origin);
+
       foreach (var kvp in _allItemDependencies)
       {
+        var isDelete = kvp.Key.Type == InstallItem.ScriptType
+          && kvp.Key.KeyedName.IndexOf("Delete", StringComparison.OrdinalIgnoreCase) >= 0;
         foreach (var value in kvp.Value.ToList())
         {
           currValue = value;
-          if (currValue.Unique.StartsWith(ItemTypeByNameWhere))
+          if (isDelete && refToDeleteRef.TryGetValue(value, out var otherDelete))
+          {
+            // Make sure that dependencies between delete scripts are handled and sorted properly
+            kvp.Value.Remove(value);
+            if (otherDelete != kvp.Key)
+              kvp.Value.Add(otherDelete);
+          }
+          else if (currValue.Unique.StartsWith(ItemTypeByNameWhere))
           {
             // If there is a dependency on an item type solely by name, add dependences on the
             // item type creation script and all subsequent edit scripts

@@ -55,11 +55,12 @@ namespace InnovatorAdmin
         loops++;
       }
 
+
       results = results
         .Where(i => !i.IsDelete())
         .Concat(results
           .Where(i => i.IsDelete())
-          .OrderByDescending(DefaultInstallOrder)
+          .Reverse()
         ).ToArray();
 
       return results;
