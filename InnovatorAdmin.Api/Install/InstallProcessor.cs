@@ -132,26 +132,33 @@ namespace InnovatorAdmin
       foreach (var group in linesToInstall
         .GroupBy(l => l.Script.GetAttribute("type")))
       {
-        var ids = group
-          .Select(l => l.Script.GetAttribute("id"))
-          .Where(i => !string.IsNullOrEmpty(i))
-          .Distinct()
-          .ToList();
-        var configIds = group
-          .Select(l => l.Script.GetAttribute("_config_id"))
-          .Where(i => !string.IsNullOrEmpty(i))
-          .Distinct()
-          .ToList();
-        if (ids.Count > 0)
-          lockedItems.AddRange(_conn.Apply(new Command((IFormattable)$@"<Item type='{group.Key}' action='get' select='locked_by_id'>
-  <id condition='in'>{ids}</id>
-  <locked_by_id condition='ne'>{_conn.UserId}</locked_by_id>
-</Item>")).Items());
-        if (configIds.Count > 0)
-          lockedItems.AddRange(_conn.Apply(new Command((IFormattable)$@"<Item type='{group.Key}' action='get' select='locked_by_id'>
-  <config_id condition='in'>{configIds}</config_id>
-  <locked_by_id condition='ne'>{_conn.UserId}</locked_by_id>
-</Item>")).Items());
+        try
+        {
+          var ids = group
+            .Select(l => l.Script.GetAttribute("id"))
+            .Where(i => !string.IsNullOrEmpty(i))
+            .Distinct()
+            .ToList();
+          var configIds = group
+            .Select(l => l.Script.GetAttribute("_config_id"))
+            .Where(i => !string.IsNullOrEmpty(i))
+            .Distinct()
+            .ToList();
+          if (ids.Count > 0)
+            lockedItems.AddRange(_conn.Apply(new Command((IFormattable)$@"<Item type='{group.Key}' action='get' select='locked_by_id'>
+    <id condition='in'>{ids}</id>
+    <locked_by_id condition='ne'>{_conn.UserId}</locked_by_id>
+  </Item>")).Items());
+          if (configIds.Count > 0)
+            lockedItems.AddRange(_conn.Apply(new Command((IFormattable)$@"<Item type='{group.Key}' action='get' select='locked_by_id'>
+    <config_id condition='in'>{configIds}</config_id>
+    <locked_by_id condition='ne'>{_conn.UserId}</locked_by_id>
+  </Item>")).Items());
+        }
+        catch (ServerException ex)
+        {
+          ;
+        }
       }
 
       if (lockedItems.Count > 0)

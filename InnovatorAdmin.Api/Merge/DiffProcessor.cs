@@ -6,7 +6,7 @@ using System.Xml.Linq;
 
 namespace InnovatorAdmin
 {
-  public class MergeProcessor
+  public class DiffProcessor
   {
     private Dictionary<string, string> _idChangeXref = new Dictionary<string, string>();
     private DependencySorter _sorter = new DependencySorter();
@@ -15,9 +15,9 @@ namespace InnovatorAdmin
 
     public DependencySorter Sorter => _sorter;
 
-    public InstallScript Merge(IPackage baseDir, IPackage compareDir)
+    public InstallScript Diff(IPackage baseDir, IPackage compareDir)
     {
-      using (SharedUtils.StartActivity("MergeProcessor.Merge", "Calculating diffs"))
+      using (SharedUtils.StartActivity("DiffProcessor.Diff", "Calculating diffs"))
       {
         var scripts = new Dictionary<string, XElement>(StringComparer.OrdinalIgnoreCase);
         var metadata = GetAmlMergeScripts(baseDir, compareDir, scripts, progress => 
@@ -136,6 +136,8 @@ namespace InnovatorAdmin
       }
       else if (node is XElement element)
       {
+        if (_idChangeXref.TryGetValue((string)element.Attribute("where") ?? "", out var newWhere))
+          element.SetAttributeValue("where", newWhere);
         foreach (var child in element.Nodes())
           ReplaceIdInTextNode(child);
       }
@@ -293,7 +295,8 @@ namespace InnovatorAdmin
               {
                 if (baseScript.Key != compareScript.Key)
                 {
-                  _idChangeXref[compareScript.Id] = baseScript.Id;
+                  _idChangeXref[compareScript.Id ?? (string)compareScript.Item.Attribute("where")]
+                    = baseScript.Id ?? (string)baseScript.Item.Attribute("where");
                   compareScript.Script.DescendantsAndSelf("Item").FirstOrDefault()?.SetAttributeValue("id", baseScript.Id);
                 }
 
@@ -379,6 +382,7 @@ namespace InnovatorAdmin
       public string Id { get; }
       public string Type { get; }
       public XElement Script { get; }
+      public XElement Item { get; }
 
       public AmlScript(IPackageFile file, IPackage package)
       {
@@ -393,11 +397,14 @@ namespace InnovatorAdmin
           && (item.Parent == null
             || !item.Parent.Elements("Item").Skip(1).Any()))
         {
+          Item = item;
           Type = (string)item.Attribute("type");
           Id = (string)item.Attribute("id");
           KeyedName = (string)item.Attribute("_keyed_name");
           var parts = new[] {
-            ((string)(item.Attribute("id") ?? item.Attribute("where")))?.ToUpperInvariant(),
+            ((string)(item.Attribute("id")
+              ?? item.Attribute("_config_id")
+              ?? item.Attribute("where")))?.ToUpperInvariant(),
             (string)item.Attribute(XmlFlags.Attr_ScriptType),
             (string)item.Attribute("action")
           };

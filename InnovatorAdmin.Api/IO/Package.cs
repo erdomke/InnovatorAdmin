@@ -185,6 +185,7 @@ namespace InnovatorAdmin
       installScript.Title = manifest.DocumentElement.GetAttribute("title");
       if (manifest.DocumentElement.HasAttribute("website"))
         installScript.Website = new Uri(manifest.DocumentElement.GetAttribute("website"));
+      installScript.IsMerge = manifest.DocumentElement.GetAttribute("merge") == "1";
 
       foreach (var child in manifest.DocumentElement.ChildNodes.OfType<XmlElement>())
       {
@@ -315,6 +316,7 @@ namespace InnovatorAdmin
         manifestWriter.WriteAttributeString("title", script.Title);
         if (script.Website != null)
           manifestWriter.WriteAttributeString("website", script.Website.ToString());
+        manifestWriter.WriteAttributeString("merge", script.IsMerge ? "1" : "0");
 
         // Achieve consistent file names regardless of the ordering.
         foreach (var line in script.Lines)

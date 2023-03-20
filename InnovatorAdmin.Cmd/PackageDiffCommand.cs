@@ -27,6 +27,9 @@ namespace InnovatorAdmin.Cmd
     [Option("clean", HelpText = "Clean the output file/directory before writing the new content")]
     public bool CleanOutput { get; set; }
 
+    [Option("merge", HelpText = "Create a package which requires a merge step with the target database")]
+    public bool MergePackage { get; set; }
+
     [Option("sort-suggest", HelpText = "An XML file which controls how the results are sorted.")]
     public string SortSuggest { get; set; }
 
@@ -56,13 +59,14 @@ namespace InnovatorAdmin.Cmd
       var script = default(InstallScript);
 
       var progress = new ProgressLogger(logger);
-      var processor = new MergeProcessor();
+      var processor = new DiffProcessor();
       if (!string.IsNullOrEmpty(FirstOfGroup))
         processor.Sorter.FirstOfGroup.UnionWith(FirstOfGroup.Split(','));
       if (!string.IsNullOrEmpty(SortSuggest))
         processor.Sorter.Load(XElement.Load(SortSuggest));
       processor.ProgressChanged += progress.Report;
-      script = processor.Merge(dirs[0], dirs[1]);
+      script = processor.Diff(dirs[0], dirs[1]);
+      script.IsMerge = MergePackage;
       
       SharedOptions.WritePackage(script, Output, MultipleDirectories, CleanOutput);
       return Task.FromResult(0);

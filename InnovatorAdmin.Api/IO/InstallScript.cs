@@ -14,6 +14,7 @@ namespace InnovatorAdmin
     public string Description { get; set; }
     public Uri ExportUri { get; set; }
     public string ExportDb { get; set; }
+    public bool IsMerge { get; set; }
     public IEnumerable<InstallItem> Lines { get; set; }
     public DateTime? Modified { get; set; }
     public List<Version> SupportedVersions { get { return _supportedVersions; } }

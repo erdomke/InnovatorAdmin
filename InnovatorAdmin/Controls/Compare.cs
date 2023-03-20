@@ -114,11 +114,11 @@ namespace InnovatorAdmin.Controls
 
     private void GetPatchPackage(InstallScript start, InstallScript dest)
     {
-      var processor = new MergeProcessor();
+      var processor = new DiffProcessor();
       ProgressDialog.Display(this, d =>
       {
         processor.ProgressChanged += (sender, e) => d.SetProgress(e.Progress);
-        _wizard.InstallScript = processor.Merge(start, dest);
+        _wizard.InstallScript = processor.Diff(start, dest);
       });
       _wizard.GoToStep(new ExportOptions());
     }

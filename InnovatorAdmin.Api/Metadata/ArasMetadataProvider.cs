@@ -180,7 +180,7 @@ namespace InnovatorAdmin
     </Item>
   </related_id>
   <source_id>@0</source_id>
-</Item>", true, false, itemtype.Id);
+</Item>", true, false, itemtype.Id).ConfigureAwait(false);
       var states = result.Items()
         .SelectMany(i => i.RelatedItem().Relationships().OfType<LifeCycleState>())
         .Select(i => i.NameProp().Value).ToArray();
@@ -293,7 +293,7 @@ namespace InnovatorAdmin
                                     </Item>", true, false).ToTask();
 
       // Load in the item types
-      var r = await itemTypes;
+      var r = await itemTypes.ConfigureAwait(false);
       ItemType result;
 
       foreach (var itemTypeData in r.Items())
@@ -305,7 +305,7 @@ namespace InnovatorAdmin
       _itemTypesById = _itemTypesByName.Values.ToDictionary(i => i.Id);
 
       // Load in the relationship types
-      r = await relTypes;
+      r = await relTypes.ConfigureAwait(false);
       ItemType relType;
       ItemType source;
       foreach (var rel in r.Items())
@@ -324,7 +324,7 @@ namespace InnovatorAdmin
       }
 
       // Sorted Types
-      r = await sortedProperties;
+      r = await sortedProperties.ConfigureAwait(false);
       foreach (var prop in r.Items())
       {
         if (_itemTypesByName.TryGetValue(prop.SourceId().Attribute("name").Value, out result))
@@ -334,7 +334,7 @@ namespace InnovatorAdmin
       }
 
       // Float props
-      r = await floatProps;
+      r = await floatProps.ConfigureAwait(false);
       foreach (var floatProp in r.Items())
       {
         if (_itemTypesByName.TryGetValue(floatProp.SourceId().Attribute("name").Value.ToLowerInvariant(), out result))
@@ -404,13 +404,15 @@ namespace InnovatorAdmin
   </related_id>
 </Item>", true, false).ToTask();
       var serverEvents = _conn.ApplyAsync(@"<Item type='Server Event' action='get' related_expand='0' select='source_id,server_event,related_id,sort_order'>
+  <related_id condition='is not null' />
 </Item>", true, false).ToTask();
       var morphae = _conn.ApplyAsync(@"<Item type='Morphae' action='get' related_expand='0' select='source_id,related_id'>
+  <related_id condition='is not null' />
 </Item>", true, false).ToTask();
 
-      Methods = (await methods).Items().Select(i => new Method(i)).ToList();
+      Methods = (await methods.ConfigureAwait(false)).Items().Select(i => new Method(i)).ToList();
 
-      _systemIdentities = (await sysIdents).Items()
+      _systemIdentities = (await sysIdents.ConfigureAwait(false)).Items()
         .Select(i =>
         {
           var itemRef = ItemReference.FromFullItem(i, false);
@@ -419,7 +421,7 @@ namespace InnovatorAdmin
         }).ToDictionary(i => i.Unique);
 
 
-      _sql = (await sqls).Items()
+      _sql = (await sqls.ConfigureAwait(false)).Items()
         .Select(i =>
         {
           var itemRef = Sql.FromFullItem(i, false);
@@ -428,7 +430,7 @@ namespace InnovatorAdmin
           return itemRef;
         }).ToDictionary(i => i.KeyedName.ToLowerInvariant(), StringComparer.OrdinalIgnoreCase);
 
-      var r = (await customProps);
+      var r = (await customProps.ConfigureAwait(false));
       foreach (var customProp in r.Items())
       {
         var itemType = customProp.SourceItem();
@@ -444,25 +446,25 @@ namespace InnovatorAdmin
         };
       }
 
-      PolyItemLists = (await polyLists).Items()
+      PolyItemLists = (await polyLists.ConfigureAwait(false)).Items()
         .OfType<Innovator.Client.Model.Property>()
         .Select(i => new ItemReference("List", i.DataSource().Value)
         {
           KeyedName = i.DataSource().KeyedName().Value
         }).ToArray();
 
-      Sequences = (await sequences).Items().Select(i => ItemReference.FromFullItem(i, true)).ToArray();
+      Sequences = (await sequences.ConfigureAwait(false)).Items().Select(i => ItemReference.FromFullItem(i, true)).ToArray();
 
       try
       {
-        CmfGeneratedTypes = new HashSet<string>((await elementTypes).Items().SelectMany(x =>
+        CmfGeneratedTypes = new HashSet<string>((await elementTypes.ConfigureAwait(false)).Items().SelectMany(x =>
         {
           var relations = x.Relationships().Select(y => y.Property("generated_type").Value).ToList();
           relations.Add(x.Property("generated_type").Value);
           return relations;
         }));
 
-        CmfLinkedTypes = (await contentTypes).Items().ToDictionary(x => x.Property("linked_item_type").Value, y => ItemReference.FromFullItem(y, true));
+        CmfLinkedTypes = (await contentTypes.ConfigureAwait(false)).Items().ToDictionary(x => x.Property("linked_item_type").Value, y => ItemReference.FromFullItem(y, true));
       }
       catch (ServerException)
       {
@@ -472,7 +474,7 @@ namespace InnovatorAdmin
       try
       {
         TocPresentationConfigs.Clear();
-        TocPresentationConfigs.UnionWith((await presentationConfigs)
+        TocPresentationConfigs.UnionWith((await presentationConfigs.ConfigureAwait(false))
           .Items()
           .Select(i => i.RelatedItem())
           .Where(i => i.Relationships().Count() == 1
@@ -484,7 +486,7 @@ namespace InnovatorAdmin
         //TODO: Do something
       }
 
-      foreach (var serverEvent in (await serverEvents).Items())
+      foreach (var serverEvent in (await serverEvents.ConfigureAwait(false)).Items())
       {
         var ev = new ServerEvent(serverEvent);
         if (_itemTypesById.TryGetValue(serverEvent.SourceId().Value, out var itemType))
@@ -494,7 +496,7 @@ namespace InnovatorAdmin
           method.IsServerEvent = true;
       }
 
-      foreach (var poly in (await morphae).Items())
+      foreach (var poly in (await morphae.ConfigureAwait(false)).Items())
       {
         if (_itemTypesById.TryGetValue(poly.SourceId().Value, out var itemType))
           itemType.Morphae.Add(poly.RelatedId().Attribute("name").Value ?? poly.RelatedId().KeyedName().Value);
