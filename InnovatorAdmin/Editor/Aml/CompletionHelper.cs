@@ -428,68 +428,8 @@ namespace InnovatorAdmin.Editor
               switch (attrName)
               {
                 case "action":
-                  var baseMethods = new string[] {"ActivateActivity"
-                    , "add"
-                    , "AddHistory"
-                    , "AddItem"
-                    , "ApplyUpdate"
-                    , "BuildProcessReport"
-                    , "CancelWorkflow"
-                    , "closeWorkflow"
-                    , "copy"
-                    , "copyAsIs"
-                    , "copyAsNew"
-                    , "create"
-                    , "delete"
-                    , "edit"
-                    , "EmailItem"
-                    , "EvaluateActivity"
-                    , "get"
-                    , "getAffectedItems"
-                    , "GetInheritedServerEvents"
-                    , "getItemAllVersions"
-                    , "GetItemConfig"
-                    , "getItemLastVersion"
-                    , "getItemNextStates"
-                    , "getItemRelationships"
-                    , "GetItemRepeatConfig"
-                    , "getItemWhereUsed"
-                    , "GetMappedPath"
-                    , "getPermissions"
-                    , "getRelatedItem"
-                    , "GetUpdateInfo"
-                    , "instantiateWorkflow"
-                    , "lock"
-                    , "merge"
-                    , "New Workflow Map"
-                    , "promoteItem"
-                    , "purge"
-                    , "recache"
-                    , "replicate"
-                    , "resetAllItemsAccess"
-                    , "resetItemAccess"
-                    , "resetLifecycle"
-                    , "setDefaultLifecycle"
-                    , "skip"
-                    , "startWorkflow"
-                    , "unlock"
-                    , "update"
-                    , "ValidateWorkflowMap"
-                    , "version"};
-
                   var aras = _conn as Innovator.Client.Connection.IArasConnection;
                   var version = aras?.Version?.Major ?? -1;
-
-                  var methods = (IEnumerable<string>)baseMethods;
-                  if (version < 10)
-                    methods = methods.Concat(Enumerable.Repeat("checkImportedItemType", 1));
-                  if (version < 11)
-                    methods = methods.Concat(Enumerable.Repeat("exportItemType", 1));
-                  if (version < 0 || version >= 10)
-                    methods = methods.Concat(Enumerable.Repeat("VaultServerEvent", 1));
-                  if (version < 0 || version >= 11)
-                    methods = methods.Concat(new string[] { "GetInheritedServerEvents", "getHistoryItems" });
-
                   items = _metadata.Methods
                     .Where(m => m.IsServerMethod)
                     .Select(m => (ICompletionData)new AttributeValueCompletionData()
@@ -497,7 +437,7 @@ namespace InnovatorAdmin.Editor
                       Text = m.KeyedName,
                       Image = Icons.ForMethod(m).Wpf,
                       Description = Tooltips.Documentation(m.Documentation, "method")
-                    }).Concat(methods.Select(m => (ICompletionData)new AttributeValueCompletionData()
+                    }).Concat(CoreActions.GetActions(version).Select(m => (ICompletionData)new AttributeValueCompletionData()
                     {
                       Text = m,
                       Image = Icons.DatabaseMethod16.Wpf,

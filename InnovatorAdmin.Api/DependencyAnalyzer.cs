@@ -1,8 +1,12 @@
 ﻿using Innovator.Client;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Xml;
 
 namespace InnovatorAdmin
@@ -286,7 +290,7 @@ namespace InnovatorAdmin
               ;
             if (topDefn == null)
             {
-              System.Diagnostics.Debug.Print("Unable to find definition for " + currValue.Unique);
+              Debug.Print("Unable to find definition for " + currValue.Unique);
             }
             else
             {
@@ -327,6 +331,17 @@ namespace InnovatorAdmin
           {
             KeyedName = elem.Attributes["type"].Value
           }, elem, elem, masterRef);
+        }
+
+        if (!string.IsNullOrEmpty(elem.GetAttribute("action")))
+        {
+          // AML with a custom action
+          var methodRef = _metadata.Methods
+            .FirstOrDefault(m => m.KeyedName == elem.GetAttribute("action"));
+          if (methodRef != null)
+          {
+            AddDependency(methodRef.Clone(), elem, elem, masterRef);
+          }
         }
       }
 
@@ -395,6 +410,27 @@ namespace InnovatorAdmin
       {
         VisitNode(ssvcElement, masterRef);
       }
+      else if (elem.LocalName == "document"
+        && elem.ChildNodes.OfType<XmlText>().FirstOrDefault()?.Value.Trim().StartsWith("{") == true)
+      {
+        // A JSON document
+        try
+        {
+          using (var doc = JsonDocument.Parse(elem.InnerText))
+            VisitJson(doc.RootElement, elem, masterRef);
+        }
+        catch (JsonException) { }
+      }
+      else if (elem.LocalName == "method_code"
+        && elem.Parent().LocalName == "Item"
+        && elem.Parent().Attribute("type") == "Method"
+        && elem.Parent().Element("method_type", "") == "C#")
+      {
+        // A C# server method
+        var names = new HashSet<string>(GetCSharpMethodCalls(elem.InnerText));
+        foreach (var methodRef in _metadata.Methods.Where(m => names.Contains(m.KeyedName)))
+          AddDependency(methodRef.Clone(), elem.Parent(), elem, masterRef);
+      }
       else if (elem != _elem && elem.LocalName == "Item" && elem.HasAttribute("type")
         && elem.Attribute("action", "") == "get"
         && (elem.HasAttribute("id") || elem.HasAttribute("where")))
@@ -411,7 +447,7 @@ namespace InnovatorAdmin
       {
         if (elem != _elem && elem.LocalName == "Item"
           && elem.HasAttribute("type") && elem.HasAttribute("id")
-          && elem.Attribute("action", "") != "edit")
+          && elem.Attribute("action", "edit") != "edit")
         {
           _definitions.Add(ItemReference.FromFullItem(elem, elem.Attribute("type") == "ItemType"));
         }
@@ -436,6 +472,31 @@ namespace InnovatorAdmin
             }
           }
           VisitNode(child, masterRef);
+        }
+      }
+    }
+
+    private void VisitJson(JsonElement element, XmlElement propertyTag, ItemReference masterRef)
+    {
+      foreach (var property in element.EnumerateObject())
+      {
+        if (property.Name == "on_execute"
+          && property.Value.ValueKind == JsonValueKind.String
+          && property.Value.GetString().IsGuid())
+        {
+          AddDependency(new ItemReference("Method", "[Method].[config_id] = '" + property.Value.GetString() + "'"), propertyTag.Parent(), propertyTag, masterRef);
+        }
+        else if (property.Value.ValueKind == JsonValueKind.Array)
+        {
+          foreach (var item in property.Value.EnumerateArray())
+          {
+            if (item.ValueKind == JsonValueKind.Object)
+              VisitJson(item, propertyTag, masterRef);
+          }
+        }
+        else if (property.Value.ValueKind == JsonValueKind.Object)
+        {
+          VisitJson(property.Value, propertyTag, masterRef);
         }
       }
     }
@@ -584,6 +645,92 @@ namespace InnovatorAdmin
       return parsed.OfType<SqlName>()
         .Where(n => string.Equals(n[0].Text, "innovator", StringComparison.OrdinalIgnoreCase)
           || (!n.Any(l => l.Text == ".") && !n[0].Text.StartsWith("@")));
+    }
+
+    public static IEnumerable<string> GetCSharpMethodCalls(string code)
+    {
+      var methods = new HashSet<string>();
+      try
+      {
+        code = $@"public class MethodCode
+{{
+  public object Item()
+  {{
+{code}
+  }}
+}}";
+        var root = CSharpSyntaxTree.ParseText(code).GetCompilationUnitRoot();
+        foreach (var invocation in root.DescendantNodes().OfType<InvocationExpressionSyntax>())
+        {
+          var identifier = invocation.Expression.DescendantNodesAndSelf()
+            .OfType<IdentifierNameSyntax>()
+            .LastOrDefault();
+          var name = identifier?.Identifier.Text;
+          if (name == "newItem"
+            && invocation.ArgumentList.Arguments.Count == 2)
+          {
+            var actionLiterals = GetStringLiterals(invocation.ArgumentList.Arguments[1].Expression).ToList();
+            if (actionLiterals.Count == 1)
+              methods.Add(actionLiterals[0]);
+          }
+          else if ((name == "apply" || name == "setAction")
+            && invocation.ArgumentList.Arguments.Count == 1)
+          {
+            var actionLiterals = GetStringLiterals(invocation.ArgumentList.Arguments[0].Expression).ToList();
+            if (actionLiterals.Count == 1)
+              methods.Add(actionLiterals[0]);
+          }
+          else if ((name == "applyAML" || name == "loadAML")
+            && invocation.ArgumentList.Arguments.Count == 1)
+          {
+            methods.UnionWith(GetStringLiterals(invocation.ArgumentList.Arguments[0].Expression)
+              .Where(s => s.StartsWith("<"))
+              .SelectMany(GetAmlActions));
+          }
+          else if ((name == "apply" || name == "setAction")
+            && invocation.ArgumentList.Arguments.Count == 1)
+          {
+            var actionLiterals = GetStringLiterals(invocation.ArgumentList.Arguments[0].Expression).ToList();
+            if (actionLiterals.Count == 1)
+              methods.Add(actionLiterals[0]);
+          }
+          // applySQL
+        }
+      }
+      catch (Exception) { }
+      methods.ExceptWith(CoreActions.GetActions(int.MaxValue));
+      return methods;
+    }
+
+    private static IEnumerable<string> GetAmlActions(string xmlString)
+    {
+      var results = new List<string>();
+      try
+      {
+        using (var reader = new StringReader(xmlString))
+        using (var xml = XmlReader.Create(reader))
+        {
+          while (xml.Read())
+          {
+            if (xml.NodeType == XmlNodeType.Element
+              && xml.LocalName == "Item"
+              && !string.IsNullOrEmpty(xml.GetAttribute("action")))
+            {
+              results.Add(xml.GetAttribute("action"));
+            }
+          }
+        }
+      }
+      catch (XmlException) { }
+      return results;
+    }
+
+    private static IEnumerable<string> GetStringLiterals(ExpressionSyntax expressionSyntax)
+    {
+      return expressionSyntax.DescendantNodesAndSelf()
+        .OfType<LiteralExpressionSyntax>()
+        .Select(l => l.Token.Value)
+        .OfType<string>();
     }
   }
 }

@@ -174,7 +174,7 @@ namespace InnovatorAdmin
           {
             Message = rootMessage + " Select `Retry` to unlock these items and `Ignore` to proceed."
           };
-          HandleErrorDefault(args, null);
+          HandleErrorDefault(args, null, Enumerable.Empty<InstallItem>());
           if (args.RecoveryOption == RecoveryOption.Abort)
             throw new InvalidOperationException(rootMessage);
 
@@ -188,8 +188,11 @@ namespace InnovatorAdmin
         }
       }
 
-      foreach (var line in linesToInstall)
+      var offset = _currLine;
+      var deferStart = linesToInstall.Count;
+      for (var i = 0; i < linesToInstall.Count; i++)
       {
+        var line = linesToInstall[i];
         repeat = true;
         _logger.LogInformation("Performing {Line} ({Index} of {Count})", line.ToString(), _currLine + 1, _lines.Count);
         ReportProgress((int)(_currLine * 80.0 / _lines.Count), string.Format("Performing {0} ({1} of {2})", line.ToString(), _currLine + 1, _lines.Count));
@@ -315,7 +318,8 @@ namespace InnovatorAdmin
               else
                 args.Message = $"Error installing {line.Reference.Type}, {line.Reference.KeyedName}: {ex.Message}";
 
-              HandleErrorDefault(args, query);
+              var skipCount = _currLine - offset;
+              HandleErrorDefault(args, query, linesToInstall.Skip(skipCount).Take(deferStart - skipCount));
               switch (args.RecoveryOption)
               {
                 case RecoveryOption.Abort:
@@ -323,6 +327,10 @@ namespace InnovatorAdmin
                 case RecoveryOption.Retry:
                   query = args.NewQuery ?? query;
                   _logger?.LogInformation("{NewQuery}", SharedUtils.TidyXml(query.WriteTo, false));
+                  break;
+                case RecoveryOption.Defer:
+                  linesToInstall.Add(line);
+                  repeat = false;
                   break;
                 default: // case RecoveryOption.Skip:
                   repeat = false;
@@ -407,7 +415,7 @@ namespace InnovatorAdmin
       }
     }
 
-    private void HandleErrorDefault(RecoverableErrorEventArgs args, XmlNode query)
+    private void HandleErrorDefault(RecoverableErrorEventArgs args, XmlNode query, IEnumerable<InstallItem> remaining)
     {
       _logger?.LogError(args.Exception, args.Message);
 
@@ -425,6 +433,13 @@ namespace InnovatorAdmin
         ((XmlElement)query).SetAttribute("action", "edit");
         args.NewQuery = query;
         args.RecoveryOption = RecoveryOption.Retry;
+        isAuto = true;
+      }
+      else if ((query?.Attribute("action") == "delete" || query?.Attribute("action") == "purge")
+        && remaining.Any()
+        && remaining.All(l => l.Name.StartsWith("delete of ", StringComparison.OrdinalIgnoreCase)))
+      {
+        args.RecoveryOption = RecoveryOption.Defer;
         isAuto = true;
       }
 

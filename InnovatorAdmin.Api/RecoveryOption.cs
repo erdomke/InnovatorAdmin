@@ -11,16 +11,20 @@ namespace InnovatorAdmin
   public enum RecoveryOption
   {
     /// <summary>
-    /// Abort installation
+    /// Abort installation immediately
     /// </summary>
     Abort,
     /// <summary>
-    /// Retry the problematic installation step
+    /// Retry the problematic installation step immediately
     /// </summary>
     Retry,
     /// <summary>
     /// Skip the problematic installation step
     /// </summary>
-    Skip
+    Skip,
+    /// <summary>
+    /// Retry the problematic installation step once more after all the other steps are complete
+    /// </summary>
+    Defer,
   }
 }
