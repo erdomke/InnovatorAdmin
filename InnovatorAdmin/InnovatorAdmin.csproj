@@ -8,7 +8,7 @@
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <Authors>erdomke</Authors>
-    <Version>22.350.31108</Version>
+    <Version>23.081.35095</Version>
     <ApplicationIcon>InnovatorAdmin.ico</ApplicationIcon>
     <!--
     <PublishSingleFile>true</PublishSingleFile>
