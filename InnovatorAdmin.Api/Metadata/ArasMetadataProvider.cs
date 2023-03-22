@@ -68,11 +68,6 @@ namespace InnovatorAdmin
     public HashSet<string> CmfGeneratedTypes { get; private set; } = new HashSet<string>();
 
     /// <summary>
-    /// Gets the IDs of all the TOC presentation configs.
-    /// </summary>
-    public HashSet<string> TocPresentationConfigs { get; } = new HashSet<string>();
-
-    /// <summary>
     /// Dictionary of all ItemTypes linked from contentTypes
     /// </summary>
     public Dictionary<string, ItemReference> CmfLinkedTypes { get; private set; } = new Dictionary<string, ItemReference>();
@@ -391,18 +386,6 @@ namespace InnovatorAdmin
     </Item>
   </linked_item_type>
 </Item>", true, false).ToTask();
-      var presentationConfigs = _conn.ApplyAsync(@"<Item type='ITPresentationConfiguration' action='get' select='id,related_id'>
-  <related_id>
-    <Item type='PresentationConfiguration' action='get' select='id'>
-      <name condition='like'>*_TOC_Configuration</name>
-      <color condition='is null'></color>
-      <Relationships>
-        <Item action='get' type='cui_PresentConfigWinSection' select='id' />
-        <Item action='get' type='PresentationCommandBarSection' select='id,related_id(id)' />
-      </Relationships>
-    </Item>
-  </related_id>
-</Item>", true, false).ToTask();
       var serverEvents = _conn.ApplyAsync(@"<Item type='Server Event' action='get' related_expand='0' select='source_id,server_event,related_id,sort_order'>
   <related_id condition='is not null' />
 </Item>", true, false).ToTask();
@@ -469,21 +452,6 @@ namespace InnovatorAdmin
       catch (ServerException)
       {
         //TODO: Do something when cmf types don't exist
-      }
-
-      try
-      {
-        TocPresentationConfigs.Clear();
-        TocPresentationConfigs.UnionWith((await presentationConfigs.ConfigureAwait(false))
-          .Items()
-          .Select(i => i.RelatedItem())
-          .Where(i => i.Relationships().Count() == 1
-            && i.Relationships().Single().RelatedId().KeyedName().AsString("").EndsWith("_TOC_Content"))
-          .Select(i => i.Id()));
-      }
-      catch (ServerException)
-      {
-        //TODO: Do something
       }
 
       foreach (var serverEvent in (await serverEvents.ConfigureAwait(false)).Items())

@@ -31,7 +31,7 @@ namespace InnovatorAdmin
     {
       if (create)
         throw new NotSupportedException();
-      return _files.TryGetValue(path.Trim(), out file);
+      return _files.TryGetValue(path.Replace('\\', '/').Trim(), out file); ;
     }
 
     public IEnumerable<IPackageFile> Files()

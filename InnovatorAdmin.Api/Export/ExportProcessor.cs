@@ -1384,14 +1384,6 @@ namespace InnovatorAdmin
       {
         elem.Detach();
       }
-
-      elemsToRemove = doc.ElementsByXPath("//Relationships/Item[@type='ITPresentationConfiguration']")
-        .Where(e => _metadata.TocPresentationConfigs.Contains(e.Element("related_id")?.InnerText))
-        .ToList();
-      foreach (var elem in elemsToRemove)
-      {
-        elem.Detach();
-      }
     }
 
     private void RemoveXPropertyFlattenRelationships(XmlDocument doc)

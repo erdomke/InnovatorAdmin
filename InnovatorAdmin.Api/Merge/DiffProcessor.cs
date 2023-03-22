@@ -336,6 +336,9 @@ namespace InnovatorAdmin
       else if (script.Type == "PresentationConfiguration"
         && script.KeyedName?.EndsWith("_TOC_Configuration") == true)
         return true;
+      else if (script.Type == "CommandBarSection"
+        && script.KeyedName?.EndsWith("_TOC_Content") == true)
+        return true;
       return false;
     }
 

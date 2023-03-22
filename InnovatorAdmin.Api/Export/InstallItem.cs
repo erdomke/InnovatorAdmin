@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Innovator.Client.Model;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -314,7 +316,22 @@ namespace InnovatorAdmin
       var folder = line.Type == InstallType.Script ? "_Scripts" : line.Reference.Type;
       var newPath = folder + "\\" + Utils.CleanFileName(line.Reference.KeyedName ?? line.Reference.Unique).Trim() + extension;
       if (existingPaths?.Contains(newPath) == true)
-        newPath = folder + "\\" + Utils.CleanFileName((line.Reference.KeyedName ?? "").Trim() + "_" + line.Reference.Unique) + extension;
+      {
+        var unique = line.Reference.Unique;
+        if (!unique.IsGuid())
+        {
+          var bytes = unique.Split(' ')
+            .Select(p => p.IsGuid()
+              ? new Guid(p).ToByteArray()
+              : Encoding.UTF8.GetBytes(p))
+            .Aggregate(Enumerable.Empty<byte>(), (p, c) => p.Concat(c))
+            .ToArray();
+
+          using (var md5 = System.Security.Cryptography.MD5.Create())
+            unique = Base32.ToBase32String(md5.ComputeHash(bytes));
+        }
+        newPath = folder + "\\" + Utils.CleanFileName((line.Reference.KeyedName ?? "").Trim() + "_" + unique) + extension;
+      }
       return newPath;
     }
   }
