@@ -13,7 +13,7 @@ namespace InnovatorAdmin
 {
   public class ExportProcessor : IProgressReporter
   {
-    private DependencySorter _sorter = new DependencySorter();
+    private readonly DependencySorter _sorter = new DependencySorter();
     private Version _arasVersion;
     private readonly IAsyncConnection _conn;
     private readonly ILogger _logger;
@@ -127,7 +127,7 @@ namespace InnovatorAdmin
           ItemReference warning;
           foreach (var relType in result.ElementsByXPath("/Result/Item[@type='ItemType']/Relationships/Item[@type='RelationshipType']"))
           {
-            warning = ItemReference.FromFullItem(relType as XmlElement, true);
+            warning = ItemReference.FromFullItem(relType, true);
             warning.KeyedName = "* Possible missing relationship: " + warning.KeyedName;
             warnings.Add(warning);
           }
@@ -265,13 +265,32 @@ namespace InnovatorAdmin
           {
             foreach (var itemType in group)
             {
-              var relation = (await _conn.ApplyAsync(@"<Item type='RelationshipType' action='get' select='id'>
-  <relationship_id><Item type='ItemType' action='get' where='@0'></Item></relationship_id>
-</Item>", true, false, itemType.Unique).ConfigureAwait(false)).Items().FirstOrNullItem();
-              if (relation.Exists)
-                results.Add(ItemReference.FromFullItem(relation, true));
-              else
-                results.Add(itemType);
+              //These gets need to be executed separately, as one of them will always throw a 'no items found' error
+              var cmfGeneratedType = (await _conn.ApplyAsync(@"<Item type='cmf_ElementType' action='get' select='id'>
+                                                                  <generated_type>
+                                                                    <Item type='ItemType' action='get' where='@0'>
+                                                                    </Item>
+                                                                  </generated_type>
+                                                                </Item>", true, false, itemType.Unique).ConfigureAwait(false)).Items();
+
+              cmfGeneratedType = cmfGeneratedType.Union((await _conn.ApplyAsync(@"<Item type='cmf_PropertyType' action='get' select='id'>
+                                                                                    <generated_type>
+                                                                                      <Item type='ItemType' action='get' where='@0'>
+                                                                                      </Item>
+                                                                                    </generated_type>
+                                                                                  </Item>", true, false, itemType.Unique).ConfigureAwait(false)).Items());
+
+              //Don't try to convert CMF generated relationship ItemTypes into RelationshipTypes
+              if (!cmfGeneratedType.Any())
+              {
+                var relation = (await _conn.ApplyAsync(@"<Item type='RelationshipType' action='get' select='id'>
+                                                          <relationship_id><Item type='ItemType' action='get' where='@0'></Item></relationship_id>
+                                                        </Item>", true, false, itemType.Unique).ConfigureAwait(false)).Items().FirstOrNullItem();
+                if (relation.Exists)
+                  results.Add(ItemReference.FromFullItem(relation, true));
+                else
+                  results.Add(itemType);
+              }
             }
           }
         }
@@ -410,7 +429,7 @@ namespace InnovatorAdmin
       }
     }
 
-    
+
 
     /// <summary>
     /// Normalize a list of item references.  Used in the resolution step to know which parent items
@@ -1295,10 +1314,12 @@ namespace InnovatorAdmin
     private void NormalizeClassStructure(XmlDocument doc)
     {
       ReportProgress(97, "Transforming the results");
-      var settings = new XmlWriterSettings();
-      settings.OmitXmlDeclaration = true;
-      settings.Indent = true;
-      settings.IndentChars = "  ";
+      var settings = new XmlWriterSettings
+      {
+        OmitXmlDeclaration = true,
+        Indent = true,
+        IndentChars = "  "
+      };
       var classStructs = (from e in doc.ElementsByXPath("//Item[@type='ItemType']/class_structure")
                           where !string.IsNullOrEmpty(e.InnerText)
                           select e);

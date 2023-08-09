@@ -10,7 +10,7 @@ namespace InnovatorAdmin
 {
   public class InstallProcessor : IProgressReporter
   {
-    private DependencySorter _sorter = new DependencySorter();
+    private readonly DependencySorter _sorter = new DependencySorter();
     private readonly IAsyncConnection _conn;
     private int _currLine;
     private InstallScript _script;
@@ -22,7 +22,7 @@ namespace InnovatorAdmin
     public event EventHandler<RecoverableErrorEventArgs> ErrorRaised;
     public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
 
-    private ILogger _logger;
+    private readonly ILogger _logger;
 
     public InstallProcessor(IAsyncConnection conn, ILogger logger)
     {
@@ -113,7 +113,7 @@ namespace InnovatorAdmin
       OnActionComplete(new ActionCompleteEventArgs() { Exception = exception });
     }
 
-    private void InstallLines()
+    private async void InstallLines()
     {
       ExportProcessor.EnsureSystemData(_conn, ref _itemTypes);
 
@@ -294,7 +294,7 @@ namespace InnovatorAdmin
             }
             var cmd = new Command(query.OuterXml)
             {
-              Settings = x => x.Timeout = TimeSpan.FromMinutes(5)
+              Settings = x => x.Timeout = TimeSpan.FromMinutes(15)
             };
             items = _conn.Apply(cmd).AssertItems();
             if (line.Type == InstallType.Create) line.InstalledId = items.First().Attribute("id").Value;
