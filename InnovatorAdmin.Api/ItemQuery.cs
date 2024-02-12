@@ -73,7 +73,8 @@ namespace InnovatorAdmin
         }
         else
         {
-          var match = Regex.Match(uri.Query, @"^\?StartItem=([A-Za-z0-9_% ]+):([A-F0-9]{32})(:released|:current)?(\&.*)?");
+          var queryString = new QueryString(uri);
+          var match = Regex.Match(queryString["StartItem"].ToString(), @"^([A-Za-z0-9_% ]+):([A-F0-9]{32})(:released|:current)?$");
           if (match.Success)
           {
             query = new ItemQuery()

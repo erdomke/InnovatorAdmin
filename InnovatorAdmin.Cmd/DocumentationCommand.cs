@@ -18,52 +18,38 @@ namespace InnovatorAdmin.Cmd
     [Option('o', "outputfile", HelpText = "Path to the file to output", Required = true)]
     public string Output { get; set; }
 
-    [Option("multiple", HelpText = "Whether the output should prefer multiple files")]
-    public bool MultipleFiles { get; set; }
-
-    public Task<int> Execute(ILogger logger)
+    public async Task<int> Execute(ILogger logger)
     {
-      return ConsoleTask.ExecuteAsync(this, async (console) =>
+      foreach (var file in GetMatchingFiles(InputFile))
       {
-        foreach (var file in GetMatchingFiles(InputFile))
+        logger.LogInformation("Generating doc for " + file);
+
+        var metadata = PackageMetadataProvider.FromPackage(Package.Create(file).Single());
+        var outputPath = Output.Replace("*", CleanFileName(metadata.Title));
+        var writer = new DocumentationWriter();
+        var extension = Path.GetExtension(outputPath).ToUpperInvariant().TrimStart('.');
+        switch (extension)
         {
-          console.Write("Generating doc for ");
-          console.WriteLine(file);
-
-          var metadata = PackageMetadataProvider.FromPackage(Package.Create(file).Single());
-          var outputPath = Output.Replace("*", CleanFileName(metadata.Title));
-          var writer = new DocumentationWriter();
-          var extension = Path.GetExtension(outputPath).ToUpperInvariant().TrimStart('.');
-          switch (extension)
-          {
-            case "PUML":
-            case "TXT":
-              writer.Format = DiagramFormat.PlantUml;
-              writer.Output = DocumentOutput.Diagram;
-              break;
-            case "SVG":
-            case "PNG":
-              writer.Format = (DiagramFormat)Enum.Parse(typeof(DiagramFormat), extension, true);
-              writer.Output = DocumentOutput.Diagram;
-              break;
-            case "MD":
-              writer.Format = DiagramFormat.PlantUml;
-              writer.Output = DocumentOutput.Markdown;
-              break;
-          }
-
-          try
-          {
-            using (var stream = File.OpenWrite(outputPath))
-              await writer.WriteAsync(metadata, stream);
-          }
-          catch (Exception ex)
-          {
-            console.WriteLine("Error documenting " + file);
-            console.WriteLine(ex.ToString());
-          }
+          case "PUML":
+          case "TXT":
+            writer.Format = DiagramFormat.PlantUml;
+            writer.Output = DocumentOutput.Diagram;
+            break;
+          case "SVG":
+          case "PNG":
+            writer.Format = (DiagramFormat)Enum.Parse(typeof(DiagramFormat), extension, true);
+            writer.Output = DocumentOutput.Diagram;
+            break;
+          case "MD":
+            writer.Format = DiagramFormat.PlantUml;
+            writer.Output = DocumentOutput.Markdown;
+            break;
         }
-      });
+
+        using (var stream = File.OpenWrite(outputPath))
+          await writer.WriteAsync(metadata, stream);
+      }
+      return 0;
     }
 
     /// <summary>

@@ -45,7 +45,7 @@ namespace InnovatorAdmin.Documentation
       var url = Url.AbsoluteUri;
       if (!url.EndsWith("/"))
         url += "/";
-      url += Format + "/" + characters;
+      url += Format + "/" + new string(characters);
       return url;
     }
 

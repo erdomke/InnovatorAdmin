@@ -324,6 +324,30 @@ namespace InnovatorAdmin
       {
         if (mode == KeyMode.ItemId)
         {
+          if ((string)elem.Attribute("type") == "Morphae"
+            && TryGetId(elem.Element("related_id"), out var relatedId)
+            && TryGetId(elem.Element("source_id"), out var sourceId))
+          {
+            // Don't worry about the ID with Morphae as this can change (especially with `FileContainerItems`)
+            return new ElementKey($"Morphae:{sourceId}-{relatedId}");
+          }
+
+          if ((string)elem.Attribute("type") == "View")
+          {
+            var formName = (string)elem.Element("related_id")?.Element("Item")?.Element("name")
+              ?? (string)elem.Element("related_id")?.Element("Item")?.Attribute("id")
+              ?? (string)elem.Element("related_id");
+
+            var role = (string)elem.Element("role")?.Element("Item")?.Element("name")
+                ?? (string)elem.Element("role")?.Element("Item")?.Attribute("id")
+                ?? (string)elem.Element("role");
+
+            // Don't worry about the ID with View as this can change.
+            if (!string.IsNullOrEmpty(formName) && !string.IsNullOrEmpty(role))
+              return new ElementKey($"View:{formName}-{role}");
+          }
+
+
           if (elem.Attribute("id") != null)
           {
             return new ElementKey(elem.Attribute("id").Value);
@@ -336,19 +360,10 @@ namespace InnovatorAdmin
           {
             return new ElementKey(elem.Attribute("where").Value);
           }
-          else if (elem.Element("related_id") != null)
+          else if (elem.Element("related_id") != null
+            && TryGetId(elem.Element("related_id"), out relatedId))
           {
-            var textNode = elem.Element("related_id").Nodes().OfType<XText>().FirstOrDefault(t => t.Value.IsGuid());
-            if (textNode == null)
-            {
-              var item = elem.Element("related_id").Element("Item");
-              if (item != null && item.Attribute("id") != null)
-                return new ElementKey(item.Attribute("id").Value);
-            }
-            else
-            {
-              return new ElementKey(textNode.Value);
-            }
+            return new ElementKey(relatedId);
           }
 
           return new ElementKey(elem.Name.LocalName + "[" + ElementIndex(elem).ToString() + "]");
@@ -358,6 +373,13 @@ namespace InnovatorAdmin
           var lang = elem.Attribute(XNamespace.Xml + "lang");
           return new ElementKey(elem.Name.LocalName + (lang == null ? "" : "[" + lang.Value + "]"));
         }
+      }
+
+      private static bool TryGetId(XElement elem, out string id)
+      {
+        id = elem.Nodes().OfType<XText>().FirstOrDefault(t => t.Value.IsGuid())?.Value
+          ?? (string)elem.Element("Item")?.Attribute("id");
+        return !string.IsNullOrEmpty(id);
       }
 
       private static int ElementIndex(XElement elem)
