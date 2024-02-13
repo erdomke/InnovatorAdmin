@@ -41,7 +41,8 @@ Task("Publish")
     PublishSingleFile = false,
     PublishReadyToRun = false,
     PublishTrimmed = false,
-    MSBuildSettings = msBuild
+    MSBuildSettings = msBuild,
+    Verbosity = DotNetVerbosity.Detailed
   });
   Zip("./publish/", $"./artifacts/InnovatorAdmin.{version}.zip");
   DeleteDirectory("./publish", deleteSettings);
