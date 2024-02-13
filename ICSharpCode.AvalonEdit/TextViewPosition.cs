@@ -18,15 +18,14 @@
 
 using System;
 using System.Globalization;
-using ICSharpCode.NRefactory;
 using ICSharpCode.AvalonEdit.Document;
 
 namespace ICSharpCode.AvalonEdit
 {
-	/// <summary>
-	/// Represents a text location with a visual column.
-	/// </summary>
-	public struct TextViewPosition : IEquatable<TextViewPosition>, IComparable<TextViewPosition>
+  /// <summary>
+  /// Represents a text location with a visual column.
+  /// </summary>
+  public struct TextViewPosition : IEquatable<TextViewPosition>, IComparable<TextViewPosition>
 	{
 		int line, column, visualColumn;
 		bool isAtEndOfLine;

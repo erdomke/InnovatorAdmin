@@ -22,14 +22,13 @@ using System.Globalization;
 using System.Text;
 using System.Windows;
 using ICSharpCode.AvalonEdit.Document;
-using ICSharpCode.NRefactory.Editor;
 
 namespace ICSharpCode.AvalonEdit.Highlighting
 {
-	/// <summary>
-	/// Allows copying HTML text to the clipboard.
-	/// </summary>
-	public static class HtmlClipboard
+  /// <summary>
+  /// Allows copying HTML text to the clipboard.
+  /// </summary>
+  public static class HtmlClipboard
 	{
 		/// <summary>
 		/// Builds a header for the CF_HTML clipboard format.

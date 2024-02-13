@@ -17,16 +17,15 @@
 // DEALINGS IN THE SOFTWARE.
 
 using System;
-using ICSharpCode.NRefactory.Editor;
 using ICSharpCode.AvalonEdit.Document;
 
 namespace ICSharpCode.AvalonEdit.Indentation
 {
-	/// <summary>
-	/// Handles indentation by copying the indentation from the previous line.
-	/// Does not support indenting multiple lines.
-	/// </summary>
-	public class DefaultIndentationStrategy : IIndentationStrategy
+  /// <summary>
+  /// Handles indentation by copying the indentation from the previous line.
+  /// Does not support indenting multiple lines.
+  /// </summary>
+  public class DefaultIndentationStrategy : IIndentationStrategy
 	{
 		/// <inheritdoc/>
 		public virtual void IndentLine(TextDocument document, DocumentLine line)

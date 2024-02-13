@@ -18,14 +18,13 @@
 
 using System;
 using ICSharpCode.AvalonEdit.Document;
-using ICSharpCode.NRefactory.Editor;
 
 namespace ICSharpCode.AvalonEdit.Snippets
 {
-	/// <summary>
-	/// Creates a named anchor that can be accessed by other SnippetElements.
-	/// </summary>
-	public sealed class SnippetAnchorElement : SnippetElement
+  /// <summary>
+  /// Creates a named anchor that can be accessed by other SnippetElements.
+  /// </summary>
+  public sealed class SnippetAnchorElement : SnippetElement
 	{
 		/// <summary>
 		/// Gets or sets the name of the anchor.

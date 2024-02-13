@@ -21,16 +21,15 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Documents;
 
-using ICSharpCode.NRefactory.Editor;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Highlighting;
 
 namespace ICSharpCode.AvalonEdit.Utils
 {
-	/// <summary>
-	/// Helps printing documents.
-	/// </summary>
-	public static class DocumentPrinter
+  /// <summary>
+  /// Helps printing documents.
+  /// </summary>
+  public static class DocumentPrinter
 	{
 		#if NREFACTORY
 		/// <summary>

@@ -20,15 +20,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ICSharpCode.AvalonEdit.Document;
-using ICSharpCode.NRefactory.Editor;
 using ICSharpCode.AvalonEdit.Utils;
 
 namespace ICSharpCode.AvalonEdit.Editing
 {
-	/// <summary>
-	/// <see cref="IReadOnlySectionProvider"/> that has no read-only sections; all text is editable.
-	/// </summary>
-	sealed class NoReadOnlySections : IReadOnlySectionProvider
+  /// <summary>
+  /// <see cref="IReadOnlySectionProvider"/> that has no read-only sections; all text is editable.
+  /// </summary>
+  sealed class NoReadOnlySections : IReadOnlySectionProvider
 	{
 		public static readonly NoReadOnlySections Instance = new NoReadOnlySections();
 		

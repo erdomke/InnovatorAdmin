@@ -23,14 +23,13 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Documents;
 using ICSharpCode.AvalonEdit.Document;
-using ICSharpCode.NRefactory.Editor;
 
 namespace ICSharpCode.AvalonEdit.Highlighting
 {
-	/// <summary>
-	/// Stores rich-text formatting.
-	/// </summary>
-	public sealed class RichTextModel
+  /// <summary>
+  /// Stores rich-text formatting.
+  /// </summary>
+  public sealed class RichTextModel
 	{
 		List<int> stateChangeOffsets = new List<int>();
 		List<HighlightingColor> stateChanges = new List<HighlightingColor>();

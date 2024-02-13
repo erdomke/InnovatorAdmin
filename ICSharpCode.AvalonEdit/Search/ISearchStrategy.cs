@@ -19,15 +19,14 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using ICSharpCode.NRefactory.Editor;
 using ICSharpCode.AvalonEdit.Document;
 
 namespace ICSharpCode.AvalonEdit.Search
 {
-	/// <summary>
-	/// Basic interface for search algorithms.
-	/// </summary>
-	public interface ISearchStrategy : IEquatable<ISearchStrategy>
+  /// <summary>
+  /// Basic interface for search algorithms.
+  /// </summary>
+  public interface ISearchStrategy : IEquatable<ISearchStrategy>
 	{
 		/// <summary>
 		/// Finds all matches in the given ITextSource and the given range.

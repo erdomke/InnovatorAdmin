@@ -20,14 +20,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using ICSharpCode.NRefactory.Editor;
 
 namespace ICSharpCode.AvalonEdit.Document
 {
-	/// <summary>
-	/// Creates/Deletes lines when text is inserted/removed.
-	/// </summary>
-	sealed class LineManager
+  /// <summary>
+  /// Creates/Deletes lines when text is inserted/removed.
+  /// </summary>
+  sealed class LineManager
 	{
 		#region Constructor
 		readonly TextDocument document;

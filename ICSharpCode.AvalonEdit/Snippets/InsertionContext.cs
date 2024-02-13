@@ -19,16 +19,15 @@
 using System;
 using System.Collections.Generic;
 using System.Windows;
-using ICSharpCode.NRefactory.Editor;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 
 namespace ICSharpCode.AvalonEdit.Snippets
 {
-	/// <summary>
-	/// Represents the context of a snippet insertion.
-	/// </summary>
-	public class InsertionContext : IWeakEventListener
+  /// <summary>
+  /// Represents the context of a snippet insertion.
+  /// </summary>
+  public class InsertionContext : IWeakEventListener
 	{
 		enum Status
 		{

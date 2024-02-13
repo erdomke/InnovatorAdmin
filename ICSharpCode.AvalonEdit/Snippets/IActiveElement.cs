@@ -17,15 +17,14 @@
 // DEALINGS IN THE SOFTWARE.
 
 using System;
-using ICSharpCode.NRefactory.Editor;
 using ICSharpCode.AvalonEdit.Document;
 
 namespace ICSharpCode.AvalonEdit.Snippets
 {
-	/// <summary>
-	/// Represents an active element that allows the snippet to stay interactive after insertion.
-	/// </summary>
-	public interface IActiveElement
+  /// <summary>
+  /// Represents an active element that allows the snippet to stay interactive after insertion.
+  /// </summary>
+  public interface IActiveElement
 	{
 		/// <summary>
 		/// Called when the all snippet elements have been inserted.

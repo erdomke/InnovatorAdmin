@@ -18,15 +18,14 @@
 
 using System;
 using System.Runtime.Serialization;
-using ICSharpCode.NRefactory.Editor;
 using ICSharpCode.AvalonEdit.Document;
 
 namespace ICSharpCode.AvalonEdit.Snippets
 {
-	/// <summary>
-	/// Sets the caret position after interactive mode has finished.
-	/// </summary>
-	[Serializable]
+  /// <summary>
+  /// Sets the caret position after interactive mode has finished.
+  /// </summary>
+  [Serializable]
 	public class SnippetCaretElement : SnippetElement
 	{
 		[OptionalField]

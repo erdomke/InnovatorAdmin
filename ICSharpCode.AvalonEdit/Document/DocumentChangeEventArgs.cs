@@ -17,16 +17,13 @@
 // DEALINGS IN THE SOFTWARE.
 
 using System;
-using ICSharpCode.AvalonEdit.Document;
-using ICSharpCode.NRefactory.Editor;
-
 namespace ICSharpCode.AvalonEdit.Document
 {
-	/// <summary>
-	/// Describes a change of the document text.
-	/// This class is thread-safe.
-	/// </summary>
-	[Serializable]
+  /// <summary>
+  /// Describes a change of the document text.
+  /// This class is thread-safe.
+  /// </summary>
+  [Serializable]
 	public class DocumentChangeEventArgs : TextChangeEventArgs
 	{
 		volatile OffsetChangeMap offsetChangeMap;

@@ -20,16 +20,15 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
-using ICSharpCode.NRefactory.Editor;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Utils;
 
 namespace ICSharpCode.AvalonEdit.Highlighting
 {
-	/// <summary>
-	/// A RichTextWriter that writes into a document and RichTextModel.
-	/// </summary>
-	class RichTextModelWriter : PlainRichTextWriter
+  /// <summary>
+  /// A RichTextWriter that writes into a document and RichTextModel.
+  /// </summary>
+  class RichTextModelWriter : PlainRichTextWriter
 	{
 		readonly RichTextModel richTextModel;
 		readonly DocumentTextWriter documentTextWriter;

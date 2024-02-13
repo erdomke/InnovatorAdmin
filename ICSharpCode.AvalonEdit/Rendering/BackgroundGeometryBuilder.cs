@@ -24,17 +24,16 @@ using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.TextFormatting;
-using ICSharpCode.NRefactory.Editor;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Utils;
 
 namespace ICSharpCode.AvalonEdit.Rendering
 {
-	/// <summary>
-	/// Helper for creating a PathGeometry.
-	/// </summary>
-	public sealed class BackgroundGeometryBuilder
+  /// <summary>
+  /// Helper for creating a PathGeometry.
+  /// </summary>
+  public sealed class BackgroundGeometryBuilder
 	{
 		double cornerRadius;
 		

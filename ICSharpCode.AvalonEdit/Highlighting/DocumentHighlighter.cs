@@ -20,18 +20,17 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using ICSharpCode.NRefactory.Editor;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Utils;
 using SpanStack = ICSharpCode.AvalonEdit.Utils.ImmutableStack<ICSharpCode.AvalonEdit.Highlighting.HighlightingSpan>;
 
 namespace ICSharpCode.AvalonEdit.Highlighting
 {
-	/// <summary>
-	/// This class can syntax-highlight a document.
-	/// It automatically manages invalidating the highlighting when the document changes.
-	/// </summary>
-	public class DocumentHighlighter : ILineTracker, IHighlighter
+  /// <summary>
+  /// This class can syntax-highlight a document.
+  /// It automatically manages invalidating the highlighting when the document changes.
+  /// </summary>
+  public class DocumentHighlighter : ILineTracker, IHighlighter
 	{
 		/// <summary>
 		/// Stores the span state at the end of each line.

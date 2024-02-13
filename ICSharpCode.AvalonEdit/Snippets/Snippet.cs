@@ -17,16 +17,15 @@
 // DEALINGS IN THE SOFTWARE.
 
 using System;
-using ICSharpCode.NRefactory.Editor;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 
 namespace ICSharpCode.AvalonEdit.Snippets
 {
-	/// <summary>
-	/// A code snippet that can be inserted into the text editor.
-	/// </summary>
-	[Serializable]
+  /// <summary>
+  /// A code snippet that can be inserted into the text editor.
+  /// </summary>
+  [Serializable]
 	public class Snippet : SnippetContainerElement
 	{
 		/// <summary>

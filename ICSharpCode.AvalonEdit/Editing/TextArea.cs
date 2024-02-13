@@ -17,6 +17,10 @@
 // DEALINGS IN THE SOFTWARE.
 
 using System;
+using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Indentation;
+using ICSharpCode.AvalonEdit.Rendering;
+using ICSharpCode.AvalonEdit.Utils;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -29,19 +33,13 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using ICSharpCode.AvalonEdit.Document;
-using ICSharpCode.AvalonEdit.Indentation;
-using ICSharpCode.AvalonEdit.Rendering;
-using ICSharpCode.AvalonEdit.Utils;
-using ICSharpCode.NRefactory;
-using ICSharpCode.NRefactory.Editor;
 
 namespace ICSharpCode.AvalonEdit.Editing
 {
-	/// <summary>
-	/// Control that wraps a TextView and adds support for user input and the caret.
-	/// </summary>
-	public class TextArea : Control, IScrollInfo, IWeakEventListener, ITextEditorComponent, IServiceProvider
+  /// <summary>
+  /// Control that wraps a TextView and adds support for user input and the caret.
+  /// </summary>
+  public class TextArea : Control, IScrollInfo, IWeakEventListener, ITextEditorComponent, IServiceProvider
 	{
 		internal readonly ImeSupport ime;
 		
