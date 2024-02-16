@@ -312,7 +312,10 @@ namespace InnovatorAdmin
           {
             using (SharedUtils.StartActivity("Install Error: " + ex.Message))
             {
-              args = new RecoverableErrorEventArgs() { Exception = ex };
+              args = new RecoverableErrorEventArgs() {
+                Exception = ex,
+                Line = line,
+              };
               if (line.Type == InstallType.DependencyCheck && ex.FaultCode == "0")
                 args.Message = "Unable to find required dependency " + line.Reference.Type + ": " + line.Reference.KeyedName;
               else

@@ -17,6 +17,8 @@ namespace InnovatorAdmin
     /// </summary>
     public HashSet<string> FirstOfGroup { get; } = new HashSet<string>();
 
+    public Action<IDependencyContext> CustomDependencies { get; set; }
+
     public DependencySorter()
     {
       Load(XElement.Parse("<AML><Item type='*' /></AML>"));
@@ -40,7 +42,7 @@ namespace InnovatorAdmin
       int loops = 0;
       var state = CycleState.ResolvedCycle;
       var results = items ?? Enumerable.Empty<InstallItem>();
-      var analyzer = new DependencyAnalyzer(metadata);
+      var analyzer = new DependencyAnalyzer(metadata, CustomDependencies);
       while (loops < maxLoops && state == CycleState.ResolvedCycle)
       {
         if (loops > 0)
@@ -54,7 +56,6 @@ namespace InnovatorAdmin
         results = GetDependencyList(analyzer, items, out state).ToList();
         loops++;
       }
-
 
       results = results
         .Where(i => !i.IsDelete())

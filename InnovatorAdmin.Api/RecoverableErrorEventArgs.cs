@@ -9,6 +9,7 @@ namespace InnovatorAdmin
 {
   public class RecoverableErrorEventArgs : EventArgs
   {
+    public InstallItem Line { get; set; }
     public string Message { get; set; }
     public ServerException Exception { get; set; }
     public XmlNode NewQuery { get; set; }

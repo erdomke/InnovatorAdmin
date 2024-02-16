@@ -31,10 +31,12 @@ namespace InnovatorAdmin
     private readonly HashSet<ItemReference> _dependencies = new HashSet<ItemReference>();
     private readonly IArasMetadataProvider _metadata;
     private XmlElement _elem;
+    private Action<IDependencyContext> _customDependencies;
 
-    public DependencyAnalyzer(IArasMetadataProvider metadata)
+    public DependencyAnalyzer(IArasMetadataProvider metadata, Action<IDependencyContext> customDependencies = null)
     {
       _metadata = metadata;
+      _customDependencies = customDependencies;
     }
 
     public void Reset()
@@ -87,7 +89,6 @@ namespace InnovatorAdmin
       if (_allItemDependencies.TryGetValue(masterRef, out childDependencies))
       {
         childDependencies.Remove(dependency);
-
       }
       References refs;
       if (_allDependencies.TryGetValue(dependency, out refs))
@@ -196,6 +197,11 @@ namespace InnovatorAdmin
 
       _elem = elem;
       VisitNode(elem, itemRef);
+      if (_customDependencies != null)
+      {
+        var context = new Context(elem, itemRef, this);
+        _customDependencies(context);
+      }
 
       // Clean up dependencies
       foreach (var defn in _definitions)
@@ -731,6 +737,27 @@ namespace InnovatorAdmin
         .OfType<LiteralExpressionSyntax>()
         .Select(l => l.Token.Value)
         .OfType<string>();
+    }
+
+    private class Context : IDependencyContext
+    {
+      private readonly DependencyAnalyzer _parent;
+
+      public XmlElement Element { get; }
+
+      public ItemReference ItemReference { get; }
+
+      public Context(XmlElement element, ItemReference itemReference, DependencyAnalyzer parent)
+      {
+        Element = element;
+        ItemReference = itemReference;
+        _parent = parent;
+      }
+
+      public void AddDependency(ItemReference itemRef, XmlNode context, XmlNode reference)
+      {
+        _parent.AddDependency(itemRef, context, reference, ItemReference);
+      }
     }
   }
 }
