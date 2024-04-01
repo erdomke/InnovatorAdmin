@@ -183,11 +183,11 @@ namespace InnovatorAdmin
               line.Reference.KeyedName = newRef.KeyedName;
             }
           }
-          activity.SetStatus(System.Diagnostics.ActivityStatusCode.Ok);
+          activity?.SetStatus(System.Diagnostics.ActivityStatusCode.Ok);
         }
         catch (Exception ex)
         {
-          activity.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
+          activity?.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
           _logger.LogError(ex, null);
           this.OnActionComplete(new ActionCompleteEventArgs() { Exception = ex });
         }

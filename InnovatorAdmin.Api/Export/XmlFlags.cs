@@ -13,5 +13,6 @@ namespace InnovatorAdmin
     public const string Attr_ConfigId = "_config_id";
     public const string Attr_ScriptType = "_scriptType";
     public const string Attr_DependenciesAnalyzed = "_dependencies_analyzed";
+    public const string Attr_DiffRelMatchPrefix = "_eq_";
   }
 }

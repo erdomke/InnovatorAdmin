@@ -631,6 +631,273 @@ namespace InnovatorAdmin.Tests
     }
 
     [TestMethod]
+    public void HandleVersionableRelationshipEdit()
+    {
+      var baseDir = new MockDiffDirectory();
+      baseDir.Add("app/FreeCAD.xml", @"<AML>
+  <Item type=""app"" _keyed_name=""FreeCAD"" action=""merge"" _config_id=""91DCF914417048CF9207439917A3A527"" where=""[app].[config_id] = '91DCF914417048CF9207439917A3A527'"">
+    <allow_custom_import>0</allow_custom_import>
+    <arguments>wrapper.py ""${Job.File.0}"" ""${Agent.FreeCAD.InstallDirectory}""</arguments>
+    <description>FreeCAD</description>
+    <executable_path>${Agent.PythonDirectory.3}\python.exe</executable_path>
+    <export_file_permissions>ReadWrite</export_file_permissions>
+    <icon>../Images/FreeCAD.svg</icon>
+    <job_template type=""ItemType"" name=""Template_Local"">1362424A17364B50A9052E144751E360</job_template>
+    <launch_local>1</launch_local>
+    <tags>FreeCAD</tags>
+    <type>local</type>
+    <name>FreeCAD</name>
+    <Relationships>
+      <Item type=""app_File"" action=""merge"">
+        <content>import os
+import sys
+import subprocess
+import time
+
+LOG_FILENAME = ""log.txt""
+
+def log(logString):
+    '''
+    log function
+    writes information with timestamp in the current folder
+    :param logString: content to write
+    :return: nothing
+    '''
+
+    localtime_ = time.localtime()
+    t = time.strftime(""%d/%m/%Y %H:%M:%S"", localtime_)
+    # try:
+        # f = open(LOG_FILENAME, ""a"")
+        # f.write(t + "" : "" + str(logString) + '\n')
+        # f.close()
+    # except:
+    print(str(logString))
+
+def main():   
+    # Version 1
+    pass
+        
+main()
+log('end of script')
+</content>
+        <path>wrapper.py</path>
+        <sort_order>128</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">4594D5AB6B4442E5913BD005A99108AB</related_id>
+        <sort_order>128</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">DC73BFD3016F4207A6CD1FB05B7277B0</related_id>
+        <sort_order>256</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">FA3ED4A0494C4E92BDCDE8ED18950999</related_id>
+        <sort_order>384</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">BB992F53C9194178A60D5172151D47BD</related_id>
+        <sort_order>512</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">8CB89003DCE44737AB89759DC10A6F6B</related_id>
+        <sort_order>640</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">50938C04C7D746679C953094D2CA8B5C</related_id>
+        <sort_order>768</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">BB518247514B47858F1366FDE8655543</related_id>
+        <sort_order>896</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">AB2F26E01CCD4EE7B2E13F52CB758F82</related_id>
+        <sort_order>1024</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">9E8CF9D57E4A481094EFF4C1CD7ECA42</related_id>
+        <sort_order>1152</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">566F9D241B84491E9B5F91A9ABD8749F</related_id>
+        <sort_order>1280</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">197CC5F7C4504F49A5C337314189DBEB</related_id>
+        <sort_order>1408</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">4E13E8F022C84A4F9B3DC9E780A88A6C</related_id>
+        <sort_order>1536</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">A54A14CE2BEF4C56B45017CC28A82F8B</related_id>
+        <sort_order>1664</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">F9128A932C5545268BF76CA911897AB9</related_id>
+        <sort_order>1792</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">23F5B8DAF54B4215ABED273ABBF3FE11</related_id>
+        <sort_order>1920</sort_order>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>");
+      var compareDir = new MockDiffDirectory();
+      compareDir.Add("app/FreeCAD.xml", @"﻿<AML>
+  <Item type=""app"" _keyed_name=""FreeCAD"" action=""merge"" _config_id=""91DCF914417048CF9207439917A3A527"" where=""[app].[config_id] = '91DCF914417048CF9207439917A3A527'"">
+    <allow_custom_import>1</allow_custom_import>
+    <arguments>wrapper.py ""${Job.File.0}"" ""${Agent.FreeCAD.InstallDirectory}""</arguments>
+    <description>Start FreeCAD on your computer</description>
+    <executable_path>${Agent.PythonDirectory.3}\python.exe</executable_path>
+    <export_file_permissions>ReadWrite</export_file_permissions>
+    <form_id type=""Form"">E4C2D4ADEA4E4173AAD1B9D0C5F52791</form_id>
+    <icon>../Images/FreeCAD.svg</icon>
+    <job_template type=""ItemType"" name=""Template_Local"">1362424A17364B50A9052E144751E360</job_template>
+    <launch_local>1</launch_local>
+    <tags>FreeCAD</tags>
+    <type>local</type>
+    <usessec>0</usessec>
+    <name>FreeCAD</name>
+    <Relationships>
+      <Item type=""app_File"" action=""merge"">
+        <content>import os
+import sys
+import subprocess
+import traceback
+
+def print_err(message, flush_output=True):
+    print('Error:', message, file=sys.stderr, flush=flush_output)
+    
+def print_out(message, flush_output=True):
+    print(message, flush=flush_output)
+
+def main():   
+    # Version 2
+    pass
+        
+exitCode = 1
+exitCode = main()
+print_out('end of script')
+sys.exit(exitCode)
+</content>
+        <path>wrapper.py</path>
+        <sort_order>128</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">4594D5AB6B4442E5913BD005A99108AB</related_id>
+        <sort_order>128</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">DC73BFD3016F4207A6CD1FB05B7277B0</related_id>
+        <sort_order>256</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">FA3ED4A0494C4E92BDCDE8ED18950999</related_id>
+        <sort_order>384</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">BB992F53C9194178A60D5172151D47BD</related_id>
+        <sort_order>512</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">8CB89003DCE44737AB89759DC10A6F6B</related_id>
+        <sort_order>640</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">50938C04C7D746679C953094D2CA8B5C</related_id>
+        <sort_order>768</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">BB518247514B47858F1366FDE8655543</related_id>
+        <sort_order>896</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">AB2F26E01CCD4EE7B2E13F52CB758F82</related_id>
+        <sort_order>1024</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">9E8CF9D57E4A481094EFF4C1CD7ECA42</related_id>
+        <sort_order>1152</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">566F9D241B84491E9B5F91A9ABD8749F</related_id>
+        <sort_order>1280</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">197CC5F7C4504F49A5C337314189DBEB</related_id>
+        <sort_order>1408</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">4E13E8F022C84A4F9B3DC9E780A88A6C</related_id>
+        <sort_order>1536</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">A54A14CE2BEF4C56B45017CC28A82F8B</related_id>
+        <sort_order>1664</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">F9128A932C5545268BF76CA911897AB9</related_id>
+        <sort_order>1792</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">23F5B8DAF54B4215ABED273ABBF3FE11</related_id>
+        <sort_order>1920</sort_order>
+      </Item>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">6F98E5024169436A94F6F10C53750D45</related_id>
+        <sort_order>2048</sort_order>
+      </Item>
+    </Relationships>
+  </Item>
+</AML>");
+
+      var scripts = new Dictionary<string, XElement>(StringComparer.OrdinalIgnoreCase);
+      new DiffProcessor().GetAmlMergeScripts(baseDir, compareDir, scripts, null);
+      Assert.AreEqual(1, scripts.Count);
+      Assert.AreEqual("app/FreeCAD.xml", scripts.Keys.Single().ToString());
+      Assert.AreEqual(@"<AML>
+  <Item type=""app"" _keyed_name=""FreeCAD"" _config_id=""91DCF914417048CF9207439917A3A527"" where=""[app].[config_id] = '91DCF914417048CF9207439917A3A527'"" action=""edit"">
+    <allow_custom_import>1</allow_custom_import>
+    <description>Start FreeCAD on your computer</description>
+    <form_id type=""Form"">E4C2D4ADEA4E4173AAD1B9D0C5F52791</form_id>
+    <Relationships>
+      <Item type=""app_FileType"" action=""merge"">
+        <related_id type=""FileType"">6F98E5024169436A94F6F10C53750D45</related_id>
+        <sort_order>2048</sort_order>
+      </Item>
+      <Item type=""app_File"" action=""edit"" _eq_path=""wrapper.py"" _eq_sort_order=""128"">
+        <content>import os
+import sys
+import subprocess
+import traceback
+
+def print_err(message, flush_output=True):
+    print('Error:', message, file=sys.stderr, flush=flush_output)
+    
+def print_out(message, flush_output=True):
+    print(message, flush=flush_output)
+
+def main():   
+    # Version 2
+    pass
+        
+exitCode = 1
+exitCode = main()
+print_out('end of script')
+sys.exit(exitCode)
+</content>
+      </Item>
+    </Relationships>
+    <usessec>0</usessec>
+  </Item>
+</AML>", scripts.Values.Single().ToString());
+    }
+
+    [TestMethod]
     public void HandleFileShuffle()
     {
       var baseDir = new MockDiffDirectory();

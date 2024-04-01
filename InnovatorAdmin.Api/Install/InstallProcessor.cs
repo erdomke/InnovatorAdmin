@@ -100,13 +100,13 @@ namespace InnovatorAdmin
             , _script.Description.Left(512)).AssertNoError();
           InstallLines();
           _conn.Apply("<Item type=\"DatabaseUpgrade\" action=\"merge\" id=\"@0\"><upgrade_status>1</upgrade_status></Item>", upgradeId).AssertNoError();
-          activity.SetStatus(System.Diagnostics.ActivityStatusCode.Ok);
+          activity?.SetStatus(System.Diagnostics.ActivityStatusCode.Ok);
         }
         catch (Exception ex)
         {
           if (!(ex is ServerException))
             _logger?.LogError(ex, null);
-          activity.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
+          activity?.SetStatus(System.Diagnostics.ActivityStatusCode.Error);
           _conn.Apply("<Item type=\"DatabaseUpgrade\" action=\"merge\" id=\"@0\"><upgrade_status>2</upgrade_status></Item>", upgradeId); //.AssertNoError();
         }
       }
@@ -140,7 +140,7 @@ namespace InnovatorAdmin
             .Distinct()
             .ToList();
           var configIds = group
-            .Select(l => l.Script.GetAttribute("_config_id"))
+            .Select(l => l.Script.GetAttribute(XmlFlags.Attr_ConfigId))
             .Where(i => !string.IsNullOrEmpty(i))
             .Distinct()
             .ToList();
@@ -372,47 +372,78 @@ namespace InnovatorAdmin
 
     private void MergeRelationshipsOnVersionableParent(string sourceId, string relType, IReadOnlyList<IReadOnlyItem> existing, IReadOnlyList<XmlElement> incoming)
     {
-      var propToMatch = default(string);
-      if (existing?.Count > 0)
-      {
-        propToMatch = _preferredRelationshipMatch
-          .FirstOrDefault(p =>
-            existing
-              .Where(i => i.Property(p).HasValue())
-              .Select(i => i.Property(p).Value)
-              .Distinct(StringComparer.OrdinalIgnoreCase)
-              .Count() == existing.Count
-            && incoming
-              .Where(e => e.Element(p) != null)
-              .Select(e => GetPropertyValue(e, p))
-              .Distinct(StringComparer.OrdinalIgnoreCase)
-              .Count() == incoming.Count);
-      }
+      var relTableName = relType.Replace(' ', '_');
 
-      if (propToMatch == null)
+      // If the AML lists the properties to match on, then use those.
+      if (incoming.All(e => e.Attributes.OfType<XmlAttribute>()
+        .Any(a => a.LocalName.StartsWith(XmlFlags.Attr_DiffRelMatchPrefix))))
       {
         foreach (var rel in incoming)
         {
+          var criteria = rel.Attributes.OfType<XmlAttribute>()
+            .Where(a => a.LocalName.StartsWith(XmlFlags.Attr_DiffRelMatchPrefix))
+            .ToDictionary(a => a.LocalName.Substring(XmlFlags.Attr_DiffRelMatchPrefix.Length), a => a.Value);
+
+          var matches = existing
+            .Where(i => criteria.All(c => i.Property(c.Key).Value == c.Value))
+            .ToList();
           rel.RemoveAttribute("id");
-          rel.SetAttribute("action", "add");
-        }
-      }
-      else
-      {
-        var xref = existing.ToDictionary(i => i.Property(propToMatch).Value, StringComparer.OrdinalIgnoreCase);
-        var relTableName = relType.Replace(' ', '_');
-        foreach (var rel in incoming)
-        {
-          rel.RemoveAttribute("id");
-          var propValue = GetPropertyValue(rel, propToMatch);
-          if (xref.TryGetValue(propValue, out var existingRel))
+          if (matches.Count == 1)
           {
-            rel.SetAttribute("where", $"[{relTableName}].[source_id]='{sourceId}' and [{relTableName}].[{propToMatch}]='{propValue}'");
-            rel.SetAttribute("action", "edit");
+            criteria["source_id"] = sourceId;
+            var whereClause = string.Join(" and ", criteria.Select(c => $"[{relTableName}].[{c.Key}]='{c.Value.Replace("'", "''")}'"));
+            rel.SetAttribute("where", whereClause);
           }
           else
           {
             rel.SetAttribute("action", "add");
+          }
+        }
+      }
+      else
+      {
+        // Otherwise, guess on how to match up the relationships
+        var propToMatch = default(string);
+        if (existing?.Count > 0)
+        {
+          propToMatch = _preferredRelationshipMatch
+            .FirstOrDefault(p =>
+              existing
+                .Where(i => i.Property(p).HasValue())
+                .Select(i => i.Property(p).Value)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Count() == existing.Count
+              && incoming
+                .Where(e => e.Element(p) != null)
+                .Select(e => GetPropertyValue(e, p))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Count() == incoming.Count);
+        }
+
+        if (propToMatch == null)
+        {
+          foreach (var rel in incoming)
+          {
+            rel.RemoveAttribute("id");
+            rel.SetAttribute("action", "add");
+          }
+        }
+        else
+        {
+          var xref = existing.ToDictionary(i => i.Property(propToMatch).Value, StringComparer.OrdinalIgnoreCase);
+          foreach (var rel in incoming)
+          {
+            rel.RemoveAttribute("id");
+            var propValue = GetPropertyValue(rel, propToMatch);
+            if (xref.TryGetValue(propValue, out var existingRel))
+            {
+              rel.SetAttribute("where", $"[{relTableName}].[source_id]='{sourceId}' and [{relTableName}].[{propToMatch}]='{propValue.Replace("'", "''")}'");
+              rel.SetAttribute("action", "edit");
+            }
+            else
+            {
+              rel.SetAttribute("action", "add");
+            }
           }
         }
       }

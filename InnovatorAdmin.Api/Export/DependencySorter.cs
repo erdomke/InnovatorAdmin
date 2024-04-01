@@ -594,7 +594,7 @@ namespace InnovatorAdmin
           switch (attribute.Name.LocalName)
           {
             case "id":
-            case "_config_id":
+            case XmlFlags.Attr_ConfigId:
             case "where":
               _ids.Add((string)attribute);
               break;

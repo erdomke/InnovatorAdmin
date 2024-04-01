@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -406,7 +407,7 @@ namespace InnovatorAdmin
           KeyedName = (string)item.Attribute("_keyed_name");
           var parts = new[] {
             ((string)(item.Attribute("id")
-              ?? item.Attribute("_config_id")
+              ?? item.Attribute(XmlFlags.Attr_ConfigId)
               ?? item.Attribute("where")))?.ToUpperInvariant(),
             (string)item.Attribute(XmlFlags.Attr_ScriptType),
             (string)item.Attribute("action")

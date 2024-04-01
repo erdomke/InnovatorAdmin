@@ -68,6 +68,22 @@ namespace InnovatorAdmin
           element.Add(child);
         }
       }
+
+      var origRel = element.Annotation<OriginalRelationship>();
+      if (origRel != null
+        && (string)element.Attribute("action") == "edit"
+        && (string)element.Attribute("id") == null
+        && (string)element.Attribute("where") == null)
+      {
+        var updates = new HashSet<string>(element.Elements().Select(e => e.Name.LocalName));
+        var tableName = $"[{((string)element.Attribute("type")).Replace(' ', '_')}]";
+        foreach (var matchProp in origRel.Original.Elements()
+          .Where(e => !updates.Contains(e.Name.LocalName) && !string.IsNullOrEmpty((string)e)))
+        {
+          element.SetAttributeValue(XmlFlags.Attr_DiffRelMatchPrefix + matchProp.Name.LocalName, matchProp.Value);
+        }
+      }
+
       foreach (var child in element.Elements())
       {
         Cleanup(child);
@@ -202,10 +218,10 @@ namespace InnovatorAdmin
       // CData nodes inherit from XText, so this covers both
       var xText = x.Nodes().OfType<XText>().FirstOrDefault()?.Value;
       if (!x.Nodes().Any())
-        xText = (string)x.Attribute("_config_id");
+        xText = (string)x.Attribute(XmlFlags.Attr_ConfigId);
       var yText = y.Nodes().OfType<XText>().FirstOrDefault()?.Value;
       if (!y.Nodes().Any())
-        yText = (string)y.Attribute("_config_id");
+        yText = (string)y.Attribute(XmlFlags.Attr_ConfigId);
 
       if (xText == null && yText == null)
         return false;
@@ -216,8 +232,8 @@ namespace InnovatorAdmin
 
     private static XElement EnsurePath(XElement path, XElement result)
     {
-      var pathList = path.ParentsAndSelf().Reverse().ToArray();
-      if (pathList.Length == 0)
+      var pathList = path.ParentsAndSelf().Reverse().ToList();
+      if (pathList.Count == 0)
         throw new ArgumentException();
       var curr = result;
       if (curr.Name != pathList[0].Name)
@@ -225,20 +241,30 @@ namespace InnovatorAdmin
 
       XElement match;
 
-      foreach (var elem in pathList.Skip(1))
+      for (var i = 1; i < pathList.Count; i++)
       {
+        var elem = pathList[i];
         match = curr.Elements().Where(e => PathMatches(elem, e)).FirstOrDefault();
         if (match == null)
         {
           match = new XElement(elem.Name, elem.Attributes().Where(IsAttributeToCopy));
           match.AddAnnotation(elem.Annotation<ElementKey>());
+          if (i >= 2
+            && elem.Name == "Item"
+            && pathList[i - 1].Name == "Relationships"
+            && pathList[i - 2].Attribute(XmlFlags.Attr_ConfigId) != null)
+          {
+            match.AddAnnotation(new OriginalRelationship(elem));
+          }
           curr.Add(match);
         }
         curr = match;
       }
-
+      
       return curr;
     }
+
+    private record class OriginalRelationship(XElement Original) { }
 
     private static bool IsAttributeToCopy(XAttribute a)
     {
