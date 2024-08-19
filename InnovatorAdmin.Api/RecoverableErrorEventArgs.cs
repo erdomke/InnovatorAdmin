@@ -9,20 +9,31 @@ namespace InnovatorAdmin
 {
   public class RecoverableErrorEventArgs : EventArgs
   {
-    public InstallItem Line { get; set; }
-    public string Message { get; set; }
-    public ServerException Exception { get; set; }
+    private string _message;
+
+    public InstallItem Line { get; }
+    public string Message => _message;
+    public ServerException Exception { get; }
     public XmlNode NewQuery { get; set; }
     public RecoveryOption RecoveryOption { get; set; }
     /// <summary>
     /// Whether the recovery decision was made automatically by code (as opposed to by the user)
     /// </summary>
     public bool IsAutomatic { get; set; }
+    public Dictionary<RecoveryOption, string> Labels { get; } = new Dictionary<RecoveryOption, string>();
 
 
-    public RecoverableErrorEventArgs()
+    internal RecoverableErrorEventArgs(string message)
     {
-      this.RecoveryOption = RecoveryOption.Abort;
+      _message = message;
+      RecoveryOption = RecoveryOption.Abort;
+    }
+
+    internal RecoverableErrorEventArgs(string message, ServerException exception, InstallItem line)
+      : this(message ?? exception.Message)
+    {
+      Exception = exception;
+      Line = line;
     }
   }
 }

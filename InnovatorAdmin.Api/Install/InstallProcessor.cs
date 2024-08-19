@@ -165,15 +165,19 @@ namespace InnovatorAdmin
       {
         using (SharedUtils.StartActivity("Unlock locked items"))
         {
-          var rootMessage = "The import is attempting to update items locked by the following individuals: "
+          var types = lockedItems.GroupBy(i => i.TypeName(), StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(g => g.Count())
+            .Take(5)
+            .Select(g => g.Key)
+            .ToList();
+          var rootMessage = $"The import is attempting to update items ({string.Join(", ", types)}...) locked by the following individuals: "
             + string.Join(", ", lockedItems
               .GroupBy(i => i.Property("locked_by_id").Attribute("keyed_name").AsString(""))
               .Select(g => $"{g.Key} ({g.Count()})"))
             + ".";
-          args = new RecoverableErrorEventArgs()
-          {
-            Message = rootMessage + " Select `Retry` to unlock these items and `Ignore` to proceed."
-          };
+          args = new RecoverableErrorEventArgs(rootMessage + " Would you like to unlock these item (Retry) or continue without unlocking (Ignore / Skip)?");
+          args.Labels[RecoveryOption.Retry] = "Unlock";
+          args.Labels[RecoveryOption.Skip] = "Continue with items locked";
           HandleErrorDefault(args, null, Enumerable.Empty<InstallItem>());
           if (args.RecoveryOption == RecoveryOption.Abort)
             throw new InvalidOperationException(rootMessage);
@@ -312,14 +316,10 @@ namespace InnovatorAdmin
           {
             using (SharedUtils.StartActivity("Install Error: " + ex.Message))
             {
-              args = new RecoverableErrorEventArgs() {
-                Exception = ex,
-                Line = line,
-              };
-              if (line.Type == InstallType.DependencyCheck && ex.FaultCode == "0")
-                args.Message = "Unable to find required dependency " + line.Reference.Type + ": " + line.Reference.KeyedName;
-              else
-                args.Message = $"Error installing {line.Reference.Type}, {line.Reference.KeyedName}: {ex.Message}";
+              var message = line.Type == InstallType.DependencyCheck && ex.FaultCode == "0"
+                ? "Unable to find required dependency " + line.Reference.Type + ": " + line.Reference.KeyedName
+                : $"Error installing {line.Reference.Type}, {line.Reference.KeyedName}: {ex.Message}";
+              args = new RecoverableErrorEventArgs(message, ex, line);
 
               var skipCount = _currLine - offset;
               HandleErrorDefault(args, query, linesToInstall.Skip(skipCount).Take(deferStart - skipCount));

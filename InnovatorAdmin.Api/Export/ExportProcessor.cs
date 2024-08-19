@@ -196,7 +196,7 @@ namespace InnovatorAdmin
         if (script.Lines != null)
         {
           var grps = script.Lines.Where(l => l.Type == InstallType.Create)
-            .GroupBy(l => l.Reference.Unique);
+            .GroupBy(l => $"{l.Reference.Unique}|{l.Reference.Type}");
           var duplicates = grps.Where(g => g.Skip(1).Any()).ToArray();
           if (duplicates.Length > 0)
             _logger.LogWarning("The package has duplicate entries for the following items: " + duplicates.GroupConcat(", ", g => g.Key));
