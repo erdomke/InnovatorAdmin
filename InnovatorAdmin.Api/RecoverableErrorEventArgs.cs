@@ -14,6 +14,11 @@ namespace InnovatorAdmin
     public ServerException Exception { get; set; }
     public XmlNode NewQuery { get; set; }
     public RecoveryOption RecoveryOption { get; set; }
+    /// <summary>
+    /// Whether the recovery decision was made automatically by code (as opposed to by the user)
+    /// </summary>
+    public bool IsAutomatic { get; set; }
+
 
     public RecoverableErrorEventArgs()
     {

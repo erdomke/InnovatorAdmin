@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace InnovatorAdmin
@@ -16,6 +17,8 @@ namespace InnovatorAdmin
   /// </summary>
   internal class DependencyAnalyzer
   {
+    private static Regex _treeGridViewUrl = new Regex(@"tgvdId=(?<id>[0-9a-fA-F]{32})");
+
     //// Persistent variables between scans
     // Pointer from a child reference to the master reference that defines it
     private readonly Dictionary<ItemReference, ItemReference> _allDefinitions = new Dictionary<ItemReference, ItemReference>();
@@ -23,6 +26,8 @@ namespace InnovatorAdmin
     private readonly Dictionary<ItemReference, References> _allDependencies = new Dictionary<ItemReference, References>();
     // All the dependencies for a given item based on the reference
     private readonly Dictionary<ItemReference, HashSet<ItemReference>> _allItemDependencies = new Dictionary<ItemReference, HashSet<ItemReference>>();
+    // Instances where a delete depends on another script
+    private readonly Dictionary<ItemReference, HashSet<ItemReference>> _allDeleteDependencies = new Dictionary<ItemReference, HashSet<ItemReference>>();
 
     private const string ItemTypeByNameWhere = "[ItemType].[name] = '";
 
@@ -163,12 +168,24 @@ namespace InnovatorAdmin
     /// <returns>The list of dependencies</returns>
     public IEnumerable<ItemReference> GetDependencies(ItemReference itemRef)
     {
-      HashSet<ItemReference> dependencies;
-      if (_allItemDependencies.TryGetValue(itemRef, out dependencies))
-      {
+      if (_allItemDependencies.TryGetValue(itemRef, out var dependencies))
         return dependencies;
-      }
       return Enumerable.Empty<ItemReference>();
+    }
+
+    public IEnumerable<ItemReference> GetDeleteDependencies(ItemReference itemRef)
+    {
+      return _allDeleteDependencies.TryGetValue(itemRef, out var dependencies) ? dependencies : Enumerable.Empty<ItemReference>();
+    }
+
+    /// <summary>
+    /// Get the items that depend on the <paramref name="itemRef"/>
+    /// </summary>
+    /// <param name="itemRef">The reference to check</param>
+    /// <returns>The list of dependencies</returns>
+    public IEnumerable<ItemReference> GetReverseDependencies(ItemReference itemRef)
+    {
+      return _allItemDependencies.Where(k => k.Value.Contains(itemRef)).Select(k => k.Key);
     }
 
     /// <summary>
@@ -448,6 +465,20 @@ namespace InnovatorAdmin
       {
         // Vault Id references for image properties
         AddDependency(new ItemReference("File", textChildren[0].Value.Substring(17)), elem.Parent(), elem, masterRef);
+      }
+      else if (elem.LocalName == "parameters"
+        && elem.Parent().LocalName == "Item"
+        && elem.Parent().Attribute("type") == "Relationship View"
+        && textChildren.Count == 1
+        && _treeGridViewUrl.TryMatch(textChildren[0].Value, out var treeGridView))
+      {
+        var itemRef = new ItemReference("rb_TreeGridViewDefinition", treeGridView.Groups["id"].Value);
+        if (!_allDeleteDependencies.TryGetValue(itemRef, out var hashSet))
+        {
+          hashSet = new HashSet<ItemReference>();
+          _allDeleteDependencies.Add(itemRef, hashSet);
+        }
+        hashSet.Add(masterRef);
       }
       else
       {

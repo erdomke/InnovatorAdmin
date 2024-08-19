@@ -57,14 +57,7 @@ namespace InnovatorAdmin
         loops++;
       }
 
-      results = results
-        .Where(i => !i.IsDelete())
-        .Concat(results
-          .Where(i => i.IsDelete())
-          .Reverse()
-        ).ToArray();
-
-      return results;
+      return results.ToArray();
     }
 
     internal IEnumerable<InstallItem> GetDependencyList(DependencyAnalyzer dependAnalyzer
@@ -82,17 +75,24 @@ namespace InnovatorAdmin
 
       // Bias the install order initially to try and help the dependency sort properly handle anything
       // where explicit dependencies don't exist.  Then, perform the dependency sort.
-      var initialSort = FilterAndSort(lookup.Keys);
+      var initialSort = FilterAndSort(lookup.Keys, r => lookup.TryGetValue(r, out var items) ? items.Any(i => i.IsDelete()) : false);
       sorted = initialSort.DependencySort<ItemReference>(d =>
       {
-        IEnumerable<InstallItem> res = null;
-        if (lookup.TryGetValue(d, out res))
+        if (lookup.TryGetValue(d, out var installItems))
         {
-          return res.SelectMany(r =>
+          return installItems.SelectMany(installItem =>
           {
-            var ii = r as InstallItem;
-            if (ii == null) return Enumerable.Empty<ItemReference>();
-            return dependAnalyzer.GetDependencies(ii.Reference);
+            if (installItem.IsDelete())
+            {
+              return dependAnalyzer
+                .GetReverseDependencies(installItem.Reference)
+                .Concat(dependAnalyzer.GetReverseDependencies(installItem.Reference.Origin))
+                .Where(r => lookup.TryGetValue(r, out var dependencies) && dependencies.Any(d => d.IsDelete()))
+                .Union(dependAnalyzer.GetDeleteDependencies(installItem.Reference.Origin))
+                .ToList();
+            }
+            else
+              return dependAnalyzer.GetDependencies(installItem.Reference);
           });
         }
 
@@ -146,14 +146,6 @@ namespace InnovatorAdmin
       }
 
       return result;
-    }
-
-    private int DefaultInstallOrder(InstallItem line)
-    {
-      var itemRef = line.Reference;
-      if (line.Reference.Type == InstallItem.ScriptType)
-        itemRef = ItemReference.FromElement(line.Script);
-      return DefaultInstallOrder(itemRef);
     }
 
     private static HashSet<string> _coreItemTypeIds = new HashSet<string>()
@@ -459,7 +451,7 @@ namespace InnovatorAdmin
       return (groupIndex * 10000) + DefaultInstallOrderWithinGroup(itemRef);
     }
 
-    private IEnumerable<ItemReference> FilterAndSort(IEnumerable<ItemReference> items)
+    private IEnumerable<ItemReference> FilterAndSort(IEnumerable<ItemReference> items, Func<ItemReference, bool> isDelete)
     {
       return items.Select(i => new
       {
@@ -470,7 +462,8 @@ namespace InnovatorAdmin
         Item = i
       })
        .Where(i => !i.Group.Skip)
-       .OrderBy(i => (i.Group.Index * 10000) + DefaultInstallOrderWithinGroup(i.Item))
+       .OrderBy(i => (i.Group.Index * 100000)
+          + (isDelete(i.Item) ? 20000 - DefaultInstallOrderWithinGroup(i.Item) : DefaultInstallOrderWithinGroup(i.Item)))
        .ThenBy(i => i.Item.Type.ToLowerInvariant())
        .ThenBy(i => i.Item.Unique)
        .Select(i => i.Item)

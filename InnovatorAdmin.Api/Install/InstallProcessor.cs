@@ -451,14 +451,13 @@ namespace InnovatorAdmin
 
     private void HandleErrorDefault(RecoverableErrorEventArgs args, XmlNode query, IEnumerable<InstallItem> remaining)
     {
-      _logger?.LogError(args.Exception, args.Message);
+      _logger?.LogWarning(args.Exception, args.Message);
 
-      var isAuto = false;
       if (args.Exception?.FaultCode == "0"
         && (query?.Attribute("action") == "delete" || query?.Attribute("action") == "purge"))
       {
         args.RecoveryOption = RecoveryOption.Skip;
-        isAuto = true;
+        args.IsAutomatic = true;
       }
       else if (args.Exception?.Message.Trim() == "Identity already exists."
         && query?.Attribute("type") == "Identity"
@@ -467,24 +466,27 @@ namespace InnovatorAdmin
         ((XmlElement)query).SetAttribute("action", "edit");
         args.NewQuery = query;
         args.RecoveryOption = RecoveryOption.Retry;
-        isAuto = true;
+        args.IsAutomatic = true;
       }
       else if ((query?.Attribute("action") == "delete" || query?.Attribute("action") == "purge")
         && remaining.Any()
         && remaining.All(l => l.Name.StartsWith("delete of ", StringComparison.OrdinalIgnoreCase)))
       {
         args.RecoveryOption = RecoveryOption.Defer;
-        isAuto = true;
+        args.IsAutomatic = true;
       }
 
-      if (isAuto)
+      if (args.IsAutomatic)
       {
         _logger?.LogInformation("Automatically decided to {action}", args.RecoveryOption.ToString());
       }
       else
       {
         OnErrorRaised(args);
-        _logger?.LogInformation("User decided to {action}", args.RecoveryOption.ToString());
+        if (args.IsAutomatic)
+          _logger?.LogInformation("Automatically decided to {action}", args.RecoveryOption.ToString());
+        else
+          _logger?.LogError("User decided to {action} after {error}", args.RecoveryOption.ToString(), args.Message);
       }
     }
 

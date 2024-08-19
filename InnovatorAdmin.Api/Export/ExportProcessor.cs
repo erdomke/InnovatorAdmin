@@ -750,8 +750,9 @@ namespace InnovatorAdmin
       var promises = queryItems.Select(q => (Func<Task<IEnumerable<XmlElement>>>)(
         async () =>
         {
-          var stream = await _conn.Process(q.OuterXml, true).ConfigureAwait(false);
-          return Items(result, stream, itemDic).ToList();
+          var command = (Command)q.OuterXml;
+          var stream = await _conn.Process(command, true).ConfigureAwait(false);
+          return Items(result, stream, itemDic, command, _conn.Database).ToList();
         })
       ).ToArray();
       query = null; // Release the query memory as soon as possible;
@@ -772,7 +773,7 @@ namespace InnovatorAdmin
     }
 
     private IEnumerable<XmlElement> Items(XmlDocument doc, Stream stream
-      , IDictionary<ItemReference, ItemReference> itemDict)
+      , IDictionary<ItemReference, ItemReference> itemDict, Command query, string database)
     {
       var settings = new XmlReaderSettings
       {
@@ -797,9 +798,12 @@ namespace InnovatorAdmin
             var body = doc.CreateElement("SOAP-ENV", "Body", "http://schemas.xmlsoap.org/soap/envelope/");
             env.AppendChild(body);
             body.AppendChild(fault);
-            var result = ElementFactory.Local.FromXml(env);
-            if (!(result.Exception is NoItemsFoundException))
-              result.AssertNoError();
+            using (var faultReader = env.CreateNavigator().ReadSubtree())
+            {
+              var result = ElementFactory.Local.FromXml(faultReader, query, database);
+              if (!(result.Exception is NoItemsFoundException))
+                result.AssertNoError();
+            }
           }
           else
           {

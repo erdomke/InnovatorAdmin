@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -227,7 +228,46 @@ namespace InnovatorAdmin
         return false;
       if (xText == null || yText == null)
         return true;
+
+      if (IsProbableJsonObjectString(xText) && IsProbableJsonObjectString(yText))
+      {
+        try
+        {
+          using (var xDoc = JsonDocument.Parse(xText))
+          using (var yDoc = JsonDocument.Parse(xText))
+          {
+            var comparer = new JsonElementComparer();
+            return !comparer.Equals(xDoc.RootElement, yDoc.RootElement);
+          }
+        }
+        catch (JsonException) { }
+      }
+
       return !string.Equals(xText, yText);
+    }
+
+    private static bool IsProbableJsonObjectString(string value)
+    {
+      var foundOpenBrace = false;
+      for (var i = 0; i < value.Length; i++)
+      {
+        if (value[i] == '{')
+          foundOpenBrace = true;
+        else if (foundOpenBrace && value[i] == '"')
+          break;
+        else if (!char.IsWhiteSpace(value[i]))
+          return false;
+      }
+
+      for (var i = value.Length - 1; i >= 0; i--)
+      {
+        if (value[i] == '}')
+          return true;
+        else if (!char.IsWhiteSpace(value[i]))
+          return false;
+      }
+
+      return false;
     }
 
     private static XElement EnsurePath(XElement path, XElement result)

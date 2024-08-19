@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -14,6 +16,18 @@ namespace InnovatorAdmin
 {
   internal static class Utils
   {
+    public static bool TryMatch(this Regex regex, string? input, [MaybeNullWhen(false)] out Match match)
+    {
+      if (string.IsNullOrEmpty(input))
+      {
+        match = null;
+        return false;
+      }
+
+      match = regex.Match(input);
+      return match.Success;
+    }
+
     public static XElement LoadXml(Stream stream)
     {
       if (stream == null || (stream.CanSeek && stream.Length < 1))
