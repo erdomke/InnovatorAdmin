@@ -234,7 +234,7 @@ namespace InnovatorAdmin
         try
         {
           using (var xDoc = JsonDocument.Parse(xText))
-          using (var yDoc = JsonDocument.Parse(xText))
+          using (var yDoc = JsonDocument.Parse(yText))
           {
             var comparer = new JsonElementComparer();
             return !comparer.Equals(xDoc.RootElement, yDoc.RootElement);
