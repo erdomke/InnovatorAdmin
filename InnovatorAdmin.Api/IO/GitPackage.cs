@@ -1,6 +1,7 @@
 ﻿using LibGit2Sharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -50,6 +51,7 @@ namespace InnovatorAdmin
       _repository.Dispose();
     }
 
+    [DebuggerDisplay("{Path,nq}")]
     private class GitDiffFile : IPackageFile
     {
       private Blob _blob;

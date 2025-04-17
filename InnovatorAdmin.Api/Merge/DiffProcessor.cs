@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -248,6 +247,7 @@ namespace InnovatorAdmin
             {
               path = baseScript.Path;
             }
+
             progress?.Invoke(completed * 100 / total);
             if (compareScript.Script.Elements("Item").Any(e => (string)e.Attribute("action") != "delete"))
               metadata.Add(compareScript.Script);
