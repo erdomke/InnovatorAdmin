@@ -217,10 +217,14 @@ namespace InnovatorAdmin
     private static bool TextDiffers(XElement x, XElement y)
     {
       // CData nodes inherit from XText, so this covers both
-      var xText = string.Join("", x.Nodes().OfType<XText>().Select(t => t.Value));
+      var xText = string.Join("", x.Nodes().OfType<XText>()
+        .Select(t => t.Value)
+        .Where(v => !string.IsNullOrWhiteSpace(v)));
       if (!x.Nodes().Any())
         xText = (string)x.Attribute(XmlFlags.Attr_ConfigId);
-      var yText = string.Join("", y.Nodes().OfType<XText>().Select(t => t.Value));
+      var yText = string.Join("", y.Nodes().OfType<XText>()
+        .Select(t => t.Value)
+        .Where(v => !string.IsNullOrWhiteSpace(v)));
       if (!y.Nodes().Any())
         yText = (string)y.Attribute(XmlFlags.Attr_ConfigId);
 
