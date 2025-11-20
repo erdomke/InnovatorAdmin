@@ -60,7 +60,22 @@ namespace InnovatorAdmin
         uniqueItems.UnionWith(script.Lines.Where(l => l.Type == InstallType.Create).Select(l => l.Reference));
         script.Lines = null;
         var itemList = uniqueItems.ToList();
+        
+        // Patch for Items with spaces in names. If this is the new way Aras is naming things we might need to do this as an matrix patch with alternative names --> "real" name
+        foreach (var item in itemList)
+        {
+          if (string.Equals(item.Type, "LifeCycleMap", StringComparison.OrdinalIgnoreCase))
+          {
+            item.Type = "Life Cycle Map";
+          }
 
+          if (string.Equals(item.Type, "WorkFlowMap", StringComparison.OrdinalIgnoreCase) ||
+              string.Equals(item.Type, "WorkflowMap", StringComparison.OrdinalIgnoreCase))
+          {
+            item.Type = "Workflow Map";
+          }
+        }
+        
         var outputDoc = new XmlDocument();
         outputDoc.AppendChild(outputDoc.CreateElement("AML"));
         XmlElement queryElem;
